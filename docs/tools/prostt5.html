@@ -18,9 +18,9 @@
 <nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../cost.html" data-keep-filters>Score against cost</a><a href="../pileup.html">Region pile-up</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../coverage.html">Coverage</a><a href="../methods.html">Methods</a></nav>
 </div></header>
 <main class="wrap" data-page="tools">
-<p class="source" id="source-commit" data-commit="39d81ec90815cacbf3744199d1fa8e99ab28c6f4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/39d81ec90815cacbf3744199d1fa8e99ab28c6f4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec90815cacbf3744199d1fa8e99ab28c6f4">39d81ec9</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p class="source" id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <div class="card"><h1>ProstT5 + Foldseek</h1>
-<p>Tool id <code>prostt5</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>39d81ec9</code>.</p>
+<p>Tool id <code>prostt5</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>4a4b1171</code>.</p>
 <h2>What it compares</h2>
 <p>Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protein language model, then searched with Foldseek, so no AlphaFold model is needed.</p>
 <h2>What it needs</h2>
@@ -52,10 +52,9 @@
 <li>Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the 998 queries that step is counted in the GPU column and the cost; for each relative's proteome it is a one-off database build and is not counted.</li>
 </ul>
 <h2>Cost per 1,000 queries</h2>
-<p>Setting <code>3di_from_seq</code>, searching zebrafish: 0.0861 CPU-hours plus 0.0192 GPU-hours for predicting the queries' 3Di letters, measured on Sherlock. Peak memory 1.5 GB. That is about $0.0232 at $0.044625 per CPU-hour and $1.006 per GPU-hour.
-This search completed 2 times; the runs took 0.0861 to 0.131 CPU-hours per 1,000 queries, and the newest is shown.
-Across the 15 relatives searched with this setting: 0.0541 to 0.123 CPU-hours per 1,000 queries; peak memory up to 1.5 GB.</p>
-<p>CPU-hours count the search only, not building the relative's database.</p>
+<p>Setting <code>3di_from_seq</code>, searching one relative (mean over the 15 relatives it searched): 0.109 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.5 GB. That is about $0.00486 at $0.044625 per CPU-hour.
+Building its databases took 5.31 core-hours over 3 databases, plus 0.664 GPU-hours (1 GPU via --gres=gpu:1 (model not recorded)). A database is built once and reused, so this is not in the per-query cost.</p>
+<p>The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.</p>
 <h2>Licence</h2>
 <ul>
 <li>Licence: GPL-3.0 (Foldseek); MIT (ProstT5 model weights) (<a href="https://huggingface.co/Rostlab/ProstT5">source</a>)</li>
@@ -84,12 +83,12 @@ foldseek search \
 <ol>
 <li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting <code>3di_from_seq</code>; strata with at least 30 true instances.)</li>
 <li><strong>Do you have a GPU to predict the 3Di letters for your proteins?</strong> The run used one GPU for that step; its cost is not counted here.</li>
-<li><strong>Can you spend about 0.0861 CPU-hours and 0.0192 GPU-hours per 1,000 proteins for each relative you search?</strong> That is the measured cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.</li>
+<li><strong>Can you spend about 0.109 core-hours per 1,000 proteins for each relative you search?</strong> That is the measured mean per relative; see "Cost per 1,000 queries" above.</li>
 </ol></div>
 <p><a href="index.html">All tool cards</a> · <a href="prostt5.md">this card as Markdown</a> · <a href="prostt5.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/39d81ec90815cacbf3744199d1fa8e99ab28c6f4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec90815cacbf3744199d1fa8e99ab28c6f4">39d81ec9</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="prostt5.html.json">prostt5.html.json</a></p>
 </div></footer>

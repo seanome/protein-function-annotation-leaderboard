@@ -261,12 +261,65 @@ def svg_marker(shape: str, color: str, filled: bool = True) -> str:
 
 # --------------------------------------------------------------------------- data
 
+EXPERIMENT = "qfo_region_midi_plus"
+DATA_DIR = Path("data")
+TRUTH_FROM_LONG = {"Pfam-A domain instances": "pfam", "Pfam-N domain instances": "pfamn",
+                   "Swiss-Prot features": "swissprot"}
+HARDWARE = "Stanford Sherlock, SLURM partition hns"
+
+
 def load(data: Path):
-    res = pl.read_parquet(data / "results.parquet").with_columns(
-        pl.when(pl.col("dedup")).then(pl.lit("dedup")).otherwise(pl.lit("raw")).alias("calls"))
-    comp = pl.read_parquet(data / "compute.parquet")
+    """Read the long tables (one row per experiment, tool, setting, target, truth, stratum and
+    metric) and shape the leaderboard's experiment into the columns the pages use."""
+    long = pl.read_parquet(data / "results.parquet")
+    exp = long.filter(pl.col("experiment") == EXPERIMENT)
+    res = (
+        exp.filter(pl.col("metric").is_in(["fmax", "fmax_precision", "fmax_recall", "auprc", "median_iou_tp"]))
+        .with_columns(
+            pl.col("truth_source").replace_strict(TRUTH_FROM_LONG).alias("truth_set"),
+            (pl.col("dedup_or_raw") == "dedup").alias("dedup"),
+            pl.col("dedup_or_raw").alias("calls"),
+            pl.when(pl.col("target_db") == "Pfam-A HMM library").then(pl.lit("all"))
+            .otherwise(pl.col("target_db").str.replace("^QfO ", "")).alias("species"),
+            pl.col("target_mya_to_human").alias("species_mya"),
+            pl.col("stratum_bin").alias("stratum"),
+            pl.col("n_instances").alias("n_truth_instances"),
+        )
+        .pivot(on="metric", index=["truth_set", "dedup", "calls", "tool", "setting", "species", "species_mya",
+                                   "stratum_axis", "stratum", "n_truth_instances"], values="value")
+        .with_columns(pl.lit(None, dtype=pl.Int64).alias("n_tp_calls"))
+    )
+    # Compute: one row per tool, setting and step, summed over the relatives searched.
+    # cpu_h there is reserved core-hours (cores x wall time). The leaderboard shows the search
+    # step per relative: cpu_h / n_target_dbs, per 1,000 queries.
+    c = pl.read_parquet(data / "compute.parquet").filter(pl.col("experiment") == EXPERIMENT)
+    search = c.filter(pl.col("setting") != "database build").filter(~pl.col("step").str.contains("Index|Db|DB"))
+    build = c.filter((pl.col("setting") == "database build") | pl.col("step").str.contains("Index|Db|DB"))
+    rows = []
+    for r in search.iter_rows(named=True):
+        b = build.filter((pl.col("tool") == r["tool"]) & pl.col("setting").is_in([r["setting"], "database build"]))
+        rows.append({
+            "tool": r["tool"], "setting": r["setting"], "step": r["step"],
+            "n_relatives": r["n_target_dbs"], "n_queries": r["n_queries"], "cores": r["cores"],
+            "wall_s": r["wall_s"], "cpu_h_total": r["cpu_h"],
+            "cpu_h_per_1000_queries": r["cpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
+            "peak_rss_gb": r["peak_ram_gb"],
+            "gpu": "none" if r["gpu_type"] in (None, "none") else r["gpu_type"],
+            "gpu_h_per_1000_queries": 0.0 if r["gpu_h"] is None else r["gpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
+            "db_cpu_h": b["cpu_h"].sum() if b.height else None,
+            "db_n": int(b["n_target_dbs"].sum()) if b.height else None,
+            "db_gpu_h": b["gpu_h"].drop_nulls().sum() if b.height and b["gpu_h"].drop_nulls().len() else None,
+            "db_gpu_type": next((g for g in b["gpu_type"].to_list() if g and g != "none"), None) if b.height else None,
+            "hardware": HARDWARE, "cpu_h_reported": None, "n_completed_runs": 1,
+        })
+    comp_ts = pl.DataFrame(rows, infer_schema_length=None)
+    # One row per relative this tool and setting searched, all carrying the same mean, so the
+    # pages can key cost by relative; a relative it did not search gets no row ("not run").
+    searched = res.select("tool", "setting", "species").unique()
+    comp = searched.join(comp_ts, on=["tool", "setting"], how="inner")
     src = json.loads((data / "SOURCE.json").read_text())
     prov = json.loads((data / "provenance.json").read_text())
+    prov["n_queries"] = int(comp_ts["n_queries"].max())
     cov = (data / "coverage.md").read_text()
     return res, comp, src, prov, cov
 
@@ -306,9 +359,7 @@ def compute_json(comp: pl.DataFrame) -> dict:
             "gpu": r["gpu"],
             "gpu_h_per_1000": r["gpu_h_per_1000_queries"],
             "hardware": r["hardware"],
-            "n_runs": r["n_completed_runs"],
-            "cpu_min": r["cpu_h_per_1000_queries_min"],
-            "cpu_max": r["cpu_h_per_1000_queries_max"],
+            "n_relatives": r["n_relatives"],
         }
     return out
 
@@ -354,7 +405,7 @@ perfect match. Click a column name to sort; rows with no value always sort last.
 <span id="count"></span> On a narrow screen, scroll the table sideways; the tool name stays in
 place.</figcaption>
 <div class="legend" aria-label="Key to the marks in Table 1">
-<span class="item"><span class="prov measured">measured</span> measured by us on Stanford's Sherlock
+<span class="item"><span class="prov measured">measured</span> measured on Stanford's Sherlock
 cluster, from the run's own task records</span>
 <span class="item"><span class="prov reported">reported</span> reported by the tool's submitter, on the
 hardware they name (none yet)</span>
@@ -366,16 +417,16 @@ longer than one residue</span>
 what the tool needs besides the sequence</span>
 <span class="item"><span class="tag warn">graded on its own models</span> hmmscan under the Pfam truth
 set: Pfam's domains are defined by the models hmmscan runs, so read its row as an upper limit</span>
-<span class="item"><span class="muted">(range, n runs)</span> some searches completed more than once;
-the first number is the newest run</span>
 </div>
 {legend_kinds(tools_used)}
 <div class="tablebox"><table class="lb" id="lb"><thead><tr></tr></thead><tbody></tbody></table></div>
 </figure>
-<p class="prose muted">cost_usd_est = CPU-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries. CPU-hours
-count the search alone, not building the relative's database. The only GPU use is ProstT5's step
-that predicts 3Di shape letters for the queries; its GPU-hours are in the GPU column and in the
-cost. Setting names, decoded: hover a setting, or see the tool's card. Definitions and worked
+<p class="prose muted">cost_usd_est = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries,
+pricing a reserved core-hour as one CPU-hour. Core-hours are cores reserved × wall time, for the
+search alone, as the mean over the relatives each tool searched; the run recorded them per tool,
+not per relative, so the same number appears for every relative. Building databases is on the
+tool cards. No search used a GPU; ProstT5's step that predicts 3Di shape letters used one while
+building its databases (see its card). Setting names, decoded: hover a setting, or see the tool's card. Definitions and worked
 examples: <a href="methods.html">Methods</a>.</p>
 <script type="application/json" id="lb-data">{meta_json}</script>
 <script src="assets/app.js"></script>
@@ -397,7 +448,7 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
                 legend.append(f'<span class="item">{svg_marker(info["shape"], k["color"])}{esc(info["name"])}</span>')
     body = f"""
 <h1>Score against cost</h1>
-<p class="lede">The same tools and filters as the leaderboard, drawn as score against CPU time.
+<p class="lede">The same tools and filters as the leaderboard, drawn as score against compute time.
 The line joins the tools that no other tool beats on both: none is both cheaper and better.
 Colour is the kind of method; within a kind, marker shape is the tool, and for kmerseek the
 alphabet. Peak memory is not on this figure; it is in Table 1.</p>
@@ -411,8 +462,8 @@ so picking a value in one of them sets the other three back to "any".</p></form>
 <button type="button" class="chip" data-metric="iou">Median IoU</button>
 </div>
 <figure>
-<figcaption><b>Figure 1.</b> Score against CPU-hours per 1,000 queries, one marker per tool and
-setting: <span id="filterline"></span> Right is more expensive, up is better. Each step along the
+<figcaption><b>Figure 1.</b> Score against core-hours per 1,000 queries for searching one relative
+(the mean over the relatives each tool searched), one marker per tool and setting: <span id="filterline"></span> Right is more expensive, up is better. Each step along the
 horizontal axis is ten times more CPU time than the last. Hover or focus a marker to see its row;
 click it to open the tool's card.</figcaption>
 <div class="legend" aria-label="Key to Figure 1">
@@ -491,9 +542,7 @@ def card_numbers(tool: str, res: pl.DataFrame, comp: pl.DataFrame) -> dict:
     c = comp.filter((pl.col("tool") == tool) & (pl.col("setting") == best["setting"]))
     here = c.filter(pl.col("species") == species)
     out["cost_here"] = here.row(0, named=True) if here.height else None
-    if c.height:
-        out["cost_range"] = (c["cpu_h_per_1000_queries"].min(), c["cpu_h_per_1000_queries"].max(), c.height)
-        out["ram_max"] = c["peak_rss_gb"].max()
+
 
     ident = {r["stratum"]: r for r in best_by(res, tool=tool, setting=best["setting"],
                                               stratum_axis="identity", **base).iter_rows(named=True)}
@@ -574,30 +623,28 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
     L += ["## Cost per 1,000 queries", ""]
     ch = nums.get("cost_here")
     if ch:
-        target = "scanning Pfam's models" if nums["species"] == "all" else f"searching {sp_name}"
         gpu = ch["gpu_h_per_1000_queries"]
         cost = ch["cpu_h_per_1000_queries"] * R_CPU + gpu * R_GPU
-        gpu_words = (f" plus {gpu:.3g} GPU-hours for predicting the queries' 3Di letters"
-                     if gpu else "")
-        price_words = (f"${R_CPU:.6g} per CPU-hour and ${R_GPU} per GPU-hour" if gpu
-                       else f"${R_CPU:.6g} per CPU-hour")
-        L += [f"Setting `{nums['best_setting']}`, {target}: "
-              f"{ch['cpu_h_per_1000_queries']:.3g} CPU-hours{gpu_words}, measured on Sherlock. "
-              f"Peak memory {ch['peak_rss_gb']:.1f} GB. That is about ${cost:.3g} at {price_words}."]
-        if ch["n_completed_runs"] > 1:
-            L += [f"This search completed {ch['n_completed_runs']} times; the runs took "
-                  f"{ch['cpu_h_per_1000_queries_min']:.3g} to {ch['cpu_h_per_1000_queries_max']:.3g} "
-                  "CPU-hours per 1,000 queries, and the newest is shown."]
-        lo, hi, n = nums["cost_range"]
-        if n > 1:
-            L += [f"Across the {n} relatives searched with this setting: {lo:.3g} to {hi:.3g} "
-                  f"CPU-hours per 1,000 queries; peak memory up to {nums['ram_max']:.1f} GB."]
+        target = ("scanning Pfam's models" if nums["species"] == "all"
+                  else f"searching one relative (mean over the {ch['n_relatives']} relatives it searched)")
+        L += [f"Setting `{nums['best_setting']}`, {target}: {ch['cpu_h_per_1000_queries']:.3g} "
+              f"core-hours reserved per 1,000 queries ({ch['cores']} cores for the task's wall time), "
+              f"measured on Sherlock. Peak memory {ch['peak_rss_gb']:.1f} GB. That is about ${cost:.3g} "
+              f"at ${R_CPU:.6g} per CPU-hour."]
+        if ch["db_cpu_h"] is not None:
+            gtxt = (f", plus {ch['db_gpu_h']:.3g} GPU-hours ({ch['db_gpu_type']})" if ch["db_gpu_h"] else "")
+            L += [f"Building its databases took {ch['db_cpu_h']:.3g} core-hours over {ch['db_n']} "
+                  f"database{'s' if ch['db_n'] != 1 else ''}{gtxt}. A database is built once and reused, "
+                  "so this is not in the per-query cost."]
+        else:
+            L += ["Building its databases: not measured."]
         L += [""]
     elif "best_setting" in nums:
         L += [f"Setting `{nums['best_setting']}`: not measured (no task record holds its search).", ""]
     else:
         L += ["Not run.", ""]
-    L += ["CPU-hours count the search only, not building the relative's database.", ""]
+    L += ["The per-query cost counts the search only. The run recorded cost per tool and setting, "
+          "summed over all relatives, so the cost for one relative is the mean.", ""]
 
     L += ["## Licence", "",
           f"- Licence: {t['licence']} ([source]({t['licence_url']}))",
@@ -660,14 +707,13 @@ def questions(tool: str, nums: dict) -> list[str]:
         gpu = ch["gpu_h_per_1000_queries"]
         extra = f" and {gpu:.3g} GPU-hours" if gpu else ""
         if nums["species"] == "all":
-            q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} CPU-hours per "
+            q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} core-hours per "
                      "1,000 proteins?** That is the measured cost of scanning them against Pfam's "
                      "models.")
         else:
-            q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} CPU-hours{extra} "
-                     "per 1,000 proteins for each relative you search?** That is the measured "
-                     f"cost against {SPECIES[nums['species']]}; the range over relatives is under "
-                     "\"Cost per 1,000 queries\" above.")
+            q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} core-hours{extra} "
+                     "per 1,000 proteins for each relative you search?** That is the measured mean "
+                     "per relative; see \"Cost per 1,000 queries\" above.")
     else:
         q.append("3. **Can you afford the search?** Its cost was not measured in this run.")
     return q
@@ -698,72 +744,95 @@ is strong and weak in the table, what it costs, and the exact command that was r
                   description="One card per protein annotation tool.")
 
 
+def parse_tables(md: str) -> list[tuple[list[str], list[list[str]]]]:
+    """Every markdown table in coverage.md as (header, rows)."""
+    out, cur = [], None
+    for ln in md.splitlines():
+        if ln.startswith("|"):
+            cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+            if cur is None:
+                cur = (cells, [])
+            elif not set("".join(cells)) <= set("-: "):
+                cur[1].append(cells)
+        elif cur is not None:
+            out.append(cur)
+            cur = None
+    if cur is not None:
+        out.append(cur)
+    return out
+
+
 def parse_coverage(md: str):
-    lines = [ln for ln in md.splitlines() if ln.startswith("|")]
-    header = [c.strip() for c in lines[0].strip("|").split("|")]
-    rows = [[c.strip() for c in ln.strip("|").split("|")] for ln in lines[2:]]
-    return header[2:], rows
+    """First table: tool by stratum axis. Returns (axes, rows) where rows are [tool, *counts]."""
+    head, rows = parse_tables(md)[0]
+    return head[1:], rows
+
+
+AXIS_TITLES = {"target species": "whole set, per relative", "identity": "% identity to nearest relative",
+               "plddt": "AlphaFold pLDDT", "feature_type": "Swiss-Prot feature type",
+               "feature_length_bin": "region length"}
 
 
 def page_coverage(cov_md: str, src: dict, species_mya: dict) -> str:
-    tools, rows = parse_coverage(cov_md)
+    tables = parse_tables(cov_md)
     kinds = list(KINDS)
-    order = sorted(range(len(tools)), key=lambda i: (kinds.index(TOOLS[tools[i]]["kind"]), list(TOOLS).index(tools[i])))
-    axis_names = {"truth set": "Truth set", "dedup": "Dedup or raw", "species": "Relative searched",
-                  "identity": "Nearest reviewed relative (% identity)",
-                  "feature_length_bin": "Region type and length", "plddt": "Disorder (mean pLDDT)",
-                  "feature_type": "Feature type (Swiss-Prot key)"}
 
-    def value_words(axis, v):
-        if axis == "truth set":
-            return TRUTH[v]
-        if axis == "species":
-            return SPECIES[v] + (f" ({int(species_mya[v])} Mya)" if v in species_mya else "")
-        if axis in STRATUM_WORDS:
-            return STRATUM_WORDS[axis].get(v, v)
-        return v
+    def tool_cell(t):
+        if t in TOOLS:
+            return (f'<span class="kind k-{TOOLS[t]["kind"]}" aria-hidden="true"></span>'
+                    f'<a href="tools/{t}.html">{esc(TOOLS[t]["name"])}</a>')
+        return f'{esc(t)} <span class="muted">(no card yet)</span>'
 
-    head = "".join(f'<th scope="col"><span class="kind k-{TOOLS[tools[i]]["kind"]}" aria-hidden="true"></span>'
-                   f'<a href="tools/{tools[i]}.html">{esc(TOOLS[tools[i]]["name"])}</a></th>' for i in order)
-    body_rows, current, todo = [], None, {tools[i]: [] for i in order}
-    n_on = n_off = 0
-    for r in rows:
-        axis, value, cells = r[0], r[1], r[2:]
-        if axis != current:
-            body_rows.append(f'<tr class="axisrow"><td colspan="{len(tools) + 1}">{esc(axis_names[axis])}</td></tr>')
-            current = axis
-        tds = []
-        for i in order:
-            on = cells[i] == "■"
-            n_on += on
-            n_off += not on
-            if not on:
-                todo[tools[i]].append(f"{axis_names[axis].split(' (')[0].lower()}: {value_words(axis, value)}")
-            tds.append(f'<td data-measured="{"1" if on else "0"}"><span class="sq{" on" if on else ""}" '
-                       f'role="img" aria-label="{"measured" if on else "not run"}"></span></td>')
-        body_rows.append(f'<tr><td class="txt">{esc(value_words(axis, value))}</td>{"".join(tds)}</tr>')
-    todo_html = "".join(
-        f"<li><b>{esc(TOOLS[t]['name'])}</b><ul>" + "".join(f"<li>{esc(x)}</li>" for x in v) + "</ul></li>"
-        for t, v in todo.items() if v)
+    def order(t):
+        return (kinds.index(TOOLS[t]["kind"]), list(TOOLS).index(t)) if t in TOOLS else (len(kinds), 0)
+
+    figs, todo, n_on, n_off = [], {}, 0, 0
+    for k, (head, rows) in enumerate(tables[:2]):
+        cols = head[1:]
+        labels = [AXIS_TITLES.get(c, c) for c in cols]
+        th = "".join(f'<th scope="col">{esc(x)}</th>' for x in labels)
+        body = []
+        for r in sorted(rows, key=lambda r: order(r[0])):
+            tds = []
+            for c, v in zip(cols, r[1:]):
+                on = v != ""
+                n_on += on
+                n_off += not on
+                # The shuffled-alphabet SCOPe run is a null control for kmerseek, not a gap.
+                if not on and not c.endswith("shuffled_k2_seed1"):
+                    todo.setdefault(r[0], []).append(AXIS_TITLES.get(c, c) if k == 0 else f"experiment {c}")
+                tds.append(f'<td data-measured="{"1" if on else "0"}"><span class="sq{" on" if on else ""}" role="img" '
+                           f'aria-label="{"measured" if on else "not run"}"></span>'
+                           f'{"<br><span class=mono>" + esc(v) + "</span>" if on else ""}</td>')
+            body.append(f'<tr><td class="txt">{tool_cell(r[0])}</td>{"".join(tds)}</tr>')
+        title = ("Figure 2a. Tool by stratum axis" if k == 0 else "Figure 2b. Tool by experiment")
+        summed = ("experiments, query sets, relatives and truth sets" if k == 0
+                  else "the query sets, relatives, truth sets and strata of that experiment")
+        figs.append(f"""<figure>
+<figcaption><b>{title}.</b> A filled square means the tables hold measured rows for that tool there.
+The number under it is the count of true instances scored, summed over {summed}. An empty square
+means not run.{" The last column, scope40_v040_shuffled_k2_seed1, is a null control for kmerseek (alphabet letters shuffled), not a run other tools need." if k == 1 else ""}</figcaption>
+<div class="tablebox"><table class="cov"><thead><tr><th class="txt" scope="col">Tool</th>{th}</tr></thead>
+<tbody>{"".join(body)}</tbody></table></div>
+</figure>""")
+    todo_html = "".join(f"<li><b>{esc(TOOLS[t]['name'] if t in TOOLS else t)}</b>: {esc('; '.join(v))}.</li>"
+                        for t, v in sorted(todo.items(), key=lambda kv: order(kv[0])))
     body = f"""<h1>Coverage</h1>
-<p class="lede">What has been measured, and what has not. Every empty square is a run still to do.</p>
-<figure>
-<figcaption><b>Figure 2.</b> Tool by stratum. A square is filled when the results table has at
-least one row for that tool with that value (under any other filters), and empty when it has
-none: not run. {n_on} squares are filled and {n_off} are empty.</figcaption>
+<p class="lede">What has been measured, across every experiment in the tables, and what has not.
+Every empty square is a run still to do.</p>
 <div class="legend" aria-label="Key to Figure 2">
-<span class="item"><span class="sq on"></span> measured: at least one row</span>
-<span class="item"><span class="sq"></span> not run: no row</span>
+<span class="item"><span class="sq on"></span> measured, with the number of true instances scored</span>
+<span class="item"><span class="sq"></span> not run</span>
 </div>
-{legend_kinds(set(tools))}
-<div class="tablebox"><table class="cov" id="cov"><thead><tr><th class="txt" scope="col">Value</th>{head}</tr></thead>
-<tbody>{"".join(body_rows)}</tbody></table></div>
-</figure>
+{legend_kinds(set(TOOLS))}
+{"".join(figs)}
+<p class="prose muted">{n_on} squares are filled and {n_off} are empty. Where each experiment's output
+came from, and which outputs were left out and why: <a href="data/inventory.md">inventory.md</a>
+(copied with the tables).</p>
 <h2>What to run next</h2>
-<p class="prose">Each empty square above, by tool:</p>
 <ul class="prose">{todo_html}</ul>"""
     return layout("Coverage", "coverage", body, src,
-                  description="Which tool and stratum combinations have been measured and which have not been run.")
+                  description="Which tool, stratum and experiment combinations have been measured and which have not been run.")
 
 
 def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict) -> str:
@@ -773,31 +842,32 @@ def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict) -
     f_check = 2 * P * R / (P + R)
     assert abs(f_check - ex["fmax"]) < 1e-9, (f_check, ex["fmax"])
     cx = comp.filter((pl.col("tool") == "hmmer3_phmmer") & (pl.col("species") == "zebrafish")).row(0, named=True)
-    cpu_h = cx["realtime_s"] * cx["cpu_percent"] / 100 / 3600
-    assert abs(cpu_h - cx["cpu_h"]) < 1e-12
-    per1k = cpu_h * 1000 / cx["n_queries"]
+    cpu_h = cx["cores"] * cx["wall_s"] / 3600
+    assert abs(cpu_h - cx["cpu_h_total"]) < 1e-9, (cpu_h, cx["cpu_h_total"])
+    per1k = cpu_h / cx["n_relatives"] * 1000 / cx["n_queries"]
     cost = per1k * R_CPU
     ded = best_by(res, tool="hmmer3_phmmer", setting="default", truth_set="pfam", calls="dedup",
                   species="zebrafish", stratum_axis="all", stratum="all").row(0, named=True)
     n_rows = res.height
-    n_multi = comp.filter(pl.col("n_completed_runs") > 1).height
     pr5 = comp.filter(pl.col("tool") == "prostt5").row(0, named=True)
-    gpu_k = pr5["gpu_h_per_1000_queries"]
-    gpu_s = pr5["gpu_h"] * 3600
+    n_long = pl.read_parquet(Path(DATA_DIR) / "results.parquet").height
+    exps = sorted(pl.read_parquet(Path(DATA_DIR) / "results.parquet")["experiment"].unique().to_list())
     pfn_all = best_by(res, tool="hmmer3_phmmer", truth_set="pfamn", calls="raw", species="zebrafish",
                       stratum_axis="all").row(0, named=True)["n_truth_instances"]
     pfn_nh = best_by(res, tool="hmmer3_phmmer", truth_set="pfamn", calls="raw", species="zebrafish",
                      stratum_axis="identity", stratum="no_homolog").row(0, named=True)["n_truth_instances"]
     pfn = {"all": pfn_all, "nohom": pfn_nh}
-    mins, secs = divmod(cx["realtime_s"], 60)
+
     body = rf"""<h1>Methods</h1>
 <div class="prose">
-<p>Everything on this site comes from one benchmark run. It searched {prov['n_queries']:,} human
+<p>The tables hold {n_long:,} rows from {len(exps)} experiments ({", ".join(exps)}); the
+coverage page counts all of them. Everything else on this site comes from one of those
+experiments, <span class="mono">{EXPERIMENT}</span>, a single benchmark run. It searched {prov['n_queries']:,} human
 proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes,
 release 2020_04. Of the human proteins, 964 are encoded on chromosome 6; the other 34 are immune
 proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The run finished on 2026-09-13 on Stanford's Sherlock
 cluster. Its tables are <span class="mono">results.parquet</span> ({n_rows:,} rows) and
-<span class="mono">compute.parquet</span> ({comp.height} rows), built by
+<span class="mono">compute.parquet</span>, built by
 <span class="mono">make leaderboard-tables</span> in {src['repo']} at commit
 <a class="mono" href="https://github.com/{src['repo']}/commit/{src['commit']}">{src['commit'][:8]}</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
@@ -848,7 +918,7 @@ supply it:</p>
 F_{{\max}} = \max_t \frac{{2\,\text{{Pr}}(t)\,\text{{Rc}}(t)}}{{\text{{Pr}}(t)+\text{{Rc}}(t)}}\]</p>
 <p>The cutoffs tried are 101 evenly spaced quantiles of the tool's call scores. Worked example:
 phmmer searching zebrafish, Pfam truth set, raw calls, all proteins. At the best cutoff (bit score
-{ex['fmax_threshold']:.4g}) precision is {P:.4f} and recall is {R:.4f}. So
+on the tool's bit score) precision is {P:.4f} and recall is {R:.4f}. So
 F = 2 × {P:.4f} × {R:.4f} / ({P:.4f} + {R:.4f}) = {f_check:.4f}, the Fmax in Table 1.</p>
 
 <h3>AUPRC</h3>
@@ -877,22 +947,22 @@ The pages show those as <i>no correct calls</i>, not as 0.</p>
 <p><b>True instances</b> (n) is the number of annotations on the human proteins in the stratum,
 reachable or not. Same row: {ex['n_truth_instances']:,}.</p>
 
-<h3>CPU-hours per 1,000 queries</h3>
-<p><b>CPU-hours</b> are taken from the run's Nextflow task records: the search task's run time
-multiplied by its average CPU use. {n_multi} of {comp.height} searches completed more than once,
-after a code change or a crash. The trace does not say which run wrote the scored
-calls, so the newest run gives the headline number and the leaderboard prints the range over all
-runs beside it. Only the search is counted; building the relative's database is not, because a
-reused database leaves no task record. Dividing by the {cx['n_queries']} queries and multiplying by 1,000
-gives the cost per 1,000 queries. Worked example: phmmer against zebrafish ran {int(mins)} min
-{secs:.1f} s at {cx['cpu_percent']:.1f}% CPU. That is {cx['realtime_s']:.1f} s × {cx['cpu_percent'] / 100:.3f}
-/ 3,600 = {cpu_h:.4f} CPU-hours, or {cpu_h:.4f} × 1,000 / {cx['n_queries']} = {per1k:.4f} CPU-hours
-per 1,000 queries. Peak RAM is the task's largest resident memory.</p>
+<h3>Core-hours per 1,000 queries</h3>
+<p><b>Core-hours</b> are taken from the run's Nextflow task records: the cores a task reserved
+multiplied by its wall time, so a task that sat partly idle still counts all its cores. The tables
+record them per tool and setting, summed over every relative searched, with building the databases
+as separate rows. The leaderboard divides the search's core-hours by the number of relatives
+searched and by the {cx['n_queries']} queries, times 1,000: the mean cost of searching one relative.
+Worked example: phmmer reserved {cx['cores']} cores for {cx['wall_s']:,.0f} s over its
+{cx['n_relatives']} searches. That is {cx['cores']} × {cx['wall_s']:,.0f} / 3,600 = {cpu_h:.4f}
+core-hours, and {cpu_h:.4f} / {cx['n_relatives']} × 1,000 / {cx['n_queries']} = {per1k:.4f}
+core-hours per 1,000 queries per relative. Peak RAM is the largest resident memory of any of
+those tasks. The tool cards give the database builds separately.</p>
 <p>Numbers marked <span class="prov measured">measured</span> come from these records, on Sherlock
-(partition hns). No search used a GPU. ProstT5 also has to turn the query sequences into 3Di
-shape letters before it can search. That step ran on one GPU for {gpu_s:.0f} s for the
-{cx['n_queries']} queries: {gpu_k:.4f} GPU-hours per 1,000 queries, counted on every ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every
-database build, is not counted. Numbers marked
+(partition hns). No search used a GPU. ProstT5 has to turn sequences into 3Di shape letters
+before it can search; that step ran on one GPU as part of building its databases, queries
+included, and is on the ProstT5 card ({pr5['db_gpu_h']:.3g} GPU-hours over {pr5['db_n']}
+databases), not in the per-query cost. Numbers marked
 <span class="prov reported">reported</span> would come from a tool's submitter, on hardware they
 name; none have been submitted yet.</p>
 
@@ -902,7 +972,8 @@ name; none have been submitted yet.</p>
 on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default \(r_\text{{gpu}}\) =
 ${R_GPU} per GPU-hour is a g5.xlarge (one NVIDIA A10G). Both are for US East (N. Virginia), Linux,
 from the <a href="{PRICE_PAGE}">EC2 on-demand price page</a> (<a href="{PRICE_FILE}">price
-file</a>, published 2026-10-12, read 2026-10-15). Memory is not priced. Worked example: {per1k:.4f} × {R_CPU:.6g} + 0 ×
+file</a>, published 2026-10-12, read 2026-10-15). A core-hour is priced as one CPU-hour. Memory is not
+priced. Worked example: {per1k:.4f} × {R_CPU:.6g} + 0 ×
 {R_GPU} = ${cost:.5f} for phmmer against zebrafish. Change either price on the leaderboard page.</p>
 
 <h2>Truth sets</h2>
@@ -1010,6 +1081,9 @@ def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dic
         f'(n = {h["n"]:,})</span>' for h in hist)
     body = f"""
 <h1>Region pile-up</h1>
+<p class="source">The pile-up's own tables (regions and calls) come from {src['repo']} at commit
+<a class="mono" href="https://github.com/{src['repo']}/commit/{src.get('pileup_commit') or src['commit']}">{(src.get('pileup_commit') or src['commit'])[:8]}</a>
+(<span class="mono">results/leaderboard/pileup</span>).</p>
 <p class="lede">Where each tool's calls fall around a known domain. A <b>call</b> is a stretch of a
 human protein that a tool matched to a zebrafish protein carrying a Pfam domain. The call names that
 domain and spans the whole matched stretch, which can be much wider than the domain itself.
@@ -1159,6 +1233,8 @@ def main() -> None:
     ap.add_argument("--data", type=Path, default=Path("data"))
     ap.add_argument("--out", type=Path, default=Path("docs"))
     a = ap.parse_args()
+    global DATA_DIR
+    DATA_DIR = a.data
     res, comp, src, prov, cov = load(a.data)
 
     unknown = set(res["tool"].unique()) - set(TOOLS)
@@ -1221,7 +1297,10 @@ def main() -> None:
             "best_setting": nums.get("best_setting"),
             "strong": nums.get("strong", []), "weak": nums.get("weak", []),
             "cost_per_1000_queries": None if not nums.get("cost_here") else {
-                "cpu_h_measured": nums["cost_here"]["cpu_h_per_1000_queries"],
+                "core_h_reserved_per_relative": nums["cost_here"]["cpu_h_per_1000_queries"],
+                "n_relatives": nums["cost_here"]["n_relatives"],
+                "database_build_core_h": nums["cost_here"]["db_cpu_h"],
+                "database_build_gpu_h": nums["cost_here"]["db_gpu_h"],
                 "peak_rss_gb": nums["cost_here"]["peak_rss_gb"],
                 "hardware": nums["cost_here"]["hardware"]},
             "questions": [re.sub(r"\*\*", "", q[3:]) for q in questions(t, nums)],
@@ -1251,9 +1330,12 @@ def main() -> None:
     page_json(out, "cost.html", src, {"note": "Same rows as index.html.json; the plot is score against "
               "cpu_h_per_1000 for every tool and setting that has both.", "results": full["results"],
               "compute": full["compute"], "rows": full["meta"]["rows"]})
-    cov_tools, cov_rows = parse_coverage(cov)
-    page_json(out, "coverage.html", src, {"tools": cov_tools, "rows": [
-        {"axis": r[0], "value": r[1], "measured": {t: c == "■" for t, c in zip(cov_tools, r[2:])}} for r in cov_rows]})
+    page_json(out, "coverage.html", src, {"tables": [
+        {"columns": h[1:], "rows": [{"tool": r[0], "instances": {c: (int(v.replace(",", "")) if v else None)
+                                                             for c, v in zip(h[1:], r[1:])}} for r in rows]}
+        for h, rows in parse_tables(cov)[:2]]})
+    if (a.data / "inventory.md").exists():
+        (out / "data" / "inventory.md").write_text((a.data / "inventory.md").read_text())
     page_json(out, "methods.html", src, None)
     page_json(out, "tools/index.html", src, {"cards": [f"{t}.json" for t in sorted(tools_used)]})
     if (out / "pileup.html").exists():

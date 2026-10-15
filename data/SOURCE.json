@@ -1,16 +1,18 @@
 {
  "repo": "seanome/2024-kmerseek-analysis",
- "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
- "commit_date": "2026-10-15T13:17:37Z",
+ "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+ "commit_date": "2026-10-15T13:12:56Z",
  "path": "results/leaderboard",
- "copied_at": "2026-10-15T13:18:08Z",
+ "copied_at": "2026-10-15T13:44:05Z",
  "sha256": {
-  "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
-  "compute.parquet": "411cac8cc8fb4b30e84a1a5319cfe08d7c42044a095307d1723acd52e084eefa",
-  "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
-  "provenance.json": "70edaff69036ea89dffcf703cf303b2d9a6e4f92f1f83a2c9043a53f7cacb3b9",
+  "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+  "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+  "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+  "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+  "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
- }
+ },
+ "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
 }

@@ -3,24 +3,26 @@
  "title": "HH-suite (hhsearch) card",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
-  "commit_date": "2026-10-15T13:17:37Z",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:18:08Z",
+  "copied_at": "2026-10-15T13:44:05Z",
   "sha256": {
-   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
-   "compute.parquet": "411cac8cc8fb4b30e84a1a5319cfe08d7c42044a095307d1723acd52e084eefa",
-   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
-   "provenance.json": "70edaff69036ea89dffcf703cf303b2d9a6e4f92f1f83a2c9043a53f7cacb3b9",
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
-  }
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
  },
  "text": [
   {
    "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 39d81ec9 (results/leaderboard), copied 2026-10-15."
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
   },
   {
    "tag": "h1",
@@ -28,7 +30,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool id hhblits. Numbers from seanome/2024-kmerseek-analysis commit 39d81ec9."
+   "text": "Tool id hhblits. Numbers from seanome/2024-kmerseek-analysis commit 4a4b1171."
   },
   {
    "tag": "h2",
@@ -120,11 +122,11 @@
   },
   {
    "tag": "p",
-   "text": "Setting single_seq, searching zebrafish: 21 CPU-hours, measured on Sherlock. Peak memory 23.4 GB. That is about $0.935 at $0.044625 per CPU-hour. This search completed 2 times; the runs took 21 to 21.6 CPU-hours per 1,000 queries, and the newest is shown. Across the 15 relatives searched with this setting: 2.18 to 30.9 CPU-hours per 1,000 queries; peak memory up to 23.4 GB."
+   "text": "Setting single_seq, searching one relative (mean over the 15 relatives it searched): 24.8 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 23.4 GB. That is about $1.11 at $0.044625 per CPU-hour. Building its databases took 30.9 core-hours over 7 databases. A database is built once and reused, so this is not in the per-query cost."
   },
   {
    "tag": "p",
-   "text": "CPU-hours count the search only, not building the relative's database."
+   "text": "The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean."
   },
   {
    "tag": "h2",
@@ -180,7 +182,7 @@
   },
   {
    "tag": "li",
-   "text": "Can you spend about 21 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+   "text": "Can you spend about 24.8 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" above."
   },
   {
    "tag": "p",
@@ -210,7 +212,7 @@
   "command": "ffindex_apply \\\n    human-38fdd87d_hhdb/db_a3m.ffdata human-38fdd87d_hhdb/db_a3m.ffindex \\\n    -d results.ffdata -i results.ffindex \\\n    -- hhsearch -i stdin -d zebrafish_hhdb/db -blasttab /dev/stdout -cpu 16 -v 0",
   "numbers_from": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
    "filters": "pfam, raw, zebrafish"
   },
   "best_setting": "single_seq",
@@ -259,14 +261,17 @@
    }
   ],
   "cost_per_1000_queries": {
-   "cpu_h_measured": 20.960518537074147,
+   "core_h_reserved_per_relative": 24.83871446596897,
+   "n_relatives": 15,
+   "database_build_core_h": 30.87333333333333,
+   "database_build_gpu_h": null,
    "peak_rss_gb": 23.4,
-   "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+   "hardware": "Stanford Sherlock, SLURM partition hns"
   },
   "questions": [
    "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.248 (n = 563), 60–100% 0.283 (n = 1,289). If no, 20–30% 0.321 (n = 93), 30–40% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `single_seq`; strata with at least 30 true instances.)",
    "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.230 (n = 963), 121–250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16–30 aa 0.066 (n = 271), 31–60 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `single_seq`.)",
-   "Can you spend about 21 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+   "Can you spend about 24.8 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" above."
   ],
   "markdown": "hhblits.md"
  }
