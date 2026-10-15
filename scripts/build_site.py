@@ -598,6 +598,10 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
         L += ["Not run.", ""]
     L += ["CPU-hours count the search only, not building the relative's database.", ""]
 
+    L += ["## Licence", "",
+          f"- Licence: {t['licence']} ([source]({t['licence_url']}))",
+          f"- Commercial use allowed: {t['commercial']}", ""]
+
     settings = sorted({r["setting"] for r in nums.get("all_settings", [])})
     if settings:
         L += ["## Settings in the table", ""]
@@ -797,6 +801,23 @@ cluster. Its tables are <span class="mono">results.parquet</span> ({n_rows:,} ro
 <a class="mono" href="https://github.com/{src['repo']}/commit/{src['commit']}">{src['commit'][:8]}</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
 
+<h2>No tool wins everywhere</h2>
+<p>No tool wins everywhere. So this board ranks tools within a stratum, a slice of the proteins
+by relative, identity, region length, disorder or feature type, and gives no overall score. Two
+earlier community benchmarks found the same. The Quest for Orthologs benchmark ran 15 orthology
+methods on 20 benchmarks. Among the balanced methods, "no method consistently obtained a better
+balance than the other methods across all data sets". Its authors chose not to compute a combined
+score, because the right trade-off depends on the application (Altenhoff et al. 2016). The Massive Text Embedding Benchmark (MTEB), for text embedding models,
+reported that "no particular text embedding method dominates across all tasks" (Muennighoff et al.
+2023).</p>
+<p class="refs">Altenhoff, Adrian M., Brigitte Boeckmann, Salvador Capella-Gutierrez, et al.
+"Standardized Benchmarking in the Quest for Orthologs." <i>Nature Methods</i> 13, no. 5 (2016):
+425–30. <a href="https://doi.org/10.1038/nmeth.3830">https://doi.org/10.1038/nmeth.3830</a>.<br>
+Muennighoff, Niklas, Nouamane Tazi, Loic Magne, and Nils Reimers. "MTEB: Massive Text Embedding
+Benchmark." In <i>Proceedings of the 17th Conference of the European Chapter of the Association for
+Computational Linguistics</i>, 2014–37. Dubrovnik, Croatia, 2023.
+<a href="https://doi.org/10.18653/v1/2023.eacl-main.148">https://doi.org/10.18653/v1/2023.eacl-main.148</a>.</p>
+
 <h2>From a search hit to a call</h2>
 <p>Each tool reports aligned regions: a stretch of the human protein matched to a stretch of a
 protein in the relative. A region becomes a <b>call</b> when it covers at least half of an annotated
@@ -846,8 +867,9 @@ recomputed here.</p>
 out (an IoU against one residue says nothing about where the ends are). Worked example, same row:
 {ex['median_iou_tp']:.3f}, so half of phmmer's correct calls on zebrafish overlap their true domain
 by at least that much. A correct call on a region longer than one residue has an IoU of at least
-0.5, so the run stores 0 only when there is no such call: no correct calls at all, or correct
-calls on single residues only (the 1 aa length bin and the ACT_SITE, BINDING and SITE features).
+0.5. So the run stores 0 only when there is no such call. Either there are no correct calls at
+all, or the correct calls are on single residues only (the 1 aa length bin and the ACT_SITE,
+BINDING and SITE features).
 The pages show those as <i>no correct calls</i>, not as 0.</p>
 
 <h3>True instances</h3>
@@ -856,8 +878,8 @@ reachable or not. Same row: {ex['n_truth_instances']:,}.</p>
 
 <h3>CPU-hours per 1,000 queries</h3>
 <p><b>CPU-hours</b> are taken from the run's Nextflow task records: the search task's run time
-multiplied by its average CPU use. {n_multi} of {comp.height} searches completed more than once
-(a re-run after a code change or a crash). The trace does not say which run wrote the scored
+multiplied by its average CPU use. {n_multi} of {comp.height} searches completed more than once,
+after a code change or a crash. The trace does not say which run wrote the scored
 calls, so the newest run gives the headline number and the leaderboard prints the range over all
 runs beside it. Only the search is counted; building the relative's database is not, because a
 reused database leaves no task record. Dividing by the {cx['n_queries']} queries and multiplying by 1,000
@@ -867,9 +889,8 @@ gives the cost per 1,000 queries. Worked example: phmmer against zebrafish ran {
 per 1,000 queries. Peak RAM is the task's largest resident memory.</p>
 <p>Numbers marked <span class="prov measured">measured</span> come from these records, on Sherlock
 (partition hns). No search used a GPU. ProstT5 also has to turn the query sequences into 3Di
-shape letters before it can search; that step ran on one GPU for {gpu_s:.0f} s for the
-{cx['n_queries']} queries, which is {gpu_k:.4f} GPU-hours per 1,000 queries, counted on every
-ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every
+shape letters before it can search. That step ran on one GPU for {gpu_s:.0f} s for the
+{cx['n_queries']} queries: {gpu_k:.4f} GPU-hours per 1,000 queries, counted on every ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every
 database build, is not counted. Numbers marked
 <span class="prov reported">reported</span> would come from a tool's submitter, on hardware they
 name; none have been submitted yet.</p>
@@ -945,6 +966,55 @@ in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
                   description="How each score is defined and computed, how the truth sets were built, and what dedup means.")
 
 
+from html.parser import HTMLParser
+
+
+class _Text(HTMLParser):
+    """Headings, paragraphs, captions, list items and table cells of <main>, in order."""
+    KEEP = {"h1", "h2", "h3", "p", "figcaption", "li", "dt", "dd", "summary", "pre"}
+
+    def __init__(self):
+        super().__init__()
+        self.out, self.stack, self.in_main, self.skip = [], [], False, 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "main":
+            self.in_main = True
+        if tag in ("script", "style", "svg"):
+            self.skip += 1
+        if self.in_main and tag in self.KEEP:
+            self.stack.append([tag, ""])
+
+    def handle_endtag(self, tag):
+        if tag in ("script", "style", "svg"):
+            self.skip -= 1
+        if tag == "main":
+            self.in_main = False
+        if self.stack and self.stack[-1][0] == tag:
+            t, text = self.stack.pop()
+            text = " ".join(text.split())
+            if text:
+                self.out.append({"tag": t, "text": text})
+
+    def handle_data(self, data):
+        if self.stack and not self.skip:
+            self.stack[-1][1] += data
+
+
+def page_json(out: Path, rel: str, src: dict, data) -> None:
+    """Write <page>.json beside <page>: the page's text in reading order plus its data, so an
+    agent gets what a person gets."""
+    html_text = (out / rel).read_text()
+    parser = _Text()
+    parser.feed(html_text)
+    title = re.search(r"<title>(.*?)</title>", html_text).group(1)
+    doc = {"page": rel, "title": html.unescape(title), "source": src, "text": parser.out, "data": data}
+    (out / (rel + ".json")).write_text(json.dumps(doc, indent=1, ensure_ascii=False, allow_nan=False) + "\n")
+    name = rel.split("/")[-1]
+    link = f'<p>This page as JSON, for scripts and agents: <a class="mono" href="{name}.json">{name}.json</a></p>\n'
+    (out / rel).write_text(html_text.replace("</div></footer>", link + "</div></footer>", 1))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", type=Path, default=Path("data"))
@@ -1004,6 +1074,8 @@ def main() -> None:
             "compares": TOOLS[t]["compares"], "needs": TOOLS[t]["needs"],
             "reference": TOOLS[t]["reference"], "score": TOOLS[t]["score"],
             "failure_modes": TOOLS[t]["failure_modes"], "version": TOOLS[t]["version"],
+            "licence": TOOLS[t]["licence"], "commercial_use": TOOLS[t]["commercial"],
+            "licence_url": TOOLS[t]["licence_url"],
             "container": TOOLS[t]["container"], "command": TOOLS[t]["command"],
             "numbers_from": {"repo": src["repo"], "commit": src["commit"],
                              "filters": "pfam, raw, " + nums["species"]},
@@ -1019,6 +1091,23 @@ def main() -> None:
         (out / "tools" / f"{t}.json").write_text(json.dumps(card, indent=1, allow_nan=False) + "\n")
         (out / "tools" / f"{t}.html").write_text(page_card(t, md, src))
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
+
+    # Every page also as JSON at its path plus .json.
+    full = json.loads(payload.replace("<\\/", "</"))
+    page_json(out, "index.html", src, {"note": "The table is drawn from these rows: results keyed "
+              "truth|calls|species|stratum_axis|stratum, then tool|setting -> [fmax, auprc, median_iou_tp, "
+              "n_truth_instances, n_tp_calls]; compute keyed tool|setting|species.", **full,
+              "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_PAGE, "price_file": PRICE_FILE}})
+    page_json(out, "cost.html", src, {"note": "Same rows as index.html.json; the plot is score against "
+              "cpu_h_per_1000 for every tool and setting that has both.", "results": full["results"],
+              "compute": full["compute"], "rows": full["meta"]["rows"]})
+    cov_tools, cov_rows = parse_coverage(cov)
+    page_json(out, "coverage.html", src, {"tools": cov_tools, "rows": [
+        {"axis": r[0], "value": r[1], "measured": {t: c == "■" for t, c in zip(cov_tools, r[2:])}} for r in cov_rows]})
+    page_json(out, "methods.html", src, None)
+    page_json(out, "tools/index.html", src, {"cards": [f"{t}.json" for t in sorted(tools_used)]})
+    for t in sorted(tools_used):
+        page_json(out, f"tools/{t}.html", src, json.loads((out / "tools" / f"{t}.json").read_text()))
     print(f"built {out}: {len(rows)} tool-setting rows, {len(tools_used)} cards, payload {len(payload) / 1e6:.2f} MB")
 
 

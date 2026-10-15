@@ -14,6 +14,9 @@
   "The run names this tool hhblits (its tool id), but it ran hhsearch on profiles of single proteins. HH-suite's usual use, with family alignments from UniRef30, was not run, so these numbers say nothing about it."
  ],
  "version": "HH-suite 3.3.0",
+ "licence": "GPL-3.0",
+ "commercial_use": "Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.",
+ "licence_url": "https://github.com/soedinglab/hh-suite",
  "container": "quay.io/biocontainers/hhsuite:3.3.0--h503566f_15 (sha256:4bf9bb5229de18f522a94f4443c19fdcbb0f0cb0e6ea92f5390aa170bcb0a24f)",
  "command": "ffindex_apply \\\n    human-38fdd87d_hhdb/db_a3m.ffdata human-38fdd87d_hhdb/db_a3m.ffindex \\\n    -d results.ffdata -i results.ffindex \\\n    -- hhsearch -i stdin -d zebrafish_hhdb/db -blasttab /dev/stdout -cpu 16 -v 0",
  "numbers_from": {

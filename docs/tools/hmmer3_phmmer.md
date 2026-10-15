@@ -48,6 +48,11 @@ Across the 15 relatives searched with this setting: 0.0189 to 0.381 CPU-hours pe
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: BSD 3-clause (HMMER) ([source](https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE))
+- Commercial use allowed: Yes.
+
 ## Settings in the table
 
 - `default`: phmmer's default options, E-value cutoff 10

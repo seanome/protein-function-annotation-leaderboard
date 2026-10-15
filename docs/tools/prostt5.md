@@ -49,6 +49,11 @@ Across the 15 relatives searched with this setting: 0.0541 to 0.123 CPU-hours pe
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: GPL-3.0 (Foldseek); MIT (ProstT5 model weights) ([source](https://huggingface.co/Rostlab/ProstT5))
+- Commercial use allowed: Yes. Foldseek's GPL-3.0 applies to changed versions you distribute.
+
 ## Settings in the table
 
 - `3di_from_seq`: 3Di letters predicted from sequence by ProstT5

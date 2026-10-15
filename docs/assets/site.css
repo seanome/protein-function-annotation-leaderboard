@@ -142,3 +142,4 @@ table.lb th:first-child{background:var(--chip)}
 table.lb tr:hover td.txt:first-child{background:var(--chip)}
 details.prose{margin:6px 0 10px}
 details.prose summary{cursor:pointer;color:var(--accent)}
+.refs{font-size:.9rem;color:var(--muted)}

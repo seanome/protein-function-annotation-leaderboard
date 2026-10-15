@@ -49,6 +49,11 @@ Across the 15 relatives searched with this setting: 0.00106 to 0.0204 CPU-hours 
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: MIT ([source](https://github.com/seanome/kmerseek))
+- Commercial use allowed: Yes.
+
 ## Settings in the table
 
 - `gbmr4_k15_lcFalse`: alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept

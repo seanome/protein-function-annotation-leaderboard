@@ -15,6 +15,9 @@
   "It was scored against the Pfam truth set only. Swiss-Prot features and Pfam-N: not run."
  ],
  "version": "HMMER 3.4",
+ "licence": "BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes)",
+ "commercial_use": "Yes.",
+ "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",
  "container": "quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)",
  "command": "hmmscan \\\n    --domtblout /dev/stdout \\\n    -o /dev/null \\\n    --noali \\\n    -E 10.0 --domE 10.0 \\\n    --cpu 4 \\\n    Pfam-A.hmm UP000005640_9606.fasta",
  "numbers_from": {
