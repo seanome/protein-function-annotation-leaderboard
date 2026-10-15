@@ -1,0 +1,1135 @@
+{
+ "page": "coverage.html",
+ "title": "Coverage",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit_date": "2026-10-15T12:40:15Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T12:40:50Z",
+  "sha256": {
+   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
+   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
+   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d"
+  }
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 548ec5b8 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "Coverage"
+  },
+  {
+   "tag": "p",
+   "text": "What has been measured, and what has not. Every empty square is a run still to do."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 2. Tool by stratum. A square is filled when the results table has at least one row for that tool with that value (under any other filters), and empty when it has none: not run. 390 squares are filled and 69 are empty."
+  },
+  {
+   "tag": "h2",
+   "text": "What to run next"
+  },
+  {
+   "tag": "p",
+   "text": "Each empty square above, by tool:"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2, three rounds"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: chimpanzee (6 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: cow (95 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: dog (95 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: opossum (160 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: western clawed frog (350 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "Foldseek"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "li",
+   "text": "truth set: Swiss-Prot features"
+  },
+  {
+   "tag": "li",
+   "text": "truth set: Pfam-N"
+  },
+  {
+   "tag": "li",
+   "text": "dedup or raw: dedup"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: chimpanzee (6 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: rat (90 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: cow (95 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: dog (95 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: mouse (100 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: opossum (160 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: chicken (300 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: western clawed frog (350 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: zebrafish (430 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: sea squirt (Ciona) (550 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: fruit fly (600 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: nematode (C. elegans) (650 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: baker's yeast (900 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: thale cress (Arabidopsis) (1500 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "relative searched: E. coli (2000 Mya)"
+  },
+  {
+   "tag": "li",
+   "text": "nearest reviewed relative: 0–20%"
+  },
+  {
+   "tag": "li",
+   "text": "nearest reviewed relative: 20–30%"
+  },
+  {
+   "tag": "li",
+   "text": "nearest reviewed relative: 30–40%"
+  },
+  {
+   "tag": "li",
+   "text": "nearest reviewed relative: 40–60%"
+  },
+  {
+   "tag": "li",
+   "text": "nearest reviewed relative: 60–100%"
+  },
+  {
+   "tag": "li",
+   "text": "nearest reviewed relative: no same-family domain"
+  },
+  {
+   "tag": "li",
+   "text": "disorder: 0–50"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: 1 aa"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: 2–15 aa"
+  },
+  {
+   "tag": "li",
+   "text": "region type and length: whole protein"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: ACT_SITE (active site residue)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: BINDING (binding site residue)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: COILED (coiled coil)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: DNA_BIND (DNA-binding region)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: DOMAIN (domain)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: INTRAMEM (region inside the membrane that does not cross it)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: MOTIF (short motif)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: REGION (region of interest)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: REPEAT (repeat)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: SITE (other single-residue site)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: TRANSMEM (membrane-spanning segment)"
+  },
+  {
+   "tag": "li",
+   "text": "feature type: ZN_FING (zinc finger)"
+  },
+  {
+   "tag": "li",
+   "text": "hmmscan with Pfam"
+  }
+ ],
+ "data": {
+  "tools": [
+   "foldseek",
+   "hhblits",
+   "hmmer3_jackhmmer",
+   "hmmer3_phmmer",
+   "hmmscan",
+   "kmerseek",
+   "mmseqs2_iterative",
+   "mmseqs2_seqseq",
+   "prostt5"
+  ],
+  "rows": [
+   {
+    "axis": "truth set",
+    "value": "swissprot",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "truth set",
+    "value": "pfam",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "truth set",
+    "value": "pfamn",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "dedup",
+    "value": "raw",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "dedup",
+    "value": "dedup",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "ptroglodytes",
+    "measured": {
+     "foldseek": false,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "rnorvegicus",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "btaurus",
+    "measured": {
+     "foldseek": false,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "clupus",
+    "measured": {
+     "foldseek": false,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "mouse",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "mdomestica",
+    "measured": {
+     "foldseek": false,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "chicken",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "xtropicalis",
+    "measured": {
+     "foldseek": false,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "zebrafish",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "ciona",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "fly",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "worm",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "yeast",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "arabidopsis",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "ecoli",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "species",
+    "value": "all",
+    "measured": {
+     "foldseek": false,
+     "hhblits": false,
+     "hmmer3_jackhmmer": false,
+     "hmmer3_phmmer": false,
+     "hmmscan": true,
+     "kmerseek": false,
+     "mmseqs2_iterative": false,
+     "mmseqs2_seqseq": false,
+     "prostt5": false
+    }
+   },
+   {
+    "axis": "identity",
+    "value": "0-20%",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "identity",
+    "value": "20-30%",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "identity",
+    "value": "30-40%",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "identity",
+    "value": "40-60%",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "identity",
+    "value": "60-100%",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "identity",
+    "value": "no_homolog",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "plddt",
+    "value": "0-50",
+    "measured": {
+     "foldseek": false,
+     "hhblits": false,
+     "hmmer3_jackhmmer": false,
+     "hmmer3_phmmer": false,
+     "hmmscan": false,
+     "kmerseek": false,
+     "mmseqs2_iterative": false,
+     "mmseqs2_seqseq": false,
+     "prostt5": false
+    }
+   },
+   {
+    "axis": "plddt",
+    "value": "50-70",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "plddt",
+    "value": "70-90",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "plddt",
+    "value": "90-100",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "1",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "2-15",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "16-30",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "31-60",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "61-120",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "121-250",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "251+",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": true,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_length_bin",
+    "value": "whole_protein",
+    "measured": {
+     "foldseek": false,
+     "hhblits": false,
+     "hmmer3_jackhmmer": false,
+     "hmmer3_phmmer": false,
+     "hmmscan": false,
+     "kmerseek": false,
+     "mmseqs2_iterative": false,
+     "mmseqs2_seqseq": false,
+     "prostt5": false
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "ACT_SITE",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "BINDING",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "COILED",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "DNA_BIND",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "DOMAIN",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "INTRAMEM",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "MOTIF",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "REGION",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "REPEAT",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "SITE",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "TRANSMEM",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   },
+   {
+    "axis": "feature_type",
+    "value": "ZN_FING",
+    "measured": {
+     "foldseek": true,
+     "hhblits": true,
+     "hmmer3_jackhmmer": true,
+     "hmmer3_phmmer": true,
+     "hmmscan": false,
+     "kmerseek": true,
+     "mmseqs2_iterative": true,
+     "mmseqs2_seqseq": true,
+     "prostt5": true
+    }
+   }
+  ]
+ }
+}

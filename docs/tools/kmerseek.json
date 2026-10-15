@@ -1,0 +1,85 @@
+{
+ "tool": "kmerseek",
+ "name": "kmerseek",
+ "kind": "counts shared k-mers in a reduced alphabet",
+ "compares": "Short words of k letters (k-mers) shared between two proteins. First, each amino acid is replaced by a letter from a smaller alphabet, for example H for hydrophobic and P for polar. Two proteins can then match where their residues differ but their pattern of residue types is the same.",
+ "needs": {
+  "sequence only": true,
+  "AlphaFold model": false,
+  "GPU": false
+ },
+ "reference": "An index of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), built once per alphabet and k-mer length.",
+ "score": "region_enrichment: the number of k-mers the region shares with the target divided by the number expected by chance (fold enrichment). Higher ranks first. A region was kept when either test passed: its own score was at least 1.3, or the whole query protein's p-value was at most 0.05.",
+ "failure_modes": [
+  "A feature shorter than k residues contains no complete k-mer, so it cannot be found. The strata above show how Fmax changes with region length.",
+  "The task script records a kmerseek search that exits with an error as a search with no hits, so a crash would look like a miss. How often that happened in this run: not measured.",
+  "Setting hp_thomas_dill2 k33 was scored, but no trace row holds its search task, so its cost is not measured, and the scoring task for it was not found either."
+ ],
+ "version": "kmerseek 0.3.1 (printed in the search log)",
+ "licence": "MIT",
+ "commercial_use": "Yes.",
+ "licence_url": "https://github.com/seanome/kmerseek",
+ "container": "docker.io/olgabot/kmerseek:2026-08-24-reduced-alphabets",
+ "command": "kmerseek search \\\n    --alphabet hp_thomas_dill2 \\\n    --ksize    24 \\\n    --query    UP000005640_9606.fasta \\\n    --target   zebrafish.hp_thomas_dill2.k24.lcfalse.kmerseek.rocksdb \\\n    --threshold         0.0 \\\n    --min-shared-kmers  2 \\\n    --max-query-pvalue  0.05 \\\n    --min-region-score  1.3",
+ "numbers_from": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "filters": "pfam, raw, zebrafish"
+ },
+ "best_setting": "gbmr4_k21_lcFalse",
+ "strong": [
+  {
+   "axis": "feature_length_bin",
+   "stratum": "16-30",
+   "fmax": 0.280694003473648,
+   "n": 271,
+   "other_tool": "hhblits",
+   "other_setting": "single_seq",
+   "other_fmax": 0.06589146154089374,
+   "margin": 0.21480254193275422
+  },
+  {
+   "axis": "feature_length_bin",
+   "stratum": "31-60",
+   "fmax": 0.23209537155652643,
+   "n": 420,
+   "other_tool": "hmmer3_phmmer",
+   "other_setting": "default",
+   "other_fmax": 0.09545667362809032,
+   "margin": 0.1366386979284361
+  }
+ ],
+ "weak": [
+  {
+   "axis": "feature_length_bin",
+   "stratum": "251+",
+   "fmax": 0.05,
+   "n": 277,
+   "other_tool": "hmmer3_phmmer",
+   "other_setting": "default",
+   "other_fmax": 0.4770249187378286,
+   "margin": -0.4270249187378286
+  },
+  {
+   "axis": "identity",
+   "stratum": "20-30%",
+   "fmax": 0.0,
+   "n": 93,
+   "other_tool": "hmmer3_phmmer",
+   "other_setting": "default",
+   "other_fmax": 0.35875364786222397,
+   "margin": -0.35875364786222397
+  }
+ ],
+ "cost_per_1000_queries": {
+  "cpu_h_measured": 0.020415831663326653,
+  "peak_rss_gb": 5.2,
+  "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+ },
+ "questions": [
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.005 (n = 563), 60\u2013100% 0.297 (n = 1,289). If no, 20\u201330% 0.000 (n = 93), 30\u201340% 0.000 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`; strata with at least 30 true instances.)",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.208 (n = 963), 121\u2013250 aa 0.098 (n = 504), 251 aa or more 0.050 (n = 277). If no, 16\u201330 aa 0.281 (n = 271), 31\u201360 aa 0.232 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`.)",
+  "Can you spend about 0.0204 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+ ],
+ "markdown": "kmerseek.md"
+}
