@@ -19,7 +19,7 @@
  "command": "foldseek search \\\n    human-38fdd87d_fsdb/db zebrafish_fsdb/db result foldseek_tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "6af1255b081630e4d51bb99c6abbe5c3d6fb49c1",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "3di_aa",
@@ -70,12 +70,12 @@
  "cost_per_1000_queries": {
   "cpu_h_measured": 0.132604097083055,
   "peak_rss_gb": 1.5,
-  "hardware": "Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU"
+  "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
  },
  "questions": [
-  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.164, 60\u2013100% 0.241. If no, 20\u201330% 0.268, 30\u201340% 0.167. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_aa`; strata with at least 30 true instances.)",
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.164 (n = 563), 60\u2013100% 0.241 (n = 1,289). If no, 20\u201330% 0.268 (n = 93), 30\u201340% 0.167 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_aa`; strata with at least 30 true instances.)",
   "Do you have an AlphaFold model for every protein you want to annotate? If not, Foldseek cannot search the proteins without one.",
-  "Can you spend about 0.133 CPU-hours per 1,000 proteins for each relative you search? That is the measured search cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  "Can you spend about 0.133 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
  ],
  "markdown": "foldseek.md"
 }

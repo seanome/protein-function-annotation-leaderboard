@@ -59,7 +59,8 @@ SNAP_TABLE = """(batch) => batch.map((s) => {
   const rows = [...document.querySelectorAll('#lb tbody tr')].map((tr) => ({
     tool: tr.dataset.tool, setting: tr.dataset.setting,
     cells: [...tr.children].slice(2).map((td) => ({
-      text: td.textContent.trim(), missing: td.dataset.missing || null, span: td.colSpan})),
+      text: td.textContent.trim(), missing: td.dataset.missing || null, none: td.dataset.none || null,
+      span: td.colSpan})),
   }));
   const dashes = (document.querySelector('#lb tbody').textContent.match(/—/g) || []).length;
   return {s, rows, dashes};
@@ -130,9 +131,14 @@ def main() -> int:
                         exp = [want["fmax"], want["auprc"], want["median_iou_tp"]]
                         # Three decimals on the page: each value within half of the last
                         # digit (the page rounds halves up, Python's format rounds them to even).
-                        bad = any(
-                            (e is None) != (t == "") or (e is not None and abs(float(t) - e) > 0.0005 + 1e-9)
-                            for t, e in zip(shown[:3], exp))
+                        bad = any(abs(float(t) - e) > 0.0005 + 1e-9 for t, e in zip(shown[:2], exp[:2]))
+                        # A stored median IoU of 0 (no correct call longer than one residue)
+                        # is shown as words, never as a number or a dash.
+                        if exp[2] == 0:
+                            bad |= cells[2]["none"] != "iou" or shown[2] != "no correct calls"
+                            stats["iou_as_words"] = stats.get("iou_as_words", 0) + 1
+                        else:
+                            bad |= abs(float(shown[2]) - exp[2]) > 0.0005 + 1e-9
                         if bad or shown[3] != f"{want['n_truth_instances']:,}" or any(c["missing"] for c in cells[:4]):
                             failures.append(f"{tag}: page {shown} != parquet {exp + [want['n_truth_instances']]}")
                         stats["numbers_checked"] += 4
@@ -145,7 +151,20 @@ def main() -> int:
                         stats["missing_compute_cells"] += 4
                         stats["missing_reported_cells"] += 1
                     else:
-                        cpu = rest[0]["text"]
+                        cpu = rest[0]["text"].split()[0]
+                        if cw["n_completed_runs"] > 1 and f"{cw['n_completed_runs']} runs" not in rest[0]["text"]:
+                            failures.append(f"{tag}: {cw['n_completed_runs']} runs but no range shown")
+                        gpu_text = rest[3]["text"]
+                        if cw["gpu_h_per_1000_queries"] > 0:
+                            g = float(gpu_text.split()[0])
+                            if abs(g - cw["gpu_h_per_1000_queries"]) > 0.006 * cw["gpu_h_per_1000_queries"]:
+                                failures.append(f"{tag}: GPU {gpu_text} != {cw['gpu_h_per_1000_queries']}")
+                        elif gpu_text != "none":
+                            failures.append(f"{tag}: GPU {gpu_text} but parquet has none")
+                        cost_shown = float(rest[4]["text"].lstrip("$"))
+                        cost_want = cw["cpu_h_per_1000_queries"] * 0.044625 + cw["gpu_h_per_1000_queries"] * 1.006
+                        if abs(cost_shown - cost_want) > 0.006 * cost_want + 1e-12:
+                            failures.append(f"{tag}: cost {cost_shown} != {cost_want}")
                         ram = rest[2]["text"]
                         if abs(float(cpu) - cw["cpu_h_per_1000_queries"]) > 0.006 * cw["cpu_h_per_1000_queries"] + 1e-9:
                             failures.append(f"{tag}: CPU-h {cpu} != {cw['cpu_h_per_1000_queries']}")
@@ -173,7 +192,7 @@ def main() -> int:
                 for r in meta["rows"]:
                     k = (s["truth"], s["calls"], s["species"], s["axis"], s["stratum"], r["tool"], r["setting"])
                     if k in expect and (r["tool"], r["setting"], s["species"]) in cexp \
-                            and expect[k][field[s["metric"]]] is not None:
+                            and expect[k][field[s["metric"]]] not in (None, 0.0 if s["metric"] == "iou" else None):
                         want.add(r["tool"] + "|" + r["setting"])
                 got = set(snap["marks"])
                 stats["markers_checked"] += len(got)

@@ -67,6 +67,40 @@ SPECIES_GROUPS = [
     ("fungus, plant, bacterium", ["yeast", "arabidopsis", "ecoli"]),
     ("no relative", ["all"]),
 ]
+# What the setting names mean. kmerseek alphabets are listed in the kmerseek README
+# (seanome/kmerseek), with their residue groups.
+ALPHABETS = {
+    "protein20": "the 20 amino acids, not reduced",
+    "gbmr4": "4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)",
+    "wwmj5": "5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)",
+    "hp_thomas_dill2": "2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)",
+}
+SETTING_WORDS = {
+    ("hmmer3_phmmer", "default"): "phmmer's default options, E-value cutoff 10",
+    ("hmmer3_jackhmmer", "n3"): "three rounds of search (-N 3)",
+    ("mmseqs2_seqseq", "s7"): "sensitivity 7 (-s 7), one round",
+    ("mmseqs2_iterative", "s7"): "sensitivity 7 (-s 7), three rounds",
+    ("hhblits", "single_seq"): "profiles built from single proteins, no family database",
+    ("foldseek", "3di_aa"): "3Di shape letters and amino acids together",
+    ("prostt5", "3di_from_seq"): "3Di letters predicted from sequence by ProstT5",
+    ("hmmscan", "direct"): "scans Pfam's models; no relative searched",
+}
+
+
+def setting_words(tool: str, setting: str) -> str:
+    if (tool, setting) in SETTING_WORDS:
+        return SETTING_WORDS[(tool, setting)]
+    m = re.fullmatch(r"(.+)_k(\d+)_lc(False|True)", setting)
+    if tool == "kmerseek" and m:
+        lc = "low-complexity k-mers kept" if m[3] == "False" else "low-complexity k-mers removed"
+        return f"alphabet {m[1]} ({ALPHABETS.get(m[1], 'see the kmerseek README')}), k = {m[2]}, {lc}"
+    return setting
+
+
+# Marker shape for each kmerseek alphabet on Figure 1; other tools take theirs from TOOLS.
+KMERSEEK_SHAPES = {"protein20": "circle", "gbmr4": "square", "wwmj5": "triangle",
+                   "hp_thomas_dill2": "diamond"}
+
 METRICS = [
     {"id": "fmax", "label": "Fmax", "field": "fmax"},
     {"id": "auprc", "label": "AUPRC", "field": "auprc"},
@@ -99,22 +133,28 @@ def chiprows(species_mya: dict) -> list[dict]:
 
     return [
         {"id": "truth", "kind": "plain", "label": "Truth set",
-         "help": "the known annotations calls are graded against",
-         "groups": [{"chips": [c("swissprot", "Swiss-Prot features"), c("pfam", "Pfam"),
-                               c("pfamn", "Pfam-N")]}]},
+         "help": "the known annotations calls are graded against. Pfam: protein domain "
+                 "families. Pfam-N: regions a deep-learning model added where Pfam's own "
+                 "models found nothing. Swiss-Prot features: 12 kinds of curated feature, "
+                 "such as active sites and membrane-spanning segments",
+         "groups": [{"chips": [c("swissprot", "Swiss-Prot features", "curated features from Swiss-Prot entries"),
+                               c("pfam", "Pfam", "Pfam-A domain families"),
+                               c("pfamn", "Pfam-N", "regions added by a deep-learning model where Pfam-A's models found nothing (Pfam 35.0)")]}]},
         {"id": "calls", "kind": "plain", "label": "Dedup or raw",
-         "help": "raw keeps every call; dedup merges overlapping calls of one family",
+         "help": "raw keeps every call; dedup merges calls of one family that overlap on the "
+                 "same protein, so one domain hit by many relatives' proteins counts once",
          "groups": [{"chips": [c("raw", "raw"), c("dedup", "dedup")]}]},
-        {"id": "species", "kind": "plain", "label": "Relative searched",
-         "help": "whose annotations are copied onto the human proteins, and how long ago "
-                 "its line split from ours (million years, Mya)",
+        {"id": "species", "kind": "plain", "label": "Nearest reviewed relative: time since split",
+         "help": "the species whose annotated proteome is searched and whose annotations are "
+                 "copied onto the human proteins; the number is how many million years (Mya) "
+                 "ago its line split from ours",
          "groups": [{"label": g, "chips": [
              c(s, SPECIES[s] if s == "all" else f"{SPECIES[s]} {int(species_mya[s])}")
              for s in members]} for g, members in SPECIES_GROUPS]},
         {"id": "identity", "kind": "stratum", "axis": "identity",
-         "label": "Nearest reviewed relative",
+         "label": "Nearest reviewed relative: % identity",
          "help": "% identity of each human domain to the closest domain of the same family "
-                 "in the relative",
+                 "in that relative",
          "groups": [{"chips": [c("all", "any")] + [c(v, w) for v, w in IDENTITY]}]},
         {"id": "length", "kind": "stratum", "axis": "feature_length_bin",
          "label": "Region type and length",
@@ -133,6 +173,19 @@ def chiprows(species_mya: dict) -> list[dict]:
          "help": "Swiss-Prot feature key; only the Swiss-Prot truth set has these",
          "groups": [{"chips": [c("all", "any")] + [c(k, k, v) for k, v in FEATURES.items()]}]},
     ]
+
+
+def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
+    """Flag stratum chips that no row of the results table has, for any tool or filter."""
+    present = {(a, v) for a, v in res.select("stratum_axis", "stratum").unique().iter_rows()}
+    for row in rows:
+        if row["kind"] != "stratum":
+            continue
+        for g in row["groups"]:
+            for c in g["chips"]:
+                if c["value"] != "all" and (row["axis"], c["value"]) not in present:
+                    c["empty"] = True
+    return rows
 
 
 def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
@@ -196,6 +249,8 @@ def svg_marker(shape: str, color: str, filled: bool = True) -> str:
     fill = color if filled else "var(--surface)"
     if shape == "square":
         m = f'<rect x="3" y="3" width="10" height="10" fill="{fill}" stroke="{color}" stroke-width="1.6"/>'
+    elif shape == "diamond":
+        m = f'<path d="M8,1.5 L14.5,8 L8,14.5 L1.5,8 Z" fill="{fill}" stroke="{color}" stroke-width="1.6"/>'
     elif shape == "triangle":
         m = f'<path d="M8,2 L14,13 L2,13 Z" fill="{fill}" stroke="{color}" stroke-width="1.6"/>'
     else:
@@ -220,7 +275,12 @@ def row_order(res: pl.DataFrame) -> list[dict]:
     pairs = res.select("tool", "setting").unique().to_dicts()
     pairs.sort(key=lambda r: (kinds.index(TOOLS[r["tool"]]["kind"]), list(TOOLS).index(r["tool"]),
                               r["setting"]))
-    return [dict(p, order=i) for i, p in enumerate(pairs)]
+    out = []
+    for i, p in enumerate(pairs):
+        alpha = re.fullmatch(r"(.+)_k\d+_lc(?:False|True)", p["setting"])
+        shape = KMERSEEK_SHAPES.get(alpha[1], "circle") if p["tool"] == "kmerseek" and alpha else TOOLS[p["tool"]]["shape"]
+        out.append(dict(p, order=i, words=setting_words(p["tool"], p["setting"]), shape=shape))
+    return out
 
 
 def results_json(res: pl.DataFrame) -> dict:
@@ -230,7 +290,7 @@ def results_json(res: pl.DataFrame) -> dict:
         k2 = f'{r["tool"]}|{r["setting"]}'
         if k2 in out.setdefault(key, {}):
             raise SystemExit(f"two rows for {key} {k2}")
-        out[key][k2] = [r["fmax"], r["auprc"], r["median_iou_tp"], r["n_truth_instances"]]
+        out[key][k2] = [r["fmax"], r["auprc"], r["median_iou_tp"], r["n_truth_instances"], r["n_tp_calls"]]
     return out
 
 
@@ -243,21 +303,34 @@ def compute_json(comp: pl.DataFrame) -> dict:
             "cpu_h_reported_per_1000": None if rep is None else rep * 1000 / r["n_queries"],
             "peak_rss_gb": r["peak_rss_gb"],
             "gpu": r["gpu"],
-            "gpu_h_per_1000": r["gpu_h"] * 1000 / r["n_queries"],
+            "gpu_h_per_1000": r["gpu_h_per_1000_queries"],
             "hardware": r["hardware"],
+            "n_runs": r["n_completed_runs"],
+            "cpu_min": r["cpu_h_per_1000_queries_min"],
+            "cpu_max": r["cpu_h_per_1000_queries_max"],
         }
     return out
 
 
 # --------------------------------------------------------------------------- pages
 
-def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -> str:
+def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[str], dd: dict) -> str:
     body = f"""
 <h1>{SITE}</h1>
 <p class="lede">Which tool finds the known domains and features of a protein, and what does it
 cost? Each row is one tool at one setting. It searched {n_queries:,} human proteins against the
 proteome of one relative and copied the relative's annotations onto them. The scores say how many
-of the human proteins' known annotations it put in the right place.</p>
+of the human proteins' known annotations it put in the right place. The queries are human proteins,
+964 of them from chromosome 6; how the ranking holds for queries from other species is not
+measured.</p>
+<details class="prose"><summary>How to choose between Fmax and AUPRC, and raw against dedup</summary>
+<p>Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it
+when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting
+each call: use it when you will rank calls and read down the list. The two can rank tools in
+opposite orders, because AUPRC pools every call of every protein while Fmax averages protein by
+protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from
+{dd['raw_fmax']:.3f} to {dd['dedup_fmax']:.3f} and AUPRC from {dd['raw_auprc']:.3f} to
+{dd['dedup_auprc']:.3f}. Definitions: <a href="methods.html">Methods</a>.</p></details>
 <form class="filters" id="filters-form" onsubmit="return false" aria-label="Filters">
 <div id="filters"></div>
 <p class="axisnote">The benchmark split the proteins along one of the last four rows at a time,
@@ -273,9 +346,12 @@ GPU: a g5.xlarge with one NVIDIA A10G costs $1.006 per hour.</span>
 </div>
 <figure>
 <figcaption><b>Table 1.</b> Tools ranked under the filters above: <span id="filterline"></span>
-Fmax and AUPRC run from 0 to 1; higher is better. Median IoU is how well a correct call's
-ends match the true region (1 is a perfect match). Click a column name to sort; rows with no
-value always sort last. <span id="count"></span></figcaption>
+Fmax is the best balance of precision and recall at any one score cutoff; AUPRC is precision
+summed over all cutoffs. Both run from 0 to 1, and higher is better. Median IoU is how well a
+correct call's ends match the true region: the overlap divided by the combined span, 1 for a
+perfect match. Click a column name to sort; rows with no value always sort last.
+<span id="count"></span> On a narrow screen, scroll the table sideways; the tool name stays in
+place.</figcaption>
 <div class="legend" aria-label="Key to the marks in Table 1">
 <span class="item"><span class="prov measured">measured</span> measured by us on Stanford's Sherlock
 cluster, from the run's own task records</span>
@@ -283,14 +359,23 @@ cluster, from the run's own task records</span>
 hardware they name (none yet)</span>
 <span class="item">— not run: no row in the results table for these filters</span>
 <span class="item">— not measured: the search ran, but no task record holds its cost</span>
+<span class="item"><i>no correct calls</i>: a median IoU needs at least one correct call on a region
+longer than one residue</span>
+<span class="item"><span class="tag">needs AlphaFold model</span> <span class="tag">needs GPU</span>
+what the tool needs besides the sequence</span>
+<span class="item"><span class="tag warn">graded on its own models</span> hmmscan under the Pfam truth
+set: Pfam's domains are defined by the models hmmscan runs, so read its row as an upper limit</span>
+<span class="item"><span class="muted">(range, n runs)</span> some searches completed more than once;
+the first number is the newest run</span>
 </div>
 {legend_kinds(tools_used)}
 <div class="tablebox"><table class="lb" id="lb"><thead><tr></tr></thead><tbody></tbody></table></div>
 </figure>
 <p class="prose muted">cost_usd_est = CPU-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries. CPU-hours
-count the search alone, not building the relative's database. No search used a GPU, so the GPU
-term is 0 on every row. ProstT5's step that predicts shape letters did use one GPU, and is not
-counted (<a href="tools/prostt5.html">see its card</a>). Definitions and worked examples: <a href="methods.html">Methods</a>.</p>
+count the search alone, not building the relative's database. The only GPU use is ProstT5's step
+that predicts 3Di shape letters for the queries; its GPU-hours are in the GPU column and in the
+cost. Setting names, decoded: hover a setting, or see the tool's card. Definitions and worked
+examples: <a href="methods.html">Methods</a>.</p>
 <script type="application/json" id="lb-data">{meta_json}</script>
 <script src="assets/app.js"></script>
 """
@@ -302,12 +387,19 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
     legend = []
     for kind, k in KINDS.items():
         for t, info in TOOLS.items():
-            if info["kind"] == kind and t in tools_used:
+            if info["kind"] != kind or t not in tools_used:
+                continue
+            if t == "kmerseek":
+                for alpha, shape in KMERSEEK_SHAPES.items():
+                    legend.append(f'<span class="item">{svg_marker(shape, k["color"])}kmerseek, {esc(alpha)}</span>')
+            else:
                 legend.append(f'<span class="item">{svg_marker(info["shape"], k["color"])}{esc(info["name"])}</span>')
     body = f"""
 <h1>Score against cost</h1>
 <p class="lede">The same tools and filters as the leaderboard, drawn as score against CPU time.
-The line joins the tools that no other tool beats on both: none is both cheaper and better.</p>
+The line joins the tools that no other tool beats on both: none is both cheaper and better.
+Colour is the kind of method; within a kind, marker shape is the tool, and for kmerseek the
+alphabet. Peak memory is not on this figure; it is in Table 1.</p>
 <form class="filters" onsubmit="return false" aria-label="Filters"><div id="filters"></div>
 <p class="axisnote">The benchmark split the proteins along one of the last four rows at a time,
 so picking a value in one of them sets the other three back to "any".</p></form>
@@ -360,6 +452,7 @@ def card_numbers(tool: str, res: pl.DataFrame, comp: pl.DataFrame) -> dict:
         return out
     best = mine_all.sort(["fmax", "setting"], descending=[True, False]).row(0, named=True)
     out["best_setting"] = best["setting"]
+    out["all_settings"] = res.filter(pl.col("tool") == tool).select("setting").unique().to_dicts()
     out["best_all"] = best
     others = res.filter(pl.col("tool") != tool)
 
@@ -442,10 +535,11 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
         b = nums["best_all"]
         L += [f"Under the {where}, its best setting is `{nums['best_setting']}`: Fmax "
               f"{fnum(b['fmax'])} over {b['n_truth_instances']:,} true instances. Below, each "
-              "stratum is compared with the best other tool and setting in the same stratum. "
+              "stratum compares this setting with the best setting of any other tool in that "
+              "same stratum, so the other tool's setting can change from line to line. "
               f"Only strata with at least {MIN_N} true instances are compared.", ""]
         if nums["strong"]:
-            L.append("Where it compares best with the other tools (its Fmax, then the best other):")
+            L.append("Where it is closest to, or furthest ahead of, the best other tool:")
             L.append("")
             for c in nums["strong"]:
                 L.append(f"- {stratum_words(c['axis'], c['stratum'])}: Fmax {fnum(c['fmax'])} "
@@ -453,7 +547,7 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
                          f"`{c['other_setting']}`, {fnum(c['other_fmax'])}.")
             L.append("")
         if nums["weak"]:
-            L.append("Where it compares worst:")
+            L.append("Where it is furthest behind the best other tool:")
             L.append("")
             for c in nums["weak"]:
                 L.append(f"- {stratum_words(c['axis'], c['stratum'])}: Fmax {fnum(c['fmax'])} "
@@ -480,19 +574,35 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
     ch = nums.get("cost_here")
     if ch:
         target = "scanning Pfam's models" if nums["species"] == "all" else f"searching {sp_name}"
+        gpu = ch["gpu_h_per_1000_queries"]
+        cost = ch["cpu_h_per_1000_queries"] * R_CPU + gpu * R_GPU
+        gpu_words = (f" plus {gpu:.3g} GPU-hours for predicting the queries' 3Di letters"
+                     if gpu else "")
+        price_words = (f"${R_CPU:.6g} per CPU-hour and ${R_GPU} per GPU-hour" if gpu
+                       else f"${R_CPU:.6g} per CPU-hour")
         L += [f"Setting `{nums['best_setting']}`, {target}: "
-              f"{ch['cpu_h_per_1000_queries']:.3g} CPU-hours and {ch['peak_rss_gb']:.1f} GB peak "
-              f"memory, measured on Sherlock ({ch['hardware']}); about "
-              f"${ch['cpu_h_per_1000_queries'] * R_CPU:.3g} at ${R_CPU:.6g} per CPU-hour."]
+              f"{ch['cpu_h_per_1000_queries']:.3g} CPU-hours{gpu_words}, measured on Sherlock. "
+              f"Peak memory {ch['peak_rss_gb']:.1f} GB. That is about ${cost:.3g} at {price_words}."]
+        if ch["n_completed_runs"] > 1:
+            L += [f"This search completed {ch['n_completed_runs']} times; the runs took "
+                  f"{ch['cpu_h_per_1000_queries_min']:.3g} to {ch['cpu_h_per_1000_queries_max']:.3g} "
+                  "CPU-hours per 1,000 queries, and the newest is shown."]
         lo, hi, n = nums["cost_range"]
-        L += [f"Across the {n} relatives searched with this setting: {lo:.3g} to {hi:.3g} "
-              f"CPU-hours per 1,000 queries; peak memory up to {nums['ram_max']:.1f} GB.", ""]
+        if n > 1:
+            L += [f"Across the {n} relatives searched with this setting: {lo:.3g} to {hi:.3g} "
+                  f"CPU-hours per 1,000 queries; peak memory up to {nums['ram_max']:.1f} GB."]
+        L += [""]
     elif "best_setting" in nums:
         L += [f"Setting `{nums['best_setting']}`: not measured (no task record holds its search).", ""]
     else:
         L += ["Not run.", ""]
     L += ["CPU-hours count the search only, not building the relative's database.", ""]
 
+    settings = sorted({r["setting"] for r in nums.get("all_settings", [])})
+    if settings:
+        L += ["## Settings in the table", ""]
+        L += [f"- `{st}`: {setting_words(tool, st)}" for st in settings]
+        L += [""]
     L += ["## Version, container, command", "",
           f"- Version: {t['version']}", f"- Container: `{t['container']}`", "",
           "```bash", t["command"], "```", "", t["command_note"], ""]
@@ -513,10 +623,13 @@ def questions(tool: str, nums: dict) -> list[str]:
         n = [k for k in no if k in ok]
         if not y or not n:
             return None
-        show = lambda ks: ", ".join(f"{words[k]} {fnum(ok[k]['fmax'])}" for k in ks)  # noqa: E731
+        show = lambda ks: ", ".join(  # noqa: E731
+            f"{words[k]} {fnum(ok[k]['fmax'])} (n = {ok[k]['n_truth_instances']:,})" for k in ks)
         return f"If yes, Fmax here is {show(y)}. If no, {show(n)}."
 
-    where = f"{DEFAULT_WORDS}, setting `{nums.get('best_setting')}`"
+    base_words = ("Pfam truth set, raw calls, no relative searched" if nums["species"] == "all"
+                  else DEFAULT_WORDS)
+    where = f"{base_words}, setting `{nums.get('best_setting')}`"
     a1 = answer(nums.get("identity", {}), ["40-60%", "60-100%"], ["0-20%", "20-30%", "30-40%"],
                 STRATUM_WORDS["identity"])
     if a1:
@@ -539,10 +652,17 @@ def questions(tool: str, nums: dict) -> list[str]:
                  + (f"{a2} ({where}.)" if a2 else "Fmax by region length for this tool: not run."))
     ch = nums.get("cost_here")
     if ch:
-        q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} CPU-hours per "
-                 "1,000 proteins for each relative you search?** That is the measured search "
-                 f"cost against {SPECIES[nums['species']]}; the range over relatives is under "
-                 "\"Cost per 1,000 queries\" above.")
+        gpu = ch["gpu_h_per_1000_queries"]
+        extra = f" and {gpu:.3g} GPU-hours" if gpu else ""
+        if nums["species"] == "all":
+            q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} CPU-hours per "
+                     "1,000 proteins?** That is the measured cost of scanning them against Pfam's "
+                     "models.")
+        else:
+            q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} CPU-hours{extra} "
+                     "per 1,000 proteins for each relative you search?** That is the measured "
+                     f"cost against {SPECIES[nums['species']]}; the range over relatives is under "
+                     "\"Cost per 1,000 queries\" above.")
     else:
         q.append("3. **Can you afford the search?** Its cost was not measured in this run.")
     return q
@@ -623,9 +743,9 @@ def page_coverage(cov_md: str, src: dict, species_mya: dict) -> str:
     body = f"""<h1>Coverage</h1>
 <p class="lede">What has been measured, and what has not. Every empty square is a run still to do.</p>
 <figure>
-<figcaption><b>Figure 2.</b> Tool by stratum. A square is filled when results.parquet has at least
-one row for that tool with that value (under any other filters), and empty when it has none:
-not run. {n_on} squares are filled and {n_off} are empty.</figcaption>
+<figcaption><b>Figure 2.</b> Tool by stratum. A square is filled when the results table has at
+least one row for that tool with that value (under any other filters), and empty when it has
+none: not run. {n_on} squares are filled and {n_off} are empty.</figcaption>
 <div class="legend" aria-label="Key to Figure 2">
 <span class="item"><span class="sq on"></span> measured: at least one row</span>
 <span class="item"><span class="sq"></span> not run: no row</span>
@@ -655,6 +775,15 @@ def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict) -
     ded = best_by(res, tool="hmmer3_phmmer", setting="default", truth_set="pfam", calls="dedup",
                   species="zebrafish", stratum_axis="all", stratum="all").row(0, named=True)
     n_rows = res.height
+    n_multi = comp.filter(pl.col("n_completed_runs") > 1).height
+    pr5 = comp.filter(pl.col("tool") == "prostt5").row(0, named=True)
+    gpu_k = pr5["gpu_h_per_1000_queries"]
+    gpu_s = pr5["gpu_h"] * 3600
+    pfn_all = best_by(res, tool="hmmer3_phmmer", truth_set="pfamn", calls="raw", species="zebrafish",
+                      stratum_axis="all").row(0, named=True)["n_truth_instances"]
+    pfn_nh = best_by(res, tool="hmmer3_phmmer", truth_set="pfamn", calls="raw", species="zebrafish",
+                     stratum_axis="identity", stratum="no_homolog").row(0, named=True)["n_truth_instances"]
+    pfn = {"all": pfn_all, "nohom": pfn_nh}
     mins, secs = divmod(cx["realtime_s"], 60)
     body = rf"""<h1>Methods</h1>
 <div class="prose">
@@ -676,7 +805,7 @@ protein where the region is. A call is <b>correct</b> when the human protein car
 annotation and the call overlaps it with an IoU of at least 0.5. <b>IoU</b> (intersection over
 union) is the number of residues the call and the true region share, divided by the number of
 residues covered by either:</p>
-<p>$$\text{{IoU}} = \frac{{|\text{{call}} \cap \text{{true region}}|}}{{|\text{{call}} \cup \text{{true region}}|}}$$</p>
+<p>\[\text{{IoU}} = \frac{{|\text{{call}} \cap \text{{true region}}|}}{{|\text{{call}} \cup \text{{true region}}|}}\]</p>
 <p>For example, a call on residues 30–129 and a true domain on residues 10–109 share 80 residues
 (30–109). Together they cover 120 (10–129). So IoU = 80 / 120 = 0.67, and the call counts as
 correct. A call of the right family that misses the region counts as wrong.</p>
@@ -686,15 +815,15 @@ proteome. A family the relative lacks cannot be copied from it by any tool.</p>
 <h2>The scores</h2>
 <h3>Fmax</h3>
 <p><b>Fmax</b> is the best balance of precision and recall a tool reaches at any score cutoff,
-counted protein by protein as in the CAFA function-prediction challenge. At a cutoff $t$, the
-precision of protein $i$ is its correct calls divided by all its calls scoring at least $t$. Its
+counted protein by protein as in the CAFA function-prediction challenge. At a cutoff \(t\), the
+precision of protein \(i\) is its correct calls divided by all its calls scoring at least \(t\). Its
 recall is the true annotations found divided by its true annotations. Precision is averaged over
-the $m(t)$ proteins with at least one call at or above $t$. Recall is averaged over all $n$
+the \(m(t)\) proteins with at least one call at or above \(t\). Recall is averaged over all \(n\)
 proteins with an annotation, and counts every true annotation, whether or not the relative could
 supply it:</p>
-<p>$$\text{{Pr}}(t) = \frac{{1}}{{m(t)}}\sum_{{i}} \frac{{\text{{correct}}_i(t)}}{{\text{{calls}}_i(t)}}, \qquad
+<p>\[\text{{Pr}}(t) = \frac{{1}}{{m(t)}}\sum_{{i}} \frac{{\text{{correct}}_i(t)}}{{\text{{calls}}_i(t)}}, \qquad
 \text{{Rc}}(t) = \frac{{1}}{{n}}\sum_{{i}} \frac{{\text{{found}}_i(t)}}{{\text{{true}}_i}}, \qquad
-F_{{\max}} = \max_t \frac{{2\,\text{{Pr}}(t)\,\text{{Rc}}(t)}}{{\text{{Pr}}(t)+\text{{Rc}}(t)}}$$</p>
+F_{{\max}} = \max_t \frac{{2\,\text{{Pr}}(t)\,\text{{Rc}}(t)}}{{\text{{Pr}}(t)+\text{{Rc}}(t)}}\]</p>
 <p>The cutoffs tried are 101 evenly spaced quantiles of the tool's call scores. Worked example:
 phmmer searching zebrafish, Pfam truth set, raw calls, all proteins. At the best cutoff (bit score
 {ex['fmax_threshold']:.4g}) precision is {P:.4f} and recall is {R:.4f}. So
@@ -703,10 +832,10 @@ F = 2 × {P:.4f} × {R:.4f} / ({P:.4f} + {R:.4f}) = {f_check:.4f}, the Fmax in T
 <h3>AUPRC</h3>
 <p><b>AUPRC</b>, the area under the precision-recall curve, sums precision over every cutoff,
 weighted by the recall gained at that cutoff:</p>
-<p>$$\text{{AUPRC}} = \sum_k (R_k - R_{{k-1}})\,P_k$$</p>
-<p>Unlike Fmax, AUPRC pools all proteins. $P_k$ is correct calls ÷ all judged calls at cutoff
-$k$. $R_k$ is reachable annotations found ÷ all reachable annotations. A tool that makes many calls per protein pays for each wrong one. A call in a
-part of a protein that no annotation covers is left out of $P_k$, since nobody has looked there;
+<p>\[\text{{AUPRC}} = \sum_k (R_k - R_{{k-1}})\,P_k\]</p>
+<p>Unlike Fmax, AUPRC pools all proteins. \(P_k\) is correct calls ÷ all judged calls at cutoff
+\(k\). \(R_k\) is reachable annotations found ÷ all reachable annotations. A tool that makes many calls per protein pays for each wrong one. A call in a
+part of a protein that no annotation covers is left out of \(P_k\), since nobody has looked there;
 Fmax counts it. Worked
 example, same row: AUPRC = {ex['auprc']:.4f}. The curve itself is in the source run
 (<span class="mono">all_domain_curves.parquet</span>), not in these tables, so the sum cannot be
@@ -716,7 +845,10 @@ recomputed here.</p>
 <p><b>Median IoU</b> is the middle IoU of all correct calls, with single-residue annotations left
 out (an IoU against one residue says nothing about where the ends are). Worked example, same row:
 {ex['median_iou_tp']:.3f}, so half of phmmer's correct calls on zebrafish overlap their true domain
-by at least that much.</p>
+by at least that much. A correct call on a region longer than one residue has an IoU of at least
+0.5, so the run stores 0 only when there is no such call: no correct calls at all, or correct
+calls on single residues only (the 1 aa length bin and the ACT_SITE, BINDING and SITE features).
+The pages show those as <i>no correct calls</i>, not as 0.</p>
 
 <h3>True instances</h3>
 <p><b>True instances</b> (n) is the number of annotations on the human proteins in the stratum,
@@ -724,22 +856,28 @@ reachable or not. Same row: {ex['n_truth_instances']:,}.</p>
 
 <h3>CPU-hours per 1,000 queries</h3>
 <p><b>CPU-hours</b> are taken from the run's Nextflow task records: the search task's run time
-multiplied by its average CPU use. For a tool searched more than once, the latest completed task
-is used. Only the search is counted; building the relative's database is not, because a reused
-database leaves no task record. Dividing by the {cx['n_queries']} queries and multiplying by 1,000
+multiplied by its average CPU use. {n_multi} of {comp.height} searches completed more than once
+(a re-run after a code change or a crash). The trace does not say which run wrote the scored
+calls, so the newest run gives the headline number and the leaderboard prints the range over all
+runs beside it. Only the search is counted; building the relative's database is not, because a
+reused database leaves no task record. Dividing by the {cx['n_queries']} queries and multiplying by 1,000
 gives the cost per 1,000 queries. Worked example: phmmer against zebrafish ran {int(mins)} min
 {secs:.1f} s at {cx['cpu_percent']:.1f}% CPU. That is {cx['realtime_s']:.1f} s × {cx['cpu_percent'] / 100:.3f}
 / 3,600 = {cpu_h:.4f} CPU-hours, or {cpu_h:.4f} × 1,000 / {cx['n_queries']} = {per1k:.4f} CPU-hours
 per 1,000 queries. Peak RAM is the task's largest resident memory.</p>
 <p>Numbers marked <span class="prov measured">measured</span> come from these records, on Sherlock
-CPU nodes (partition hns), with no GPU in any search. Numbers marked
+(partition hns). No search used a GPU. ProstT5 also has to turn the query sequences into 3Di
+shape letters before it can search; that step ran on one GPU for {gpu_s:.0f} s for the
+{cx['n_queries']} queries, which is {gpu_k:.4f} GPU-hours per 1,000 queries, counted on every
+ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every
+database build, is not counted. Numbers marked
 <span class="prov reported">reported</span> would come from a tool's submitter, on hardware they
 name; none have been submitted yet.</p>
 
 <h3>Estimated cost</h3>
-<p>$$\text{{cost\_usd\_est}} = \text{{CPU-hours}} \times r_\text{{cpu}} + \text{{GPU-hours}} \times r_\text{{gpu}}$$</p>
-<p>per 1,000 queries. The default $r_\text{{cpu}}$ = ${R_CPU:.6g} per CPU-hour is half of AWS's
-on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default $r_\text{{gpu}}$ =
+<p>\[\text{{cost\_usd\_est}} = \text{{CPU-hours}} \times r_\text{{cpu}} + \text{{GPU-hours}} \times r_\text{{gpu}}\]</p>
+<p>per 1,000 queries. The default \(r_\text{{cpu}}\) = ${R_CPU:.6g} per CPU-hour is half of AWS's
+on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default \(r_\text{{gpu}}\) =
 ${R_GPU} per GPU-hour is a g5.xlarge (one NVIDIA A10G). Both are for US East (N. Virginia), Linux,
 from the <a href="{PRICE_PAGE}">EC2 on-demand price page</a> (<a href="{PRICE_FILE}">price
 file</a>, published 2026-10-12, read 2026-10-15). Memory is not priced. Worked example: {per1k:.4f} × {R_CPU:.6g} + 0 ×
@@ -751,11 +889,15 @@ file</a>, published 2026-10-12, read 2026-10-15). Memory is not priced. Worked e
 UniProt reference proteomes. The same file supplies the domains on each relative's proteins, which
 are what a call copies. Pfam families are defined by profile models, so tools that build profiles
 (jackhmmer, HH-suite) are graded against the kind of model they build, and hmmscan against its own
-models. Release of the regions file: not recorded in the run; the hmmscan models are Pfam-A 38.2.</p>
+models. Release of the regions file: not recorded in the run; the hmmscan models are Pfam-A 38.2.
+hmmscan was scored on raw calls only, so it shows "not run" under dedup.</p>
 <h3>Pfam-N</h3>
 <p>Pfam-N is an extension of Pfam made by a deep-learning model: it labels regions the Pfam
 profile models missed. It is only published for Pfam 35.0. This is the one truth set the profile
-models did not produce. Its regions were filtered to the human proteins queried here.</p>
+models did not produce. Its regions were filtered to the human proteins queried here. Few of them
+can be copied from any relative: against zebrafish, {pfn['nohom']:,} of the {pfn['all']:,} Pfam-N
+regions have no domain of the same family in the zebrafish proteome. So every tool scores low on
+Pfam-N, and the set says little about which tool is better.</p>
 <h3>Swiss-Prot features</h3>
 <p>Curated features from Swiss-Prot entries, of 12 types (the feature keys on the leaderboard,
 such as TRANSMEM for a membrane-spanning segment and ACT_SITE for an active site residue). They
@@ -797,7 +939,7 @@ in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
- onload="renderMathInElement(document.body,{{delimiters:[{{left:'$$',right:'$$',display:true}},{{left:'$',right:'$',display:false}}]}})"></script>
+ onload="renderMathInElement(document.body,{{delimiters:[{{left:'\\[',right:'\\]',display:true}},{{left:'\\(',right:'\\)',display:false}}]}})"></script>
 """
     return layout("Methods", "methods", body, src,
                   description="How each score is defined and computed, how the truth sets were built, and what dedup means.")
@@ -822,9 +964,11 @@ def main() -> None:
                        for r in res.select("tool", "setting", "species").unique().iter_rows(named=True)})
     meta = {
         "defaults": DEFAULTS,
-        "chiprows": chiprows(species_mya),
+        "chiprows": mark_empty(chiprows(species_mya), res),
         "rows": rows,
-        "tools": {t: {"name": TOOLS[t]["name"], "kind": TOOLS[t]["kind"], "shape": TOOLS[t]["shape"]}
+        "tools": {t: {"name": TOOLS[t]["name"], "kind": TOOLS[t]["kind"], "shape": TOOLS[t]["shape"],
+                      "tags": [w for k, w in (("AlphaFold model", "needs AlphaFold model"), ("GPU", "needs GPU"))
+                               if TOOLS[t]["needs"][k]]}
                   for t in tools_used},
         "kinds": KINDS,
         "species": {s: {"name": SPECIES[s], "mya": int(species_mya[s]) if s in species_mya else None}
@@ -843,7 +987,10 @@ def main() -> None:
     (out / "tools").mkdir(parents=True, exist_ok=True)
     (out / "data").mkdir(parents=True, exist_ok=True)
     (out / ".nojekyll").write_text("")
-    (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used))
+    phm = res.filter((pl.col("tool") == "hmmer3_phmmer") & (pl.col("truth_set") == "pfam")
+                     & (pl.col("species") == "zebrafish") & (pl.col("stratum_axis") == "all"))
+    dd = {f"{k}_{m}": phm.filter(pl.col("calls") == k)[m][0] for k in ("raw", "dedup") for m in ("fmax", "auprc")}
+    (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used, dd))
     (out / "cost.html").write_text(page_cost(payload, src, n_q, tools_used))
     (out / "coverage.html").write_text(page_coverage(cov, src, species_mya))
     (out / "methods.html").write_text(page_methods(res, comp, src, prov))

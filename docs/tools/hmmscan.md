@@ -1,6 +1,6 @@
 # hmmscan with Pfam
 
-Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `6af1255b`.
+Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
 
 ## What it compares
 
@@ -22,7 +22,7 @@ Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).
 
 ## Strong and weak strata
 
-Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is `direct`: Fmax 0.886 over 2,435 true instances. Below, each stratum is compared with the best other tool and setting in the same stratum. Only strata with at least 30 true instances are compared.
+Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is `direct`: Fmax 0.886 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
 
 No other tool was scored in the same strata, so no comparison: not run.
 
@@ -35,10 +35,14 @@ Swiss-Prot feature types: not run.
 
 ## Cost per 1,000 queries
 
-Setting `direct`, scanning Pfam's models: 0.198 CPU-hours and 0.5 GB peak memory, measured on Sherlock (Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU); about $0.00883 at $0.044625 per CPU-hour.
-Across the 1 relatives searched with this setting: 0.198 to 0.198 CPU-hours per 1,000 queries; peak memory up to 0.5 GB.
+Setting `direct`, scanning Pfam's models: 0.198 CPU-hours, measured on Sherlock. Peak memory 0.5 GB. That is about $0.00883 at $0.044625 per CPU-hour.
+This search completed 2 times; the runs took 0.198 to 0.313 CPU-hours per 1,000 queries, and the newest is shown.
 
 CPU-hours count the search only, not building the relative's database.
+
+## Settings in the table
+
+- `direct`: scans Pfam's models; no relative searched
 
 ## Version, container, command
 
@@ -60,5 +64,5 @@ Query: the same 998 human proteins.
 ## Will it work for you?
 
 1. **Is every family you expect to find already in Pfam?** If no, this tool cannot find it: it only reports families that have a Pfam model.
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.785, 121–250 aa 0.802, 251 aa or more 0.871. If no, 16–30 aa 0.580, 31–60 aa 0.573. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `direct`.)
-3. **Can you spend about 0.198 CPU-hours per 1,000 proteins for each relative you search?** That is the measured search cost against none: Pfam models (hmmscan only); the range over relatives is under "Cost per 1,000 queries" above.
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)
+3. **Can you spend about 0.198 CPU-hours per 1,000 proteins?** That is the measured cost of scanning them against Pfam's models.

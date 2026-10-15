@@ -18,7 +18,7 @@
  "command": "mmseqs search \\\n    human-38fdd87d_mmdb/db zebrafish_mmdb/db result mmseqs_tmp \\\n    --threads 16 \\\n    -s 7 \\\n    --max-seqs 1000 \\\n    -e 10.0",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "6af1255b081630e4d51bb99c6abbe5c3d6fb49c1",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "s7",
@@ -69,12 +69,12 @@
  "cost_per_1000_queries": {
   "cpu_h_measured": 0.019432197728790915,
   "peak_rss_gb": 1.1,
-  "hardware": "Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU"
+  "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
  },
  "questions": [
-  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.249, 60\u2013100% 0.297. If no, 20\u201330% 0.325, 30\u201340% 0.188. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `s7`; strata with at least 30 true instances.)",
-  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.243, 121\u2013250 aa 0.305, 251 aa or more 0.462. If no, 16\u201330 aa 0.027, 31\u201360 aa 0.089. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `s7`.)",
-  "Can you spend about 0.0194 CPU-hours per 1,000 proteins for each relative you search? That is the measured search cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.249 (n = 563), 60\u2013100% 0.297 (n = 1,289). If no, 20\u201330% 0.325 (n = 93), 30\u201340% 0.188 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `s7`; strata with at least 30 true instances.)",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.243 (n = 963), 121\u2013250 aa 0.305 (n = 504), 251 aa or more 0.462 (n = 277). If no, 16\u201330 aa 0.027 (n = 271), 31\u201360 aa 0.089 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `s7`.)",
+  "Can you spend about 0.0194 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
  ],
  "markdown": "mmseqs2_seqseq.md"
 }

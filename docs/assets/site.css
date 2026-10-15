@@ -132,3 +132,13 @@ table.lb td.txt:first-child{white-space:nowrap}
 :not(pre) > code{overflow-wrap:anywhere}
 .katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
 main.wrap{min-width:0}
+.tag{display:inline-block;font-size:.72rem;line-height:1.3;border:1px solid var(--hair);border-radius:3px;padding:0 4px;color:var(--muted);white-space:nowrap}
+.tag.warn{border-color:var(--ink);color:var(--ink)}
+td.none{color:var(--muted);text-align:center !important;white-space:nowrap}
+.runs{font-size:.8em}
+/* Tool name stays in view while the table scrolls sideways. */
+table.lb td.txt:first-child,table.lb th:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
+table.lb th:first-child{background:var(--chip)}
+table.lb tr:hover td.txt:first-child{background:var(--chip)}
+details.prose{margin:6px 0 10px}
+details.prose summary{cursor:pointer;color:var(--accent)}

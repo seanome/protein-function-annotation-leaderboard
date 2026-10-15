@@ -19,7 +19,7 @@
  "command": "hmmscan \\\n    --domtblout /dev/stdout \\\n    -o /dev/null \\\n    --noali \\\n    -E 10.0 --domE 10.0 \\\n    --cpu 4 \\\n    Pfam-A.hmm UP000005640_9606.fasta",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "6af1255b081630e4d51bb99c6abbe5c3d6fb49c1",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
   "filters": "pfam, raw, all"
  },
  "best_setting": "direct",
@@ -28,12 +28,12 @@
  "cost_per_1000_queries": {
   "cpu_h_measured": 0.19777443776441772,
   "peak_rss_gb": 0.46298828125,
-  "hardware": "Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU"
+  "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
  },
  "questions": [
   "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model.",
-  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.785, 121\u2013250 aa 0.802, 251 aa or more 0.871. If no, 16\u201330 aa 0.580, 31\u201360 aa 0.573. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `direct`.)",
-  "Can you spend about 0.198 CPU-hours per 1,000 proteins for each relative you search? That is the measured search cost against none: Pfam models (hmmscan only); the range over relatives is under \"Cost per 1,000 queries\" above."
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.785 (n = 963), 121\u2013250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16\u201330 aa 0.580 (n = 271), 31\u201360 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)",
+  "Can you spend about 0.198 CPU-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
  ],
  "markdown": "hmmscan.md"
 }

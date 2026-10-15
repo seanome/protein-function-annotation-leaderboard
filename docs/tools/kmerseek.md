@@ -1,6 +1,6 @@
 # kmerseek
 
-Tool id `kmerseek`. Numbers from seanome/2024-kmerseek-analysis commit `6af1255b`.
+Tool id `kmerseek`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
 
 ## What it compares
 
@@ -18,18 +18,18 @@ An index of the relative's proteome (Quest for Orthologs reference proteomes, re
 
 ## How to read its score
 
-region_enrichment: the number of k-mers the region shares with the target divided by the number expected by chance (fold enrichment). Higher ranks first. Regions were kept when their score was at least 1.3 or the whole query's p-value was at most 0.05.
+region_enrichment: the number of k-mers the region shares with the target divided by the number expected by chance (fold enrichment). Higher ranks first. A region was kept when either test passed: its own score was at least 1.3, or the whole query protein's p-value was at most 0.05.
 
 ## Strong and weak strata
 
-Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is `gbmr4_k21_lcFalse`: Fmax 0.192 over 2,435 true instances. Below, each stratum is compared with the best other tool and setting in the same stratum. Only strata with at least 30 true instances are compared.
+Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is `gbmr4_k21_lcFalse`: Fmax 0.192 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
 
-Where it compares best with the other tools (its Fmax, then the best other):
+Where it is closest to, or furthest ahead of, the best other tool:
 
 - regions 16–30 aa long: Fmax 0.281 (n = 271); best other: HH-suite (hhsearch) `single_seq`, 0.066.
 - regions 31–60 aa long: Fmax 0.232 (n = 420); best other: phmmer `default`, 0.095.
 
-Where it compares worst:
+Where it is furthest behind the best other tool:
 
 - regions 251 aa or more long: Fmax 0.050 (n = 277); best other: phmmer `default`, 0.477.
 - identity 20–30% to the closest same-family domain: Fmax 0.000 (n = 93); best other: phmmer `default`, 0.359.
@@ -44,10 +44,28 @@ Swiss-Prot features, raw calls, zebrafish, setting `wwmj5_k11_lcFalse`: best fea
 
 ## Cost per 1,000 queries
 
-Setting `gbmr4_k21_lcFalse`, searching zebrafish: 0.0204 CPU-hours and 5.2 GB peak memory, measured on Sherlock (Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU); about $0.000911 at $0.044625 per CPU-hour.
+Setting `gbmr4_k21_lcFalse`, searching zebrafish: 0.0204 CPU-hours, measured on Sherlock. Peak memory 5.2 GB. That is about $0.000911 at $0.044625 per CPU-hour.
 Across the 15 relatives searched with this setting: 0.00106 to 0.0204 CPU-hours per 1,000 queries; peak memory up to 5.2 GB.
 
 CPU-hours count the search only, not building the relative's database.
+
+## Settings in the table
+
+- `gbmr4_k15_lcFalse`: alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept
+- `gbmr4_k17_lcFalse`: alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 17, low-complexity k-mers kept
+- `gbmr4_k19_lcFalse`: alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 19, low-complexity k-mers kept
+- `gbmr4_k21_lcFalse`: alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 21, low-complexity k-mers kept
+- `hp_thomas_dill2_k24_lcFalse`: alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 24, low-complexity k-mers kept
+- `hp_thomas_dill2_k27_lcFalse`: alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 27, low-complexity k-mers kept
+- `hp_thomas_dill2_k30_lcFalse`: alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 30, low-complexity k-mers kept
+- `hp_thomas_dill2_k33_lcFalse`: alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 33, low-complexity k-mers kept
+- `protein20_k6_lcFalse`: alphabet protein20 (the 20 amino acids, not reduced), k = 6, low-complexity k-mers kept
+- `protein20_k7_lcFalse`: alphabet protein20 (the 20 amino acids, not reduced), k = 7, low-complexity k-mers kept
+- `protein20_k8_lcFalse`: alphabet protein20 (the 20 amino acids, not reduced), k = 8, low-complexity k-mers kept
+- `wwmj5_k11_lcFalse`: alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 11, low-complexity k-mers kept
+- `wwmj5_k12_lcFalse`: alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 12, low-complexity k-mers kept
+- `wwmj5_k14_lcFalse`: alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 14, low-complexity k-mers kept
+- `wwmj5_k15_lcFalse`: alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 15, low-complexity k-mers kept
 
 ## Version, container, command
 
@@ -70,6 +88,6 @@ Shown for setting hp_thomas_dill2 k24. Other settings change --alphabet and --ks
 
 ## Will it work for you?
 
-1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.005, 60–100% 0.297. If no, 20–30% 0.000, 30–40% 0.000. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`; strata with at least 30 true instances.)
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.208, 121–250 aa 0.098, 251 aa or more 0.050. If no, 16–30 aa 0.281, 31–60 aa 0.232. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`.)
-3. **Can you spend about 0.0204 CPU-hours per 1,000 proteins for each relative you search?** That is the measured search cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.005 (n = 563), 60–100% 0.297 (n = 1,289). If no, 20–30% 0.000 (n = 93), 30–40% 0.000 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`; strata with at least 30 true instances.)
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.208 (n = 963), 121–250 aa 0.098 (n = 504), 251 aa or more 0.050 (n = 277). If no, 16–30 aa 0.281 (n = 271), 31–60 aa 0.232 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`.)
+3. **Can you spend about 0.0204 CPU-hours per 1,000 proteins for each relative you search?** That is the measured cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.

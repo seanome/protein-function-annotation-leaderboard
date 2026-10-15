@@ -1,6 +1,6 @@
 # jackhmmer
 
-Tool id `hmmer3_jackhmmer`. Numbers from seanome/2024-kmerseek-analysis commit `6af1255b`.
+Tool id `hmmer3_jackhmmer`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
 
 ## What it compares
 
@@ -22,14 +22,14 @@ Domain bit score: higher ranks first. The E-value cutoff was 10.
 
 ## Strong and weak strata
 
-Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is `n3`: Fmax 0.290 over 2,435 true instances. Below, each stratum is compared with the best other tool and setting in the same stratum. Only strata with at least 30 true instances are compared.
+Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is `n3`: Fmax 0.290 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
 
-Where it compares best with the other tools (its Fmax, then the best other):
+Where it is closest to, or furthest ahead of, the best other tool:
 
 - regions 121–250 aa long: Fmax 0.333 (n = 504); best other: phmmer `default`, 0.329.
 - no same-family domain in the relative: Fmax 0.023 (n = 321); best other: HH-suite (hhsearch) `single_seq`, 0.032.
 
-Where it compares worst:
+Where it is furthest behind the best other tool:
 
 - regions 16–30 aa long: Fmax 0.029 (n = 271); best other: kmerseek `wwmj5_k11_lcFalse`, 0.330.
 - regions 31–60 aa long: Fmax 0.066 (n = 420); best other: kmerseek `gbmr4_k21_lcFalse`, 0.232.
@@ -42,10 +42,15 @@ Swiss-Prot features, raw calls, zebrafish, setting `n3`: best feature type ACT_S
 
 ## Cost per 1,000 queries
 
-Setting `n3`, searching zebrafish: 1.83 CPU-hours and 5.2 GB peak memory, measured on Sherlock (Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU); about $0.0818 at $0.044625 per CPU-hour.
+Setting `n3`, searching zebrafish: 1.83 CPU-hours, measured on Sherlock. Peak memory 5.2 GB. That is about $0.0818 at $0.044625 per CPU-hour.
+This search completed 2 times; the runs took 1.83 to 3.21 CPU-hours per 1,000 queries, and the newest is shown.
 Across the 15 relatives searched with this setting: 0.0402 to 2.43 CPU-hours per 1,000 queries; peak memory up to 5.2 GB.
 
 CPU-hours count the search only, not building the relative's database.
+
+## Settings in the table
+
+- `n3`: three rounds of search (-N 3)
 
 ## Version, container, command
 
@@ -68,6 +73,6 @@ Query: 998 human proteins. Target: the zebrafish proteome.
 
 ## Will it work for you?
 
-1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.217, 60–100% 0.264. If no, 20–30% 0.327, 30–40% 0.175. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`; strata with at least 30 true instances.)
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.210, 121–250 aa 0.333, 251 aa or more 0.427. If no, 16–30 aa 0.029, 31–60 aa 0.066. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`.)
-3. **Can you spend about 1.83 CPU-hours per 1,000 proteins for each relative you search?** That is the measured search cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.217 (n = 563), 60–100% 0.264 (n = 1,289). If no, 20–30% 0.327 (n = 93), 30–40% 0.175 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`; strata with at least 30 true instances.)
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.210 (n = 963), 121–250 aa 0.333 (n = 504), 251 aa or more 0.427 (n = 277). If no, 16–30 aa 0.029 (n = 271), 31–60 aa 0.066 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`.)
+3. **Can you spend about 1.83 CPU-hours per 1,000 proteins for each relative you search?** That is the measured cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.

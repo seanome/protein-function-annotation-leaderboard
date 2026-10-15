@@ -18,7 +18,7 @@
 <nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="cost.html" data-keep-filters>Score against cost</a><a href="tools/index.html">Tool cards</a><a href="coverage.html">Coverage</a><a href="methods.html" aria-current="page">Methods</a></nav>
 </div></header>
 <main class="wrap">
-<p class="source" id="source-commit" data-commit="6af1255b081630e4d51bb99c6abbe5c3d6fb49c1">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1">6af1255b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p class="source" id="source-commit" data-commit="548ec5b89dccedd329849d7a1b4ada2ae89478ee">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/548ec5b89dccedd329849d7a1b4ada2ae89478ee/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/548ec5b89dccedd329849d7a1b4ada2ae89478ee">548ec5b8</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <h1>Methods</h1>
 <div class="prose">
 <p>Everything on this site comes from one benchmark run. It searched 998 human
@@ -28,7 +28,7 @@ proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The run f
 cluster. Its tables are <span class="mono">results.parquet</span> (30,029 rows) and
 <span class="mono">compute.parquet</span> (311 rows), built by
 <span class="mono">make leaderboard-tables</span> in seanome/2024-kmerseek-analysis at commit
-<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1">6af1255b</a>.
+<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/548ec5b89dccedd329849d7a1b4ada2ae89478ee">548ec5b8</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
 
 <h2>From a search hit to a call</h2>
@@ -39,7 +39,7 @@ protein where the region is. A call is <b>correct</b> when the human protein car
 annotation and the call overlaps it with an IoU of at least 0.5. <b>IoU</b> (intersection over
 union) is the number of residues the call and the true region share, divided by the number of
 residues covered by either:</p>
-<p>$$\text{IoU} = \frac{|\text{call} \cap \text{true region}|}{|\text{call} \cup \text{true region}|}$$</p>
+<p>\[\text{IoU} = \frac{|\text{call} \cap \text{true region}|}{|\text{call} \cup \text{true region}|}\]</p>
 <p>For example, a call on residues 30–129 and a true domain on residues 10–109 share 80 residues
 (30–109). Together they cover 120 (10–129). So IoU = 80 / 120 = 0.67, and the call counts as
 correct. A call of the right family that misses the region counts as wrong.</p>
@@ -49,15 +49,15 @@ proteome. A family the relative lacks cannot be copied from it by any tool.</p>
 <h2>The scores</h2>
 <h3>Fmax</h3>
 <p><b>Fmax</b> is the best balance of precision and recall a tool reaches at any score cutoff,
-counted protein by protein as in the CAFA function-prediction challenge. At a cutoff $t$, the
-precision of protein $i$ is its correct calls divided by all its calls scoring at least $t$. Its
+counted protein by protein as in the CAFA function-prediction challenge. At a cutoff \(t\), the
+precision of protein \(i\) is its correct calls divided by all its calls scoring at least \(t\). Its
 recall is the true annotations found divided by its true annotations. Precision is averaged over
-the $m(t)$ proteins with at least one call at or above $t$. Recall is averaged over all $n$
+the \(m(t)\) proteins with at least one call at or above \(t\). Recall is averaged over all \(n\)
 proteins with an annotation, and counts every true annotation, whether or not the relative could
 supply it:</p>
-<p>$$\text{Pr}(t) = \frac{1}{m(t)}\sum_{i} \frac{\text{correct}_i(t)}{\text{calls}_i(t)}, \qquad
+<p>\[\text{Pr}(t) = \frac{1}{m(t)}\sum_{i} \frac{\text{correct}_i(t)}{\text{calls}_i(t)}, \qquad
 \text{Rc}(t) = \frac{1}{n}\sum_{i} \frac{\text{found}_i(t)}{\text{true}_i}, \qquad
-F_{\max} = \max_t \frac{2\,\text{Pr}(t)\,\text{Rc}(t)}{\text{Pr}(t)+\text{Rc}(t)}$$</p>
+F_{\max} = \max_t \frac{2\,\text{Pr}(t)\,\text{Rc}(t)}{\text{Pr}(t)+\text{Rc}(t)}\]</p>
 <p>The cutoffs tried are 101 evenly spaced quantiles of the tool's call scores. Worked example:
 phmmer searching zebrafish, Pfam truth set, raw calls, all proteins. At the best cutoff (bit score
 34.3) precision is 0.2471 and recall is 0.5108. So
@@ -66,10 +66,10 @@ F = 2 × 0.2471 × 0.5108 / (0.2471 + 0.5108) = 0.3331, the Fmax in Table 1.</p>
 <h3>AUPRC</h3>
 <p><b>AUPRC</b>, the area under the precision-recall curve, sums precision over every cutoff,
 weighted by the recall gained at that cutoff:</p>
-<p>$$\text{AUPRC} = \sum_k (R_k - R_{k-1})\,P_k$$</p>
-<p>Unlike Fmax, AUPRC pools all proteins. $P_k$ is correct calls ÷ all judged calls at cutoff
-$k$. $R_k$ is reachable annotations found ÷ all reachable annotations. A tool that makes many calls per protein pays for each wrong one. A call in a
-part of a protein that no annotation covers is left out of $P_k$, since nobody has looked there;
+<p>\[\text{AUPRC} = \sum_k (R_k - R_{k-1})\,P_k\]</p>
+<p>Unlike Fmax, AUPRC pools all proteins. \(P_k\) is correct calls ÷ all judged calls at cutoff
+\(k\). \(R_k\) is reachable annotations found ÷ all reachable annotations. A tool that makes many calls per protein pays for each wrong one. A call in a
+part of a protein that no annotation covers is left out of \(P_k\), since nobody has looked there;
 Fmax counts it. Worked
 example, same row: AUPRC = 0.0291. The curve itself is in the source run
 (<span class="mono">all_domain_curves.parquet</span>), not in these tables, so the sum cannot be
@@ -79,7 +79,10 @@ recomputed here.</p>
 <p><b>Median IoU</b> is the middle IoU of all correct calls, with single-residue annotations left
 out (an IoU against one residue says nothing about where the ends are). Worked example, same row:
 0.700, so half of phmmer's correct calls on zebrafish overlap their true domain
-by at least that much.</p>
+by at least that much. A correct call on a region longer than one residue has an IoU of at least
+0.5, so the run stores 0 only when there is no such call: no correct calls at all, or correct
+calls on single residues only (the 1 aa length bin and the ACT_SITE, BINDING and SITE features).
+The pages show those as <i>no correct calls</i>, not as 0.</p>
 
 <h3>True instances</h3>
 <p><b>True instances</b> (n) is the number of annotations on the human proteins in the stratum,
@@ -87,22 +90,28 @@ reachable or not. Same row: 2,435.</p>
 
 <h3>CPU-hours per 1,000 queries</h3>
 <p><b>CPU-hours</b> are taken from the run's Nextflow task records: the search task's run time
-multiplied by its average CPU use. For a tool searched more than once, the latest completed task
-is used. Only the search is counted; building the relative's database is not, because a reused
-database leaves no task record. Dividing by the 998 queries and multiplying by 1,000
+multiplied by its average CPU use. 63 of 311 searches completed more than once
+(a re-run after a code change or a crash). The trace does not say which run wrote the scored
+calls, so the newest run gives the headline number and the leaderboard prints the range over all
+runs beside it. Only the search is counted; building the relative's database is not, because a
+reused database leaves no task record. Dividing by the 998 queries and multiplying by 1,000
 gives the cost per 1,000 queries. Worked example: phmmer against zebrafish ran 5 min
 21.0 s at 426.7% CPU. That is 321.0 s × 4.267
 / 3,600 = 0.3805 CPU-hours, or 0.3805 × 1,000 / 998 = 0.3812 CPU-hours
 per 1,000 queries. Peak RAM is the task's largest resident memory.</p>
 <p>Numbers marked <span class="prov measured">measured</span> come from these records, on Sherlock
-CPU nodes (partition hns), with no GPU in any search. Numbers marked
+(partition hns). No search used a GPU. ProstT5 also has to turn the query sequences into 3Di
+shape letters before it can search; that step ran on one GPU for 69 s for the
+998 queries, which is 0.0192 GPU-hours per 1,000 queries, counted on every
+ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every
+database build, is not counted. Numbers marked
 <span class="prov reported">reported</span> would come from a tool's submitter, on hardware they
 name; none have been submitted yet.</p>
 
 <h3>Estimated cost</h3>
-<p>$$\text{cost\_usd\_est} = \text{CPU-hours} \times r_\text{cpu} + \text{GPU-hours} \times r_\text{gpu}$$</p>
-<p>per 1,000 queries. The default $r_\text{cpu}$ = $0.044625 per CPU-hour is half of AWS's
-on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default $r_\text{gpu}$ =
+<p>\[\text{cost\_usd\_est} = \text{CPU-hours} \times r_\text{cpu} + \text{GPU-hours} \times r_\text{gpu}\]</p>
+<p>per 1,000 queries. The default \(r_\text{cpu}\) = $0.044625 per CPU-hour is half of AWS's
+on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default \(r_\text{gpu}\) =
 $1.006 per GPU-hour is a g5.xlarge (one NVIDIA A10G). Both are for US East (N. Virginia), Linux,
 from the <a href="https://aws.amazon.com/ec2/pricing/on-demand/">EC2 on-demand price page</a> (<a href="https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/ec2-ondemand-without-sec-sel/US%20East%20(N.%20Virginia)/Linux/index.json">price
 file</a>, published 2026-10-12, read 2026-10-15). Memory is not priced. Worked example: 0.3812 × 0.044625 + 0 ×
@@ -114,11 +123,15 @@ file</a>, published 2026-10-12, read 2026-10-15). Memory is not priced. Worked e
 UniProt reference proteomes. The same file supplies the domains on each relative's proteins, which
 are what a call copies. Pfam families are defined by profile models, so tools that build profiles
 (jackhmmer, HH-suite) are graded against the kind of model they build, and hmmscan against its own
-models. Release of the regions file: not recorded in the run; the hmmscan models are Pfam-A 38.2.</p>
+models. Release of the regions file: not recorded in the run; the hmmscan models are Pfam-A 38.2.
+hmmscan was scored on raw calls only, so it shows "not run" under dedup.</p>
 <h3>Pfam-N</h3>
 <p>Pfam-N is an extension of Pfam made by a deep-learning model: it labels regions the Pfam
 profile models missed. It is only published for Pfam 35.0. This is the one truth set the profile
-models did not produce. Its regions were filtered to the human proteins queried here.</p>
+models did not produce. Its regions were filtered to the human proteins queried here. Few of them
+can be copied from any relative: against zebrafish, 44,246 of the 44,315 Pfam-N
+regions have no domain of the same family in the zebrafish proteome. So every tool scores low on
+Pfam-N, and the set says little about which tool is better.</p>
 <h3>Swiss-Prot features</h3>
 <p>Curated features from Swiss-Prot entries, of 12 types (the feature keys on the leaderboard,
 such as TRANSMEM for a membrane-spanning segment and ACT_SITE for an active site residue). They
@@ -160,11 +173,11 @@ in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
- onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+ onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
 
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1">6af1255b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/548ec5b89dccedd329849d7a1b4ada2ae89478ee/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/548ec5b89dccedd329849d7a1b4ada2ae89478ee">548ec5b8</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 </div></footer>
 </body>

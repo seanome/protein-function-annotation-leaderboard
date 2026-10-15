@@ -57,7 +57,7 @@
   function sig(x, n) {
     if (x === 0) return "0";
     const d = Math.max(0, n - 1 - Math.floor(Math.log10(Math.abs(x))));
-    return x.toFixed(Math.min(d, 6));
+    return x.toFixed(d);
   }
 
   // ---------- chips ----------
@@ -101,7 +101,7 @@
             pressed = state[row.id] === c.value;
           }
           grp.appendChild(
-            chip(c.label, pressed, () => {
+            chip(c.empty ? c.label + " (not run)" : c.label, pressed, () => {
               if (row.kind === "stratum") {
                 // The run cut the queries along one stratum axis at a time, so picking a
                 // value here clears the other three stratum rows.
@@ -141,7 +141,10 @@
     const c = computeRow(s, row);
     return {
       row, r, c,
-      fmax: r ? r[0] : null, auprc: r ? r[1] : null, iou: r ? r[2] : null, n: r ? r[3] : null,
+      // A stored median IoU of 0 means no correct call on a region longer than one residue
+      // (any such call has IoU >= 0.5), so it is shown as words and sorts with the missing.
+      fmax: r ? r[0] : null, auprc: r ? r[1] : null, iou: r && r[2] ? r[2] : null, n: r ? r[3] : null,
+      ntp: r ? r[4] : null,
       cpu: c ? c.cpu_h_per_1000 : null,
       cpu_rep: c ? c.cpu_h_reported_per_1000 : null,
       ram: c ? c.peak_rss_gb : null,
@@ -205,26 +208,39 @@
       const t = M.tools[v.row.tool];
       const td1 = document.createElement("td");
       td1.className = "txt";
-      td1.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="tools/' + v.row.tool + '.html">' + t.name + "</a>";
+      const tags = (t.tags || []).map((x) => '<span class="tag">' + x + "</span>");
+      if (v.row.tool === "hmmscan" && state.truth === "pfam") tags.push('<span class="tag warn">graded on its own models</span>');
+      td1.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="tools/' + v.row.tool + '.html">' + t.name + "</a>" +
+        (tags.length ? "<br>" + tags.join(" ") : "");
       tr.appendChild(td1);
       const td2 = document.createElement("td");
       td2.className = "txt mono";
       td2.textContent = v.row.setting;
+      td2.title = v.row.words;
       tr.appendChild(td2);
       if (v.r) {
         tr.appendChild(numCell(fmt3(v.fmax)));
         tr.appendChild(numCell(fmt3(v.auprc)));
-        tr.appendChild(numCell(v.iou == null ? "" : fmt3(v.iou)));
+        if (v.iou == null) {
+          const td = document.createElement("td");
+          td.className = "none";
+          td.dataset.none = "iou";
+          td.innerHTML = "<i>no correct calls</i>";
+          td.title = v.ntp ? "correct calls only on single residues, where IoU says nothing about the ends" : "no correct calls";
+          tr.appendChild(td);
+        } else tr.appendChild(numCell(fmt3(v.iou)));
         tr.appendChild(numCell(fmtInt(v.n)));
       } else {
         tr.appendChild(missingCell("results", "not run", 4));
       }
       if (v.c) {
-        tr.appendChild(numCell(sig(v.cpu, 3)));
+        const cc = numCell(sig(v.cpu, 3));
+        if (v.c.n_runs > 1) cc.innerHTML += ` <span class="muted runs">(${sig(v.c.cpu_min, 3)}–${sig(v.c.cpu_max, 3)}, ${v.c.n_runs} runs)</span>`;
+        tr.appendChild(cc);
         tr.appendChild(v.cpu_rep == null ? missingCell("reported", "none reported") : numCell(sig(v.cpu_rep, 3)));
         tr.appendChild(numCell(v.ram.toFixed(1)));
-        const g = numCell(v.gpu);
-        if (v.row.tool === "prostt5") g.innerHTML = v.gpu + ' <a href="tools/prostt5.html#failure-modes" title="Predicting the 3Di letters used one GPU; not counted">*</a>';
+        const g = numCell(v.c.gpu_h_per_1000 ? sig(v.c.gpu_h_per_1000, 3) + " GPU-h" : "none");
+        if (v.c.gpu_h_per_1000) g.title = "one GPU, while predicting 3Di letters for the queries";
         tr.appendChild(g);
         tr.appendChild(numCell("$" + sig(v.cost, 3)));
       } else {
@@ -240,8 +256,9 @@
       tbody.appendChild(tr);
     }
     const nRun = vals.filter((v) => v.r).length;
-    document.getElementById("count").textContent =
-      nRun + " of " + vals.length + " tool and setting rows have results for these filters.";
+    document.getElementById("count").textContent = nRun
+      ? nRun + " of " + vals.length + " tool and setting rows have results for these filters."
+      : "No tool has results for these filters: either this stratum holds no regions for this relative, or it was not scored.";
   }
 
   // ---------- prices ----------
@@ -268,6 +285,7 @@
   function marker(shape, x, y, r, color, filled, parent) {
     const common = { stroke: color, "stroke-width": 1.6, fill: filled ? color : "var(--surface)" };
     if (shape === "square") return el("rect", Object.assign({ x: x - r * 0.9, y: y - r * 0.9, width: r * 1.8, height: r * 1.8 }, common), parent);
+    if (shape === "diamond") return el("path", Object.assign({ d: `M${x},${y - r * 1.2} L${x + r * 1.2},${y} L${x},${y + r * 1.2} L${x - r * 1.2},${y} Z` }, common), parent);
     if (shape === "triangle") return el("path", Object.assign({ d: `M${x},${y - r * 1.1} L${x + r},${y + r * 0.75} L${x - r},${y + r * 0.75} Z` }, common), parent);
     return el("circle", Object.assign({ cx: x, cy: y, r: r }, common), parent);
   }
@@ -287,7 +305,7 @@
       const y = v[metric.field];
       if (!v.r) { notPlotted.push([row, "not run"]); continue; }
       if (!v.c || v.cpu == null) { notPlotted.push([row, "CPU-hours not measured"]); continue; }
-      if (y == null) { notPlotted.push([row, "no value"]); continue; }
+      if (y == null) { notPlotted.push([row, metric.id === "iou" ? "no correct calls" : "no value"]); continue; }
       pts.push({ x: v.cpu, y, v, row });
     }
     const W = 760, H = 440, L = 64, R = 18, T = 14, B = 52;
@@ -329,7 +347,7 @@
       if (fr.length > 1) el("polyline", { points: fr.map((p) => sx(p.x) + "," + sy(p.y)).join(" "), class: "frontier" }, svg);
       for (const p of pts) {
         const t = M.tools[p.row.tool];
-        const m = marker(t.shape, sx(p.x), sy(p.y), 6, M.kinds[t.kind].color, true, svg);
+        const m = marker(p.row.shape, sx(p.x), sy(p.y), 6, M.kinds[t.kind].color, true, svg);
         m.setAttribute("tabindex", "0");
         m.setAttribute("role", "link");
         m.dataset.tool = p.row.tool;
@@ -341,6 +359,7 @@
           tip.innerHTML = `<b>${t.name}</b> <span class="mono">${p.row.setting}</span><br>${metric.label} ${fmt3(p.y)}<br>` +
             `Fmax ${fmt3(p.v.fmax)} · AUPRC ${fmt3(p.v.auprc)} · median IoU ${p.v.iou == null ? "—" : fmt3(p.v.iou)}<br>` +
             `${fmtInt(p.v.n)} true instances<br>${sig(p.x, 3)} CPU-h per 1,000 queries · peak RAM ${p.v.ram.toFixed(1)} GB` +
+            (p.v.c.gpu_h_per_1000 ? `<br>plus ${sig(p.v.c.gpu_h_per_1000, 3)} GPU-h (not on the axis)` : "") +
             (fr.includes(p) ? "<br>On the line: no other tool is both cheaper and better here." : "");
           const bb = box.getBoundingClientRect();
           const mx = (ev.clientX || bb.left + (sx(p.x) / W) * bb.width) - bb.left;
