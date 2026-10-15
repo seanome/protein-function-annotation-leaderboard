@@ -192,6 +192,7 @@ def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
            head: str = "", description: str = "") -> str:
     up = "../" * depth
     nav = [("index.html", "Leaderboard", "leaderboard"), ("cost.html", "Score against cost", "cost"),
+           ("pileup.html", "Region pile-up", "pileup"),
            ("tools/index.html", "Tool cards", "tools"), ("coverage.html", "Coverage", "coverage"),
            ("methods.html", "Methods", "methods")]
     links = "".join(
@@ -222,7 +223,7 @@ def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
 <a class="brand" href="{up}index.html">{SITE}</a>
 <nav class="site" aria-label="Pages">{links}</nav>
 </div></header>
-<main class="wrap">
+<main class="wrap" data-page="{page}">
 <p class="source" id="source-commit" data-commit="{commit}">{src_line}</p>
 {body}
 </main>
@@ -936,13 +937,123 @@ no row shows "—" and "not run".</p>
 leaderboard is a missing row in results.parquet or compute.parquet. The source table checksums are
 in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/contrib/auto-render.min.js"
  onload="renderMathInElement(document.body,{{delimiters:[{{left:'\\[',right:'\\]',display:true}},{{left:'\\(',right:'\\)',display:false}}]}})"></script>
 """
     return layout("Methods", "methods", body, src,
                   description="How each score is defined and computed, how the truth sets were built, and what dedup means.")
+
+
+def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dict) -> str:
+    regions = data["regions"]
+    import statistics
+    med_len = statistics.median(r["len"] for r in regions)
+    n_past = sum(r["past_end"] for r in regions)
+    past = ", ".join(f'{r["acc"]} {r["fam"]} {r["s"]}–{r["e"]} on {r["plen"]} aa' for r in regions if r["past_end"])
+    # The histogram's kmerseek line is its best Pfam setting against zebrafish by Fmax.
+    km = best_by(res, tool="kmerseek", truth_set="pfam", calls="raw", species="zebrafish",
+                 stratum_axis="all").sort(["fmax", "setting"], descending=[True, False]).row(0, named=True)
+    dashes = {"hmmer3_phmmer": "", "mmseqs2_seqseq": "6 3", "hmmer3_jackhmmer": "", "mmseqs2_iterative": "6 3",
+              "hhblits": "2 2", "foldseek": "", "prostt5": "6 3", "kmerseek": "", "hmmscan": ""}
+    hist = [{"tool": t, "setting": st, "dash": dashes[t]} for t, st in
+            [("hmmer3_phmmer", "default"), ("mmseqs2_seqseq", "s7"), ("hmmer3_jackhmmer", "n3"),
+             ("mmseqs2_iterative", "s7"), ("hhblits", "single_seq"), ("foldseek", "3di_aa"),
+             ("prostt5", "3di_from_seq"), ("kmerseek", km["setting"]), ("hmmscan", "direct")]]
+    meta = {
+        "kinds": {k: v["color"] for k, v in KINDS.items()},
+        "names": {t: TOOLS[t]["name"] for t in TOOLS},
+        "median_len": med_len, "focus_default": "hmmer3_phmmer", "hist": hist,
+    }
+    hist_legend = "".join(
+        f'<span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" '
+        f'stroke="{KINDS[TOOLS[h["tool"]]["kind"]]["color"]}" stroke-width="2" stroke-dasharray="{h["dash"]}"/></svg>'
+        f'{esc(TOOLS[h["tool"]]["name"])}{" " + esc(h["setting"]) if h["tool"] == "kmerseek" else ""}</span>' for h in hist)
+    sp = prov.get("pileup", {})
+    body = f"""
+<h1>Region pile-up</h1>
+<p class="lede">Where each tool's calls fall around a known domain. Every row is one of the
+{len(regions):,} Pfam domains on the 998 human query proteins. Every panel is one tool and setting
+searching the zebrafish proteome (430 Mya), and every panel has the same rows. A residue counts as
+covered when the tool made a call of that domain's own Pfam family over it, at any score the tool
+reported (E-value cutoff 10).</p>
+<div class="prose muted">
+<p>Built the way deepTools draws a profile around genes (computeMatrix scale-regions, then
+plotHeatmap and plotProfile), on residues instead of bases. Each row holds 100 residues before
+the domain's start, then the domain stretched or squeezed into 100 equal bins, then 100 residues
+after its end. Each bin shows the residue at its centre. The median domain is {med_len:.0f} aa, so a
+bin is about {med_len / 100:.1f} aa.</p></div>
+<div class="metricpick" role="group" aria-label="Row order">
+<span>Order rows by:</span>
+<button type="button" class="chip" data-sort="coverage">coverage in the chosen panel (missed rows last)</button>
+<button type="button" class="chip" data-sort="identity">% identity to the closest zebrafish domain</button>
+<button type="button" class="chip" data-sort="length">domain length</button>
+<button type="button" class="chip" data-sort="plddt">pLDDT of the domain</button>
+</div>
+<p id="pu-loading" class="muted">Loading 23 panels…</p>
+<figure>
+<figcaption><b>Figure 3.</b> Calls piled up around {len(regions):,} Pfam domains, one panel per tool
+and setting. Top of each panel: the share of domains covered at each position (the column
+average). Below it, every domain as a row, squeezed to fit; darker means more of the rows in that
+band are covered. Click a panel to draw it full size below, one pixel row per domain.
+Under each panel are four readouts. Missed is the share of domains with no call anywhere inside
+them. Inside and flanks are the mean coverage in the domain and in the 100 residues either side.
+Last comes how many residues the curve takes to fall from 0.8 to 0.2 at each end. Where the
+protein ends inside the window, the cells past its end are grey, not white. {n_past} Pfam domains
+lie partly or wholly past the end of their protein's sequence, so for them the Pfam coordinates
+and this sequence do not match: {esc(past)}.</figcaption>
+<div class="legend" aria-label="Key to Figure 3">
+<span class="item"><span class="sw" style="background:var(--k-letters)"></span>
+<span class="sw" style="background:var(--k-profiles)"></span><span class="sw" style="background:var(--k-shapes)"></span>
+<span class="sw" style="background:var(--k-kmers)"></span><span class="sw" style="background:var(--k-models)"></span>
+covered by a call (colour: kind of method, as on every page)</span>
+<span class="item"><span class="sw" style="background:var(--surface);border:1px solid var(--hair)"></span> not covered</span>
+<span class="item"><span class="sw" style="background:var(--null)"></span> past the protein's end (no residue there)</span>
+<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--k-letters)" stroke-width="2"/></svg>
+curve: share of all domains covered (colour: kind of method)</span>
+<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.2"/></svg>
+the same, with one domain per Pfam family, since domains from one protein or family are not independent</span>
+</div>
+<div id="pu-grid" class="pu-grid"></div>
+</figure>
+<figure>
+<figcaption><b>Figure 3, chosen panel:</b> <span id="pu-ftitle"></span>. <span id="pu-caption-numbers"></span>
+Hover a row to see its protein, domain, true coordinates, calls and residues.</figcaption>
+<div class="legend" aria-label="Key to the chosen panel">
+<span class="item"><span class="sw" style="background:var(--strip-a)"></span><span class="sw" style="background:var(--strip-b)"></span>
+left strip: rows from one protein share a shade; the shade changes where the protein changes</span>
+<span class="item">Colour cells by: <button type="button" class="chip" data-color="coverage">covered or not</button>
+<button type="button" class="chip" data-color="score">call score</button></span>
+<span class="item" id="pu-scorebar" hidden><span class="lo mono"></span><span class="bar"></span><span class="hi mono"></span>
+highest call score over the residue, this tool's own scale (5th to 95th percentile)</span>
+</div>
+<div class="plotbox pu-focus">
+<svg id="pu-fcurve" class="pu-fcurve" role="img" aria-label="share of domains covered at each position"></svg>
+<div class="pu-scroll"><canvas id="pu-fheat" class="pu-fheat" aria-label="one row per domain"></canvas>
+<div id="pu-tip" class="tip pu-tip" hidden></div></div>
+</div>
+<p id="pu-fro" class="prose muted"></p>
+</figure>
+<h2>Where calls start</h2>
+<figure>
+<figcaption><b>Figure 4.</b> For each domain with a call, take the call that overlaps it most.
+Subtract the domain's first residue from the call's first residue. 0 means the call starts on the
+domain's first residue. Negative values start early; positive values start late. One line per tool, as a share of that tool's
+domains with a call, in 5-residue steps; the end bins hold everything beyond 100 residues. For
+kmerseek the line is its best Pfam setting against zebrafish by Fmax, <span class="mono">{esc(km["setting"])}</span>.
+Most aligner calls start more than 100 residues early. A call spans the whole stretch the two
+proteins aligned over, which is often far wider than the domain; this is also why the aligners'
+flanks are covered in Figure 3. hmmscan's calls start on the domain, because Pfam's domains are
+defined by the models hmmscan runs.</figcaption>
+<div class="legend" aria-label="Key to Figure 4">{hist_legend}</div>
+<div class="plotbox"><svg id="pu-hist" role="img" aria-label="histogram of call start minus true start"></svg></div>
+</figure>
+<script type="application/json" id="pu-meta">{json.dumps(meta)}</script>
+<script src="assets/pileup.js"></script>
+"""
+    return layout("Region pile-up", "pileup", body, src,
+                  description="Where each tool's calls fall around known Pfam domains, residue by residue.")
 
 
 def main() -> None:
@@ -1019,6 +1130,17 @@ def main() -> None:
         (out / "tools" / f"{t}.json").write_text(json.dumps(card, indent=1, allow_nan=False) + "\n")
         (out / "tools" / f"{t}.html").write_text(page_card(t, md, src))
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
+    if (a.data / "pileup/regions.parquet").exists():
+        import pileup
+        calls = pl.read_parquet(a.data / "pileup/calls.parquet").select("tool", "setting").unique()
+        kinds = list(KINDS)
+        panels = sorted(({"tool": t, "setting": st, "kind": TOOLS[t]["kind"]} for t, st in calls.iter_rows()),
+                        key=lambda q: (kinds.index(q["kind"]), list(TOOLS).index(q["tool"]), q["setting"]))
+        data, check = pileup.build(a.data, panels)
+        (out / "data" / "pileup.json").write_text(json.dumps(data, separators=(",", ":"), allow_nan=False))
+        (out / "data" / "pileup_check.json").write_text(json.dumps(check, indent=1) + "\n")
+        prov["pileup"] = json.loads((a.data / "pileup/provenance.json").read_text())
+        (out / "pileup.html").write_text(page_pileup(src, res, prov, data, check))
     print(f"built {out}: {len(rows)} tool-setting rows, {len(tools_used)} cards, payload {len(payload) / 1e6:.2f} MB")
 
 

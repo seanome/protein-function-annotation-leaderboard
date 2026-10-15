@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Region pile-up</title>
+<meta name="description" content="Where each tool&#x27;s calls fall around known Pfam domains, residue by residue.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+</head>
+<body data-page="pileup">
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="cost.html" data-keep-filters>Score against cost</a><a href="pileup.html" aria-current="page">Region pile-up</a><a href="tools/index.html">Tool cards</a><a href="coverage.html">Coverage</a><a href="methods.html">Methods</a></nav>
+</div></header>
+<main class="wrap" data-page="pileup">
+<p class="source" id="source-commit" data-commit="3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5">3aa8d649</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+
+<h1>Region pile-up</h1>
+<p class="lede">Where each tool's calls fall around a known domain. Every row is one of the
+2,435 Pfam domains on the 998 human query proteins. Every panel is one tool and setting
+searching the zebrafish proteome (430 Mya), and every panel has the same rows. A residue counts as
+covered when the tool made a call of that domain's own Pfam family over it, at any score the tool
+reported (E-value cutoff 10).</p>
+<div class="prose muted">
+<p>Built the way deepTools draws a profile around genes (computeMatrix scale-regions, then
+plotHeatmap and plotProfile), on residues instead of bases. Each row holds 100 residues before
+the domain's start, then the domain stretched or squeezed into 100 equal bins, then 100 residues
+after its end. Each bin shows the residue at its centre. The median domain is 89 aa, so a
+bin is about 0.9 aa.</p></div>
+<div class="metricpick" role="group" aria-label="Row order">
+<span>Order rows by:</span>
+<button type="button" class="chip" data-sort="coverage">coverage in the chosen panel (missed rows last)</button>
+<button type="button" class="chip" data-sort="identity">% identity to the closest zebrafish domain</button>
+<button type="button" class="chip" data-sort="length">domain length</button>
+<button type="button" class="chip" data-sort="plddt">pLDDT of the domain</button>
+</div>
+<p id="pu-loading" class="muted">Loading 23 panels…</p>
+<figure>
+<figcaption><b>Figure 3.</b> Calls piled up around 2,435 Pfam domains, one panel per tool
+and setting. Top of each panel: the share of domains covered at each position (the column
+average). Below it, every domain as a row, squeezed to fit; darker means more of the rows in that
+band are covered. Click a panel to draw it full size below, one pixel row per domain.
+Under each panel are four readouts. Missed is the share of domains with no call anywhere inside
+them. Inside and flanks are the mean coverage in the domain and in the 100 residues either side.
+Last comes how many residues the curve takes to fall from 0.8 to 0.2 at each end. Where the
+protein ends inside the window, the cells past its end are grey, not white. 9 Pfam domains
+lie partly or wholly past the end of their protein's sequence, so for them the Pfam coordinates
+and this sequence do not match: P15692 PF00341 232–310 on 232 aa, P15692 PF14554 342–395 on 232 aa, Q5VWP3 PF15274 130–906 on 458 aa, Q8NFD5 PF12031 2010–2265 on 2236 aa, Q9Y233 PF00233 790–1021 on 779 aa, Q9Y4K1 PF00030 1728–1811 on 1723 aa, Q9Y4K1 PF00030 1824–1903 on 1723 aa, Q9Y4K1 PF00030 1911–1991 on 1723 aa, Q9Y4K1 PF00652 1996–2124 on 1723 aa.</figcaption>
+<div class="legend" aria-label="Key to Figure 3">
+<span class="item"><span class="sw" style="background:var(--k-letters)"></span>
+<span class="sw" style="background:var(--k-profiles)"></span><span class="sw" style="background:var(--k-shapes)"></span>
+<span class="sw" style="background:var(--k-kmers)"></span><span class="sw" style="background:var(--k-models)"></span>
+covered by a call (colour: kind of method, as on every page)</span>
+<span class="item"><span class="sw" style="background:var(--surface);border:1px solid var(--hair)"></span> not covered</span>
+<span class="item"><span class="sw" style="background:var(--null)"></span> past the protein's end (no residue there)</span>
+<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--k-letters)" stroke-width="2"/></svg>
+curve: share of all domains covered (colour: kind of method)</span>
+<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.2"/></svg>
+the same, with one domain per Pfam family, since domains from one protein or family are not independent</span>
+</div>
+<div id="pu-grid" class="pu-grid"></div>
+</figure>
+<figure>
+<figcaption><b>Figure 3, chosen panel:</b> <span id="pu-ftitle"></span>. <span id="pu-caption-numbers"></span>
+Hover a row to see its protein, domain, true coordinates, calls and residues.</figcaption>
+<div class="legend" aria-label="Key to the chosen panel">
+<span class="item"><span class="sw" style="background:var(--strip-a)"></span><span class="sw" style="background:var(--strip-b)"></span>
+left strip: rows from one protein share a shade; the shade changes where the protein changes</span>
+<span class="item">Colour cells by: <button type="button" class="chip" data-color="coverage">covered or not</button>
+<button type="button" class="chip" data-color="score">call score</button></span>
+<span class="item" id="pu-scorebar" hidden><span class="lo mono"></span><span class="bar"></span><span class="hi mono"></span>
+highest call score over the residue, this tool's own scale (5th to 95th percentile)</span>
+</div>
+<div class="plotbox pu-focus">
+<svg id="pu-fcurve" class="pu-fcurve" role="img" aria-label="share of domains covered at each position"></svg>
+<div class="pu-scroll"><canvas id="pu-fheat" class="pu-fheat" aria-label="one row per domain"></canvas>
+<div id="pu-tip" class="tip pu-tip" hidden></div></div>
+</div>
+<p id="pu-fro" class="prose muted"></p>
+</figure>
+<h2>Where calls start</h2>
+<figure>
+<figcaption><b>Figure 4.</b> For each domain with a call, take the call that overlaps it most.
+Subtract the domain's first residue from the call's first residue. 0 means the call starts on the
+domain's first residue. Negative values start early; positive values start late. One line per tool, as a share of that tool's
+domains with a call, in 5-residue steps; the end bins hold everything beyond 100 residues. For
+kmerseek the line is its best Pfam setting against zebrafish by Fmax, <span class="mono">gbmr4_k21_lcFalse</span>.
+Most aligner calls start more than 100 residues early. A call spans the whole stretch the two
+proteins aligned over, which is often far wider than the domain; this is also why the aligners'
+flanks are covered in Figure 3. hmmscan's calls start on the domain, because Pfam's domains are
+defined by the models hmmscan runs.</figcaption>
+<div class="legend" aria-label="Key to Figure 4"><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#0072B2" stroke-width="2" stroke-dasharray=""/></svg>phmmer</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#0072B2" stroke-width="2" stroke-dasharray="6 3"/></svg>MMseqs2</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#E69F00" stroke-width="2" stroke-dasharray=""/></svg>jackhmmer</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#E69F00" stroke-width="2" stroke-dasharray="6 3"/></svg>MMseqs2, three rounds</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#E69F00" stroke-width="2" stroke-dasharray="2 2"/></svg>HH-suite (hhsearch)</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#009E73" stroke-width="2" stroke-dasharray=""/></svg>Foldseek</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#009E73" stroke-width="2" stroke-dasharray="6 3"/></svg>ProstT5 + Foldseek</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#CC3311" stroke-width="2" stroke-dasharray=""/></svg>kmerseek gbmr4_k21_lcFalse</span><span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" stroke="#6B4C9A" stroke-width="2" stroke-dasharray=""/></svg>hmmscan with Pfam</span></div>
+<div class="plotbox"><svg id="pu-hist" role="img" aria-label="histogram of call start minus true start"></svg></div>
+</figure>
+<script type="application/json" id="pu-meta">{"kinds": {"letters": "#0072B2", "profiles": "#E69F00", "shapes": "#009E73", "kmers": "#CC3311", "models": "#6B4C9A"}, "names": {"kmerseek": "kmerseek", "hmmer3_phmmer": "phmmer", "hmmer3_jackhmmer": "jackhmmer", "mmseqs2_seqseq": "MMseqs2", "mmseqs2_iterative": "MMseqs2, three rounds", "hhblits": "HH-suite (hhsearch)", "foldseek": "Foldseek", "prostt5": "ProstT5 + Foldseek", "hmmscan": "hmmscan with Pfam"}, "median_len": 89, "focus_default": "hmmer3_phmmer", "hist": [{"tool": "hmmer3_phmmer", "setting": "default", "dash": ""}, {"tool": "mmseqs2_seqseq", "setting": "s7", "dash": "6 3"}, {"tool": "hmmer3_jackhmmer", "setting": "n3", "dash": ""}, {"tool": "mmseqs2_iterative", "setting": "s7", "dash": "6 3"}, {"tool": "hhblits", "setting": "single_seq", "dash": "2 2"}, {"tool": "foldseek", "setting": "3di_aa", "dash": ""}, {"tool": "prostt5", "setting": "3di_from_seq", "dash": "6 3"}, {"tool": "kmerseek", "setting": "gbmr4_k21_lcFalse", "dash": ""}, {"tool": "hmmscan", "setting": "direct", "dash": ""}]}</script>
+<script src="assets/pileup.js"></script>
+
+</main>
+<footer class="site"><div class="wrap">
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5">3aa8d649</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+</div></footer>
+</body>
+</html>

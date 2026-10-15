@@ -19,7 +19,7 @@
  "command": "mmseqs search \\\n    human-38fdd87d_mmdb/db zebrafish_mmdb/db result mmseqs_tmp \\\n    --threads 16 \\\n    -s 7 \\\n    --num-iterations 3 \\\n    --max-seqs 1000 \\\n    -e 10.0",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit": "3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "s7",

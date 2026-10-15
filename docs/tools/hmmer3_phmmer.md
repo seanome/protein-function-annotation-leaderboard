@@ -1,6 +1,6 @@
 # phmmer
 
-Tool id `hmmer3_phmmer`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
+Tool id `hmmer3_phmmer`. Numbers from seanome/2024-kmerseek-analysis commit `3aa8d649`.
 
 ## What it compares
 

@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 FILES = ["results.parquet", "compute.parquet", "coverage.md", "provenance.json"]
+PILEUP = ["pileup/regions.parquet", "pileup/calls.parquet", "pileup/provenance.json"]
 
 
 def gh(*args: str, raw: bool = False) -> bytes:
@@ -38,6 +39,20 @@ def main() -> None:
         body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={sha}", raw=True)
         (a.out / name).write_bytes(body)
         checksums[name] = hashlib.sha256(body).hexdigest()
+
+    for name in PILEUP:
+        try:
+            body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={sha}", raw=True)
+        except subprocess.CalledProcessError:
+            continue  # a commit from before the pile-up tables existed
+        (a.out / name).parent.mkdir(parents=True, exist_ok=True)
+        (a.out / name).write_bytes(body)
+        checksums[name] = hashlib.sha256(body).hexdigest()
+    if "pileup/provenance.json" in checksums:
+        want = json.loads((a.out / "pileup/provenance.json").read_text())["outputs"]
+        for name, digest in want.items():
+            if checksums[f"pileup/{name}"] != digest:
+                raise SystemExit(f"pileup/{name}: sha256 does not match pileup/provenance.json")
 
     # The source's own provenance.json lists the checksum of each table it wrote.
     expected = json.loads((a.out / "provenance.json").read_text())["outputs"]

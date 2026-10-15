@@ -1,7 +1,7 @@
 # Source of the tables: a commit of seanome/2024-kmerseek-analysis that holds
 # results/leaderboard/, written there by `make leaderboard-tables`.
 SOURCE_REPO ?= seanome/2024-kmerseek-analysis
-SOURCE_COMMIT ?= 548ec5b8
+SOURCE_COMMIT ?= 3aa8d649
 PY ?= .venv/bin/python
 
 .PHONY: tables site check serve

@@ -1,6 +1,6 @@
 # ProstT5 + Foldseek
 
-Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
+Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `3aa8d649`.
 
 ## What it compares
 

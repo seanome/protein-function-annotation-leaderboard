@@ -18,7 +18,7 @@
  "command": "phmmer \\\n    --domtblout /dev/stdout \\\n    --tblout /dev/null \\\n    -o /dev/stderr \\\n    --noali \\\n    -E 10.0 \\\n    --cpu 8 \\\n    UP000005640_9606.fasta UP000000437_7955.fasta",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit": "3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "default",
