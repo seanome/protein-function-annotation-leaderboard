@@ -49,6 +49,11 @@ Across the 10 relatives searched with this setting: 0.0648 to 0.171 CPU-hours pe
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: GPL-3.0 ([source](https://github.com/steineggerlab/foldseek))
+- Commercial use allowed: Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.
+
 ## Settings in the table
 
 - `3di_aa`: 3Di shape letters and amino acids together

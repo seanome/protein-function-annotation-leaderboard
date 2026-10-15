@@ -48,6 +48,11 @@ Across the 15 relatives searched with this setting: 2.18 to 30.9 CPU-hours per 1
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: GPL-3.0 ([source](https://github.com/soedinglab/hh-suite))
+- Commercial use allowed: Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.
+
 ## Settings in the table
 
 - `single_seq`: profiles built from single proteins, no family database

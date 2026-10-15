@@ -15,6 +15,9 @@
   "AlphaFold models of long proteins come in overlapping pieces (F1, F2, ...). The task script moves piece n's coordinates 200 x (n - 1) residues along the protein; if a piece started elsewhere, its calls would land in the wrong place. Checked against the real piece starts: not measured."
  ],
  "version": "Foldseek 10.941cd33",
+ "licence": "GPL-3.0",
+ "commercial_use": "Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.",
+ "licence_url": "https://github.com/steineggerlab/foldseek",
  "container": "quay.io/biocontainers/foldseek:10.941cd33--h5021889_1 (sha256:1156a052f31b2afb85257c02e83a962f559c9752273fe1064ab735f90ac29d1a)",
  "command": "foldseek search \\\n    human-38fdd87d_fsdb/db zebrafish_fsdb/db result foldseek_tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
  "numbers_from": {

@@ -31,6 +31,23 @@ cluster. Its tables are <span class="mono">results.parquet</span> (30,029 rows) 
 <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5">3aa8d649</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
 
+<h2>No tool wins everywhere</h2>
+<p>No tool wins everywhere. So this board ranks tools within a stratum, a slice of the proteins
+by relative, identity, region length, disorder or feature type, and gives no overall score. Two
+earlier community benchmarks found the same. The Quest for Orthologs benchmark ran 15 orthology
+methods on 20 benchmarks. Among the balanced methods, "no method consistently obtained a better
+balance than the other methods across all data sets". Its authors chose not to compute a combined
+score, because the right trade-off depends on the application (Altenhoff et al. 2016). The Massive Text Embedding Benchmark (MTEB), for text embedding models,
+reported that "no particular text embedding method dominates across all tasks" (Muennighoff et al.
+2023).</p>
+<p class="refs">Altenhoff, Adrian M., Brigitte Boeckmann, Salvador Capella-Gutierrez, et al.
+"Standardized Benchmarking in the Quest for Orthologs." <i>Nature Methods</i> 13, no. 5 (2016):
+425–30. <a href="https://doi.org/10.1038/nmeth.3830">https://doi.org/10.1038/nmeth.3830</a>.<br>
+Muennighoff, Niklas, Nouamane Tazi, Loic Magne, and Nils Reimers. "MTEB: Massive Text Embedding
+Benchmark." In <i>Proceedings of the 17th Conference of the European Chapter of the Association for
+Computational Linguistics</i>, 2014–37. Dubrovnik, Croatia, 2023.
+<a href="https://doi.org/10.18653/v1/2023.eacl-main.148">https://doi.org/10.18653/v1/2023.eacl-main.148</a>.</p>
+
 <h2>From a search hit to a call</h2>
 <p>Each tool reports aligned regions: a stretch of the human protein matched to a stretch of a
 protein in the relative. A region becomes a <b>call</b> when it covers at least half of an annotated
@@ -80,8 +97,9 @@ recomputed here.</p>
 out (an IoU against one residue says nothing about where the ends are). Worked example, same row:
 0.700, so half of phmmer's correct calls on zebrafish overlap their true domain
 by at least that much. A correct call on a region longer than one residue has an IoU of at least
-0.5, so the run stores 0 only when there is no such call: no correct calls at all, or correct
-calls on single residues only (the 1 aa length bin and the ACT_SITE, BINDING and SITE features).
+0.5. So the run stores 0 only when there is no such call. Either there are no correct calls at
+all, or the correct calls are on single residues only (the 1 aa length bin and the ACT_SITE,
+BINDING and SITE features).
 The pages show those as <i>no correct calls</i>, not as 0.</p>
 
 <h3>True instances</h3>
@@ -90,8 +108,8 @@ reachable or not. Same row: 2,435.</p>
 
 <h3>CPU-hours per 1,000 queries</h3>
 <p><b>CPU-hours</b> are taken from the run's Nextflow task records: the search task's run time
-multiplied by its average CPU use. 63 of 311 searches completed more than once
-(a re-run after a code change or a crash). The trace does not say which run wrote the scored
+multiplied by its average CPU use. 63 of 311 searches completed more than once,
+after a code change or a crash. The trace does not say which run wrote the scored
 calls, so the newest run gives the headline number and the leaderboard prints the range over all
 runs beside it. Only the search is counted; building the relative's database is not, because a
 reused database leaves no task record. Dividing by the 998 queries and multiplying by 1,000
@@ -101,9 +119,8 @@ gives the cost per 1,000 queries. Worked example: phmmer against zebrafish ran 5
 per 1,000 queries. Peak RAM is the task's largest resident memory.</p>
 <p>Numbers marked <span class="prov measured">measured</span> come from these records, on Sherlock
 (partition hns). No search used a GPU. ProstT5 also has to turn the query sequences into 3Di
-shape letters before it can search; that step ran on one GPU for 69 s for the
-998 queries, which is 0.0192 GPU-hours per 1,000 queries, counted on every
-ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every
+shape letters before it can search. That step ran on one GPU for 69 s for the
+998 queries: 0.0192 GPU-hours per 1,000 queries, counted on every ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every
 database build, is not counted. Numbers marked
 <span class="prov reported">reported</span> would come from a tool's submitter, on hardware they
 name; none have been submitted yet.</p>
@@ -179,6 +196,7 @@ in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
 <footer class="site"><div class="wrap">
 <p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5">3aa8d649</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+<p>This page as JSON, for scripts and agents: <a class="mono" href="methods.html.json">methods.html.json</a></p>
 </div></footer>
 </body>
 </html>

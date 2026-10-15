@@ -166,3 +166,4 @@ details.prose summary{cursor:pointer;color:var(--accent)}
 .pu-res{font-size:.78rem;margin:4px 0;padding:6px;white-space:pre;overflow-x:auto}
 #pu-scorebar .bar{display:inline-block;width:80px;height:10px;border-radius:2px;background:linear-gradient(90deg,color-mix(in srgb,var(--kind) 25%,var(--surface)),var(--kind))}
 #pu-hist{width:100%;height:auto}
+.refs{font-size:.9rem;color:var(--muted)}

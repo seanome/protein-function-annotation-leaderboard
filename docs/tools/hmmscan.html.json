@@ -1,0 +1,216 @@
+{
+ "page": "tools/hmmscan.html",
+ "title": "hmmscan with Pfam card",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5",
+  "commit_date": "2026-10-15T12:53:33Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T12:54:29Z",
+  "sha256": {
+   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
+   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
+   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d",
+   "pileup/regions.parquet": "68f4541fc0bddaed7eb5053970e1cbd405a49ac517917b00eb7b806180581ef1",
+   "pileup/calls.parquet": "413c6e4acad44b931d526be3644ad0bd017acb2772833ad2f1a3a77add122d50",
+   "pileup/provenance.json": "dd1bcda25c89982c1f3ca8908703fed59ab5c5b02382453899ec7cc7eb5050f0"
+  }
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 3aa8d649 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "hmmscan with Pfam"
+  },
+  {
+   "tag": "p",
+   "text": "Tool id hmmscan. Numbers from seanome/2024-kmerseek-analysis commit 3aa8d649."
+  },
+  {
+   "tag": "h2",
+   "text": "What it compares"
+  },
+  {
+   "tag": "p",
+   "text": "Each query protein against the curated profile models of every Pfam family, without searching any relative."
+  },
+  {
+   "tag": "h2",
+   "text": "What it needs"
+  },
+  {
+   "tag": "li",
+   "text": "sequence only: yes"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold model: no"
+  },
+  {
+   "tag": "li",
+   "text": "GPU: no"
+  },
+  {
+   "tag": "h2",
+   "text": "Reference searched"
+  },
+  {
+   "tag": "p",
+   "text": "Pfam-A 38.2 family models (30,134 models)."
+  },
+  {
+   "tag": "h2",
+   "text": "How to read its score"
+  },
+  {
+   "tag": "p",
+   "text": "Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain)."
+  },
+  {
+   "tag": "h2",
+   "text": "Strong and weak strata"
+  },
+  {
+   "tag": "p",
+   "text": "Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is direct: Fmax 0.886 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared."
+  },
+  {
+   "tag": "p",
+   "text": "No other tool was scored in the same strata, so no comparison: not run."
+  },
+  {
+   "tag": "p",
+   "text": "Swiss-Prot feature types: not run."
+  },
+  {
+   "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "li",
+   "text": "Pfam domains are defined by these same models, so scoring hmmscan against the Pfam truth set grades the models against their own output. Read its Pfam row as the best a search could do, not as a competitor."
+  },
+  {
+   "tag": "li",
+   "text": "It was scored against the Pfam truth set only. Swiss-Prot features and Pfam-N: not run."
+  },
+  {
+   "tag": "h2",
+   "text": "Cost per 1,000 queries"
+  },
+  {
+   "tag": "p",
+   "text": "Setting direct, scanning Pfam's models: 0.198 CPU-hours, measured on Sherlock. Peak memory 0.5 GB. That is about $0.00883 at $0.044625 per CPU-hour. This search completed 2 times; the runs took 0.198 to 0.313 CPU-hours per 1,000 queries, and the newest is shown."
+  },
+  {
+   "tag": "p",
+   "text": "CPU-hours count the search only, not building the relative's database."
+  },
+  {
+   "tag": "h2",
+   "text": "Licence"
+  },
+  {
+   "tag": "li",
+   "text": "Licence: BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes) (source)"
+  },
+  {
+   "tag": "li",
+   "text": "Commercial use allowed: Yes."
+  },
+  {
+   "tag": "h2",
+   "text": "Settings in the table"
+  },
+  {
+   "tag": "li",
+   "text": "direct: scans Pfam's models; no relative searched"
+  },
+  {
+   "tag": "h2",
+   "text": "Version, container, command"
+  },
+  {
+   "tag": "li",
+   "text": "Version: HMMER 3.4"
+  },
+  {
+   "tag": "li",
+   "text": "Container: quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)"
+  },
+  {
+   "tag": "pre",
+   "text": "hmmscan \\ --domtblout /dev/stdout \\ -o /dev/null \\ --noali \\ -E 10.0 --domE 10.0 \\ --cpu 4 \\ Pfam-A.hmm UP000005640_9606.fasta"
+  },
+  {
+   "tag": "p",
+   "text": "Query: the same 998 human proteins."
+  },
+  {
+   "tag": "h2",
+   "text": "Will it work for you?"
+  },
+  {
+   "tag": "li",
+   "text": "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model."
+  },
+  {
+   "tag": "li",
+   "text": "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting direct.)"
+  },
+  {
+   "tag": "li",
+   "text": "Can you spend about 0.198 CPU-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
+  },
+  {
+   "tag": "p",
+   "text": "All tool cards · this card as Markdown · as JSON"
+  }
+ ],
+ "data": {
+  "tool": "hmmscan",
+  "name": "hmmscan with Pfam",
+  "kind": "scans curated Pfam family models",
+  "compares": "Each query protein against the curated profile models of every Pfam family, without searching any relative.",
+  "needs": {
+   "sequence only": true,
+   "AlphaFold model": false,
+   "GPU": false
+  },
+  "reference": "Pfam-A 38.2 family models (30,134 models).",
+  "score": "Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).",
+  "failure_modes": [
+   "Pfam domains are defined by these same models, so scoring hmmscan against the Pfam truth set grades the models against their own output. Read its Pfam row as the best a search could do, not as a competitor.",
+   "It was scored against the Pfam truth set only. Swiss-Prot features and Pfam-N: not run."
+  ],
+  "version": "HMMER 3.4",
+  "licence": "BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes)",
+  "commercial_use": "Yes.",
+  "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",
+  "container": "quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)",
+  "command": "hmmscan \\\n    --domtblout /dev/stdout \\\n    -o /dev/null \\\n    --noali \\\n    -E 10.0 --domE 10.0 \\\n    --cpu 4 \\\n    Pfam-A.hmm UP000005640_9606.fasta",
+  "numbers_from": {
+   "repo": "seanome/2024-kmerseek-analysis",
+   "commit": "3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5",
+   "filters": "pfam, raw, all"
+  },
+  "best_setting": "direct",
+  "strong": [],
+  "weak": [],
+  "cost_per_1000_queries": {
+   "cpu_h_measured": 0.19777443776441772,
+   "peak_rss_gb": 0.46298828125,
+   "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+  },
+  "questions": [
+   "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model.",
+   "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)",
+   "Can you spend about 0.198 CPU-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
+  ],
+  "markdown": "hmmscan.md"
+ }
+}

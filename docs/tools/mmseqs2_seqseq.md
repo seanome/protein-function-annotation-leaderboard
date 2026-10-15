@@ -48,6 +48,11 @@ Across the 15 relatives searched with this setting: 0.00837 to 0.025 CPU-hours p
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: MIT ([source](https://github.com/soedinglab/MMseqs2))
+- Commercial use allowed: Yes.
+
 ## Settings in the table
 
 - `s7`: sensitivity 7 (-s 7), one round

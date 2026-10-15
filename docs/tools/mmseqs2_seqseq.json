@@ -14,6 +14,9 @@
   "At most 1,000 target proteins are kept per query (--max-seqs 1000), so a query from a very large family can lose hits. How often: not measured."
  ],
  "version": "MMseqs2 18.8cc5c",
+ "licence": "MIT",
+ "commercial_use": "Yes.",
+ "licence_url": "https://github.com/soedinglab/MMseqs2",
  "container": "quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)",
  "command": "mmseqs search \\\n    human-38fdd87d_mmdb/db zebrafish_mmdb/db result mmseqs_tmp \\\n    --threads 16 \\\n    -s 7 \\\n    --max-seqs 1000 \\\n    -e 10.0",
  "numbers_from": {

@@ -224,6 +224,18 @@ def main() -> int:
                             failures.append(f"{pg}: broken link {href}")
         browser.close()
     httpd.shutdown()
+
+    # ---- 4. every page has its JSON twin, naming the same source commit ----
+    commit = json.loads((a.site / "data/SOURCE.json").read_text())["commit"]
+    for pg in pages:
+        jp = a.site / (pg + ".json")
+        if not jp.exists():
+            failures.append(f"{pg}: no {pg}.json")
+            continue
+        doc = json.loads(jp.read_text())
+        if doc["source"]["commit"] != commit or not doc["text"]:
+            failures.append(f"{pg}.json: wrong commit or no text")
+    stats["json_pages"] = len(pages)
     failures += [f"console: {e}" for e in console_errors]
 
     print(json.dumps(stats, indent=1))

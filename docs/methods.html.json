@@ -1,0 +1,215 @@
+{
+ "page": "methods.html",
+ "title": "Methods",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5",
+  "commit_date": "2026-10-15T12:53:33Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T12:54:29Z",
+  "sha256": {
+   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
+   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
+   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d",
+   "pileup/regions.parquet": "68f4541fc0bddaed7eb5053970e1cbd405a49ac517917b00eb7b806180581ef1",
+   "pileup/calls.parquet": "413c6e4acad44b931d526be3644ad0bd017acb2772833ad2f1a3a77add122d50",
+   "pileup/provenance.json": "dd1bcda25c89982c1f3ca8908703fed59ab5c5b02382453899ec7cc7eb5050f0"
+  }
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 3aa8d649 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "Methods"
+  },
+  {
+   "tag": "p",
+   "text": "Everything on this site comes from one benchmark run. It searched 998 human proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes, release 2020_04. Of the human proteins, 964 are encoded on chromosome 6; the other 34 are immune proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The run finished on 2026-09-13 on Stanford's Sherlock cluster. Its tables are results.parquet (30,029 rows) and compute.parquet (311 rows), built by make leaderboard-tables in seanome/2024-kmerseek-analysis at commit 3aa8d649. These 998 proteins are not a random sample of the human proteome."
+  },
+  {
+   "tag": "h2",
+   "text": "No tool wins everywhere"
+  },
+  {
+   "tag": "p",
+   "text": "No tool wins everywhere. So this board ranks tools within a stratum, a slice of the proteins by relative, identity, region length, disorder or feature type, and gives no overall score. Two earlier community benchmarks found the same. The Quest for Orthologs benchmark ran 15 orthology methods on 20 benchmarks. Among the balanced methods, \"no method consistently obtained a better balance than the other methods across all data sets\". Its authors chose not to compute a combined score, because the right trade-off depends on the application (Altenhoff et al. 2016). The Massive Text Embedding Benchmark (MTEB), for text embedding models, reported that \"no particular text embedding method dominates across all tasks\" (Muennighoff et al. 2023)."
+  },
+  {
+   "tag": "p",
+   "text": "Altenhoff, Adrian M., Brigitte Boeckmann, Salvador Capella-Gutierrez, et al. \"Standardized Benchmarking in the Quest for Orthologs.\" Nature Methods 13, no. 5 (2016): 425–30. https://doi.org/10.1038/nmeth.3830. Muennighoff, Niklas, Nouamane Tazi, Loic Magne, and Nils Reimers. \"MTEB: Massive Text Embedding Benchmark.\" In Proceedings of the 17th Conference of the European Chapter of the Association for Computational Linguistics, 2014–37. Dubrovnik, Croatia, 2023. https://doi.org/10.18653/v1/2023.eacl-main.148."
+  },
+  {
+   "tag": "h2",
+   "text": "From a search hit to a call"
+  },
+  {
+   "tag": "p",
+   "text": "Each tool reports aligned regions: a stretch of the human protein matched to a stretch of a protein in the relative. A region becomes a call when it covers at least half of an annotated domain or feature on the relative's protein. The call names that annotation and sits on the human protein where the region is. A call is correct when the human protein carries that annotation and the call overlaps it with an IoU of at least 0.5. IoU (intersection over union) is the number of residues the call and the true region share, divided by the number of residues covered by either:"
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\text{IoU} = \\frac{|\\text{call} \\cap \\text{true region}|}{|\\text{call} \\cup \\text{true region}|}\\]"
+  },
+  {
+   "tag": "p",
+   "text": "For example, a call on residues 30–129 and a true domain on residues 10–109 share 80 residues (30–109). Together they cover 120 (10–129). So IoU = 80 / 120 = 0.67, and the call counts as correct. A call of the right family that misses the region counts as wrong."
+  },
+  {
+   "tag": "p",
+   "text": "A true annotation is reachable when its family occurs somewhere in the relative's proteome. A family the relative lacks cannot be copied from it by any tool."
+  },
+  {
+   "tag": "h2",
+   "text": "The scores"
+  },
+  {
+   "tag": "h3",
+   "text": "Fmax"
+  },
+  {
+   "tag": "p",
+   "text": "Fmax is the best balance of precision and recall a tool reaches at any score cutoff, counted protein by protein as in the CAFA function-prediction challenge. At a cutoff \\(t\\), the precision of protein \\(i\\) is its correct calls divided by all its calls scoring at least \\(t\\). Its recall is the true annotations found divided by its true annotations. Precision is averaged over the \\(m(t)\\) proteins with at least one call at or above \\(t\\). Recall is averaged over all \\(n\\) proteins with an annotation, and counts every true annotation, whether or not the relative could supply it:"
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\text{Pr}(t) = \\frac{1}{m(t)}\\sum_{i} \\frac{\\text{correct}_i(t)}{\\text{calls}_i(t)}, \\qquad \\text{Rc}(t) = \\frac{1}{n}\\sum_{i} \\frac{\\text{found}_i(t)}{\\text{true}_i}, \\qquad F_{\\max} = \\max_t \\frac{2\\,\\text{Pr}(t)\\,\\text{Rc}(t)}{\\text{Pr}(t)+\\text{Rc}(t)}\\]"
+  },
+  {
+   "tag": "p",
+   "text": "The cutoffs tried are 101 evenly spaced quantiles of the tool's call scores. Worked example: phmmer searching zebrafish, Pfam truth set, raw calls, all proteins. At the best cutoff (bit score 34.3) precision is 0.2471 and recall is 0.5108. So F = 2 × 0.2471 × 0.5108 / (0.2471 + 0.5108) = 0.3331, the Fmax in Table 1."
+  },
+  {
+   "tag": "h3",
+   "text": "AUPRC"
+  },
+  {
+   "tag": "p",
+   "text": "AUPRC, the area under the precision-recall curve, sums precision over every cutoff, weighted by the recall gained at that cutoff:"
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\text{AUPRC} = \\sum_k (R_k - R_{k-1})\\,P_k\\]"
+  },
+  {
+   "tag": "p",
+   "text": "Unlike Fmax, AUPRC pools all proteins. \\(P_k\\) is correct calls ÷ all judged calls at cutoff \\(k\\). \\(R_k\\) is reachable annotations found ÷ all reachable annotations. A tool that makes many calls per protein pays for each wrong one. A call in a part of a protein that no annotation covers is left out of \\(P_k\\), since nobody has looked there; Fmax counts it. Worked example, same row: AUPRC = 0.0291. The curve itself is in the source run (all_domain_curves.parquet), not in these tables, so the sum cannot be recomputed here."
+  },
+  {
+   "tag": "h3",
+   "text": "Median IoU"
+  },
+  {
+   "tag": "p",
+   "text": "Median IoU is the middle IoU of all correct calls, with single-residue annotations left out (an IoU against one residue says nothing about where the ends are). Worked example, same row: 0.700, so half of phmmer's correct calls on zebrafish overlap their true domain by at least that much. A correct call on a region longer than one residue has an IoU of at least 0.5. So the run stores 0 only when there is no such call. Either there are no correct calls at all, or the correct calls are on single residues only (the 1 aa length bin and the ACT_SITE, BINDING and SITE features). The pages show those as no correct calls, not as 0."
+  },
+  {
+   "tag": "h3",
+   "text": "True instances"
+  },
+  {
+   "tag": "p",
+   "text": "True instances (n) is the number of annotations on the human proteins in the stratum, reachable or not. Same row: 2,435."
+  },
+  {
+   "tag": "h3",
+   "text": "CPU-hours per 1,000 queries"
+  },
+  {
+   "tag": "p",
+   "text": "CPU-hours are taken from the run's Nextflow task records: the search task's run time multiplied by its average CPU use. 63 of 311 searches completed more than once, after a code change or a crash. The trace does not say which run wrote the scored calls, so the newest run gives the headline number and the leaderboard prints the range over all runs beside it. Only the search is counted; building the relative's database is not, because a reused database leaves no task record. Dividing by the 998 queries and multiplying by 1,000 gives the cost per 1,000 queries. Worked example: phmmer against zebrafish ran 5 min 21.0 s at 426.7% CPU. That is 321.0 s × 4.267 / 3,600 = 0.3805 CPU-hours, or 0.3805 × 1,000 / 998 = 0.3812 CPU-hours per 1,000 queries. Peak RAM is the task's largest resident memory."
+  },
+  {
+   "tag": "p",
+   "text": "Numbers marked measured come from these records, on Sherlock (partition hns). No search used a GPU. ProstT5 also has to turn the query sequences into 3Di shape letters before it can search. That step ran on one GPU for 69 s for the 998 queries: 0.0192 GPU-hours per 1,000 queries, counted on every ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every database build, is not counted. Numbers marked reported would come from a tool's submitter, on hardware they name; none have been submitted yet."
+  },
+  {
+   "tag": "h3",
+   "text": "Estimated cost"
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\text{cost\\_usd\\_est} = \\text{CPU-hours} \\times r_\\text{cpu} + \\text{GPU-hours} \\times r_\\text{gpu}\\]"
+  },
+  {
+   "tag": "p",
+   "text": "per 1,000 queries. The default \\(r_\\text{cpu}\\) = $0.044625 per CPU-hour is half of AWS's on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default \\(r_\\text{gpu}\\) = $1.006 per GPU-hour is a g5.xlarge (one NVIDIA A10G). Both are for US East (N. Virginia), Linux, from the EC2 on-demand price page (price file, published 2026-10-12, read 2026-10-15). Memory is not priced. Worked example: 0.3812 × 0.044625 + 0 × 1.006 = $0.01701 for phmmer against zebrafish. Change either price on the leaderboard page."
+  },
+  {
+   "tag": "h2",
+   "text": "Truth sets"
+  },
+  {
+   "tag": "h3",
+   "text": "Pfam"
+  },
+  {
+   "tag": "p",
+   "text": "Every Pfam-A domain with coordinates on the human proteins, from the Pfam regions file for UniProt reference proteomes. The same file supplies the domains on each relative's proteins, which are what a call copies. Pfam families are defined by profile models, so tools that build profiles (jackhmmer, HH-suite) are graded against the kind of model they build, and hmmscan against its own models. Release of the regions file: not recorded in the run; the hmmscan models are Pfam-A 38.2. hmmscan was scored on raw calls only, so it shows \"not run\" under dedup."
+  },
+  {
+   "tag": "h3",
+   "text": "Pfam-N"
+  },
+  {
+   "tag": "p",
+   "text": "Pfam-N is an extension of Pfam made by a deep-learning model: it labels regions the Pfam profile models missed. It is only published for Pfam 35.0. This is the one truth set the profile models did not produce. Its regions were filtered to the human proteins queried here. Few of them can be copied from any relative: against zebrafish, 44,246 of the 44,315 Pfam-N regions have no domain of the same family in the zebrafish proteome. So every tool scores low on Pfam-N, and the set says little about which tool is better."
+  },
+  {
+   "tag": "h3",
+   "text": "Swiss-Prot features"
+  },
+  {
+   "tag": "p",
+   "text": "Curated features from Swiss-Prot entries, of 12 types (the feature keys on the leaderboard, such as TRANSMEM for a membrane-spanning segment and ACT_SITE for an active site residue). They come from the literature, not from any sequence or structure model. Single-residue features (ACT_SITE, BINDING, SITE) are scored by whether the call covers the residue, since an IoU against one residue cannot reach 0.5. A Swiss-Prot feature counts as reachable when the relative has a protein that carries the same feature type and shares a Pfam family with the human protein."
+  },
+  {
+   "tag": "h2",
+   "text": "Dedup against raw"
+  },
+  {
+   "tag": "p",
+   "text": "Raw keeps every call a tool makes. One human region that matches 300 mouse kinases becomes 300 kinase calls on nearly the same residues, and all but one count as wrong. Dedup merges calls of the same family on the same human protein that overlap each other with an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by side barely overlap, so both are kept. Comparing the two separates finding a domain from reporting it many times. For phmmer on zebrafish (Pfam, all proteins): Fmax 0.333 raw and 0.457 dedup."
+  },
+  {
+   "tag": "h2",
+   "text": "Strata"
+  },
+  {
+   "tag": "li",
+   "text": "Nearest reviewed relative, % identity: for each human domain, the percent identity to the closest domain of the same family in the relative. Bins: 0–20, 20–30, 30–40, 40–60 and 60–100%. A domain whose family is absent from the relative is \"no same-family domain\"."
+  },
+  {
+   "tag": "li",
+   "text": "Nearest reviewed relative, Mya: the relative searched, labelled with how many million years ago its line split from ours."
+  },
+  {
+   "tag": "li",
+   "text": "Region type and length: the length of the annotated region, in residues. Bins up to 60 aa are short features; 61 aa and up is the size of a folded domain. Whole-protein annotations were not scored in this run."
+  },
+  {
+   "tag": "li",
+   "text": "Disorder: the mean AlphaFold confidence (pLDDT, 0–100) of the human protein. Low pLDDT marks regions without a fixed shape."
+  },
+  {
+   "tag": "li",
+   "text": "Feature type: the Swiss-Prot feature key, for the Swiss-Prot truth set only."
+  },
+  {
+   "tag": "p",
+   "text": "The run computed each stratum on its own, so two strata cannot be combined; a combination with no row shows \"—\" and \"not run\"."
+  },
+  {
+   "tag": "h2",
+   "text": "Checks on this site"
+  },
+  {
+   "tag": "p",
+   "text": "A headless browser renders every filter combination and confirms that each \"—\" on the leaderboard is a missing row in results.parquet or compute.parquet. The source table checksums are in data/SOURCE.json of the site repository."
+  }
+ ],
+ "data": null
+}

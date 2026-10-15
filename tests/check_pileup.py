@@ -119,6 +119,20 @@ def main() -> int:
             if abs(ro["bodyMean"] - want) > 0.01:
                 failures.append(f"{key}: curve body {ro['bodyMean']:.4f} vs per-residue recall {want:.4f}")
 
+        # ---- 2b. the page's readouts against pileup.html.json (Python copy) ----
+        pj = json.loads((ROOT / "docs/pileup.html.json").read_text())["data"]["panels"]
+        n_cmp = 0
+        for k, key in enumerate(panels):
+            for fam, name in ((False, "all_domains"), (True, "one_domain_per_family")):
+                js = page.evaluate(f"window.__pileup.readoutsOf({k}, {str(fam).lower()})")
+                py = pj[key][name]
+                for jk, pk in (("missedFrac", "missed_fraction"), ("bodyMean", "mean_coverage_inside"),
+                               ("flankMean", "mean_coverage_flanks")):
+                    n_cmp += 1
+                    if abs(js[jk] - py[pk]) > 1e-9:
+                        failures.append(f"{key} {name} {pk}: page {js[jk]} vs json {py[pk]}")
+        report.append({"page_vs_json_readouts_compared": n_cmp})
+
         # ---- 3. sorts ----
         for srt in ("coverage", "identity", "length", "plddt"):
             page.evaluate(f"window.__pileup.setSort('{srt}')")

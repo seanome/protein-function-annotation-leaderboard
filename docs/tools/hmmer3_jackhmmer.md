@@ -48,6 +48,11 @@ Across the 15 relatives searched with this setting: 0.0402 to 2.43 CPU-hours per
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: BSD 3-clause (HMMER) ([source](https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE))
+- Commercial use allowed: Yes.
+
 ## Settings in the table
 
 - `n3`: three rounds of search (-N 3)

@@ -14,6 +14,9 @@
   "Failure modes specific to phmmer: not measured in this run."
  ],
  "version": "HMMER 3.4",
+ "licence": "BSD 3-clause (HMMER)",
+ "commercial_use": "Yes.",
+ "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",
  "container": "quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)",
  "command": "phmmer \\\n    --domtblout /dev/stdout \\\n    --tblout /dev/null \\\n    -o /dev/stderr \\\n    --noali \\\n    -E 10.0 \\\n    --cpu 8 \\\n    UP000005640_9606.fasta UP000000437_7955.fasta",
  "numbers_from": {

@@ -40,6 +40,11 @@ This search completed 2 times; the runs took 0.198 to 0.313 CPU-hours per 1,000 
 
 CPU-hours count the search only, not building the relative's database.
 
+## Licence
+
+- Licence: BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes) ([source](https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE))
+- Commercial use allowed: Yes.
+
 ## Settings in the table
 
 - `direct`: scans Pfam's models; no relative searched

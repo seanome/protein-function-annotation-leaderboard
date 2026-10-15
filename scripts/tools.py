@@ -64,6 +64,9 @@ TOOLS = {
     --min-region-score  1.3""",
         "command_note": "Shown for setting hp_thomas_dill2 k24. Other settings change "
         "--alphabet and --ksize only.",
+        "licence": 'MIT',
+        "commercial": 'Yes.',
+        "licence_url": 'https://github.com/seanome/kmerseek',
         "requirement_question": None,
     },
     "hmmer3_phmmer": {
@@ -91,6 +94,9 @@ TOOLS = {
     --cpu 8 \\
     UP000005640_9606.fasta UP000000437_7955.fasta""",
         "command_note": "Query: 998 human proteins. Target: the zebrafish proteome.",
+        "licence": 'BSD 3-clause (HMMER)',
+        "commercial": 'Yes.',
+        "licence_url": 'https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE',
         "requirement_question": None,
     },
     "hmmer3_jackhmmer": {
@@ -121,6 +127,9 @@ TOOLS = {
     --cpu 8 \\
     UP000005640_9606.fasta UP000000437_7955.fasta""",
         "command_note": "Query: 998 human proteins. Target: the zebrafish proteome.",
+        "licence": 'BSD 3-clause (HMMER)',
+        "commercial": 'Yes.',
+        "licence_url": 'https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE',
         "requirement_question": None,
     },
     "mmseqs2_seqseq": {
@@ -149,6 +158,9 @@ TOOLS = {
     --max-seqs 1000 \\
     -e 10.0""",
         "command_note": "Followed by mmseqs convertalis to write the table of hits.",
+        "licence": 'MIT',
+        "commercial": 'Yes.',
+        "licence_url": 'https://github.com/soedinglab/MMseqs2',
         "requirement_question": None,
     },
     "mmseqs2_iterative": {
@@ -179,6 +191,9 @@ TOOLS = {
     --max-seqs 1000 \\
     -e 10.0""",
         "command_note": "Followed by mmseqs convertalis to write the table of hits.",
+        "licence": 'MIT',
+        "commercial": 'Yes.',
+        "licence_url": 'https://github.com/soedinglab/MMseqs2',
         "requirement_question": None,
     },
     "hhblits": {
@@ -208,6 +223,9 @@ TOOLS = {
     -d results.ffdata -i results.ffindex \\
     -- hhsearch -i stdin -d zebrafish_hhdb/db -blasttab /dev/stdout -cpu 16 -v 0""",
         "command_note": "One hhsearch per query protein, run through ffindex_apply.",
+        "licence": 'GPL-3.0',
+        "commercial": 'Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.',
+        "licence_url": 'https://github.com/soedinglab/hh-suite',
         "requirement_question": None,
     },
     "foldseek": {
@@ -243,6 +261,9 @@ TOOLS = {
     -e 10.0 \\
     --max-seqs 1000""",
         "command_note": "Followed by foldseek convertalis to write the table of hits.",
+        "licence": 'GPL-3.0',
+        "commercial": 'Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.',
+        "licence_url": 'https://github.com/steineggerlab/foldseek',
         "requirement_question": (
             "Do you have an AlphaFold model for every protein you want to annotate?",
             "If not, Foldseek cannot search the proteins without one.",
@@ -283,6 +304,9 @@ foldseek search \\
     --max-seqs 1000""",
         "command_note": "The first command (one per proteome, on a GPU) predicts the "
         "3Di letters. The second is the search the cost columns measure.",
+        "licence": 'GPL-3.0 (Foldseek); MIT (ProstT5 model weights)',
+        "commercial": "Yes. Foldseek's GPL-3.0 applies to changed versions you distribute.",
+        "licence_url": 'https://huggingface.co/Rostlab/ProstT5',
         "requirement_question": (
             "Do you have a GPU to predict the 3Di letters for your proteins?",
             "The run used one GPU for that step; its cost is not counted here.",
@@ -317,6 +341,9 @@ foldseek search \\
     --cpu 4 \\
     Pfam-A.hmm UP000005640_9606.fasta""",
         "command_note": "Query: the same 998 human proteins.",
+        "licence": 'BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes)',
+        "commercial": 'Yes.',
+        "licence_url": 'https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE',
         "requirement_question": None,
     },
 }

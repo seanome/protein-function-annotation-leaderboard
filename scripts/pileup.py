@@ -136,3 +136,86 @@ def build(data: Path, panels: list[dict]) -> tuple[dict, dict]:
 
 if __name__ == "__main__":
     sys.exit("import build() from build_site.py")
+
+
+def readouts(data: dict) -> dict:
+    """The page's readouts() in Python, for pileup.html.json. tests/check_pileup.py asserts
+    these equal what the page computes, panel by panel, for all rows and for one row per
+    family."""
+    regions, flank = data["regions"], data["flank"]
+    n = len(regions)
+    ordered = sorted(range(n), key=lambda i: (regions[i]["acc"], regions[i]["s"]))
+    seen, family_rows = set(), []
+    for i in ordered:
+        if regions[i]["fam"] not in seen:
+            seen.add(regions[i]["fam"])
+            family_rows.append(i)
+    median_len = float(np.median([r["len"] for r in regions]))
+
+    def matrix(panel):
+        m = np.zeros((n, NCOL), dtype=np.uint8)
+        for i, r in enumerate(regions):
+            if r["c0"] is None:
+                m[i, :] = 255
+            else:
+                m[i, :r["c0"]] = 255
+                m[i, r["c1"] + 1:] = 255
+            for a, b, _v in panel["rows"][i]["r"]:
+                m[i, a:b + 1] = 1
+        return m
+
+    def one(m, rows):
+        sub = m[rows]
+        ok = sub != 255
+        cov = (sub == 1)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            curve = cov.sum(0) / ok.sum(0)
+        body = slice(flank, flank + 100)
+        body_n = ok[:, body].sum(1)
+        body_c = cov[:, body].sum(1)
+        scored = body_n > 0
+        missed = int(((body_c == 0) & scored).sum())
+        fl = np.r_[0:flank, flank + 100:NCOL]
+        plateau = float(np.sort(curve[flank + 10:flank + 90])[40])
+
+        def width(side, hi, lo):
+            cols = range(flank + 50, -1, -1) if side == "start" else range(flank + 50, NCOL)
+            j80 = j20 = None
+            for j in cols:
+                if np.isnan(curve[j]):
+                    continue
+                if j80 is None:
+                    if curve[j] >= hi:
+                        j80 = j
+                    continue
+                if curve[j] <= lo:
+                    j20 = j
+                    break
+            if j80 is None:
+                return None, "not reached"
+            if j20 is None:
+                return None, "does not fall that far"
+            w = sum(median_len / 100 if flank <= j < flank + 100 else 1
+                    for j in range(min(j80, j20), max(j80, j20)))
+            return w, f"{w:.0f} aa"
+
+        out = {
+            "rows_scored": int(scored.sum()), "missed": missed,
+            "missed_fraction": missed / int(scored.sum()),
+            "mean_coverage_inside": float((body_c[scored] / body_n[scored]).mean()),
+            "mean_coverage_flanks": float(cov[:, fl].sum() / ok[:, fl].sum()),
+            "plateau": plateau,
+        }
+        for key, side, hi, lo in (("start_0.8_to_0.2", "start", 0.8, 0.2), ("end_0.8_to_0.2", "end", 0.8, 0.2),
+                                  ("start_80_to_20_percent_of_plateau", "start", 0.8 * plateau, 0.2 * plateau),
+                                  ("end_80_to_20_percent_of_plateau", "end", 0.8 * plateau, 0.2 * plateau)):
+            out[key] = width(side, hi, lo)[1]
+        out["curve"] = [None if np.isnan(x) else round(float(x), 5) for x in curve]
+        return out
+
+    res = {}
+    for p in data["panels"]:
+        m = matrix(p)
+        res[f'{p["tool"]}|{p["setting"]}'] = {"all_domains": one(m, list(range(n))),
+                                              "one_domain_per_family": one(m, family_rows)}
+    return {"n_domains": n, "n_families": len(family_rows), "median_domain_length": median_len, "panels": res}
