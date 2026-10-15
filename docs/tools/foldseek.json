@@ -1,0 +1,81 @@
+{
+ "tool": "foldseek",
+ "name": "Foldseek",
+ "kind": "compares 3-D shape letters (3Di)",
+ "compares": "Predicted 3-D shapes. Each residue of an AlphaFold model gets one of 20 shape letters (3Di) from its local fold. The shape letters are aligned together with the amino acids.",
+ "needs": {
+  "sequence only": false,
+  "AlphaFold model": true,
+  "GPU": false
+ },
+ "reference": "AlphaFold models of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04 accessions), as a Foldseek database.",
+ "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
+ "failure_modes": [
+  "A protein with no AlphaFold model cannot be searched. Five relatives have no Foldseek rows at all (chimpanzee, cow, dog, opossum, western clawed frog): not run.",
+  "AlphaFold models of long proteins come in overlapping pieces (F1, F2, ...). The task script moves piece n's coordinates 200 x (n - 1) residues along the protein; if a piece started elsewhere, its calls would land in the wrong place. Checked against the real piece starts: not measured."
+ ],
+ "version": "Foldseek 10.941cd33",
+ "container": "quay.io/biocontainers/foldseek:10.941cd33--h5021889_1 (sha256:1156a052f31b2afb85257c02e83a962f559c9752273fe1064ab735f90ac29d1a)",
+ "command": "foldseek search \\\n    human-38fdd87d_fsdb/db zebrafish_fsdb/db result foldseek_tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
+ "numbers_from": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "6af1255b081630e4d51bb99c6abbe5c3d6fb49c1",
+  "filters": "pfam, raw, zebrafish"
+ },
+ "best_setting": "3di_aa",
+ "strong": [
+  {
+   "axis": "identity",
+   "stratum": "no_homolog",
+   "fmax": 0.027082308589475693,
+   "n": 321,
+   "other_tool": "hhblits",
+   "other_setting": "single_seq",
+   "other_fmax": 0.03236195478661682,
+   "margin": -0.005279646197141125
+  },
+  {
+   "axis": "identity",
+   "stratum": "30-40%",
+   "fmax": 0.16701190421314652,
+   "n": 165,
+   "other_tool": "mmseqs2_iterative",
+   "other_setting": "s7",
+   "other_fmax": 0.20886402027992682,
+   "margin": -0.0418521160667803
+  }
+ ],
+ "weak": [
+  {
+   "axis": "feature_length_bin",
+   "stratum": "16-30",
+   "fmax": 0.004474321206119519,
+   "n": 271,
+   "other_tool": "kmerseek",
+   "other_setting": "wwmj5_k11_lcFalse",
+   "other_fmax": 0.3297506857792661,
+   "margin": -0.32527636457314657
+  },
+  {
+   "axis": "feature_length_bin",
+   "stratum": "31-60",
+   "fmax": 0.034179736822508223,
+   "n": 420,
+   "other_tool": "kmerseek",
+   "other_setting": "gbmr4_k21_lcFalse",
+   "other_fmax": 0.23209537155652643,
+   "margin": -0.19791563473401821
+  }
+ ],
+ "cost_per_1000_queries": {
+  "cpu_h_measured": 0.132604097083055,
+  "peak_rss_gb": 1.5,
+  "hardware": "Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU"
+ },
+ "questions": [
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.164, 60\u2013100% 0.241. If no, 20\u201330% 0.268, 30\u201340% 0.167. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_aa`; strata with at least 30 true instances.)",
+  "Do you have an AlphaFold model for every protein you want to annotate? If not, Foldseek cannot search the proteins without one.",
+  "Can you spend about 0.133 CPU-hours per 1,000 proteins for each relative you search? That is the measured search cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+ ],
+ "markdown": "foldseek.md"
+}

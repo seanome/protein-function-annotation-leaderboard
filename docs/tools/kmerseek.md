@@ -1,0 +1,75 @@
+# kmerseek
+
+Tool id `kmerseek`. Numbers from seanome/2024-kmerseek-analysis commit `6af1255b`.
+
+## What it compares
+
+Short words of k letters (k-mers) shared between two proteins. First, each amino acid is replaced by a letter from a smaller alphabet, for example H for hydrophobic and P for polar. Two proteins can then match where their residues differ but their pattern of residue types is the same.
+
+## What it needs
+
+- sequence only: yes
+- AlphaFold model: no
+- GPU: no
+
+## Reference searched
+
+An index of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), built once per alphabet and k-mer length.
+
+## How to read its score
+
+region_enrichment: the number of k-mers the region shares with the target divided by the number expected by chance (fold enrichment). Higher ranks first. Regions were kept when their score was at least 1.3 or the whole query's p-value was at most 0.05.
+
+## Strong and weak strata
+
+Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is `gbmr4_k21_lcFalse`: Fmax 0.192 over 2,435 true instances. Below, each stratum is compared with the best other tool and setting in the same stratum. Only strata with at least 30 true instances are compared.
+
+Where it compares best with the other tools (its Fmax, then the best other):
+
+- regions 16–30 aa long: Fmax 0.281 (n = 271); best other: HH-suite (hhsearch) `single_seq`, 0.066.
+- regions 31–60 aa long: Fmax 0.232 (n = 420); best other: phmmer `default`, 0.095.
+
+Where it compares worst:
+
+- regions 251 aa or more long: Fmax 0.050 (n = 277); best other: phmmer `default`, 0.477.
+- identity 20–30% to the closest same-family domain: Fmax 0.000 (n = 93); best other: phmmer `default`, 0.359.
+
+Swiss-Prot features, raw calls, zebrafish, setting `wwmj5_k11_lcFalse`: best feature type TRANSMEM (membrane-spanning segment), Fmax 0.362 (n = 1,124); worst COILED (coiled coil), Fmax 0.000 (n = 145).
+
+## Known failure modes {#failure-modes}
+
+- A feature shorter than k residues contains no complete k-mer, so it cannot be found. The strata above show how Fmax changes with region length.
+- The task script records a kmerseek search that exits with an error as a search with no hits, so a crash would look like a miss. How often that happened in this run: not measured.
+- Setting hp_thomas_dill2 k33 was scored, but no trace row holds its search task, so its cost is not measured, and the scoring task for it was not found either.
+
+## Cost per 1,000 queries
+
+Setting `gbmr4_k21_lcFalse`, searching zebrafish: 0.0204 CPU-hours and 5.2 GB peak memory, measured on Sherlock (Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU); about $0.000911 at $0.044625 per CPU-hour.
+Across the 15 relatives searched with this setting: 0.00106 to 0.0204 CPU-hours per 1,000 queries; peak memory up to 5.2 GB.
+
+CPU-hours count the search only, not building the relative's database.
+
+## Version, container, command
+
+- Version: kmerseek 0.3.1 (printed in the search log)
+- Container: `docker.io/olgabot/kmerseek:2026-08-24-reduced-alphabets`
+
+```bash
+kmerseek search \
+    --alphabet hp_thomas_dill2 \
+    --ksize    24 \
+    --query    UP000005640_9606.fasta \
+    --target   zebrafish.hp_thomas_dill2.k24.lcfalse.kmerseek.rocksdb \
+    --threshold         0.0 \
+    --min-shared-kmers  2 \
+    --max-query-pvalue  0.05 \
+    --min-region-score  1.3
+```
+
+Shown for setting hp_thomas_dill2 k24. Other settings change --alphabet and --ksize only.
+
+## Will it work for you?
+
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.005, 60–100% 0.297. If no, 20–30% 0.000, 30–40% 0.000. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`; strata with at least 30 true instances.)
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.208, 121–250 aa 0.098, 251 aa or more 0.050. If no, 16–30 aa 0.281, 31–60 aa 0.232. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`.)
+3. **Can you spend about 0.0204 CPU-hours per 1,000 proteins for each relative you search?** That is the measured search cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.

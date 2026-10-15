@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MMseqs2, three rounds card</title>
+<meta name="description" content="What MMseqs2, three rounds compares, what it needs, where it is strong and weak, and what it costs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+
+</head>
+<body data-page="tools">
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../cost.html" data-keep-filters>Score against cost</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../coverage.html">Coverage</a><a href="../methods.html">Methods</a></nav>
+</div></header>
+<main class="wrap">
+<p class="source" id="source-commit" data-commit="6af1255b081630e4d51bb99c6abbe5c3d6fb49c1">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1">6af1255b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<div class="card"><h1>MMseqs2, three rounds</h1>
+<p>Tool id <code>mmseqs2_iterative</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>6af1255b</code>.</p>
+<h2>What it compares</h2>
+<p>A profile of a protein family, built by MMseqs2 from its own hits over three rounds of search, as jackhmmer does.</p>
+<h2>What it needs</h2>
+<ul>
+<li>sequence only: yes</li>
+<li>AlphaFold model: no</li>
+<li>GPU: no</li>
+</ul>
+<h2>Reference searched</h2>
+<p>The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an MMseqs2 database.</p>
+<h2>How to read its score</h2>
+<p>Bit score: higher ranks first. The E-value cutoff was 10.</p>
+<h2>Strong and weak strata</h2>
+<p>Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is <code>s7</code>: Fmax 0.324 over 2,435 true instances. Below, each stratum is compared with the best other tool and setting in the same stratum. Only strata with at least 30 true instances are compared.</p>
+<p>Where it compares best with the other tools (its Fmax, then the best other):</p>
+<ul>
+<li>identity 30–40% to the closest same-family domain: Fmax 0.209 (n = 165); best other: phmmer <code>default</code>, 0.199.</li>
+<li>AlphaFold confidence (pLDDT) 90–100: Fmax 0.484 (n = 186); best other: MMseqs2 <code>s7</code>, 0.480.</li>
+</ul>
+<p>Where it compares worst:</p>
+<ul>
+<li>regions 16–30 aa long: Fmax 0.028 (n = 271); best other: kmerseek <code>wwmj5_k11_lcFalse</code>, 0.330.</li>
+<li>regions 31–60 aa long: Fmax 0.085 (n = 420); best other: kmerseek <code>gbmr4_k21_lcFalse</code>, 0.232.</li>
+</ul>
+<p>Swiss-Prot features, raw calls, zebrafish, setting <code>s7</code>: best feature type DOMAIN (domain), Fmax 0.321 (n = 1,107); worst MOTIF (short motif), Fmax 0.004 (n = 190).</p>
+<h2 id="failure-modes">Known failure modes</h2>
+<ul>
+<li>At most 1,000 target proteins are kept per query (--max-seqs 1000). How often that cut hits: not measured.</li>
+<li>Each round can pull in proteins from a different family. How often: not measured.</li>
+</ul>
+<h2>Cost per 1,000 queries</h2>
+<p>Setting <code>s7</code>, searching zebrafish: 0.0743 CPU-hours and 1.1 GB peak memory, measured on Sherlock (Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU); about $0.00332 at $0.044625 per CPU-hour.
+Across the 15 relatives searched with this setting: 0.0236 to 0.0769 CPU-hours per 1,000 queries; peak memory up to 1.1 GB.</p>
+<p>CPU-hours count the search only, not building the relative's database.</p>
+<h2>Version, container, command</h2>
+<ul>
+<li>Version: MMseqs2 18.8cc5c</li>
+<li>Container: <code>quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)</code></li>
+</ul>
+<pre><code class="language-bash">mmseqs search \
+    human-38fdd87d_mmdb/db zebrafish_mmdb/db result mmseqs_tmp \
+    --threads 16 \
+    -s 7 \
+    --num-iterations 3 \
+    --max-seqs 1000 \
+    -e 10.0
+</code></pre>
+<p>Followed by mmseqs convertalis to write the table of hits.</p>
+<h2>Will it work for you?</h2>
+<ol>
+<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.241, 60–100% 0.300. If no, 20–30% 0.337, 30–40% 0.209. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting <code>s7</code>; strata with at least 30 true instances.)</li>
+<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.245, 121–250 aa 0.319, 251 aa or more 0.462. If no, 16–30 aa 0.028, 31–60 aa 0.085. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting <code>s7</code>.)</li>
+<li><strong>Can you spend about 0.0743 CPU-hours per 1,000 proteins for each relative you search?</strong> That is the measured search cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.</li>
+</ol></div>
+<p><a href="index.html">All tool cards</a> · <a href="mmseqs2_iterative.md">this card as Markdown</a> · <a href="mmseqs2_iterative.json">as JSON</a></p>
+</main>
+<footer class="site"><div class="wrap">
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/6af1255b081630e4d51bb99c6abbe5c3d6fb49c1">6af1255b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+</div></footer>
+</body>
+</html>

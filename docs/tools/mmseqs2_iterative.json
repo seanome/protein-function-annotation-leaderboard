@@ -1,0 +1,81 @@
+{
+ "tool": "mmseqs2_iterative",
+ "name": "MMseqs2, three rounds",
+ "kind": "builds a profile of a protein family",
+ "compares": "A profile of a protein family, built by MMseqs2 from its own hits over three rounds of search, as jackhmmer does.",
+ "needs": {
+  "sequence only": true,
+  "AlphaFold model": false,
+  "GPU": false
+ },
+ "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an MMseqs2 database.",
+ "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
+ "failure_modes": [
+  "At most 1,000 target proteins are kept per query (--max-seqs 1000). How often that cut hits: not measured.",
+  "Each round can pull in proteins from a different family. How often: not measured."
+ ],
+ "version": "MMseqs2 18.8cc5c",
+ "container": "quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)",
+ "command": "mmseqs search \\\n    human-38fdd87d_mmdb/db zebrafish_mmdb/db result mmseqs_tmp \\\n    --threads 16 \\\n    -s 7 \\\n    --num-iterations 3 \\\n    --max-seqs 1000 \\\n    -e 10.0",
+ "numbers_from": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "6af1255b081630e4d51bb99c6abbe5c3d6fb49c1",
+  "filters": "pfam, raw, zebrafish"
+ },
+ "best_setting": "s7",
+ "strong": [
+  {
+   "axis": "identity",
+   "stratum": "30-40%",
+   "fmax": 0.20886402027992682,
+   "n": 165,
+   "other_tool": "hmmer3_phmmer",
+   "other_setting": "default",
+   "other_fmax": 0.1992544309512196,
+   "margin": 0.009609589328707202
+  },
+  {
+   "axis": "plddt",
+   "stratum": "90-100",
+   "fmax": 0.4844368729216556,
+   "n": 186,
+   "other_tool": "mmseqs2_seqseq",
+   "other_setting": "s7",
+   "other_fmax": 0.47975974573333247,
+   "margin": 0.004677127188323138
+  }
+ ],
+ "weak": [
+  {
+   "axis": "feature_length_bin",
+   "stratum": "16-30",
+   "fmax": 0.027591549087534743,
+   "n": 271,
+   "other_tool": "kmerseek",
+   "other_setting": "wwmj5_k11_lcFalse",
+   "other_fmax": 0.3297506857792661,
+   "margin": -0.30215913669173133
+  },
+  {
+   "axis": "feature_length_bin",
+   "stratum": "31-60",
+   "fmax": 0.08485680470619356,
+   "n": 420,
+   "other_tool": "kmerseek",
+   "other_setting": "gbmr4_k21_lcFalse",
+   "other_fmax": 0.23209537155652643,
+   "margin": -0.14723856685033287
+  }
+ ],
+ "cost_per_1000_queries": {
+  "cpu_h_measured": 0.07433144065909597,
+  "peak_rss_gb": 1.1,
+  "hardware": "Stanford Sherlock, SLURM partition hns, CPU nodes, no GPU"
+ },
+ "questions": [
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.241, 60\u2013100% 0.300. If no, 20\u201330% 0.337, 30\u201340% 0.209. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `s7`; strata with at least 30 true instances.)",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.245, 121\u2013250 aa 0.319, 251 aa or more 0.462. If no, 16\u201330 aa 0.028, 31\u201360 aa 0.085. (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `s7`.)",
+  "Can you spend about 0.0743 CPU-hours per 1,000 proteins for each relative you search? That is the measured search cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+ ],
+ "markdown": "mmseqs2_iterative.md"
+}
