@@ -97,12 +97,16 @@ def build(data: Path, panels: list[dict]) -> tuple[dict, dict]:
             inside = np.arange(s, e + 1) <= r["protein_length"]
             if inside.any():
                 recall.append(float(np.isfinite(best[s - lo:e - lo + 1])[inside].mean()))
-            # The call with the largest overlap with the true region gives the start offset.
-            best_ov, d = 0, None
-            for a, b, _sc in cs:
+            # The call with the largest overlap with the true region gives the start offset;
+            # ties go to the higher score, then to the earlier start.
+            best_key, d = None, None
+            for a, b, sc in cs:
                 ov = min(b, e) - max(a, s) + 1
-                if ov > best_ov:
-                    best_ov, d = ov, a - s
+                if ov <= 0:
+                    continue
+                key = (ov, sc, -a)
+                if best_key is None or key > best_key:
+                    best_key, d = key, a - s
             prow.append({
                 "r": runs(val, cov),
                 "c": merge([(max(a, 1), min(b, r["protein_length"])) for a, b, _ in cs
@@ -179,17 +183,19 @@ def readouts(data: dict) -> dict:
         plateau = float(np.sort(curve[flank + 10:flank + 90])[40])
 
         def width(side, hi, lo):
+            # The page's width(): from the outermost column at or above hi to the first
+            # column beyond it at or below lo.
             cols = range(flank + 50, -1, -1) if side == "start" else range(flank + 50, NCOL)
             j80 = j20 = None
             for j in cols:
                 if np.isnan(curve[j]):
                     continue
-                if j80 is None:
-                    if curve[j] >= hi:
-                        j80 = j
+                if curve[j] >= hi:
+                    j80 = j
                     continue
                 if curve[j] <= lo:
-                    j20 = j
+                    if j80 is not None:
+                        j20 = j
                     break
             if j80 is None:
                 return None, "not reached"
@@ -209,7 +215,9 @@ def readouts(data: dict) -> dict:
         for key, side, hi, lo in (("start_0.8_to_0.2", "start", 0.8, 0.2), ("end_0.8_to_0.2", "end", 0.8, 0.2),
                                   ("start_80_to_20_percent_of_plateau", "start", 0.8 * plateau, 0.2 * plateau),
                                   ("end_80_to_20_percent_of_plateau", "end", 0.8 * plateau, 0.2 * plateau)):
-            out[key] = width(side, hi, lo)[1]
+            w = width(side, hi, lo)
+            out[key] = w[1]
+            out[key + "_aa"] = w[0]
         out["curve"] = [None if np.isnan(x) else round(float(x), 5) for x in curve]
         return out
 

@@ -21,7 +21,7 @@
  "command": "ffindex_apply \\\n    human-38fdd87d_hhdb/db_a3m.ffdata human-38fdd87d_hhdb/db_a3m.ffindex \\\n    -d results.ffdata -i results.ffindex \\\n    -- hhsearch -i stdin -d zebrafish_hhdb/db -blasttab /dev/stdout -cpu 16 -v 0",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5",
+  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "single_seq",

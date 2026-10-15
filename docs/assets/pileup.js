@@ -51,14 +51,15 @@
     const plateau = bodyCurve[Math.floor(bodyCurve.length / 2)];
     const colWidth = (j) => (j >= FL && j < FL + 100 ? META.median_len / 100 : 1);
     function width(side, hi, lo) {
-      // Residues over which the curve goes from >= hi down to <= lo, moving out of the
-      // region at its start (side "start", leftwards) or its end ("end", rightwards).
+      // Residues between the outermost column at or above `hi` and the first column beyond it
+      // at or below `lo`, moving out of the region from its centre: leftwards at the start,
+      // rightwards at the end. Fewer residues means a sharper edge at the region's boundary.
       const cols = side === "start" ? range(FL + 50, -1, -1) : range(FL + 50, NCOL, 1);
       let j80 = null, j20 = null;
       for (const j of cols) {
         if (isNaN(curve[j])) continue;
-        if (j80 === null) { if (curve[j] >= hi) j80 = j; continue; }
-        if (curve[j] <= lo) { j20 = j; break; }
+        if (curve[j] >= hi) { j80 = j; continue; }
+        if (curve[j] <= lo) { if (j80 !== null) j20 = j; break; }
       }
       if (j80 === null) return { text: "not reached", value: null };
       if (j20 === null) return { text: "does not fall that far", value: null };
@@ -75,10 +76,10 @@
   }
   function range(a, b, s) { const o = []; for (let i = a; s > 0 ? i < b : i > b; i += s) o.push(i); return o; }
   function readoutText(ro) {
-    return `${ro.missed.toLocaleString("en-US")} of ${ro.rowsScored.toLocaleString("en-US")} domains missed (${(100 * ro.missedFrac).toFixed(1)}%). ` +
-      `Mean coverage ${ro.bodyMean.toFixed(3)} inside the domain and ${ro.flankMean.toFixed(3)} in the flanks. ` +
+    return `${ro.missed.toLocaleString("en-US")} of ${ro.rowsScored.toLocaleString("en-US")} regions missed (${(100 * ro.missedFrac).toFixed(1)}%). ` +
+      `Mean coverage ${ro.bodyMean.toFixed(3)} inside the region and ${ro.flankMean.toFixed(3)} in the flanks. ` +
       `Curve from 0.8 to 0.2: start ${ro.startAbs.text}, end ${ro.endAbs.text}. ` +
-      `From 80% to 20% of its height inside the domain (${ro.plateau.toFixed(2)}): start ${ro.startRel.text}, end ${ro.endRel.text}`;
+      `From 80% to 20% of the curve's own height inside the region (${ro.plateau.toFixed(2)}): start ${ro.startRel.text}, end ${ro.endRel.text}`;
   }
 
   // ---------- order ----------
@@ -133,7 +134,7 @@
         else if (!v) rgb = c.off;
         else if (state.color === "score") {
           const t = Math.min(1, Math.max(0, (s[i * NCOL + j] - scoreRange[0]) / (scoreRange[1] - scoreRange[0] || 1)));
-          rgb = mix(c.off, c.on, 0.25 + 0.75 * t);
+          rgb = mix(c.off, c.on, 0.4 + 0.6 * t);
         } else rgb = c.on;
         set(SW + 2 + 2 * j, rgb); set(SW + 3 + 2 * j, rgb);
       }
@@ -167,13 +168,16 @@
     if (capped) {
       let d2 = "";
       for (let j = 0; j < NCOL; j++) if (!isNaN(capped[j])) d2 += (d2 ? "L" : "M") + sx(j).toFixed(1) + "," + sy(capped[j]).toFixed(1);
-      el("path", { d: d2, fill: "none", stroke: tok("--ink") || "#1c211f", "stroke-width": big ? 1.2 : 0.9, class: "pu-cap" }, svg);
+      el("path", { d: d2, fill: "none", stroke: tok("--ink") || "#1c211f", "stroke-width": big ? 1.6 : 1.2, class: "pu-cap" }, svg);
     }
     if (big) el("text", { x: 10, y: (T + H - B) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(T + H - B) / 2})`, class: "lab" }, svg).textContent = "fraction of regions covered";
   }
 
   // ---------- page ----------
-  function panelTitle(p) { return `${META.names[p.tool]} <span class="mono">${p.setting}</span>`; }
+  function panelTitle(p) {
+    const ref = p.tool === "hmmscan" ? ' <span class="tag warn">reference: graded on its own models</span>' : "";
+    return `${META.names[p.tool]} <span class="mono">${p.setting}</span>${ref}<span class="pu-w">${META.words[p.tool + "|" + p.setting] || ""}</span>`;
+  }
   function render() {
     const ord = order();
     const grid = document.getElementById("pu-grid");
@@ -219,18 +223,20 @@
       `All domains: ${readoutText(ro)}. ${famText}`;
     const sb = document.getElementById("pu-scorebar");
     sb.hidden = state.color !== "score";
+    sb.querySelector(".name").textContent = `${META.names[p.tool]}: ${META.scores[p.tool]}, higher is better.`;
     sb.querySelector(".lo").textContent = sr[0].toPrecision(3);
     sb.querySelector(".hi").textContent = sr[1].toPrecision(3);
     sb.style.setProperty("--kind", META.kinds[p.kind]);
     document.querySelectorAll("button[data-sort]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sort === state.sort));
     document.querySelectorAll("button[data-color]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.color === state.color));
     window.__pileup.readouts = P.map((_, k) => readouts(COV[k]));
+    document.getElementById("pu-tip").hidden = true;
   }
 
   // ---------- hover ----------
   function hoverText(i) {
     const r = R[i], p = P[state.focus], row = p.rows[i];
-    const calls = row.c.length ? row.c.slice(0, 6).map(([a, b]) => `${a}–${b}`).join(", ") + (row.c.length > 6 ? ", …" : "") : "none";
+    const calls = row.c.length ? row.c.slice(0, 6).map(([a, b]) => `${a}–${b}`).join(", ") + (row.c.length > 6 ? ", …" : "") : "no call";
     // Residues of the true region (up to 120), with a mark under each one a call covers.
     let res = "";
     if (r.seq) {
@@ -244,12 +250,12 @@
       }
       if (r.e > b) res += `      … ${r.e - b} more residues\n`;
     }
-    return `<b>${r.sym || r.acc}</b> <span class="mono">${r.acc}</span> · ${r.fam}<br>` +
-      `true region ${r.s}–${r.e} (${r.len} aa) of ${r.plen} aa${r.past_end ? " · extends past the end of this sequence" : ""}<br>` +
-      `identity to closest same-family domain in zebrafish: ${r.pid === null ? "no such domain" : r.pid + "%"} · pLDDT ${r.plddt === null ? "no model" : r.plddt}<br>` +
-      `${META.names[p.tool]} calls over the region (${row.n} in the window): ${calls}<br>` +
+    return `<b>${r.sym || r.acc}</b> <span class="mono">${r.acc}</span> · Pfam ${r.fam}<br>` +
+      `Pfam domain at residues ${r.s}–${r.e} (${r.len} aa) of a ${r.plen} aa protein${r.past_end ? "; it runs past the end of this sequence" : ""}<br>` +
+      `Identity to the closest ${r.fam} domain in zebrafish: ${r.pid === null ? "zebrafish has none" : r.pid + "%"} · mean pLDDT over the domain: ${r.plddt === null ? "no matching AlphaFold model" : r.plddt}<br>` +
+      `${META.names[p.tool]}: ${row.n} call${row.n === 1 ? "" : "s"} of ${r.fam} within 100 residues of the domain. Residues they cover, merged: ${calls}<br>` +
       `<pre class="pu-res">${res}</pre>` +
-      `<span class="muted">The relative's aligned residues are not kept in the call tables.</span>`;
+      `<span class="muted">Top line: the human residues of the domain. Under each, | marks a residue inside a call; this is not an alignment. The zebrafish residues each call matched are not stored in the run's call tables.</span>`;
   }
 
   // ---------- histogram ----------
@@ -282,7 +288,7 @@
       el("text", { x, y: H - B + 16, "text-anchor": "middle", class: "tk" }, svg).textContent = lab;
       if (b === 21) el("line", { x1: x, x2: x, y1: T, y2: H - B, class: "edge" }, svg);
     }
-    el("text", { x: (L + W) / 2, y: H - 6, "text-anchor": "middle", class: "lab" }, svg).textContent = "called start minus true start, residues (negative: the call starts early)";
+    el("text", { x: (L + W) / 2, y: H - 6, "text-anchor": "middle", class: "lab" }, svg).textContent = "call start minus region start, residues (negative: the call starts early)";
     el("text", { x: 12, y: (T + H - B) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(T + H - B) / 2})`, class: "lab" }, svg).textContent = "share of regions with a call";
     for (const s of series) {
       let d = "";
@@ -306,7 +312,8 @@
     window.__pileup.cov = COV; window.__pileup.regions = R; window.__pileup.panels = P.map((p) => p.tool + "|" + p.setting);
     window.__pileup.setFocus = (k) => { state.focus = k; render(); };
     window.__pileup.setSort = (s) => { state.sort = s; render(); };
-    window.__pileup.readoutsOf = (k, fam) => { const ro = readouts(COV[k], fam ? FAMILY_ROWS : null); return { missedFrac: ro.missedFrac, bodyMean: ro.bodyMean, flankMean: ro.flankMean, rowsScored: ro.rowsScored }; };
+    window.__pileup.readoutsOf = (k, fam) => { const ro = readouts(COV[k], fam ? FAMILY_ROWS : null); return { missedFrac: ro.missedFrac, bodyMean: ro.bodyMean, flankMean: ro.flankMean, rowsScored: ro.rowsScored,
+      startAbs: ro.startAbs.text, endAbs: ro.endAbs.text, startRel: ro.startRel.text, endRel: ro.endRel.text }; };
     document.querySelectorAll("button[data-sort]").forEach((b) => b.addEventListener("click", () => { state.sort = b.dataset.sort; render(); }));
     document.querySelectorAll("button[data-color]").forEach((b) => b.addEventListener("click", () => { state.color = b.dataset.color; render(); }));
     const fc = document.getElementById("pu-fheat"), tip = document.getElementById("pu-tip");

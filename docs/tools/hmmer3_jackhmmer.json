@@ -21,7 +21,7 @@
  "command": "jackhmmer \\\n    -N 3 \\\n    --domtblout /dev/stdout \\\n    --tblout /dev/null \\\n    -o /dev/stderr \\\n    --noali \\\n    -E 10.0 \\\n    --cpu 8 \\\n    UP000005640_9606.fasta UP000000437_7955.fasta",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "3aa8d6493c19cb5fcdbaa74ad9463e23b1e428b5",
+  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "n3",

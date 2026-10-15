@@ -131,6 +131,12 @@ def main() -> int:
                     n_cmp += 1
                     if abs(js[jk] - py[pk]) > 1e-9:
                         failures.append(f"{key} {name} {pk}: page {js[jk]} vs json {py[pk]}")
+                for jk, pk in (("startAbs", "start_0.8_to_0.2"), ("endAbs", "end_0.8_to_0.2"),
+                               ("startRel", "start_80_to_20_percent_of_plateau"),
+                               ("endRel", "end_80_to_20_percent_of_plateau")):
+                    n_cmp += 1
+                    if js[jk] != py[pk]:
+                        failures.append(f"{key} {name} {pk}: page {js[jk]!r} vs json {py[pk]!r}")
         report.append({"page_vs_json_readouts_compared": n_cmp})
 
         # ---- 3. sorts ----
