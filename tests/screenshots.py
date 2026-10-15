@@ -16,6 +16,8 @@ PAGES = {
     "2_score_against_cost": "cost.html",
     "6_region_pileup": "pileup.html",
     "3_tool_card_kmerseek": "tools/kmerseek.html",
+    "3b_tool_cards_index": "tools/index.html",
+    "7_claims": "claims.html",
     "4_coverage": "coverage.html",
     "5_methods": "methods.html",
 }

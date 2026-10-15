@@ -1,0 +1,284 @@
+{
+ "page": "claims-schema.html",
+ "title": "claims.yaml",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T13:44:05Z",
+  "sha256": {
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "claims.yaml"
+  },
+  {
+   "tag": "p",
+   "text": "One file per tool, claims/<tool>.yaml, lists the tool's claims. Each claim has the claim in plain words, the result that would retire it (kill), the data it is tested on (scope), and a test. The file never states a verdict. scripts/claims.py runs each test and sets the status:"
+  },
+  {
+   "tag": "li",
+   "text": "table, table_bins, table_max, table_count_passing: recomputed from results.parquet on every build."
+  },
+  {
+   "tag": "li",
+   "text": "record, record_compare: a number quoted from the experiment inventory (data/experiments.json, seanome/2024-kmerseek-analysis PR 97). The quote must match the recorded value character for character, so a notebook that changes a number fails the check until the claim is updated."
+  },
+  {
+   "tag": "li",
+   "text": "not_run: no test yet; the claim is untested and the reason is shown."
+  },
+  {
+   "tag": "p",
+   "text": "The full schema: claims/schema.json. The first claim of claims/kmerseek.yaml:"
+  },
+  {
+   "tag": "pre",
+   "text": "- id: phmmer-parity-mammals claim: Parity with phmmer inside mammals kill: Fmax more than 0.05 from phmmer's on any of the 6 mammals scope: Swiss-Prot features, raw calls, setting hp_thomas_dill2_k24_lcFalse, 998 human queries test: kind: table experiment: qfo_region_midi_plus truth_source: Swiss-Prot features dedup_or_raw: raw stratum_axis: all stratum_bin: all metric: fmax tool: kmerseek setting: hp_thomas_dill2_k24_lcFalse against: {tool: hmmer3_phmmer, setting: default} targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica] kill_if: {abs_difference_above: 0.05} context: - label: on Pfam domains, the best kmerseek setting for each mammal test: kind: table experiment: qfo_region_midi_plus truth_source: Pfam-A domain instances dedup_or_raw: raw stratum_axis: all stratum_bin: all metric: fmax tool: kmerseek setting: best_per_target against: {tool: hmmer3_phmmer, setting: default} targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica] kill_if: {abs_difference_above: 0.05} - label: settings of 22 that pass on Swiss-Prot features (raw or dedup) test: kind: table_count_passing experiment: qfo_region_midi_plus truth_source: Swiss-Prot features stratum_axis: all stratum_bin: all metric: fmax tool: kmerseek against: {tool: hmmer3_phmmer, setting: default} targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica] kill_if: {abs_difference_above: 0.05} evidence: {label: leaderboard, href: index.html}"
+  },
+  {
+   "tag": "h2",
+   "text": "Badge and CI check"
+  },
+  {
+   "tag": "p",
+   "text": "Every push and pull request runs python scripts/claims.py --check in a GitHub Action (.github/workflows/claims.yml). It fails when a file breaks the schema, a quote no longer matches its record, or a table test cannot find its rows. The build also writes a badge per tool from the same verdicts:"
+  },
+  {
+   "tag": "pre",
+   "text": "![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-kmerseek.svg)"
+  }
+ ],
+ "data": {
+  "schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "$id": "https://seanome.github.io/protein-function-annotation-leaderboard/claims/schema.json",
+   "title": "claims.yaml",
+   "description": "Claims about one tool, each with the test that would kill it. Status is computed from the test by scripts/claims.py, never written by hand.",
+   "type": "object",
+   "required": [
+    "tool",
+    "title",
+    "updated",
+    "claims"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "tool": {
+     "type": "string",
+     "description": "Tool id as in results.parquet."
+    },
+    "title": {
+     "type": "string"
+    },
+    "updated": {
+     "type": "string",
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "description": "Date the file was last edited, YYYY-MM-DD, quoted."
+    },
+    "claims": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "$ref": "#/$defs/claim"
+     }
+    }
+   },
+   "$defs": {
+    "claim": {
+     "type": "object",
+     "required": [
+      "id",
+      "claim",
+      "kill",
+      "test"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[a-z0-9-]+$"
+      },
+      "claim": {
+       "type": "string",
+       "description": "The claim, as a reader would say it."
+      },
+      "kill": {
+       "type": "string",
+       "description": "The result that would retire the claim."
+      },
+      "scope": {
+       "type": "string",
+       "description": "Data, settings and truth set the test runs on."
+      },
+      "test": {
+       "$ref": "#/$defs/test"
+      },
+      "context": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "required": [
+         "label",
+         "test"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "test": {
+          "$ref": "#/$defs/test"
+         }
+        }
+       }
+      },
+      "evidence": {
+       "type": "object",
+       "required": [
+        "label",
+        "href"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "label": {
+         "type": "string"
+        },
+        "href": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    },
+    "test": {
+     "type": "object",
+     "required": [
+      "kind"
+     ],
+     "properties": {
+      "kind": {
+       "enum": [
+        "table",
+        "table_count_passing",
+        "table_bins",
+        "table_max",
+        "record",
+        "record_compare",
+        "not_run"
+       ],
+       "description": "table*: recomputed from results.parquet. record*: quoted from data/experiments.json and checked against it. not_run: no test yet."
+      },
+      "reason": {
+       "type": "string"
+      },
+      "row": {
+       "type": "string"
+      },
+      "name": {
+       "type": "string"
+      },
+      "quote": {
+       "type": "string"
+      },
+      "ours": {
+       "type": "object"
+      },
+      "theirs": {
+       "type": "object"
+      },
+      "kill_if": {
+       "type": "object"
+      }
+     },
+     "allOf": [
+      {
+       "if": {
+        "properties": {
+         "kind": {
+          "const": "not_run"
+         }
+        }
+       },
+       "then": {
+        "required": [
+         "reason"
+        ]
+       }
+      },
+      {
+       "if": {
+        "properties": {
+         "kind": {
+          "const": "record"
+         }
+        }
+       },
+       "then": {
+        "required": [
+         "row",
+         "name",
+         "quote"
+        ]
+       }
+      },
+      {
+       "if": {
+        "properties": {
+         "kind": {
+          "const": "record_compare"
+         }
+        }
+       },
+       "then": {
+        "required": [
+         "row",
+         "ours",
+         "theirs",
+         "kill_if"
+        ]
+       }
+      },
+      {
+       "if": {
+        "properties": {
+         "kind": {
+          "enum": [
+           "table",
+           "table_bins",
+           "table_count_passing"
+          ]
+         }
+        }
+       },
+       "then": {
+        "required": [
+         "experiment",
+         "metric",
+         "tool",
+         "kill_if"
+        ]
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

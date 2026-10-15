@@ -172,3 +172,56 @@ details.prose summary{cursor:pointer;color:var(--accent)}
 .pu-fcurve .lab{font-size:15px}
 #pu-scorebar .name{margin-right:4px}
 .pu-w{min-height:5.1em}
+
+/* Claims card: status by mark and word (● alive, × retired, ○ untested), no status colours,
+   so no colour here competes with the kind-of-method colours. */
+.cl-card{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:18px 22px 16px;max-width:900px;margin:0 0 22px;box-shadow:var(--shadow)}
+@media (max-width:600px){.cl-card{padding:14px}}
+.cl-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 16px}
+.cl-title{font-size:1.45rem;margin:0;border:none;padding:0}
+.cl-file{color:var(--muted);font-size:.9rem}
+.cl-file a{color:inherit}
+.cl-pills{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 6px}
+.cl-pill{border-radius:999px;padding:3px 12px;font-size:.92rem;background:var(--chip);border:1px solid var(--hair)}
+.cl-pill.alive{border-color:var(--ink)}
+.cl-pill.retired{text-decoration:none}
+.cl-pill.plain{background:transparent}
+.cl-sub{color:var(--muted);font-size:.9rem;margin:2px 0 6px;padding-bottom:8px;border-bottom:1px solid var(--hair)}
+.cl-rows{list-style:none;padding:0;margin:0}
+.cl-row{display:grid;grid-template-columns:22px 1fr;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--hair)}
+.cl-row:last-child{border-bottom:none}
+.cl-mark{font-size:1.15rem;line-height:1.4;color:var(--ink);text-align:center}
+.cl-row[data-status="untested"] .cl-mark,.cl-row[data-status="untested"] .cl-claim{color:var(--muted)}
+.cl-claim{font-size:1.12rem;font-weight:600;line-height:1.3}
+.cl-row[data-status="retired"] .cl-claim{text-decoration:line-through;text-decoration-thickness:1px}
+.cl-kill{color:var(--muted);font-size:.95rem}
+.cl-verdict{font-size:.95rem}
+.cl-st{font-weight:600}
+.cl-more{margin-top:4px;font-size:.88rem}
+.cl-more summary{cursor:pointer;color:var(--accent)}
+.cl-more ul{margin:4px 0;padding-left:18px}
+.cl-buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.cl-btn{border:1px solid var(--hair);border-radius:10px;padding:7px 16px;color:var(--ink);text-decoration:none;background:var(--surface)}
+.cl-btn:hover,.cl-btn:focus-visible{border-color:var(--ink)}
+
+/* Tool cards index */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tc-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;margin:14px 0 10px}
+.tc-search input{font:inherit;width:min(420px,100%);padding:9px 16px;border:1px solid var(--hair);border-radius:999px;background:var(--surface);color:var(--ink)}
+.tc-search input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tc-search{flex:1 1 260px;min-width:0}
+.tc-chips{margin:0 0 10px}
+.tc-chips .chip{font-family:"Fantasque Sans Mono",monospace;font-size:.86rem}
+.tc-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}
+.tc{background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:16px 18px 0;display:flex;flex-direction:column;min-width:0}
+.tc-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.tc-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tc-tag{font-family:"Fantasque Sans Mono",monospace;font-size:.78rem;border:1px solid var(--hair);border-radius:999px;padding:1px 9px;color:var(--muted)}
+.dg{width:110px;height:66px;flex:none}
+.dg-t{font:12px "Source Sans 3",sans-serif;fill:var(--muted)}
+.tc-name{font-size:1.25rem;margin:8px 0 4px;border:none;padding:0}
+.tc-name a{color:var(--ink);text-decoration:none}
+.tc-name a:hover,.tc-name a:focus-visible{text-decoration:underline}
+.tc-desc{color:var(--muted);margin:0 0 12px;flex:1}
+.tc-foot{border-top:1px solid var(--hair);margin:0 -18px;padding:10px 18px;font-family:"Fantasque Sans Mono",monospace;font-size:.82rem;color:var(--muted)}
+.tc-foot b{color:var(--ink);font-weight:600}
