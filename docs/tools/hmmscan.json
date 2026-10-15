@@ -22,7 +22,7 @@
  "command": "hmmscan \\\n    --domtblout /dev/stdout \\\n    -o /dev/null \\\n    --noali \\\n    -E 10.0 --domE 10.0 \\\n    --cpu 4 \\\n    Pfam-A.hmm UP000005640_9606.fasta",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
   "filters": "pfam, raw, all"
  },
  "best_setting": "direct",

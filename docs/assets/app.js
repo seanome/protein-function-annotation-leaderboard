@@ -8,7 +8,7 @@
   const M = DATA.meta;
   const RESULTS = DATA.results; // key -> {tool|setting: [fmax, auprc, iou, n]}
   const COMPUTE = DATA.compute; // tool|setting|species -> {...}
-  const page = document.body.dataset.page;
+  const page = (document.querySelector("main[data-page]") || document.body).dataset.page;
 
   // ---------- state, kept in the URL hash so both pages share the filters ----------
   const state = Object.assign({}, M.defaults);
@@ -26,7 +26,7 @@
     for (const k of ["truth", "calls", "species", "axis", "stratum", "metric", "sort", "dir", "r_cpu", "r_gpu"]) {
       if (state[k] !== undefined && state[k] !== null) h.set(k, state[k]);
     }
-    history.replaceState(null, "", "#" + h.toString());
+    try { history.replaceState(null, "", "#" + h.toString()); } catch (e) { /* framed viewers may refuse */ }
     // Keep the filters when moving between the leaderboard and the plot.
     document.querySelectorAll("a[data-keep-filters]").forEach((a) => {
       a.href = a.getAttribute("href").split("#")[0] + "#" + h.toString();
