@@ -1,6 +1,6 @@
 # ProstT5 + Foldseek
 
-Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `39d81ec9`.
+Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
 
 ## What it compares
 
@@ -43,11 +43,10 @@ Swiss-Prot features, raw calls, zebrafish, setting `3di_from_seq`: best feature 
 
 ## Cost per 1,000 queries
 
-Setting `3di_from_seq`, searching zebrafish: 0.0861 CPU-hours plus 0.0192 GPU-hours for predicting the queries' 3Di letters, measured on Sherlock. Peak memory 1.5 GB. That is about $0.0232 at $0.044625 per CPU-hour and $1.006 per GPU-hour.
-This search completed 2 times; the runs took 0.0861 to 0.131 CPU-hours per 1,000 queries, and the newest is shown.
-Across the 15 relatives searched with this setting: 0.0541 to 0.123 CPU-hours per 1,000 queries; peak memory up to 1.5 GB.
+Setting `3di_from_seq`, searching one relative (mean over the 15 relatives it searched): 0.109 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.5 GB. That is about $0.00486 at $0.044625 per CPU-hour.
+Building its databases took 5.31 core-hours over 3 databases, plus 0.664 GPU-hours (1 GPU via --gres=gpu:1 (model not recorded)). A database is built once and reused, so this is not in the per-query cost.
 
-CPU-hours count the search only, not building the relative's database.
+The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
 ## Licence
 
@@ -80,4 +79,4 @@ The first command (one per proteome, on a GPU) predicts the 3Di letters. The sec
 
 1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_from_seq`; strata with at least 30 true instances.)
 2. **Do you have a GPU to predict the 3Di letters for your proteins?** The run used one GPU for that step; its cost is not counted here.
-3. **Can you spend about 0.0861 CPU-hours and 0.0192 GPU-hours per 1,000 proteins for each relative you search?** That is the measured cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.
+3. **Can you spend about 0.109 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" above.

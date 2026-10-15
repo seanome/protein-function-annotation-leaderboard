@@ -130,7 +130,7 @@
     { id: "auprc", label: "AUPRC", key: "auprc" },
     { id: "iou", label: "Median IoU", key: "median_iou_tp" },
     { id: "n", label: "True instances", key: "n_truth_instances" },
-    { id: "cpu", label: 'CPU-h per 1,000 queries <span class="prov measured">measured</span>', key: "cpu_h" },
+    { id: "cpu", label: 'Core-hours per 1,000 queries, per relative <span class="prov measured">measured</span>', key: "cpu_h" },
     { id: "cpu_rep", label: 'CPU-h per 1,000 queries <span class="prov reported">reported</span>', key: "cpu_h_reported" },
     { id: "ram", label: 'Peak RAM, GB <span class="prov measured">measured</span>', key: "peak_rss_gb" },
     { id: "gpu", label: "GPU in search", key: "gpu" },
@@ -340,7 +340,7 @@
         el("text", { x: L - 6, y: sy(y) + 4, "text-anchor": "end" }, g).textContent = y.toFixed(step < 0.01 ? 3 : 2);
       }
       el("text", { x: (L + W - R) / 2, y: H - 10, "text-anchor": "middle", "font-size": 13 }, svg).textContent =
-        "CPU-hours per 1,000 queries, measured on Sherlock (less is cheaper)";
+        "core-hours per 1,000 queries per relative, measured on Sherlock (less is cheaper)";
       el("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 13, transform: `rotate(-90 14 ${(T + H - B) / 2})` }, svg).textContent =
         metric.label + " (higher is better)";
       const fr = frontier(pts);
@@ -358,7 +358,7 @@
           tip.style.display = "block";
           tip.innerHTML = `<b>${t.name}</b> <span class="mono">${p.row.setting}</span><br>${metric.label} ${fmt3(p.y)}<br>` +
             `Fmax ${fmt3(p.v.fmax)} · AUPRC ${fmt3(p.v.auprc)} · median IoU ${p.v.iou == null ? "—" : fmt3(p.v.iou)}<br>` +
-            `${fmtInt(p.v.n)} true instances<br>${sig(p.x, 3)} CPU-h per 1,000 queries · peak RAM ${p.v.ram.toFixed(1)} GB` +
+            `${fmtInt(p.v.n)} true instances<br>${sig(p.x, 3)} core-hours per 1,000 queries per relative · peak RAM ${p.v.ram.toFixed(1)} GB` +
             (p.v.c.gpu_h_per_1000 ? `<br>plus ${sig(p.v.c.gpu_h_per_1000, 3)} GPU-h (not on the axis)` : "") +
             (fr.includes(p) ? "<br>On the line: no other tool is both cheaper and better here." : "");
           const bb = box.getBoundingClientRect();

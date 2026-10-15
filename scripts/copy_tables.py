@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 FILES = ["results.parquet", "compute.parquet", "coverage.md", "provenance.json"]
+OPTIONAL = ["inventory.md"]
 PILEUP = ["pileup/regions.parquet", "pileup/calls.parquet", "pileup/provenance.json"]
 
 
@@ -29,6 +30,8 @@ def main() -> None:
     ap.add_argument("--repo", required=True)
     ap.add_argument("--commit", required=True)
     ap.add_argument("--out", type=Path, default=Path("data"))
+    ap.add_argument("--pileup-commit", default=None,
+                    help="commit holding results/leaderboard/pileup/, when it is not --commit")
     a = ap.parse_args()
 
     commit = json.loads(gh(f"repos/{a.repo}/commits/{a.commit}"))
@@ -40,9 +43,17 @@ def main() -> None:
         (a.out / name).write_bytes(body)
         checksums[name] = hashlib.sha256(body).hexdigest()
 
-    for name in PILEUP:
+    for name in OPTIONAL:
         try:
             body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={sha}", raw=True)
+        except subprocess.CalledProcessError:
+            continue
+        (a.out / name).write_bytes(body)
+        checksums[name] = hashlib.sha256(body).hexdigest()
+    pileup_sha = json.loads(gh(f"repos/{a.repo}/commits/{a.pileup_commit}"))["sha"] if a.pileup_commit else sha
+    for name in PILEUP:
+        try:
+            body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={pileup_sha}", raw=True)
         except subprocess.CalledProcessError:
             continue  # a commit from before the pile-up tables existed
         (a.out / name).parent.mkdir(parents=True, exist_ok=True)
@@ -67,6 +78,7 @@ def main() -> None:
         "path": "results/leaderboard",
         "copied_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sha256": checksums,
+        "pileup_commit": pileup_sha if "pileup/regions.parquet" in checksums else None,
     }
     (a.out / "SOURCE.json").write_text(json.dumps(source, indent=1) + "\n")
     print(f"copied {len(FILES)} files from {a.repo}@{sha[:8]}")

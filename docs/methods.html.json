@@ -3,24 +3,26 @@
  "title": "Methods",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
-  "commit_date": "2026-10-15T13:17:37Z",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:18:08Z",
+  "copied_at": "2026-10-15T13:44:05Z",
   "sha256": {
-   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
-   "compute.parquet": "411cac8cc8fb4b30e84a1a5319cfe08d7c42044a095307d1723acd52e084eefa",
-   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
-   "provenance.json": "70edaff69036ea89dffcf703cf303b2d9a6e4f92f1f83a2c9043a53f7cacb3b9",
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
-  }
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
  },
  "text": [
   {
    "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 39d81ec9 (results/leaderboard), copied 2026-10-15."
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
   },
   {
    "tag": "h1",
@@ -28,7 +30,7 @@
   },
   {
    "tag": "p",
-   "text": "Everything on this site comes from one benchmark run. It searched 998 human proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes, release 2020_04. Of the human proteins, 964 are encoded on chromosome 6; the other 34 are immune proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The run finished on 2026-09-13 on Stanford's Sherlock cluster. Its tables are results.parquet (30,029 rows) and compute.parquet (311 rows), built by make leaderboard-tables in seanome/2024-kmerseek-analysis at commit 39d81ec9. These 998 proteins are not a random sample of the human proteome."
+   "text": "The tables hold 3,975,483 rows from 12 experiments (alphabet_ranking_three_cases, dark_set_accuracy, dark_set_gain, dark_set_pfam_fmax, deep_twilight, elm_cover, qfo_region_midi, qfo_region_midi_plus, qfo_region_mini, scope40_v040, scope40_v040_below_kmin, scope40_v040_shuffled_k2_seed1); the coverage page counts all of them. Everything else on this site comes from one of those experiments, qfo_region_midi_plus, a single benchmark run. It searched 998 human proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes, release 2020_04. Of the human proteins, 964 are encoded on chromosome 6; the other 34 are immune proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The run finished on 2026-09-13 on Stanford's Sherlock cluster. Its tables are results.parquet (29,379 rows) and compute.parquet, built by make leaderboard-tables in seanome/2024-kmerseek-analysis at commit 4a4b1171. These 998 proteins are not a random sample of the human proteome."
   },
   {
    "tag": "h2",
@@ -80,7 +82,7 @@
   },
   {
    "tag": "p",
-   "text": "The cutoffs tried are 101 evenly spaced quantiles of the tool's call scores. Worked example: phmmer searching zebrafish, Pfam truth set, raw calls, all proteins. At the best cutoff (bit score 34.3) precision is 0.2471 and recall is 0.5108. So F = 2 × 0.2471 × 0.5108 / (0.2471 + 0.5108) = 0.3331, the Fmax in Table 1."
+   "text": "The cutoffs tried are 101 evenly spaced quantiles of the tool's call scores. Worked example: phmmer searching zebrafish, Pfam truth set, raw calls, all proteins. At the best cutoff (bit score on the tool's bit score) precision is 0.2471 and recall is 0.5108. So F = 2 × 0.2471 × 0.5108 / (0.2471 + 0.5108) = 0.3331, the Fmax in Table 1."
   },
   {
    "tag": "h3",
@@ -116,15 +118,15 @@
   },
   {
    "tag": "h3",
-   "text": "CPU-hours per 1,000 queries"
+   "text": "Core-hours per 1,000 queries"
   },
   {
    "tag": "p",
-   "text": "CPU-hours are taken from the run's Nextflow task records: the search task's run time multiplied by its average CPU use. 63 of 311 searches completed more than once, after a code change or a crash. The trace does not say which run wrote the scored calls, so the newest run gives the headline number and the leaderboard prints the range over all runs beside it. Only the search is counted; building the relative's database is not, because a reused database leaves no task record. Dividing by the 998 queries and multiplying by 1,000 gives the cost per 1,000 queries. Worked example: phmmer against zebrafish ran 5 min 21.0 s at 426.7% CPU. That is 321.0 s × 4.267 / 3,600 = 0.3805 CPU-hours, or 0.3805 × 1,000 / 998 = 0.3812 CPU-hours per 1,000 queries. Peak RAM is the task's largest resident memory."
+   "text": "Core-hours are taken from the run's Nextflow task records: the cores a task reserved multiplied by its wall time, so a task that sat partly idle still counts all its cores. The tables record them per tool and setting, summed over every relative searched, with building the databases as separate rows. The leaderboard divides the search's core-hours by the number of relatives searched and by the 998 queries, times 1,000: the mean cost of searching one relative. Worked example: phmmer reserved 8 cores for 2,806 s over its 15 searches. That is 8 × 2,806 / 3,600 = 6.2356 core-hours, and 6.2356 / 15 × 1,000 / 998 = 0.4165 core-hours per 1,000 queries per relative. Peak RAM is the largest resident memory of any of those tasks. The tool cards give the database builds separately."
   },
   {
    "tag": "p",
-   "text": "Numbers marked measured come from these records, on Sherlock (partition hns). No search used a GPU. ProstT5 also has to turn the query sequences into 3Di shape letters before it can search. That step ran on one GPU for 69 s for the 998 queries: 0.0192 GPU-hours per 1,000 queries, counted on every ProstT5 row. The same step for each relative's proteome is a one-off per relative and, like every database build, is not counted. Numbers marked reported would come from a tool's submitter, on hardware they name; none have been submitted yet."
+   "text": "Numbers marked measured come from these records, on Sherlock (partition hns). No search used a GPU. ProstT5 has to turn sequences into 3Di shape letters before it can search; that step ran on one GPU as part of building its databases, queries included, and is on the ProstT5 card (0.664 GPU-hours over 3 databases), not in the per-query cost. Numbers marked reported would come from a tool's submitter, on hardware they name; none have been submitted yet."
   },
   {
    "tag": "h3",
@@ -136,7 +138,7 @@
   },
   {
    "tag": "p",
-   "text": "per 1,000 queries. The default \\(r_\\text{cpu}\\) = $0.044625 per CPU-hour is half of AWS's on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default \\(r_\\text{gpu}\\) = $1.006 per GPU-hour is a g5.xlarge (one NVIDIA A10G). Both are for US East (N. Virginia), Linux, from the EC2 on-demand price page (price file, published 2026-10-12, read 2026-10-15). Memory is not priced. Worked example: 0.3812 × 0.044625 + 0 × 1.006 = $0.01701 for phmmer against zebrafish. Change either price on the leaderboard page."
+   "text": "per 1,000 queries. The default \\(r_\\text{cpu}\\) = $0.044625 per CPU-hour is half of AWS's on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default \\(r_\\text{gpu}\\) = $1.006 per GPU-hour is a g5.xlarge (one NVIDIA A10G). Both are for US East (N. Virginia), Linux, from the EC2 on-demand price page (price file, published 2026-10-12, read 2026-10-15). A core-hour is priced as one CPU-hour. Memory is not priced. Worked example: 0.4165 × 0.044625 + 0 × 1.006 = $0.01859 for phmmer against zebrafish. Change either price on the leaderboard page."
   },
   {
    "tag": "h2",

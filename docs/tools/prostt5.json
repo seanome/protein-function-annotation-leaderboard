@@ -22,7 +22,7 @@
  "command": "foldseek createdb filtered.fasta zebrafish_prostt5/db \\\n    --prostt5-model weights --gpu 1 --threads 8\n\nfoldseek search \\\n    human-38fdd87d_prostt5/db zebrafish_prostt5/db result tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "3di_from_seq",
@@ -71,14 +71,17 @@
   }
  ],
  "cost_per_1000_queries": {
-  "cpu_h_measured": 0.08607492763304385,
+  "core_h_reserved_per_relative": 0.10895865805685447,
+  "n_relatives": 15,
+  "database_build_core_h": 5.3133333333333335,
+  "database_build_gpu_h": 0.6641666666666667,
   "peak_rss_gb": 1.5,
-  "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+  "hardware": "Stanford Sherlock, SLURM partition hns"
  },
  "questions": [
   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.139 (n = 563), 60\u2013100% 0.209 (n = 1,289). If no, 20\u201330% 0.247 (n = 93), 30\u201340% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_from_seq`; strata with at least 30 true instances.)",
   "Do you have a GPU to predict the 3Di letters for your proteins? The run used one GPU for that step; its cost is not counted here.",
-  "Can you spend about 0.0861 CPU-hours and 0.0192 GPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  "Can you spend about 0.109 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" above."
  ],
  "markdown": "prostt5.md"
 }

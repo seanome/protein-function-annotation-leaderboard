@@ -1,6 +1,6 @@
 # Foldseek
 
-Tool id `foldseek`. Numbers from seanome/2024-kmerseek-analysis commit `39d81ec9`.
+Tool id `foldseek`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
 
 ## What it compares
 
@@ -43,11 +43,10 @@ Swiss-Prot features, raw calls, zebrafish, setting `3di_aa`: best feature type A
 
 ## Cost per 1,000 queries
 
-Setting `3di_aa`, searching zebrafish: 0.133 CPU-hours, measured on Sherlock. Peak memory 1.5 GB. That is about $0.00592 at $0.044625 per CPU-hour.
-This search completed 2 times; the runs took 0.133 to 0.211 CPU-hours per 1,000 queries, and the newest is shown.
-Across the 10 relatives searched with this setting: 0.0648 to 0.171 CPU-hours per 1,000 queries; peak memory up to 1.5 GB.
+Setting `3di_aa`, searching one relative (mean over the 10 relatives it searched): 0.129 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.5 GB. That is about $0.00574 at $0.044625 per CPU-hour.
+Building its databases took 0.267 core-hours over 2 databases. A database is built once and reused, so this is not in the per-query cost.
 
-CPU-hours count the search only, not building the relative's database.
+The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
 ## Licence
 
@@ -77,4 +76,4 @@ Followed by foldseek convertalis to write the table of hits.
 
 1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.164 (n = 563), 60–100% 0.241 (n = 1,289). If no, 20–30% 0.268 (n = 93), 30–40% 0.167 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_aa`; strata with at least 30 true instances.)
 2. **Do you have an AlphaFold model for every protein you want to annotate?** If not, Foldseek cannot search the proteins without one.
-3. **Can you spend about 0.133 CPU-hours per 1,000 proteins for each relative you search?** That is the measured cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.
+3. **Can you spend about 0.129 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" above.
