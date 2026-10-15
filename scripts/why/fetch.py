@@ -260,7 +260,12 @@ def step_interpro(raw, man):
             raise RuntimeError(f"{tag}: {n} rows written, API count {expected}")
         man.add(f"interpro_{tag}", dest, first, release, rows=n)
         print(tag, n)
-    # Step 6: every match, with coordinates, on the four proteins.
+    step_interpro_four(raw, man)
+
+
+def step_interpro_four(raw, man):
+    """Step 6: every InterPro match, with coordinates, on the four proteins."""
+    release = interpro_release()
     for acc in FOUR:
         url = f"https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/{acc}/?page_size=200"
         dest = raw / f"interpro_matches_{acc}.json"

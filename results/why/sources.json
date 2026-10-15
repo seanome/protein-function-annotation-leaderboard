@@ -88,6 +88,42 @@
   "sha256": "1935dc7eb08de6a66ce069594c5855c626850b699dd4c4b7125698ea5fc9afb8",
   "url": "https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP000005640&fields=accession%2Creviewed%2Clength%2Cgene_primary%2Cprotein_name%2Cxref_interpro%2Cxref_alphafolddb%2Cxref_pdb&format=tsv&size=500"
  },
+ "interpro_matches_P05484": {
+  "bytes": 3293,
+  "fetched_utc": "2026-10-15T14:35:46Z",
+  "file": "interpro_matches_P05484.json",
+  "http_status": 200,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "1be3d61e056c379583884a2e0c32ea451c174e510a3e36370a1ae4a695b67606",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P05484/?page_size=200"
+ },
+ "interpro_matches_P24856": {
+  "bytes": 27,
+  "fetched_utc": "2026-10-15T14:35:45Z",
+  "file": "interpro_matches_P24856.json",
+  "http_status": 204,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "b3d9099952278972fe6dcccaa4876ff859687876b4119738f4f23a9746f7d1d0",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P24856/?page_size=200"
+ },
+ "interpro_matches_P42212": {
+  "bytes": 6056,
+  "fetched_utc": "2026-10-15T14:35:47Z",
+  "file": "interpro_matches_P42212.json",
+  "http_status": 200,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "8313e27e1a551a4cdf44605e0eb969fbaede0c80fed29c6bf14b8574b751fb25",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P42212/?page_size=200"
+ },
+ "interpro_matches_Q25460": {
+  "bytes": 1290,
+  "fetched_utc": "2026-10-15T14:35:44Z",
+  "file": "interpro_matches_Q25460.json",
+  "http_status": 200,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "393271d1543b4e226298d0bc88eab941950e0b22738b5de1acf006d8f4d46b68",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/Q25460/?page_size=200"
+ },
  "larsen2017_notebook": {
   "bytes": 30274,
   "computed": true,
