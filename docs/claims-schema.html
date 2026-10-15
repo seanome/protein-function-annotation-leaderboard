@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>claims.yaml</title>
+<meta name="description" content="The claims.yaml format, the CI check and the badge.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+</head>
+<body data-page="claims">
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="cost.html" data-keep-filters>Score against cost</a><a href="pileup.html">Region pile-up</a><a href="claims.html" aria-current="page">Claims</a><a href="tools/index.html">Tool cards</a><a href="coverage.html">Coverage</a><a href="methods.html">Methods</a></nav>
+</div></header>
+<main class="wrap" data-page="claims">
+<p class="source" id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<h1>claims.yaml</h1>
+<div class="prose">
+<p>One file per tool, <span class="mono">claims/&lt;tool&gt;.yaml</span>, lists the tool's claims. Each claim
+has the claim in plain words, the result that would retire it (<b>kill</b>), the data it is tested on
+(<b>scope</b>), and a <b>test</b>. The file never states a verdict. <span class="mono">scripts/claims.py</span>
+runs each test and sets the status:</p>
+<ul>
+<li><b>table</b>, <b>table_bins</b>, <b>table_max</b>, <b>table_count_passing</b>: recomputed from
+<span class="mono">results.parquet</span> on every build.</li>
+<li><b>record</b>, <b>record_compare</b>: a number quoted from the experiment inventory
+(<span class="mono">data/experiments.json</span>, seanome/2024-kmerseek-analysis PR 97). The quote must
+match the recorded value character for character, so a notebook that changes a number fails the check until the claim
+is updated.</li>
+<li><b>not_run</b>: no test yet; the claim is untested and the reason is shown.</li>
+</ul>
+<p>The full schema: <a class="mono" href="claims/schema.json">claims/schema.json</a>. The first claim of
+<a class="mono" href="claims/kmerseek.yaml">claims/kmerseek.yaml</a>:</p>
+<pre><code>  - id: phmmer-parity-mammals
+    claim: Parity with phmmer inside mammals
+    kill: Fmax more than 0.05 from phmmer&#x27;s on any of the 6 mammals
+    scope: Swiss-Prot features, raw calls, setting hp_thomas_dill2_k24_lcFalse, 998 human queries
+    test:
+      kind: table
+      experiment: qfo_region_midi_plus
+      truth_source: Swiss-Prot features
+      dedup_or_raw: raw
+      stratum_axis: all
+      stratum_bin: all
+      metric: fmax
+      tool: kmerseek
+      setting: hp_thomas_dill2_k24_lcFalse
+      against: {tool: hmmer3_phmmer, setting: default}
+      targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica]
+      kill_if: {abs_difference_above: 0.05}
+    context:
+      - label: on Pfam domains, the best kmerseek setting for each mammal
+        test:
+          kind: table
+          experiment: qfo_region_midi_plus
+          truth_source: Pfam-A domain instances
+          dedup_or_raw: raw
+          stratum_axis: all
+          stratum_bin: all
+          metric: fmax
+          tool: kmerseek
+          setting: best_per_target
+          against: {tool: hmmer3_phmmer, setting: default}
+          targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica]
+          kill_if: {abs_difference_above: 0.05}
+      - label: settings of 22 that pass on Swiss-Prot features (raw or dedup)
+        test:
+          kind: table_count_passing
+          experiment: qfo_region_midi_plus
+          truth_source: Swiss-Prot features
+          stratum_axis: all
+          stratum_bin: all
+          metric: fmax
+          tool: kmerseek
+          against: {tool: hmmer3_phmmer, setting: default}
+          targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica]
+          kill_if: {abs_difference_above: 0.05}
+    evidence: {label: leaderboard, href: index.html}</code></pre>
+<h2 id="badge">Badge and CI check</h2>
+<p>Every push and pull request runs <span class="mono">python scripts/claims.py --check</span> in a GitHub
+Action (<a class="mono" href="https://github.com/seanome/protein-function-annotation-leaderboard/blob/main/.github/workflows/claims.yml">.github/workflows/claims.yml</a>).
+It fails when a file breaks the schema, a quote no longer matches its record, or a table test cannot
+find its rows. The build also writes a badge per tool from the same verdicts:</p>
+<p><img src="badges/claims-kmerseek.svg" alt="claims for kmerseek: 1 alive, 2 retired, 3 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-kmerseek.svg)</code></pre>
+</div>
+</main>
+<footer class="site"><div class="wrap">
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+<p>This page as JSON, for scripts and agents: <a class="mono" href="claims-schema.html.json">claims-schema.html.json</a></p>
+</div></footer>
+</body>
+</html>
