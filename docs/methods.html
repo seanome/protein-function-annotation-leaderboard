@@ -25,10 +25,13 @@
 coverage page counts all of them. Everything else on this site comes from one of those
 experiments, <span class="mono">qfo_region_midi_plus</span>, a single benchmark run. It searched 998 human
 proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes,
-release 2020_04. Of the human proteins, 964 are encoded on chromosome 6; the other 34 are immune
-proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The run finished on 2026-09-13 on Stanford's Sherlock
-cluster. Its tables are <span class="mono">results.parquet</span> (29,379 rows) and
-<span class="mono">compute.parquet</span>, built by
+release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune
+proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not
+record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock
+cluster. It has 205,653 of the 3,975,483 rows of <span class="mono">results.parquet</span>,
+one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative,
+truth set, raw or dedup, and stratum. Its cost is in <span class="mono">compute.parquet</span>. Both
+tables were built by
 <span class="mono">make leaderboard-tables</span> in seanome/2024-kmerseek-analysis at commit
 <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
@@ -101,8 +104,9 @@ out (an IoU against one residue says nothing about where the ends are). Worked e
 by at least that much. A correct call on a region longer than one residue has an IoU of at least
 0.5. So the run stores 0 only when there is no such call. Either there are no correct calls at
 all, or the correct calls are on single residues only (the 1 aa length bin and the ACT_SITE,
-BINDING and SITE features).
-The pages show those as <i>no correct calls</i>, not as 0.</p>
+BINDING and SITE features). The pages show the first case as <i>no correct calls</i> and the
+second as <i>correct calls only on single residues</i>, never as 0. They tell the two apart by
+Fmax: an Fmax above 0 means at least one call was correct.</p>
 
 <h3>True instances</h3>
 <p><b>True instances</b> (n) is the number of annotations on the human proteins in the stratum,

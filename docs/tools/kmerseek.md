@@ -46,6 +46,7 @@ Swiss-Prot features, raw calls, zebrafish, setting `wwmj5_k11_lcFalse`: best fea
 
 Setting `gbmr4_k21_lcFalse`, searching one relative (mean over the 15 relatives it searched): 0.0552 core-hours reserved per 1,000 queries (4 cores for the task's wall time), measured on Sherlock. Peak memory 5.2 GB. That is about $0.00246 at $0.044625 per CPU-hour.
 Building its databases took 0.147 core-hours over 6 databases. A database is built once and reused, so this is not in the per-query cost.
+This covers the 6 database builds the task records hold; the search used 15 relatives.
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 

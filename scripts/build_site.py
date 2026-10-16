@@ -267,6 +267,9 @@ DATA_DIR = Path("data")
 TRUTH_FROM_LONG = {"Pfam-A domain instances": "pfam", "Pfam-N domain instances": "pfamn",
                    "Swiss-Prot features": "swissprot"}
 HARDWARE = "Stanford Sherlock, SLURM partition hns"
+# Search tool -> the tool name its database-build rows carry in compute.parquet, where the
+# two differ. Both MMseqs2 searches use the one database built by the `mmseqs2` step.
+BUILD_TOOL = {"mmseqs2_seqseq": "mmseqs2", "mmseqs2_iterative": "mmseqs2"}
 
 
 def load(data: Path):
@@ -288,7 +291,7 @@ def load(data: Path):
         )
         .pivot(on="metric", index=["truth_set", "dedup", "calls", "tool", "setting", "species", "species_mya",
                                    "stratum_axis", "stratum", "n_truth_instances"], values="value")
-        .with_columns(pl.lit(None, dtype=pl.Int64).alias("n_tp_calls"))
+        .sort("truth_set", "calls", "species", "stratum_axis", "stratum", "tool", "setting")
     )
     # Compute: one row per tool, setting and step, summed over the relatives searched.
     # cpu_h there is reserved core-hours (cores x wall time). The leaderboard shows the search
@@ -296,9 +299,17 @@ def load(data: Path):
     c = pl.read_parquet(data / "compute.parquet").filter(pl.col("experiment") == EXPERIMENT)
     search = c.filter(pl.col("setting") != "database build").filter(~pl.col("step").str.contains("Index|Db|DB"))
     build = c.filter((pl.col("setting") == "database build") | pl.col("step").str.contains("Index|Db|DB"))
+    # Every build row must belong to a tool that searched; otherwise its cost would silently
+    # drop off every card (the MMseqs2 build is stored as tool "mmseqs2").
+    claimed = {BUILD_TOOL.get(t, t) for t in search["tool"].unique().to_list()}
+    orphans = sorted(set(build["tool"].unique().to_list()) - claimed)
+    if orphans:
+        raise SystemExit(f"compute.parquet has database-build rows for {orphans}, which no search tool "
+                         "maps to; add them to BUILD_TOOL in build_site.py")
     rows = []
     for r in search.iter_rows(named=True):
-        b = build.filter((pl.col("tool") == r["tool"]) & pl.col("setting").is_in([r["setting"], "database build"]))
+        bt = BUILD_TOOL.get(r["tool"], r["tool"])
+        b = build.filter((pl.col("tool") == bt) & pl.col("setting").is_in([r["setting"], "database build"]))
         rows.append({
             "tool": r["tool"], "setting": r["setting"], "step": r["step"],
             "n_relatives": r["n_target_dbs"], "n_queries": r["n_queries"], "cores": r["cores"],
@@ -316,8 +327,11 @@ def load(data: Path):
     comp_ts = pl.DataFrame(rows, infer_schema_length=None)
     # One row per relative this tool and setting searched, all carrying the same mean, so the
     # pages can key cost by relative; a relative it did not search gets no row ("not run").
-    searched = res.select("tool", "setting", "species").unique()
-    comp = searched.join(comp_ts, on=["tool", "setting"], how="inner")
+    # Sorted so that two builds from the same data/ write byte-identical files: unique() and
+    # join() do not keep row order.
+    searched = res.select("tool", "setting", "species").unique().sort("tool", "setting", "species")
+    comp = (searched.join(comp_ts, on=["tool", "setting"], how="inner")
+            .sort("tool", "setting", "species", "step"))
     src = json.loads((data / "SOURCE.json").read_text())
     prov = json.loads((data / "provenance.json").read_text())
     prov["n_queries"] = int(comp_ts["n_queries"].max())
@@ -345,7 +359,7 @@ def results_json(res: pl.DataFrame) -> dict:
         k2 = f'{r["tool"]}|{r["setting"]}'
         if k2 in out.setdefault(key, {}):
             raise SystemExit(f"two rows for {key} {k2}")
-        out[key][k2] = [r["fmax"], r["auprc"], r["median_iou_tp"], r["n_truth_instances"], r["n_tp_calls"]]
+        out[key][k2] = [r["fmax"], r["auprc"], r["median_iou_tp"], r["n_truth_instances"]]
     return out
 
 
@@ -371,7 +385,7 @@ def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[
     body = f"""
 <h1>{SITE}</h1>
 <p class="lede">Which tool puts the known domains and features of human proteins in the right
-place, and what does it cost? Each row is one tool at one setting, ranked best first.</p>
+place, and what does it cost? Each row is one tool at one setting.</p>
 <details class="choices" id="choices">
 <summary><span class="choices-label">Change what is ranked</span>
 <span class="choices-now" id="filtersummary"></span></summary>
@@ -390,7 +404,7 @@ GPU: a g5.xlarge with one NVIDIA A10G costs $1.006 per hour.</span>
 </div>
 </details>
 <figure>
-<figcaption><b>Table 1.</b> Tools ranked by Fmax, best first: <span id="filterline"></span> <span id="count"></span> Click a column name to sort; rows with no value always sort last. On a narrow screen, scroll the table sideways; the tool name stays in place.</figcaption>
+<figcaption><b>Table 1.</b> <span id="rankline">Tools ranked by Fmax, highest first</span>: <span id="filterline"></span> <span id="count"></span> Click a column name to sort; rows with no value always sort last. On a narrow screen, scroll the table sideways; the tool name stays in place.</figcaption>
 <details class="key"><summary>Key to the marks in Table 1</summary>
 <div class="legend">
 <span class="item"><span class="prov measured">measured</span> measured on Stanford's Sherlock
@@ -399,8 +413,9 @@ cluster, from the run's own task records</span>
 hardware they name (none yet)</span>
 <span class="item">— not run: no row in the results table for these filters</span>
 <span class="item">— not measured: the search ran, but no task record holds its cost</span>
-<span class="item"><i>no correct calls</i>: a median IoU needs at least one correct call on a region
-longer than one residue</span>
+<span class="item"><i>no correct calls</i>: no call was correct, so there is no median IoU</span>
+<span class="item"><i>correct calls only on single residues</i>: Fmax is above 0, but every correct
+call is on a one-residue annotation, where an IoU says nothing about where the ends are</span>
 <span class="item"><span class="tag">needs 3D structure prediction</span> <span class="tag">needs GPU</span>
 what the tool needs besides the sequence</span>
 <span class="item"><span class="tag warn">graded on its own models</span> hmmscan under the Pfam truth
@@ -416,8 +431,9 @@ correct call's ends match the true region: the overlap divided by the combined s
 perfect match.</p>
 <p class="prose">Each tool searched {n_queries:,} human proteins against the proteome of one
 relative and copied the relative's annotations onto them. The scores say how many of the human
-proteins' known annotations it put in the right place. The queries are human proteins, 964 of them
-from chromosome 6; how the ranking holds for queries from other species is not measured.</p>
+proteins' known annotations it put in the right place. The queries are human proteins, most of them
+from chromosome 6 (see <a href="methods.html">Methods</a>); how the ranking holds for queries from
+other species is not measured.</p>
 <details class="prose"><summary>How to choose between Fmax and AUPRC, and raw against dedup</summary>
 <p>Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it
 when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting
@@ -448,9 +464,9 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
                 continue
             if t == "kmerseek":
                 for alpha, shape in KMERSEEK_SHAPES.items():
-                    legend.append(f'<span class="item">{svg_marker(shape, k["color"])}kmerseek, {esc(alpha)}</span>')
+                    legend.append(f'<span class="item">{svg_marker(shape, f"var(--k-{kind})")}kmerseek, {esc(alpha)}</span>')
             else:
-                legend.append(f'<span class="item">{svg_marker(info["shape"], k["color"])}{esc(info["name"])}</span>')
+                legend.append(f'<span class="item">{svg_marker(info["shape"], f"var(--k-{kind})")}{esc(info["name"])}</span>')
     body = f"""
 <h1>Score against cost</h1>
 <p class="lede">The same tools and filters as the leaderboard, drawn as score against compute time.
@@ -499,6 +515,12 @@ def best_by(res: pl.DataFrame, **filt) -> pl.DataFrame:
     return q
 
 
+def strong_weak(comparisons: list) -> tuple[list, list]:
+    """From comparisons sorted best margin first: the two strongest, and the two weakest
+    (weakest first), never repeating a stratum already listed as strong."""
+    return comparisons[:2], list(reversed(comparisons[max(2, len(comparisons) - 2):]))
+
+
 def card_numbers(tool: str, res: pl.DataFrame, comp: pl.DataFrame) -> dict:
     """Strong and weak strata, cost and the three questions, all read from the tables."""
     species = "all" if tool == "hmmscan" else "zebrafish"
@@ -528,8 +550,7 @@ def card_numbers(tool: str, res: pl.DataFrame, comp: pl.DataFrame) -> dict:
                 "margin": r["fmax"] - ob["fmax"],
             })
     comparisons.sort(key=lambda c: (-c["margin"], c["axis"], c["stratum"]))
-    out["strong"] = comparisons[:2]
-    out["weak"] = list(reversed(comparisons[-2:])) if len(comparisons) > 2 else []
+    out["strong"], out["weak"] = strong_weak(comparisons)
 
     # Swiss-Prot feature types, same relative, this tool's best setting there.
     sp = best_by(res, tool=tool, truth_set="swissprot", calls="raw", species=species,
@@ -641,8 +662,12 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
             L += [f"Building its databases took {ch['db_cpu_h']:.3g} core-hours over {ch['db_n']} "
                   f"database{'s' if ch['db_n'] != 1 else ''}{gtxt}. A database is built once and reused, "
                   "so this is not in the per-query cost."]
+            if ch["db_n"] != ch["n_relatives"] and nums["species"] != "all":
+                L += [f"This covers the {ch['db_n']} database builds the task records hold; the search "
+                      f"used {ch['n_relatives']} relatives."]
         else:
-            L += ["Building its databases: not measured."]
+            L += [f"Building its databases for setting `{nums['best_setting']}`: not measured (no task "
+                  "record holds a database build for this tool and setting)."]
         L += [""]
     elif "best_setting" in nums:
         L += [f"Setting `{nums['best_setting']}`: not measured (no task record holds its search).", ""]
@@ -732,6 +757,8 @@ def page_card(tool: str, md: str, src: dict, cl: dict | None = None) -> str:
                   description=f"What {TOOLS[tool]['name']} compares, what it needs, where it is strong and weak, and what it costs.")
 
 
+# Licence categories a tool card can be filtered by; each tool's is set in scripts/tools.py.
+LICENCE_TAGS = ("permissive licence", "GPL-3.0")
 SHORT_KIND = {"letters": "aligns letters", "profiles": "family profiles", "shapes": "3-D shape letters",
               "kmers": "reduced-alphabet k-mers", "models": "Pfam models"}
 
@@ -744,7 +771,9 @@ def tool_tags(t: str, cl: dict | None) -> list[str]:
     tags.append("needs 3D structure prediction" if needs["3D structure prediction"] else "sequence only")
     if needs["GPU"]:
         tags.append("needs GPU")
-    tags.append("GPL-3.0" if "GPL" in info["licence"] else "permissive licence")
+    if info["licence_tag"] not in LICENCE_TAGS:
+        raise SystemExit(f"{t}: licence_tag {info['licence_tag']!r} is not one of {LICENCE_TAGS}")
+    tags.append(info["licence_tag"])
     if t == "hmmscan":
         tags.append("reference")
     if cl:
@@ -777,8 +806,9 @@ def dot_grid(t: str, res: pl.DataFrame, rel_order: list[str]) -> str:
 
 
 def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, claims_by_tool: dict) -> str:
-    rel_order = (res.filter(pl.col("species") != "all").select("species", "species_mya").unique()
-                 .sort("species_mya", "species")["species"].to_list())
+    rel = res.filter(pl.col("species") != "all").select("species", "species_mya").unique().sort("species_mya", "species")
+    rel_order = rel["species"].to_list()
+    mya = {s: int(m) for s, m in rel.iter_rows()}
     cards, all_tags = [], []
     for kind in KINDS:
         for t, info in TOOLS.items():
@@ -818,7 +848,7 @@ is strong and weak in the table, what it costs, its licence, and the exact comma
 {legend_kinds(tools_used)}
 <div class="legend" aria-label="Key to the dots"><span class="item"><svg width="44" height="14" aria-hidden="true">
 <circle cx="7" cy="7" r="6" fill="var(--ink)"/><circle cx="24" cy="7" r="3" fill="var(--ink)"/><circle cx="38" cy="7" r="3" fill="none" stroke="var(--muted)"/></svg>
-dots: one per relative, nearest (chimpanzee, 6 Mya) top left to farthest (E. coli, 2,000 Mya) bottom right;
+dots: one per relative, nearest ({esc(SPECIES[rel_order[0]])}, {mya[rel_order[0]]:,} Mya) top left to farthest ({esc(SPECIES[rel_order[-1]])}, {mya[rel_order[-1]]:,} Mya) bottom right;
 larger means a higher best Fmax on Pfam domains (raw calls, all regions); an open ring means not run.
 Hover the dots for the numbers.</span></div>
 <ul class="tc-grid" id="tc-grid">{"".join(cards)}</ul>
@@ -955,27 +985,33 @@ def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict) -
                   species="zebrafish", stratum_axis="all", stratum="all").row(0, named=True)
     n_rows = res.height
     pr5 = comp.filter(pl.col("tool") == "prostt5").row(0, named=True)
-    n_long = pl.read_parquet(Path(DATA_DIR) / "results.parquet").height
-    exps = sorted(pl.read_parquet(Path(DATA_DIR) / "results.parquet")["experiment"].unique().to_list())
+    long = pl.read_parquet(Path(DATA_DIR) / "results.parquet")
+    n_long = long.height
+    n_exp_long = long.filter(pl.col("experiment") == EXPERIMENT).height
+    exps = sorted(long["experiment"].unique().to_list())
     pfn_all = best_by(res, tool="hmmer3_phmmer", truth_set="pfamn", calls="raw", species="zebrafish",
                       stratum_axis="all").row(0, named=True)["n_truth_instances"]
     pfn_nh = best_by(res, tool="hmmer3_phmmer", truth_set="pfamn", calls="raw", species="zebrafish",
                      stratum_axis="identity", stratum="no_homolog").row(0, named=True)["n_truth_instances"]
     pfn = {"all": pfn_all, "nohom": pfn_nh}
+    n_rel = res.filter(pl.col("species") != "all")["species"].n_unique()
 
     body = rf"""<h1>Methods</h1>
 <div class="prose">
 <p>The tables hold {n_long:,} rows from {len(exps)} experiments ({", ".join(exps)}); the
 coverage page counts all of them. Everything else on this site comes from one of those
 experiments, <span class="mono">{EXPERIMENT}</span>, a single benchmark run. It searched {prov['n_queries']:,} human
-proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes,
-release 2020_04. Of the human proteins, 964 are encoded on chromosome 6; the other 34 are immune
-proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The run finished on 2026-09-13 on Stanford's Sherlock
-cluster. Its tables are <span class="mono">results.parquet</span> ({n_rows:,} rows) and
-<span class="mono">compute.parquet</span>, built by
+proteins against the proteomes of {n_rel} relatives from the Quest for Orthologs reference proteomes,
+release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune
+proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not
+record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock
+cluster. It has {n_exp_long:,} of the {n_long:,} rows of <span class="mono">results.parquet</span>,
+one per score. The leaderboard groups them into {n_rows:,} combinations of tool, setting, relative,
+truth set, raw or dedup, and stratum. Its cost is in <span class="mono">compute.parquet</span>. Both
+tables were built by
 <span class="mono">make leaderboard-tables</span> in {src['repo']} at commit
 <a class="mono" href="https://github.com/{src['repo']}/commit/{src['commit']}">{src['commit'][:8]}</a>.
-These 998 proteins are not a random sample of the human proteome.</p>
+These {prov['n_queries']:,} proteins are not a random sample of the human proteome.</p>
 
 <h2>No tool wins everywhere</h2>
 <p>No tool wins everywhere. So this board ranks tools within a stratum, a slice of the proteins
@@ -1045,8 +1081,9 @@ out (an IoU against one residue says nothing about where the ends are). Worked e
 by at least that much. A correct call on a region longer than one residue has an IoU of at least
 0.5. So the run stores 0 only when there is no such call. Either there are no correct calls at
 all, or the correct calls are on single residues only (the 1 aa length bin and the ACT_SITE,
-BINDING and SITE features).
-The pages show those as <i>no correct calls</i>, not as 0.</p>
+BINDING and SITE features). The pages show the first case as <i>no correct calls</i> and the
+second as <i>correct calls only on single residues</i>, never as 0. They tell the two apart by
+Fmax: an Fmax above 0 means at least one call was correct.</p>
 
 <h3>True instances</h3>
 <p><b>True instances</b> (n) is the number of annotations on the human proteins in the stratum,
@@ -1152,6 +1189,8 @@ def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dic
     n_outside = sum(r["c0"] is None or r["c0"] > 199 for r in regions)
     n_in = n_all - sum(1 for r in regions if r["s"] > r["plen"])
     n_fam = len({r["fam"] for r in regions})
+    n_prot = len({r["acc"] for r in regions})
+    zf_mya = int(res.filter(pl.col("species") == "zebrafish")["species_mya"][0])
     past = "".join(f'<li>{r["acc"]} {r["fam"]}: {r["s"]}–{r["e"]} on a {r["plen"]} aa sequence</li>'
                    for r in regions if r["past_end"])
     km = best_by(res, tool="kmerseek", truth_set="pfam", calls="raw", species="zebrafish",
@@ -1181,20 +1220,20 @@ def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dic
     }
     hist_legend = "".join(
         f'<span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" '
-        f'stroke="{KINDS[TOOLS[h["tool"]]["kind"]]["color"]}" stroke-width="2" stroke-dasharray="{h["dash"]}"/></svg>'
+        f'stroke="var(--k-{TOOLS[h["tool"]]["kind"]})" stroke-width="2" stroke-dasharray="{h["dash"]}"/></svg>'
         f'{esc(TOOLS[h["tool"]]["name"])}{" " + esc(h["setting"]) if h["tool"] == "kmerseek" else ""} '
         f'(n = {h["n"]:,})</span>' for h in hist)
     body = f"""
 <h1>Region pile-up</h1>
 <p class="source">The pile-up's own tables (regions and calls) come from {src['repo']} at commit
-<a class="mono" href="https://github.com/{src['repo']}/commit/{src.get('pileup_commit') or src['commit']}">{(src.get('pileup_commit') or src['commit'])[:8]}</a>
+<a class="mono" href="https://github.com/{src['repo']}/commit/{src['pileup_commit']}">{src['pileup_commit'][:8]}</a>
 (<span class="mono">results/leaderboard/pileup</span>).</p>
 <p class="lede">Where each tool's calls fall around a known domain. A <b>call</b> is a stretch of a
 human protein that a tool matched to a zebrafish protein carrying a Pfam domain. The call names that
 domain and spans the whole matched stretch, which can be much wider than the domain itself.
-Every row below is one <b>region</b>: one of the {n_all:,} Pfam domains on the 998 human query
+Every row below is one <b>region</b>: one of the {n_all:,} Pfam domains on the {n_prot:,} human query
 proteins. Every panel is one tool and setting searching the zebrafish proteome (zebrafish and
-human last shared an ancestor about 430 million years ago), and every panel has the same rows.</p>
+human last shared an ancestor about {zf_mya:,} million years ago), and every panel has the same rows.</p>
 <p class="prose">A residue counts as <b>covered</b> when a call naming that region's own Pfam family
 spans it, at any score the tool reported (E-value cutoff 10). Covered does not mean correctly
 placed: a call that runs far past the domain still covers it. Each row shows 100 residues before
@@ -1212,7 +1251,7 @@ is {med_len:.0f} aa, so one step is about {med_len / 100:.1f} aa.</p>
 panels. In the other panels the same order can look like scattered stripes. Identity is the best
 pairwise identity between the human domain and any zebrafish domain of its family. Regions with no
 such domain, or no matching AlphaFold model, sort last.</p>
-<p id="pu-loading" class="muted">Loading 23 panels…</p>
+<p id="pu-loading" class="muted">Loading {len(data["panels"])} panels…</p>
 <figure>
 <figcaption><b>Figure 3.</b> Calls piled up around {n_all:,} Pfam regions, one panel per tool and
 setting. At the top of each panel is the share of regions covered at each position (the column
@@ -1289,7 +1328,7 @@ from html.parser import HTMLParser
 
 class _Text(HTMLParser):
     """Headings, paragraphs, captions, list items and table cells of <main>, in order."""
-    KEEP = {"h1", "h2", "h3", "p", "figcaption", "li", "dt", "dd", "summary", "pre"}
+    KEEP = {"h1", "h2", "h3", "p", "figcaption", "li", "dt", "dd", "summary", "pre", "td", "th"}
 
     def __init__(self):
         super().__init__()
@@ -1394,7 +1433,7 @@ nothing on a card is typed in by hand.</p>
     return layout("Claims", "claims", body, src, description="Each tool's claims, the test that would retire each one, and its verdict.")
 
 
-def page_claims_schema(src: dict, cards: list[dict]) -> str:
+def page_claims_schema(src: dict, cards: list[dict], inv: dict) -> str:
     example = (ROOT_DIR / "claims" / "kmerseek.yaml").read_text().split("claims:\n", 1)[1].split("\n\n  - id:", 1)[0]
     badges = "".join(f'<p><img src="badges/claims-{c["tool"]}.svg" alt="claims for {esc(c["tool"])}: '
                      f'{c["counts"]["alive"]} alive, {c["counts"]["retired"]} retired, {c["counts"]["untested"]} untested"></p>'
@@ -1410,11 +1449,18 @@ runs each test and sets the status:</p>
 <li><b>table</b>, <b>table_bins</b>, <b>table_max</b>, <b>table_count_passing</b>: recomputed from
 <span class="mono">results.parquet</span> on every build.</li>
 <li><b>record</b>, <b>record_compare</b>: a number quoted from the experiment inventory
-(<span class="mono">data/experiments.json</span>, seanome/2024-kmerseek-analysis PR 97). The quote must
+(<span class="mono">data/experiments.json</span>, copied from {esc(inv['repo'])} at commit
+<a class="mono" href="https://github.com/{esc(inv['repo'])}/blob/{esc(inv['commit'])}/{esc(inv['path'])}">{esc(inv['commit'][:8])}</a>,
+PR {inv['pr']}; recorded in <span class="mono">data/experiments.SOURCE.json</span>). The quote must
 match the recorded value character for character, so a notebook that changes a number fails the check until the claim
 is updated.</li>
 <li><b>not_run</b>: no test yet; the claim is untested and the reason is shown.</li>
 </ul>
+<p>A test may carry a <b>verdict</b>: the wording of its verdict line, with the resolved numbers
+filled in. Without one, the line is the test's own result.</p>
+<p>A claim retired by a record test is dated with the date of that inventory record. A claim retired
+by a table test has no date, because the tables are recomputed on every build and the build cannot
+tell when the kill first held. The "last kill" date on a card counts only dated kills.</p>
 <p>The full schema: <a class="mono" href="claims/schema.json">claims/schema.json</a>. The first claim of
 <a class="mono" href="claims/kmerseek.yaml">claims/kmerseek.yaml</a>:</p>
 <pre><code>{esc(example)}</code></pre>
@@ -1422,7 +1468,8 @@ is updated.</li>
 <p>Every push and pull request runs <span class="mono">python scripts/claims.py --check</span> in a GitHub
 Action (<a class="mono" href="https://github.com/{REPO}/blob/main/.github/workflows/claims.yml">.github/workflows/claims.yml</a>).
 It fails when a file breaks the schema, a quote no longer matches its record, or a table test cannot
-find its rows. The build also writes a badge per tool from the same verdicts:</p>
+find its rows. A second job rebuilds the site from <span class="mono">data/</span> and fails if any
+page differs from the committed one. The build also writes a badge per tool from the same verdicts:</p>
 {badges}
 </div>"""
     return layout("claims.yaml", "claims", body, src, description="The claims.yaml format, the CI check and the badge.")
@@ -1454,7 +1501,7 @@ def main() -> None:
         "tools": {t: {"name": TOOLS[t]["name"], "kind": TOOLS[t]["kind"], "shape": TOOLS[t]["shape"],
                       "tags": [w for k, w in (("3D structure prediction", "needs 3D structure prediction"), ("GPU", "needs GPU"))
                                if TOOLS[t]["needs"][k]]}
-                  for t in tools_used},
+                  for t in sorted(tools_used)},
         "kinds": KINDS,
         "species": {s: {"name": SPECIES[s], "mya": int(species_mya[s]) if s in species_mya else None}
                     for s in SPECIES},
@@ -1496,7 +1543,7 @@ def main() -> None:
     claims_by_tool = {c["tool"]: c for c in cards}
     (out / "claims.html").write_text(page_claims(src, cards))
     (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, claims_by_tool))
-    (out / "claims-schema.html").write_text(page_claims_schema(src, cards))
+    (out / "claims-schema.html").write_text(page_claims_schema(src, cards, resolver.inv_src))
     for t in sorted(tools_used):
         nums = card_numbers(t, res, comp)
         md = card_markdown(t, nums, src)
@@ -1527,6 +1574,10 @@ def main() -> None:
         (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, claims_by_tool.get(t)))
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
     if (a.data / "pileup/regions.parquet").exists():
+        # The page credits its tables to this commit; without it, the copy is of unknown origin.
+        if not src.get("pileup_commit"):
+            raise SystemExit("data/pileup/ exists but data/SOURCE.json has no pileup_commit; "
+                             "re-run `make tables` so the pile-up tables are credited to their commit")
         import pileup
         calls = pl.read_parquet(a.data / "pileup/calls.parquet").select("tool", "setting").unique()
         kinds = list(KINDS)
@@ -1537,12 +1588,16 @@ def main() -> None:
         (out / "data" / "pileup_check.json").write_text(json.dumps(check, indent=1) + "\n")
         prov["pileup"] = json.loads((a.data / "pileup/provenance.json").read_text())
         (out / "pileup.html").write_text(page_pileup(src, res, prov, data, check))
+    else:
+        # No pile-up tables in data/: remove the pages an earlier build wrote from older ones.
+        for stale in ("pileup.html", "pileup.html.json", "data/pileup.json", "data/pileup_check.json"):
+            (out / stale).unlink(missing_ok=True)
 
     # Every page also as JSON at its path plus .json.
     full = json.loads(payload.replace("<\\/", "</"))
     page_json(out, "index.html", src, {"note": "The table is drawn from these rows: results keyed "
               "truth|calls|species|stratum_axis|stratum, then tool|setting -> [fmax, auprc, median_iou_tp, "
-              "n_truth_instances, n_tp_calls]; compute keyed tool|setting|species.", **full,
+              "n_truth_instances]; compute keyed tool|setting|species.", **full,
               "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_PAGE, "price_file": PRICE_FILE}})
     page_json(out, "cost.html", src, {"note": "Same rows as index.html.json; the plot is score against "
               "cpu_h_per_1000 for every tool and setting that has both.", "results": full["results"],
@@ -1553,6 +1608,8 @@ def main() -> None:
         for h, rows in parse_tables(cov)[:2]]})
     if (a.data / "inventory.md").exists():
         (out / "data" / "inventory.md").write_text((a.data / "inventory.md").read_text())
+    else:
+        (out / "data" / "inventory.md").unlink(missing_ok=True)
     page_json(out, "methods.html", src, None)
     page_json(out, "tools/index.html", src, {"cards": [f"{t}.json" for t in sorted(tools_used)]})
     page_json(out, "claims.html", src, {"claims": cards})

@@ -37,8 +37,624 @@
    "text": "Figure 2a. Tool by stratum axis. A filled square means the tables hold measured rows for that tool there. The number under it is the count of true instances scored, summed over experiments, query sets, relatives and truth sets. An empty square means not run."
   },
   {
+   "tag": "th",
+   "text": "Tool"
+  },
+  {
+   "tag": "th",
+   "text": "whole set, per relative"
+  },
+  {
+   "tag": "th",
+   "text": "% identity to nearest relative"
+  },
+  {
+   "tag": "th",
+   "text": "AlphaFold pLDDT"
+  },
+  {
+   "tag": "th",
+   "text": "Swiss-Prot feature type"
+  },
+  {
+   "tag": "th",
+   "text": "region length"
+  },
+  {
+   "tag": "td",
+   "text": "phmmer"
+  },
+  {
+   "tag": "td",
+   "text": "1,329,895"
+  },
+  {
+   "tag": "td",
+   "text": "952,047"
+  },
+  {
+   "tag": "td",
+   "text": "276,686"
+  },
+  {
+   "tag": "td",
+   "text": "181,647"
+  },
+  {
+   "tag": "td",
+   "text": "1,133,694"
+  },
+  {
+   "tag": "td",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "td",
+   "text": "1,158,512"
+  },
+  {
+   "tag": "td",
+   "text": "952,047"
+  },
+  {
+   "tag": "td",
+   "text": "276,686"
+  },
+  {
+   "tag": "td",
+   "text": "181,647"
+  },
+  {
+   "tag": "td",
+   "text": "1,133,694"
+  },
+  {
+   "tag": "td",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "td",
+   "text": "1,329,803"
+  },
+  {
+   "tag": "td",
+   "text": "952,047"
+  },
+  {
+   "tag": "td",
+   "text": "276,686"
+  },
+  {
+   "tag": "td",
+   "text": "181,647"
+  },
+  {
+   "tag": "td",
+   "text": "1,133,694"
+  },
+  {
+   "tag": "td",
+   "text": "MMseqs2, three rounds"
+  },
+  {
+   "tag": "td",
+   "text": "1,158,512"
+  },
+  {
+   "tag": "td",
+   "text": "952,047"
+  },
+  {
+   "tag": "td",
+   "text": "276,686"
+  },
+  {
+   "tag": "td",
+   "text": "181,647"
+  },
+  {
+   "tag": "td",
+   "text": "1,133,694"
+  },
+  {
+   "tag": "td",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "td",
+   "text": "1,158,512"
+  },
+  {
+   "tag": "td",
+   "text": "952,047"
+  },
+  {
+   "tag": "td",
+   "text": "276,686"
+  },
+  {
+   "tag": "td",
+   "text": "181,647"
+  },
+  {
+   "tag": "td",
+   "text": "1,133,694"
+  },
+  {
+   "tag": "td",
+   "text": "Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "1,110,504"
+  },
+  {
+   "tag": "td",
+   "text": "939,872"
+  },
+  {
+   "tag": "td",
+   "text": "231,206"
+  },
+  {
+   "tag": "td",
+   "text": "145,722"
+  },
+  {
+   "tag": "td",
+   "text": "1,085,594"
+  },
+  {
+   "tag": "td",
+   "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "1,158,512"
+  },
+  {
+   "tag": "td",
+   "text": "952,047"
+  },
+  {
+   "tag": "td",
+   "text": "276,686"
+  },
+  {
+   "tag": "td",
+   "text": "181,647"
+  },
+  {
+   "tag": "td",
+   "text": "1,133,694"
+  },
+  {
+   "tag": "td",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "td",
+   "text": "1,584,821"
+  },
+  {
+   "tag": "td",
+   "text": "1,105,115"
+  },
+  {
+   "tag": "td",
+   "text": "276,686"
+  },
+  {
+   "tag": "td",
+   "text": "181,647"
+  },
+  {
+   "tag": "td",
+   "text": "1,133,694"
+  },
+  {
+   "tag": "td",
+   "text": "hmmscan with Pfam"
+  },
+  {
+   "tag": "td",
+   "text": "8,793"
+  },
+  {
+   "tag": "td",
+   "text": "8,234"
+  },
+  {
+   "tag": "td",
+   "text": "8,793"
+  },
+  {
+   "tag": "td",
+   "text": "folddisco (no card yet)"
+  },
+  {
+   "tag": "td",
+   "text": "590,559"
+  },
+  {
+   "tag": "td",
+   "text": "516,687"
+  },
+  {
+   "tag": "td",
+   "text": "121,049"
+  },
+  {
+   "tag": "td",
+   "text": "73,872"
+  },
+  {
+   "tag": "td",
+   "text": "590,559"
+  },
+  {
+   "tag": "td",
+   "text": "mmseqs2 (no card yet)"
+  },
+  {
+   "tag": "td",
+   "text": "171,383"
+  },
+  {
+   "tag": "td",
+   "text": "reseek (no card yet)"
+  },
+  {
+   "tag": "td",
+   "text": "615,377"
+  },
+  {
+   "tag": "td",
+   "text": "516,687"
+  },
+  {
+   "tag": "td",
+   "text": "121,049"
+  },
+  {
+   "tag": "td",
+   "text": "73,872"
+  },
+  {
+   "tag": "td",
+   "text": "590,559"
+  },
+  {
    "tag": "figcaption",
    "text": "Figure 2b. Tool by experiment. A filled square means the tables hold measured rows for that tool there. The number under it is the count of true instances scored, summed over the query sets, relatives, truth sets and strata of that experiment. An empty square means not run. The last column, scope40_v040_shuffled_k2_seed1, is a null control for kmerseek (alphabet letters shuffled), not a run other tools need."
+  },
+  {
+   "tag": "th",
+   "text": "Tool"
+  },
+  {
+   "tag": "th",
+   "text": "alphabet_ranking_three_cases"
+  },
+  {
+   "tag": "th",
+   "text": "dark_set_accuracy"
+  },
+  {
+   "tag": "th",
+   "text": "dark_set_gain"
+  },
+  {
+   "tag": "th",
+   "text": "dark_set_pfam_fmax"
+  },
+  {
+   "tag": "th",
+   "text": "deep_twilight"
+  },
+  {
+   "tag": "th",
+   "text": "elm_cover"
+  },
+  {
+   "tag": "th",
+   "text": "qfo_region_midi"
+  },
+  {
+   "tag": "th",
+   "text": "qfo_region_midi_plus"
+  },
+  {
+   "tag": "th",
+   "text": "qfo_region_mini"
+  },
+  {
+   "tag": "th",
+   "text": "scope40_v040"
+  },
+  {
+   "tag": "th",
+   "text": "scope40_v040_below_kmin"
+  },
+  {
+   "tag": "th",
+   "text": "scope40_v040_shuffled_k2_seed1"
+  },
+  {
+   "tag": "td",
+   "text": "phmmer"
+  },
+  {
+   "tag": "td",
+   "text": "159,304"
+  },
+  {
+   "tag": "td",
+   "text": "11,987"
+  },
+  {
+   "tag": "td",
+   "text": "92"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,785,042"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,785,042"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "td",
+   "text": "159,304"
+  },
+  {
+   "tag": "td",
+   "text": "11,987"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,785,042"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "MMseqs2, three rounds"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,785,042"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,785,042"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "92"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,595,262"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,785,042"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "td",
+   "text": "2"
+  },
+  {
+   "tag": "td",
+   "text": "159,304"
+  },
+  {
+   "tag": "td",
+   "text": "93,098"
+  },
+  {
+   "tag": "td",
+   "text": "11,987"
+  },
+  {
+   "tag": "td",
+   "text": "92"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "1,785,042"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "44,970"
+  },
+  {
+   "tag": "td",
+   "text": "147,070"
+  },
+  {
+   "tag": "td",
+   "text": "122,854"
+  },
+  {
+   "tag": "td",
+   "text": "hmmscan with Pfam"
+  },
+  {
+   "tag": "td",
+   "text": "6,998"
+  },
+  {
+   "tag": "td",
+   "text": "7,203"
+  },
+  {
+   "tag": "td",
+   "text": "11,619"
+  },
+  {
+   "tag": "td",
+   "text": "folddisco (no card yet)"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "mmseqs2 (no card yet)"
+  },
+  {
+   "tag": "td",
+   "text": "159,304"
+  },
+  {
+   "tag": "td",
+   "text": "11,987"
+  },
+  {
+   "tag": "td",
+   "text": "92"
+  },
+  {
+   "tag": "td",
+   "text": "reseek (no card yet)"
+  },
+  {
+   "tag": "td",
+   "text": "24,818"
+  },
+  {
+   "tag": "td",
+   "text": "1,547,820"
+  },
+  {
+   "tag": "td",
+   "text": "344,906"
   },
   {
    "tag": "p",
