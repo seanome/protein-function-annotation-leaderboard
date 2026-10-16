@@ -19,6 +19,12 @@ https://seanome.github.io/protein-function-annotation-leaderboard/
 | `coverage.md` | tool by stratum: measured or not run |
 | `provenance.json` | sha256 of every input and output |
 
+The Reduced alphabets page (`alphabets.html`) reads `data/alphabets/`, copied by
+`make alphabet-tables` from `results/leaderboard/alphabets/` of its own commit
+(`ALPHABETS_COMMIT`, written there by `make leaderboard-alphabets`), with PR 116's
+`tables/hp_borderline_residues.csv` from the same commit. `data/SOURCE.json` records that
+commit as `alphabets_commit`, and the page prints it.
+
 `data/SOURCE.json` records the commit, and every page prints it. The site never fills a gap:
 where the table has no row, the page shows "—" and "not run".
 
