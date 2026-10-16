@@ -107,7 +107,12 @@ td.missing{color:var(--muted);font-family:"Source Sans 3",sans-serif !important;
 .plotbox .frontier{stroke:var(--ink);stroke-width:1.6;fill:none}
 .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--ink);border-radius:6px;padding:6px 9px;font-size:.85rem;
   box-shadow:var(--shadow);max-width:280px;display:none;z-index:2}
-.metricpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+.axispick{margin:10px 0 4px}
+.pickrow{display:grid;grid-template-columns:minmax(150px,190px) 1fr;gap:4px 12px;align-items:center;padding:4px 0}
+.picklabel{font-weight:600;font-size:.95rem}
+@media (max-width:640px){.pickrow{grid-template-columns:1fr}}
+button.chip:disabled{opacity:.45;cursor:not-allowed;border-style:dashed}
+button.chip:disabled:hover{border-color:var(--hair)}
 
 /* Cards and coverage */
 .card{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:6px 22px 18px;box-shadow:var(--shadow);max-width:900px}
