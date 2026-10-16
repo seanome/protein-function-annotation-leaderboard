@@ -206,15 +206,11 @@
   },
   {
    "tag": "figcaption",
-   "text": "made-up exampleFigure 6. IoU of one call with one true domain. Top: a 200-residue protein with one true domain, and the call below it; the brackets underneath show the shared residues and the residues covered by either. It starts at the example on the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU of each correct call of protein A in Figure 4, with your call added when it is correct; the dashed line is their median."
+   "text": "made-up exampleFigure 6. IoU of one call with one true domain. Top: a 200-residue protein with one true domain, and the call below it; the brackets underneath show the shared residues and the residues covered by either. It starts at the example on the Methods page (call 30–129, domain 10–109). Drag the call, or its handles, to see IoU change. Bottom: the IoU of each correct call of protein A in Figure 4, with your call added when it is correct; the dashed line is their median."
   },
   {
    "tag": "p",
-   "text": "IoU = shared ÷ covered by either = ÷ = : ."
-  },
-  {
-   "tag": "p",
-   "text": "Median IoU of the correct calls: ."
+   "text": "Drag the black call to move it, or drag its handles to move one end."
   },
   {
    "tag": "summary",
@@ -302,11 +298,19 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 8. The cost formula with your own numbers. It starts at phmmer's measured core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any box to see the cost change."
+   "text": "Figure 8. The cost formula with your own numbers. It starts at phmmer's measured core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Drag any underlined number to see the cost change."
   },
   {
    "tag": "p",
-   "text": "cost_usd_est = = per 1,000 queries."
+   "text": "Drag any underlined number left or right to change it (hold Shift for small steps), or click it and use the arrow keys."
+  },
+  {
+   "tag": "p",
+   "text": "cost per 1,000 queries = core-hours × $ per CPU-hour + GPU-hours × $ per GPU-hour"
+  },
+  {
+   "tag": "summary",
+   "text": "Type exact numbers"
   },
   {
    "tag": "p",

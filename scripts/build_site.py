@@ -2036,24 +2036,32 @@ where the domain does, and 0 when they do not overlap. A call needs an IoU of 0.
 <figcaption><span class="ex-made-up">made-up example</span><b>Figure 6.</b> IoU of one call with one true
 domain. <details class="capmore"><summary>How to read Figure 6</summary>Top: a 200-residue protein with one true domain, and the call below it; the brackets
 underneath show the shared residues and the residues covered by either. It starts at the example on
-the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU
+the Methods page (call 30–129, domain 10–109). Drag the call, or its handles, to see IoU change. Bottom: the IoU
 of each correct call of protein A in Figure 4, with your call added when it is correct; the dashed
 line is their median.</details></figcaption>
 <div class="ex-legend" aria-label="Key to Figure 6">
 @@LEG3@@
 </div>
-<div class="ex-controls">
+<p class="ex-hint">Drag the black call to move it, or drag its handles to move one end.</p>
+<div class="ex-box ex-drag" id="f3-track"></div>
+<div class="ex-tiles" aria-live="polite">
+<div class="ex-tile"><span class="ex-tl">Shared residues</span><span class="ex-tv" id="f3-inter"></span>
+<span class="ex-ts">in both the call and the true domain</span></div>
+<div class="ex-tile"><span class="ex-tl">Covered by either</span><span class="ex-tv" id="f3-union"></span>
+<span class="ex-ts">in the call, the true domain, or both</span></div>
+<div class="ex-tile now"><span class="ex-tl">IoU of your call</span><span class="ex-tv" id="f3-iou"></span>
+<span class="ex-ts">shared ÷ covered by either: <span id="f3-verdict"></span></span></div>
+<div class="ex-tile best"><span class="ex-tl">Median IoU</span><span class="ex-tv" id="f3-median"></span>
+<span class="ex-ts">the middle of the <span class="v" id="f3-n"></span> correct calls below</span></div>
+</div>
+<div class="ex-controls ex-exact">
 <label for="f3-start"><span>Call starts at residue <span class="v mono" id="f3-start-v"></span></span>
 <input type="range" id="f3-start" min="1" max="200" step="1" value="@@S@@"></label>
 <label for="f3-end"><span>Call ends at residue <span class="v mono" id="f3-end-v"></span></span>
 <input type="range" id="f3-end" min="1" max="200" step="1" value="@@E@@"></label>
 </div>
-<div class="ex-box" id="f3-track"></div>
-<p class="ex-read">IoU = shared ÷ covered by either = <span class="v" id="f3-inter"></span> ÷
-<span class="v" id="f3-union"></span> = <span class="v" id="f3-iou"></span>: <span id="f3-verdict"></span>.</p>
 <div class="ex-box" id="f3-strip"></div>
-<p class="ex-read">Median IoU of the <span class="v" id="f3-n"></span> correct calls:
-<span class="v" id="f3-median"></span>. <span id="f3-mine"></span></p>
+<p class="ex-read"><span id="f3-mine"></span></p>
 </figure>
 <details class="prose ex-more"><summary>Median IoU on the leaderboard</summary>
 <p><b>Median IoU</b> on the leaderboard is the middle IoU of all of a tool's correct calls. Half of
@@ -2114,16 +2122,30 @@ GPU-hour, in US dollars. A core-hour is priced as one CPU-hour.</p>
 <figure class="ex-fig" id="fig5">
 <figcaption><b>Figure 8.</b> The cost formula with your own numbers. <details class="capmore"><summary>How to read Figure 8</summary>It starts at phmmer's measured
 core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These
-are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any
-box to see the cost change.</details></figcaption>
+are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Drag any underlined
+number to see the cost change.</details></figcaption>
+<p class="ex-hint">Drag any <span class="scrub-demo">underlined number</span> left or right to change it
+(hold Shift for small steps), or click it and use the arrow keys.</p>
+<p class="ex-formula">cost per 1,000 queries =
+<span class="scrub" data-for="f5-cpu" data-step="0.005" data-name="core-hours per 1,000 queries"></span> core-hours
+× $<span class="scrub" data-for="f5-rcpu" data-step="0.0005" data-name="price per CPU-hour"></span> per CPU-hour
++ <span class="scrub" data-for="f5-gpu" data-step="0.01" data-name="GPU-hours per 1,000 queries"></span> GPU-hours
+× $<span class="scrub" data-for="f5-rgpu" data-step="0.01" data-name="price per GPU-hour"></span> per GPU-hour</p>
+<div class="ex-tiles" aria-live="polite">
+<div class="ex-tile"><span class="ex-tl">CPU part</span><span class="ex-tv" id="f5-a"></span>
+<span class="ex-ts">core-hours × price per CPU-hour</span></div>
+<div class="ex-tile"><span class="ex-tl">GPU part</span><span class="ex-tv" id="f5-b"></span>
+<span class="ex-ts">GPU-hours × price per GPU-hour</span></div>
+<div class="ex-tile best"><span class="ex-tl">Estimated cost</span><span class="ex-tv" id="f5-out"></span>
+<span class="ex-ts">US dollars per 1,000 queries</span></div>
+</div>
+<details class="ex-exact"><summary>Type exact numbers</summary>
 <div class="ex-controls">
 <label for="f5-cpu">core-hours per 1,000 queries <input type="number" id="f5-cpu" min="0" step="any" inputmode="decimal" value="@@CPU@@"></label>
 <label for="f5-gpu">GPU-hours per 1,000 queries <input type="number" id="f5-gpu" min="0" step="any" inputmode="decimal" value="0"></label>
 <label for="f5-rcpu">r_cpu, USD per CPU-hour <input type="number" id="f5-rcpu" min="0" step="any" inputmode="decimal" value="@@RCPU@@"></label>
 <label for="f5-rgpu">r_gpu, USD per GPU-hour <input type="number" id="f5-rgpu" min="0" step="any" inputmode="decimal" value="@@RGPU@@"></label>
-</div>
-<p class="ex-read">cost_usd_est = <span class="v" id="f5-line"></span> = <span class="v" id="f5-out"></span>
-per 1,000 queries.</p>
+</div></details>
 </figure>
 <p class="prose muted">The made-up example is also in this page's JSON copy. Definitions of every
 score as the benchmark computes them, with a worked example from the real data, are on

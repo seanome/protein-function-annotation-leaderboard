@@ -451,3 +451,16 @@ table.cov .mono,td.num{overflow-wrap:normal;white-space:nowrap}
 @keyframes exflash{from{background:var(--accent-soft,rgba(31,95,103,.18))}to{background:var(--bg)}}
 .ex-tile.flash{animation:exflash .9s ease-out}
 @media (prefers-reduced-motion:reduce){.ex-tile.flash{animation:none}}
+
+/* Draggable call in Figure 6 and draggable numbers in Figure 8. */
+.ex-hint{font-size:.9rem;color:var(--muted);margin:6px 0 2px}
+.ex-drag{touch-action:none;user-select:none}
+.ex-grab{cursor:grab}
+.ex-drag.dragging .ex-grab,.ex-drag.dragging{cursor:grabbing}
+.ex-handle{fill:var(--surface);stroke:var(--ink);stroke-width:2;cursor:ew-resize}
+.ex-exact{margin-top:8px;font-size:.9rem}
+.ex-formula{font-size:1.15rem;line-height:2.1;margin:10px 0}
+.scrub,.scrub-demo{font-family:"Fantasque Sans Mono",monospace;font-weight:700;color:var(--accent);
+  border-bottom:2px dashed var(--accent);cursor:ew-resize;touch-action:none;user-select:none;padding:0 2px}
+.scrub:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.scrub.scrubbing{background:var(--surface);border-bottom-style:solid}
