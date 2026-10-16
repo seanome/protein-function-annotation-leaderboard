@@ -1,0 +1,13 @@
+{
+ "note": "Copies, byte for byte, of the scorer that wrote every region-benchmark number on the leaderboard. Do not edit here: change it in the source repository and copy it again. tests/check_scorer.py fails if a file's sha256 differs from this list.",
+ "repo": "seanome/2024-kmerseek-analysis",
+ "branch": "olgabot/leaderboard-all-experiments (PR 148)",
+ "commit": "6df20c1f290fc123781df8d58097bf7b836535ac",
+ "files": {
+  "evaluate_domain_calls.py": {"path": "nextflow-runs/qfo-pfam-region-benchmark/bin/evaluate_domain_calls.py", "sha256": "9e630486853c46d26867e7e3fd8103d70914af484354b3eb002205f20271a801"},
+  "cafa_metrics.py": {"path": "nextflow-runs/qfo-pfam-region-benchmark/bin/cafa_metrics.py", "sha256": "e8f97c34326549acdf150fd018688e54d4076db73609f22e4e19f63c9d847525"},
+  "build_swissprot_truth.py": {"path": "nextflow-runs/qfo-pfam-region-benchmark/bin/build_swissprot_truth.py", "sha256": "2e6ce718322a7f822f47b9f979c826861049859f3712677ff081be501710f327"},
+  "build_leaderboard_long.py": {"path": "scripts/build_leaderboard_long.py", "sha256": "70cb52f906a936a5f5c5050def4f0ae310aa1756515fa57ed366564a58cfa331"}
+ },
+ "flags": "The pipeline's scoreDomainCalls process (main.nf) calls evaluate_domain_calls.py with --min-overlap 0.5 --strict-iou 0.8 --dedup-transfer-modes off,on, once per truth set; scripts/score_submission.py passes the same."
+}

@@ -1,0 +1,6 @@
+{
+ "note": "Accepted wet-lab rows in data/truth_contributed.tsv, per organism. Keyed by NCBI taxon ID; rows given as a sequence with an organism name and no taxon ID are under 'by_name'.",
+ "n_rows": 0,
+ "by_taxon": {},
+ "by_name": {}
+}

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contribute</title>
+<meta name="description" content="How tool authors and labs add to the protein annotation leaderboard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script defer src="../assets/terms.js"></script>
+<script defer src="../assets/nav.js"></script>
+
+</head>
+<body data-page="contribute">
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><details class="navmore"><summary class="cur">More</summary>
+<div class="navpop"><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a><a href="../contribute/index.html" aria-current="page">Contribute</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Contribute">Contribute</summary>
+<div class="navpop"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a><a href="../contribute/index.html" aria-current="page">Contribute</a></div></details>
+</div></header>
+<main class="wrap" data-page="contribute">
+<h1>Contribute</h1>
+<p class="lede">The leaderboard grows in two ways without anyone here running your tool or
+your experiment. Tool authors send predictions; labs send regions they have tested.</p>
+<p class="asof">Data from 15 Oct 2026, commit <span class="mono">4a4b1171</span> (<a href="#source-commit">source</a>)</p>
+
+<h2 id="tools">Tool authors: send predictions</h2>
+<figure>
+<figcaption><b>Figure 1.</b> What happens to a tool submission, in order. No account on this
+site and nothing of ours to install: a GitHub account is enough.</figcaption>
+<ol class="flow" aria-label="Steps of a tool submission"><li><span class="flow-n">1</span><b>Run your tool</b><span class="flow-d">on a published query set, on your own hardware</span></li><li><span class="flow-n">2</span><b>Open a pull request</b><span class="flow-d">predictions, timing log, tool card</span></li><li><span class="flow-n">3</span><b>Workflow scores it</b><span class="flow-d">the leaderboard's own scorer, against the known regions of the query proteins</span></li><li><span class="flow-n">4</span><b>Rows posted</b><span class="flow-d">as a comment on the pull request, before merge</span></li><li><span class="flow-n">5</span><b>Merge</b><span class="flow-d">the folder stays in the repository and is scored again at every release</span></li></ol>
+</figure>
+<p>A query set is a fixed list of query proteins whose known regions (Pfam domains and Swiss-Prot
+features) are the answers every tool is graded on. Run your tool on one of the query sets in
+<a href="https://github.com/seanome/protein-function-annotation-leaderboard/tree/main/data/query_sets"><span class="mono">data/query_sets/</span></a>, then open a
+pull request that adds one folder under <span class="mono">submissions/</span> with three files:
+the predictions, a timing log (how long each run took, on what hardware), and a short tool card
+(what the tool compares, its licence and command, shown on the site). A workflow grades the predictions with
+the same scorer that made every number on this site and posts the rows on the pull request.
+Cost numbers you send are shown as <em>reported</em>, with your hardware named, never as measured.
+<a href="https://github.com/seanome/protein-function-annotation-leaderboard/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> has the five steps and a worked example
+with MMseqs2. The leaderboard table does not show submitted rows yet; until it does, they are on
+the pull request and in the repository.</p>
+
+<h2 id="labs">Labs: send a region you have tested</h2>
+<figure>
+<figcaption><b>Figure 2.</b> What happens to a lab's submission (one region of one protein), in order.</figcaption>
+<ol class="flow" aria-label="Steps of a lab submission"><li><span class="flow-n">1</span><b>Fill in the form</b><span class="flow-d">one tested region of one protein</span></li><li><span class="flow-n">2</span><b>GitHub issue</b><span class="flow-d">you submit it on GitHub; it joins the curation queue</span></li><li><span class="flow-n">3</span><b>Curator decides</b><span class="flow-d">accepted or rejected, always with a reason</span></li><li><span class="flow-n">4</span><b>Table of tested regions</b><span class="flow-d">an accepted region is added, with your ORCID iD</span></li><li><span class="flow-n">5</span><b>Tools graded on it</b><span class="flow-d">at the next rebuild of the tables, if a query set holds the protein</span></li></ol>
+</figure>
+<p>If your lab has shown by experiment that a stretch of a protein binds something, carries an
+activity, sends the protein somewhere in the cell, or has a solved structure, that region is a
+test every tool can be graded on, once a query set holds the protein. <a href="truth/">The form</a> takes one region at a time. A
+curator checks it against the rules in
+<a href="https://github.com/seanome/protein-function-annotation-leaderboard/blob/main/docs/curation.md">docs/curation.md</a>; a row that only repeats an
+annotation already in a database is turned down, because the tools are already graded on those.</p>
+
+</main>
+<footer class="site"><div class="wrap">
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+</div></footer>
+</body>
+</html>

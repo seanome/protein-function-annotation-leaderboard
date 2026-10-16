@@ -1,0 +1,86 @@
+# The wet-lab form, for people who start on GitHub instead of the site's /contribute/truth/
+# page. Both write the same "### <label>" sections; scripts/truth_contributed.py reads them.
+# Keep the labels below and the headings in docs/assets/truth-form.js identical.
+name: Add a region your lab has tested
+description: One protein region, with what your experiment showed about it. It joins the curation queue.
+title: "[truth] "
+labels: ["truth-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One region per issue. A curator accepts or rejects it with a reason, following docs/curation.md.
+        Positions count the first residue as 1, and both ends are part of the region.
+  - type: input
+    id: accession
+    attributes:
+      label: UniProt accession
+      description: Such as P01375. Leave empty if the protein has no UniProt entry and give the sequence instead.
+  - type: textarea
+    id: sequence
+    attributes:
+      label: Sequence
+      description: One-letter amino-acid code. Only when there is no UniProt accession.
+  - type: input
+    id: organism
+    attributes:
+      label: Organism
+      description: Scientific name or NCBI taxon ID. Needed when you give a sequence.
+  - type: input
+    id: start
+    attributes:
+      label: First residue
+    validations:
+      required: true
+  - type: input
+    id: end
+    attributes:
+      label: Last residue
+    validations:
+      required: true
+  - type: dropdown
+    id: shown
+    attributes:
+      label: What was shown
+      options:
+        - binding
+        - activity
+        - localisation
+        - structure
+    validations:
+      required: true
+  - type: input
+    id: eco
+    attributes:
+      label: ECO evidence code
+      description: From the Evidence and Conclusion Ontology, such as ECO:0000269. Browse at https://www.ebi.ac.uk/ols4/ontologies/eco
+    validations:
+      required: true
+  - type: textarea
+    id: citation
+    attributes:
+      label: Citation or note
+      description: A DOI or PubMed ID, or a note on unpublished work (method, controls, who did it). Say what the region binds, what activity was measured, or where it sends the protein.
+    validations:
+      required: true
+  - type: input
+    id: orcid
+    attributes:
+      label: ORCID iD
+      description: Such as 0000-0002-1825-0097. It is stored beside your row.
+    validations:
+      required: true
+  - type: checkboxes
+    id: cc0
+    attributes:
+      label: Licence
+      options:
+        - label: I release this region under CC0
+          required: true
+  - type: checkboxes
+    id: newexp
+    attributes:
+      label: Source
+      options:
+        - label: It comes from an experiment, not only from a database annotation
+          required: true

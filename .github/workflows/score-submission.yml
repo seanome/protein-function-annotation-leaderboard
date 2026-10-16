@@ -1,0 +1,119 @@
+# Scores a tool submission (a pull request that adds or changes submissions/<name>/) with the
+# leaderboard's own scorer and posts the resulting rows on the pull request.
+#
+# Two triggers, one job, never both on one pull request:
+#   pull_request_target  pull requests from forks. Under plain pull_request a fork gets a
+#                        read-only token and could not post its comment. GitHub runs
+#                        pull_request_target from the workflow file on the DEFAULT branch, so
+#                        this path works once this file is on main.
+#   pull_request         pull requests from branches of this repository, which already have
+#                        write access. Runs from the pull request's own workflow file, so it
+#                        also works before this file reaches main.
+# Either way the scorer is checked out from the BASE commit, and the pull request's own code is
+# never run: only the three data files of each submission folder are copied out of the pull
+# request's commit (git show), and scripts/score_submission.py reads them as data (polars CSV
+# and yaml.safe_load). Any other file name in the folder is refused.
+name: score-submission
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths: ["submissions/**"]
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: ["submissions/**"]
+permissions:
+  contents: read
+  pull-requests: write
+concurrency:
+  group: score-submission-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  score:
+    if: >-
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install polars==1.44.2 pyarrow==26.0.0 pyyaml==6.0.2 numpy==2.3.5
+      - name: Copy the submission files out of the pull request
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 "https://github.com/${HEAD_REPO}.git" "${HEAD_SHA}"
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR}/files" --jq '.[].filename' > changed.txt
+          grep -E '^submissions/[^/]+/' changed.txt | cut -d/ -f2 | sort -u > folders.txt || true
+          mkdir -p incoming
+          : > refused.txt
+          while read -r name; do
+            if ! [[ "$name" =~ ^[a-z0-9_-]+$ ]]; then echo "submissions/$name: folder names may hold only a-z, 0-9, _ and -" >> refused.txt; continue; fi
+            mkdir -p "incoming/$name"
+            git ls-tree --name-only "${HEAD_SHA}" "submissions/$name/" | while read -r f; do
+              base=$(basename "$f")
+              case "$base" in
+                predictions.tsv|predictions.tsv.gz|timing.tsv|tool.yaml)
+                  git show "${HEAD_SHA}:$f" > "incoming/$name/$base" ;;
+                *) echo "submissions/$name/$base: only predictions.tsv(.gz), timing.tsv and tool.yaml belong in a submission folder" >> refused.txt ;;
+              esac
+            done
+          done < folders.txt
+          echo "folders:"; cat folders.txt
+      - name: Score
+        id: score
+        run: |
+          # Not -e: one folder that fails is reported in its comment and the next is still scored.
+          set +e -uo pipefail
+          status=0
+          mkdir -p scored
+          while read -r name; do
+            [ -d "incoming/$name" ] || continue
+            python scripts/score_submission.py --submission "incoming/$name" --out "scored/$name" \
+              --commit "${HEAD_SHA}" --path "submissions/$name"
+            [ $? -eq 0 ] || status=1
+          done < folders.txt
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+      - name: Post or update one comment per submission folder
+        if: always()
+        run: |
+          set -euo pipefail
+          post() {  # $1 marker, $2 file with the comment text
+            body_file=$(mktemp)
+            { echo "<!-- $1 -->"; cat "$2"; } > "$body_file"
+            id=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" \
+                   --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"<!-- $1 -->\"))) | .id" | head -1)
+            if [ -n "$id" ]; then
+              gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/$id" -F "body=@$body_file" >/dev/null
+            else
+              gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" -F "body=@$body_file" >/dev/null
+            fi
+          }
+          if [ -s refused.txt ]; then
+            { echo "## Some files were not read"; echo; sed 's/^/- /' refused.txt; } > refused.md
+            post "score-submission:refused" refused.md
+          fi
+          while read -r name; do
+            [ -f "scored/$name/comment.md" ] && post "score-submission:$name" "scored/$name/comment.md"
+          done < folders.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scored-rows
+          path: |
+            scored/*/results.parquet
+            scored/*/compute.parquet
+            scored/*/card.json
+            scored/*/comment.md
+          if-no-files-found: ignore
+      - name: Fail if a submission could not be scored
+        if: steps.score.outputs.status != '0'
+        run: exit 1
