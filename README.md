@@ -19,6 +19,12 @@ https://seanome.github.io/protein-function-annotation-leaderboard/
 | `coverage.md` | tool by stratum: measured or not run |
 | `provenance.json` | sha256 of every input and output |
 
+`data/hardware.parquet` is written in this repo by `scripts/read_hardware.py`, which reads
+the run's traces, SLURM's job records (`sacct`) and node records (`scontrol show node`) on
+Sherlock over `ssh sherlock`. It holds, for every task `compute.parquet` counts, the partition,
+the node, and that node's CPU and GPU. The traces have no `hostname` column, so the node comes
+from `sacct`. `data/hardware_provenance.json` records the commands and the date.
+
 `data/SOURCE.json` records the commit, and every page prints it. The site never fills a gap:
 where the table has no row, the page shows "—" and "not run".
 
@@ -47,6 +53,7 @@ then runs the prose checker on every page.
 ## Layout
 
 - `scripts/copy_tables.py`: copies `results/leaderboard/` from a commit, checks the sha256 sums
+- `scripts/read_hardware.py`: the node, CPU and GPU of every counted task, read on Sherlock
 - `scripts/build_site.py`: writes `docs/` from `data/`
 - `scripts/tools.py`: what each tool compares, needs, and was run with (read from the run itself)
 - `docs/assets/`: stylesheet, page script, Fantasque Sans Mono 1.8.0 (SIL Open Font License)

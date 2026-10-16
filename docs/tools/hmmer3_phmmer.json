@@ -77,6 +77,57 @@
   "peak_rss_gb": 4.9,
   "hardware": "Stanford Sherlock, SLURM partition hns"
  },
+ "hardware": {
+  "search": {
+   "recorded": true,
+   "n_tasks": 15,
+   "partitions": [
+    {
+     "value": "hns",
+     "n_tasks": 15
+    }
+   ],
+   "hostname_in_trace": false,
+   "n_nodes": 14,
+   "n_tasks_without_node": 0,
+   "cpu_models": [
+    {
+     "value": "AMD 7543",
+     "n_tasks": 6
+    },
+    {
+     "value": "AMD 8224P",
+     "n_tasks": 5
+    },
+    {
+     "value": "AMD 9754",
+     "n_tasks": 3
+    },
+    {
+     "value": "AMD 7742",
+     "n_tasks": 1
+    }
+   ],
+   "gpu_models": [],
+   "n_tasks_with_gpu": 0
+  },
+  "database_build": {
+   "recorded": false
+  },
+  "source": {
+   "read_on": "2026-10-16",
+   "experiment": "qfo_region_midi_plus",
+   "traces": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/{run-midi-plus,run-midi-plus-all-qfo}/*trace*.txt",
+   "trace_has_hostname": false,
+   "node_from": "sacct -u olgabot -X -n -P -S 2026-08-31 -E 2026-09-14 --format=JobID,NodeList,Partition,AllocTRES, matched on the trace's native_id",
+   "hardware_from": "scontrol -o show node <node>: AvailableFeatures CPU_MNF, CPU_SKU, GPU_SKU",
+   "feature_names_documented_at": "https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/",
+   "partition_specs": "https://www.sherlock.stanford.edu/docs/tech/",
+   "n_tasks": 6260,
+   "n_tasks_with_node": 6260,
+   "n_nodes": 131
+  }
+ },
  "questions": [
   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.252 (n = 563), 60\u2013100% 0.308 (n = 1,289). If no, 20\u201330% 0.359 (n = 93), 30\u201340% 0.199 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `default`; strata with at least 30 true instances.)",
   "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.250 (n = 963), 121\u2013250 aa 0.329 (n = 504), 251 aa or more 0.477 (n = 277). If no, 16\u201330 aa 0.042 (n = 271), 31\u201360 aa 0.095 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `default`.)",

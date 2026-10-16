@@ -12,6 +12,12 @@
    exactly the rows with a value on both axes, each marker's x and y must equal the value
    computed here from the parquet files, every other row must be listed as not plotted, and
    the line through the best trade-offs must be drawn only for a cost against a score.
+   Core-hours, cost and wall-clock time are checked at the default 20,000 proteins.
+2b. The cost calculator: for ten random (proteins, budget) pairs on random relatives, every
+   scaled cost and the set of rows that fit the budget are recomputed from compute.parquet;
+   markers are filled exactly for those rows and the caption names each tool that fits.
+   cost.html.json's "calculator" block is recomputed the same way at the default inputs.
+   Every tool card has a hardware line whose task counts match data/hardware.parquet.
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
    at phone width (375 px).
 
@@ -23,6 +29,7 @@ import functools
 import http.server
 import itertools
 import json
+import random
 import socketserver
 import sys
 import threading
@@ -224,9 +231,12 @@ def main() -> int:
                 return None if v is None or (ax == "iou" and v == 0) else v
             if k not in expect or cw is None:
                 return None
-            return {"cpu": cw["cpu_h_per_1000_queries"],
-                    "cost": cw["cpu_h_per_1000_queries"] * 0.044625 + cw["gpu_h_per_1000_queries"] * 1.006,
-                    "wall": cw["wall_h_per_1000_queries"], "ram": cw["peak_rss_gb"],
+            # Core-hours, cost and wall-clock time are drawn for the calculator's n proteins
+            # (default 20,000): the value per 1,000 queries times n / 1000.
+            f = meta["defaults"]["n"] / 1000
+            return {"cpu": cw["cpu_h_per_1000_queries"] * f,
+                    "cost": (cw["cpu_h_per_1000_queries"] * 0.044625 + cw["gpu_h_per_1000_queries"] * 1.006) * f,
+                    "wall": cw["wall_h_per_1000_queries"] * f, "ram": cw["peak_rss_gb"],
                     "db": cw["db_cpu_h_per_db"]}[ax]
 
         axis_ids = {a["id"] for a in meta["axes"]}
@@ -277,6 +287,90 @@ def main() -> int:
                 stats["lines_drawn"] = stats.get("lines_drawn", 0) + int(snap["frontier"])
                 stats["markers_checked"] += len(got)
 
+        # ---- 2b. the cost calculator: ten random (proteins, budget) pairs ----
+        # For each pair, on a random relative, every scaled number and the set of tool and
+        # setting rows that fit is recomputed here from compute.parquet: cost for N proteins =
+        # (core-hours per 1,000 x r_cpu + GPU-hours per 1,000 x r_gpu) x N / 1000; it fits
+        # when that is at most the budget. Markers must be filled exactly for those rows.
+        def db_gpu_per_db(tool, setting):
+            b = build.filter(pl.col("tool").is_in([tool, tool.split("_")[0]])
+                             & pl.col("setting").is_in([setting, "database build"]))
+            g = b["gpu_h"].drop_nulls()
+            return g.sum() / b["n_target_dbs"].sum() if b.height and g.len() else None
+
+        rng = random.Random(20261016)
+        species = sorted({k[2] for k in expect if k[2] != "all"})
+        calc_pairs = [(int(10 ** rng.uniform(2, 5.5)), round(10 ** rng.uniform(-2, 3), 2), rng.choice(species))
+                      for _ in range(10)]
+        # Two more at the edge: a budget equal to one row's cost (it fits, since the rule is
+        # "at most") and 5% under it (it does not). Random budgets rarely land that close.
+        edge = cexp[("hmmer3_phmmer", "default", "zebrafish")]
+        edge_usd = (edge["cpu_h_per_1000_queries"] * 0.044625 + edge["gpu_h_per_1000_queries"] * 1.006) * (20000 / 1000)
+        calc_pairs += [(20000, edge_usd, "zebrafish"), (20000, edge_usd * 0.95, "zebrafish")]
+        stats["calculator_pairs"] = [list(p) for p in calc_pairs]
+        for n_prot, budget, sp in calc_pairs:
+            s = {"truth": "pfam", "calls": "raw", "species": sp, "axis": "all", "stratum": "all",
+                 "x": "cost", "y": "fmax", "n": n_prot, "budget": budget, "r_cpu": 0.044625, "r_gpu": 1.006}
+            snap = page.evaluate("""(s) => { window.__lb.set(s);
+              return {calc: window.__lb.calc(), plotted: window.__lb.plotted(),
+                      fitline: document.getElementById('fitline').textContent,
+                      budget: !!document.querySelector('#plot line.budget'),
+                      filled: [...document.querySelectorAll('#plot [data-tool]')].map((m) =>
+                        [m.dataset.tool + '|' + m.dataset.setting, m.getAttribute('fill') !== 'var(--surface)'])}; }""", s)
+            f = n_prot / 1000
+            want_fit, rows_seen = set(), 0
+            got_rows = {r["tool"] + "|" + r["setting"]: r for r in snap["calc"]["rows"]}
+            for r in meta["rows"]:
+                k = ("pfam", "raw", sp, "all", "all", r["tool"], r["setting"])
+                if k not in expect:
+                    if r["tool"] + "|" + r["setting"] in got_rows:
+                        failures.append(f"calc {s}: {r['tool']} {r['setting']} has no result but is in the calculator")
+                    continue
+                key = r["tool"] + "|" + r["setting"]
+                got = got_rows.get(key)
+                cw = cexp.get((r["tool"], r["setting"], sp))
+                if got is None:
+                    failures.append(f"calc {s}: {key} missing from the calculator")
+                    continue
+                rows_seen += 1
+                if cw is None:
+                    if got["measured"]:
+                        failures.append(f"calc {s}: {key} has no compute row but the page has a cost")
+                    continue
+                usd = (cw["cpu_h_per_1000_queries"] * 0.044625 + cw["gpu_h_per_1000_queries"] * 1.006) * f
+                want = {"core_h": cw["cpu_h_per_1000_queries"] * f, "usd": usd,
+                        "wall_h": cw["wall_h_per_1000_queries"] * f, "gpu_h": cw["gpu_h_per_1000_queries"] * f,
+                        "db_core_h_per_db": cw["db_cpu_h_per_db"],
+                        "db_gpu_h_per_db": db_gpu_per_db(r["tool"], r["setting"])}
+                for name, wv in want.items():
+                    gv = got.get(name)
+                    if (wv is None) != (gv is None) or (wv is not None and abs(gv - wv) > 1e-9 * max(1.0, abs(wv))):
+                        failures.append(f"calc {s}: {key} {name} {gv} != parquet {wv}")
+                    stats["calculator_values_checked"] = stats.get("calculator_values_checked", 0) + 1
+                if usd <= budget:
+                    want_fit.add(key)
+            if set(snap["calc"]["fit"]) != want_fit:
+                failures.append(f"calc {s}: fits {sorted(snap['calc']['fit'])}, expected {sorted(want_fit)}")
+            filled = {k for k, fl in snap["filled"] if fl}
+            if filled != want_fit & {k for k, _ in snap["filled"]}:
+                failures.append(f"calc {s}: filled markers {sorted(filled)} != rows that fit {sorted(want_fit)}")
+            names = {meta["tools"][k.split("|")[0]]["name"] for k in want_fit}
+            fit_part = snap["fitline"].split("Over the budget")[0]
+            for nm in names:
+                if nm not in fit_part:
+                    failures.append(f"calc {s}: caption does not name {nm} among the tools that fit")
+            if not snap["budget"]:
+                failures.append(f"calc {s}: no budget line on the cost axis")
+            stats["calculator_rows_checked"] = stats.get("calculator_rows_checked", 0) + rows_seen
+
+        # By hand (PR 7's number x 20): phmmer, Pfam, raw calls, zebrafish, 20,000 proteins.
+        snap = page.evaluate("""() => { window.__lb.set({truth: 'pfam', calls: 'raw', species: 'zebrafish',
+            axis: 'all', stratum: 'all', n: 20000, budget: 10}); return window.__lb.calc(); }""")
+        ph = [r for r in snap["rows"] if r["tool"] == "hmmer3_phmmer"]
+        if not ph or f"{ph[0]['core_h']:.2f}" != "8.33":
+            failures.append(f"calc: phmmer at 20,000 proteins is {ph and ph[0]['core_h']} core-hours, not 8.33")
+        stats["phmmer_core_h_at_20000"] = ph[0]["core_h"] if ph else None
+
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "tools/index.html"] + \
         (["pileup.html"] if (a.site / "pileup.html").exists() else []) + \
@@ -315,6 +409,52 @@ def main() -> int:
         if doc["source"]["commit"] != commit or not doc["text"]:
             failures.append(f"{pg}.json: wrong commit or no text")
     stats["json_pages"] = len(pages)
+
+    # ---- 5. the calculator's JSON twin, at the default inputs ----
+    twin = json.loads((a.site / "cost.html.json").read_text())["data"]["calculator"]
+    d = meta["defaults"]
+    if {k: twin["inputs"][k] for k in ("n", "budget", "r_cpu", "r_gpu")} != {k: d[k] for k in ("n", "budget", "r_cpu", "r_gpu")}:
+        failures.append(f"cost.html.json: calculator inputs {twin['inputs']} are not the page defaults")
+    f = d["n"] / 1000
+    want_fit = set()
+    for r in twin["rows"]:
+        cw = cexp.get((r["tool"], r["setting"], d["species"]))
+        if cw is None:
+            if r["measured"]:
+                failures.append(f"cost.html.json: {r['tool']} {r['setting']} has a cost but no compute row")
+            continue
+        usd = (cw["cpu_h_per_1000_queries"] * d["r_cpu"] + cw["gpu_h_per_1000_queries"] * d["r_gpu"]) * f
+        for name, wv in (("usd", usd), ("core_h", cw["cpu_h_per_1000_queries"] * f), ("wall_h", cw["wall_h_per_1000_queries"] * f)):
+            if abs(r[name] - wv) > 1e-9 * max(1.0, wv):
+                failures.append(f"cost.html.json: {r['tool']} {r['setting']} {name} {r[name]} != {wv}")
+        if usd <= d["budget"]:
+            want_fit.add(f"{r['tool']}|{r['setting']}")
+    if set(twin["fit"]) != want_fit:
+        failures.append(f"cost.html.json: fit {twin['fit']} != {sorted(want_fit)}")
+    stats["json_twin_rows"] = len(twin["rows"])
+
+    # ---- 6. hardware line on every tool card, recounted from data/hardware.parquet ----
+    hwp = a.data / "hardware.parquet"
+    for t in sorted(meta["tools"]):
+        card = json.loads((a.site / f"tools/{t}.json").read_text())
+        md = (a.site / f"tools/{t}.md").read_text()
+        if "Hardware of the search" not in md or "Hardware of the database build" not in md:
+            failures.append(f"tools/{t}.md: no hardware line")
+        if not hwp.exists():
+            continue
+        hw = pl.read_parquet(hwp)
+        is_build = (pl.col("setting") == "database build") | pl.col("step").str.contains("Index|Db|DB")
+        q = hw.filter(pl.col("tool").is_in([t, t.split("_")[0]]) & ~is_build
+                      & pl.col("setting").is_in([card["best_setting"] or "", "database build"]))
+        h = card["hardware"]["search"]
+        if q.height == 0:
+            if h["recorded"]:
+                failures.append(f"tools/{t}.json: hardware recorded but no task in hardware.parquet")
+            continue
+        cpus = {r["cpu_model"]: r["len"] for r in q.group_by("cpu_model").len().iter_rows(named=True)}
+        if h["n_tasks"] != q.height or {c["value"]: c["n_tasks"] for c in h["cpu_models"]} != cpus:
+            failures.append(f"tools/{t}.json: hardware {h} != parquet {cpus}")
+        stats["hardware_cards_checked"] = stats.get("hardware_cards_checked", 0) + 1
     failures += [f"console: {e}" for e in console_errors]
 
     print(json.dumps(stats, indent=1))

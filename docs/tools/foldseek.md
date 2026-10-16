@@ -48,6 +48,14 @@ Building its databases took 0.267 core-hours over 2 databases. A database is bui
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
+## Hardware
+
+Hardware of the search (setting `3di_aa`, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 10 tasks on 9 nodes. CPU: AMD 7763 (3 tasks); AMD 8224P (3 tasks); AMD 7742 (2 tasks); AMD 7543 (1 task); AMD 9754 (1 task). GPU: none allocated.
+
+Hardware of the database build: Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 2 tasks on 2 nodes. CPU: AMD 7742 (1 task); not recorded, node no longer in SLURM (1 task). GPU: none allocated.
+
+Sources, read 2026-10-16: the partition is the `queue` column of the run's Nextflow traces. The traces have no `hostname` column, so the node is the one SLURM's job record (`sacct`) gives for the trace's job id. CPU and GPU are that node's features in SLURM (`scontrol show node`: CPU_MNF, CPU_SKU, GPU_SKU), named as on Sherlock's [node features page](https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/). Partition hns is owned by a research group, and Sherlock's [tech specs page](https://www.sherlock.stanford.edu/docs/tech/) lists no CPU models for such partitions. Script: `scripts/read_hardware.py`.
+
 ## Licence
 
 - Licence: GPL-3.0 ([source](https://github.com/steineggerlab/foldseek))

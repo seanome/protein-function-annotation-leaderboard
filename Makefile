@@ -5,7 +5,11 @@ SOURCE_COMMIT ?= 4a4b1171
 PILEUP_COMMIT ?= 39d81ec9
 PY ?= .venv/bin/python
 
-.PHONY: tables site check serve
+.PHONY: tables hardware site check serve
+
+# Needs `ssh sherlock` (open the socket first with `ssh -fN sherlock`).
+hardware:
+	$(PY) scripts/read_hardware.py --data data
 
 tables:
 	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --out data

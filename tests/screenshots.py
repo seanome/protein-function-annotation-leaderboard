@@ -25,6 +25,10 @@ EXTRA = {
     "2b_compare_cost_usd_auprc": "cost.html#x=cost&y=auprc",
     "2c_compare_fmax_auprc": "cost.html#x=fmax&y=auprc",
     "2d_compare_ram_iou": "cost.html#x=ram&y=iou",
+    "2f_compare_cpu_fmax": "cost.html#x=cpu&y=fmax",
+    "8a_calculator_budget_1": "cost.html#x=cost&y=fmax&n=20000&budget=1",
+    "8b_calculator_n_200000": "cost.html#x=cost&y=auprc&n=200000&budget=10",
+    "3c_tool_card_prostt5": "tools/prostt5.html",
 }
 PHONE = {"2e_compare_two_columns_400px": "cost.html"}
 
