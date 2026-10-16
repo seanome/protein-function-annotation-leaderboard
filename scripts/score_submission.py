@@ -130,6 +130,7 @@ def check_predictions(df: pl.DataFrame, qs_dir: Path, card: dict, problems: Prob
           ("call_start", "call_end", "target_start", "target_end")],
         pl.col("score").cast(pl.Float64, strict=False).alias("score_f"),
         accession(pl.col("query")).alias("query_acc"),
+        pl.col("label").str.replace(r"^(PF\d{5})\.\d+$", "$1").alias("label"),
     )
 
     def first_lines(mask: pl.Expr, what: str) -> None:
@@ -165,6 +166,8 @@ def check_predictions(df: pl.DataFrame, qs_dir: Path, card: dict, problems: Prob
                 "name a relative but leave target, target_start or target_end empty")
     first_lines(search & (pl.col("target_end_i") < pl.col("target_start_i")),
                 "have a target interval that ends before it starts")
+    first_lines(search & (pl.col("target_start_i") < 1),
+                "have a target_start before residue 1")
     first_lines(search & (pl.col("label") != ""),
                 "name a relative and also a label; a search call carries no label")
     first_lines(~search & (pl.col("label") == ""),
@@ -252,6 +255,9 @@ def run_scorer(work: Path, qs_dir: Path, preds: pl.DataFrame, card: dict,
         qs: pl.read_csv(qs_dir / qs / "relatives.tsv", separator="\t")
         for qs in preds["query_set"].unique().to_list()
     }
+    preds = preds.with_columns(
+        pl.when(pl.col("call_end_i") == pl.col("call_start_i"))
+        .then(pl.col("call_end_i") + 1).otherwise(pl.col("call_end_i")).alias("call_end"))
     for (qs, relative), g in preds.group_by(["query_set", "relative"], maintain_order=True):
         qsd = qs_dir / qs
         species = "all" if relative == "none" else relative
