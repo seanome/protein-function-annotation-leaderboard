@@ -23,7 +23,7 @@
  "command": "kmerseek search \\\n    --alphabet hp_thomas_dill2 \\\n    --ksize    24 \\\n    --query    UP000005640_9606.fasta \\\n    --target   zebrafish.hp_thomas_dill2.k24.lcfalse.kmerseek.rocksdb \\\n    --threshold         0.0 \\\n    --min-shared-kmers  2 \\\n    --max-query-pvalue  0.05 \\\n    --min-region-score  1.3",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "gbmr4_k21_lcFalse",

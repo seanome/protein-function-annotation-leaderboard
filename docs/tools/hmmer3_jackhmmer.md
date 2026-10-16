@@ -86,5 +86,5 @@ jackhmmer \
 
 Query: 998 human proteins. Target: the zebrafish proteome.
 
-Tool id `hmmer3_jackhmmer`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Tool id `hmmer3_jackhmmer`. Numbers from seanome/2024-kmerseek-analysis commit `26a778cb`.
 

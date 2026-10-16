@@ -3,19 +3,25 @@
  "title": "ProstT5 + Foldseek card",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
-  "commit_date": "2026-10-15T13:12:56Z",
+  "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
+  "commit_date": "2026-10-16T19:47:35Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:44:05Z",
+  "copied_at": "2026-10-16T19:47:54Z",
   "sha256": {
-   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "results.parquet": "50a9ea98f3110eb3fffc4e9bbca2de714278118cc2d89c2dd59ac985b323e752",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
-   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
-   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
-   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "coverage.md": "cc1b2273680bd4c39806525bcade5c816506ce70ca1b0a7b5dbad137836d77e2",
+   "provenance.json": "40dae057f103b483428e57b14d59bf903362b6b965523676bd9947ff98d7a71f",
+   "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
-   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+   "query_strata/query_strata.tsv": "90cac50229e65df8bda83a26dd256e28e6461b4aa9655391cfaf7ab3d1954024",
+   "query_strata/query_nearest_hits.tsv": "d4ceb1e7a762820fea492cc3a01c810293cf910d2e9a9c51d131a111e3a3862b",
+   "query_strata/busco_summary.json": "16475186c75d9e4bab2dfe060d77f39127a93be7f3590fb16adc2474b07f9736",
+   "query_strata/commands.sh": "62a48445c2a07a927e44c2704c85f505c4d337aa608fb17aa8b6cebab42e55a4",
+   "query_strata/RULES.md": "da15ff78a41ca8a43a64a5cf0cf738569776f274b938be776218923490a44bae",
+   "query_strata/provenance.json": "136f4e6d55028117591cd069e83b63ae543687f0f758630f846e3d703aa4cb0b"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
  },
@@ -198,7 +204,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool id prostt5. Numbers from seanome/2024-kmerseek-analysis commit 4a4b1171."
+   "text": "Tool id prostt5. Numbers from seanome/2024-kmerseek-analysis commit 26a778cb."
   },
   {
    "tag": "p",
@@ -229,7 +235,7 @@
   "command": "foldseek createdb filtered.fasta zebrafish_prostt5/db \\\n    --prostt5-model weights --gpu 1 --threads 8\n\nfoldseek search \\\n    human-38fdd87d_prostt5/db zebrafish_prostt5/db result tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
   "numbers_from": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+   "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
    "filters": "pfam, raw, zebrafish"
   },
   "best_setting": "3di_from_seq",

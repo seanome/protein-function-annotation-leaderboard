@@ -142,7 +142,7 @@
             chip(c.empty ? c.label + " (not run)" : c.label, pressed, () => {
               if (row.kind === "stratum") {
                 // The run cut the queries along one stratum axis at a time, so picking a
-                // value here clears the other three stratum rows.
+                // value here clears every other stratum row.
                 if (c.value === "all") {
                   if (state.axis === row.axis) { state.axis = "all"; state.stratum = "all"; }
                 } else { state.axis = row.axis; state.stratum = c.value; }
@@ -174,7 +174,7 @@
     { id: "cost", label: "Estimated cost per 1,000 queries", key: "cost_usd_est", term: "cost" },
     { id: "auprc", label: "AUPRC", key: "auprc", term: "auprc", cls: "c-wide" },
     { id: "iou", label: "Median IoU", key: "median_iou_tp", term: "iou", cls: "c-wide" },
-    { id: "n", label: "True instances", key: "n_truth_instances", term: "n", cls: "c-more" },
+    { id: "n", label: "True instances", key: "n_truth_instances", term: "n", cls: "c-wide" },
     { id: "cpu", label: "Core-hours per 1,000 queries", key: "cpu_h_per_1000", term: "cpu", cls: "c-more" },
     { id: "ram", label: "Peak RAM, GB", key: "peak_rss_gb", term: "ram", cls: "c-more" },
   ];
@@ -273,6 +273,8 @@
     tr.dataset.tool = v.row.tool;
     tr.dataset.setting = v.row.setting;
     if (!lead) tr.className = "sub";
+    // Under 30 true instances one or two calls swing Fmax from 0 to 1: grey numbers.
+    if (v.r && v.n != null && v.n < 30) { tr.classList.add("few"); tr.title = "fewer than 30 true instances"; }
     tr.appendChild(toolCell(v, lead ? nOthers : 0, open));
     const why = v.r ? null : "not run";
     const cwhy = v.r && !v.c ? (M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species) ? "not measured" : "not run") : why;
