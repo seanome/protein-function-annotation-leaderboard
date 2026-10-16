@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hyphodiscus hymeniophilus: which tools to run</title>
+<meta name="description" content="Which annotation tools to run on Hyphodiscus hymeniophilus, read from measured results, with a command to copy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script defer src="../assets/terms.js"></script>
+<script defer src="../assets/nav.js"></script>
+<script defer src="../assets/organism.js"></script>
+<script defer src="../assets/organism-page.js"></script>
+</head>
+<body data-page="organism">
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="../index.html" aria-current="page">Your organism</a><a href="../leaderboard.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><details class="navmore"><summary>More</summary>
+<div class="navpop"><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Your organism">Your organism</summary>
+<div class="navpop"><a href="../index.html" aria-current="page">Your organism</a><a href="../leaderboard.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details>
+</div></header>
+<main class="wrap" data-page="organism">
+<nav class="crumb" aria-label="Breadcrumb"><a href="../index.html">Your organism</a> › Hyphodiscus hymeniophilus</nav>
+<h1>Hyphodiscus hymeniophilus</h1>
+<p class="lede three">The closest species with at least 100 curator-checked (Swiss-Prot) proteins is gray fruit mold (Botrytis cinerea); TimeTree has no age for when the two lineages split. No tool on this board was measured at this distance. In the measured organism closest to this one, baker's yeast (Saccharomyces cerevisiae), 21% of proteins had no hit from any sequence tool, so expect a share like that to stay without a label.</p>
+<div class="cmdrow"><button type="button" class="copy" data-copy="cmd-all">Copy command</button> <span class="small muted">downloads this species' proteins and Swiss-Prot, runs nf-core/proteinannotator 1.1.0, then the three tools; needs a Unix computer with curl, Nextflow and Docker</span></div>
+<pre class="cmd" id="cmd-all"><code># Hyphodiscus hymeniophilus
+# UniProt reference proteome UP000785200, 8,215 proteins
+curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP000785200&amp;format=fasta&amp;compressed=true'
+# All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Botrytis cinerea).
+# Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs.
+curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz'
+# nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome.
+# Version 1.1.0 has no option to run the tools below; their commands follow.
+printf 'id,fasta\nhyphodiscus_hymeniophilus,proteome.fasta.gz\n' &gt; samplesheet.csv
+nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results</code></pre><h2 id="cards">Four facts about this species</h2><div class="mcards">
+<div class="mcard"><div class="mtitle">Nearest reviewed relative</div><div class="mvalue">— Mya</div><div class="msub">gray fruit mold (Botrytis cinerea), 227 reviewed proteins; lineages meet at Helotiales (order)</div><div class="msrc">TimeTree: no age for this pair; Swiss-Prot counts from UniProt 2026_03 (02-September-2026)</div></div>
+<div class="mcard"><div class="mtitle">Reviewed proteins nearby</div><div class="mvalue">485 <span class="unit">in the order</span></div><div class="msub">Helotiales; class Leotiomycetes: 493; this species: 0</div><div class="msrc">Swiss-Prot reviewed entries, UniProt 2026_03 (02-September-2026), summed over NCBI Taxonomy</div></div>
+<div class="mcard"><div class="mtitle">Proteins with an AlphaFold model</div><div class="mvalue">96%</div><div class="msub">7,910 of 8,215 proteins in UP000785200; mean pLDDT 77.2 <span class="est">estimate</span>, from 7,910 AlphaFold DB models of this organism's reference-proteome entries, counted in 5-point bands (AlphaFold DB keeps entries UniProt has since dropped, so this count can differ from the protein count)</div><div class="msrc">UniProt 2026_03 (02-September-2026) cross-references; AlphaFold DB search, models version 6</div></div>
+<div class="mcard"><div class="mtitle">Earth BioGenome Project target</div><div class="mvalue">on the list</div><div class="msub">listed by DTOL</div><div class="msrc">GoaT, attribute long_list (GoaT index taxon--ncbi--goat--2026.10.14)</div></div>
+</div><h2 id="verdict">Three tools, in the order to run them</h2><p class="notice">No verdict: TimeTree gives no age between this species and its nearest reviewed relative, so the page cannot place it at a distance.</p><section class="darkbox"><h2 id="dark">What no tool on this board will find for you</h2><p><b>21.5%</b> of 6,049 proteins of baker's yeast (Saccharomyces cerevisiae) had no hit from any sequence tool, even at a loose E-value below 1 (the E-value is the number of hits that size expected by chance). They were searched against Swiss-Prot with the organism's own group removed; we call these proteins dark. Of the five organisms measured, this one is closest to this species: their lineages meet at saccharomyceta.</p>
+<table class="mini"><thead><tr><th>Part of the dark share</th><th>Measured</th></tr></thead><tbody>
+<tr><td>no relative in Swiss-Prot (no hit at all)</td><td>21.5%</td></tr>
+<tr><td>disordered (no stable fold)</td><td>— not run</td></tr>
+<tr><td>short motif only</td><td>— not run</td></tr></tbody></table>
+<p class="small muted">The tables hold the dark share but do not split it into disordered proteins and short motifs; those two parts are not measured. Measured on: human (Homo sapiens) 15.1% of 20,600; baker's yeast (Saccharomyces cerevisiae) 21.5% of 6,049; nematode (Caenorhabditis elegans) 45.0% of 19,819; Lyme disease bacterium (Borrelia burgdorferi) 47.4% of 1,291; star ascidian (Botryllus schlosseri) 45.1% of 45,339.</p></section><h2 id="estimate">Expected to get a label</h2><p>— Cannot be estimated: no verdict.</p><h2 id="figures">Figures</h2><h2 id="sources">Where every number comes from</h2><p class="small">Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit <span class="mono">4a4b1171</span>, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:</p><div class="tablewrap"><table class="mini"><thead><tr><th>lookup</th><th>release</th><th>fetched</th><th>address</th></tr></thead><tbody><tr><td>alphafold_counts</td><td>AlphaFold DB search API (models version 6) and UniProt 2026_03</td><td>2026-10-16</td><td class="mono small">https://alphafold.ebi.ac.uk/api/search?q=taxId:&lt;taxon&gt; AND isUniProtReferenceProteome:true AND globalMetricValue:[lo TO hi} (and UniProt proteome:&lt;UP&gt; AND database:alphafolddb)</td></tr><tr><td>goat_ebp_list</td><td>GoaT index taxon--ncbi--goat--2026.10.14</td><td>2026-10-16</td><td class="mono small">https://goat.genomehubs.org/api/v2/search?query=tax_tree(&lt;clade&gt;) AND long_list AND tax_rank(species)</td></tr><tr><td>ncbi_taxdump</td><td>NCBI Taxonomy taxdump, Last-Modified Fri, 16 Oct 2026 16:29:52 GMT</td><td>2026-10-16</td><td class="mono small">https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</td></tr><tr><td>swissprot_per_taxon</td><td>UniProt 2026_03 (02-September-2026)</td><td>2026-10-16</td><td class="mono small">https://rest.uniprot.org/uniprotkb/stream?query=reviewed:true&amp;fields=organism_id&amp;format=tsv&amp;compressed=true</td></tr><tr><td>timetree_mrca</td><td>TimeTree 5, database version 20260820</td><td>2026-10-16</td><td class="mono small">https://timetree.org/api/mrca/id/&lt;NCBI taxon id&gt;</td></tr><tr><td>timetree_pairs</td><td>TimeTree 5, database version 20260820</td><td>2026-10-16</td><td class="mono small">https://timetree.org/api/pairwise/&lt;species&gt;/&lt;relative&gt;</td></tr><tr><td>uniprot_reference_proteomes</td><td>UniProt 2026_03 (02-September-2026)</td><td>2026-10-16</td><td class="mono small">https://rest.uniprot.org/proteomes/stream?query=reference:true&amp;fields=upid,organism_id,organism,protein_count,busco&amp;format=tsv</td></tr></tbody></table></div>
+</main>
+<footer class="site"><div class="wrap">
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+<p>This page as JSON, for scripts and agents: <a class="mono" href="hyphodiscus_hymeniophilus.html.json">hyphodiscus_hymeniophilus.html.json</a></p>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Built in this browser: which tools to run</title>
+<meta name="description" content="The organism page for a species with no pre-built page, built from live lookups.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script defer src="../assets/terms.js"></script>
+<script defer src="../assets/nav.js"></script>
+<script defer src="../assets/organism.js"></script>
+<script defer src="../assets/organism-page.js"></script>
+</head>
+<body data-page="organism" data-organism="live" data-base="../">
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="../index.html" aria-current="page">Your organism</a><a href="../leaderboard.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><details class="navmore"><summary>More</summary>
+<div class="navpop"><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Your organism">Your organism</summary>
+<div class="navpop"><a href="../index.html" aria-current="page">Your organism</a><a href="../leaderboard.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details>
+</div></header>
+<main class="wrap" data-page="organism">
+<nav class="crumb" aria-label="Breadcrumb"><a href="../index.html">Your organism</a> › built in this browser</nav>
+<p id="progress" class="small muted" aria-live="polite">Looking up…</p>
+<div id="answer"></div>
+<p class="small"><a id="json-link" hidden>This answer as JSON</a></p>
+<noscript><p>This page builds the answer in the browser and needs JavaScript. Pre-built pages: <a href="index.html">all species</a>.</p></noscript>
+
+</main>
+<footer class="site"><div class="wrap">
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+</div></footer>
+</body>
+</html>

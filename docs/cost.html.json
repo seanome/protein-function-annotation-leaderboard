@@ -50,7 +50,7 @@
   }
  ],
  "data": {
-  "note": "Same rows as index.html.json. Figure 1 plots any two of the columns in 'axes' for every tool and setting that has both: scores from results [fmax, auprc, median_iou_tp], cpu = cpu_h_per_1000, cost = cpu_h_per_1000 * r_cpu + gpu_h_per_1000 * r_gpu, wall = wall_h_per_1000, ram = peak_rss_gb, db = db_cpu_h_per_db.",
+  "note": "Same rows as leaderboard.html.json. Figure 1 plots any two of the columns in 'axes' for every tool and setting that has both: scores from results [fmax, auprc, median_iou_tp], cpu = cpu_h_per_1000, cost = cpu_h_per_1000 * r_cpu + gpu_h_per_1000 * r_gpu, wall = wall_h_per_1000, ram = peak_rss_gb, db = db_cpu_h_per_db.",
   "axes": [
    {
     "id": "fmax",

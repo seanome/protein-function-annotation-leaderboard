@@ -1,0 +1,2158 @@
+{
+ "page": "organism/drosophila_simulans.html",
+ "title": "Drosophila simulans: which tools to run",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T13:44:05Z",
+  "sha256": {
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+ },
+ "text": [
+  {
+   "tag": "h1",
+   "text": "Drosophila simulans"
+  },
+  {
+   "tag": "p",
+   "text": "The closest species with at least 100 curator-checked (Swiss-Prot) proteins is fruit fly (Drosophila melanogaster); the two lineages split 6 million years ago (Mya). In human proteins searched against a species that far away (chimpanzee, 6 Mya), the three tools with the best Fmax (the balance of finding domains and being right) were kmerseek; HH-suite (hhsearch); MMseqs2, three rounds, and kmerseek found 37% of the known Pfam domains. In the measured organism closest to this one, nematode (Caenorhabditis elegans), 45% of proteins had no hit from any sequence tool, so expect a share like that to stay without a label."
+  },
+  {
+   "tag": "pre",
+   "text": "# Drosophila simulans # UniProt reference proteome UP000000304, 15,361 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP000000304&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Drosophila melanogaster). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run kmerseek; HH-suite (hhsearch); MMseqs2, three rounds; their commands follow. printf 'id,fasta\\ndrosophila_simulans,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # kmerseek: its database needs build steps this page does not write out. # The command the board ran is on its tool card: tools/kmerseek.html # HH-suite (hhsearch): its database needs build steps this page does not write out. # The command the board ran is on its tool card: tools/hhblits.html # MMseqs2, sensitivity 7, three rounds (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)) mmseqs createdb proteome.fasta.gz q_db mmseqs createdb swissprot.fasta.gz t_db mmseqs search q_db t_db result_s7_n3 tmp_s7_n3 --threads 16 -s 7 --num-iterations 3 --max-seqs 1000 -e 10.0 mmseqs convertalis q_db t_db result_s7_n3 mmseqs2_s7_3rounds.m8"
+  },
+  {
+   "tag": "h2",
+   "text": "Four facts about this species"
+  },
+  {
+   "tag": "h2",
+   "text": "Three tools, in the order to run them"
+  },
+  {
+   "tag": "p",
+   "text": "How this was measured: 998 human proteins were searched against the proteome of chimpanzee (Pan troglodytes), whose lineage split from human 6 Mya. Of the 15 relatives measured, its split age is the closest to this species' 6 Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: 1,399 Pfam domains in human proteins whose mean AlphaFold confidence (pLDDT, 0–100; AlphaFold DB calls 70 to 90 confident and above 90 very high) is 70-90. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect; the three differ by 0.122 in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them."
+  },
+  {
+   "tag": "h3",
+   "text": "1. kmerseek protein20, k = 6"
+  },
+  {
+   "tag": "p",
+   "text": "Finds 37% of Pfam domains at this distance, and 55% of the domains it reports (its calls) are right; starts a found domain a median 23 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 1% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (5% of those calls right)."
+  },
+  {
+   "tag": "p",
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.445 on 1,399 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 64% of the span they cover together."
+  },
+  {
+   "tag": "p",
+   "text": "Computer time per 1,000 proteins searched against one relative's proteome: 0.06 processor-hours (CPU-h); cloud price $0.003 estimate (cost_usd_est). Search step only; building the relative's database took 0.03 CPU-h more, once per relative."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 1a. kmerseek: at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+  },
+  {
+   "tag": "pre",
+   "text": "# Drosophila simulans # UniProt reference proteome UP000000304, 15,361 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP000000304&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Drosophila melanogaster). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run kmerseek; its command follows. printf 'id,fasta\\ndrosophila_simulans,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # kmerseek: its database needs build steps this page does not write out. # The command the board ran is on its tool card: tools/kmerseek.html"
+  },
+  {
+   "tag": "li",
+   "text": "Copy command"
+  },
+  {
+   "tag": "h3",
+   "text": "2. HH-suite (hhsearch) single-protein profiles"
+  },
+  {
+   "tag": "p",
+   "text": "Finds 42% of Pfam domains at this distance, and 27% of the domains it reports (its calls) are right; starts a found domain a median 26 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 6% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (1% of those calls right)."
+  },
+  {
+   "tag": "p",
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.331 on 1,399 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 70% of the span they cover together."
+  },
+  {
+   "tag": "p",
+   "text": "Computer time per 1,000 proteins searched against one relative's proteome: 24.84 processor-hours (CPU-h); cloud price $1.108 estimate (cost_usd_est). Search step only; building the relative's database took 4.41 CPU-h more, once per relative."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 1b. HH-suite (hhsearch): at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+  },
+  {
+   "tag": "pre",
+   "text": "# Drosophila simulans # UniProt reference proteome UP000000304, 15,361 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP000000304&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Drosophila melanogaster). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run HH-suite (hhsearch); its command follows. printf 'id,fasta\\ndrosophila_simulans,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # HH-suite (hhsearch): its database needs build steps this page does not write out. # The command the board ran is on its tool card: tools/hhblits.html"
+  },
+  {
+   "tag": "li",
+   "text": "Copy command"
+  },
+  {
+   "tag": "h3",
+   "text": "3. MMseqs2, three rounds sensitivity 7, 3 rounds"
+  },
+  {
+   "tag": "p",
+   "text": "Finds 41% of Pfam domains at this distance, and 27% of the domains it reports (its calls) are right; starts a found domain a median 18 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+  },
+  {
+   "tag": "p",
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.323 on 1,399 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 70% of the span they cover together."
+  },
+  {
+   "tag": "p",
+   "text": "Computer time per 1,000 proteins searched against one relative's proteome: 0.08 processor-hours (CPU-h); cloud price $0.004 estimate (cost_usd_est). Search step only; building the relative's database took 0.00 CPU-h more, once per relative."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 1c. MMseqs2, three rounds: at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+  },
+  {
+   "tag": "pre",
+   "text": "# Drosophila simulans # UniProt reference proteome UP000000304, 15,361 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP000000304&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Drosophila melanogaster). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run MMseqs2, three rounds; its command follows. printf 'id,fasta\\ndrosophila_simulans,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # MMseqs2, sensitivity 7, three rounds (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)) mmseqs createdb proteome.fasta.gz q_db mmseqs createdb swissprot.fasta.gz t_db mmseqs search q_db t_db result_s7_n3 tmp_s7_n3 --threads 16 -s 7 --num-iterations 3 --max-seqs 1000 -e 10.0 mmseqs convertalis q_db t_db result_s7_n3 mmseqs2_s7_3rounds.m8"
+  },
+  {
+   "tag": "li",
+   "text": "Copy command"
+  },
+  {
+   "tag": "p",
+   "text": "Not run at this distance and pLDDT: Foldseek (shown as — in the tables). Pfam's own models (hmmscan) are left out of the ranking, because the answer key is made from those models."
+  },
+  {
+   "tag": "h2",
+   "text": "What no tool on this board will find for you"
+  },
+  {
+   "tag": "p",
+   "text": "45.0% of 19,819 proteins of nematode (Caenorhabditis elegans) had no hit from any sequence tool, even at a loose E-value below 1 (the E-value is the number of hits that size expected by chance). They were searched against Swiss-Prot with the organism's own group removed; we call these proteins dark. Of the five organisms measured, this one is closest to this species: their lineages meet at Ecdysozoa."
+  },
+  {
+   "tag": "th",
+   "text": "Part of the dark share"
+  },
+  {
+   "tag": "th",
+   "text": "Measured"
+  },
+  {
+   "tag": "td",
+   "text": "no relative in Swiss-Prot (no hit at all)"
+  },
+  {
+   "tag": "td",
+   "text": "45.0%"
+  },
+  {
+   "tag": "td",
+   "text": "disordered (no stable fold)"
+  },
+  {
+   "tag": "td",
+   "text": "— not run"
+  },
+  {
+   "tag": "td",
+   "text": "short motif only"
+  },
+  {
+   "tag": "td",
+   "text": "— not run"
+  },
+  {
+   "tag": "p",
+   "text": "The tables hold the dark share but do not split it into disordered proteins and short motifs; those two parts are not measured. Measured on: human (Homo sapiens) 15.1% of 20,600; baker's yeast (Saccharomyces cerevisiae) 21.5% of 6,049; nematode (Caenorhabditis elegans) 45.0% of 19,819; Lyme disease bacterium (Borrelia burgdorferi) 47.4% of 1,291; star ascidian (Botryllus schlosseri) 45.1% of 45,339."
+  },
+  {
+   "tag": "h2",
+   "text": "Expected to get a label"
+  },
+  {
+   "tag": "p",
+   "text": "39% estimate (expected_label_fraction_est): the share of this species' Pfam domains, not proteins, that kmerseek would be expected to find, if it finds them as often as it did in human proteins (Pfam 38.2 domains) searched against chimpanzee (Pan troglodytes), 6 Mya."
+  },
+  {
+   "tag": "p",
+   "text": "How: kmerseek's measured recall in each pLDDT band at that distance, weighted by the share of this species' AlphaFold models in the band. The bands with a measured recall hold 88% of its models; the rest (pLDDT 0–50, no measured domains) are left out, so for the whole proteome the share is likely lower."
+  },
+  {
+   "tag": "th",
+   "text": "pLDDT band"
+  },
+  {
+   "tag": "th",
+   "text": "share of this species' models"
+  },
+  {
+   "tag": "th",
+   "text": "recall measured"
+  },
+  {
+   "tag": "th",
+   "text": "domains measured"
+  },
+  {
+   "tag": "td",
+   "text": "0-50"
+  },
+  {
+   "tag": "td",
+   "text": "11.7%"
+  },
+  {
+   "tag": "td",
+   "text": "— not run"
+  },
+  {
+   "tag": "td",
+   "text": "0"
+  },
+  {
+   "tag": "td",
+   "text": "50-70"
+  },
+  {
+   "tag": "td",
+   "text": "34.6%"
+  },
+  {
+   "tag": "td",
+   "text": "39.9%"
+  },
+  {
+   "tag": "td",
+   "text": "748"
+  },
+  {
+   "tag": "td",
+   "text": "70-90"
+  },
+  {
+   "tag": "td",
+   "text": "42.7%"
+  },
+  {
+   "tag": "td",
+   "text": "37.4%"
+  },
+  {
+   "tag": "td",
+   "text": "1,399"
+  },
+  {
+   "tag": "td",
+   "text": "90-100"
+  },
+  {
+   "tag": "td",
+   "text": "10.9%"
+  },
+  {
+   "tag": "td",
+   "text": "44.9%"
+  },
+  {
+   "tag": "td",
+   "text": "186"
+  },
+  {
+   "tag": "h2",
+   "text": "Figures"
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 2. Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against zebrafish (430 Mya); domains whose own stretch of the protein has pLDDT 70-90. Per-domain calls were kept only for zebrafish, so this figure is at 430 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other."
+  },
+  {
+   "tag": "p",
+   "text": "1,023 domains in this band; 362 of them found by none of the three. A domain counts as found when any call on it names the right Pfam family and overlaps it, at any score."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 3. How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (dog and cow, 95 Mya) the line goes through their mean. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000."
+  },
+  {
+   "tag": "h2",
+   "text": "Where every number comes from"
+  },
+  {
+   "tag": "p",
+   "text": "Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit 4a4b1171, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:"
+  },
+  {
+   "tag": "th",
+   "text": "lookup"
+  },
+  {
+   "tag": "th",
+   "text": "release"
+  },
+  {
+   "tag": "th",
+   "text": "fetched"
+  },
+  {
+   "tag": "th",
+   "text": "address"
+  },
+  {
+   "tag": "td",
+   "text": "alphafold_counts"
+  },
+  {
+   "tag": "td",
+   "text": "AlphaFold DB search API (models version 6) and UniProt 2026_03"
+  },
+  {
+   "tag": "td",
+   "text": "2026-10-16"
+  },
+  {
+   "tag": "td",
+   "text": "https://alphafold.ebi.ac.uk/api/search?q=taxId:<taxon> AND isUniProtReferenceProteome:true AND globalMetricValue:[lo TO hi} (and UniProt proteome:<UP> AND database:alphafolddb)"
+  },
+  {
+   "tag": "td",
+   "text": "goat_ebp_list"
+  },
+  {
+   "tag": "td",
+   "text": "GoaT index taxon--ncbi--goat--2026.10.14"
+  },
+  {
+   "tag": "td",
+   "text": "2026-10-16"
+  },
+  {
+   "tag": "td",
+   "text": "https://goat.genomehubs.org/api/v2/search?query=tax_tree(<clade>) AND long_list AND tax_rank(species)"
+  },
+  {
+   "tag": "td",
+   "text": "ncbi_taxdump"
+  },
+  {
+   "tag": "td",
+   "text": "NCBI Taxonomy taxdump, Last-Modified Fri, 16 Oct 2026 16:29:52 GMT"
+  },
+  {
+   "tag": "td",
+   "text": "2026-10-16"
+  },
+  {
+   "tag": "td",
+   "text": "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"
+  },
+  {
+   "tag": "td",
+   "text": "swissprot_per_taxon"
+  },
+  {
+   "tag": "td",
+   "text": "UniProt 2026_03 (02-September-2026)"
+  },
+  {
+   "tag": "td",
+   "text": "2026-10-16"
+  },
+  {
+   "tag": "td",
+   "text": "https://rest.uniprot.org/uniprotkb/stream?query=reviewed:true&fields=organism_id&format=tsv&compressed=true"
+  },
+  {
+   "tag": "td",
+   "text": "timetree_mrca"
+  },
+  {
+   "tag": "td",
+   "text": "TimeTree 5, database version 20260820"
+  },
+  {
+   "tag": "td",
+   "text": "2026-10-16"
+  },
+  {
+   "tag": "td",
+   "text": "https://timetree.org/api/mrca/id/<NCBI taxon id>"
+  },
+  {
+   "tag": "td",
+   "text": "timetree_pairs"
+  },
+  {
+   "tag": "td",
+   "text": "TimeTree 5, database version 20260820"
+  },
+  {
+   "tag": "td",
+   "text": "2026-10-16"
+  },
+  {
+   "tag": "td",
+   "text": "https://timetree.org/api/pairwise/<species>/<relative>"
+  },
+  {
+   "tag": "td",
+   "text": "uniprot_reference_proteomes"
+  },
+  {
+   "tag": "td",
+   "text": "UniProt 2026_03 (02-September-2026)"
+  },
+  {
+   "tag": "td",
+   "text": "2026-10-16"
+  },
+  {
+   "tag": "td",
+   "text": "https://rest.uniprot.org/proteomes/stream?query=reference:true&fields=upid,organism_id,organism,protein_count,busco&format=tsv"
+  }
+ ],
+ "data": {
+  "lookups": {
+   "taxid": 7240,
+   "name": "Drosophila simulans",
+   "common_name": null,
+   "slug": "drosophila_simulans",
+   "lineage": [
+    {
+     "taxid": 7240,
+     "rank": "species",
+     "name": "Drosophila simulans"
+    },
+    {
+     "taxid": 32351,
+     "rank": "species subgroup",
+     "name": "melanogaster subgroup"
+    },
+    {
+     "taxid": 32346,
+     "rank": "species group",
+     "name": "melanogaster group"
+    },
+    {
+     "taxid": 32341,
+     "rank": "subgenus",
+     "name": "Sophophora"
+    },
+    {
+     "taxid": 7215,
+     "rank": "genus",
+     "name": "Drosophila"
+    },
+    {
+     "taxid": 46877,
+     "rank": "tribe",
+     "name": "Drosophilini"
+    },
+    {
+     "taxid": 43845,
+     "rank": "subfamily",
+     "name": "Drosophilinae"
+    },
+    {
+     "taxid": 7214,
+     "rank": "family",
+     "name": "Drosophilidae"
+    },
+    {
+     "taxid": 43746,
+     "rank": "superfamily",
+     "name": "Ephydroidea"
+    },
+    {
+     "taxid": 43741,
+     "rank": "no rank",
+     "name": "Acalyptratae"
+    },
+    {
+     "taxid": 43738,
+     "rank": "no rank",
+     "name": "Schizophora"
+    },
+    {
+     "taxid": 480117,
+     "rank": "clade",
+     "name": "Cyclorrhapha"
+    },
+    {
+     "taxid": 480118,
+     "rank": "clade",
+     "name": "Eremoneura"
+    },
+    {
+     "taxid": 43733,
+     "rank": "infraorder",
+     "name": "Muscomorpha"
+    },
+    {
+     "taxid": 7203,
+     "rank": "suborder",
+     "name": "Brachycera"
+    },
+    {
+     "taxid": 7147,
+     "rank": "order",
+     "name": "Diptera"
+    },
+    {
+     "taxid": 3701063,
+     "rank": "clade",
+     "name": "Panorpida"
+    },
+    {
+     "taxid": 3701062,
+     "rank": "clade",
+     "name": "Aparaglossata"
+    },
+    {
+     "taxid": 33392,
+     "rank": "cohort",
+     "name": "Endopterygota"
+    },
+    {
+     "taxid": 3701061,
+     "rank": "clade",
+     "name": "Eumetabola"
+    },
+    {
+     "taxid": 33340,
+     "rank": "infraclass",
+     "name": "Neoptera"
+    },
+    {
+     "taxid": 7496,
+     "rank": "subclass",
+     "name": "Pterygota"
+    },
+    {
+     "taxid": 85512,
+     "rank": "clade",
+     "name": "Dicondylia"
+    },
+    {
+     "taxid": 50557,
+     "rank": "class",
+     "name": "Insecta"
+    },
+    {
+     "taxid": 6960,
+     "rank": "subphylum",
+     "name": "Hexapoda"
+    },
+    {
+     "taxid": 3701030,
+     "rank": "clade",
+     "name": "Allotriocarida"
+    },
+    {
+     "taxid": 3701028,
+     "rank": "clade",
+     "name": "Altocrustacea"
+    },
+    {
+     "taxid": 197562,
+     "rank": "clade",
+     "name": "Pancrustacea"
+    },
+    {
+     "taxid": 197563,
+     "rank": "clade",
+     "name": "Mandibulata"
+    },
+    {
+     "taxid": 6656,
+     "rank": "phylum",
+     "name": "Arthropoda"
+    },
+    {
+     "taxid": 88770,
+     "rank": "clade",
+     "name": "Panarthropoda"
+    },
+    {
+     "taxid": 1206794,
+     "rank": "clade",
+     "name": "Ecdysozoa"
+    },
+    {
+     "taxid": 33317,
+     "rank": "clade",
+     "name": "Protostomia"
+    },
+    {
+     "taxid": 33213,
+     "rank": "clade",
+     "name": "Bilateria"
+    },
+    {
+     "taxid": 6072,
+     "rank": "clade",
+     "name": "Eumetazoa"
+    },
+    {
+     "taxid": 33208,
+     "rank": "kingdom",
+     "name": "Metazoa"
+    },
+    {
+     "taxid": 33154,
+     "rank": "clade",
+     "name": "Opisthokonta"
+    },
+    {
+     "taxid": 2759,
+     "rank": "domain",
+     "name": "Eukaryota"
+    },
+    {
+     "taxid": 131567,
+     "rank": "cellular root",
+     "name": "cellular organisms"
+    },
+    {
+     "taxid": 1,
+     "rank": "no rank",
+     "name": "root"
+    }
+   ],
+   "self_entries": 199,
+   "ranks": {
+    "order": {
+     "taxid": 7147,
+     "name": "Diptera",
+     "entries": 7473
+    },
+    "class": {
+     "taxid": 50557,
+     "name": "Insecta",
+     "entries": 10168
+    }
+   },
+   "relative": {
+    "taxid": 7227,
+    "name": "Drosophila melanogaster",
+    "common_name": "fruit fly",
+    "entries": 3904,
+    "shared_ancestor": {
+     "taxid": 32351,
+     "name": "melanogaster subgroup",
+     "rank": "species subgroup"
+    }
+   },
+   "proteome": {
+    "upid": "UP000000304",
+    "taxid": 7240,
+    "organism": "Drosophila simulans (Fruit fly)",
+    "protein_count": 15361
+   },
+   "ebp": {
+    "on_list": true,
+    "projects": "DTOL"
+   },
+   "mya": {
+    "value": 6.15858,
+    "method": "pairwise",
+    "between": [
+     7240,
+     7227
+    ]
+   },
+   "alphafold": {
+    "proteome_entries": 15361,
+    "with_model": 14659,
+    "share_with_model": 0.9542998502701647,
+    "afdb_models": 22783,
+    "bands5": {
+     "plddt_00_005": 0,
+     "plddt_05_010": 0,
+     "plddt_10_015": 0,
+     "plddt_15_020": 0,
+     "plddt_20_025": 1,
+     "plddt_25_030": 31,
+     "plddt_30_035": 198,
+     "plddt_35_040": 320,
+     "plddt_40_045": 818,
+     "plddt_45_050": 1307,
+     "plddt_50_055": 1825,
+     "plddt_55_060": 2055,
+     "plddt_60_065": 2040,
+     "plddt_65_070": 1974,
+     "plddt_70_075": 2099,
+     "plddt_75_080": 2300,
+     "plddt_80_085": 2666,
+     "plddt_85_090": 2672,
+     "plddt_90_095": 2045,
+     "plddt_95_100": 432
+    },
+    "models_in_bands": 22783
+   }
+  },
+  "answer": {
+   "taxid": 7240,
+   "name": "Drosophila simulans",
+   "common_name": null,
+   "slug": "drosophila_simulans",
+   "built": null,
+   "cards": {
+    "relative": {
+     "taxid": 7227,
+     "name": "Drosophila melanogaster",
+     "common_name": "fruit fly",
+     "entries": 3904,
+     "shared_ancestor": {
+      "taxid": 32351,
+      "name": "melanogaster subgroup",
+      "rank": "species subgroup"
+     },
+     "mya": 6.15858,
+     "mya_method": "pairwise",
+     "mya_detail": {
+      "value": 6.15858,
+      "method": "pairwise",
+      "between": [
+       7240,
+       7227
+      ]
+     }
+    },
+    "reviewed": {
+     "self": 199,
+     "order": {
+      "taxid": 7147,
+      "name": "Diptera",
+      "entries": 7473
+     },
+     "class": {
+      "taxid": 50557,
+      "name": "Insecta",
+      "entries": 10168
+     }
+    },
+    "alphafold": {
+     "proteome": "UP000000304",
+     "proteome_entries": 15361,
+     "with_model": 14659,
+     "share_with_model": 0.9542998502701647,
+     "afdb_models_counted": 22783,
+     "mean_plddt_est": 70.50574990124215,
+     "band_share": {
+      "0-50": 0.11741210551727164,
+      "50-70": 0.34648641530966073,
+      "70-90": 0.4273800640828688,
+      "90-100": 0.10872141509019884
+     },
+     "band_counts": {
+      "0-50": 2675,
+      "50-70": 7894,
+      "70-90": 9737,
+      "90-100": 2477
+     }
+    },
+    "ebp": {
+     "on_list": true,
+     "projects": "DTOL"
+    }
+   },
+   "proteome": {
+    "upid": "UP000000304",
+    "taxid": 7240,
+    "organism": "Drosophila simulans (Fruit fly)",
+    "protein_count": 15361
+   },
+   "stratum": {
+    "relative": {
+     "id": "ptroglodytes",
+     "name": "chimpanzee",
+     "scientific": "Pan troglodytes",
+     "taxid": 9598,
+     "mya": 6
+    },
+    "band_asked": "70-90",
+    "mean_plddt_est": 70.50574990124215,
+    "models_counted": 22783,
+    "fallback": false,
+    "reason": null,
+    "n_asked": 1399,
+    "band": "70-90",
+    "n": 1399
+   },
+   "verdict": [
+    {
+     "tool": "kmerseek",
+     "name": "kmerseek",
+     "kind": "kmers",
+     "shape": "circle",
+     "setting": "protein20_k6_lcFalse",
+     "setting_label": "protein20, k = 6",
+     "fmax": 0.4453340438654068,
+     "recall": 0.37418713039259877,
+     "precision": 0.5498882941475535,
+     "overlap_median": 0.6369627093474135,
+     "n": 1399,
+     "short_recall": 0.014598540145985401,
+     "short_precision": 0.04722222222222222,
+     "short_n": 546,
+     "pileup": {
+      "species": "zebrafish",
+      "band": "70-90",
+      "n_domains": 1023,
+      "curve": [
+       0.0043,
+       0.0043,
+       0.0043,
+       0.0043,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0028,
+       0.0014,
+       0.0014,
+       0.0014,
+       0,
+       0.0014,
+       0.0014,
+       0.0014,
+       0.0014,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0041,
+       0.0055,
+       0.0054,
+       0.0054,
+       0.0067,
+       0.0067,
+       0.0067,
+       0.0067,
+       0.0067,
+       0.0067,
+       0.0067,
+       0.008,
+       0.0066,
+       0.0066,
+       0.0066,
+       0.0066,
+       0.0066,
+       0.0066,
+       0.0053,
+       0.0052,
+       0.0052,
+       0.0052,
+       0.0052,
+       0.0065,
+       0.0065,
+       0.0065,
+       0.0065,
+       0.0064,
+       0.0064,
+       0.0064,
+       0.0077,
+       0.0064,
+       0.0064,
+       0.0064,
+       0.0063,
+       0.0063,
+       0.0062,
+       0.0062,
+       0.0062,
+       0.0062,
+       0.0062,
+       0.0062,
+       0.0049,
+       0.0049,
+       0.0048,
+       0.0048,
+       0.0048,
+       0.0048,
+       0.0036,
+       0.0047,
+       0.0047,
+       0.0047,
+       0.0058,
+       0.0069,
+       0.0069,
+       0.008,
+       0.0079,
+       0.0101,
+       0.009,
+       0.0101,
+       0.0111,
+       0.0111,
+       0.0121,
+       0.012,
+       0.0119,
+       0.0119,
+       0.0117,
+       0.0117,
+       0.0116,
+       0.0095,
+       0.0094,
+       0.0094,
+       0.0093,
+       0.0093,
+       0.0092,
+       0.0082,
+       0.0082,
+       0.0082,
+       0.0091,
+       0.0101,
+       0.012,
+       0.0117,
+       0.0127,
+       0.0127,
+       0.0127,
+       0.0127,
+       0.0127,
+       0.0127,
+       0.0127,
+       0.0127,
+       0.0147,
+       0.0156,
+       0.0156,
+       0.0156,
+       0.0156,
+       0.0156,
+       0.0156,
+       0.0156,
+       0.0137,
+       0.0137,
+       0.0127,
+       0.0147,
+       0.0166,
+       0.0196,
+       0.0205,
+       0.0215,
+       0.0215,
+       0.0235,
+       0.0293,
+       0.0293,
+       0.0303,
+       0.0332,
+       0.0332,
+       0.0332,
+       0.0332,
+       0.0332,
+       0.0342,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0362,
+       0.0371,
+       0.0371,
+       0.0371,
+       0.0381,
+       0.0381,
+       0.0381,
+       0.0381,
+       0.0391,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0401,
+       0.0391,
+       0.0381,
+       0.0381,
+       0.0362,
+       0.0362,
+       0.0362,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0352,
+       0.0342,
+       0.0342,
+       0.0323,
+       0.0323,
+       0.0313,
+       0.0313,
+       0.0313,
+       0.0313,
+       0.0313,
+       0.0313,
+       0.0313,
+       0.0303,
+       0.0303,
+       0.0303,
+       0.0293,
+       0.0289,
+       0.0263,
+       0.0234,
+       0.0227,
+       0.0208,
+       0.0211,
+       0.0193,
+       0.0205,
+       0.0197,
+       0.0165,
+       0.0189,
+       0.0178,
+       0.0189,
+       0.019,
+       0.0201,
+       0.0202,
+       0.0214,
+       0.0215,
+       0.0216,
+       0.0217,
+       0.0218,
+       0.0219,
+       0.022,
+       0.0197,
+       0.0198,
+       0.0118,
+       0.0095,
+       0.0096,
+       0.0096,
+       0.0096,
+       0.0085,
+       0.0085,
+       0.0073,
+       0.0073,
+       0.0062,
+       0.0062,
+       0.0062,
+       0.0062,
+       0.0075,
+       0.0063,
+       0.0076,
+       0.0076,
+       0.0076,
+       0.0076,
+       0.0076,
+       0.0076,
+       0.0077,
+       0.0077,
+       0.0077,
+       0.0077,
+       0.0077,
+       0.0077,
+       0.0065,
+       0.0065,
+       0.0065,
+       0.0065,
+       0.0039,
+       0.0039,
+       0.0039,
+       0.0039,
+       0.0039,
+       0.0053,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0013,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0027,
+       0.0041,
+       0.0041,
+       0.0041,
+       0.0041,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0042,
+       0.0029,
+       0.0043,
+       0.0043,
+       0.0043,
+       0.0043,
+       0.0029,
+       0.0029,
+       0.0029,
+       0.0029,
+       0.0015
+      ],
+      "median_start_offset_aa": 23,
+      "n_tp_calls": 56
+     },
+     "cpu_h_per_1000": 0.0584725005566689,
+     "gpu_h_per_1000": 0,
+     "cost_usd_est": 0.0026093353373413497,
+     "db_cpu_h_per_db": 0.025462962962962965
+    },
+    {
+     "tool": "hhblits",
+     "name": "HH-suite (hhsearch)",
+     "kind": "profiles",
+     "shape": "triangle",
+     "setting": "single_seq",
+     "setting_label": "single-protein profiles",
+     "fmax": 0.3313220553431388,
+     "recall": 0.42182112759035845,
+     "precision": 0.27279549591194324,
+     "overlap_median": 0.7027027027027027,
+     "n": 1399,
+     "short_recall": 0.06493309002433091,
+     "short_precision": 0.0073356283019239315,
+     "short_n": 546,
+     "pileup": {
+      "species": "zebrafish",
+      "band": "70-90",
+      "n_domains": 1023,
+      "curve": [
+       0.7429,
+       0.7461,
+       0.7461,
+       0.7429,
+       0.7426,
+       0.744,
+       0.7458,
+       0.744,
+       0.7447,
+       0.7427,
+       0.7399,
+       0.7368,
+       0.7417,
+       0.7438,
+       0.7469,
+       0.7469,
+       0.749,
+       0.7469,
+       0.7459,
+       0.7462,
+       0.7476,
+       0.7503,
+       0.7503,
+       0.7507,
+       0.7497,
+       0.7513,
+       0.7527,
+       0.7487,
+       0.7487,
+       0.7477,
+       0.746,
+       0.7463,
+       0.7477,
+       0.7477,
+       0.7483,
+       0.7493,
+       0.7533,
+       0.7536,
+       0.7533,
+       0.7539,
+       0.7487,
+       0.749,
+       0.751,
+       0.7506,
+       0.7519,
+       0.7558,
+       0.7552,
+       0.7545,
+       0.7535,
+       0.7532,
+       0.7522,
+       0.7548,
+       0.7532,
+       0.7503,
+       0.7456,
+       0.7478,
+       0.7466,
+       0.7506,
+       0.7509,
+       0.7525,
+       0.75,
+       0.7506,
+       0.7482,
+       0.7503,
+       0.7512,
+       0.7539,
+       0.7461,
+       0.747,
+       0.7518,
+       0.7559,
+       0.7579,
+       0.7625,
+       0.7638,
+       0.7617,
+       0.7625,
+       0.763,
+       0.7649,
+       0.7668,
+       0.7676,
+       0.7684,
+       0.7736,
+       0.7707,
+       0.7733,
+       0.7773,
+       0.7799,
+       0.7774,
+       0.7797,
+       0.7853,
+       0.792,
+       0.7958,
+       0.7992,
+       0.7952,
+       0.7948,
+       0.7988,
+       0.8074,
+       0.8088,
+       0.8145,
+       0.8161,
+       0.8187,
+       0.8258,
+       0.8172,
+       0.8221,
+       0.827,
+       0.8289,
+       0.8328,
+       0.8338,
+       0.8348,
+       0.8348,
+       0.8358,
+       0.8377,
+       0.8387,
+       0.8407,
+       0.8416,
+       0.8426,
+       0.8446,
+       0.8446,
+       0.8456,
+       0.8456,
+       0.8456,
+       0.8456,
+       0.8456,
+       0.8456,
+       0.8465,
+       0.8475,
+       0.8495,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8504,
+       0.8514,
+       0.8514,
+       0.8514,
+       0.8514,
+       0.8514,
+       0.8524,
+       0.8524,
+       0.8514,
+       0.8514,
+       0.8514,
+       0.8514,
+       0.8514,
+       0.8514,
+       0.8504,
+       0.8504,
+       0.8495,
+       0.8495,
+       0.8475,
+       0.8475,
+       0.8475,
+       0.8475,
+       0.8465,
+       0.8465,
+       0.8456,
+       0.8456,
+       0.8456,
+       0.8456,
+       0.8446,
+       0.8436,
+       0.8426,
+       0.8426,
+       0.8416,
+       0.8407,
+       0.8397,
+       0.8387,
+       0.8377,
+       0.8368,
+       0.8338,
+       0.8309,
+       0.8309,
+       0.827,
+       0.8287,
+       0.8273,
+       0.8247,
+       0.8196,
+       0.817,
+       0.8154,
+       0.8158,
+       0.8155,
+       0.812,
+       0.8152,
+       0.8124,
+       0.8078,
+       0.8073,
+       0.8049,
+       0.8009,
+       0.8025,
+       0.798,
+       0.7941,
+       0.7952,
+       0.7934,
+       0.7927,
+       0.7912,
+       0.7919,
+       0.7914,
+       0.7895,
+       0.7858,
+       0.7893,
+       0.7919,
+       0.7914,
+       0.7904,
+       0.7899,
+       0.7896,
+       0.7837,
+       0.7832,
+       0.7857,
+       0.7847,
+       0.7776,
+       0.7758,
+       0.7779,
+       0.7746,
+       0.773,
+       0.7727,
+       0.7696,
+       0.7658,
+       0.764,
+       0.7656,
+       0.7628,
+       0.7634,
+       0.7641,
+       0.7635,
+       0.7603,
+       0.76,
+       0.761,
+       0.7588,
+       0.7604,
+       0.7575,
+       0.7559,
+       0.7562,
+       0.7569,
+       0.7569,
+       0.7566,
+       0.7589,
+       0.7557,
+       0.754,
+       0.7527,
+       0.7547,
+       0.7577,
+       0.7574,
+       0.7571,
+       0.7591,
+       0.7591,
+       0.7585,
+       0.7565,
+       0.7548,
+       0.7517,
+       0.7483,
+       0.749,
+       0.7493,
+       0.749,
+       0.7476,
+       0.7483,
+       0.7493,
+       0.7476,
+       0.7455,
+       0.7483,
+       0.7483,
+       0.7483,
+       0.7458,
+       0.7468,
+       0.7475,
+       0.7475,
+       0.7468,
+       0.7468,
+       0.7489,
+       0.7496,
+       0.7507,
+       0.7504,
+       0.7504,
+       0.7511,
+       0.7504
+      ],
+      "median_start_offset_aa": 26,
+      "n_tp_calls": 985
+     },
+     "cpu_h_per_1000": 24.83871446596897,
+     "gpu_h_per_1000": 0,
+     "cost_usd_est": 1.1084276330438652,
+     "db_cpu_h_per_db": 4.41047619047619
+    },
+    {
+     "tool": "mmseqs2_iterative",
+     "name": "MMseqs2, three rounds",
+     "kind": "profiles",
+     "shape": "square",
+     "setting": "s7",
+     "setting_label": "sensitivity 7, 3 rounds",
+     "fmax": 0.32289426893191475,
+     "recall": 0.40813549504108954,
+     "precision": 0.26710747922847583,
+     "overlap_median": 0.7,
+     "n": 1399,
+     "short_recall": 0,
+     "short_precision": 0,
+     "short_n": 546,
+     "pileup": {
+      "species": "zebrafish",
+      "band": "70-90",
+      "n_domains": 1023,
+      "curve": [
+       0.6657,
+       0.6662,
+       0.6662,
+       0.6648,
+       0.6662,
+       0.6662,
+       0.6653,
+       0.6624,
+       0.662,
+       0.6643,
+       0.6662,
+       0.6648,
+       0.6671,
+       0.6694,
+       0.6685,
+       0.6726,
+       0.6722,
+       0.6717,
+       0.6721,
+       0.6739,
+       0.6767,
+       0.6771,
+       0.6788,
+       0.6792,
+       0.6797,
+       0.6801,
+       0.6868,
+       0.6858,
+       0.6845,
+       0.6836,
+       0.6809,
+       0.6826,
+       0.6879,
+       0.6879,
+       0.6887,
+       0.6887,
+       0.69,
+       0.6917,
+       0.6929,
+       0.695,
+       0.6927,
+       0.697,
+       0.6965,
+       0.6977,
+       0.6977,
+       0.699,
+       0.701,
+       0.7044,
+       0.7047,
+       0.702,
+       0.7037,
+       0.7037,
+       0.7023,
+       0.6999,
+       0.6967,
+       0.6966,
+       0.6944,
+       0.6973,
+       0.6964,
+       0.698,
+       0.6946,
+       0.6919,
+       0.6934,
+       0.6958,
+       0.6944,
+       0.696,
+       0.6901,
+       0.6912,
+       0.6915,
+       0.6922,
+       0.6927,
+       0.6952,
+       0.6993,
+       0.6987,
+       0.7011,
+       0.6998,
+       0.7053,
+       0.7074,
+       0.7084,
+       0.7082,
+       0.7092,
+       0.71,
+       0.7119,
+       0.7189,
+       0.7228,
+       0.721,
+       0.7267,
+       0.7284,
+       0.7321,
+       0.7372,
+       0.7367,
+       0.7363,
+       0.734,
+       0.7351,
+       0.7398,
+       0.7474,
+       0.7554,
+       0.7591,
+       0.7644,
+       0.7718,
+       0.7664,
+       0.7722,
+       0.7761,
+       0.7771,
+       0.7801,
+       0.784,
+       0.7849,
+       0.7849,
+       0.7869,
+       0.7869,
+       0.7879,
+       0.7898,
+       0.7908,
+       0.7928,
+       0.7937,
+       0.7947,
+       0.7977,
+       0.7996,
+       0.8006,
+       0.8016,
+       0.8025,
+       0.8025,
+       0.8035,
+       0.8035,
+       0.8045,
+       0.8055,
+       0.8055,
+       0.8065,
+       0.8065,
+       0.8074,
+       0.8074,
+       0.8074,
+       0.8074,
+       0.8074,
+       0.8074,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8104,
+       0.8104,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8094,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8084,
+       0.8074,
+       0.8055,
+       0.8045,
+       0.8045,
+       0.8025,
+       0.8016,
+       0.8016,
+       0.8006,
+       0.8006,
+       0.8006,
+       0.8006,
+       0.8006,
+       0.7996,
+       0.7996,
+       0.7957,
+       0.7957,
+       0.7947,
+       0.7937,
+       0.7918,
+       0.7918,
+       0.7918,
+       0.7918,
+       0.7889,
+       0.7889,
+       0.7869,
+       0.783,
+       0.7781,
+       0.7749,
+       0.7737,
+       0.7696,
+       0.7722,
+       0.7672,
+       0.7669,
+       0.7666,
+       0.7627,
+       0.7617,
+       0.7624,
+       0.7636,
+       0.7578,
+       0.7528,
+       0.7514,
+       0.7483,
+       0.7475,
+       0.7483,
+       0.7455,
+       0.7429,
+       0.7432,
+       0.7388,
+       0.7405,
+       0.7399,
+       0.737,
+       0.7384,
+       0.7361,
+       0.7393,
+       0.7416,
+       0.7434,
+       0.7422,
+       0.744,
+       0.7412,
+       0.7388,
+       0.7345,
+       0.7352,
+       0.7351,
+       0.7342,
+       0.7285,
+       0.7277,
+       0.728,
+       0.7251,
+       0.7197,
+       0.7203,
+       0.7203,
+       0.7195,
+       0.7197,
+       0.7168,
+       0.7187,
+       0.7167,
+       0.7172,
+       0.7165,
+       0.7135,
+       0.7132,
+       0.7121,
+       0.7148,
+       0.7145,
+       0.7141,
+       0.713,
+       0.7109,
+       0.7083,
+       0.7092,
+       0.7099,
+       0.7103,
+       0.7086,
+       0.7072,
+       0.7078,
+       0.7093,
+       0.7089,
+       0.7085,
+       0.7104,
+       0.7104,
+       0.7096,
+       0.7075,
+       0.7071,
+       0.704,
+       0.7018,
+       0.7023,
+       0.6997,
+       0.6993,
+       0.6979,
+       0.6957,
+       0.6967,
+       0.6976,
+       0.6982,
+       0.7007,
+       0.6993,
+       0.6965,
+       0.6966,
+       0.6962,
+       0.6953,
+       0.6961,
+       0.6953,
+       0.6938,
+       0.6944,
+       0.695,
+       0.696,
+       0.697,
+       0.697,
+       0.6975,
+       0.6967
+      ],
+      "median_start_offset_aa": 18,
+      "n_tp_calls": 571
+     },
+     "cpu_h_per_1000": 0.07867587025903659,
+     "gpu_h_per_1000": 0,
+     "cost_usd_est": 0.0035109107103095077,
+     "db_cpu_h_per_db": 0.0012698412698412698
+    }
+   ],
+   "not_run": [
+    "foldseek"
+   ],
+   "upset": {
+    "species": "zebrafish",
+    "band": "70-90",
+    "n_domains": 1023,
+    "tools": [
+     "kmerseek",
+     "hhblits",
+     "mmseqs2_iterative"
+    ],
+    "combos": {
+     "100": 5,
+     "110": 4,
+     "111": 38,
+     "010": 169,
+     "000": 362,
+     "011": 428,
+     "001": 17
+    }
+   },
+   "curve": [
+    {
+     "tool": "kmerseek",
+     "setting": "protein20_k6_lcFalse",
+     "points": [
+      {
+       "relative": "ptroglodytes",
+       "mya": 6,
+       "fmax": 0.44321639696329435
+      },
+      {
+       "relative": "rnorvegicus",
+       "mya": 90,
+       "fmax": 0.2703345507671435
+      },
+      {
+       "relative": "btaurus",
+       "mya": 95,
+       "fmax": 0.2903450834198843
+      },
+      {
+       "relative": "clupus",
+       "mya": 95,
+       "fmax": 0.054633008453046326
+      },
+      {
+       "relative": "mouse",
+       "mya": 100,
+       "fmax": 0.3049039643618391
+      },
+      {
+       "relative": "mdomestica",
+       "mya": 160,
+       "fmax": 0.24990329873910852
+      },
+      {
+       "relative": "chicken",
+       "mya": 300,
+       "fmax": 0.11553982247800378
+      },
+      {
+       "relative": "xtropicalis",
+       "mya": 350,
+       "fmax": 0.06698888802909093
+      },
+      {
+       "relative": "zebrafish",
+       "mya": 430,
+       "fmax": 0.09072341090819058
+      },
+      {
+       "relative": "ciona",
+       "mya": 550,
+       "fmax": 0.008957452102513063
+      },
+      {
+       "relative": "fly",
+       "mya": 600,
+       "fmax": 0.023111130657473857
+      },
+      {
+       "relative": "worm",
+       "mya": 650,
+       "fmax": 0.013651274008460257
+      },
+      {
+       "relative": "yeast",
+       "mya": 900,
+       "fmax": 0
+      },
+      {
+       "relative": "arabidopsis",
+       "mya": 1500,
+       "fmax": 0
+      },
+      {
+       "relative": "ecoli",
+       "mya": 2000,
+       "fmax": 0
+      }
+     ]
+    },
+    {
+     "tool": "hhblits",
+     "setting": "single_seq",
+     "points": [
+      {
+       "relative": "ptroglodytes",
+       "mya": 6,
+       "fmax": 0.311328253651204
+      },
+      {
+       "relative": "rnorvegicus",
+       "mya": 90,
+       "fmax": 0.31255993333394255
+      },
+      {
+       "relative": "btaurus",
+       "mya": 95,
+       "fmax": 0.29680715867472923
+      },
+      {
+       "relative": "clupus",
+       "mya": 95,
+       "fmax": 0.2690609580498647
+      },
+      {
+       "relative": "mouse",
+       "mya": 100,
+       "fmax": 0.31380473289141964
+      },
+      {
+       "relative": "mdomestica",
+       "mya": 160,
+       "fmax": 0.3115964207063659
+      },
+      {
+       "relative": "chicken",
+       "mya": 300,
+       "fmax": 0.3162182759156151
+      },
+      {
+       "relative": "xtropicalis",
+       "mya": 350,
+       "fmax": 0.3391834268902635
+      },
+      {
+       "relative": "zebrafish",
+       "mya": 430,
+       "fmax": 0.31303012408094416
+      },
+      {
+       "relative": "ciona",
+       "mya": 550,
+       "fmax": 0.3205404896480434
+      },
+      {
+       "relative": "fly",
+       "mya": 600,
+       "fmax": 0.3265168384661322
+      },
+      {
+       "relative": "worm",
+       "mya": 650,
+       "fmax": 0.3019010142586021
+      },
+      {
+       "relative": "yeast",
+       "mya": 900,
+       "fmax": 0.2696538610876024
+      },
+      {
+       "relative": "arabidopsis",
+       "mya": 1500,
+       "fmax": 0.2350288684161828
+      },
+      {
+       "relative": "ecoli",
+       "mya": 2000,
+       "fmax": 0.12346302108033828
+      }
+     ]
+    },
+    {
+     "tool": "mmseqs2_iterative",
+     "setting": "s7",
+     "points": [
+      {
+       "relative": "ptroglodytes",
+       "mya": 6,
+       "fmax": 0.30105637481300707
+      },
+      {
+       "relative": "rnorvegicus",
+       "mya": 90,
+       "fmax": 0.3107565181903354
+      },
+      {
+       "relative": "btaurus",
+       "mya": 95,
+       "fmax": 0.3033285005763616
+      },
+      {
+       "relative": "clupus",
+       "mya": 95,
+       "fmax": 0.27871038816135574
+      },
+      {
+       "relative": "mouse",
+       "mya": 100,
+       "fmax": 0.3165282069932801
+      },
+      {
+       "relative": "mdomestica",
+       "mya": 160,
+       "fmax": 0.3117102435265398
+      },
+      {
+       "relative": "chicken",
+       "mya": 300,
+       "fmax": 0.3300728023034689
+      },
+      {
+       "relative": "xtropicalis",
+       "mya": 350,
+       "fmax": 0.34670093274403063
+      },
+      {
+       "relative": "zebrafish",
+       "mya": 430,
+       "fmax": 0.3242333985424603
+      },
+      {
+       "relative": "ciona",
+       "mya": 550,
+       "fmax": 0.32101163033306485
+      },
+      {
+       "relative": "fly",
+       "mya": 600,
+       "fmax": 0.3254091437251392
+      },
+      {
+       "relative": "worm",
+       "mya": 650,
+       "fmax": 0.29893693646469743
+      },
+      {
+       "relative": "yeast",
+       "mya": 900,
+       "fmax": 0.25988935842918226
+      },
+      {
+       "relative": "arabidopsis",
+       "mya": 1500,
+       "fmax": 0.24173722247499785
+      },
+      {
+       "relative": "ecoli",
+       "mya": 2000,
+       "fmax": 0.10396023441745252
+      }
+     ]
+    }
+   ],
+   "dark": {
+    "organism": "worm",
+    "name": "nematode (Caenorhabditis elegans)",
+    "taxid": 6239,
+    "dark": 8915,
+    "proteins": 19819,
+    "dark_fraction": 0.4498208789545386,
+    "no_relative_fraction": 0.4498208789545386,
+    "disordered_fraction": null,
+    "short_motif_fraction": null,
+    "query_set": "worm dark proteins (no sequence-tool hit at E<1)",
+    "target_db": "Swiss-Prot reviewed, query clade removed",
+    "source_path": "/scratch/users/olgabot/invertebrate-dark-set/results-0.4/worm/worm_kmerseek_dark_gain.parquet",
+    "source_commit": "0dad375",
+    "lineage": [
+     6239,
+     6237,
+     55885,
+     6243,
+     55879,
+     2301119,
+     2301116,
+     6236,
+     119089,
+     6231,
+     1206794,
+     33317,
+     33213,
+     6072,
+     33208,
+     33154,
+     2759,
+     131567,
+     1
+    ],
+    "shared_ancestor": {
+     "taxid": 1206794,
+     "name": "Ecdysozoa"
+    }
+   },
+   "dark_all": [
+    {
+     "organism": "human",
+     "name": "human (Homo sapiens)",
+     "dark_fraction": 0.15058252427184465,
+     "proteins": 20600
+    },
+    {
+     "organism": "yeast",
+     "name": "baker's yeast (Saccharomyces cerevisiae)",
+     "dark_fraction": 0.21474623904777648,
+     "proteins": 6049
+    },
+    {
+     "organism": "worm",
+     "name": "nematode (Caenorhabditis elegans)",
+     "dark_fraction": 0.4498208789545386,
+     "proteins": 19819
+    },
+    {
+     "organism": "borrelia",
+     "name": "Lyme disease bacterium (Borrelia burgdorferi)",
+     "dark_fraction": 0.4740511231603408,
+     "proteins": 1291
+    },
+    {
+     "organism": "botryllus",
+     "name": "star ascidian (Botryllus schlosseri)",
+     "dark_fraction": 0.45100244822338387,
+     "proteins": 45339
+    }
+   ],
+   "expected_label_fraction_est": {
+    "value": 0.3930944573653667,
+    "share_of_models_covered": 0.8825878944827285,
+    "tool": "kmerseek",
+    "setting": "protein20_k6_lcFalse",
+    "relative": "ptroglodytes",
+    "parts": [
+     {
+      "band": "0-50",
+      "share": 0.11741210551727164,
+      "recall": null,
+      "n": 0
+     },
+     {
+      "band": "50-70",
+      "share": 0.34648641530966073,
+      "recall": 0.39873735686575973,
+      "n": 748
+     },
+     {
+      "band": "70-90",
+      "share": 0.4273800640828688,
+      "recall": 0.37418713039259877,
+      "n": 1399
+     },
+     {
+      "band": "90-100",
+      "share": 0.10872141509019884,
+      "recall": 0.44943502824858755,
+      "n": 186
+     }
+    ],
+    "rests_on": "human proteins (Pfam 38.2 domains) searched against chimpanzee (Pan troglodytes), 6 Mya"
+   },
+   "command": "# Drosophila simulans\n# UniProt reference proteome UP000000304, 15,361 proteins\ncurl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP000000304&format=fasta&compressed=true'\n# All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Drosophila melanogaster).\n# Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs.\ncurl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz'\n# nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome.\n# Version 1.1.0 has no option to run kmerseek; HH-suite (hhsearch); MMseqs2, three rounds; their commands follow.\nprintf 'id,fasta\\ndrosophila_simulans,proteome.fasta.gz\\n' > samplesheet.csv\nnextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results\n\n# -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off\n# that gives each tool its best Fmax; filter the output before you take labels from it.\n\n# kmerseek: its database needs build steps this page does not write out.\n# The command the board ran is on its tool card: tools/kmerseek.html\n\n# HH-suite (hhsearch): its database needs build steps this page does not write out.\n# The command the board ran is on its tool card: tools/hhblits.html\n\n# MMseqs2, sensitivity 7, three rounds (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef))\nmmseqs createdb proteome.fasta.gz q_db\nmmseqs createdb swissprot.fasta.gz t_db\nmmseqs search q_db t_db result_s7_n3 tmp_s7_n3 --threads 16 -s 7 --num-iterations 3 --max-seqs 1000 -e 10.0\nmmseqs convertalis q_db t_db result_s7_n3 mmseqs2_s7_3rounds.m8"
+  }
+ }
+}
