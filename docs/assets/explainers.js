@@ -167,7 +167,13 @@
   function put(id, v) {
     const e = document.getElementById(id);
     if (!e) return;
-    e.textContent = typeof v === "number" ? f3(v) : v;
+    const text = typeof v === "number" ? f3(v) : v;
+    // A number that changes flashes once, so the eye goes to what the slider moved.
+    if (e.textContent && e.textContent !== text && e.closest(".ex-tile")) {
+      const tile = e.closest(".ex-tile");
+      tile.classList.remove("flash"); void tile.offsetWidth; tile.classList.add("flash");
+    }
+    e.textContent = text;
     if (typeof v === "number") e.dataset.value = String(v);
   }
   function onResize(fn) {
@@ -305,6 +311,7 @@
       const box = document.getElementById("f3-track");
       box.innerHTML = "";
       const W = widthOf(box), L = 14, R = 14, H = 150;
+      geom = { W, L, R, len: P.length, a, b };
       const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img",
         "aria-label": `True domain ${P.true.start}–${P.true.end}, call ${a}–${b}, IoU ${f3(r.iou)}` }, box);
       const sx = (x) => L + ((x - 1) / (P.length - 1)) * (W - L - R);
@@ -312,7 +319,11 @@
       svgEl("line", { x1: sx(1), x2: sx(P.length), y1: y0, y2: y0, class: "ex-backbone" }, svg);
       svgEl("rect", { x: sx(P.true.start), y: y0 - 9, width: sx(P.true.end) - sx(P.true.start), height: 18, rx: 3, class: "ex-true" }, svg);
       text(svg, (sx(P.true.start) + sx(P.true.end)) / 2, y0 + 4, `true domain ${P.true.start}–${P.true.end}`, { class: "ex-domlab", "text-anchor": "middle" });
-      svgEl("rect", { x: sx(a), y: y0 + 18, width: Math.max(2, sx(b) - sx(a)), height: 10, rx: 2, class: "ex-kept" }, svg);
+      svgEl("rect", { x: sx(a), y: y0 + 13, width: Math.max(2, sx(b) - sx(a)), height: 20, rx: 2, class: "ex-kept ex-grab", "data-drag": "move" }, svg);
+      // One handle at each end of the call; dragging it moves that end only.
+      for (const [x, which] of [[sx(a), "start"], [sx(b), "end"]]) {
+        svgEl("rect", { x: x - 5, y: y0 + 9, width: 10, height: 28, rx: 3, class: "ex-handle", "data-drag": which }, svg);
+      }
       const cl = `call ${a}–${b}`;
       text(svg, Math.min(sx(a), W - R - cl.length * 6.6), y0 + 44, cl, { class: "ex-note" });
       // Brackets: shared residues, then residues covered by either.
@@ -357,6 +368,40 @@
     }
     s.addEventListener("input", draw);
     e.addEventListener("input", draw);
+    // Drag on the drawing: the bar moves the whole call, a handle moves one end. The sliders
+    // stay for keyboards and exact values, and follow the drag.
+    let geom = null, drag = null;
+    const box = document.getElementById("f3-track");
+    const resAt = (px) => {
+      const g = geom;
+      return 1 + ((px - g.L) / (g.W - g.L - g.R)) * (g.len - 1);
+    };
+    box.addEventListener("pointerdown", (ev) => {
+      const which = ev.target.dataset && ev.target.dataset.drag;
+      if (!which || !geom) return;
+      const x = ev.clientX - box.getBoundingClientRect().left;
+      drag = { which, r0: resAt(x), a0: geom.a, b0: geom.b };
+      box.setPointerCapture(ev.pointerId);
+      box.classList.add("dragging");
+      ev.preventDefault();
+    });
+    box.addEventListener("pointermove", (ev) => {
+      if (!drag) return;
+      const x = ev.clientX - box.getBoundingClientRect().left;
+      const d = Math.round(resAt(x) - drag.r0), len = geom.len;
+      let a = drag.a0, b = drag.b0;
+      if (drag.which === "move") {
+        const w = b - a;
+        a = Math.max(1, Math.min(len - w, a + d)); b = a + w;
+      } else if (drag.which === "start") a = Math.max(1, Math.min(b, a + d));
+      else b = Math.max(a, Math.min(len, b + d));
+      if (a === +s.value && b === +e.value) return;
+      s.value = a; e.value = b;
+      draw();
+    });
+    const stop = () => { drag = null; box.classList.remove("dragging"); };
+    box.addEventListener("pointerup", stop);
+    box.addEventListener("pointercancel", stop);
     onResize(draw);
     draw();
   }
@@ -391,20 +436,66 @@
   }
 
   // ---------------------------------------------------------------- Figure 5: cost
+  // Numbers in the formula change by dragging them sideways, as in Bret Victor's "Explorable
+  // Explanations" (2011). Each one is tied to a number box in "Type exact numbers".
   function fig5() {
     const ids = ["f5-cpu", "f5-gpu", "f5-rcpu", "f5-rgpu"];
     const sig = (x) => (x === 0 ? "0" : x >= 1 ? x.toFixed(3) : x.toPrecision(3));
+    const scrubs = [...document.querySelectorAll("#fig5 .scrub")];
+    const decimals = (step) => Math.max(0, -Math.floor(Math.log10(step)) + 1);
+    function show() {
+      for (const sp of scrubs) {
+        const inp = document.getElementById(sp.dataset.for), v = parseFloat(inp.value);
+        sp.textContent = isFinite(v) ? String(v) : "?";
+        sp.setAttribute("aria-valuenow", isFinite(v) ? String(v) : "");
+      }
+    }
     function draw() {
+      show();
       const [cpu, gpu, rc, rg] = ids.map((id) => parseFloat(document.getElementById(id).value));
       if (![cpu, gpu, rc, rg].every((x) => isFinite(x) && x >= 0)) {
         put("f5-out", "enter four numbers of 0 or more");
         return;
       }
       const a = cpu * rc, b = gpu * rg, tot = a + b;
-      put("f5-line", `${cpu} × ${rc} + ${gpu} × ${rg} = ${sig(a)} + ${sig(b)}`);
+      put("f5-a", "$" + sig(a)); put("f5-b", "$" + sig(b));
       const o = document.getElementById("f5-out");
-      o.textContent = "$" + sig(tot);
+      put("f5-out", "$" + sig(tot));
       o.dataset.value = String(tot);
+    }
+    function set(sp, v) {
+      const step = +sp.dataset.step, inp = document.getElementById(sp.dataset.for);
+      const k = decimals(step) + 1;
+      inp.value = String(Math.max(0, +v.toFixed(k)));
+      inp.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    for (const sp of scrubs) {
+      sp.tabIndex = 0;
+      sp.setAttribute("role", "slider");
+      sp.setAttribute("aria-label", sp.dataset.name);
+      sp.setAttribute("aria-valuemin", "0");
+      let start = null;
+      sp.addEventListener("pointerdown", (ev) => {
+        start = { x: ev.clientX, v: parseFloat(document.getElementById(sp.dataset.for).value) || 0 };
+        sp.setPointerCapture(ev.pointerId);
+        sp.classList.add("scrubbing");
+        ev.preventDefault();
+      });
+      sp.addEventListener("pointermove", (ev) => {
+        if (!start) return;
+        const step = +sp.dataset.step * (ev.shiftKey ? 0.1 : 1);
+        set(sp, start.v + Math.round((ev.clientX - start.x) / 4) * step);
+      });
+      const end = () => { start = null; sp.classList.remove("scrubbing"); };
+      sp.addEventListener("pointerup", end);
+      sp.addEventListener("pointercancel", end);
+      sp.addEventListener("keydown", (ev) => {
+        const dir = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[ev.key];
+        if (!dir) return;
+        const step = +sp.dataset.step * (ev.shiftKey ? 0.1 : 1);
+        set(sp, (parseFloat(document.getElementById(sp.dataset.for).value) || 0) + dir * step);
+        ev.preventDefault();
+      });
     }
     ids.forEach((id) => document.getElementById(id).addEventListener("input", draw));
     draw();

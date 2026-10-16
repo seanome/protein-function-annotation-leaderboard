@@ -315,7 +315,8 @@
       if (col.cls) th.classList.add(col.cls);
       if (state.sort === col.id) th.setAttribute("aria-sort", state.dir === "asc" ? "ascending" : "descending");
       const b = document.createElement("button");
-      b.innerHTML = col.label + '<span class="arrow"></span>';
+      const plain = col.term && M.terms && M.terms.short ? M.terms.short[col.term] : "";
+      b.innerHTML = col.label + '<span class="arrow"></span>' + (plain ? '<span class="th-plain">' + plain + "</span>" : "");
       if (col.key) b.title = "field " + col.key;
       b.addEventListener("click", () => {
         if (state.sort === col.id) state.dir = state.dir === "asc" ? "desc" : "asc";

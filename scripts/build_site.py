@@ -225,13 +225,59 @@ TERMS = {
 }
 
 
+# The same terms in everyday words, for a reader who has never met them: (a few words shown
+# under the column name, one or two plain sentences that open each definition). The fuller,
+# technical definition from TERMS follows them, then the link to the worked example.
+PLAIN = {
+    "fmax": ("right calls, few wrong ones",
+             "Does the tool find the real domains and features without adding wrong ones? Fmax "
+             "balances the two at the tool's best score cutoff. 1 is perfect; 0 means it found none."),
+    "auprc": ("right calls stay on top",
+              "Line up every call the tool makes, most confident first. AUPRC asks how well the "
+              "correct calls stay near the top of that list, whatever cutoff you pick. 1 is "
+              "perfect; 0 means none are correct."),
+    "iou": ("how well the ends line up",
+            "For the calls that are right, how closely the start and end match the real domain. 1 "
+            "means exactly the same residues; 0.5 means half of the residues the two cover "
+            "together are shared."),
+    "n": ("known annotations to find",
+          "How many known domains or features the human proteins have here. A tool can find at "
+          "most this many."),
+    "cpu": ("computer time used",
+            "How much computer time the search took for 1,000 human proteins against one relative. "
+            "Lower is cheaper."),
+    "cpu_rep": ("the authors' own figure",
+                "Computer time the tool's authors report on their own hardware. None sent yet."),
+    "ram": ("memory needed",
+            "The most memory the search needed at one time. A computer with less memory than this "
+            "cannot run it."),
+    "gpu": ("graphics-card time",
+            "Time on a graphics card (GPU). No search here used one."),
+    "cost": ("price for 1,000 proteins",
+             "What the search would cost, in US dollars, to annotate 1,000 proteins against one "
+             "relative at cloud prices. You can change the prices. Lower is cheaper."),
+    "calls": ("count each domain once?",
+              "Raw counts every call. Dedup counts a domain once, even when several of the "
+              "relative's proteins point to it."),
+    "wall": ("time to finish",
+             "How long you wait for the search to finish, for 1,000 proteins against one relative."),
+    "db": ("set-up time",
+           "Time to get the relative's proteins ready to search. It is done once, before any search."),
+    "measured": ("timed by us",
+                 "We timed it ourselves, on Stanford's Sherlock computer cluster."),
+    "reported": ("timed by the authors",
+                 "The tool's authors timed it on their own computers."),
+}
+
 def term_btn(term: str, where: str, up: str = "") -> str:
     """A "?" button and its definition, for terms.js. `where` makes the id unique on the page."""
     name, href, words = TERMS[term]
+    simple = PLAIN[term][1]
     tid = f"tip-{term}-{where}"
     return (f'<button type="button" class="term" data-term="{term}" aria-label="What is {esc(name)}?" '
             f'aria-expanded="false" aria-controls="{tid}" aria-describedby="{tid}">?</button>'
-            f'<span class="term-tip" role="tooltip" id="{tid}" hidden><b>{esc(name)}.</b> {words} '
+            f'<span class="term-tip" role="tooltip" id="{tid}" hidden><b>{esc(name)}.</b> {simple}'
+            f'<span class="term-detail"><b>In detail:</b> {words}</span> '
             f'<a href="{up}{href}">how it works →</a></span>')
 
 
@@ -595,9 +641,11 @@ set: Pfam's domains are defined by the models hmmscan runs, so read its row as a
 <span class="item">Cost and core-hours are measured on Stanford's Sherlock cluster, from the run's own task records {term_btn("measured", "key")}</span>
 </div>
 </details>
-<p class="prose oneline">Fmax: the best balance of precision and recall at one score cutoff. AUPRC:
-precision over every cutoff. Median IoU: how well a correct call's ends match the true region.
-All run 0 to 1, higher is better; <a href="explainers.html">How the scores work</a> works each through on a made-up protein.</p>
+<p class="prose oneline">In plain words: <b>Fmax</b> asks whether a tool finds the real domains
+without adding wrong ones. <b>AUPRC</b> asks whether its correct calls stay at the top of its list.
+<b>Median IoU</b> asks how well the ends of its right calls line up with the real domain. All run
+0 to 1, and higher is better. Hover or tap a <b>?</b> for more, or see
+<a href="explainers.html">How the scores work</a>, which works each through on a made-up protein.</p>
 <p class="prose oneline">Each tool searched {n_queries:,} human proteins, most from chromosome 6, against one
 relative's proteome and copied its annotations (<a href="methods.html#data">which proteins</a>).</p>
 <p class="prose oneline">Estimated cost = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries,
@@ -1904,12 +1952,19 @@ Fmax.</details></figcaption>
 <input type="range" id="f1-cut" min="0" max="100" step="1" value="50"></label>
 <button type="button" class="chip" id="f1-go">Go to the best cutoff</button>
 </div>
+<div class="ex-tiles" id="f1-read" aria-live="polite">
+<div class="ex-tile"><span class="ex-tl">Calls kept</span><span class="ex-tv" id="f1-kept"></span>
+<span class="ex-ts"><span class="v" id="f1-correct"></span> of them correct</span></div>
+<div class="ex-tile"><span class="ex-tl">Precision</span><span class="ex-tv" id="f1-p"></span>
+<span class="ex-ts">correct ÷ kept: how many of the kept calls are right</span></div>
+<div class="ex-tile"><span class="ex-tl">Recall</span><span class="ex-tv" id="f1-r"></span>
+<span class="ex-ts">domains found ÷ true domains = <span class="v" id="f1-found"></span> ÷ <span class="v" id="f1-ntrue"></span></span></div>
+<div class="ex-tile now"><span class="ex-tl">F at your cutoff</span><span class="ex-tv" id="f1-f"></span>
+<span class="ex-ts">the balance of precision and recall</span></div>
+<div class="ex-tile best"><span class="ex-tl">○ Highest F (Fmax)</span><span class="ex-tv" id="f1-fmax"></span>
+<span class="ex-ts">at any cutoff in <span class="v" id="f1-best"></span>; it does not move with the slider</span></div>
+</div>
 <div class="ex-box" id="f1-track"></div>
-<p class="ex-read" id="f1-read">Kept: <span class="v" id="f1-kept"></span> calls, <span class="v" id="f1-correct"></span> of them
-correct. Precision = correct ÷ kept = <span class="v" id="f1-p"></span>. Recall = domains found ÷ true domains
-= <span class="v" id="f1-found"></span> ÷ <span class="v" id="f1-ntrue"></span> = <span class="v" id="f1-r"></span>.
-F = <span class="v" id="f1-f"></span>.<br>Highest F over all cutoffs (Fmax): <span class="v" id="f1-fmax"></span>,
-for any cutoff in <span class="v" id="f1-best"></span>.</p>
 <div class="ex-box" id="f1-curve"></div>
 </figure>
 <details class="prose ex-more"><summary>How the leaderboard does this over many proteins</summary>
@@ -1981,24 +2036,32 @@ where the domain does, and 0 when they do not overlap. A call needs an IoU of 0.
 <figcaption><span class="ex-made-up">made-up example</span><b>Figure 6.</b> IoU of one call with one true
 domain. <details class="capmore"><summary>How to read Figure 6</summary>Top: a 200-residue protein with one true domain, and the call below it; the brackets
 underneath show the shared residues and the residues covered by either. It starts at the example on
-the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU
+the Methods page (call 30–129, domain 10–109). Drag the call, or its handles, to see IoU change. Bottom: the IoU
 of each correct call of protein A in Figure 4, with your call added when it is correct; the dashed
 line is their median.</details></figcaption>
 <div class="ex-legend" aria-label="Key to Figure 6">
 @@LEG3@@
 </div>
-<div class="ex-controls">
+<p class="ex-hint">Drag the black call to move it, or drag its handles to move one end.</p>
+<div class="ex-box ex-drag" id="f3-track"></div>
+<div class="ex-tiles" aria-live="polite">
+<div class="ex-tile"><span class="ex-tl">Shared residues</span><span class="ex-tv" id="f3-inter"></span>
+<span class="ex-ts">in both the call and the true domain</span></div>
+<div class="ex-tile"><span class="ex-tl">Covered by either</span><span class="ex-tv" id="f3-union"></span>
+<span class="ex-ts">in the call, the true domain, or both</span></div>
+<div class="ex-tile now"><span class="ex-tl">IoU of your call</span><span class="ex-tv" id="f3-iou"></span>
+<span class="ex-ts">shared ÷ covered by either: <span id="f3-verdict"></span></span></div>
+<div class="ex-tile best"><span class="ex-tl">Median IoU</span><span class="ex-tv" id="f3-median"></span>
+<span class="ex-ts">the middle of the <span class="v" id="f3-n"></span> correct calls below</span></div>
+</div>
+<div class="ex-controls ex-exact">
 <label for="f3-start"><span>Call starts at residue <span class="v mono" id="f3-start-v"></span></span>
 <input type="range" id="f3-start" min="1" max="200" step="1" value="@@S@@"></label>
 <label for="f3-end"><span>Call ends at residue <span class="v mono" id="f3-end-v"></span></span>
 <input type="range" id="f3-end" min="1" max="200" step="1" value="@@E@@"></label>
 </div>
-<div class="ex-box" id="f3-track"></div>
-<p class="ex-read">IoU = shared ÷ covered by either = <span class="v" id="f3-inter"></span> ÷
-<span class="v" id="f3-union"></span> = <span class="v" id="f3-iou"></span>: <span id="f3-verdict"></span>.</p>
 <div class="ex-box" id="f3-strip"></div>
-<p class="ex-read">Median IoU of the <span class="v" id="f3-n"></span> correct calls:
-<span class="v" id="f3-median"></span>. <span id="f3-mine"></span></p>
+<p class="ex-read"><span id="f3-mine"></span></p>
 </figure>
 <details class="prose ex-more"><summary>Median IoU on the leaderboard</summary>
 <p><b>Median IoU</b> on the leaderboard is the middle IoU of all of a tool's correct calls. Half of
@@ -2059,16 +2122,30 @@ GPU-hour, in US dollars. A core-hour is priced as one CPU-hour.</p>
 <figure class="ex-fig" id="fig5">
 <figcaption><b>Figure 8.</b> The cost formula with your own numbers. <details class="capmore"><summary>How to read Figure 8</summary>It starts at phmmer's measured
 core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These
-are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any
-box to see the cost change.</details></figcaption>
+are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Drag any underlined
+number to see the cost change.</details></figcaption>
+<p class="ex-hint">Drag any <span class="scrub-demo">underlined number</span> left or right to change it
+(hold Shift for small steps), or click it and use the arrow keys.</p>
+<p class="ex-formula">cost per 1,000 queries =
+<span class="scrub" data-for="f5-cpu" data-step="0.005" data-name="core-hours per 1,000 queries"></span> core-hours
+× $<span class="scrub" data-for="f5-rcpu" data-step="0.0005" data-name="price per CPU-hour"></span> per CPU-hour
++ <span class="scrub" data-for="f5-gpu" data-step="0.01" data-name="GPU-hours per 1,000 queries"></span> GPU-hours
+× $<span class="scrub" data-for="f5-rgpu" data-step="0.01" data-name="price per GPU-hour"></span> per GPU-hour</p>
+<div class="ex-tiles" aria-live="polite">
+<div class="ex-tile"><span class="ex-tl">CPU part</span><span class="ex-tv" id="f5-a"></span>
+<span class="ex-ts">core-hours × price per CPU-hour</span></div>
+<div class="ex-tile"><span class="ex-tl">GPU part</span><span class="ex-tv" id="f5-b"></span>
+<span class="ex-ts">GPU-hours × price per GPU-hour</span></div>
+<div class="ex-tile best"><span class="ex-tl">Estimated cost</span><span class="ex-tv" id="f5-out"></span>
+<span class="ex-ts">US dollars per 1,000 queries</span></div>
+</div>
+<details class="ex-exact"><summary>Type exact numbers</summary>
 <div class="ex-controls">
 <label for="f5-cpu">core-hours per 1,000 queries <input type="number" id="f5-cpu" min="0" step="any" inputmode="decimal" value="@@CPU@@"></label>
 <label for="f5-gpu">GPU-hours per 1,000 queries <input type="number" id="f5-gpu" min="0" step="any" inputmode="decimal" value="0"></label>
 <label for="f5-rcpu">r_cpu, USD per CPU-hour <input type="number" id="f5-rcpu" min="0" step="any" inputmode="decimal" value="@@RCPU@@"></label>
 <label for="f5-rgpu">r_gpu, USD per GPU-hour <input type="number" id="f5-rgpu" min="0" step="any" inputmode="decimal" value="@@RGPU@@"></label>
-</div>
-<p class="ex-read">cost_usd_est = <span class="v" id="f5-line"></span> = <span class="v" id="f5-out"></span>
-per 1,000 queries.</p>
+</div></details>
 </figure>
 <p class="prose muted">The made-up example is also in this page's JSON copy. Definitions of every
 score as the benchmark computes them, with a worked example from the real data, are on
@@ -2181,7 +2258,7 @@ def main() -> None:
         "source": src,
         # "?" buttons with their definitions, drawn by app.js into Table 1's header and the
         # filter rows (terms.js shows them).
-        "terms": {"th": {t: term_btn(t, "th") for t in TERMS}, "filters": {"calls": term_btn("calls", "filters")},
+        "terms": {"th": {t: term_btn(t, "th") for t in TERMS}, "short": {t: PLAIN[t][0] for t in PLAIN}, "filters": {"calls": term_btn("calls", "filters")},
                   "axes": {a["id"]: term_btn(a["id"], "ax") for a in AXES if a["id"] in TERMS}},
     }
     payload = json.dumps({"meta": meta, "results": results_json(res), "compute": compute_json(comp)},
@@ -2291,7 +2368,8 @@ def main() -> None:
         (out / "data" / "inventory.md").unlink(missing_ok=True)
     page_json(out, "methods.html", src, None)
     page_json(out, "explainers.html", src, {"made_up_example": TOY, "terms": {
-        k: {"name": n, "explainer": h, "definition": w} for k, (n, h, w) in TERMS.items()}})
+        k: {"name": n, "in_plain_words": PLAIN[k][1], "short": PLAIN[k][0], "explainer": h, "definition": w}
+        for k, (n, h, w) in TERMS.items()}})
     page_json(out, "tools/index.html", src, {"cards": [f"{t}.json" for t in sorted(tools_used)]})
     page_json(out, "claims.html", src, {"claims": cards})
     page_json(out, "claims-schema.html", src, {"schema": json.loads((ROOT_DIR / "claims/schema.json").read_text())})
