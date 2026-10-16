@@ -25,6 +25,17 @@ def gh(*args: str, raw: bool = False) -> bytes:
     return subprocess.run(cmd + list(args), check=True, capture_output=True).stdout
 
 
+def check_listed(want: dict, checksums: dict, listing: str, prefix: str = "") -> None:
+    """Every file a provenance listing names must have been copied, with the listed sha256."""
+    for name, digest in want.items():
+        got = checksums.get(prefix + name)
+        if got is None:
+            raise SystemExit(f"{listing} lists {prefix + name}, which was not copied "
+                             f"(copied: {', '.join(sorted(checksums))})")
+        if got != digest:
+            raise SystemExit(f"{prefix + name}: sha256 {got} != {digest} in {listing}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True)
@@ -47,6 +58,8 @@ def main() -> None:
         try:
             body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={sha}", raw=True)
         except subprocess.CalledProcessError:
+            # Not in this commit: remove an older copy, or it would be credited to this commit.
+            (a.out / name).unlink(missing_ok=True)
             continue
         (a.out / name).write_bytes(body)
         checksums[name] = hashlib.sha256(body).hexdigest()
@@ -55,21 +68,23 @@ def main() -> None:
         try:
             body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={pileup_sha}", raw=True)
         except subprocess.CalledProcessError:
-            continue  # a commit from before the pile-up tables existed
+            # A commit from before the pile-up tables existed: drop any older copy too.
+            (a.out / name).unlink(missing_ok=True)
+            continue
         (a.out / name).parent.mkdir(parents=True, exist_ok=True)
         (a.out / name).write_bytes(body)
         checksums[name] = hashlib.sha256(body).hexdigest()
+    got_pileup = [n for n in PILEUP if n in checksums]
+    if got_pileup and len(got_pileup) != len(PILEUP):
+        raise SystemExit(f"{pileup_sha[:8]} has only some of the pile-up files ({got_pileup}); "
+                         "the page needs all of them from one commit")
     if "pileup/provenance.json" in checksums:
         want = json.loads((a.out / "pileup/provenance.json").read_text())["outputs"]
-        for name, digest in want.items():
-            if checksums[f"pileup/{name}"] != digest:
-                raise SystemExit(f"pileup/{name}: sha256 does not match pileup/provenance.json")
+        check_listed(want, checksums, "pileup/provenance.json", prefix="pileup/")
 
     # The source's own provenance.json lists the checksum of each table it wrote.
     expected = json.loads((a.out / "provenance.json").read_text())["outputs"]
-    for name, digest in expected.items():
-        if checksums[name] != digest:
-            raise SystemExit(f"{name}: sha256 {checksums[name]} != {digest} in provenance.json")
+    check_listed(expected, checksums, "provenance.json")
 
     source = {
         "repo": a.repo,
