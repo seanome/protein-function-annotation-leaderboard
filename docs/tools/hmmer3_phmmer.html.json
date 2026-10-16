@@ -50,7 +50,7 @@
   },
   {
    "tag": "li",
-   "text": "AlphaFold model: no"
+   "text": "3D structure prediction: no"
   },
   {
    "tag": "li",
@@ -196,7 +196,7 @@
   "compares": "Amino-acid letters, one query protein against each protein of the relative, scored with a substitution matrix the way BLAST does but with HMMER's model of insertions and deletions.",
   "needs": {
    "sequence only": true,
-   "AlphaFold model": false,
+   "3D structure prediction": false,
    "GPU": false
   },
   "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a FASTA file.",

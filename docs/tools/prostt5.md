@@ -9,7 +9,7 @@ Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protei
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: yes
 
 ## Reference searched
