@@ -14,7 +14,7 @@ Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searche
 
 ## Known failure modes
 
-None recorded yet.
+- Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early. The number: median 5 to 21 residues early; 45% to 60% more than 100 residues early. Status: open. What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment. Source: [seanome/2024-kmerseek-analysis PR 146](https://github.com/seanome/2024-kmerseek-analysis/pull/146); [PR 3, comment 6193138553](https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553).
 
 ## Where it is strong and weak
 

@@ -1,4 +1,4 @@
-# Known failure modes of phmmer, and of the other aligners where also_tools says so.
+# Known failure modes of phmmer, and of the other tools where also_tools says so.
 # Each quote must match its source character for character: scripts/failure_modes.py --check.
 # Schema: failure_modes/schema.json.
 
@@ -7,6 +7,36 @@ name: phmmer
 updated: "2026-10-16"
 
 entries:
+  - id: evalue-two-significant-figures
+    finding: >-
+      HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those
+      rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The
+      dark set is the proteins that phmmer, jackhmmer and MMseqs2 all fail to place.
+    number: 2 to 222
+    evidence:
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 57, comment_id: 6151921382}
+        quote: >-
+          The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two
+          significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus
+          at E ≤ 10 is 2_039.
+      - source:
+          kind: file
+          repo: seanome/2024-kmerseek-analysis
+          commit: ec91da53b26d88474679989205045de45e38a162
+          path: nextflow-runs/invertebrate-dark-set/main.nf
+        quote: >-
+          The dark set is every protein in the query proteome that phmmer, jackhmmer and mmseqs2
+    run: notebook 289, dark set and kmerseek reach at E < 1 vs E < 10
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 029c47a}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 57}
+    what_to_do: >-
+      Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in
+      every count that is compared.
+    date: "2026-10-13"
+    status: open
+    also_tools: [hmmer3_jackhmmer]
+
   - id: whole-alignment-call-misses-repeats
     finding: >-
       A call is the whole alignment, not the target's domain placed on the query, so a
@@ -36,27 +66,29 @@ entries:
       - {repo: seanome/2024-kmerseek-analysis, number: 121}
     what_to_do: >-
       Place the target's domain on the query through the alignment before scoring.
-      Notebook 280 switched to this rule.
+      Notebook 280 switched to this rule; the leaderboard's own calls are still whole
+      alignments.
     date: "2026-10-13"
     status: open
     also_tools: [mmseqs2_iterative]
 
   - id: calls-run-past-domain-edges
     finding: >-
-      Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of
-      the flank residues (the 100 residues either side of the domain), because a call spans
-      the whole aligned stretch.
-    number: median 5 to 21 residues early; 66–78% of flank residues
+      Aligner calls run past the domain, because a call spans the whole aligned stretch.
+      Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45%
+      to 60% start more than 100 residues early.
+    number: median 5 to 21 residues early; 45% to 60% more than 100 residues early
     evidence:
       - source: {kind: pr_body, repo: seanome/2024-kmerseek-analysis, pr: 146}
         quote: >-
-          Aligners start a median 5 to 21 residues early, because a call spans the whole
-          aligned stretch.
-      - source: {kind: pr_body, repo: seanome/protein-function-annotation-leaderboard, pr: 3}
+          Over correct calls, the median of call start minus true start is 0 for hmmscan,
+          whose models define the Pfam truth, so the 1-based reading of truth and aligners
+          holds. Aligners start a median 5 to 21 residues early, because a call spans the
+          whole aligned stretch.
+      - source: {kind: pr_comment, repo: seanome/protein-function-annotation-leaderboard, pr: 3, comment_id: 6193138553}
         quote: >-
-          **Flanks:** aligner calls cover 66–78% of flank residues, so their curves never
-          fall to 0.2 within 100 residues.
-    run: "`make leaderboard-pileup` and the region pile-up page (Figures 3 and 4)"
+          45% to 60% of aligner calls start more than 100 residues early, not "most"
+    run: "`make leaderboard-pileup` and the region pile-up page (Figure 4)"
     commit: {repo: seanome/2024-kmerseek-analysis, sha: 39d81ec9}
     pr:
       - {repo: seanome/2024-kmerseek-analysis, number: 146}
@@ -66,4 +98,4 @@ entries:
       sits, place the target's domain through the alignment.
     date: "2026-10-15"
     status: open
-    also_tools: [hmmer3_jackhmmer, mmseqs2_seqseq, mmseqs2_iterative, hhblits]
+    also_tools: [hmmer3_jackhmmer, mmseqs2_seqseq, mmseqs2_iterative, hhblits, foldseek, prostt5]

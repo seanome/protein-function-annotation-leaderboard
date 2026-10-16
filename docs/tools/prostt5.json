@@ -15,7 +15,60 @@
   "Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the 998 queries that step is counted in the GPU column and the cost; for each relative's proteome it is a one-off database build and is not counted."
  ],
  "version": "Foldseek 10.941cd33 with ProstT5 weights",
- "known_failure_modes": [],
+ "known_failure_modes": [
+  {
+   "tool": "hmmer3_phmmer",
+   "tool_name": "phmmer",
+   "file": "failure_modes/hmmer3_phmmer.yaml",
+   "id": "calls-run-past-domain-edges",
+   "shown_on_cards": [
+    "hmmer3_phmmer",
+    "hmmer3_jackhmmer",
+    "mmseqs2_seqseq",
+    "mmseqs2_iterative",
+    "hhblits",
+    "foldseek",
+    "prostt5"
+   ],
+   "finding": "Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.",
+   "number": "median 5 to 21 residues early; 45% to 60% more than 100 residues early",
+   "number_note": null,
+   "evidence": [
+    {
+     "source": "seanome/2024-kmerseek-analysis PR 146",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
+     "quote": "Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+    },
+    {
+     "source": "PR 3, comment 6193138553",
+     "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553",
+     "quote": "45% to 60% of aligner calls start more than 100 residues early, not \"most\""
+    }
+   ],
+   "run": "`make leaderboard-pileup` and the region pile-up page (Figure 4)",
+   "commit": {
+    "repo": "seanome/2024-kmerseek-analysis",
+    "sha": "39d81ec9",
+    "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec9"
+   },
+   "pr": [
+    {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "number": 146,
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146"
+    },
+    {
+     "repo": "seanome/protein-function-annotation-leaderboard",
+     "number": 3,
+     "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3"
+    }
+   ],
+   "what_to_do": "Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.",
+   "date": "2026-10-15",
+   "status": "open",
+   "fixed": false
+  }
+ ],
  "licence": "GPL-3.0 (Foldseek); MIT (ProstT5 model weights)",
  "commercial_use": "Yes. Foldseek's GPL-3.0 applies to changed versions you distribute.",
  "licence_url": "https://huggingface.co/Rostlab/ProstT5",

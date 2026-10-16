@@ -132,7 +132,8 @@ def main() -> int:
             tmp = Path(tmp)
             shutil.copy(ROOT / "failure_modes/schema.json", tmp / "schema.json")
             y = (ROOT / "failure_modes/kmerseek.yaml").read_text()
-            y2 = y.replace("stops at 307.65, which", "stops at 307.66, which").replace("6 of 99_232 rows\n      showed", "6 of 99_233 rows\n      showed")
+            # First occurrences: the 307.65 in a quote, and the 99_232 in a finding.
+            y2 = y.replace("stops at 307.65, which", "stops at 307.66, which").replace("99_232", "99_233", 1)
             check(y2.count("307.66") == 1 and y2.count("99_233") == 1, "live: made the two wrong numbers")
             (tmp / "kmerseek.yaml").write_text(y2)
             n_bad = fm.check(fm.load(tmp), fm.GitHub(), set(TOOLS))

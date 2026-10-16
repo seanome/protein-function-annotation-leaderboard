@@ -15,6 +15,7 @@ Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searche
 ## Known failure modes
 
 - In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model. It cannot search those, so its share of motifs found is low for a reason that is not the search. The number: The source does not count the orthologs with no AlphaFold model.. Status: open. What to do: Score a structure tool only on proteins that have a structure, and print how many proteins were left out. Source: [seanome/2024-kmerseek-analysis results/leaderboard/inventory.md at 6df20c1f](https://github.com/seanome/2024-kmerseek-analysis/blob/6df20c1f290fc123781df8d58097bf7b836535ac/results/leaderboard/inventory.md).
+- Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early. The number: median 5 to 21 residues early; 45% to 60% more than 100 residues early. Status: open. What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment. Source: [seanome/2024-kmerseek-analysis PR 146](https://github.com/seanome/2024-kmerseek-analysis/pull/146); [PR 3, comment 6193138553](https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553).
 
 ## Where it is strong and weak
 

@@ -25,24 +25,26 @@
     "hmmer3_jackhmmer",
     "mmseqs2_seqseq",
     "mmseqs2_iterative",
-    "hhblits"
+    "hhblits",
+    "foldseek",
+    "prostt5"
    ],
-   "finding": "Aligner calls start a median 5 to 21 residues before the domain, and cover 66\u201378% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch.",
-   "number": "median 5 to 21 residues early; 66\u201378% of flank residues",
+   "finding": "Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.",
+   "number": "median 5 to 21 residues early; 45% to 60% more than 100 residues early",
    "number_note": null,
    "evidence": [
     {
      "source": "seanome/2024-kmerseek-analysis PR 146",
      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
-     "quote": "Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+     "quote": "Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
     },
     {
-     "source": "PR 3",
-     "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3",
-     "quote": "**Flanks:** aligner calls cover 66\u201378% of flank residues, so their curves never fall to 0.2 within 100 residues."
+     "source": "PR 3, comment 6193138553",
+     "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553",
+     "quote": "45% to 60% of aligner calls start more than 100 residues early, not \"most\""
     }
    ],
-   "run": "`make leaderboard-pileup` and the region pile-up page (Figures 3 and 4)",
+   "run": "`make leaderboard-pileup` and the region pile-up page (Figure 4)",
    "commit": {
     "repo": "seanome/2024-kmerseek-analysis",
     "sha": "39d81ec9",

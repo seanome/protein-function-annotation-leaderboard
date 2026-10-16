@@ -106,11 +106,11 @@
   },
   {
    "tag": "p",
-   "text": "Run: make leaderboard-pileup and the region pile-up page (Figures 3 and 4) · commit 39d81ec9 in seanome/2024-kmerseek-analysis"
+   "text": "Run: make leaderboard-pileup and the region pile-up page (Figure 4) · commit 39d81ec9 in seanome/2024-kmerseek-analysis"
   },
   {
    "tag": "li",
-   "text": "phmmer Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch.open · the number: median 5 to 21 residues early; 66–78% of flank residues · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 146, PR 3Also on the cards of: jackhmmer, MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch)What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch.seanome/2024-kmerseek-analysis PR 146Flanks: aligner calls cover 66–78% of flank residues, so their curves never fall to 0.2 within 100 residues.PR 3"
+   "text": "phmmer Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.open · the number: median 5 to 21 residues early; 45% to 60% more than 100 residues early · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 146, PR 3Also on the cards of: jackhmmer, MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + FoldseekWhat to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch.seanome/2024-kmerseek-analysis PR 14645% to 60% of aligner calls start more than 100 residues early, not \"most\"PR 3, comment 6193138553"
   },
   {
    "tag": "h2",
@@ -248,24 +248,26 @@
      "hmmer3_jackhmmer",
      "mmseqs2_seqseq",
      "mmseqs2_iterative",
-     "hhblits"
+     "hhblits",
+     "foldseek",
+     "prostt5"
     ],
-    "finding": "Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch.",
-    "number": "median 5 to 21 residues early; 66–78% of flank residues",
+    "finding": "Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.",
+    "number": "median 5 to 21 residues early; 45% to 60% more than 100 residues early",
     "number_note": null,
     "evidence": [
      {
       "source": "seanome/2024-kmerseek-analysis PR 146",
       "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
-      "quote": "Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+      "quote": "Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
      },
      {
-      "source": "PR 3",
-      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3",
-      "quote": "**Flanks:** aligner calls cover 66–78% of flank residues, so their curves never fall to 0.2 within 100 residues."
+      "source": "PR 3, comment 6193138553",
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553",
+      "quote": "45% to 60% of aligner calls start more than 100 residues early, not \"most\""
      }
     ],
-    "run": "`make leaderboard-pileup` and the region pile-up page (Figures 3 and 4)",
+    "run": "`make leaderboard-pileup` and the region pile-up page (Figure 4)",
     "commit": {
      "repo": "seanome/2024-kmerseek-analysis",
      "sha": "39d81ec9",

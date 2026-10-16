@@ -10,9 +10,11 @@ entries:
   - id: index-merges-equal-kmer-sets
     finding: >-
       kmerseek 0.4.0 keys each index entry by its k-mer set, so two different sequences
-      with the same k-mer set become one entry. In a regions-index pilot, 6 of 99_232 rows
-      showed another sequence's residues. In an index of 125 ribonucleases, 31 are missing
-      under cys2 and 7 under cys_hp3.
+      with the same k-mer set become one entry and the second is lost. In a regions-index
+      pilot, 6 of 99_232 rows reported residues that are not at the target's own
+      coordinates; the PR traces this to the key but has not confirmed it for each of the 6.
+      In an index of 125 ribonucleases built on a later branch with the same key, 31 are
+      missing under cys2 and 7 under cys_hp3.
     number: 6 of 99_232 rows; 31 of the 125 ribonucleases
     evidence:
       - source: {kind: pr_body, repo: seanome/kmerseek, pr: 141}
@@ -23,6 +25,15 @@ entries:
         quote: >-
           Two different sequences with the same k-mer set get the same sum. So the second
           entry's hits came out with the first entry's coordinates and residues.
+      - source: {kind: pr_body, repo: seanome/kmerseek, pr: 141}
+        quote: >-
+          Not done: rebuilding the pilot index and rechecking the 6 rows. The two rows that are
+          not anywhere in the target fit this cause, but I have not confirmed which earlier
+          entry each of the 6 targets was merged into.
+      - source: {kind: pr_body, repo: seanome/kmerseek, pr: 148}
+        quote: >-
+          An index keys each entry by its k-mer set, so two sequences with equal sets collapse
+          into one entry and only the first is stored.
       - source: {kind: pr_body, repo: seanome/kmerseek, pr: 148}
         quote: >-
           That is why 31 of the 125 ribonucleases are absent under `cys2` and 7 under `cys_hp3`.

@@ -14,7 +14,7 @@ Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam mode
 
 ## Known failure modes
 
-- HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that no search tool hits below the cutoff. The number: 2 to 222. Status: open. What to do: Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared. Source: [seanome/2024-kmerseek-analysis PR 57, comment 6151921382](https://github.com/seanome/2024-kmerseek-analysis/pull/57#issuecomment-6151921382).
+None recorded yet.
 
 ## Where it is strong and weak
 

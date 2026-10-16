@@ -110,7 +110,7 @@
   },
   {
    "tag": "li",
-   "text": "0.250 best Fmax$0.00574 per 1,000 queriesPfam, raw calls, zebrafish; shape letters + amino acids needs 3D structure predictionGPL-3.0known failure modes: 1"
+   "text": "0.250 best Fmax$0.00574 per 1,000 queriesPfam, raw calls, zebrafish; shape letters + amino acids needs 3D structure predictionGPL-3.0known failure modes: 2"
   },
   {
    "tag": "h2",
@@ -122,7 +122,7 @@
   },
   {
    "tag": "li",
-   "text": "0.223 best Fmax$0.00486 per 1,000 queriesPfam, raw calls, zebrafish; shape letters from sequence needs GPUGPL-3.0known failure modes: none recorded yet"
+   "text": "0.223 best Fmax$0.00486 per 1,000 queriesPfam, raw calls, zebrafish; shape letters from sequence needs GPUGPL-3.0known failure modes: 1"
   },
   {
    "tag": "h2",
@@ -150,7 +150,7 @@
   },
   {
    "tag": "li",
-   "text": "0.886 best Fmax$0.0173 per 1,000 queriesPfam, raw calls, no relative; Pfam models permissive licencegraded on its own models under Pfamknown failure modes: 1"
+   "text": "0.886 best Fmax$0.0173 per 1,000 queriesPfam, raw calls, no relative; Pfam models permissive licencegraded on its own models under Pfamknown failure modes: none recorded yet"
   }
  ],
  "data": {
