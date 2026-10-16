@@ -412,3 +412,6 @@ table.cov.cov-exp{font-size:.8rem}
 table.cov.cov-exp thead th{min-width:0;width:6.2em;max-width:7em;font-size:.74rem;line-height:1.2}
 table.cov.cov-exp td{padding:3px 4px}
 table.cov td.txt{white-space:normal;min-width:9em;max-width:14em}
+.toc{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:10px 16px;max-width:76ch;margin:8px 0 14px;font-size:.95rem}
+.toc ol{margin:4px 0 0;padding-left:20px}
+.toc li{margin:2px 0}

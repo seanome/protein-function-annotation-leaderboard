@@ -1321,25 +1321,35 @@ def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict) -
     n_rel = res.filter(pl.col("species") != "all")["species"].n_unique()
 
     body = rf"""<h1>Methods</h1>
+<p class="lede">How each score and cost on this site is computed, which proteins were searched, and
+how the truth sets were built.</p>
+<nav class="toc" aria-label="Contents"><b>Contents</b>
+<ol><li><a href="#data">The benchmark run</a></li><li><a href="#no-winner">No tool wins everywhere</a></li>
+<li><a href="#calls">From a search hit to a call</a></li>
+<li><a href="#scores">The scores</a>: <a href="#fmax">Fmax</a>, <a href="#auprc">AUPRC</a>, <a href="#iou">median IoU</a>,
+<a href="#n">true instances</a>, <a href="#cpu">core-hours</a>, <a href="#cost">estimated cost</a></li>
+<li><a href="#truth">Truth sets</a></li><li><a href="#dedup">Dedup against raw</a></li>
+<li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#checks">Checks on this site</a></li>
+<li><a href="#experiments">Experiments in the tables</a></li></ol></nav>
 <div class="prose">
-<p>The tables hold {n_long:,} rows from {len(exps)} experiments ({", ".join(exps)}); the
-coverage page counts all of them. Everything else on this site comes from one of those
-experiments, <span class="mono">{EXPERIMENT}</span>, a single benchmark run. It searched {prov['n_queries']:,} human
+<h2 id="data">The benchmark run</h2>
+<p>Everything on this site except the coverage page comes from one experiment,
+<span class="mono">{EXPERIMENT}</span>, a single benchmark run. It searched {prov['n_queries']:,} human
 proteins against the proteomes of {n_rel} relatives from the Quest for Orthologs reference proteomes,
 release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune
 proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not
 record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock
 cluster. It has {n_exp_long:,} of the {n_long:,} rows of <span class="mono">results.parquet</span>,
 one per score. The leaderboard groups them into {n_rows:,} combinations of tool, setting, relative,
-truth set, raw or dedup, and stratum. Its cost is in <span class="mono">compute.parquet</span>. Both
+truth set, raw or dedup, and subset. Its cost is in <span class="mono">compute.parquet</span>. Both
 tables were built by
 <span class="mono">make leaderboard-tables</span> in {src['repo']} at commit
 <a class="mono" href="https://github.com/{src['repo']}/commit/{src['commit']}">{src['commit'][:8]}</a>.
 These {prov['n_queries']:,} proteins are not a random sample of the human proteome.</p>
 
-<h2>No tool wins everywhere</h2>
-<p>No tool wins everywhere. So this board ranks tools within a stratum, a slice of the proteins
-by relative, identity, region length, disorder or feature type, and gives no overall score. Two
+<h2 id="no-winner">No tool wins everywhere</h2>
+<p>No tool wins everywhere. So this board ranks tools within a subset of the proteins (by
+relative, identity, region length, disorder or feature type), and gives no overall score. Two
 earlier community benchmarks found the same. The Quest for Orthologs benchmark ran 15 orthology
 methods on 20 benchmarks. Among the balanced methods, "no method consistently obtained a better
 balance than the other methods across all data sets". Its authors chose not to compute a combined
@@ -1354,7 +1364,7 @@ Benchmark." In <i>Proceedings of the 17th Conference of the European Chapter of 
 Computational Linguistics</i>, 2014–37. Dubrovnik, Croatia, 2023.
 <a href="https://doi.org/10.18653/v1/2023.eacl-main.148">https://doi.org/10.18653/v1/2023.eacl-main.148</a>.</p>
 
-<h2>From a search hit to a call</h2>
+<h2 id="calls">From a search hit to a call</h2>
 <p>Each tool reports aligned regions: a stretch of the human protein matched to a stretch of a
 protein in the relative. A region becomes a <b>call</b> when it covers at least half of an annotated
 domain or feature on the relative's protein. The call names that annotation and sits on the human
@@ -1365,12 +1375,13 @@ residues covered by either:</p>
 <p>\[\text{{IoU}} = \frac{{|\text{{call}} \cap \text{{true region}}|}}{{|\text{{call}} \cup \text{{true region}}|}}\]</p>
 <p>For example, a call on residues 30–129 and a true domain on residues 10–109 share 80 residues
 (30–109). Together they cover 120 (10–129). So IoU = 80 / 120 = 0.67, and the call counts as
-correct. A call of the right family that misses the region counts as wrong.</p>
+correct. A call of the right family that misses the region counts as wrong. The IoU is drawn as
+bars on a protein line, with ends you can move, on <a href="explainers.html#iou">How the scores work</a>.</p>
 <p>A true annotation is <b>reachable</b> when its family occurs somewhere in the relative's
 proteome. A family the relative lacks cannot be copied from it by any tool.</p>
 
-<h2>The scores</h2>
-<h3>Fmax</h3>
+<h2 id="scores">The scores</h2>
+<h3 id="fmax">Fmax</h3>
 <p><b>Fmax</b> is the best balance of precision and recall a tool reaches at any score cutoff,
 counted protein by protein as in the CAFA function-prediction challenge. At a cutoff \(t\), the
 precision of protein \(i\) is its correct calls divided by all its calls scoring at least \(t\). Its
@@ -1378,15 +1389,15 @@ recall is the true annotations found divided by its true annotations. Precision 
 the \(m(t)\) proteins with at least one call at or above \(t\). Recall is averaged over all \(n\)
 proteins with an annotation, and counts every true annotation, whether or not the relative could
 supply it:</p>
-<p>\[\text{{Pr}}(t) = \frac{{1}}{{m(t)}}\sum_{{i}} \frac{{\text{{correct}}_i(t)}}{{\text{{calls}}_i(t)}}, \qquad
-\text{{Rc}}(t) = \frac{{1}}{{n}}\sum_{{i}} \frac{{\text{{found}}_i(t)}}{{\text{{true}}_i}}, \qquad
-F_{{\max}} = \max_t \frac{{2\,\text{{Pr}}(t)\,\text{{Rc}}(t)}}{{\text{{Pr}}(t)+\text{{Rc}}(t)}}\]</p>
+<p>\[\text{{Pr}}(t) = \frac{{1}}{{m(t)}}\sum_{{i}} \frac{{\text{{correct}}_i(t)}}{{\text{{calls}}_i(t)}}\]</p>
+<p>\[\text{{Rc}}(t) = \frac{{1}}{{n}}\sum_{{i}} \frac{{\text{{found}}_i(t)}}{{\text{{true}}_i}}\]</p>
+<p>\[F_{{\max}} = \max_t \frac{{2\,\text{{Pr}}(t)\,\text{{Rc}}(t)}}{{\text{{Pr}}(t)+\text{{Rc}}(t)}}\]</p>
 <p>The cutoffs tried are 101 evenly spaced quantiles of the tool's call scores. Worked example:
 phmmer searching zebrafish, Pfam truth set, raw calls, all proteins. At the best cutoff (bit score
 on the tool's bit score) precision is {P:.4f} and recall is {R:.4f}. So
 F = 2 × {P:.4f} × {R:.4f} / ({P:.4f} + {R:.4f}) = {f_check:.4f}, the Fmax in Table 1.</p>
 
-<h3>AUPRC</h3>
+<h3 id="auprc">AUPRC</h3>
 <p><b>AUPRC</b>, the area under the precision-recall curve, sums precision over every cutoff,
 weighted by the recall gained at that cutoff:</p>
 <p>\[\text{{AUPRC}} = \sum_k (R_k - R_{{k-1}})\,P_k\]</p>
@@ -1398,7 +1409,7 @@ example, same row: AUPRC = {ex['auprc']:.4f}. The curve itself is in the source 
 (<span class="mono">all_domain_curves.parquet</span>), not in these tables, so the sum cannot be
 recomputed here.</p>
 
-<h3>Median IoU</h3>
+<h3 id="iou">Median IoU</h3>
 <p><b>Median IoU</b> is the middle IoU of all correct calls, with single-residue annotations left
 out (an IoU against one residue says nothing about where the ends are). Worked example, same row:
 {ex['median_iou_tp']:.3f}, so half of phmmer's correct calls on zebrafish overlap their true domain
@@ -1409,11 +1420,11 @@ BINDING and SITE features). The pages show the first case as <i>no correct calls
 second as <i>correct calls only on single residues</i>, never as 0. They tell the two apart by
 Fmax: an Fmax above 0 means at least one call was correct.</p>
 
-<h3>True instances</h3>
-<p><b>True instances</b> (n) is the number of annotations on the human proteins in the stratum,
+<h3 id="n">True instances</h3>
+<p><b>True instances</b> (n) is the number of annotations on the human proteins in the subset,
 reachable or not. Same row: {ex['n_truth_instances']:,}.</p>
 
-<h3>Core-hours per 1,000 queries</h3>
+<h3 id="cpu">Core-hours per 1,000 queries</h3>
 <p><b>Core-hours</b> are taken from the run's Nextflow task records: the cores a task reserved
 multiplied by its wall time, so a task that sat partly idle still counts all its cores. The tables
 record them per tool and setting, summed over every relative searched, with building the databases
@@ -1432,7 +1443,7 @@ databases), not in the per-query cost. Numbers marked
 <span class="prov reported">reported</span> would come from a tool's submitter, on hardware they
 name; none have been submitted yet.</p>
 
-<h3>Estimated cost</h3>
+<h3 id="cost">Estimated cost</h3>
 <p>\[\text{{cost\_usd\_est}} = \text{{CPU-hours}} \times r_\text{{cpu}} + \text{{GPU-hours}} \times r_\text{{gpu}}\]</p>
 <p>per 1,000 queries. The default \(r_\text{{cpu}}\) = ${R_CPU:.6g} per CPU-hour is half of AWS's
 on-demand price for a c7i.large (2 vCPU, $0.08925 per hour). The default \(r_\text{{gpu}}\) =
@@ -1442,7 +1453,7 @@ file</a>, published 2026-10-12, read 2026-10-15). A core-hour is priced as one C
 priced. Worked example: {per1k:.4f} × {R_CPU:.6g} + 0 ×
 {R_GPU} = ${cost:.5f} for phmmer against zebrafish. Change either price on the leaderboard page.</p>
 
-<h2>Truth sets</h2>
+<h2 id="truth">Truth sets</h2>
 <h3>Pfam</h3>
 <p>Every Pfam-A domain with coordinates on the human proteins, from the Pfam regions file for
 UniProt reference proteomes. The same file supplies the domains on each relative's proteins, which
@@ -1465,15 +1476,17 @@ come from the literature, not from any sequence or structure model. Single-resid
 one residue cannot reach 0.5. A Swiss-Prot feature counts as reachable when the relative has a
 protein that carries the same feature type and shares a Pfam family with the human protein.</p>
 
-<h2>Dedup against raw</h2>
+<h2 id="dedup">Dedup against raw</h2>
 <p><b>Raw</b> keeps every call a tool makes. One human region that matches 300 mouse kinases
 becomes 300 kinase calls on nearly the same residues, and all but one count as wrong.
 <b>Dedup</b> merges calls of the same family on the same human protein that overlap each other with
 an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by side
 barely overlap, so both are kept. Comparing the two separates finding a domain from reporting it many times.
-For phmmer on zebrafish (Pfam, all proteins): Fmax {ex['fmax']:.3f} raw and {ded['fmax']:.3f} dedup.</p>
+For phmmer on zebrafish (Pfam, all proteins): Fmax {ex['fmax']:.3f} raw and {ded['fmax']:.3f} dedup.
+The same calls drawn raw and after dedup, on a made-up protein: <a href="explainers.html#dedup">How the scores work</a>.</p>
 
-<h2>Strata</h2>
+<h2 id="subsets">Subsets of the proteins</h2>
+<p>The tables call each subset a stratum. There are four ways to cut the proteins:</p>
 <ul>
 <li><b>Nearest reviewed relative, % identity</b>: for each human domain, the percent identity to the
 closest domain of the same family in the relative. Bins: 0–20, 20–30, 30–40, 40–60 and 60–100%. A
@@ -1487,13 +1500,16 @@ were not scored in this run.</li>
 marks regions without a fixed shape.</li>
 <li><b>Feature type</b>: the Swiss-Prot feature key, for the Swiss-Prot truth set only.</li>
 </ul>
-<p>The run computed each stratum on its own, so two strata cannot be combined; a combination with
-no row shows "—" and "not run".</p>
+<p>The run computed each subset on its own, so two subsets cannot be combined; a combination with
+no row shows × and "not run".</p>
 
-<h2>Checks on this site</h2>
-<p>A headless browser renders every filter combination and confirms that each "—" on the
-leaderboard is a missing row in results.parquet or compute.parquet. The source table checksums are
-in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
+<h2 id="checks">Checks on this site</h2>
+<p>A headless browser renders every filter combination and confirms that each × on the
+leaderboard is a missing row in results.parquet, and that every number matches the tables. The
+source table checksums are in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
+<h2 id="experiments">Experiments in the tables</h2>
+<p>The tables hold {n_long:,} rows from {len(exps)} experiments; the coverage page counts all of
+them. Their ids: {", ".join(f'<span class="mono">{esc(e)}</span>' for e in exps)}.</p>
 </div>
 <link rel="stylesheet" href="assets/katex/katex.min.css">
 <script defer src="assets/katex/katex.min.js"></script>
