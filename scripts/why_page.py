@@ -519,7 +519,7 @@ Biotechnology 2025, co-authored by Olga Botvinnik) does the same for single-cell
         f'<li><span class="mono">{esc(k)}</span>: <a href="{esc(w.sources[k]["url"])}">{esc(w.sources[k].get("file", k))}</a>, '
         f'{esc(w.sources[k].get("release", ""))}, fetched {esc(str(w.sources[k].get("fetched_utc", ""))[:10])}</li>'
         for k in srcs if str(w.sources[k].get("url", "")).startswith("http"))
-    sources = f"""<section class="screen" id="sources"><details><summary>Where every number on this page comes from</summary>
+    sources = f"""<section class="screen" id="sources"><details><summary>The files behind these numbers</summary>
 <p class="prose">Counts: <span class="mono">results/why/numbers.parquet</span>, built by <span class="mono">scripts/why/</span>; each row names its source below.
 Missing parts: {esc(", ".join(sorted(set(w.missing))) or "none")}.</p><ul class="srclist">{src_items}</ul></details></section>"""
 
