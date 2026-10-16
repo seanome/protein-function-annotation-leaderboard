@@ -1394,7 +1394,7 @@ nothing on a card is typed in by hand.</p>
     return layout("Claims", "claims", body, src, description="Each tool's claims, the test that would retire each one, and its verdict.")
 
 
-def page_claims_schema(src: dict, cards: list[dict]) -> str:
+def page_claims_schema(src: dict, cards: list[dict], inv: dict) -> str:
     example = (ROOT_DIR / "claims" / "kmerseek.yaml").read_text().split("claims:\n", 1)[1].split("\n\n  - id:", 1)[0]
     badges = "".join(f'<p><img src="badges/claims-{c["tool"]}.svg" alt="claims for {esc(c["tool"])}: '
                      f'{c["counts"]["alive"]} alive, {c["counts"]["retired"]} retired, {c["counts"]["untested"]} untested"></p>'
@@ -1410,11 +1410,18 @@ runs each test and sets the status:</p>
 <li><b>table</b>, <b>table_bins</b>, <b>table_max</b>, <b>table_count_passing</b>: recomputed from
 <span class="mono">results.parquet</span> on every build.</li>
 <li><b>record</b>, <b>record_compare</b>: a number quoted from the experiment inventory
-(<span class="mono">data/experiments.json</span>, seanome/2024-kmerseek-analysis PR 97). The quote must
+(<span class="mono">data/experiments.json</span>, copied from {esc(inv['repo'])} at commit
+<a class="mono" href="https://github.com/{esc(inv['repo'])}/blob/{esc(inv['commit'])}/{esc(inv['path'])}">{esc(inv['commit'][:8])}</a>,
+PR {inv['pr']}; recorded in <span class="mono">data/experiments.SOURCE.json</span>). The quote must
 match the recorded value character for character, so a notebook that changes a number fails the check until the claim
 is updated.</li>
 <li><b>not_run</b>: no test yet; the claim is untested and the reason is shown.</li>
 </ul>
+<p>A test may carry a <b>verdict</b>: the wording of its verdict line, with the resolved numbers
+filled in. Without one, the line is the test's own result.</p>
+<p>A claim retired by a record test is dated with the date of that inventory record. A claim retired
+by a table test has no date, because the tables are recomputed on every build and the build cannot
+tell when the kill first held. The "last kill" date on a card counts only dated kills.</p>
 <p>The full schema: <a class="mono" href="claims/schema.json">claims/schema.json</a>. The first claim of
 <a class="mono" href="claims/kmerseek.yaml">claims/kmerseek.yaml</a>:</p>
 <pre><code>{esc(example)}</code></pre>
@@ -1496,7 +1503,7 @@ def main() -> None:
     claims_by_tool = {c["tool"]: c for c in cards}
     (out / "claims.html").write_text(page_claims(src, cards))
     (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, claims_by_tool))
-    (out / "claims-schema.html").write_text(page_claims_schema(src, cards))
+    (out / "claims-schema.html").write_text(page_claims_schema(src, cards, resolver.inv_src))
     for t in sorted(tools_used):
         nums = card_numbers(t, res, comp)
         md = card_markdown(t, nums, src)

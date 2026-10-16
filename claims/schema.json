@@ -32,12 +32,27 @@
   "test": {
    "type": "object",
    "required": ["kind"],
+   "additionalProperties": false,
    "properties": {
     "kind": {"enum": ["table", "table_count_passing", "table_bins", "table_max", "record", "record_compare", "not_run"],
      "description": "table*: recomputed from results.parquet. record*: quoted from data/experiments.json and checked against it. not_run: no test yet."},
     "reason": {"type": "string"},
     "row": {"type": "string"}, "name": {"type": "string"}, "quote": {"type": "string"},
-    "ours": {"type": "object"}, "theirs": {"type": "object"}, "kill_if": {"type": "object"}
+    "ours": {"type": "object"}, "theirs": {"type": "object"}, "kill_if": {"type": "object"},
+    "total": {"type": "object", "required": ["field", "quote"], "additionalProperties": false,
+     "properties": {"field": {"type": "string"}, "quote": {"type": "string"}},
+     "description": "record_compare: a denominator quoted from a field of the same inventory record; the field must contain the quote."},
+    "verdict": {"type": "string",
+     "description": "Wording of the verdict line, a Python format string filled from the resolved test. Without it the line is the test's own text."},
+    "experiment": {"type": "string"}, "metric": {"type": "string"}, "tool": {"type": "string"},
+    "truth_source": {"type": "string"}, "dedup_or_raw": {"enum": ["raw", "dedup"]},
+    "stratum_axis": {"type": "string"}, "stratum_bin": {"type": "string"},
+    "stratum_bins": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "setting": {"type": "string"}, "setting_prefix": {"type": "string"},
+    "against": {"type": "object", "required": ["tool", "setting"], "additionalProperties": false,
+     "properties": {"tool": {"type": "string"}, "setting": {"type": "string"}}},
+    "targets": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "min_instances": {"type": "integer", "minimum": 1}
    },
    "allOf": [
     {"if": {"properties": {"kind": {"const": "not_run"}}}, "then": {"required": ["reason"]}},

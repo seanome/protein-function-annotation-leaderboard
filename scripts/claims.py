@@ -10,13 +10,18 @@ not kill the claim, retired when it does, untested when the test was not run or 
 cannot decide it (too few instances). A `record` quote must equal the inventory's value
 character for character, so a re-run notebook that changes a number fails the check here
 instead of leaving a stale claim on the site.
+
+A claim retired by a record test is dated with that record's date. A claim retired by a
+table test has no date: the tables are recomputed on every build, so the build cannot tell
+when the kill first held. The verdict line is the test's optional `verdict` template,
+filled from the resolved test; without one it is the test's own text.
 """
 
 import argparse
+import hashlib
 import json
 import re
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 import jsonschema
@@ -41,8 +46,16 @@ class Resolver:
     def __init__(self, data: Path):
         self.long = pl.read_parquet(data / "results.parquet")
         self.src = json.loads((data / "SOURCE.json").read_text())
-        inv = json.loads((data / "experiments.json").read_text())
-        self.records = {str(r["id"]): r for r in inv}
+        raw = (data / "experiments.json").read_bytes()
+        # Where data/experiments.json was copied from; the copy must match its checksum.
+        self.inv_src = json.loads((data / "experiments.SOURCE.json").read_text())
+        if hashlib.sha256(raw).hexdigest() != self.inv_src["sha256"]:
+            raise ValueError("data/experiments.json does not match the sha256 in data/experiments.SOURCE.json")
+        self.records = {str(r["id"]): r for r in json.loads(raw)}
+
+    def inventory_words(self) -> str:
+        s = self.inv_src
+        return f"{s['repo']} {s['path']} @ {s['commit'][:8]} (PR {s['pr']})"
 
     # ---- tables ----
     def _rows(self, t: dict) -> pl.DataFrame:
@@ -81,7 +94,7 @@ class Resolver:
         text = f"{signed(min(ds))} to {signed(max(ds))} across {len(ds)} of {len(t['targets'])}"
         if killed:
             text += f"; furthest: {worst[0].removeprefix('QfO ')} {signed(worst[1])}"
-        return {"status": "retired" if killed else "alive", "text": text, "date": self.src["commit_date"][:10],
+        return {"status": "retired" if killed else "alive", "text": text,
                 "source": f"{self.src['repo']}@{self.src['commit'][:8]} results.parquet"}
 
     def table_count_passing(self, t: dict) -> dict:
@@ -105,19 +118,25 @@ class Resolver:
                                  pl.col("setting").str.starts_with(t["setting_prefix"]))
         if q.height == 0:
             return {"status": "untested", "text": "no rows in those bins"}
-        n = q.group_by("stratum_bin").agg(pl.col("n_instances").max())
-        n_max = int(n["n_instances"].max())
-        if n_max < t["min_instances"]:
+        # Only rows with enough regions to decide take part: in a bin of one region, Fmax
+        # swings from 0 to 1 on a single call.
+        big = q.filter(pl.col("n_instances") >= t["min_instances"])
+        if big.height == 0:
+            n_max = int(q["n_instances"].max())
             return {"status": "untested",
-                    "text": f"the under-40% bins hold at most {n_max} region{'s' if n_max != 1 else ''} "
-                            f"each; at least {t['min_instances']} are needed to decide"}
-        best = float(q["value"].max())
+                    "text": f"the {', '.join(t['stratum_bins'])} bins hold at most {n_max} "
+                            f"region{'s' if n_max != 1 else ''} for any setting and relative; "
+                            f"at least {t['min_instances']} are needed to decide"}
+        best = float(big["value"].max())
         killed = best < t["kill_if"]["all_below"]
-        return {"status": "retired" if killed else "alive", "text": f"best Fmax {best:.3f}",
-                "date": self.src["commit_date"][:10]}
+        return {"status": "retired" if killed else "alive",
+                "text": f"best Fmax {best:.3f} over the {big.height} setting, relative and bin "
+                        f"combinations with at least {t['min_instances']} regions"}
 
     def table_max(self, t: dict) -> dict:
         q = self._rows(t).filter(pl.col("tool") == t["tool"]).sort(["value", "setting"], descending=[True, False])
+        if q.height == 0:
+            return {"status": "untested", "text": "no rows for this test"}
         r = q.row(0, named=True)
         return {"text": f"{r['value']:.3f} ({r['setting']}, n = {r['n_instances']:,} queries)"}
 
@@ -143,8 +162,16 @@ class Resolver:
         a, b = num(t["ours"]["quote"]), num(t["theirs"]["quote"])
         k = t["kill_if"]
         killed = (k.get("ours_below_theirs") and a < b) or ("ours_at_most" in k and a <= k["ours_at_most"])
-        return {"status": "retired" if killed else "alive", "a": a, "b": b, "date": rec.get("date"),
-                "source": self._src(rec, ro)}
+        out = {"status": "retired" if killed else "alive", "a": a, "b": b, "a_plus_b": a + b,
+               "date": rec.get("date"), "source": self._src(rec, ro)}
+        if "total" in t:
+            # A denominator quoted from a field of the same record, checked like any quote.
+            field, quote = t["total"]["field"], t["total"]["quote"]
+            if quote not in str(rec.get(field, "")):
+                raise ValueError(f"row {t['row']} field {field!r} does not contain {quote!r}")
+            out["total"] = num(quote.replace(",", ""))
+            out["a_plus_b_share"] = (a + b) / out["total"]
+        return out
 
     @staticmethod
     def _src(rec: dict, res: dict) -> str:
@@ -157,31 +184,31 @@ class Resolver:
         return getattr(self, t["kind"])(t)
 
 
-def verdict_text(c: dict, r: dict) -> str:
-    """The number on the verdict line, worded per claim from the resolved test."""
-    if c["id"] == "faster-than-mmseqs2":
-        return f"{r['a']:.2f} queries per second against MMseqs2's {r['b']:.1f}"
-    if c["id"] == "beats-foldseek-scope":
-        # 5,713 is FoldSeek's SCOPe40 benchmark size, as nb 076 states in its verdict basis.
-        return (f"fired on {int(r['b'])} of 5,713 benchmark queries ({100 * r['b'] / 5713:.1f}%); "
-                f"{int(r['a'])} that FoldSeek missed")
-    return r.get("text", "")
+def verdict_text(t: dict, r: dict) -> str:
+    """The verdict line: the test's `verdict` template filled from the resolved test, or the
+    test's own text when it has no template."""
+    if "verdict" not in t:
+        return r.get("text", "")
+    try:
+        return t["verdict"].format_map(r)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"verdict template {t['verdict']!r} cannot be filled from {sorted(r)}: {e}") from e
 
 
 def resolve_file(path: Path, res: Resolver, schema: dict) -> dict:
     doc = yaml.safe_load(path.read_text())
     jsonschema.validate(doc, schema)
     out = {"tool": doc["tool"], "title": doc["title"], "updated": str(doc["updated"]),
-           "file": str(path.relative_to(ROOT)), "claims": []}
+           "file": str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path), "claims": []}
     for c in doc["claims"]:
         r = res.resolve(c["test"])
         ctx = []
         for x in c.get("context", []):
             rx = res.resolve(x["test"])
-            ctx.append({"label": x["label"], "text": rx.get("text") or verdict_text(c, rx), "source": rx.get("source")})
+            ctx.append({"label": x["label"], "text": verdict_text(x["test"], rx), "source": rx.get("source")})
         out["claims"].append({
             "id": c["id"], "claim": c["claim"], "kill": c["kill"], "scope": c.get("scope"),
-            "status": r["status"], "verdict": verdict_text(c, r), "date": r.get("date"),
+            "status": r["status"], "verdict": verdict_text(c["test"], r), "date": r.get("date"),
             "source": r.get("source"), "context": ctx, "evidence": c.get("evidence"),
         })
     counts = {s: sum(x["status"] == s for x in out["claims"]) for s in ("alive", "retired", "untested")}
@@ -189,7 +216,7 @@ def resolve_file(path: Path, res: Resolver, schema: dict) -> dict:
     out["counts"] = counts
     out["last_kill"] = max(kills) if kills else None
     out["source"] = {"tables": {k: res.src[k] for k in ("repo", "commit", "commit_date")},
-                     "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"}
+                     "inventory": res.inventory_words()}
     return out
 
 
@@ -211,15 +238,21 @@ def main() -> int:
     ap.add_argument("--data", type=Path, default=ROOT / "data")
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--claims", type=Path, default=ROOT / "claims", help="folder of <tool>.yaml files")
     a = ap.parse_args()
     schema = json.loads((ROOT / "claims/schema.json").read_text())
     res = Resolver(a.data)
     ok = True
-    for f in sorted((ROOT / "claims").glob("*.yaml")):
+    for f in sorted(a.claims.glob("*.yaml")):
         try:
             out = resolve_file(f, res, schema)
-        except (ValueError, jsonschema.ValidationError) as e:
-            print(f"{f.name}: {e}")
+        except jsonschema.ValidationError as e:
+            where = "/".join(map(str, e.absolute_path)) or "top level"
+            print(f"{f.name}: does not match claims/schema.json at {where}: {e.message}")
+            ok = False
+            continue
+        except Exception as e:  # one broken file must not stop the other files being checked
+            print(f"{f.name}: {type(e).__name__}: {e}")
             ok = False
             continue
         print(f"{f.name}: {out['counts']}, last kill {out['last_kill']}")
@@ -228,7 +261,6 @@ def main() -> int:
         if a.out:
             (a.out / "data/claims").mkdir(parents=True, exist_ok=True)
             (a.out / "badges").mkdir(parents=True, exist_ok=True)
-            out["resolved_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             (a.out / f"data/claims/{out['tool']}.json").write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")
             (a.out / f"badges/claims-{out['tool']}.svg").write_text(badge(out["tool"], out["counts"]))
     return 0 if ok else 1
