@@ -1520,13 +1520,12 @@ them. Their ids: {", ".join(f'<span class="mono">{esc(e)}</span>' for e in exps)
                   description="How each score is defined and computed, how the truth sets were built, and what dedup means.")
 
 
-def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dict) -> str:
+def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dict, ro: dict) -> str:
     regions = data["regions"]
     import statistics
     med_len = statistics.median(r["len"] for r in regions)
     n_all = len(regions)
     n_past = sum(r["past_end"] for r in regions)
-    n_outside = sum(r["c0"] is None or r["c0"] > 199 for r in regions)
     n_in = n_all - sum(1 for r in regions if r["s"] > r["plen"])
     n_fam = len({r["fam"] for r in regions})
     n_prot = len({r["acc"] for r in regions})
@@ -1535,129 +1534,141 @@ def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dic
                    for r in regions if r["past_end"])
     km = best_by(res, tool="kmerseek", truth_set="pfam", calls="raw", species="zebrafish",
                  stratum_axis="all").sort(["fmax", "setting"], descending=[True, False]).row(0, named=True)
-    dashes = {"hmmer3_phmmer": "", "mmseqs2_seqseq": "6 3", "hmmer3_jackhmmer": "", "mmseqs2_iterative": "6 3",
-              "hhblits": "2 2", "foldseek": "", "prostt5": "6 3", "kmerseek": "", "hmmscan": ""}
-    hist = [{"tool": t, "setting": st, "dash": dashes[t]} for t, st in
-            [("hmmer3_phmmer", "default"), ("mmseqs2_seqseq", "s7"), ("hmmer3_jackhmmer", "n3"),
-             ("mmseqs2_iterative", "s7"), ("hhblits", "single_seq"), ("foldseek", "3di_aa"),
-             ("prostt5", "3di_from_seq"), ("kmerseek", km["setting"]), ("hmmscan", "direct")]]
-    # Figure 4's numbers for its caption, from the same per-region offsets the page draws.
+    # One panel per tool by default: its only setting, or kmerseek's setting with the highest
+    # Fmax against zebrafish. Figure 10 draws the same panels.
+    default = [(q["tool"], q["setting"]) for q in data["panels"]
+               if q["tool"] != "kmerseek" or q["setting"] == km["setting"]]
+    hist = [{"tool": t, "setting": st} for t, st in default]
     early = {}
     for h in hist:
         pnl = next(q for q in data["panels"] if q["tool"] == h["tool"] and q["setting"] == h["setting"])
         ds = [row["d"] for row in pnl["rows"] if row["d"] is not None]
         h["n"] = len(ds)
         early[h["tool"]] = sum(d < -100 for d in ds) / len(ds)
-    aligners = ["hmmer3_phmmer", "mmseqs2_seqseq", "hmmer3_jackhmmer", "mmseqs2_iterative", "hhblits", "foldseek", "prostt5"]
+    aligners = [t for t, _ in default if TOOLS[t]["kind"] in ("letters", "profiles", "shapes")]
     lo_t = min(aligners, key=lambda t: early[t]); hi_t = max(aligners, key=lambda t: early[t])
+    # The page's lead sentence, from the same readouts the page computes (scripts/pileup.py).
+    R = {k: v["all_domains"] for k, v in ro["panels"].items()}
+    al = [R[f"{t}|{st}"] for t, st in default if t in aligners]
+    kr = R[f"kmerseek|{km['setting']}"]
+    hs = R.get("hmmscan|direct")
+    lead = (f"The {len(al)} aligners cover {100 * min(a['mean_coverage_inside'] for a in al):.0f}% to "
+            f"{100 * max(a['mean_coverage_inside'] for a in al):.0f}% of each domain on average, and also "
+            f"{100 * min(a['mean_coverage_flanks'] for a in al):.0f}% to {100 * max(a['mean_coverage_flanks'] for a in al):.0f}% "
+            "of the 100 residues either side: their calls run well past the domain's ends. "
+            f"kmerseek ({esc(setting_label('kmerseek', km['setting']))}, its best setting by Fmax) misses "
+            f"{100 * kr['missed_fraction']:.0f}% of the domains.")
+    if hs:
+        lead += (f" hmmscan, graded on its own models, covers {100 * hs['mean_coverage_inside']:.0f}% inside "
+                 f"and {100 * hs['mean_coverage_flanks']:.0f}% of the flanks.")
     scores = {t: ("region_enrichment (shared k-mers over the number expected by chance)" if t == "kmerseek" else "bit score")
               for t in TOOLS}
     words = {f'{q["tool"]}|{q["setting"]}': setting_words(q["tool"], q["setting"]) for q in data["panels"]}
+    labels = {f'{q["tool"]}|{q["setting"]}': setting_label(q["tool"], q["setting"]) for q in data["panels"]}
     meta = {
         "kinds": {k: v["color"] for k, v in KINDS.items()},
-        "names": {t: TOOLS[t]["name"] for t in TOOLS}, "words": words, "scores": scores,
+        "names": {t: TOOLS[t]["name"] for t in TOOLS}, "words": words, "labels": labels, "scores": scores,
         "median_len": med_len, "focus_default": "hmmer3_phmmer", "hist": hist,
+        "default_panels": [f"{t}|{st}" for t, st in default],
     }
-    hist_legend = "".join(
-        f'<span class="item"><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" '
-        f'stroke="var(--k-{TOOLS[h["tool"]]["kind"]})" stroke-width="2" stroke-dasharray="{h["dash"]}"/></svg>'
-        f'{esc(TOOLS[h["tool"]]["name"])}{" " + esc(h["setting"]) if h["tool"] == "kmerseek" else ""} '
-        f'(n = {h["n"]:,})</span>' for h in hist)
+    curve_key = ('<svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--k-letters)" stroke-width="2"/></svg>'
+                 ' share of all domains covered, in the tool\'s colour')
+    cap_key = ('<svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.2"/></svg>'
+               ' thin line: the same, one domain per Pfam family')
     body = f"""
 <h1>Region pile-up</h1>
-<p class="source">The pile-up's own tables (regions and calls) come from {src['repo']} at commit
-<a class="mono" href="https://github.com/{src['repo']}/commit/{src['pileup_commit']}">{src['pileup_commit'][:8]}</a>
-(<span class="mono">results/leaderboard/pileup</span>).</p>
-<p class="lede">Where each tool's calls fall around a known domain. A <b>call</b> is a stretch of a
-human protein that a tool matched to a zebrafish protein carrying a Pfam domain. The call names that
-domain and spans the whole matched stretch, which can be much wider than the domain itself.
-Every row below is one <b>region</b>: one of the {n_all:,} Pfam domains on the {n_prot:,} human query
-proteins. Every panel is one tool and setting searching the zebrafish proteome (zebrafish and
-human last shared an ancestor about {zf_mya:,} million years ago), and every panel has the same rows.</p>
-<p class="prose">A residue counts as <b>covered</b> when a call naming that region's own Pfam family
-spans it, at any score the tool reported (E-value cutoff 10). Covered does not mean correctly
-placed: a call that runs far past the domain still covers it. Each row shows 100 residues before
-the region, then the region itself stretched or squeezed into 100 equal steps, then 100 residues
-after it, as deepTools does for genes. Each step shows the residue at its centre; the median region
-is {med_len:.0f} aa, so one step is about {med_len / 100:.1f} aa.</p>
-<div class="metricpick" role="group" aria-label="Row order">
-<span>Order rows by:</span>
-<button type="button" class="chip" data-sort="coverage">coverage in the chosen panel, most first (missed regions last)</button>
-<button type="button" class="chip" data-sort="identity">% identity to the closest zebrafish domain of the same family, highest first</button>
-<button type="button" class="chip" data-sort="length">region length, longest first</button>
-<button type="button" class="chip" data-sort="plddt">mean pLDDT over the region, highest first</button>
-</div>
-<p class="axisnote">The order is set by one panel and used in all of them, so the rows line up across
-panels. In the other panels the same order can look like scattered stripes. Identity is the best
-pairwise identity between the human domain and any zebrafish domain of its family. Regions with no
-such domain, or no matching AlphaFold model, sort last.</p>
+<p class="lede">Where each tool's calls fall around {n_all:,} known Pfam domains on {n_prot:,} human
+proteins, searching the zebrafish proteome ({zf_mya:,} million years since the split).</p>
+<p class="verdict" id="pu-lead">{lead}</p>
 <p id="pu-loading" class="muted">Loading {len(data["panels"])} panels…</p>
 <figure>
-<figcaption><b>Figure 3.</b> Calls piled up around {n_all:,} Pfam regions, one panel per tool and
-setting. At the top of each panel is the share of regions covered at each position (the column
-average). A tool that covers the region and nothing around it draws a high step between the start
-and end lines. Below it, every region as a row, squeezed to fit; darker means more of the rows in
-that band are covered. Click a panel to draw it full size below, one pixel row per region.</figcaption>
-{legend_kinds({q["tool"] for q in data["panels"]})}
-<div class="legend" aria-label="Key to Figure 3">
+<figcaption><b>Figure 9.</b> Calls piled up around each domain, one panel per tool. Top of each panel:
+the share of domains covered at each position, from 100 residues before the domain's start to 100
+after its end. Below: every domain as a row; stronger colour means more of the rows there are covered.
+Click a panel to draw it full size below.
+<button type="button" class="chip" id="pu-all" aria-pressed="false">Show all {len(data["panels"])} settings</button></figcaption>
+<div class="legend" aria-label="Key to Figure 9">
+<span class="item">{curve_key}</span><span class="item">{cap_key}</span>
+<span class="item"><svg width="14" height="12" aria-hidden="true"><line x1="7" y1="0" x2="7" y2="12" stroke="var(--muted)" stroke-dasharray="3 2"/></svg> the domain's start and end</span>
 <span class="item"><span class="sw" style="background:var(--surface);border:1px solid var(--hair)"></span> not covered</span>
-<span class="item"><span class="sw" style="background:var(--null)"></span> past the protein's end (no residue there)</span>
-<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--k-letters)" stroke-width="2"/></svg>
-coloured curve: share of all regions covered</span>
-<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.6"/></svg>
-black curve: the same with one region per Pfam family, since regions from one protein or family are not independent</span>
-</div>
-<div class="prose muted pu-readkey">
-<p>The numbers under each panel: <b>missed</b> is the share of regions with no covered residue
-inside them (lower is better). <b>Inside</b> is the mean coverage inside the region (higher is
-better). <b>Flanks</b> is the mean coverage in the 100 residues either side. For placing domain
-boundaries lower is better, though a second copy of the same domain nearby counts as covered too.
-<b>0.8→0.2</b> is how many residues the curve takes to fall from 0.8 to 0.2 at each end of the region:
-fewer residues means a sharper edge. "Not reached" means the curve never gets to 0.8 inside the
-region; "does not fall that far" means it stays above 0.2 for all 100 residues outside.</p>
-<p>Counts: {n_in:,} of the {n_all:,} regions have at least one residue inside their protein's
-sequence; the readouts use those. With one region per Pfam family ({n_fam:,} families), the region
-kept is the first by protein accession, then start. {n_past} Pfam regions run partly or wholly past the
-end of the protein sequence this run searched, so their Pfam coordinates belong to a different
-version of the sequence.</p>
-<details><summary>The {n_past} regions that run past their protein's end</summary><ul class="mono">{past}</ul></details>
+<span class="item"><span class="sw" style="background:var(--null)"></span> past the protein's end</span>
 </div>
 <div id="pu-grid" class="pu-grid"></div>
 </figure>
+<details class="prose pu-howto"><summary>How to read a panel: covered, missed, inside, flanks, edge sharpness</summary>
+<p>A <b>call</b> is a stretch of a human protein that a tool matched to a zebrafish protein carrying a
+Pfam domain. It names that domain and spans the whole matched stretch, which can be much wider than
+the domain. A residue is <b>covered</b> when a call naming that row's own Pfam family spans it, at any
+score the tool reported (E-value cutoff 10). Covered does not mean correctly placed: a call that runs
+far past the domain still covers it.</p>
+<p>Each row shows 100 residues before the domain, then the domain stretched or squeezed into 100
+equal steps, then 100 residues after it, as deepTools does for genes. The median domain is
+{med_len:.0f} aa, so one step is about {med_len / 100:.1f} aa.</p>
+<p>The numbers under each panel: <b>missed</b> is the share of domains with no covered residue inside
+(lower is better). <b>Inside</b> is the mean coverage inside the domain (higher is better).
+<b>Flanks</b> is the mean coverage in the 100 residues either side; for placing domain ends lower is
+better, though a second copy of the same domain nearby counts as covered too. <b>Edge sharpness</b>
+is how many residues the curve takes to fall from 0.8 to 0.2 at each end of the domain: fewer
+residues means a sharper edge. "None" means the curve never reaches 0.8 inside the domain, or never
+falls to 0.2 within 100 residues outside it; the chosen panel below says which.</p>
+<p>Rows from one protein or one family are not independent, so the thin line repeats the curve
+with one domain per Pfam family ({n_fam:,} families).</p>
+</details>
 <figure>
-<figcaption><b>Figure 3, chosen panel:</b> <span id="pu-ftitle"></span>. <span id="pu-caption-numbers"></span>
+<figcaption><b>Figure 9, chosen panel:</b> <span id="pu-ftitle"></span>. <span id="pu-caption-numbers"></span>
 Hover a row to see its protein, domain, coordinates, calls and residues.</figcaption>
+<div class="metricpick" role="group" aria-label="Row order">
+<span>Order rows (in every panel) by:</span>
+<button type="button" class="chip" data-sort="coverage">coverage in this panel</button>
+<button type="button" class="chip" data-sort="identity">% identity to zebrafish</button>
+<button type="button" class="chip" data-sort="length">domain length</button>
+<button type="button" class="chip" data-sort="plddt">mean pLDDT</button>
+</div>
 <div class="legend" aria-label="Key to the chosen panel">
 <span class="item"><span class="sw" style="background:var(--strip-a)"></span><span class="sw" style="background:var(--strip-b)"></span>
-left strip: rows from one protein share a shade; the shade changes where the protein changes</span>
-<span class="item">Colour cells by: <button type="button" class="chip" data-color="coverage">covered or not</button>
+left strip: rows from one protein share a shade</span>
+<span class="item">Colour by: <button type="button" class="chip" data-color="coverage">covered or not</button>
 <button type="button" class="chip" data-color="score">call score</button></span>
 <span class="item" id="pu-scorebar" hidden><span class="name"></span><span class="lo mono"></span><span class="bar"></span><span class="hi mono"></span>
 highest score of the calls over the residue, 5th to 95th percentile of this tool's scores</span>
 </div>
 <div class="plotbox pu-focus">
-<svg id="pu-fcurve" class="pu-fcurve" role="img" aria-label="share of regions covered at each position"></svg>
-<div class="pu-scroll"><canvas id="pu-fheat" class="pu-fheat" aria-label="one row per region"></canvas>
+<svg id="pu-fcurve" class="pu-fcurve" role="img" aria-label="share of domains covered at each position"></svg>
+<div class="pu-scroll"><canvas id="pu-fheat" class="pu-fheat" aria-label="one row per domain"></canvas>
 <div id="pu-tip" class="tip pu-tip" hidden></div></div>
 </div>
 <p id="pu-fro" class="prose muted"></p>
+<p class="axisnote">Identity is the best pairwise identity between the human domain and any zebrafish
+domain of its family. Domains with no such domain, or no matching AlphaFold model, sort last.</p>
 </figure>
 <h2>Where calls start</h2>
 <figure>
-<figcaption><b>Figure 4.</b> For each region with a call, take the call that overlaps it most (ties go to
-the higher score, then the earlier start). Subtract the region's first residue from the call's first
-residue. 0 means the call starts on the domain's first residue; negative values start early. One line
-per tool, as a share of that tool's regions with a call (n in the key), in 5-residue steps; the end
-bins hold everything beyond 100 residues. For kmerseek the line is its setting with the highest Fmax
-(the best balance of precision and recall, see <a href="methods.html">Methods</a>) against
-zebrafish, <span class="mono">{esc(km["setting"])}</span>. Among the aligners, between
-{100 * early[lo_t]:.0f}% ({esc(TOOLS[lo_t]["name"])}) and {100 * early[hi_t]:.0f}%
-({esc(TOOLS[hi_t]["name"])}) of calls start more than 100 residues early. That is because a call
-spans the whole matched stretch. hmmscan's calls start on the domain because Pfam's domains are defined by the
-models hmmscan runs. Where calls end is not drawn.</figcaption>
-<div class="legend" aria-label="Key to Figure 4">{hist_legend}</div>
-<div class="plotbox"><svg id="pu-hist" role="img" aria-label="histogram of call start minus true start"></svg></div>
+<figcaption><b>Figure 10.</b> Among the aligners, {100 * early[lo_t]:.0f}% ({esc(TOOLS[lo_t]["name"])}) to
+{100 * early[hi_t]:.0f}% ({esc(TOOLS[hi_t]["name"])}) of calls start more than 100 residues before the
+domain, because a call spans the whole matched stretch; hmmscan's calls start on the domain, whose
+ends its own models define. Each panel is one tool: for each domain with a call, the call that
+overlaps it most (ties to the higher score, then the earlier start), its first residue minus the
+domain's first residue, as a share of that tool's domains with a call (n on the panel), in 5-residue
+steps; the end bins hold everything beyond 100 residues. kmerseek is drawn at
+{esc(setting_label("kmerseek", km["setting"]))} (<span class="mono">{esc(km["setting"])}</span>). All panels share one
+vertical scale except hmmscan's, whose peak near 1 would flatten the rest. Where calls end is not drawn.</figcaption>
+<div class="legend" aria-label="Key to Figure 10"><span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--k-letters)" stroke-width="2"/></svg> this panel's tool, in its colour</span>
+<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--hair)" stroke-width="1.5"/></svg> the other tools, for comparison</span>
+<span class="item"><svg width="14" height="12" aria-hidden="true"><line x1="7" y1="0" x2="7" y2="12" stroke="var(--muted)" stroke-dasharray="3 2"/></svg> 0: the call starts on the domain's first residue</span></div>
+<div id="pu-hist" class="pu-hist" role="group" aria-label="call start minus domain start, one panel per tool"></div>
 </figure>
+<h2>Counts and sources</h2>
+<div class="prose muted">
+<p>{n_in:,} of the {n_all:,} domains have at least one residue inside their protein's sequence; the
+readouts use those. With one domain per Pfam family ({n_fam:,} families), the domain kept is the
+first by protein accession, then start. {n_past} Pfam domains run partly or wholly past the end of
+the protein sequence this run searched, so their Pfam coordinates belong to a different version of
+the sequence.</p>
+<details><summary>The {n_past} domains that run past their protein's end</summary><ul class="mono">{past}</ul></details>
+<p>The pile-up's own tables (domains and calls) come from {src['repo']} at commit
+<a class="mono" href="https://github.com/{src['repo']}/commit/{src['pileup_commit']}">{src['pileup_commit'][:8]}</a>
+(<span class="mono">results/leaderboard/pileup</span>).</p>
+</div>
 <script type="application/json" id="pu-meta">{json.dumps(meta)}</script>
 <script src="assets/pileup.js"></script>
 """
@@ -2245,12 +2256,13 @@ def main() -> None:
         calls = pl.read_parquet(a.data / "pileup/calls.parquet").select("tool", "setting").unique()
         kinds = list(KINDS)
         panels = sorted(({"tool": t, "setting": st, "kind": TOOLS[t]["kind"]} for t, st in calls.iter_rows()),
-                        key=lambda q: (kinds.index(q["kind"]), list(TOOLS).index(q["tool"]), q["setting"]))
+                        key=lambda q: (kinds.index(q["kind"]), list(TOOLS).index(q["tool"]),
+                                       setting_key(q["tool"], q["setting"])))
         data, check = pileup.build(a.data, panels)
         (out / "data" / "pileup.json").write_text(json.dumps(data, separators=(",", ":"), allow_nan=False))
         (out / "data" / "pileup_check.json").write_text(json.dumps(check, indent=1) + "\n")
         prov["pileup"] = json.loads((a.data / "pileup/provenance.json").read_text())
-        (out / "pileup.html").write_text(page_pileup(src, res, prov, data, check))
+        (out / "pileup.html").write_text(page_pileup(src, res, prov, data, check, pileup.readouts(data)))
     else:
         # No pile-up tables in data/: remove the pages an earlier build wrote from older ones.
         for stale in ("pileup.html", "pileup.html.json", "data/pileup.json", "data/pileup_check.json"):
