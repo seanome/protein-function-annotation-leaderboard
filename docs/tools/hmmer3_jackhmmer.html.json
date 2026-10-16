@@ -94,6 +94,38 @@
   },
   {
    "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "p",
+   "text": "each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push."
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: notebook 289, dark set and kmerseek reach at E < 1 vs E < 10 · commit 029c47a in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that phmmer, jackhmmer and MMseqs2 all fail to place.open · the number: 2 to 222 · reported 13 Oct 2026 in seanome/2024-kmerseek-analysis PR 57Also on the cards of: jackhmmerWhat to do: Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared.The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus at E ≤ 10 is 2_039.seanome/2024-kmerseek-analysis PR 57, comment 6151921382The dark set is every protein in the query proteome that phmmer, jackhmmer and mmseqs2seanome/2024-kmerseek-analysis nextflow-runs/invertebrate-dark-set/main.nf at ec91da53"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: make leaderboard-pileup and the region pile-up page (Figure 4) · commit 39d81ec9 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.open · the number: median 5 to 21 residues early; 45% to 60% more than 100 residues early · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 146, PR 3Also on the cards of: jackhmmer, MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + FoldseekWhat to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch.seanome/2024-kmerseek-analysis PR 14645% to 60% of aligner calls start more than 100 residues early, not \"most\"PR 3, comment 6193138553"
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {
@@ -134,7 +166,7 @@
   },
   {
    "tag": "h2",
-   "text": "Known failure modes"
+   "text": "Caveats of how this run was set up"
   },
   {
    "tag": "li",
@@ -213,10 +245,106 @@
   },
   "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a FASTA file.",
   "score": "Domain bit score: higher ranks first. The E-value cutoff was 10.",
-  "failure_modes": [
+  "caveats": [
    "Each round can pull in proteins from a different family, which then pull in more. How often that happened here: not measured."
   ],
   "version": "HMMER 3.4",
+  "known_failure_modes": [
+   {
+    "tool": "hmmer3_phmmer",
+    "tool_name": "phmmer",
+    "file": "failure_modes/hmmer3_phmmer.yaml",
+    "id": "evalue-two-significant-figures",
+    "shown_on_cards": [
+     "hmmer3_phmmer",
+     "hmmer3_jackhmmer"
+    ],
+    "finding": "HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that phmmer, jackhmmer and MMseqs2 all fail to place.",
+    "number": "2 to 222",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 57, comment 6151921382",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/57#issuecomment-6151921382",
+      "quote": "The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus at E ≤ 10 is 2_039."
+     },
+     {
+      "source": "seanome/2024-kmerseek-analysis nextflow-runs/invertebrate-dark-set/main.nf at ec91da53",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/blob/ec91da53b26d88474679989205045de45e38a162/nextflow-runs/invertebrate-dark-set/main.nf",
+      "quote": "The dark set is every protein in the query proteome that phmmer, jackhmmer and mmseqs2"
+     }
+    ],
+    "run": "notebook 289, dark set and kmerseek reach at E < 1 vs E < 10",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "029c47a",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/029c47a"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 57,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/57"
+     }
+    ],
+    "what_to_do": "Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared.",
+    "date": "2026-10-13",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "hmmer3_phmmer",
+    "tool_name": "phmmer",
+    "file": "failure_modes/hmmer3_phmmer.yaml",
+    "id": "calls-run-past-domain-edges",
+    "shown_on_cards": [
+     "hmmer3_phmmer",
+     "hmmer3_jackhmmer",
+     "mmseqs2_seqseq",
+     "mmseqs2_iterative",
+     "hhblits",
+     "foldseek",
+     "prostt5"
+    ],
+    "finding": "Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.",
+    "number": "median 5 to 21 residues early; 45% to 60% more than 100 residues early",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 146",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
+      "quote": "Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+     },
+     {
+      "source": "PR 3, comment 6193138553",
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553",
+      "quote": "45% to 60% of aligner calls start more than 100 residues early, not \"most\""
+     }
+    ],
+    "run": "`make leaderboard-pileup` and the region pile-up page (Figure 4)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "39d81ec9",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec9"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 146,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146"
+     },
+     {
+      "repo": "seanome/protein-function-annotation-leaderboard",
+      "number": 3,
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3"
+     }
+    ],
+    "what_to_do": "Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.",
+    "date": "2026-10-15",
+    "status": "open",
+    "fixed": false
+   }
+  ],
   "licence": "BSD 3-clause (HMMER)",
   "commercial_use": "Yes.",
   "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",

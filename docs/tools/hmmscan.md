@@ -12,6 +12,10 @@ Each query protein against the curated profile models of every Pfam family, with
 
 Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is Pfam models (`direct`): Fmax 0.886 over 2,435 true instances. Searching costs about $0.0173 per 1,000 queries (0.389 core-hours), for scanning Pfam's models.
 
+## Known failure modes
+
+None recorded yet.
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -39,7 +43,7 @@ Pfam-A 38.2 family models (30,134 models).
 
 Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
 - Pfam domains are defined by these same models, so scoring hmmscan against the Pfam truth set grades the models against their own output. Read its Pfam row as the best a search could do, not as a competitor.
 - It was scored against the Pfam truth set only. Swiss-Prot features and Pfam-N: not run.

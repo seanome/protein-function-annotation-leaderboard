@@ -367,7 +367,8 @@ def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
 NAV = [("index.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool cards", "tools"),
        ("cost.html", "Compare two columns", "cost"), ("explainers.html", "How the scores work", "explainers"),
        ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods")]
-NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage")]
+NAV_MORE = [("claims.html", "Claims", "claims"), ("failure-modes.html", "Known failure modes", "failure-modes"),
+            ("coverage.html", "Coverage", "coverage")]
 
 
 def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
@@ -814,7 +815,7 @@ def stratum_words(axis, stratum):
     return v
 
 
-def card_markdown(tool: str, nums: dict, src: dict) -> tuple[str, str]:
+def card_markdown(tool: str, nums: dict, src: dict, fm_rows: list[dict] | None = None) -> tuple[str, str]:
     """The card as Markdown, in two parts: what a reader choosing a tool needs first (the
     one-line description, "Will it work for you?", best Fmax and cost, strong and weak
     subsets), and the rest. The HTML card puts its figure and the claims between them."""
@@ -842,6 +843,16 @@ def card_markdown(tool: str, nums: dict, src: dict) -> tuple[str, str]:
         else:
             line += " Its search cost was not measured."
         T += [line, ""]
+    T += ["## Known failure modes", ""]
+    mine = [r for r in (fm_rows or []) if tool in r["shown_on_cards"]]
+    if mine:
+        for r in mine:
+            src_links = "; ".join(f"[{ev['source']}]({ev['url']})" for ev in r["evidence"])
+            T += [f"- {' '.join(r['finding'].split())} The number: {r['number'] if r['number'] is not None else r['number_note']}. "
+                  f"Status: {r['status']}. What to do: {' '.join(r['what_to_do'].split())} Source: {src_links}."]
+        T += [""]
+    else:
+        T += ["None recorded yet.", ""]
     T += ["## Where it is strong and weak", ""]
     if "best_setting" not in nums:
         T += ["Not run under the Pfam truth set for this relative.", ""]
@@ -876,8 +887,8 @@ def card_markdown(tool: str, nums: dict, src: dict) -> tuple[str, str]:
         L.append(f"- {k}: {'yes' if v else 'no'}")
     L += ["", "## Reference searched", "", t["reference"], "",
           "## How to read its score", "", t["score"], ""]
-    L += ['## Known failure modes {#failure-modes}', ""]
-    L += [f"- {f}" for f in t["failure_modes"]]
+    L += ["## Caveats of how this run was set up {#caveats}", ""]
+    L += [f"- {f}" for f in t["caveats"]]
     L.append("")
 
     L += ["## Cost per 1,000 queries", ""]
@@ -1057,12 +1068,16 @@ def questions(tool: str, nums: dict) -> list[str]:
     return q
 
 
-def page_card(tool: str, md: tuple[str, str], src: dict, fig: str, cl: dict | None = None) -> str:
+def page_card(tool: str, md: tuple[str, str], src: dict, fig: str, cl: dict | None = None,
+              fm_rows: list[dict] | None = None) -> str:
     ext = ["fenced_code", "attr_list", "tables"]
-    top, rest = (markdown.markdown(x, extensions=ext) for x in md)
+    # The HTML card draws the failure modes as their own section, so drop them from the Markdown part.
+    top_md = re.sub(r"## Known failure modes\n.*?(?=\n## )", "", md[0], flags=re.S)
+    top, rest = (markdown.markdown(x, extensions=ext) for x in (top_md, md[1]))
     crumb = f'<nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Tool cards</a> › {esc(TOOLS[tool]["name"])}</nav>'
     body = (f'{crumb}<div class="card">{top}{fig}</div>\n'
             + (claims_card(cl, up="../") if cl else "")
+            + fm_section(tool, fm_rows or [], up="../")
             + f'<div class="card card-rest">{rest}</div>\n<p><a href="index.html">All tool cards</a> · '
             f'<a href="{tool}.md">this card as Markdown</a> · <a href="{tool}.json">as JSON</a></p>')
     return layout(f"{TOOLS[tool]['name']} card", "tools", body, src, depth=1,
@@ -1131,7 +1146,7 @@ FILTER_GROUPS = [("structure", "3D structure prediction"), ("gpu", "GPU"), ("lic
 
 
 def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, comp: pl.DataFrame,
-                     claims_by_tool: dict) -> str:
+                     claims_by_tool: dict, fm: dict) -> str:
     rel = res.filter(pl.col("species") != "all").select("species", "species_mya").unique().sort("species_mya", "species")
     rel_order = rel["species"].to_list()
     mya = {s: int(m) for s, m in rel.iter_rows()}
@@ -1151,11 +1166,13 @@ def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, comp: p
         info = TOOLS[t]
         f = tool_filters(t)
         cl = claims_by_tool.get(t)
+        n_fm = sum(t in r["shown_on_cards"] for r in fm["entries"])
         tags = [f'<span class="tc-tag">needs 3D structure prediction</span>' if f["structure"] == "needed" else "",
                 f'<span class="tc-tag">needs GPU</span>' if f["gpu"] == "needed" else "",
                 f'<span class="tc-tag">{esc(f["licence"])}</span>',
                 '<span class="tag warn">graded on its own models under Pfam</span>' if t == "hmmscan" else "",
-                f'<span class="tc-tag">claims: {cl["counts"]["alive"]} hold{"s" if cl["counts"]["alive"] == 1 else ""}, {cl["counts"]["retired"]} disproved</span>' if cl else ""]
+                f'<span class="tc-tag">claims: {cl["counts"]["alive"]} hold{"s" if cl["counts"]["alive"] == 1 else ""}, {cl["counts"]["retired"]} disproved</span>' if cl else "",
+                f'<a class="tc-tag" href="{t}.html#failure-modes">known failure modes: {n_fm or "none recorded yet"}</a>']
         where = "no relative" if nums["species"] == "all" else "zebrafish"
         nums_html = (f'<div class="tc-nums"><span><b>{fmax:.3f}</b> best Fmax</span>'
                      f'<span><b>{"$" + format(cost, ".3g") if cost is not None else "not measured"}</b> per 1,000 queries</span>'
@@ -1833,6 +1850,105 @@ def claims_card(cl: dict, up: str = "") -> str:
 </section>"""
 
 
+def md_inline(text: str) -> str:
+    """Escape, then show `code` and **bold** from a quoted source as the source shows them."""
+    t = esc(plain_refs(" ".join(text.split())))
+    t = re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
+    return re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", t)
+
+
+def fm_row(r: dict, show_tool: bool = False) -> str:
+    """One known failure mode: the finding, its number, its status, what to do, and (folded)
+    the quotes from each source, the run and the commit."""
+    status = "open" if not r["fixed"] else r["status"]
+    num = (f'<span class="fm-num">{esc(r["number"])}</span>' if r["number"] is not None
+           else f'<span class="muted">{esc(r["number_note"])}</span>')
+    prs = ", ".join(f'<a href="{esc(p["url"])}">{esc(("" if p["repo"] == REPO else p["repo"] + " ") + "PR " + str(p["number"]))}</a>'
+                    for p in r["pr"])
+    quotes = "".join(f'<blockquote class="fm-quote">{md_inline(ev["quote"])}'
+                     f'<footer><a href="{esc(ev["url"])}">{esc(ev["source"])}</a></footer></blockquote>'
+                     for ev in r["evidence"])
+    commit = (f' · commit <a class="mono" href="{esc(r["commit"]["url"])}">{esc(r["commit"]["sha"][:8])}</a>'
+              f' in {esc(r["commit"]["repo"])}' if r["commit"] else "")
+    tool = f'<span class="fm-tool">{esc(r["tool_name"])}</span> ' if show_tool else ""
+    others = [TOOLS[t]["name"] for t in r["shown_on_cards"] if t != r["tool"]]
+    also = (f'<div class="fm-meta">Also on the cards of: {esc(", ".join(others))}</div>' if others else "")
+    tools_attr = " ".join(dict.fromkeys([r["tool"]] + r["shown_on_cards"]))
+    return (f'<li class="fm-row" data-tool="{esc(tools_attr)}" data-fixed="{"fixed" if r["fixed"] else "open"}" id="fm-{esc(r["tool"])}-{esc(r["id"])}">'
+            f'<div class="fm-finding">{tool}{md_inline(r["finding"])}</div>'
+            f'<div class="fm-meta"><span class="fm-st">{esc(status)}</span> · the number: {num} · reported {fmt_date(r["date"])} in {prs}</div>'
+            f'{also}<div class="fm-do"><b>What to do:</b> {md_inline(r["what_to_do"])}</div>'
+            f'<details class="fm-more"><summary>The source text, the run and its commit</summary>{quotes}'
+            f'<p>Run: {md_inline(r["run"])}{commit}</p></details></li>')
+
+
+def fm_section(tool: str, rows: list[dict], up: str = "") -> str:
+    """The "Known failure modes" section of a tool card: the entries from failure_modes/,
+    including those another tool's file shares with this card, or "none recorded yet"."""
+    mine = [r for r in rows if tool in r["shown_on_cards"]]
+    own = (ROOT_DIR / "failure_modes" / f"{tool}.yaml").exists()
+    file_line = (f'<a class="mono" href="{up}failure_modes/{tool}.yaml">failure_modes/{tool}.yaml</a>' if own
+                 else f'no <span class="mono">failure_modes/{tool}.yaml</span> yet')
+    inner = (f'<ul class="fm-rows">{"".join(fm_row(r, show_tool=r["tool"] != tool) for r in mine)}</ul>' if mine
+             else '<p class="fm-none">None recorded yet.</p>')
+    return f"""<section class="cl-card fm-card" id="failure-modes" aria-label="Known failure modes of {esc(TOOLS[tool]['name'])}">
+<div class="cl-head"><h2 class="cl-title">Known failure modes</h2><span class="cl-file">{file_line}</span></div>
+<p class="cl-sub">each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push.</p>
+{inner}
+<div class="cl-buttons"><a class="cl-btn" href="{up}failure-modes.html">All known failure modes ↗</a></div>
+</section>"""
+
+
+def page_failure_modes(src: dict, fm: dict) -> str:
+    rows = fm["entries"]
+    tools = sorted({(r["tool"], r["tool_name"]) for r in rows}
+                   | {(t, TOOLS[t]["name"]) for r in rows for t in r["shown_on_cards"]}, key=lambda x: x[1].lower())
+    chips_t = '<button type="button" class="chip" data-f="" aria-pressed="true">any</button>' + "".join(
+        f'<button type="button" class="chip" data-f="{esc(t)}" aria-pressed="false">{esc(n)}</button>' for t, n in tools)
+    chips_s = ('<button type="button" class="chip" data-f="" aria-pressed="true">any</button>'
+               '<button type="button" class="chip" data-f="open" aria-pressed="false">open</button>'
+               '<button type="button" class="chip" data-f="fixed" aria-pressed="false">fixed</button>')
+    n_fixed = sum(r["fixed"] for r in rows)
+    body = f"""<h1>Known failure modes</h1>
+<p class="lede">Ways each tool is known to fail, each with the run that showed it and a source you can
+open. {len(rows)} entries, shown on {len(tools)} tools and inputs; {len(rows) - n_fixed} open, {n_fixed} fixed.</p>
+<details class="choices tc-filters" open><summary><span class="choices-label">Filter the entries</span>
+<span class="choices-now" id="fm-count"></span></summary>
+<div class="tc-fbox"><div class="tc-frow" role="group" aria-label="Tool or input" data-key="tool"><span class="tc-flab">Tool or input</span>{chips_t}</div>
+<div class="tc-frow" role="group" aria-label="Status" data-key="fixed"><span class="tc-flab">Status</span>{chips_s}</div></div></details>
+<p class="prose muted">Each entry is one item of a file <span class="mono">failure_modes/&lt;tool&gt;.yaml</span>
+(<a class="mono" href="failure_modes/schema.json">schema</a>). On every push,
+<span class="mono">scripts/failure_modes.py --check</span> fetches each source from GitHub and fails if a
+quote is not in it character for character, or if a number in the finding is not in a quote. An
+entry shows on its tool's card; an entry about an input (the Pfam truth set, the AlphaFold models)
+shows only here.</p>
+<section class="cl-card fm-card"><ul class="fm-rows" id="fm-rows">{"".join(fm_row(r, show_tool=True) for r in rows)}</ul>
+<p class="fm-none" id="fm-empty" hidden>None recorded yet for this choice.</p></section>
+<script>
+(function () {{
+  const rows = [...document.querySelectorAll("#fm-rows .fm-row")], count = document.getElementById("fm-count");
+  const want = {{}};
+  function apply() {{
+    let n = 0;
+    for (const r of rows) {{
+      const ok = Object.entries(want).every(([k, v]) => !v || r.dataset[k].split(" ").includes(v));
+      r.hidden = !ok; n += ok;
+    }}
+    count.textContent = "showing " + n + " of " + rows.length + " entries";
+    document.getElementById("fm-empty").hidden = n > 0;
+  }}
+  document.querySelectorAll(".tc-frow").forEach((row) => row.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {{
+    want[row.dataset.key] = b.dataset.f;
+    row.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    apply();
+  }})));
+  apply();
+}})();
+</script>"""
+    return layout("Known failure modes", "failure-modes", body, src,
+                  description="Ways each protein annotation tool is known to fail, each with the run that showed it and a quoted source.")
+
+
 def page_claims(src: dict, cards: list[dict]) -> str:
     who = ("Only kmerseek has filed claims so far." if [c["tool"] for c in cards] == ["kmerseek"]
            else f"{len(cards)} tools have filed claims so far.")
@@ -2294,17 +2410,25 @@ def main() -> None:
     (out / "claims" / "schema.json").write_text((ROOT_DIR / "claims/schema.json").read_text())
     claims_by_tool = {c["tool"]: c for c in cards}
     (out / "claims.html").write_text(page_claims(src, cards))
-    (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, comp, claims_by_tool))
+    import failure_modes as fm_mod
+    fm = fm_mod.site_json(fm_mod.load(), REPO, {t: TOOLS[t]["name"] for t in tools_used})
+    (out / "data" / "failure_modes.json").write_text(json.dumps(fm, indent=1, ensure_ascii=False) + "\n")
+    (out / "failure_modes").mkdir(parents=True, exist_ok=True)
+    for f in sorted((ROOT_DIR / "failure_modes").glob("*")):
+        (out / "failure_modes" / f.name).write_text(f.read_text())
+    (out / "failure-modes.html").write_text(page_failure_modes(src, fm))
+    (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, comp, claims_by_tool, fm))
     (out / "claims-schema.html").write_text(page_claims_schema(src, cards, resolver.inv_src))
     for t in sorted(tools_used):
         nums = card_numbers(t, res, comp)
-        md = card_markdown(t, nums, src)
+        md = card_markdown(t, nums, src, fm["entries"])
         (out / "tools" / f"{t}.md").write_text(md[0] + "\n" + md[1])
         card = {
             "tool": t, "name": TOOLS[t]["name"], "kind": KINDS[TOOLS[t]["kind"]]["label"],
             "compares": TOOLS[t]["compares"], "needs": TOOLS[t]["needs"],
             "reference": TOOLS[t]["reference"], "score": TOOLS[t]["score"],
-            "failure_modes": TOOLS[t]["failure_modes"], "version": TOOLS[t]["version"],
+            "caveats": TOOLS[t]["caveats"], "version": TOOLS[t]["version"],
+            "known_failure_modes": [r for r in fm["entries"] if t in r["shown_on_cards"]],
             "licence": TOOLS[t]["licence"], "commercial_use": TOOLS[t]["commercial"],
             "licence_url": TOOLS[t]["licence_url"],
             "container": TOOLS[t]["container"], "command": TOOLS[t]["command"],
@@ -2323,7 +2447,7 @@ def main() -> None:
             "markdown": f"{t}.md",
         }
         (out / "tools" / f"{t}.json").write_text(json.dumps(card, indent=1, allow_nan=False) + "\n")
-        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, card_figure(t, nums, res), claims_by_tool.get(t)))
+        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, card_figure(t, nums, res), claims_by_tool.get(t), fm["entries"]))
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
     if (a.data / "pileup/regions.parquet").exists():
         # The page credits its tables to this commit; without it, the copy is of unknown origin.
@@ -2372,6 +2496,7 @@ def main() -> None:
         for k, (n, h, w) in TERMS.items()}})
     page_json(out, "tools/index.html", src, {"cards": [f"{t}.json" for t in sorted(tools_used)]})
     page_json(out, "claims.html", src, {"claims": cards})
+    page_json(out, "failure-modes.html", src, fm)
     page_json(out, "claims-schema.html", src, {"schema": json.loads((ROOT_DIR / "claims/schema.json").read_text())})
     if (out / "pileup.html").exists():
         page_json(out, "pileup.html", src, {

@@ -1,0 +1,545 @@
+{
+ "page": "failure-modes.html",
+ "title": "Known failure modes",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T13:44:05Z",
+  "sha256": {
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+ },
+ "text": [
+  {
+   "tag": "h1",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "p",
+   "text": "Ways each tool is known to fail, each with the run that showed it and a source you can open. 9 entries, shown on 10 tools and inputs; 8 open, 1 fixed."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
+  },
+  {
+   "tag": "summary",
+   "text": "Filter the entries"
+  },
+  {
+   "tag": "p",
+   "text": "Each entry is one item of a file failure_modes/<tool>.yaml (schema). On every push, scripts/failure_modes.py --check fetches each source from GitHub and fails if a quote is not in it character for character, or if a number in the finding is not in a quote. An entry shows on its tool's card; an entry about an input (the Pfam truth set, the AlphaFold models) shows only here."
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the region pile-up page's review · commit 65bb7e0 in seanome/protein-function-annotation-leaderboard"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold models (pLDDT) For 32 proteins, pLDDT came from AlphaFold models of a different sequence version. The pile-up page now leaves pLDDT empty for those proteins, 196 regions in all.fixed in site commit 65bb7e0 · the number: 32 · reported 15 Oct 2026 in PR 3What to do: Check that a model's sequence equals the searched sequence before reading pLDDT from it.pLDDT came from AlphaFold models of a different sequence version for 32 proteins, and is now null there (196 regions without pLDDT).PR 3, comment 6193138553"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the elm_cover run (notebook 253, PR 72) · commit ca051a6 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "Foldseek In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model. It cannot search those, so its share of motifs found is low for a reason that is not the search.open · the number: The source does not count the orthologs with no AlphaFold model. · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 148What to do: Score a structure tool only on proteins that have a structure, and print how many proteins were left out.Foldseek and Reseek were scored on orthologs with no AlphaFold model too, so their shares are low for a reason that is not the searchseanome/2024-kmerseek-analysis results/leaderboard/inventory.md at 6df20c1f"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: notebook 289, dark set and kmerseek reach at E < 1 vs E < 10 · commit 029c47a in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that phmmer, jackhmmer and MMseqs2 all fail to place.open · the number: 2 to 222 · reported 13 Oct 2026 in seanome/2024-kmerseek-analysis PR 57Also on the cards of: jackhmmerWhat to do: Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared.The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus at E ≤ 10 is 2_039.seanome/2024-kmerseek-analysis PR 57, comment 6151921382The dark set is every protein in the query proteome that phmmer, jackhmmer and mmseqs2seanome/2024-kmerseek-analysis nextflow-runs/invertebrate-dark-set/main.nf at ec91da53"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the time-split pilot's tune half (notebook 280), rapeseed protein A0A078HBQ0, LRR_1 repeats 64-86 and 88-110 · commit 787bc31 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer A call is the whole alignment, not the target's domain placed on the query, so a long alignment over repeats never lands on one repeat. On a 23-aa LRR_1 repeat, every MMseqs2 and phmmer call was 47 aa or longer, so none landed.open · the number: 47 aa or longer, on a 23-aa repeat · reported 13 Oct 2026 in seanome/2024-kmerseek-analysis PR 121Also on the cards of: MMseqs2, three roundsWhat to do: Place the target's domain on the query through the alignment before scoring. Notebook 280 switched to this rule; the leaderboard's own calls are still whole alignments.But every one of their calls is 47 aa or longer, so under half of it lies inside a 23-aa repeat, and the landing rule (at least half the call inside the domain) rejects it.seanome/2024-kmerseek-analysis PR 121, comment 6154499159a call is the whole alignment, not the target's domain projected onto the query, so long alignments over repeats never land on one repeat.seanome/2024-kmerseek-analysis PR 121, comment 6154499159Olga's decision (2026-10-14, before the test half was read): a call is the target domain placed on the query through the hit, and MMseqs2 runs one round (2067fa1; recorded in notebook 280's first cell).seanome/2024-kmerseek-analysis PR 121, comment 6169102356"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: make leaderboard-pileup and the region pile-up page (Figure 4) · commit 39d81ec9 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.open · the number: median 5 to 21 residues early; 45% to 60% more than 100 residues early · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 146, PR 3Also on the cards of: jackhmmer, MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + FoldseekWhat to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch.seanome/2024-kmerseek-analysis PR 14645% to 60% of aligner calls start more than 100 residues early, not \"most\"PR 3, comment 6193138553"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the regions-index pilot (kmerseek v0.4.0, protein20, k=5), and the 125 test ribonucleases searched with topi ribonuclease (P00659) · commit d3046f8 in seanome/kmerseek"
+  },
+  {
+   "tag": "li",
+   "text": "kmerseek kmerseek 0.4.0 keys each index entry by its k-mer set, so two different sequences with the same k-mer set become one entry and the second is lost. In a regions-index pilot, 6 of 99_232 rows reported residues that are not at the target's own coordinates; the PR traces this to the key but has not confirmed it for each of the 6. In an index of 125 ribonucleases built on a later branch with the same key, 31 are missing under cys2 and 7 under cys_hp3.open · the number: 6 of 99_232 rows; 31 of the 125 ribonucleases · reported 10 Oct 2026 in seanome/kmerseek PR 141, seanome/kmerseek PR 148What to do: Rebuild every 0.4.0 index once kmerseek PR 141 is merged; it keys each entry by its sequence. Until then, a recall number from a 0.4.0 index is measured against a reference that may be missing targets.In the 2024-kmerseek-analysis regions-index pilot (kmerseek v0.4.0, protein20, k=5), 6 of 99_232 rows had a target_subseq that is not target[target_start:target_end].seanome/kmerseek PR 141Two different sequences with the same k-mer set get the same sum. So the second entry's hits came out with the first entry's coordinates and residues.seanome/kmerseek PR 141Not done: rebuilding the pilot index and rechecking the 6 rows. The two rows that are not anywhere in the target fit this cause, but I have not confirmed which earlier entry each of the 6 targets was merged into.seanome/kmerseek PR 141An index keys each entry by its k-mer set, so two sequences with equal sets collapse into one entry and only the first is stored.seanome/kmerseek PR 148That is why 31 of the 125 ribonucleases are absent under cys2 and 7 under cys_hp3.seanome/kmerseek PR 148"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the time-split pilot's tune half, 186 settings (notebook 280) · commit f918447 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "kmerseek The exact Poisson score (region_poisson_score) stops at 307.65, where the p-value underflows. In 102 of 107 exact settings, decoy pairs reach that ceiling, so the decoy-matched cutoff sits above it and those settings find nothing.open · the number: 307.65 · reported 14 Oct 2026 in seanome/2024-kmerseek-analysis PR 121What to do: Compute the p-value in log space inside kmerseek. Until then, score exact settings on region_tfidf, as notebook 280 now does.region_poisson_score stops at 307.65, which is -log10 of the smallest normal double: the Poisson p-value underflows. In 102 of 107 exact settings, at least two tune decoy-family pairs reach that ceiling. The matched cutoff then sits just above it, and those settings find nothing at all.seanome/2024-kmerseek-analysis PR 121, comment 6169347124b215e87 scores the exact arm on region_tfidf (Olga, 2026-10-14; recorded in notebook 280's first cell).seanome/2024-kmerseek-analysis PR 121, comment 6170231005"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: make mmseqs-one-round, Slurm job 47690191, on the time-split pilot's tune half; tables in pilot_partial_2026-10-13/mmseqs_one_round/ · commit 3a12009 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2, three rounds Three rounds of profile search gave dipeptide-shuffled decoy proteins hits as strong as E 1e-22. One round gave them none below E 0.026. So with three rounds, a cutoff matched to decoys is set by the profile's own drift toward a family.open · the number: E 1e-22 (three rounds) vs E 0.026 (one round) · reported 13 Oct 2026 in seanome/2024-kmerseek-analysis PR 121What to do: Run one round (--num-iterations 1) when a cutoff is matched to decoys, or set the cutoff separately for each number of rounds.The 3-round profile search gave dipeptide-shuffled decoys hits down to E 1e-22, and one round gives none below E 0.026.seanome/2024-kmerseek-analysis PR 121, comment 6155881035"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: make leaderboard-pileup, the pile-up tables · commit 39d81ec9 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "Pfam truth set 9 Pfam truth domains lie partly or wholly past the end of their protein's QfO sequence, for example P15692 PF14554 342–395 on a 232 aa protein. The Pfam coordinates come from a different version of these sequences.open · the number: 9 · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 146What to do: Map Pfam coordinates onto the sequence version the tools searched, or leave those domains out of scoring. The pile-up figure draws residues past a protein's end grey.Found: 9 Pfam truth domains lie partly or wholly past the end of their protein's QfO sequence, for example P15692 PF14554 342–395 on a 232 aa protein. The Pfam coordinates come from a different version of these sequences.seanome/2024-kmerseek-analysis PR 146"
+  },
+  {
+   "tag": "p",
+   "text": "None recorded yet for this choice."
+  }
+ ],
+ "data": {
+  "note": "Known failure modes, one row per entry of failure_modes/<tool>.yaml. Each quote was checked against its source by scripts/failure_modes.py --check.",
+  "schema": "failure_modes/schema.json",
+  "entries": [
+   {
+    "tool": "alphafold_models",
+    "tool_name": "AlphaFold models (pLDDT)",
+    "file": "failure_modes/alphafold_models.yaml",
+    "id": "plddt-other-sequence-version",
+    "shown_on_cards": [],
+    "finding": "For 32 proteins, pLDDT came from AlphaFold models of a different sequence version. The pile-up page now leaves pLDDT empty for those proteins, 196 regions in all.",
+    "number": "32",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "PR 3, comment 6193138553",
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553",
+      "quote": "pLDDT came from AlphaFold models of a different sequence version for 32 proteins, and is now null there (196 regions without pLDDT)."
+     }
+    ],
+    "run": "the region pile-up page's review",
+    "commit": {
+     "repo": "seanome/protein-function-annotation-leaderboard",
+     "sha": "65bb7e0",
+     "url": "https://github.com/seanome/protein-function-annotation-leaderboard/commit/65bb7e0"
+    },
+    "pr": [
+     {
+      "repo": "seanome/protein-function-annotation-leaderboard",
+      "number": 3,
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3"
+     }
+    ],
+    "what_to_do": "Check that a model's sequence equals the searched sequence before reading pLDDT from it.",
+    "date": "2026-10-15",
+    "status": "fixed in site commit 65bb7e0",
+    "fixed": true
+   },
+   {
+    "tool": "foldseek",
+    "tool_name": "Foldseek",
+    "file": "failure_modes/foldseek.yaml",
+    "id": "scored-without-a-structure",
+    "shown_on_cards": [
+     "foldseek"
+    ],
+    "finding": "In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model. It cannot search those, so its share of motifs found is low for a reason that is not the search.",
+    "number": null,
+    "number_note": "The source does not count the orthologs with no AlphaFold model.",
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis results/leaderboard/inventory.md at 6df20c1f",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/blob/6df20c1f290fc123781df8d58097bf7b836535ac/results/leaderboard/inventory.md",
+      "quote": "Foldseek and Reseek were scored on orthologs with no AlphaFold model too, so their shares are low for a reason that is not the search"
+     }
+    ],
+    "run": "the elm_cover run (notebook 253, PR 72)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "ca051a6",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/ca051a6"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 148,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/148"
+     }
+    ],
+    "what_to_do": "Score a structure tool only on proteins that have a structure, and print how many proteins were left out.",
+    "date": "2026-10-15",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "hmmer3_phmmer",
+    "tool_name": "phmmer",
+    "file": "failure_modes/hmmer3_phmmer.yaml",
+    "id": "evalue-two-significant-figures",
+    "shown_on_cards": [
+     "hmmer3_phmmer",
+     "hmmer3_jackhmmer"
+    ],
+    "finding": "HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that phmmer, jackhmmer and MMseqs2 all fail to place.",
+    "number": "2 to 222",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 57, comment 6151921382",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/57#issuecomment-6151921382",
+      "quote": "The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus at E ≤ 10 is 2_039."
+     },
+     {
+      "source": "seanome/2024-kmerseek-analysis nextflow-runs/invertebrate-dark-set/main.nf at ec91da53",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/blob/ec91da53b26d88474679989205045de45e38a162/nextflow-runs/invertebrate-dark-set/main.nf",
+      "quote": "The dark set is every protein in the query proteome that phmmer, jackhmmer and mmseqs2"
+     }
+    ],
+    "run": "notebook 289, dark set and kmerseek reach at E < 1 vs E < 10",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "029c47a",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/029c47a"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 57,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/57"
+     }
+    ],
+    "what_to_do": "Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared.",
+    "date": "2026-10-13",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "hmmer3_phmmer",
+    "tool_name": "phmmer",
+    "file": "failure_modes/hmmer3_phmmer.yaml",
+    "id": "whole-alignment-call-misses-repeats",
+    "shown_on_cards": [
+     "hmmer3_phmmer",
+     "mmseqs2_iterative"
+    ],
+    "finding": "A call is the whole alignment, not the target's domain placed on the query, so a long alignment over repeats never lands on one repeat. On a 23-aa LRR_1 repeat, every MMseqs2 and phmmer call was 47 aa or longer, so none landed.",
+    "number": "47 aa or longer, on a 23-aa repeat",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6154499159",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6154499159",
+      "quote": "But every one of their calls is 47 aa or longer, so under half of it lies inside a 23-aa repeat, and the landing rule (at least half the call inside the domain) rejects it."
+     },
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6154499159",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6154499159",
+      "quote": "a call is the whole alignment, not the target's domain projected onto the query, so long alignments over repeats never land on one repeat."
+     },
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6169102356",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6169102356",
+      "quote": "Olga's decision (2026-10-14, before the test half was read): a call is the target domain placed on the query through the hit, and MMseqs2 runs one round (2067fa1; recorded in nb 280's first cell)."
+     }
+    ],
+    "run": "the time-split pilot's tune half (notebook 280), rapeseed protein A0A078HBQ0, LRR_1 repeats 64-86 and 88-110",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "787bc31",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/787bc31"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 121,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121"
+     }
+    ],
+    "what_to_do": "Place the target's domain on the query through the alignment before scoring. Notebook 280 switched to this rule; the leaderboard's own calls are still whole alignments.",
+    "date": "2026-10-13",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "hmmer3_phmmer",
+    "tool_name": "phmmer",
+    "file": "failure_modes/hmmer3_phmmer.yaml",
+    "id": "calls-run-past-domain-edges",
+    "shown_on_cards": [
+     "hmmer3_phmmer",
+     "hmmer3_jackhmmer",
+     "mmseqs2_seqseq",
+     "mmseqs2_iterative",
+     "hhblits",
+     "foldseek",
+     "prostt5"
+    ],
+    "finding": "Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.",
+    "number": "median 5 to 21 residues early; 45% to 60% more than 100 residues early",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 146",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
+      "quote": "Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+     },
+     {
+      "source": "PR 3, comment 6193138553",
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553",
+      "quote": "45% to 60% of aligner calls start more than 100 residues early, not \"most\""
+     }
+    ],
+    "run": "`make leaderboard-pileup` and the region pile-up page (Figure 4)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "39d81ec9",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec9"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 146,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146"
+     },
+     {
+      "repo": "seanome/protein-function-annotation-leaderboard",
+      "number": 3,
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3"
+     }
+    ],
+    "what_to_do": "Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.",
+    "date": "2026-10-15",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "kmerseek",
+    "tool_name": "kmerseek",
+    "file": "failure_modes/kmerseek.yaml",
+    "id": "index-merges-equal-kmer-sets",
+    "shown_on_cards": [
+     "kmerseek"
+    ],
+    "finding": "kmerseek 0.4.0 keys each index entry by its k-mer set, so two different sequences with the same k-mer set become one entry and the second is lost. In a regions-index pilot, 6 of 99_232 rows reported residues that are not at the target's own coordinates; the PR traces this to the key but has not confirmed it for each of the 6. In an index of 125 ribonucleases built on a later branch with the same key, 31 are missing under cys2 and 7 under cys_hp3.",
+    "number": "6 of 99_232 rows; 31 of the 125 ribonucleases",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/kmerseek PR 141",
+      "url": "https://github.com/seanome/kmerseek/pull/141",
+      "quote": "In the 2024-kmerseek-analysis regions-index pilot (kmerseek v0.4.0, protein20, k=5), 6 of 99_232 rows had a `target_subseq` that is not `target[target_start:target_end]`."
+     },
+     {
+      "source": "seanome/kmerseek PR 141",
+      "url": "https://github.com/seanome/kmerseek/pull/141",
+      "quote": "Two different sequences with the same k-mer set get the same sum. So the second entry's hits came out with the first entry's coordinates and residues."
+     },
+     {
+      "source": "seanome/kmerseek PR 141",
+      "url": "https://github.com/seanome/kmerseek/pull/141",
+      "quote": "Not done: rebuilding the pilot index and rechecking the 6 rows. The two rows that are not anywhere in the target fit this cause, but I have not confirmed which earlier entry each of the 6 targets was merged into."
+     },
+     {
+      "source": "seanome/kmerseek PR 148",
+      "url": "https://github.com/seanome/kmerseek/pull/148",
+      "quote": "An index keys each entry by its k-mer set, so two sequences with equal sets collapse into one entry and only the first is stored."
+     },
+     {
+      "source": "seanome/kmerseek PR 148",
+      "url": "https://github.com/seanome/kmerseek/pull/148",
+      "quote": "That is why 31 of the 125 ribonucleases are absent under `cys2` and 7 under `cys_hp3`."
+     }
+    ],
+    "run": "the regions-index pilot (kmerseek v0.4.0, protein20, k=5), and the 125 test ribonucleases searched with topi ribonuclease (P00659)",
+    "commit": {
+     "repo": "seanome/kmerseek",
+     "sha": "d3046f8",
+     "url": "https://github.com/seanome/kmerseek/commit/d3046f8"
+    },
+    "pr": [
+     {
+      "repo": "seanome/kmerseek",
+      "number": 141,
+      "url": "https://github.com/seanome/kmerseek/pull/141"
+     },
+     {
+      "repo": "seanome/kmerseek",
+      "number": 148,
+      "url": "https://github.com/seanome/kmerseek/pull/148"
+     }
+    ],
+    "what_to_do": "Rebuild every 0.4.0 index once kmerseek PR 141 is merged; it keys each entry by its sequence. Until then, a recall number from a 0.4.0 index is measured against a reference that may be missing targets.",
+    "date": "2026-10-10",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "kmerseek",
+    "tool_name": "kmerseek",
+    "file": "failure_modes/kmerseek.yaml",
+    "id": "poisson-score-ceiling",
+    "shown_on_cards": [
+     "kmerseek"
+    ],
+    "finding": "The exact Poisson score (`region_poisson_score`) stops at 307.65, where the p-value underflows. In 102 of 107 exact settings, decoy pairs reach that ceiling, so the decoy-matched cutoff sits above it and those settings find nothing.",
+    "number": "307.65",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6169347124",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6169347124",
+      "quote": "`region_poisson_score` stops at 307.65, which is -log10 of the smallest normal double: the Poisson p-value underflows. In 102 of 107 exact settings, at least two tune decoy-family pairs reach that ceiling. The matched cutoff then sits just above it, and those settings find nothing at all."
+     },
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6170231005",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6170231005",
+      "quote": "b215e87 scores the exact arm on `region_tfidf` (Olga, 2026-10-14; recorded in nb 280's first cell)."
+     }
+    ],
+    "run": "the time-split pilot's tune half, 186 settings (notebook 280)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "f918447",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/f918447"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 121,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121"
+     }
+    ],
+    "what_to_do": "Compute the p-value in log space inside kmerseek. Until then, score exact settings on `region_tfidf`, as notebook 280 now does.",
+    "date": "2026-10-14",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "mmseqs2_iterative",
+    "tool_name": "MMseqs2, three rounds",
+    "file": "failure_modes/mmseqs2_iterative.yaml",
+    "id": "profile-drift-decoy-hits",
+    "shown_on_cards": [
+     "mmseqs2_iterative"
+    ],
+    "finding": "Three rounds of profile search gave dipeptide-shuffled decoy proteins hits as strong as E 1e-22. One round gave them none below E 0.026. So with three rounds, a cutoff matched to decoys is set by the profile's own drift toward a family.",
+    "number": "E 1e-22 (three rounds) vs E 0.026 (one round)",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6155881035",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6155881035",
+      "quote": "The 3-round profile search gave dipeptide-shuffled decoys hits down to E 1e-22, and one round gives none below E 0.026."
+     }
+    ],
+    "run": "`make mmseqs-one-round`, Slurm job 47690191, on the time-split pilot's tune half; tables in `pilot_partial_2026-10-13/mmseqs_one_round/`",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "3a12009",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/3a12009"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 121,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121"
+     }
+    ],
+    "what_to_do": "Run one round (`--num-iterations 1`) when a cutoff is matched to decoys, or set the cutoff separately for each number of rounds.",
+    "date": "2026-10-13",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "pfam_truth",
+    "tool_name": "Pfam truth set",
+    "file": "failure_modes/pfam_truth.yaml",
+    "id": "domains-past-protein-end",
+    "shown_on_cards": [],
+    "finding": "9 Pfam truth domains lie partly or wholly past the end of their protein's QfO sequence, for example P15692 PF14554 342–395 on a 232 aa protein. The Pfam coordinates come from a different version of these sequences.",
+    "number": "9",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 146",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
+      "quote": "Found: 9 Pfam truth domains lie partly or wholly past the end of their protein's QfO sequence, for example P15692 PF14554 342–395 on a 232 aa protein. The Pfam coordinates come from a different version of these sequences."
+     }
+    ],
+    "run": "`make leaderboard-pileup`, the pile-up tables",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "39d81ec9",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec9"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 146,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146"
+     }
+    ],
+    "what_to_do": "Map Pfam coordinates onto the sequence version the tools searched, or leave those domains out of scoring. The pile-up figure draws residues past a protein's end grey.",
+    "date": "2026-10-15",
+    "status": "open",
+    "fixed": false
+   }
+  ]
+ }
+}

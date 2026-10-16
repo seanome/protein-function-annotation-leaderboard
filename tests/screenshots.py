@@ -22,6 +22,7 @@ PAGES = {
     "5_region_pileup": "pileup.html",
     "6_methods": "methods.html",
     "7_claims": "claims.html",
+    "7b_failure_modes": "failure-modes.html",
     "8_coverage": "coverage.html",
 }
 EXTRA = {

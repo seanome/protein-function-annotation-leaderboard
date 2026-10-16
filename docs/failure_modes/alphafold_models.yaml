@@ -1,0 +1,29 @@
+# Known failures in reading AlphaFold models (pLDDT). No tool card shows these; the
+# failure-modes page does.
+# Each quote must match its source character for character: scripts/failure_modes.py --check.
+# Schema: failure_modes/schema.json.
+
+tool: alphafold_models
+name: AlphaFold models (pLDDT)
+updated: "2026-10-16"
+
+entries:
+  - id: plddt-other-sequence-version
+    finding: >-
+      For 32 proteins, pLDDT came from AlphaFold models of a different sequence version.
+      The pile-up page now leaves pLDDT empty for those proteins, 196 regions in all.
+    number: "32"
+    evidence:
+      - source: {kind: pr_comment, repo: seanome/protein-function-annotation-leaderboard, pr: 3, comment_id: 6193138553}
+        quote: >-
+          pLDDT came from AlphaFold models of a different sequence version for 32 proteins,
+          and is now null there (196 regions without pLDDT).
+    run: the region pile-up page's review
+    commit: {repo: seanome/protein-function-annotation-leaderboard, sha: 65bb7e0}
+    pr:
+      - {repo: seanome/protein-function-annotation-leaderboard, number: 3}
+    what_to_do: >-
+      Check that a model's sequence equals the searched sequence before reading pLDDT from
+      it.
+    date: "2026-10-15"
+    status: fixed in site commit 65bb7e0
