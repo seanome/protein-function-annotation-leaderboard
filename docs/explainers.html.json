@@ -1,0 +1,410 @@
+{
+ "page": "explainers.html",
+ "title": "How the scores work",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T13:44:05Z",
+  "sha256": {
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "How the scores work"
+  },
+  {
+   "tag": "p",
+   "text": "The leaderboard ranks tools by three scores and one cost. Each section below works one of them through on a made-up protein that you can change. Every number in Figures 1 to 4 is computed in your browser from that made-up example, not from the benchmark."
+  },
+  {
+   "tag": "h2",
+   "text": "The made-up example"
+  },
+  {
+   "tag": "p",
+   "text": "Protein A is 400 residues (aa) long and has three true domains: the known annotations a tool should find. A tool searched it and made seven calls. A call is a region the tool says carries a domain of a given family, copied from a protein of the relative it searched. Each call has the tool's score: higher means the tool is more sure. The family names are only labels."
+  },
+  {
+   "tag": "p",
+   "text": "A call is correct when it names the family of a true domain and overlaps that domain with an IoU of at least 0.5 (Figure 3 shows IoU). Each true domain can be found once. If two calls find the same domain, the higher-scoring one is correct and the other counts as wrong, as on the leaderboard."
+  },
+  {
+   "tag": "p",
+   "text": "In this example every domain can be found in the relative, and every call lies on an annotated part of the protein. So the small differences in what Fmax and AUPRC count (see Methods) do not arise here."
+  },
+  {
+   "tag": "h2",
+   "text": "Fmax: the best single score cutoff"
+  },
+  {
+   "tag": "p",
+   "text": "To use a tool's calls you pick a score cutoff: you keep every call scoring at least that much and drop the rest. At a cutoff, precision is the share of kept calls that are correct. Recall is the share of true domains that a kept, correct call found. A high cutoff keeps few calls, mostly correct; a low cutoff finds more domains but keeps more wrong calls. F combines the two into one number, high only when both are high:"
+  },
+  {
+   "tag": "p",
+   "text": "\\[F = \\frac{2 \\times \\text{precision} \\times \\text{recall}}{\\text{precision} + \\text{recall}}\\]"
+  },
+  {
+   "tag": "p",
+   "text": "Fmax is the highest F over all cutoffs: the score of the tool at its best single cutoff. Move the slider in Figure 1 to try each cutoff."
+  },
+  {
+   "tag": "figcaption",
+   "text": "made-up exampleFigure 1. Fmax on protein A. Top: the protein as a line with its three true domains as boxes. Each call is a bar below it, at the residues it covers, labelled with its family and score. Bottom: F at each cutoff. Move the cutoff and read off which calls are kept and what F they give; the ring marks the highest F, which is the Fmax."
+  },
+  {
+   "tag": "p",
+   "text": "Kept: calls, of them correct. Precision = correct ÷ kept = . Recall = domains found ÷ true domains = ÷ = . F = .Highest F over all cutoffs (Fmax): , for any cutoff in ."
+  },
+  {
+   "tag": "p",
+   "text": "The leaderboard has many proteins, not one. At each cutoff it works out precision and recall for each protein, then averages them over proteins; F comes from the two averages. This is the protein-by-protein Fmax of the CAFA function-prediction challenge. Precision is averaged over the proteins with at least one call kept; recall over every protein with a true annotation. The true instances (n) on the leaderboard are those true annotations, the denominator of recall. The leaderboard tries 101 cutoffs, evenly spaced through the tool's own scores; here every whole-number cutoff from 0 to 100 is tried."
+  },
+  {
+   "tag": "h2",
+   "text": "AUPRC: every cutoff at once"
+  },
+  {
+   "tag": "p",
+   "text": "Fmax keeps one cutoff. AUPRC, the area under the precision-recall curve, looks at every cutoff. Put every call in one list, best score first. Take the calls one at a time; after each, write down the precision and recall so far. Each call that finds a new domain adds a strip of area: its width is the recall gained and its height is the precision at that point."
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\text{AUPRC} = \\sum_k (R_k - R_{k-1})\\,P_k\\]"
+  },
+  {
+   "tag": "p",
+   "text": "Here \\(P_k\\) and \\(R_k\\) are the precision and recall after the \\(k\\)-th call of the list. A wrong call adds no area itself, but it lowers the precision, and so the height of every strip after it. AUPRC runs from 0 to 1, and higher is better."
+  },
+  {
+   "tag": "figcaption",
+   "text": "made-up exampleFigure 2. The precision-recall curve of protein A's calls, and what happens when protein B is added. Each point is one call, taken in score order; its position is the precision and recall after taking it. The shaded strips add up to the AUPRC. Lower the cutoff to add calls one by one, and switch protein B on to see Fmax and AUPRC move in opposite directions."
+  },
+  {
+   "tag": "p",
+   "text": "Area of the calls taken so far: . AUPRC, with every call taken: . Fmax of the same proteins: ."
+  },
+  {
+   "tag": "p",
+   "text": "The list behind the curve, best score first. Grey rows score below the cutoff."
+  },
+  {
+   "tag": "p",
+   "text": "Protein B has five Ig domains, and its five calls are all correct, but they score 45 to 60. Fmax averages protein by protein, so protein B counts as one protein of two, whatever its number of domains. On its own protein B is perfect, so Fmax goes up. AUPRC pools every call of every protein into one list. Protein B's domains are five of the eight true domains. In the list its calls come after one or two of protein A's wrong calls (scores 70 and 55), so AUPRC goes down. Use Fmax when you will keep every call above one cutoff. Use AUPRC when you will rank calls and read down the list."
+  },
+  {
+   "tag": "h2",
+   "text": "Median IoU: are the ends in the right place?"
+  },
+  {
+   "tag": "p",
+   "text": "IoU (intersection over union) is the number of residues the call and the true domain share, divided by the number of residues covered by either. It is 1 when the call starts and ends where the domain does, and 0 when they do not overlap. A call needs an IoU of 0.5 or more to be correct."
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\text{IoU} = \\frac{|\\text{call} \\cap \\text{true domain}|}{|\\text{call} \\cup \\text{true domain}|}\\]"
+  },
+  {
+   "tag": "figcaption",
+   "text": "made-up exampleFigure 3. IoU of one call with one true domain. Top: a 200-residue protein with one true domain, and the call below it; the brackets underneath show the shared residues and the residues covered by either. It starts at the example on the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU of each correct call of protein A in Figure 1, with your call added when it is correct; the dashed line is their median."
+  },
+  {
+   "tag": "p",
+   "text": "IoU = shared ÷ covered by either = ÷ = : ."
+  },
+  {
+   "tag": "p",
+   "text": "Median IoU of the correct calls: ."
+  },
+  {
+   "tag": "p",
+   "text": "Median IoU on the leaderboard is the middle IoU of all of a tool's correct calls. Half of the correct calls match their domain at least that well. Since a correct call has an IoU of at least 0.5, the median runs from 0.5 to 1. Single-residue annotations, such as an active site, are left out: an IoU against one residue says nothing about where the ends are."
+  },
+  {
+   "tag": "h2",
+   "text": "Raw or dedup: one domain, many calls"
+  },
+  {
+   "tag": "p",
+   "text": "A tool often finds the same domain through several proteins of the relative, and reports one call for each. Raw keeps every call: the first copy can be correct, and every other copy counts as wrong. Dedup merges calls of the same family on the same protein that overlap each other with an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by side barely overlap, so both are kept."
+  },
+  {
+   "tag": "figcaption",
+   "text": "made-up exampleFigure 4. Protein A's seven calls, raw and after dedup. Switch between the two: dedup merges the two lower-scoring PH calls into the PH call scoring 95, and the table shows how the scores change."
+  },
+  {
+   "tag": "p",
+   "text": "Here both merged calls were wrong copies, so recall does not change, and precision, Fmax and AUPRC go up. Dedup can also lower a score: when the higher-scoring call misses the domain's ends and a lower-scoring copy matches them, dedup keeps the one that misses. Comparing raw with dedup separates finding a domain from reporting it many times."
+  },
+  {
+   "tag": "h2",
+   "text": "Cost: core-hours, GPU-hours and the price of an hour"
+  },
+  {
+   "tag": "p",
+   "text": "Core-hours are the cores a search reserved multiplied by its wall time, so a task that sat partly idle still counts all its cores. They come from the run's own task records on Stanford's Sherlock cluster, so they are marked measured. Numbers a tool's submitter gives, on hardware they name, would be marked reported (CPU-h reported); none have been submitted yet. The leaderboard divides the search's core-hours by the number of relatives searched and scales them to 1,000 human proteins (queries). GPU-hours are the same for GPU time; no search here used a GPU. Peak RAM is the largest memory any of the search's tasks held, in GB; it is not priced."
+  },
+  {
+   "tag": "p",
+   "text": "The estimated cost, cost_usd_est, puts a price on each hour:"
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\begin{aligned}\\text{cost\\_usd\\_est} &= \\text{core-hours} \\times r_\\text{cpu}\\\\ &+ \\text{GPU-hours} \\times r_\\text{gpu}\\end{aligned}\\]"
+  },
+  {
+   "tag": "p",
+   "text": "per 1,000 queries, where \\(r_\\text{cpu}\\) is the price of one CPU-hour and \\(r_\\text{gpu}\\) of one GPU-hour, in US dollars. A core-hour is priced as one CPU-hour."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 5. The cost formula with your own numbers. It starts at phmmer's measured core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any box to see the cost change."
+  },
+  {
+   "tag": "p",
+   "text": "cost_usd_est = = per 1,000 queries."
+  },
+  {
+   "tag": "p",
+   "text": "The made-up example is also in this page's JSON copy. Definitions of every score as the benchmark computes them, with a worked example from the real data, are on Methods."
+  }
+ ],
+ "data": {
+  "made_up_example": {
+   "note": "A made-up example for explaining the scores. Not benchmark data.",
+   "proteins": {
+    "A": {
+     "name": "protein A",
+     "short": "A",
+     "length": 400,
+     "true": [
+      {
+       "family": "PH",
+       "start": 20,
+       "end": 120
+      },
+      {
+       "family": "SH2",
+       "start": 150,
+       "end": 230
+      },
+      {
+       "family": "SH3",
+       "start": 280,
+       "end": 340
+      }
+     ],
+     "calls": [
+      {
+       "id": "a1",
+       "family": "PH",
+       "start": 25,
+       "end": 118,
+       "score": 95
+      },
+      {
+       "id": "a2",
+       "family": "SH2",
+       "start": 155,
+       "end": 228,
+       "score": 80
+      },
+      {
+       "id": "a3",
+       "family": "PH",
+       "start": 30,
+       "end": 115,
+       "score": 70
+      },
+      {
+       "id": "a4",
+       "family": "PDZ",
+       "start": 160,
+       "end": 225,
+       "score": 55
+      },
+      {
+       "id": "a5",
+       "family": "SH3",
+       "start": 285,
+       "end": 338,
+       "score": 40
+      },
+      {
+       "id": "a6",
+       "family": "SH3",
+       "start": 200,
+       "end": 260,
+       "score": 25
+      },
+      {
+       "id": "a7",
+       "family": "PH",
+       "start": 22,
+       "end": 120,
+       "score": 15
+      }
+     ]
+    },
+    "B": {
+     "name": "protein B",
+     "short": "B",
+     "length": 600,
+     "true": [
+      {
+       "family": "Ig",
+       "start": 20,
+       "end": 110
+      },
+      {
+       "family": "Ig",
+       "start": 130,
+       "end": 220
+      },
+      {
+       "family": "Ig",
+       "start": 240,
+       "end": 330
+      },
+      {
+       "family": "Ig",
+       "start": 350,
+       "end": 440
+      },
+      {
+       "family": "Ig",
+       "start": 460,
+       "end": 550
+      }
+     ],
+     "calls": [
+      {
+       "id": "b1",
+       "family": "Ig",
+       "start": 22,
+       "end": 108,
+       "score": 60
+      },
+      {
+       "id": "b2",
+       "family": "Ig",
+       "start": 132,
+       "end": 218,
+       "score": 58
+      },
+      {
+       "id": "b3",
+       "family": "Ig",
+       "start": 242,
+       "end": 328,
+       "score": 52
+      },
+      {
+       "id": "b4",
+       "family": "Ig",
+       "start": 352,
+       "end": 438,
+       "score": 50
+      },
+      {
+       "id": "b5",
+       "family": "Ig",
+       "start": 462,
+       "end": 548,
+       "score": 45
+      }
+     ]
+    }
+   },
+   "iou": {
+    "length": 200,
+    "true": {
+     "start": 10,
+     "end": 109
+    },
+    "call": {
+     "start": 30,
+     "end": 129
+    }
+   }
+  },
+  "terms": {
+   "fmax": {
+    "name": "Fmax",
+    "explainer": "explainers.html#fmax",
+    "definition": "The best balance of precision and recall at any one score cutoff, with both worked out protein by protein and averaged. Precision is the share of calls that are correct; recall is the share of true annotations found. 0 to 1, higher is better."
+   },
+   "auprc": {
+    "name": "AUPRC",
+    "explainer": "explainers.html#auprc",
+    "definition": "Area under the precision-recall curve: precision summed over every score cutoff, weighted by the recall gained there. It pools every call of every protein into one list. 0 to 1, higher is better."
+   },
+   "iou": {
+    "name": "Median IoU",
+    "explainer": "explainers.html#iou",
+    "definition": "How well a correct call's ends match the true region. IoU is the residues the call and the region share divided by the residues either covers: 1 is a perfect match. The median is the middle IoU over all correct calls."
+   },
+   "n": {
+    "name": "True instances",
+    "explainer": "explainers.html#fmax",
+    "definition": "The number of known annotations on the human proteins in this slice, whether or not the relative could supply them. Recall in Fmax is counted out of these."
+   },
+   "cpu": {
+    "name": "Core-hours per 1,000 queries",
+    "explainer": "explainers.html#cost",
+    "definition": "Cores the search reserved × its wall time, for the search alone, divided by the number of relatives searched and scaled to 1,000 human proteins. A task that sat partly idle still counts all its cores. Less is cheaper."
+   },
+   "cpu_rep": {
+    "name": "CPU-h reported",
+    "explainer": "explainers.html#cost",
+    "definition": "CPU-hours per 1,000 queries as reported by a tool's submitter, on hardware they name. None have been submitted yet."
+   },
+   "ram": {
+    "name": "Peak RAM",
+    "explainer": "explainers.html#cost",
+    "definition": "The largest resident memory, in GB, of any of the search's tasks, from the run's task records. Memory is not priced in the cost."
+   },
+   "gpu": {
+    "name": "GPU-hours",
+    "explainer": "explainers.html#cost",
+    "definition": "GPU time the search used, per 1,000 queries. No search here used a GPU. ProstT5 used one to predict 3Di shape letters while building its databases; that time is on its card."
+   },
+   "cost": {
+    "name": "cost_usd_est",
+    "explainer": "explainers.html#cost",
+    "definition": "Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand rates."
+   },
+   "calls": {
+    "name": "Raw or dedup",
+    "explainer": "explainers.html#dedup",
+    "definition": "Raw keeps every call a tool makes. Dedup merges calls of the same family on the same protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so one domain hit by many of the relative's proteins counts once."
+   },
+   "measured": {
+    "name": "measured",
+    "explainer": "explainers.html#cost",
+    "definition": "Measured on Stanford's Sherlock cluster, from the run's own task records."
+   },
+   "reported": {
+    "name": "reported",
+    "explainer": "explainers.html#cost",
+    "definition": "Reported by the tool's submitter, on the hardware they name. None yet."
+   }
+  }
+ }
+}
