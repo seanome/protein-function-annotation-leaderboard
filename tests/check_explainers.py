@@ -310,21 +310,22 @@ def main() -> int:
         page.click("button.term[aria-controls='tip-cost-th']")
         if page.evaluate("window.__lb.state().sort") != before:
             fails.append("clicking the ? of the cost column sorted the table")
-        # Every definition link on every page with definitions points at an explainer anchor.
-        anchors = None
+        # Every definition link on every page with definitions points at an anchor that exists
+        # on the page it names (explainers.html, or methods.html for weak hits).
+        anchors: dict = {}
         for pg in ("index.html", "cost.html"):
             page.goto(base + pg)
             page.wait_for_load_state("networkidle")
             links = page.eval_on_selector_all(".term-tip a", "es => es.map(e => e.getAttribute('href'))")
             if not links:
                 fails.append(f"{pg}: no definitions found")
-            if anchors is None:
-                page.goto(base + "explainers.html")
-                anchors = set(page.eval_on_selector_all("[id]", "es => es.map(e => e.id)"))
-                page.goto(base + pg)
+            for target in sorted({h.split("#")[0] for h in links} - set(anchors)):
+                page.goto(base + target)
+                anchors[target] = set(page.eval_on_selector_all("[id]", "es => es.map(e => e.id)"))
             for h in links:
-                if h.split("#")[1] not in anchors:
-                    fails.append(f"{pg}: definition link {h} has no anchor on explainers.html")
+                target, frag = h.split("#")
+                if frag not in anchors[target]:
+                    fails.append(f"{pg}: definition link {h} has no anchor on {target}")
         browser.close()
     httpd.shutdown()
 

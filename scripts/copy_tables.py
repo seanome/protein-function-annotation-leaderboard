@@ -16,6 +16,8 @@ from pathlib import Path
 FILES = ["results.parquet", "compute.parquet", "coverage.md", "provenance.json"]
 OPTIONAL = ["inventory.md"]
 PILEUP = ["pileup/regions.parquet", "pileup/calls.parquet", "pileup/provenance.json"]
+# Weak-hit accuracy on the dark set (seanome/2024-kmerseek-analysis, weak-hits/summarize.py)
+WEAK = ["weak_hits/weak_hits.parquet", "weak_hits/provenance.json"]
 
 
 def gh(*args: str, raw: bool = False) -> bytes:
@@ -43,6 +45,8 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=Path("data"))
     ap.add_argument("--pileup-commit", default=None,
                     help="commit holding results/leaderboard/pileup/, when it is not --commit")
+    ap.add_argument("--weak-hits-commit", default=None,
+                    help="commit holding results/leaderboard/weak_hits/, when it is not --commit")
     a = ap.parse_args()
 
     commit = json.loads(gh(f"repos/{a.repo}/commits/{a.commit}"))
@@ -82,6 +86,23 @@ def main() -> None:
         want = json.loads((a.out / "pileup/provenance.json").read_text())["outputs"]
         check_listed(want, checksums, "pileup/provenance.json", prefix="pileup/")
 
+    weak_sha = json.loads(gh(f"repos/{a.repo}/commits/{a.weak_hits_commit}"))["sha"] if a.weak_hits_commit else sha
+    for name in WEAK:
+        try:
+            body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={weak_sha}", raw=True)
+        except subprocess.CalledProcessError:
+            (a.out / name).unlink(missing_ok=True)
+            continue
+        (a.out / name).parent.mkdir(parents=True, exist_ok=True)
+        (a.out / name).write_bytes(body)
+        checksums[name] = hashlib.sha256(body).hexdigest()
+    got_weak = [n for n in WEAK if n in checksums]
+    if got_weak and len(got_weak) != len(WEAK):
+        raise SystemExit(f"{weak_sha[:8]} has only some of the weak-hit files ({got_weak})")
+    if "weak_hits/provenance.json" in checksums:
+        want = json.loads((a.out / "weak_hits/provenance.json").read_text())["outputs"]
+        check_listed(want, checksums, "weak_hits/provenance.json", prefix="weak_hits/")
+
     # The source's own provenance.json lists the checksum of each table it wrote.
     expected = json.loads((a.out / "provenance.json").read_text())["outputs"]
     check_listed(expected, checksums, "provenance.json")
@@ -94,6 +115,7 @@ def main() -> None:
         "copied_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sha256": checksums,
         "pileup_commit": pileup_sha if "pileup/regions.parquet" in checksums else None,
+        "weak_hits_commit": weak_sha if "weak_hits/weak_hits.parquet" in checksums else None,
     }
     (a.out / "SOURCE.json").write_text(json.dumps(source, indent=1) + "\n")
     print(f"copied {len(FILES)} files from {a.repo}@{sha[:8]}")

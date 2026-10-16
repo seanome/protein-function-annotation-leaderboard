@@ -6,7 +6,7 @@
   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
   "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:44:05Z",
+  "copied_at": "2026-10-16T19:21:29Z",
   "sha256": {
    "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -15,9 +15,12 @@
    "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
-   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+   "weak_hits/weak_hits.parquet": "cec1343e6d18f9dc35eb732e606828462899193ccf10249e2fd15a38b8c7a548",
+   "weak_hits/provenance.json": "2a6293b56b27819a7e934bd62d35b17f9efe97bfe9f073f361996db2fdd6c699"
   },
-  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "weak_hits_commit": "cc33016e578f4cf2440f249b10992670347978cb"
  },
  "text": [
   {
@@ -87,6 +90,14 @@
   {
    "tag": "p",
    "text": "Swiss-Prot features, raw calls, zebrafish, setting shape letters from sequence: best feature type active site, Fmax 0.278 (n = 176); worst membrane-spanning, Fmax 0.000 (n = 1,124)."
+  },
+  {
+   "tag": "h2",
+   "text": "Can its weak hits be trusted?"
+  },
+  {
+   "tag": "p",
+   "text": "Not run on the dark set. The weak-hit test so far covers phmmer, jackhmmer, MMseqs2 (3 rounds) and kmerseek (how it was measured)."
   },
   {
    "tag": "figcaption",

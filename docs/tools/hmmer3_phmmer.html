@@ -45,7 +45,91 @@
 <li>regions 16–30 aa long: Fmax 0.042 (n = 271); best other: kmerseek, wwmj5, k = 11, 0.330.</li>
 <li>regions 31–60 aa long: Fmax 0.095 (n = 420); best other: kmerseek, gbmr4, k = 21, 0.232.</li>
 </ul>
-<p>Swiss-Prot features, raw calls, zebrafish, setting default options: best feature type domain, Fmax 0.304 (n = 1,107); worst short motif, Fmax 0.000 (n = 190).</p><figure class="cardfig">
+<p>Swiss-Prot features, raw calls, zebrafish, setting default options: best feature type domain, Fmax 0.304 (n = 1,107); worst short motif, Fmax 0.000 (n = 190).</p>
+<h2 id="weak-hits">Can its weak hits be trusted?</h2>
+<p>When this tool's best hit on a protein is weak, is it right? It was measured on the dark set of four species, each searched against Swiss-Prot without its own clade. Dark proteins have no phmmer, jackhmmer or MMseqs2 hit at E ≤ 1; placed proteins are the rest. A best hit is right when the target shares a Pfam family with the query and the hit covers a Pfam domain of that family on the query. n counts the best hits whose target has any Pfam family. Test half of the proteins only. Grey: fewer than 30 judged hits (<a href="../methods.html#weak-hits">how it was measured</a>).</p>
+<p><strong>Dark proteins</strong>, best hit right:</p>
+<table>
+<thead>
+<tr>
+<th>species</th>
+<th style="text-align: right;">E ≤ 0.001</th>
+<th style="text-align: right;">0.001 &lt; E ≤ 1</th>
+<th style="text-align: right;">1 &lt; E ≤ 10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>human</td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;">2.2% (9 of 401; 95% CI 1.2–4.2%)</td>
+</tr>
+<tr>
+<td>C. elegans</td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;">1.8% (13 of 729; 95% CI 1.0–3.0%)</td>
+</tr>
+<tr>
+<td>S. cerevisiae</td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;">3.0% (4 of 132; 95% CI 1.2–7.5%)</td>
+</tr>
+<tr>
+<td>B. burgdorferi</td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;"><span class="few">no judged hits (n = 0)</span></td>
+<td style="text-align: right;">0.0% (0 of 65; 95% CI 0.0–5.6%)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Placed proteins</strong>, best hit right:</p>
+<table>
+<thead>
+<tr>
+<th>species</th>
+<th style="text-align: right;">E ≤ 0.001</th>
+<th style="text-align: right;">0.001 &lt; E ≤ 1</th>
+<th style="text-align: right;">1 &lt; E ≤ 10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>human</td>
+<td style="text-align: right;">96.4% (8,110 of 8,417; 95% CI 95.9–96.7%)</td>
+<td style="text-align: right;">19.6% (118 of 601; 95% CI 16.7–23.0%)</td>
+<td style="text-align: right;"><span class="few">4.8% (1 of 21; 95% CI 0.8–22.7%)</span></td>
+</tr>
+<tr>
+<td>C. elegans</td>
+<td style="text-align: right;">94.5% (4,616 of 4,884; 95% CI 93.8–95.1%)</td>
+<td style="text-align: right;">14.9% (151 of 1,011; 95% CI 12.9–17.3%)</td>
+<td style="text-align: right;"><span class="few">3.4% (1 of 29; 95% CI 0.6–17.2%)</span></td>
+</tr>
+<tr>
+<td>S. cerevisiae</td>
+<td style="text-align: right;">95.8% (2,097 of 2,189; 95% CI 94.9–96.6%)</td>
+<td style="text-align: right;">17.6% (36 of 204; 95% CI 13.0–23.5%)</td>
+<td style="text-align: right;"><span class="few">0.0% (0 of 10; 95% CI 0.0–27.8%)</span></td>
+</tr>
+<tr>
+<td>B. burgdorferi</td>
+<td style="text-align: right;">98.1% (313 of 319; 95% CI 96.0–99.1%)</td>
+<td style="text-align: right;">4.6% (5 of 109; 95% CI 2.0–10.3%)</td>
+<td style="text-align: right;"><span class="few">0.0% (0 of 3; 95% CI 0.0–56.1%)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Setting in the dark-set run: phmmer, default options, E ≤ 10.</p>
+<p><a href="https://github.com/seanome/2024-kmerseek-analysis/pull/133">PR 133</a>'s looser test counts a shared Pfam family or clan anywhere on the two proteins. By that test, on dark proteins at E 1–10:</p>
+<ul>
+<li>human 4.0% (16 of 401)</li>
+<li>C. elegans 3.4% (25 of 729)</li>
+<li>S. cerevisiae 3.8% (5 of 132)</li>
+<li>B. burgdorferi 0.0% (0 of 65)</li>
+</ul><figure class="cardfig">
 <figcaption><b>Figure 2.</b> Where phmmer is ahead and behind: its Fmax on each subset of the
 proteins, against the best other tool on that subset (Pfam truth set, raw calls, zebrafish as the relative; its best setting,
 default options). Left out, under 30 true instances: 0–20%.</figcaption>
@@ -101,7 +185,7 @@ Building its databases for setting <code>default</code>: not measured (no task r
 <p><a href="index.html">All tool cards</a> · <a href="hmmer3_phmmer.md">this card as Markdown</a> · <a href="hmmer3_phmmer.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-16.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="hmmer3_phmmer.html.json">hmmer3_phmmer.html.json</a></p>
 </div></footer>
