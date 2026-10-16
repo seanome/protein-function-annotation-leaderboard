@@ -8,7 +8,7 @@ not reported by each author.
 
 ```mermaid
 flowchart LR
-  A["Your PR to seanome/2024-kmerseek-analysis:<br/>one Nextflow module,<br/>container pinned by sha256 digest"] --> B["Host review:<br/>make stub, hits format check"]
+  A["Your PR to seanome/2024-kmerseek-analysis:<br/>one Nextflow module,<br/>container pinned by sha256 digest"] --> B["Host review:<br/>digest resolves, hits format check"]
   B --> C["Host run on Sherlock:<br/>998 human queries x 15 relatives,<br/>Nextflow trace kept"]
   C --> D["Scoring: same truth sets and<br/>metrics as every tool"]
   D --> E["Rows in results.parquet,<br/>checked by validate_rows.py --submitted"]
@@ -32,7 +32,8 @@ flowchart LR
 
 ## What the host does
 
-- Reviews the module and runs `make stub` and the hits format check.
+- Reviews the module, checks that the digest resolves, and runs the hits format check
+  (`bin/check_tool_hits.py` in the analysis repository) on the mini query set.
 - Runs it on Stanford's Sherlock cluster against the 998 human queries and the 15 Quest for
   Orthologs relatives, with the same truth sets (Pfam-A, Pfam-N, Swiss-Prot features) as every
   other tool. The first memory and time request comes from the measured runs of the most
