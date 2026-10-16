@@ -88,6 +88,7 @@ def main() -> int:
             pg.fill(sel, val)
         pg.check('input[name="shown"][value="structure"]')
         pg.check("#tf-cc0")
+        pg.check("#tf-new")
         pg.click("button.tf-go")
         urls = pg.evaluate("window.__opened")
         browser.close()

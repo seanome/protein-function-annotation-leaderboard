@@ -30,9 +30,9 @@ submitter's ORCID iD.
 4. **What was shown matches the evidence.** "Binding" needs a binding experiment, "activity" an
    activity assay, "localisation" an experiment that moves or tracks the protein, "structure"
    a solved or tested structure.
-5. **The ORCID iD is valid** (the form and the build both check its last character) and the
-   submitter can be reached through it.
-6. **The submitter released the row under CC0**, by ticking the box.
+5. **The ORCID iD is valid**: the form and the build both check its last character.
+6. **The submitter ticked both boxes**: the region is released under CC0, and it comes from an
+   experiment rather than only from a database.
 
 ## Reject a row when any of these holds
 

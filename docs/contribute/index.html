@@ -31,13 +31,15 @@ your experiment. Tool authors send predictions; labs send regions they have test
 <h2 id="tools">Tool authors: send predictions</h2>
 <figure>
 <figcaption><b>Figure 1.</b> What happens to a tool submission, in order. No account on this
-site and nothing to install: a GitHub account is enough.</figcaption>
-<ol class="flow" aria-label="Steps of a tool submission"><li><span class="flow-n">1</span><b>Run your tool</b><span class="flow-d">on a published query set, on your own hardware</span></li><li><span class="flow-n">2</span><b>Open a pull request</b><span class="flow-d">predictions, timing log, tool card</span></li><li><span class="flow-n">3</span><b>Workflow scores it</b><span class="flow-d">the leaderboard's own scorer, against the truth sets</span></li><li><span class="flow-n">4</span><b>Rows posted</b><span class="flow-d">as a comment on the pull request, before merge</span></li><li><span class="flow-n">5</span><b>Merge</b><span class="flow-d">the folder stays in the repository and is scored again at every release</span></li></ol>
+site and nothing of ours to install: a GitHub account is enough.</figcaption>
+<ol class="flow" aria-label="Steps of a tool submission"><li><span class="flow-n">1</span><b>Run your tool</b><span class="flow-d">on a published query set, on your own hardware</span></li><li><span class="flow-n">2</span><b>Open a pull request</b><span class="flow-d">predictions, timing log, tool card</span></li><li><span class="flow-n">3</span><b>Workflow scores it</b><span class="flow-d">the leaderboard's own scorer, against the known regions of the query proteins</span></li><li><span class="flow-n">4</span><b>Rows posted</b><span class="flow-d">as a comment on the pull request, before merge</span></li><li><span class="flow-n">5</span><b>Merge</b><span class="flow-d">the folder stays in the repository and is scored again at every release</span></li></ol>
 </figure>
-<p>Run your tool on one of the fixed query sets in
+<p>A query set is a fixed list of query proteins whose known regions (Pfam domains and Swiss-Prot
+features) are the answers every tool is graded on. Run your tool on one of the query sets in
 <a href="https://github.com/seanome/protein-function-annotation-leaderboard/tree/main/data/query_sets"><span class="mono">data/query_sets/</span></a>, then open a
 pull request that adds one folder under <span class="mono">submissions/</span> with three files:
-the predictions, a timing log, and a short tool card. A workflow grades the predictions with
+the predictions, a timing log (how long each run took, on what hardware), and a short tool card
+(what the tool compares, its licence and command, shown on the site). A workflow grades the predictions with
 the same scorer that made every number on this site and posts the rows on the pull request.
 Cost numbers you send are shown as <em>reported</em>, with your hardware named, never as measured.
 <a href="https://github.com/seanome/protein-function-annotation-leaderboard/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> has the five steps and a worked example
@@ -46,12 +48,12 @@ the pull request and in the repository.</p>
 
 <h2 id="labs">Labs: send a region you have tested</h2>
 <figure>
-<figcaption><b>Figure 2.</b> What happens to a lab's row, in order.</figcaption>
-<ol class="flow" aria-label="Steps of a lab submission"><li><span class="flow-n">1</span><b>Fill in the form</b><span class="flow-d">one tested region of one protein</span></li><li><span class="flow-n">2</span><b>GitHub issue</b><span class="flow-d">you submit it on GitHub; it joins the curation queue</span></li><li><span class="flow-n">3</span><b>Curator decides</b><span class="flow-d">accepted or rejected, always with a reason</span></li><li><span class="flow-n">4</span><b>Truth table</b><span class="flow-d">accepted rows join truth_contributed, with your ORCID</span></li><li><span class="flow-n">5</span><b>Rescore</b><span class="flow-d">every tool is scored on them at the next release</span></li></ol>
+<figcaption><b>Figure 2.</b> What happens to a lab's submission (one region of one protein), in order.</figcaption>
+<ol class="flow" aria-label="Steps of a lab submission"><li><span class="flow-n">1</span><b>Fill in the form</b><span class="flow-d">one tested region of one protein</span></li><li><span class="flow-n">2</span><b>GitHub issue</b><span class="flow-d">you submit it on GitHub; it joins the curation queue</span></li><li><span class="flow-n">3</span><b>Curator decides</b><span class="flow-d">accepted or rejected, always with a reason</span></li><li><span class="flow-n">4</span><b>Table of tested regions</b><span class="flow-d">an accepted region is added, with your ORCID iD</span></li><li><span class="flow-n">5</span><b>Tools graded on it</b><span class="flow-d">at the next rebuild of the tables, if a query set holds the protein</span></li></ol>
 </figure>
 <p>If your lab has shown by experiment that a stretch of a protein binds something, carries an
 activity, sends the protein somewhere in the cell, or has a solved structure, that region is a
-test every tool can be graded on. <a href="truth/">The form</a> takes one region at a time. A
+test every tool can be graded on, once a query set holds the protein. <a href="truth/">The form</a> takes one region at a time. A
 curator checks it against the rules in
 <a href="https://github.com/seanome/protein-function-annotation-leaderboard/blob/main/docs/curation.md">docs/curation.md</a>; a row that only repeats an
 annotation already in a database is turned down, because the tools are already graded on those.</p>

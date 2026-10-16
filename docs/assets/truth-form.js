@@ -34,6 +34,7 @@
       citation: $("tf-cite").value.trim(),
       orcid: $("tf-orcid").value.trim().toUpperCase(),
       cc0: $("tf-cc0").checked,
+      newexp: $("tf-new").checked,
     };
   }
 
@@ -51,7 +52,8 @@
     if (!/^ECO:\d{7}$/.test(v.eco)) p.push("The evidence code must look like ECO:0000269.");
     if (!v.citation) p.push("Give a citation, or a note on unpublished work.");
     if (!orcidOk(v.orcid)) p.push("The ORCID iD is not valid; it looks like 0000-0002-1825-0097, and its last character is a check digit.");
-    if (!v.cc0) p.push("Tick the box about CC0 and database copies.");
+    if (!v.cc0) p.push("Tick the CC0 box.");
+    if (!v.newexp) p.push("Tick the box saying the region comes from an experiment.");
     return p;
   }
 
@@ -69,7 +71,7 @@
       ["ORCID iD", v.orcid],
     ];
     return sections.map(([h, x]) => `### ${h}\n\n${x}`).join("\n\n") +
-      "\n\n### Licence and database copies\n\n- [x] I release this row under CC0, and it is not only a copy of a database annotation\n";
+      "\n\n### Licence\n\n- [x] I release this region under CC0\n\n### Source\n\n- [x] It comes from an experiment, not only from a database annotation\n";
   }
 
   function title(v) {

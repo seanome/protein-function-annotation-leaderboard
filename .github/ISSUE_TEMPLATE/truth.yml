@@ -60,7 +60,7 @@ body:
     id: citation
     attributes:
       label: Citation or note
-      description: A DOI or PubMed ID, or a note on unpublished work (method, controls, who did it).
+      description: A DOI or PubMed ID, or a note on unpublished work (method, controls, who did it). Say what the region binds, what activity was measured, or where it sends the protein.
     validations:
       required: true
   - type: input
@@ -73,7 +73,14 @@ body:
   - type: checkboxes
     id: cc0
     attributes:
-      label: Licence and database copies
+      label: Licence
       options:
-        - label: I release this row under CC0, and it is not only a copy of a database annotation
+        - label: I release this region under CC0
+          required: true
+  - type: checkboxes
+    id: newexp
+    attributes:
+      label: Source
+      options:
+        - label: It comes from an experiment, not only from a database annotation
           required: true

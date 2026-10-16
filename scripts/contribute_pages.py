@@ -14,14 +14,14 @@ SHOWN = [
     ("binding", "Binding", "the region binds a molecule, ion or another protein"),
     ("activity", "Activity", "the region carries out a catalytic or other measured activity"),
     ("localisation", "Localisation", "the region sends the protein to a place in the cell"),
-    ("structure", "Structure", "the region's 3D structure was solved or tested"),
+    ("structure", "Structure", "a 3D structure of the region was solved"),
 ]
 
 # One step per box, read left to right (top to bottom on a phone). Used by Figure 1 on both pages.
 FLOW_TOOL = [
     ("1", "Run your tool", "on a published query set, on your own hardware"),
     ("2", "Open a pull request", "predictions, timing log, tool card"),
-    ("3", "Workflow scores it", "the leaderboard's own scorer, against the truth sets"),
+    ("3", "Workflow scores it", "the leaderboard's own scorer, against the known regions of the query proteins"),
     ("4", "Rows posted", "as a comment on the pull request, before merge"),
     ("5", "Merge", "the folder stays in the repository and is scored again at every release"),
 ]
@@ -29,8 +29,8 @@ FLOW_LAB = [
     ("1", "Fill in the form", "one tested region of one protein"),
     ("2", "GitHub issue", "you submit it on GitHub; it joins the curation queue"),
     ("3", "Curator decides", "accepted or rejected, always with a reason"),
-    ("4", "Truth table", "accepted rows join truth_contributed, with your ORCID"),
-    ("5", "Rescore", "every tool is scored on them at the next release"),
+    ("4", "Table of tested regions", "an accepted region is added, with your ORCID iD"),
+    ("5", "Tools graded on it", "at the next rebuild of the tables, if a query set holds the protein"),
 ]
 
 
@@ -51,13 +51,15 @@ your experiment. Tool authors send predictions; labs send regions they have test
 <h2 id="tools">Tool authors: send predictions</h2>
 <figure>
 <figcaption><b>Figure 1.</b> What happens to a tool submission, in order. No account on this
-site and nothing to install: a GitHub account is enough.</figcaption>
+site and nothing of ours to install: a GitHub account is enough.</figcaption>
 {flow(FLOW_TOOL, "Steps of a tool submission")}
 </figure>
-<p>Run your tool on one of the fixed query sets in
+<p>A query set is a fixed list of query proteins whose known regions (Pfam domains and Swiss-Prot
+features) are the answers every tool is graded on. Run your tool on one of the query sets in
 <a href="{gh}/tree/main/data/query_sets"><span class="mono">data/query_sets/</span></a>, then open a
 pull request that adds one folder under <span class="mono">submissions/</span> with three files:
-the predictions, a timing log, and a short tool card. A workflow grades the predictions with
+the predictions, a timing log (how long each run took, on what hardware), and a short tool card
+(what the tool compares, its licence and command, shown on the site). A workflow grades the predictions with
 the same scorer that made every number on this site and posts the rows on the pull request.
 Cost numbers you send are shown as <em>reported</em>, with your hardware named, never as measured.
 <a href="{gh}/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> has the five steps and a worked example
@@ -66,12 +68,12 @@ the pull request and in the repository.</p>
 
 <h2 id="labs">Labs: send a region you have tested</h2>
 <figure>
-<figcaption><b>Figure 2.</b> What happens to a lab's row, in order.</figcaption>
+<figcaption><b>Figure 2.</b> What happens to a lab's submission (one region of one protein), in order.</figcaption>
 {flow(FLOW_LAB, "Steps of a lab submission")}
 </figure>
 <p>If your lab has shown by experiment that a stretch of a protein binds something, carries an
 activity, sends the protein somewhere in the cell, or has a solved structure, that region is a
-test every tool can be graded on. <a href="truth/">The form</a> takes one region at a time. A
+test every tool can be graded on, once a query set holds the protein. <a href="truth/">The form</a> takes one region at a time. A
 curator checks it against the rules in
 <a href="{gh}/blob/main/docs/curation.md">docs/curation.md</a>; a row that only repeats an
 annotation already in a database is turned down, because the tools are already graded on those.</p>
@@ -88,8 +90,10 @@ def page_truth_form(layout, src) -> str:
     config = json.dumps({"repo": REPO, "label": ISSUE_LABEL})
     body = f"""<nav class="crumb" aria-label="Breadcrumb"><a href="../">Contribute</a> › Add a tested region</nav>
 <h1>Add a region your lab has tested</h1>
-<p class="lede">One protein region per form, with what your experiment showed about it. Your row
-goes to a public curation queue; once accepted, every tool on the leaderboard is graded on it.</p>
+<p class="lede">One protein region per form, with what your experiment showed about it. It goes to
+a public curation queue. Once accepted, every tool on the leaderboard is graded on it at the next
+rebuild of the tables, if the protein is in one of the query sets (the fixed lists of proteins the
+tools are run on); otherwise it is kept and counted for its organism until a query set includes it.</p>
 
 <figure>
 <figcaption><b>Figure 1.</b> Where your answers go, in order. Nothing leaves this page until you
@@ -106,6 +110,7 @@ That needs a free GitHub account, and the issue is public. The curator answers i
 
 <form id="truth-form" class="tf" novalidate>
 <fieldset><legend>Protein</legend>
+<p class="tf-hint">Give the UniProt accession, or, only if there is none, the sequence and the organism.</p>
 <label for="tf-acc">UniProt accession <span class="tf-hint">such as P01375</span></label>
 <input id="tf-acc" name="accession" autocomplete="off" spellcheck="false" inputmode="latin">
 <label for="tf-seq">Or the sequence, if the protein has no UniProt entry <span class="tf-hint">one-letter amino-acid code</span></label>
@@ -115,28 +120,29 @@ That needs a free GitHub account, and the issue is public. The curator answers i
 </fieldset>
 
 <fieldset><legend>Region</legend>
-<p class="tf-hint">Residue positions on that sequence, counting the first residue as 1. Both ends are part of the region.</p>
+<p class="tf-hint">Required. Residue positions on that sequence, counting the first residue as 1. Both ends are part of the region. If your experiment used another isoform or an older sequence, convert the positions to the UniProt sequence first.</p>
 <div class="tf-pair"><span><label for="tf-start">First residue</label>
 <input id="tf-start" name="start" type="number" min="1" step="1" required></span>
 <span><label for="tf-end">Last residue</label>
 <input id="tf-end" name="end" type="number" min="1" step="1" required></span></div>
 </fieldset>
 
-<fieldset><legend>What the experiment showed about this region</legend>
+<fieldset><legend>What the experiment showed about this region (required)</legend>
 {shown}
-<label for="tf-eco">Evidence code from the ECO ontology <span class="tf-hint">such as ECO:0000269, "experimental evidence used in manual assertion"; look one up at the
+<label for="tf-eco">Evidence code from the ECO ontology <span class="tf-hint">such as ECO:0000269, "experimental evidence used in manual assertion". It must be an experimental code: codes for sequence similarity, prediction or author statement are turned down. Look one up at the
 <a href="https://www.ebi.ac.uk/ols4/ontologies/eco">ECO browser</a></span></label>
 <input id="tf-eco" name="eco" autocomplete="off" spellcheck="false" placeholder="ECO:0000000" required>
-<label for="tf-cite">Citation or note <span class="tf-hint">a DOI or PubMed ID of the paper, or a note on unpublished work: method, controls, who did it</span></label>
+<label for="tf-cite">Citation or note <span class="tf-hint">a DOI or PubMed ID of the paper, or a note on unpublished work: method, controls, who did it. Say what the region binds, what activity was measured, or where in the cell it sends the protein</span></label>
 <textarea id="tf-cite" name="citation" rows="4" required></textarea>
 </fieldset>
 
 <fieldset><legend>You</legend>
 <label for="tf-orcid">Your ORCID iD <span class="tf-hint">such as 0000-0002-1825-0097; it goes into the table beside your row</span></label>
 <input id="tf-orcid" name="orcid" autocomplete="off" spellcheck="false" placeholder="0000-0000-0000-0000" required>
-<label class="tf-radio"><input type="checkbox" name="cc0" id="tf-cc0" required><span>I release this row under
-<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>, so anyone may reuse it, and it is not
-only a copy of an annotation already in UniProt, Pfam, InterPro or another database.</span></label>
+<label class="tf-radio"><input type="checkbox" name="cc0" id="tf-cc0" required><span>I release this region under
+<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>, so anyone may reuse it.</span></label>
+<label class="tf-radio"><input type="checkbox" name="newexp" id="tf-new" required><span>It comes from an
+experiment, not only from an annotation already in UniProt, Pfam, InterPro or another database.</span></label>
 </fieldset>
 
 <p id="tf-problems" class="tf-problems" role="alert" hidden></p>

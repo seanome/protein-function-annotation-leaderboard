@@ -25,14 +25,16 @@
 <main class="wrap" data-page="contribute">
 <nav class="crumb" aria-label="Breadcrumb"><a href="../">Contribute</a> › Add a tested region</nav>
 <h1>Add a region your lab has tested</h1>
-<p class="lede">One protein region per form, with what your experiment showed about it. Your row
-goes to a public curation queue; once accepted, every tool on the leaderboard is graded on it.</p>
+<p class="lede">One protein region per form, with what your experiment showed about it. It goes to
+a public curation queue. Once accepted, every tool on the leaderboard is graded on it at the next
+rebuild of the tables, if the protein is in one of the query sets (the fixed lists of proteins the
+tools are run on); otherwise it is kept and counted for its organism until a query set includes it.</p>
 <p class="asof">Data from 15 Oct 2026, commit <span class="mono">4a4b1171</span> (<a href="#source-commit">source</a>)</p>
 
 <figure>
 <figcaption><b>Figure 1.</b> Where your answers go, in order. Nothing leaves this page until you
 press <em>Submit new issue</em> on GitHub in step 2.</figcaption>
-<ol class="flow" aria-label="Steps of a lab submission"><li><span class="flow-n">1</span><b>Fill in the form</b><span class="flow-d">one tested region of one protein</span></li><li><span class="flow-n">2</span><b>GitHub issue</b><span class="flow-d">you submit it on GitHub; it joins the curation queue</span></li><li><span class="flow-n">3</span><b>Curator decides</b><span class="flow-d">accepted or rejected, always with a reason</span></li><li><span class="flow-n">4</span><b>Truth table</b><span class="flow-d">accepted rows join truth_contributed, with your ORCID</span></li><li><span class="flow-n">5</span><b>Rescore</b><span class="flow-d">every tool is scored on them at the next release</span></li></ol>
+<ol class="flow" aria-label="Steps of a lab submission"><li><span class="flow-n">1</span><b>Fill in the form</b><span class="flow-d">one tested region of one protein</span></li><li><span class="flow-n">2</span><b>GitHub issue</b><span class="flow-d">you submit it on GitHub; it joins the curation queue</span></li><li><span class="flow-n">3</span><b>Curator decides</b><span class="flow-d">accepted or rejected, always with a reason</span></li><li><span class="flow-n">4</span><b>Table of tested regions</b><span class="flow-d">an accepted region is added, with your ORCID iD</span></li><li><span class="flow-n">5</span><b>Tools graded on it</b><span class="flow-d">at the next rebuild of the tables, if a query set holds the protein</span></li></ol>
 </figure>
 
 <h2 id="how">How the form reaches GitHub</h2>
@@ -44,6 +46,7 @@ That needs a free GitHub account, and the issue is public. The curator answers i
 
 <form id="truth-form" class="tf" novalidate>
 <fieldset><legend>Protein</legend>
+<p class="tf-hint">Give the UniProt accession, or, only if there is none, the sequence and the organism.</p>
 <label for="tf-acc">UniProt accession <span class="tf-hint">such as P01375</span></label>
 <input id="tf-acc" name="accession" autocomplete="off" spellcheck="false" inputmode="latin">
 <label for="tf-seq">Or the sequence, if the protein has no UniProt entry <span class="tf-hint">one-letter amino-acid code</span></label>
@@ -53,28 +56,29 @@ That needs a free GitHub account, and the issue is public. The curator answers i
 </fieldset>
 
 <fieldset><legend>Region</legend>
-<p class="tf-hint">Residue positions on that sequence, counting the first residue as 1. Both ends are part of the region.</p>
+<p class="tf-hint">Required. Residue positions on that sequence, counting the first residue as 1. Both ends are part of the region. If your experiment used another isoform or an older sequence, convert the positions to the UniProt sequence first.</p>
 <div class="tf-pair"><span><label for="tf-start">First residue</label>
 <input id="tf-start" name="start" type="number" min="1" step="1" required></span>
 <span><label for="tf-end">Last residue</label>
 <input id="tf-end" name="end" type="number" min="1" step="1" required></span></div>
 </fieldset>
 
-<fieldset><legend>What the experiment showed about this region</legend>
-<label class="tf-radio"><input type="radio" name="shown" value="binding" required><span><b>Binding</b>: the region binds a molecule, ion or another protein</span></label><label class="tf-radio"><input type="radio" name="shown" value="activity" required><span><b>Activity</b>: the region carries out a catalytic or other measured activity</span></label><label class="tf-radio"><input type="radio" name="shown" value="localisation" required><span><b>Localisation</b>: the region sends the protein to a place in the cell</span></label><label class="tf-radio"><input type="radio" name="shown" value="structure" required><span><b>Structure</b>: the region's 3D structure was solved or tested</span></label>
-<label for="tf-eco">Evidence code from the ECO ontology <span class="tf-hint">such as ECO:0000269, "experimental evidence used in manual assertion"; look one up at the
+<fieldset><legend>What the experiment showed about this region (required)</legend>
+<label class="tf-radio"><input type="radio" name="shown" value="binding" required><span><b>Binding</b>: the region binds a molecule, ion or another protein</span></label><label class="tf-radio"><input type="radio" name="shown" value="activity" required><span><b>Activity</b>: the region carries out a catalytic or other measured activity</span></label><label class="tf-radio"><input type="radio" name="shown" value="localisation" required><span><b>Localisation</b>: the region sends the protein to a place in the cell</span></label><label class="tf-radio"><input type="radio" name="shown" value="structure" required><span><b>Structure</b>: a 3D structure of the region was solved</span></label>
+<label for="tf-eco">Evidence code from the ECO ontology <span class="tf-hint">such as ECO:0000269, "experimental evidence used in manual assertion". It must be an experimental code: codes for sequence similarity, prediction or author statement are turned down. Look one up at the
 <a href="https://www.ebi.ac.uk/ols4/ontologies/eco">ECO browser</a></span></label>
 <input id="tf-eco" name="eco" autocomplete="off" spellcheck="false" placeholder="ECO:0000000" required>
-<label for="tf-cite">Citation or note <span class="tf-hint">a DOI or PubMed ID of the paper, or a note on unpublished work: method, controls, who did it</span></label>
+<label for="tf-cite">Citation or note <span class="tf-hint">a DOI or PubMed ID of the paper, or a note on unpublished work: method, controls, who did it. Say what the region binds, what activity was measured, or where in the cell it sends the protein</span></label>
 <textarea id="tf-cite" name="citation" rows="4" required></textarea>
 </fieldset>
 
 <fieldset><legend>You</legend>
 <label for="tf-orcid">Your ORCID iD <span class="tf-hint">such as 0000-0002-1825-0097; it goes into the table beside your row</span></label>
 <input id="tf-orcid" name="orcid" autocomplete="off" spellcheck="false" placeholder="0000-0000-0000-0000" required>
-<label class="tf-radio"><input type="checkbox" name="cc0" id="tf-cc0" required><span>I release this row under
-<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>, so anyone may reuse it, and it is not
-only a copy of an annotation already in UniProt, Pfam, InterPro or another database.</span></label>
+<label class="tf-radio"><input type="checkbox" name="cc0" id="tf-cc0" required><span>I release this region under
+<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>, so anyone may reuse it.</span></label>
+<label class="tf-radio"><input type="checkbox" name="newexp" id="tf-new" required><span>It comes from an
+experiment, not only from an annotation already in UniProt, Pfam, InterPro or another database.</span></label>
 </fieldset>
 
 <p id="tf-problems" class="tf-problems" role="alert" hidden></p>

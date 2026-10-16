@@ -53,7 +53,7 @@ HEADINGS = {
     "UniProt accession": "accession", "Sequence": "sequence", "Organism": "organism",
     "First residue": "start", "Last residue": "end", "What was shown": "shown",
     "ECO evidence code": "eco", "Citation or note": "citation", "ORCID iD": "orcid",
-    "Licence and database copies": "cc0",
+    "Licence": "cc0", "Source": "newexp",
 }
 TABLE_COLS = ["issue", "issue_url", "accession", "sequence", "organism", "taxon_id", "start",
               "end", "shown", "swissprot_type", "eco", "citation", "orcid", "provenance",
@@ -115,7 +115,9 @@ def check(f: dict, uniprot: dict | None) -> list[str]:
     if not orcid_ok(f.get("orcid", "").upper()):
         p.append("ORCID iD fails its check digit")
     if "[x]" not in f.get("cc0", "").lower():
-        p.append("CC0 and database-copy box not ticked")
+        p.append("CC0 box not ticked")
+    if "[x]" not in f.get("newexp", "").lower():
+        p.append("'comes from an experiment' box not ticked")
     return p
 
 
