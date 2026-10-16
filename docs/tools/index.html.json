@@ -6,7 +6,7 @@
   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
   "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-16T19:08:43Z",
+  "copied_at": "2026-10-16T19:21:29Z",
   "sha256": {
    "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -17,10 +17,10 @@
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
    "weak_hits/weak_hits.parquet": "cec1343e6d18f9dc35eb732e606828462899193ccf10249e2fd15a38b8c7a548",
-   "weak_hits/provenance.json": "8ce807cf60210caf83a9cc9177513ca8ef1a084b93eb65b37a3fb54b12b3cc16"
+   "weak_hits/provenance.json": "2a6293b56b27819a7e934bd62d35b17f9efe97bfe9f073f361996db2fdd6c699"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
-  "weak_hits_commit": "6796441365084293be3be4c740d1679fbec5aab1"
+  "weak_hits_commit": "cc33016e578f4cf2440f249b10992670347978cb"
  },
  "text": [
   {

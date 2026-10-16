@@ -4,7 +4,7 @@ SOURCE_REPO ?= seanome/2024-kmerseek-analysis
 SOURCE_COMMIT ?= 4a4b1171
 PILEUP_COMMIT ?= 39d81ec9
 # results/leaderboard/weak_hits/ (dark-set weak-hit accuracy), 2024-kmerseek-analysis PR 163
-WEAK_HITS_COMMIT ?= 67964413
+WEAK_HITS_COMMIT ?= cc33016e
 PY ?= .venv/bin/python
 
 .PHONY: tables site check serve

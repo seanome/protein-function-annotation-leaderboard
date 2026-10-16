@@ -57,6 +57,8 @@ The kmerseek setting for each species was picked on the other half of the protei
 - S. cerevisiae: alphabet hp_pbotc_1st_ed2, k = 23, scaled 1
 - B. burgdorferi: alphabet uniprot18, k = 5, scaled 1
 
+The pick is close to arbitrary: on the tune half no setting was ahead by more than two right hits, and in two species every setting had none, so the setting with the most judged hits was taken ([rule and numbers](https://github.com/seanome/2024-kmerseek-analysis/blob/olgabot/dark-set-weak-hit-accuracy/nextflow-runs/invertebrate-dark-set/weak-hits/README.md)).
+
 [PR 133](https://github.com/seanome/2024-kmerseek-analysis/pull/133)'s looser test counts a shared Pfam family or clan anywhere on the two proteins. By that test, on dark proteins at E 1–10:
 
 - human 0.7% (2 of 292)

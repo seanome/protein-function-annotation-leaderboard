@@ -707,6 +707,11 @@ def weak_card_md(tool: str) -> list[str]:
         T += ["The kmerseek setting for each species was picked on the other half of the "
               "proteins, as the one with the highest share right at E 1–10 on dark proteins:", ""]
         T += [f"- {name}: {sett[sp]}" for sp, name in WEAK_SPECIES if sett[sp]] + [""]
+        T += ["The pick is close to arbitrary: on the tune half no setting was ahead by more than "
+              "two right hits, and in two species every setting had none, so the setting with the "
+              "most judged hits was taken ([rule and numbers](https://github.com/seanome/"
+              "2024-kmerseek-analysis/blob/olgabot/dark-set-weak-hit-accuracy/nextflow-runs/"
+              "invertebrate-dark-set/weak-hits/README.md)).", ""]
     else:
         s = next((v for v in sett.values() if v), None)
         if s:
