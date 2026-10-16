@@ -22,7 +22,7 @@ DASH = "—"
 NYM = "not yet measured"
 # The proteome maps: tiles per row, the same for both species, so a tile is one protein
 # at the same size in both maps and the map's height is proportional to the protein count.
-COLS = 400
+COLS = 480
 ROOT = Path(__file__).resolve().parents[1]
 
 FOUR = {
@@ -109,22 +109,30 @@ class Why:
 # --------------------------------------------------------------------------- numbers
 
 def ocean_counts(w: Why) -> dict | None:
-    """Swiss-Prot entries from ocean animals: animal species that WoRMS flags as marine and
-    not as freshwater or land (counts.py, sp_marine_only_animal_share). Recomputed here from
-    the per-species table, and checked against the stored share."""
+    """Swiss-Prot entries from ocean animals, two ways (counts.py):
+    strict: animal species WoRMS flags as marine, with both its freshwater and land flags
+      set to 0 (sp_marine_only_animal_share). A species whose flag is empty is left out.
+    broad: every animal species WoRMS flags as marine (sp_marine_animal_share), some of which
+      also live in fresh water or on land.
+    Recomputed here from the per-species table and checked against the stored values."""
     t = w.why / "tables"
     if not (t / "swissprot_entries_per_species_taxid.parquet").exists():
         return None
     sp = pl.read_parquet(t / "swissprot_entries_per_species_taxid.parquet")
     worms = pl.read_parquet(t / "metazoan_species_worms.parquet")
-    ocean = (worms.filter((pl.col("isMarine") == 1) & (pl.col("isFreshwater").fill_null(0) != 1)
-                          & (pl.col("isTerrestrial").fill_null(0) != 1))["species_name"].to_list())
+    broad = worms.filter(pl.col("isMarine") == 1)["species_name"].to_list()
+    ocean = (worms.filter((pl.col("isMarine") == 1) & (pl.col("isFreshwater") == 0)
+                          & (pl.col("isTerrestrial") == 0))["species_name"].to_list())
     o = sp.filter(pl.col("name").is_in(ocean))
+    ob = sp.filter(pl.col("name").is_in(broad))
     total = w.v("sp_entries")
     share = w.v("sp_marine_only_animal_share")
-    n = int(o["entries"].sum())
+    share_b = w.v("sp_marine_animal_share")
+    n, nb = int(o["entries"].sum()), int(ob["entries"].sum())
     if total is not None and share is not None and abs(round(100 * n / total, 2) - share) > 1e-9:
         raise SystemExit(f"ocean animal entries {n} give {100 * n / total:.2f}%, numbers.parquet says {share}%")
+    if w.v("sp_marine_animal_entries") is not None and nb != w.v("sp_marine_animal_entries"):
+        raise SystemExit(f"broad ocean animal entries {nb}, numbers.parquet says {w.v('sp_marine_animal_entries')}")
     top = sp.sort("entries", descending=True).head(5)
     top5 = int(top["entries"].sum())
     top5_share = w.v("sp_top5_share_by_species")
@@ -134,6 +142,7 @@ def ocean_counts(w: Why) -> dict | None:
     rest = sp.filter(~pl.col("name").is_in(top["name"].to_list() + ocean))
     return {
         "entries": n, "species": o.height, "share_pct": share, "total": total,
+        "broad_entries": nb, "broad_species": ob.height, "broad_share_pct": share_b,
         "top": [(r["name"], int(r["entries"])) for r in top.iter_rows(named=True)],
         "top5": top5, "top5_share": top5_share,
         "rest_entries": int(rest["entries"].sum()), "rest_species": rest.height,
@@ -168,6 +177,9 @@ def map_data(w: Why) -> dict | None:
                  int(bool(r["interpro_match"])), int(bool(r["sprot_hit_nonself"]))]
                 for r in t.select("accession", "gene", "protein_name", "interpro_match", "sprot_hit_nonself").iter_rows(named=True)]
         dark_pct = round(100 * (n - k) / n, 2)
+        stored_dark = w.v(f"{sp}_no_interpro_no_sprot_nonself_pct")
+        if stored_dark is not None and abs(dark_pct - stored_dark) > 1e-9:
+            raise SystemExit(f"{sp}: {dark_pct}% dark without self-hits, numbers.parquet says {stored_dark}%")
         out["species"][sp] = {"n": n, "lit": k, "dark": n - k, "dark_pct": dark_pct, "lit_pct": round(100 - dark_pct, 2),
                               "dark_counting_self_hits": n - k_self, "dark_pct_counting_self_hits": stored_dark_self,
                               "proteins": prot}
@@ -209,6 +221,7 @@ def fig_concentration(oc: dict) -> str:
               "Salmonella enterica": "Salmonella (bacterium)"}
     rows = [(common.get(n, n), e, 1) for n, e in oc["top"]]
     rows.append((f"Ocean animals ({oc['species']:,} species)", oc["entries"], oc["species"]))
+    # "All other species" below holds the rest, including the broad-rule ocean animals.
     rows.append((f"All other species ({oc['rest_species']:,})", oc["rest_entries"], oc["rest_species"]))
 
     def panel(title, unit, vals, fmt):
@@ -321,26 +334,27 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
             return f'<p class="src">Source: {NYM}</p>'
         s = w.sources.get(r["source"], {})
         url = s.get("url")
-        name = {"swissprot_dat": "Swiss-Prot", "worms_matches": "World Register of Marine Species habitat flags",
+        name = {"swissprot_dat": "Swiss-Prot", "worms_matches": "WoRMS",
                 "sherlock_mmseqs": "MMseqs2 against Swiss-Prot"}.get(r["source"], r["source"])
         link = f'<a href="{esc(url)}">{esc(name)}</a>' if url and url.startswith("http") else esc(name)
         return f'<p class="src">{link}, {esc(r["release"])}{extra}</p>'
 
     # Screen 1 numbers, written once and used in the headline and the cards.
     n1 = fint(total) if total is not None else DASH
-    n2 = f"{oc['share_pct']:.2f}%" if oc and oc["share_pct"] is not None else DASH
+    n2 = (f"{oc['share_pct']:.2f}% to {oc['broad_share_pct']:.2f}%"
+          if oc and oc["share_pct"] is not None and oc["broad_share_pct"] is not None else DASH)
     n3 = f"{oy_dark:.1f}%" if oy_dark is not None else DASH
-    head3 = (f"<b>{n3}</b> of a Pacific oyster's proteins match no known protein family and no described protein"
+    head3 = (f"<b>{n3}</b> of a Pacific oyster's proteins match no known family or described protein"
              if oy_dark is not None else
              "the share of a Pacific oyster's proteins that match nothing known is not yet measured")
-    headline = (f'Curators have reviewed <b>{n1}</b> proteins by hand, only <b>{n2}</b> of them '
+    headline = (f'Curators have reviewed <b>{n1}</b> proteins by hand, only <b>{n2}</b> '
                 f'from ocean animals, and {head3}.')
 
     oy_count = None
     if mp:
         oy_count = mp["species"]["oyster"]["dark"]
-    card3_sub = (f"{oy_count:,} of {fint(oy_n)} oyster proteins have no family in InterPro (the catalogue of known "
-                 f"protein families), and no other Swiss-Prot protein shares 30% or more of their amino acids"
+    card3_sub = (f"{oy_count:,} of {fint(oy_n)} have no family in InterPro (the catalogue of known protein "
+                 f"families) and no other Swiss-Prot protein at least 30% identical"
                  if oy_count is not None and oy_n is not None else
                  "no InterPro family match and no described protein at least 30% identical")
     cards = f"""<div class="cards">
@@ -348,11 +362,11 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
 <p>proteins whose entry a curator has reviewed by hand (Swiss-Prot, the reviewed part of UniProt)</p>
 {src_line("sp_entries")}</div>
 <div class="card"><div class="big">{n2 if oc else nym()}</div>
-<p>come from ocean animals: {oc['entries']:,} proteins from {oc['species']:,} species the World Register of Marine Species lists as marine, not freshwater or land ({100 * oc['entries'] / animal:.1f}% of the {fint(animal)} reviewed animal proteins)</p>
+<p>come from ocean animals: {oc['entries']:,} proteins from species the World Register of Marine Species (WoRMS) lists as marine only, up to {oc['broad_entries']:,} counting species that also live in fresh water or on land</p>
 {src_line("sp_marine_only_animal_share")}</div>
 <div class="card"><div class="big">{n3 if oy_dark is not None else nym()}</div>
 <p>of a Pacific oyster's proteins get no label: {card3_sub}</p>
-<p class="src">InterPro matches as UniProt 2026_03 lists them; MMseqs2 against Swiss-Prot 2026_03 (E-value 0.001 or less); oyster reference proteome UP000005408</p></div>
+<p class="src">InterPro as UniProt 2026_03 lists it; MMseqs2, E-value 0.001 or less; proteome UP000005408</p></div>
 </div>"""
 
     if mp:
@@ -372,9 +386,9 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
 </div>
 <div class="tip" id="maptip" hidden></div>
 <figcaption><b>Figure 1.</b> Every protein of two animals, one tile each. Like Earth seen from space at night,
-lit tiles show where knowledge reaches, and ocean animals are the dark continents: the oyster has {oy['dark'] / hu['dark']:.0f} times
-as many dark proteins as human ({oy['dark']:,} against {hu['dark']:,}). A protein's match to its own Swiss-Prot entry does not count. Hover or tap a tile to see the protein.
-UniProt 2026_03 reference proteomes, one protein per gene: human UP000005640, oyster UP000005408.</figcaption>
+lit tiles show where knowledge reaches, and ocean animals are the dark continents. The oyster has {oy['dark'] / hu['dark']:.0f} times
+as many dark proteins as human ({oy['dark']:,} against {hu['dark']:,}). A match to a protein's own Swiss-Prot entry does not count.
+Hover or tap a tile to see the protein. Proteomes: UP000005640 and UP000005408, UniProt 2026_03, one protein per gene.</figcaption>
 </figure>"""
     else:
         maps = f"""<figure class="maps" id="figure-1"><div class="placeholder">{DASH} The two proteome maps are {NYM}:
@@ -397,7 +411,7 @@ The first organism page will be the Pacific oyster's; it is not built yet, so th
 {fig_concentration(oc)}
 <figcaption><b>Figure 2.</b> The five best-studied species hold {oc['top5']:,} reviewed proteins
 ({oc['top5_share']:.1f}% of all), about {oc['top5'] / 5:,.0f} each. The {oc['species']:,} ocean animal species
-hold {oc['entries']:,} together, {oc['entries'] / oc['species']:.1f} each on average.
+(the low end of Card 2) hold {oc['entries']:,} together, {oc['entries'] / oc['species']:.1f} each on average.
 The other {oc['rest_species']:,} species hold {oc['rest_entries']:,}. {oc['no_species']:,} entries have no species
 and are left out. Human has {dict(oc['top']).get('Homo sapiens', 0):,} reviewed entries here; Figure 1 counts the {fint(w.v('human_proteins')) if w.v('human_proteins') else DASH} proteins of the
 human reference proteome, one per gene, reviewed or not. Source: Swiss-Prot, {esc(w.release('sp_entries'))}; World Register of Marine Species habitat flags.</figcaption>
@@ -419,7 +433,7 @@ human reference proteome, one per gene, reviewed or not. Source: Swiss-Prot, {es
             ipr = (f"matches <i>{esc('; '.join(c['ipr_names']))}</i> on {c['ipr_residues']:,} of {s['length']:,} residues"
                    if c["ipr_spans"] else "no match")
             hit = (f"{c['n_hits']} other Swiss-Prot protein{'s' if c['n_hits'] != 1 else ''} at least 30% identical; "
-                   f"the closest, {esc(c['best']['target'])}, is {100 * c['best']['identity']:.0f}% identical over residues "
+                   f"the closest, {esc(c['best']['target'])}, is {int(100 * c['best']['identity'] + 0.5)}% identical over residues "
                    f"{c['best']['start']}-{c['best']['end']}" if c["best"] else "no other Swiss-Prot protein at least 30% identical")
             labelled = bool(c["ipr_spans"] or c["best"])
             verdict = ("A tool labels it today." if labelled else
@@ -478,7 +492,7 @@ them today. Residues and features: UniProt 2026_03. Matches: the InterPro web se
 <div class="tablewrap"><table class="strata"><thead><tr><th>Known Swiss-Prot features on human proteins (how many)</th><th>Found, out of 100</th><th>Best tool</th></tr></thead>
 <tbody>{''.join(srows)}</tbody></table></div>
 <figcaption><b>Figure 4.</b> For each group of known features (Swiss-Prot annotations on human proteins), the
-share found by the tool that does best on that group, with the score cut-off that suits that tool best. Picking the best tool for each row raises every row. Each tool
+share found by the tool that does best on that group. Each tool uses the score cut-off that suits it best. Picking the best tool for each row raises every row. Each tool
 labelled human proteins by searching the proteins of zebrafish (a freshwater fish), the relative in the leaderboard's <a href="{up}index.html">default view</a>. Source: the leaderboard tables (footer).</figcaption>
 </figure>"""
 

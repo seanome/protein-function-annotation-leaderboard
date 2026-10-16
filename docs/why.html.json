@@ -22,11 +22,11 @@
  "text": [
   {
    "tag": "h1",
-   "text": "Experts have described 575,748 proteins by hand, only 0.91% of them from ocean animals, and the two standard checks name no function for 19.4% of a Pacific oyster's proteins."
+   "text": "Curators have reviewed 575,748 proteins by hand, only 0.47% to 1.18% from ocean animals, and 19.4% of a Pacific oyster's proteins match no known family or described protein."
   },
   {
    "tag": "p",
-   "text": "proteins whose function experts have written down by hand (Swiss-Prot, the reviewed part of UniProt)"
+   "text": "proteins whose entry a curator has reviewed by hand (Swiss-Prot, the reviewed part of UniProt)"
   },
   {
    "tag": "p",
@@ -34,19 +34,19 @@
   },
   {
    "tag": "p",
-   "text": "come from ocean animals: 5,257 proteins from 880 species the World Register of Marine Species lists as marine, not freshwater or land"
+   "text": "come from ocean animals: 2,702 proteins from species the World Register of Marine Species (WoRMS) lists as marine only, up to 6,792 counting species that also live in fresh water or on land"
   },
   {
    "tag": "p",
-   "text": "WoRMS habitat flags on Swiss-Prot species, WoRMS REST API + UniProt 2026_03"
+   "text": "WoRMS, WoRMS REST API + UniProt 2026_03"
   },
   {
    "tag": "p",
-   "text": "of a Pacific oyster's proteins get no function from the two standard checks: 5,877 of 30,272 oyster proteins have no InterPro match and no Swiss-Prot protein at least 30% identical"
+   "text": "of a Pacific oyster's proteins get no label: 5,879 of 30,272 have no family in InterPro (the catalogue of known protein families) and no other Swiss-Prot protein at least 30% identical"
   },
   {
    "tag": "p",
-   "text": "InterPro and MMseqs2 against Swiss-Prot, UniProt 2026_03, oyster reference proteome UP000005408"
+   "text": "InterPro as UniProt 2026_03 lists it; MMseqs2, E-value 0.001 or less; proteome UP000005408"
   },
   {
    "tag": "h3",
@@ -54,7 +54,7 @@
   },
   {
    "tag": "p",
-   "text": "99.1% lit, 181 dark"
+   "text": "97.2% lit, 574 dark"
   },
   {
    "tag": "h3",
@@ -62,15 +62,15 @@
   },
   {
    "tag": "p",
-   "text": "80.6% lit, 5,877 dark"
+   "text": "80.6% lit, 5,879 dark"
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1. Every protein of two animals, one tile each. Like Earth seen from space at night, lit tiles show where knowledge reaches; ocean animals are the dark continents. Hover or tap a tile to see the protein. UniProt 2026_03 reference proteomes, one protein per gene: human UP000005640, oyster UP000005408."
+   "text": "Figure 1. Every protein of two animals, one tile each. Like Earth seen from space at night, lit tiles show where knowledge reaches, and ocean animals are the dark continents. The oyster has 10 times as many dark proteins as human (5,879 against 574). A match to a protein's own Swiss-Prot entry does not count. Hover or tap a tile to see the protein. Proteomes: UP000005640 and UP000005408, UniProt 2026_03, one protein per gene."
   },
   {
    "tag": "p",
-   "text": "This site measures, for every tool and every kind of organism, which proteins get a label and what the run costs, and tells each lab which tool to run. The first organism page will be the Pacific oyster's; it is not built yet, so there is no link to it."
+   "text": "This site measures, for every software tool and every kind of organism, which proteins get a label and what the run costs, and tells each lab which tool to run. Today it scores 9 tools on human proteins. The first organism page will be the Pacific oyster's; it is not built yet, so there is no link to it."
   },
   {
    "tag": "h2",
@@ -82,7 +82,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 2. The five best-studied species hold 90,318 reviewed proteins (15.7% of all), about 18,064 each. The 880 ocean animal species hold 5,257 together, 6.0 each. The other 10,885 species hold 480,114. 59 entries have no species and are left out. Source: Swiss-Prot, UniProt 2026_03 (02-Sep-2026); World Register of Marine Species habitat flags."
+   "text": "Figure 2. The five best-studied species hold 90,318 reviewed proteins (15.7% of all), about 18,064 each. The 564 ocean animal species (the low end of Card 2) hold 2,702 together, 4.8 each on average. The other 11,201 species hold 482,669. 59 entries have no species and are left out. Human has 20,432 reviewed entries here; Figure 1 counts the 20,652 proteins of the human reference proteome, one per gene, reviewed or not. Source: Swiss-Prot, UniProt 2026_03 (02-Sep-2026); World Register of Marine Species habitat flags."
   },
   {
    "tag": "h3",
@@ -210,7 +210,7 @@
   },
   {
    "tag": "li",
-   "text": "MMseqs2 against Swiss-Prot: 5 other Swiss-Prot proteins at least 30% identical; the closest, Q9U6Y6, is 36% identical over residues 18-140"
+   "text": "MMseqs2 against Swiss-Prot: 5 other Swiss-Prot proteins at least 30% identical; the closest, Q9U6Y6, is 37% identical over residues 18-140"
   },
   {
    "tag": "li",
@@ -230,11 +230,11 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 3. Four ocean proteins that changed medicine and biology, and what the tools find on them today. Residues and features: UniProt 2026_03. Matches: InterPro API and MMseqs2 against Swiss-Prot (Prompt E, step 6)."
+   "text": "Figure 3. Four ocean proteins that changed medicine and biology, and what the tools find on them today. Residues and features: UniProt 2026_03. Matches: the InterPro web service, and MMseqs2 against Swiss-Prot 2026_03."
   },
   {
    "tag": "p",
-   "text": "The proteins that gave us underwater glue, antifreeze, a painkiller and the green light of cell biology were all found at the bench, by people, not by a tool. Three of the four are built from repeats or short peptides. On the leaderboard, the best tool finds 7 in 100 known features 2 to 15 residues long, against 28 in 100 features of any length. Repeats are found about as often as other features (30 in 100), and stretches with no fixed shape are not yet measured."
+   "text": "The proteins that gave us underwater glue, antifreeze, a painkiller and the green light of cell biology were all found at the bench, by people, not by a tool. The three that tools label today are found by their likeness to proteins people described first; the antifreeze protein still gets no label. Three of the four are built from repeats or short peptides. On the leaderboard, the best tool finds 7 in 100 known features 2 to 15 residues long, against 28 in 100 features of any length. Repeats are found about as often as other features (30 in 100), and stretches with no fixed shape are not yet measured."
   },
   {
    "tag": "th",
@@ -302,11 +302,11 @@
   },
   {
    "tag": "td",
-   "text": "— not yet measured: the leaderboard has no stratum below 50"
+   "text": "— not yet measured: the leaderboard does not yet group features with confidence below 50"
   },
   {
    "tag": "figcaption",
-   "text": "Figure 4. For each group of known features (Swiss-Prot annotations on human proteins), the share found by the tool that does best on that group, each at its own best score cut-off. Each tool searched zebrafish proteins, the relative in the leaderboard's default view. Source: the leaderboard tables (footer)."
+   "text": "Figure 4. For each group of known features (Swiss-Prot annotations on human proteins), the share found by the tool that does best on that group. Each tool uses the score cut-off that suits it best. Picking the best tool for each row raises every row. Each tool labelled human proteins by searching the proteins of zebrafish (a freshwater fish), the relative in the leaderboard's default view. Source: the leaderboard tables (footer)."
   },
   {
    "tag": "h2",
@@ -386,11 +386,11 @@
   },
   {
    "tag": "td",
-   "text": "one click copies the command for the best tool for that organism, so a lab can run it the same day; not built yet"
+   "text": "one click copies the command that runs the best tool on that organism's proteins, so a lab can run it the same day; not built yet"
   },
   {
    "tag": "th",
-   "text": "Wet-lab truth rows contributed by labs"
+   "text": "Lab results sent in: a protein and what an experiment showed it does"
   },
   {
    "tag": "td",
@@ -398,7 +398,7 @@
   },
   {
    "tag": "td",
-   "text": "counted through a contribution path that is not built yet"
+   "text": "counted through a way to send results in that is not built yet"
   },
   {
    "tag": "th",
@@ -450,65 +450,93 @@
   },
   {
    "tag": "p",
-   "text": "Counts: results/why/numbers.parquet, built by scripts/why/; each row names its source below. Missing parts: none."
+   "text": "Counts: results/why/numbers.parquet and results/why/proteome_labels.parquet, built by scripts/why/ from the files below. Missing parts: none."
   },
   {
    "tag": "li",
-   "text": "afdb_predictions: afdb_predictions.jsonl.gz, AlphaFold DB API (version per model in latestVersion), fetched 2026-10-15"
+   "text": "afdb_confidence_P05484.json, AlphaFold DB v6, fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "col_accepted_species: col_accepted_species.json, Catalogue of Life COL26.9 (version 2026-09-11, doi 10.48580/dgz5n, dataset key 316321), fetched 2026-10-15"
+   "text": "afdb_confidence_P24856.json, AlphaFold DB v6, fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "deck_parquet: wealth_inequality_uniprot_combined_sprot_trembl_taxonomy_summary.parquet, computed, fetched 2026-10-15"
+   "text": "afdb_confidence_P42212.json, AlphaFold DB v6, fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "human_canonical_fasta: UP000005640_9606.fasta.gz, Last-Modified Tue, 15 Sep 2026 09:21:31 GMT, fetched 2026-10-15"
+   "text": "afdb_confidence_Q25460.json, AlphaFold DB v6, fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "human_interpro_xrefs: human_interpro_xrefs.tsv.gz, UniProt 2026_03 (02-September-2026), fetched 2026-10-15"
+   "text": "afdb_predictions.jsonl.gz, AlphaFold DB API (version per model in latestVersion), fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "larsen2017_notebook: wealth_inequality_03_make_predicted_n_proteins.ipynb, computed, fetched 2026-10-15"
+   "text": "UP000005640_9606.fasta.gz, Last-Modified Tue, 15 Sep 2026 09:21:31 GMT, fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "oyster_canonical_fasta: UP000005408_29159.fasta.gz, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15"
+   "text": "human_interpro_xrefs.tsv.gz, UniProt 2026_03 (02-September-2026), fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "oyster_interpro_xrefs: oyster_interpro_xrefs.tsv.gz, UniProt 2026_03 (02-September-2026), fetched 2026-10-15"
+   "text": "interpro_matches_P05484.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "sifts_uniprot_pdb: sifts_uniprot_pdb.tsv.gz, Last-Modified Sun, 11 Oct 2026 18:53:06 GMT, fetched 2026-10-15"
+   "text": "interpro_matches_P24856.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "swissprot_dat: uniprot_sprot.dat.gz, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15"
+   "text": "interpro_matches_P42212.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "uniprotkb_with_pdb: uniprotkb_with_pdb.tsv.gz, UniProt 2026_03 (02-September-2026), fetched 2026-10-15"
+   "text": "interpro_matches_Q25460.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
   },
   {
    "tag": "li",
-   "text": "worms_matches: worms_matches.jsonl.gz, World Register of Marine Species REST API, queried 2026-10-15T14:11:27Z, fetched 2026-10-15"
+   "text": "UP000005408_29159.fasta.gz, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "oyster_interpro_xrefs.tsv.gz, UniProt 2026_03 (02-September-2026), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_sprot.dat.gz, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_P05484.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_P24856.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_P42212.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_Q25460.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "worms_matches.jsonl.gz, World Register of Marine Species REST API, queried 2026-10-15T14:11:27Z, fetched 2026-10-15"
   }
  ],
  "data": {
   "note": "Numbers from results/why/ (see scripts/why_page.py); null means not yet measured. The proteome maps are data/why_map.json.",
-  "headline": "Experts have described 575,748 proteins by hand, only 0.91% of them from ocean animals, and the two standard checks name no function for 19.4% of a Pacific oyster's proteins.",
+  "headline": "Curators have reviewed 575,748 proteins by hand, only 0.47% to 1.18% from ocean animals, and 19.4% of a Pacific oyster's proteins match no known family or described protein.",
   "numbers": {
    "swissprot_entries": 575748.0,
-   "ocean_animal_entries": 5257,
-   "ocean_animal_species": 880,
-   "ocean_animal_share_pct": 0.91,
+   "ocean_animal_entries": 2702,
+   "ocean_animal_species": 564,
+   "ocean_animal_share_pct": 0.47,
    "top5_species": [
     [
      "Escherichia coli",
@@ -532,24 +560,28 @@
     ]
    ],
    "top5_share_pct": 15.69,
-   "oyster_no_function_label_pct": 19.41,
-   "human_no_function_label_pct": 0.88,
-   "oyster_proteins": 30272.0
+   "oyster_no_function_label_pct": 19.42,
+   "human_no_function_label_pct": 2.78,
+   "oyster_proteins": 30272
   },
   "maps": {
    "human": {
     "n": 20652,
-    "lit": 20471,
-    "dark": 181,
-    "dark_pct": 0.88,
-    "lit_pct": 99.12
+    "lit": 20078,
+    "dark": 574,
+    "dark_pct": 2.78,
+    "lit_pct": 97.22,
+    "dark_counting_self_hits": 181,
+    "dark_pct_counting_self_hits": 0.88
    },
    "oyster": {
     "n": 30272,
-    "lit": 24395,
-    "dark": 5877,
-    "dark_pct": 19.41,
-    "lit_pct": 80.59
+    "lit": 24393,
+    "dark": 5879,
+    "dark_pct": 19.42,
+    "lit_pct": 80.58,
+    "dark_counting_self_hits": 5877,
+    "dark_pct_counting_self_hits": 19.41
    }
   },
   "four_proteins": {
@@ -696,7 +728,7 @@
    {
     "label": "Features where AlphaFold's confidence is below 50 (often disordered)",
     "value": null,
-    "why": "the leaderboard has no stratum below 50"
+    "why": "the leaderboard does not yet group features with confidence below 50"
    }
   ],
   "not_yet_measured": [
