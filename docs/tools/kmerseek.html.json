@@ -93,6 +93,14 @@
    "text": "Figure 2. Where kmerseek is ahead and behind: its Fmax on each subset of the proteins, against the best other tool on that subset (Pfam truth set, raw calls, zebrafish as the relative; its best setting, gbmr4, k = 21). Left out, under 30 true instances: 0–20%."
   },
   {
+   "tag": "figcaption",
+   "text": "Figure 14. Precision and recall of kmerseek (gbmr4, k = 21) at its Fmax cutoff, one point per subset of the proteins. The tables keep precision and recall at that one cutoff only, so the curve through the other cutoffs cannot be drawn. Pfam truth set, raw calls, zebrafish as the relative; subsets with at least 30 true domains. Up and to the right is better."
+  },
+  {
+   "tag": "p",
+   "text": "On all proteins kmerseek reaches precision 0.456 and recall 0.121 at its Fmax cutoff (Fmax 0.192, n = 2,435). Its best subset is identity 60–100% to the closest same-family domain (Fmax 0.297, n = 1,289), its worst identity 20–30% to the closest same-family domain (0.000, n = 93)."
+  },
+  {
    "tag": "h2",
    "text": "kmerseek"
   },

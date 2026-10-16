@@ -464,3 +464,27 @@ table.cov .mono,td.num{overflow-wrap:normal;white-space:nowrap}
   border-bottom:2px dashed var(--accent);cursor:ew-resize;touch-action:none;user-select:none;padding:0 2px}
 .scrub:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .scrub.scrubbing{background:var(--surface);border-bottom-style:solid}
+
+/* Figures 11 to 17 (scripts/figures.py). Colours only from the tokens above. */
+figure.fgfig{margin:22px 0 30px}
+.figscroll{overflow-x:auto;background:var(--surface);border:1px solid var(--hair);border-radius:8px;padding:6px;isolation:isolate}
+svg.fg{display:block;width:100%;height:auto}
+svg.fg text{font-family:"Source Sans 3",sans-serif;fill:var(--ink);font-size:12px}
+svg.fg .fg-tick{font-family:"Fantasque Sans Mono",monospace;font-size:11.5px;fill:var(--muted)}
+svg.fg .fg-small{font-size:11.5px}
+svg.fg .fg-ax{font-size:12.5px;font-weight:600}
+svg.fg .fg-lab{font-size:12px}
+svg.fg .fg-grid{stroke:var(--hair);stroke-width:1}
+svg.fg .fg-axis{stroke:var(--muted);stroke-width:1}
+svg.fg .fg-rel{stroke:var(--hair);stroke-width:1;stroke-dasharray:2 3}
+svg.fg .fg-iso{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4;fill:none}
+.legend svg .fg-iso{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+svg.fg [data-tip]{cursor:pointer}
+svg.fg [data-tip]:focus{outline:none;stroke:var(--ink);stroke-width:2}
+.fg-sentence{font-size:.95rem;max-width:90ch;margin:8px 0 0;border-left:3px solid var(--accent);padding-left:10px}
+.fg-grid-panels{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,370px),1fr));gap:12px}
+.fg-panel{background:var(--surface);border:1px solid var(--hair);border-radius:8px;padding:6px 8px;min-width:0}
+.fg-panel h4{font-family:"Source Sans 3",sans-serif;font-size:.95rem;margin:2px 0 4px}
+.fg-none{color:var(--muted);font-size:.9rem;margin:10px 0}
+svg.fg-sq{max-width:420px;background:var(--surface);border:1px solid var(--hair);border-radius:8px}
+.fg-tip{white-space:normal}

@@ -21,6 +21,7 @@ import polars as pl
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 ROOT_DIR = Path(__file__).resolve().parents[1]
 from tools import KINDS, SPECIES, TOOLS  # noqa: E402
+import figures  # noqa: E402
 
 SITE = "Protein annotation leaderboard"
 REPO = "seanome/protein-function-annotation-leaderboard"
@@ -592,7 +593,8 @@ def key_line(tools_used: set[str]) -> str:
             '<span class="item"><span class="tag warn">graded on its own models</span></span></div>')
 
 
-def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[str], dd: dict) -> str:
+def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[str], dd: dict,
+                     figs: str = "") -> str:
     body = f"""
 <h1>{SITE}</h1>
 <p class="lede">Which tool puts the known domains and features of human proteins in the right
@@ -658,10 +660,11 @@ opposite orders, because AUPRC pools every call of every protein while Fmax aver
 protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from
 {dd['raw_fmax']:.3f} to {dd['dedup_fmax']:.3f} and AUPRC from {dd['raw_auprc']:.3f} to
 {dd['dedup_auprc']:.3f}. Definitions: <a href="methods.html#dedup">Methods</a>.</p></details>
+{figs}
 <script type="application/json" id="lb-data">{meta_json}</script>
 <script src="assets/app.js"></script>
 """
-    return layout(SITE, "leaderboard", body, src,
+    return layout(SITE, "leaderboard", body, src, head='<script defer src="assets/figures.js"></script>',
                   description="Protein annotation tools ranked by Fmax, AUPRC and boundary accuracy, with measured cost.")
 
 
@@ -1001,6 +1004,181 @@ proteins, against the best other tool on that subset ({where}; its best setting,
 </figure>"""
 
 
+# --------------------------------------------------------------------------- figures 11-14
+# Data steps: each shapes one table for one draw function in figures.py.
+
+def series_cols(df: pl.DataFrame) -> pl.DataFrame:
+    """Add name, label, kind, shape and a sort rank for each (tool, setting), as Table 1
+    shows them: kind of method first, then tool, then kmerseek alphabet size and k."""
+    def shape(t, s):
+        m = KMER_SETTING.fullmatch(s)
+        return KMERSEEK_SHAPES.get(m[1], "circle") if t == "kmerseek" and m else TOOLS[t]["shape"]
+    keys = sorted(df.select("tool", "setting").unique().iter_rows(),
+                  key=lambda ts: (list(KINDS).index(TOOLS[ts[0]]["kind"]), list(TOOLS).index(ts[0]),
+                                  setting_key(*ts)))
+    info = pl.DataFrame([{"tool": t, "setting": s, "name": TOOLS[t]["name"], "label": setting_label(t, s),
+                          "kind": TOOLS[t]["kind"], "shape": shape(t, s), "rank": i}
+                         for i, (t, s) in enumerate(keys)])
+    return df.join(info, on=["tool", "setting"], how="left")
+
+
+def best_kmerseek_setting(q: pl.DataFrame) -> str | None:
+    """kmerseek's setting with the highest mean Fmax over the rows given; ties by name."""
+    k = q.filter(pl.col("tool") == "kmerseek").group_by("setting").agg(pl.col("fmax").mean())
+    return k.sort(["fmax", "setting"], descending=[True, False])["setting"][0] if k.height else None
+
+
+def distance_table(res: pl.DataFrame) -> pl.DataFrame:
+    """Figure 11: Pfam truth set, raw calls, all proteins, one row per tool, setting and
+    relative searched (hmmscan searches no relative and is left out)."""
+    q = res.filter((pl.col("truth_set") == "pfam") & (pl.col("calls") == "raw") & (pl.col("stratum_axis") == "all")
+                   & (pl.col("species") != "all") & pl.col("fmax").is_not_null())
+    ks = best_kmerseek_setting(q)
+    return (series_cols(q).with_columns(
+        pl.col("species").replace_strict(SPECIES).alias("organism"), pl.col("species_mya").alias("mya"),
+        pl.col("n_truth_instances").alias("n"),
+        ((pl.col("tool") != "kmerseek") | (pl.col("setting") == ks)).alias("highlight"))
+        .select("tool", "setting", "name", "label", "kind", "shape", "highlight", "organism", "mya", "fmax", "n", "rank")
+        .sort("rank", "mya"))
+
+
+def identity_table(res: pl.DataFrame, species: str = "zebrafish") -> pl.DataFrame:
+    """Figure 12: Pfam truth set, raw calls, one relative, one row per tool, setting and identity bin."""
+    order = [v for v, _ in IDENTITY]
+    q = res.filter((pl.col("truth_set") == "pfam") & (pl.col("calls") == "raw") & (pl.col("species") == species)
+                   & (pl.col("stratum_axis") == "identity") & pl.col("fmax").is_not_null())
+    ks = best_kmerseek_setting(q)
+    return (series_cols(q).with_columns(
+        pl.col("stratum").alias("bin"),
+        pl.col("stratum").replace_strict({v: ("no same-family domain" if v == "no_homolog" else w)
+                                          for v, w in IDENTITY}).alias("bin_label"),
+        pl.col("stratum").replace_strict({v: i for i, v in enumerate(order)}).alias("bin_order"),
+        (pl.col("stratum") != "no_homolog").alias("joined"),
+        pl.col("n_truth_instances").alias("n"),
+        (pl.col("n_truth_instances") >= MIN_N).alias("enough"),
+        ((pl.col("tool") != "kmerseek") | (pl.col("setting") == ks)).alias("highlight"))
+        .select("tool", "setting", "name", "label", "kind", "shape", "highlight", "bin", "bin_label", "bin_order",
+                "joined", "fmax", "n", "enough", "rank", pl.lit(MIN_N).alias("min_n"))
+        .sort("rank", "bin_order"))
+
+
+# The feature types Figure 13 asks for, in this order, with the Swiss-Prot feature key each
+# is read from. Signal peptides and disordered regions are not bins of results.parquet;
+# their panels say so instead of borrowing another bin (REGION is every "region of
+# interest", not only disordered ones).
+FEATURE_PANELS = [("SIGNAL", "signal peptide"), ("TRANSMEM", "membrane-spanning segment"),
+                  ("ZN_FING", "zinc finger"), ("COILED", "coiled coil"), ("REPEAT", "repeat"),
+                  ("DOMAIN", "domain"), ("DISORDERED", "disordered region")]
+
+
+def feature_table(res: pl.DataFrame, species: str = "zebrafish") -> pl.DataFrame:
+    """Figure 13: Swiss-Prot truth set, raw calls, one relative; per feature type, each tool's
+    best setting there."""
+    q = res.filter((pl.col("truth_set") == "swissprot") & (pl.col("calls") == "raw") & (pl.col("species") == species)
+                   & (pl.col("stratum_axis") == "feature_type") & pl.col("fmax").is_not_null())
+    q = series_cols(q)
+    n_set = q.group_by("tool", "stratum").agg(pl.col("setting").n_unique().alias("n_settings"))
+    q = q.join(n_set, on=["tool", "stratum"], how="left")
+    frames = []
+    for i, (key, word) in enumerate(FEATURE_PANELS):
+        g = q.filter(pl.col("stratum") == key)
+        if g.height == 0:
+            frames.append(pl.DataFrame({"panel": [key], "panel_label": [word], "panel_order": [i], "measured": [False]}))
+            continue
+        g = (g.sort(["fmax", "setting"], descending=[True, False]).group_by("tool", maintain_order=True).first()
+             .sort("rank"))
+        frames.append(g.select(pl.lit(key).alias("panel"), pl.lit(word).alias("panel_label"),
+                               pl.lit(i).alias("panel_order"), pl.lit(True).alias("measured"), "tool", "setting",
+                               "name", "label", "kind", "fmax", pl.col("n_truth_instances").alias("n"),
+                               "n_settings"))
+    return pl.concat(frames, how="diagonal_relaxed")
+
+
+def pr_points_table(tool: str, nums: dict, res: pl.DataFrame) -> pl.DataFrame:
+    """Figure 14 of a card: the tool's best setting, Pfam, raw, its relative; precision and
+    recall at the Fmax cutoff for all proteins and each identity and length bin with at
+    least MIN_N true domains."""
+    base = dict(tool=tool, setting=nums["best_setting"], truth_set="pfam", calls="raw", species=nums["species"])
+    rows = []
+    for axis, group in (("all", "all"), ("identity", "identity"), ("feature_length_bin", "length")):
+        for r in best_by(res, stratum_axis=axis, **base).iter_rows(named=True):
+            if axis != "all" and r["n_truth_instances"] < MIN_N:
+                continue
+            if r["fmax_precision"] is None or r["fmax_recall"] is None:
+                continue
+            rows.append({"name": TOOLS[tool]["name"], "label": setting_label(tool, nums["best_setting"]),
+                         "kind": TOOLS[tool]["kind"], "group": group,
+                         "stratum_label": "all proteins" if axis == "all" else stratum_words(axis, r["stratum"]),
+                         "precision": r["fmax_precision"], "recall": r["fmax_recall"], "fmax": r["fmax"],
+                         "n": r["n_truth_instances"]})
+    return pl.DataFrame(rows)
+
+
+def card_pr_figure(tool: str, nums: dict, res: pl.DataFrame) -> str:
+    """Figure 14 of a card, or nothing when the card has no best setting."""
+    if "best_setting" not in nums:
+        return ""
+    t = pr_points_table(tool, nums, res)
+    if t.height == 0:
+        return ""
+    body, s = figures.draw_pr_points(t)
+    where = ("Pfam truth set, raw calls, no relative" if nums["species"] == "all"
+             else "Pfam truth set, raw calls, zebrafish as the relative")
+    return fig_block(
+        14, f"Precision and recall of {esc(TOOLS[tool]['name'])} ({esc(setting_label(tool, nums['best_setting']))}) at "
+        "its Fmax cutoff, one point per subset of the proteins. The tables keep precision and recall at that one "
+        "cutoff only, so the curve through the other cutoffs cannot be drawn.",
+        f"{where}; subsets with at least {MIN_N} true domains. Up and to the right is better.", body, s, "fig-pr")
+
+
+def fig_block(num: int, title: str, where: str, body: str, sentence: str, fid: str) -> str:
+    return (f'<figure class="fgfig" id="{fid}"><figcaption><b>Figure {num}.</b> {title} '
+            f'<span class="muted">{where}</span></figcaption>{body}'
+            f'<p class="fg-sentence">{esc(sentence)}</p></figure>')
+
+
+def leaderboard_figures(res: pl.DataFrame) -> str:
+    d, ds = figures.draw_distance(distance_table(res))
+    i, is_ = figures.draw_identity(identity_table(res))
+    f, fs = figures.draw_feature_types(feature_table(res))
+    return (
+        '<h2 id="figures">Where each tool stops</h2>'
+        '<p class="prose oneline">These figures are drawn at fixed filters, named in each caption. The filters '
+        'above change Table 1 only.</p>'
+        + fig_block(11, "Fmax against how long ago human and the relative shared an ancestor, one line per tool and "
+                    "setting, one dot per relative searched. The step from 10 to 100 Mya takes as much room as the "
+                    "step from 100 to 1,000.",
+                    "Pfam truth set, raw calls, all proteins. Hover or tap a dot for its numbers.", d, ds,
+                    "fig-distance")
+        + fig_block(12, "Fmax by how close the nearest same-family domain in the relative is, in % identity.",
+                    "Pfam truth set, raw calls, zebrafish as the relative. n = true domains in the bin, the same for "
+                    "every tool. The last bin is drawn apart: it has no identity value.", i, is_, "fig-identity")
+        + fig_block(13, "Fmax by Swiss-Prot feature type, one bar per tool (its best setting there). After each bar: "
+                    "its Fmax, and n, the true features of that type.",
+                    "Swiss-Prot truth set, raw calls, zebrafish as the relative; one shared Fmax scale.", f, fs,
+                    "fig-features")
+        + NOT_DRAWN)
+
+
+# Figures asked for that the copied tables cannot support. Each names what is missing, so
+# nothing is drawn from a guess.
+NOT_DRAWN = """<details class="prose" id="not-drawn"><summary>Figures not drawn, and what the tables lack</summary>
+<ul>
+<li><b>Calibration</b> (a tool's own E-value or score against the share of its calls that are correct):
+the per-call table (the one behind the region pile-up page) keeps one score per call and no E-value, and
+it keeps only calls that name the true region's own family. Calls naming another family are not in it,
+so the share of calls that are correct cannot be counted.</li>
+<li><b>Wrong calls above the tool's recommended cutoff, per 1,000 proteins</b>: needs the same wrong-family
+calls, and each tool's recommended cutoff in the unit its documentation uses (an E-value).</li>
+<li><b>Precision when two tools agree</b>: needs the wrong-family calls too, for both tools.</li>
+<li><b>Precision-recall curves</b>: <span class="mono">results.parquet</span> keeps precision and recall at
+the Fmax cutoff only. The curve needs them at every cutoff tried. Each tool card shows the one point
+(Figure 14).</li>
+<li><b>Signal peptides and disordered regions</b> in Figure 13: the Swiss-Prot feature types in the table
+do not include them.</li>
+</ul></details>"""
+
+
 def questions(tool: str, nums: dict) -> list[str]:
     """Three yes/no questions. Each answer is the Fmax range the table shows for it."""
     t = TOOLS[tool]
@@ -1066,6 +1244,7 @@ def page_card(tool: str, md: tuple[str, str], src: dict, fig: str, cl: dict | No
             + f'<div class="card card-rest">{rest}</div>\n<p><a href="index.html">All tool cards</a> · '
             f'<a href="{tool}.md">this card as Markdown</a> · <a href="{tool}.json">as JSON</a></p>')
     return layout(f"{TOOLS[tool]['name']} card", "tools", body, src, depth=1,
+                  head='<script defer src="../assets/figures.js"></script>',
                   description=f"What {TOOLS[tool]['name']} compares, what it needs, where it is strong and weak, and what it costs.")
 
 
@@ -2273,7 +2452,7 @@ def main() -> None:
     phm = res.filter((pl.col("tool") == "hmmer3_phmmer") & (pl.col("truth_set") == "pfam")
                      & (pl.col("species") == "zebrafish") & (pl.col("stratum_axis") == "all"))
     dd = {f"{k}_{m}": phm.filter(pl.col("calls") == k)[m][0] for k in ("raw", "dedup") for m in ("fmax", "auprc")}
-    (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used, dd))
+    (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used, dd, leaderboard_figures(res)))
     (out / "cost.html").write_text(page_cost(payload, src, n_q, tools_used))
     (out / "coverage.html").write_text(page_coverage(cov, src, species_mya))
     (out / "methods.html").write_text(page_methods(res, comp, src, prov))
@@ -2323,7 +2502,8 @@ def main() -> None:
             "markdown": f"{t}.md",
         }
         (out / "tools" / f"{t}.json").write_text(json.dumps(card, indent=1, allow_nan=False) + "\n")
-        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, card_figure(t, nums, res), claims_by_tool.get(t)))
+        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, card_figure(t, nums, res) + card_pr_figure(t, nums, res),
+                                                         claims_by_tool.get(t)))
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
     if (a.data / "pileup/regions.parquet").exists():
         # The page credits its tables to this commit; without it, the copy is of unknown origin.
