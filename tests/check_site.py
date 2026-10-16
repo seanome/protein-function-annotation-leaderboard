@@ -144,10 +144,15 @@ def main() -> int:
                         # digit (the page rounds halves up, Python's format rounds them to even).
                         bad = any(abs(float(t) - e) > 0.0005 + 1e-9 for t, e in zip(shown[:2], exp[:2]))
                         # A stored median IoU of 0 (no correct call longer than one residue)
-                        # is shown as words, never as a number or a dash.
+                        # is shown as words, never as a number or a dash: with Fmax above 0
+                        # some call was correct, so those correct calls are all on single
+                        # residues; with Fmax 0 no call was correct.
                         if exp[2] is None or exp[2] == 0:
-                            bad |= cells[2]["none"] != "iou" or shown[2] != "no correct calls"
-                            stats["iou_as_words"] = stats.get("iou_as_words", 0) + 1
+                            words = ("correct calls only on single residues" if exp[0] > 0
+                                     else "no correct calls")
+                            bad |= cells[2]["none"] != "iou" or shown[2] != words
+                            k_iou = "iou_single_residue_words" if exp[0] > 0 else "iou_no_correct_words"
+                            stats[k_iou] = stats.get(k_iou, 0) + 1
                         else:
                             bad |= abs(float(shown[2]) - exp[2]) > 0.0005 + 1e-9
                         if bad or shown[3] != f"{want['n_truth_instances']:,}" or any(c["missing"] for c in cells[:4]):
@@ -209,6 +214,54 @@ def main() -> int:
                 stats["markers_checked"] += len(got)
                 if got != want or len(snap["marks"]) != len(got):
                     failures.append(f"plot {s}: markers {sorted(got ^ want)} differ from the rows with score and cost")
+
+        # ---- 2b. the URL hash: bad values fall back to the defaults, hashchange applies ----
+        defaults = meta["defaults"]
+        n_rows = len(meta["rows"])
+        for bad in ("species=Zebrafish", "axis=identity&stratum=nope", "axis=nope&stratum=all",
+                    "truth=pfam2", "metric=x&sort=evil&dir=up", "r_cpu=-1&r_gpu=abc"):
+            page.goto(base + "index.html#" + bad)
+            got = page.evaluate("window.__lb.state()")
+            shown = page.evaluate("document.querySelectorAll('#lb tbody tr').length")
+            cost_cells = page.evaluate("[...document.querySelectorAll('#lb tbody td')].map(t => t.textContent).filter(t => t.startsWith('$-'))")
+            want = {k: defaults[k] for k in ("truth", "calls", "species", "axis", "stratum", "metric", "sort", "dir", "r_cpu", "r_gpu")}
+            if {k: got[k] for k in want} != want or shown != n_rows or cost_cells:
+                failures.append(f"hash #{bad}: state {got}, {shown} rows, negative costs {cost_cells[:2]}")
+            stats["bad_hashes_checked"] = stats.get("bad_hashes_checked", 0) + 1
+        page.goto(base + "index.html")
+        page.evaluate("location.hash = 'truth=swissprot&species=mouse&axis=feature_type&stratum=TRANSMEM&sort=auprc&dir=asc'")
+        page.wait_for_function("window.__lb.state().species === 'mouse'", timeout=5000)
+        got = page.evaluate("window.__lb.state()")
+        caption = page.evaluate("document.getElementById('rankline').textContent")
+        if (got["truth"], got["stratum"], got["sort"]) != ("swissprot", "TRANSMEM", "auprc"):
+            failures.append(f"hashchange not applied: {got}")
+        if caption != "Tools ranked by AUPRC, lowest first":
+            failures.append(f"caption after sorting by AUPRC ascending: {caption!r}")
+        # Switching truth set to Pfam drops the Swiss-Prot-only feature-type stratum.
+        page.evaluate("[...document.querySelectorAll('.chiprow[data-row=truth] .chip')].find(b => b.textContent === 'Pfam').click()")
+        got = page.evaluate("window.__lb.state()")
+        n_run = page.evaluate("[...document.querySelectorAll('#lb tbody tr')].filter(tr => !tr.querySelector('[data-missing=results]')).length")
+        if (got["truth"], got["axis"], got["stratum"]) != ("pfam", "all", "all") or n_run == 0:
+            failures.append(f"Swiss-Prot TRANSMEM -> Pfam kept the stratum: {got}, {n_run} rows with results")
+        stats["hash_and_caption_checks"] = 3
+
+        # ---- 2c. dark mode: plot markers take the dark kind colours of the legend ----
+        # Same page (the test server answers one connection at a time): load in light mode,
+        # then switch the colour scheme, which must redraw the plot without a reload.
+        page.goto(base + "cost.html")
+        page.emulate_media(color_scheme="dark")
+        page.wait_for_timeout(200)
+        dark = page
+        col = dark.evaluate("""() => {
+            const s = getComputedStyle(document.documentElement);
+            const m = document.querySelector('#plot [data-tool="hmmer3_phmmer"]');
+            const leg = [...document.querySelectorAll('.legend svg [stroke]')].map(e => e.getAttribute('stroke'));
+            return {tok: s.getPropertyValue('--k-letters').trim(), marker: m && m.getAttribute('stroke'), legendHex: leg.filter(x => x.startsWith('#'))};
+        }""")
+        if not col["tok"] or col["marker"] != col["tok"] or col["legendHex"]:
+            failures.append(f"dark mode cost.html: marker {col['marker']} vs token {col['tok']}, hex legend strokes {col['legendHex']}")
+        stats["dark_mode_marker"] = col["marker"]
+        page.emulate_media(color_scheme="light")
 
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "tools/index.html"] + \
