@@ -115,7 +115,7 @@ td.missing{color:var(--muted);font-family:"Source Sans 3",sans-serif !important;
 .k-kmers{background:var(--k-kmers)}.k-models{background:var(--k-models)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9rem;margin:8px 0 10px;align-items:center}
 .legend .item{display:inline-flex;align-items:center;gap:6px;min-width:0}
-.legend .item.wrap{flex-wrap:wrap}
+@media (max-width:640px){.legend .item.kwrap{flex-wrap:wrap}}
 .legend svg,.legend .kind{flex:none}
 
 /* Plot */
@@ -432,3 +432,5 @@ table.cov td.txt{white-space:normal;min-width:9em;max-width:14em}
 .pu-hcell .lab{font:600 12px "Source Sans 3",sans-serif;fill:var(--ink)}
 #pu-all{margin-left:4px;min-height:26px;padding:2px 10px;font-size:.84rem}
 .pu-howto{margin:4px 0 14px}
+.nowrap{white-space:nowrap}
+table.cov .mono,td.num{overflow-wrap:normal;white-space:nowrap}

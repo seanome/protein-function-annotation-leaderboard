@@ -625,9 +625,9 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
                 continue
             if t == "kmerseek":
                 # One entry: kmerseek's colour, with the shape of each alphabet, smallest first.
-                shapes = " ".join(f'<span class="sub">{svg_marker(KMERSEEK_SHAPES[a], f"var(--k-{kind})")}{esc(a)}</span>'
+                shapes = "".join(f'<span class="sub">{svg_marker(KMERSEEK_SHAPES[a], f"var(--k-{kind})")}{esc(a)}</span>'
                                   for a in ALPHA_ORDER)
-                legend.append(f'<span class="item wrap">kmerseek, by alphabet: {shapes}</span>')
+                legend.append(f'<span class="item kwrap"><span class="nowrap">kmerseek, by alphabet:</span>{shapes}</span>')
             else:
                 legend.append(f'<span class="item">{svg_marker(info["shape"], f"var(--k-{kind})")}{esc(info["name"])}</span>')
     body = f"""
@@ -1107,7 +1107,7 @@ def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, comp: p
                 f'<span class="tc-tag">needs GPU</span>' if f["gpu"] == "needed" else "",
                 f'<span class="tc-tag">{esc(f["licence"])}</span>',
                 '<span class="tag warn">graded on its own models under Pfam</span>' if t == "hmmscan" else "",
-                f'<span class="tc-tag">claims: {cl["counts"]["alive"]} hold, {cl["counts"]["retired"]} disproved</span>' if cl else ""]
+                f'<span class="tc-tag">claims: {cl["counts"]["alive"]} hold{"s" if cl["counts"]["alive"] == 1 else ""}, {cl["counts"]["retired"]} disproved</span>' if cl else ""]
         where = "no relative" if nums["species"] == "all" else "zebrafish"
         nums_html = (f'<div class="tc-nums"><span><b>{fmax:.3f}</b> best Fmax</span>'
                      f'<span><b>{"$" + format(cost, ".3g") if cost is not None else "not measured"}</b> per 1,000 queries</span>'
