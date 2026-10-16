@@ -1,6 +1,33 @@
 # HH-suite (hhsearch)
 
-Tool id `hhblits`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Two profiles against each other.
+
+## Will it work for you?
+
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.248 (n = 563), 60–100% 0.283 (n = 1,289). If no, 20–30% 0.321 (n = 93), 30–40% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting single-protein profiles; subsets with at least 30 true instances.)
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.230 (n = 963), 121–250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16–30 aa 0.066 (n = 271), 31–60 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting single-protein profiles.)
+3. **Can you spend about 24.8 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" below.
+
+## Best Fmax and cost
+
+Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is single-protein profiles (`single_seq`): Fmax 0.313 over 2,435 true instances. Searching costs about $1.11 per 1,000 queries (24.8 core-hours), for each relative searched.
+
+## Where it is strong and weak
+
+Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
+
+Where it is closest to, or furthest ahead of, the best other tool:
+
+- no same-family domain in the relative: Fmax 0.032 (n = 321); best other: Foldseek, shape letters + amino acids, 0.027.
+- identity 40–60% to the closest same-family domain: Fmax 0.248 (n = 563); best other: phmmer, default options, 0.252.
+
+Where it is furthest behind the best other tool:
+
+- regions 16–30 aa long: Fmax 0.066 (n = 271); best other: kmerseek, wwmj5, k = 11, 0.330.
+- regions 31–60 aa long: Fmax 0.085 (n = 420); best other: kmerseek, gbmr4, k = 21, 0.232.
+
+Swiss-Prot features, raw calls, zebrafish, setting single-protein profiles: best feature type domain, Fmax 0.294 (n = 1,107); worst short motif, Fmax 0.003 (n = 190).
+
 
 ## What it compares
 
@@ -19,22 +46,6 @@ Single-protein profiles of the relative's proteome (Quest for Orthologs referenc
 ## How to read its score
 
 Bit score from hhsearch: higher ranks first.
-
-## Strong and weak strata
-
-Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is `single_seq`: Fmax 0.313 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
-
-Where it is closest to, or furthest ahead of, the best other tool:
-
-- no same-family domain in the relative: Fmax 0.032 (n = 321); best other: Foldseek `3di_aa`, 0.027.
-- identity 40–60% to the closest same-family domain: Fmax 0.248 (n = 563); best other: phmmer `default`, 0.252.
-
-Where it is furthest behind the best other tool:
-
-- regions 16–30 aa long: Fmax 0.066 (n = 271); best other: kmerseek `wwmj5_k11_lcFalse`, 0.330.
-- regions 31–60 aa long: Fmax 0.085 (n = 420); best other: kmerseek `gbmr4_k21_lcFalse`, 0.232.
-
-Swiss-Prot features, raw calls, zebrafish, setting `single_seq`: best feature type DOMAIN (domain), Fmax 0.294 (n = 1,107); worst MOTIF (short motif), Fmax 0.003 (n = 190).
 
 ## Known failure modes {#failure-modes}
 
@@ -55,7 +66,7 @@ The per-query cost counts the search only. The run recorded cost per tool and se
 
 ## Settings in the table
 
-- `single_seq`: profiles built from single proteins, no family database
+- single-protein profiles (`single_seq`): profiles built from single proteins, no family database
 
 ## Version, container, command
 
@@ -71,8 +82,5 @@ ffindex_apply \
 
 One hhsearch per query protein, run through ffindex_apply.
 
-## Will it work for you?
+Tool id `hhblits`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
 
-1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.248 (n = 563), 60–100% 0.283 (n = 1,289). If no, 20–30% 0.321 (n = 93), 30–40% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `single_seq`; strata with at least 30 true instances.)
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.230 (n = 963), 121–250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16–30 aa 0.066 (n = 271), 31–60 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `single_seq`.)
-3. **Can you spend about 24.8 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" above.

@@ -114,7 +114,8 @@ td.missing{color:var(--muted);font-family:"Source Sans 3",sans-serif !important;
 .k-letters{background:var(--k-letters)}.k-profiles{background:var(--k-profiles)}.k-shapes{background:var(--k-shapes)}
 .k-kmers{background:var(--k-kmers)}.k-models{background:var(--k-models)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9rem;margin:8px 0 10px;align-items:center}
-.legend .item{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.legend .item{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.legend .item.wrap{flex-wrap:wrap}
 .legend svg,.legend .kind{flex:none}
 
 /* Plot */
@@ -368,3 +369,36 @@ td.missing i{color:var(--muted)}
 }
 .legend .item .sub{display:inline-flex;align-items:center;gap:3px;margin-right:6px}
 .pickchip{display:inline-flex;align-items:center}
+
+/* Tool cards index: name, numbers, one line, then Figure 1's bar per relative. */
+.tc{padding:14px 18px 12px;gap:4px}
+.tc-name{margin:0 0 2px}
+.tc-nums{display:flex;flex-wrap:wrap;gap:2px 16px;font-size:.92rem}
+.tc-nums b{font-family:"Fantasque Sans Mono",monospace;font-size:1.05rem}
+.tc-desc{margin:2px 0 4px;flex:none}
+.tc-tags{margin-top:4px}
+.strip{display:block;width:100%;max-width:420px;height:auto}
+.st-base{stroke:var(--muted);stroke-width:1}
+.st-grid{stroke:var(--hair);stroke-dasharray:2 2}
+.st-t{font:11px "Fantasque Sans Mono",monospace;fill:var(--muted)}
+.st-l{font:12px "Source Sans 3",sans-serif;fill:var(--muted)}
+.st-nr{stroke:var(--nr);stroke-width:1.6}
+.strip-none{font-size:.88rem;color:var(--muted);margin:4px 0}
+.tc-fbox{padding:6px 14px 12px;border-top:1px solid var(--hair)}
+.tc-frow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:4px 0}
+.tc-flab{font-weight:600;font-size:.92rem;min-width:13em}
+details.tc-filters{margin:8px 0 6px}
+.tcfig figcaption{max-width:90ch}
+
+/* Tool card */
+.crumb{font-size:.92rem;color:var(--muted);margin:0 0 8px}
+.card-rest{margin-top:16px}
+.cardfig{margin:10px 0 6px}
+svg.cf{display:block;width:100%;max-width:440px;height:auto}
+.cf-h{font:600 12.5px "Source Sans 3",sans-serif;fill:var(--ink)}
+.cf-l{font:12px "Source Sans 3",sans-serif;fill:var(--ink)}
+.cf-n{font:11.5px "Source Sans 3",sans-serif;fill:var(--muted)}
+.cf-t{font:11px "Fantasque Sans Mono",monospace;fill:var(--muted)}
+.cf-row{stroke:var(--hair)}
+.cf-grid{stroke:var(--hair);stroke-dasharray:2 2}
+.cf-o{fill:var(--muted)}

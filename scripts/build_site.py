@@ -627,7 +627,7 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
                 # One entry: kmerseek's colour, with the shape of each alphabet, smallest first.
                 shapes = " ".join(f'<span class="sub">{svg_marker(KMERSEEK_SHAPES[a], f"var(--k-{kind})")}{esc(a)}</span>'
                                   for a in ALPHA_ORDER)
-                legend.append(f'<span class="item">kmerseek, by alphabet: {shapes}</span>')
+                legend.append(f'<span class="item wrap">kmerseek, by alphabet: {shapes}</span>')
             else:
                 legend.append(f'<span class="item">{svg_marker(info["shape"], f"var(--k-{kind})")}{esc(info["name"])}</span>')
     body = f"""
@@ -698,7 +698,7 @@ def strong_weak(comparisons: list) -> tuple[list, list]:
 
 
 def card_numbers(tool: str, res: pl.DataFrame, comp: pl.DataFrame) -> dict:
-    """Strong and weak strata, cost and the three questions, all read from the tables."""
+    """Strong and weak subsets, cost and the three questions, all read from the tables."""
     species = "all" if tool == "hmmscan" else "zebrafish"
     base = dict(truth_set="pfam", calls="raw", species=species)
     mine_all = best_by(res, tool=tool, stratum_axis="all", **base)
@@ -766,64 +766,73 @@ def stratum_words(axis, stratum):
     return v
 
 
-def card_markdown(tool: str, nums: dict, src: dict) -> str:
+def card_markdown(tool: str, nums: dict, src: dict) -> tuple[str, str]:
+    """The card as Markdown, in two parts: what a reader choosing a tool needs first (the
+    one-line description, "Will it work for you?", best Fmax and cost, strong and weak
+    subsets), and the rest. The HTML card puts its figure and the claims between them."""
     t = TOOLS[tool]
     sp_name = SPECIES[nums["species"]]
     where = ("Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models)"
              if nums["species"] == "all" else DEFAULT_WORDS)
-    L = [f"# {t['name']}", "",
-         f"Tool id `{tool}`. Numbers from {src['repo']} commit `{src['commit'][:8]}`.", "",
-         "## What it compares", "", t["compares"], "",
-         "## What it needs", ""]
+    first = t["compares"].split(". ")[0].rstrip(".") + "."
+    T = [f"# {t['name']}", "", first, "", "## Will it work for you?", ""]
+    T += questions(tool, nums)
+    T += ["", "## Best Fmax and cost", ""]
+    ch = nums.get("cost_here")
+    if "best_setting" not in nums:
+        T += ["Not run under the Pfam truth set for this relative.", ""]
+    else:
+        b = nums["best_all"]
+        bs = nums["best_setting"]
+        line = (f"Under the {where}, its best setting is {setting_label(tool, bs)} (`{bs}`): Fmax "
+                f"{fnum(b['fmax'])} over {b['n_truth_instances']:,} true instances.")
+        if ch:
+            cost = ch["cpu_h_per_1000_queries"] * R_CPU + ch["gpu_h_per_1000_queries"] * R_GPU
+            line += (f" Searching costs about ${cost:.3g} per 1,000 queries "
+                     f"({ch['cpu_h_per_1000_queries']:.3g} core-hours), "
+                     + ("for scanning Pfam's models." if nums["species"] == "all" else "for each relative searched."))
+        else:
+            line += " Its search cost was not measured."
+        T += [line, ""]
+    T += ["## Where it is strong and weak", ""]
+    if "best_setting" not in nums:
+        T += ["Not run under the Pfam truth set for this relative.", ""]
+    else:
+        T += ["Each line compares this setting with the best setting of any other tool on the same "
+              "subset of the proteins, so the other tool's setting can change from line to line. "
+              f"Only subsets with at least {MIN_N} true instances are compared.", ""]
+
+        def lines(cs):
+            return [f"- {stratum_words(c['axis'], c['stratum'])}: Fmax {fnum(c['fmax'])} "
+                    f"(n = {c['n']:,}); best other: {TOOLS[c['other_tool']]['name']}, "
+                    f"{setting_label(c['other_tool'], c['other_setting'])}, {fnum(c['other_fmax'])}."
+                    for c in cs]
+        if nums["strong"]:
+            T += ["Where it is closest to, or furthest ahead of, the best other tool:", ""] + lines(nums["strong"]) + [""]
+        if nums["weak"]:
+            T += ["Where it is furthest behind the best other tool:", ""] + lines(nums["weak"]) + [""]
+        if not nums["strong"] and not nums["weak"]:
+            T += ["No other tool was scored on the same subsets, so no comparison: not run.", ""]
+        if "sp_best" in nums:
+            sb, sw = nums["sp_best"], nums["sp_worst"]
+            T += [f"Swiss-Prot features, raw calls, {sp_name}, setting {setting_label(tool, nums['sp_setting'])}: "
+                  f"best feature type {FEATURE_WORDS.get(sb['stratum'], sb['stratum'])}, Fmax "
+                  f"{fnum(sb['fmax'])} (n = {sb['n_truth_instances']:,}); worst "
+                  f"{FEATURE_WORDS.get(sw['stratum'], sw['stratum'])}, Fmax {fnum(sw['fmax'])} "
+                  f"(n = {sw['n_truth_instances']:,}).", ""]
+        else:
+            T += ["Swiss-Prot feature types: not run.", ""]
+
+    L = ["## What it compares", "", t["compares"], "", "## What it needs", ""]
     for k, v in t["needs"].items():
         L.append(f"- {k}: {'yes' if v else 'no'}")
     L += ["", "## Reference searched", "", t["reference"], "",
           "## How to read its score", "", t["score"], ""]
-
-    L += ["## Strong and weak strata", ""]
-    if "best_setting" not in nums:
-        L += ["Not run under the Pfam truth set for this relative.", ""]
-    else:
-        b = nums["best_all"]
-        L += [f"Under the {where}, its best setting is `{nums['best_setting']}`: Fmax "
-              f"{fnum(b['fmax'])} over {b['n_truth_instances']:,} true instances. Below, each "
-              "stratum compares this setting with the best setting of any other tool in that "
-              "same stratum, so the other tool's setting can change from line to line. "
-              f"Only strata with at least {MIN_N} true instances are compared.", ""]
-        if nums["strong"]:
-            L.append("Where it is closest to, or furthest ahead of, the best other tool:")
-            L.append("")
-            for c in nums["strong"]:
-                L.append(f"- {stratum_words(c['axis'], c['stratum'])}: Fmax {fnum(c['fmax'])} "
-                         f"(n = {c['n']:,}); best other: {TOOLS[c['other_tool']]['name']} "
-                         f"`{c['other_setting']}`, {fnum(c['other_fmax'])}.")
-            L.append("")
-        if nums["weak"]:
-            L.append("Where it is furthest behind the best other tool:")
-            L.append("")
-            for c in nums["weak"]:
-                L.append(f"- {stratum_words(c['axis'], c['stratum'])}: Fmax {fnum(c['fmax'])} "
-                         f"(n = {c['n']:,}); best other: {TOOLS[c['other_tool']]['name']} "
-                         f"`{c['other_setting']}`, {fnum(c['other_fmax'])}.")
-            L.append("")
-        if not nums["strong"] and not nums["weak"]:
-            L += ["No other tool was scored in the same strata, so no comparison: not run.", ""]
-        if "sp_best" in nums:
-            sb, sw = nums["sp_best"], nums["sp_worst"]
-            L += [f"Swiss-Prot features, raw calls, {sp_name}, setting `{nums['sp_setting']}`: "
-                  f"best feature type {sb['stratum']} ({FEATURES.get(sb['stratum'], '')}), Fmax "
-                  f"{fnum(sb['fmax'])} (n = {sb['n_truth_instances']:,}); worst {sw['stratum']} "
-                  f"({FEATURES.get(sw['stratum'], '')}), Fmax {fnum(sw['fmax'])} "
-                  f"(n = {sw['n_truth_instances']:,}).", ""]
-        else:
-            L += ["Swiss-Prot feature types: not run.", ""]
-
     L += ['## Known failure modes {#failure-modes}', ""]
     L += [f"- {f}" for f in t["failure_modes"]]
     L.append("")
 
     L += ["## Cost per 1,000 queries", ""]
-    ch = nums.get("cost_here")
     if ch:
         gpu = ch["gpu_h_per_1000_queries"]
         cost = ch["cpu_h_per_1000_queries"] * R_CPU + gpu * R_GPU
@@ -856,18 +865,92 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
           f"- Licence: {t['licence']} ([source]({t['licence_url']}))",
           f"- Commercial use allowed: {t['commercial']}", ""]
 
-    settings = sorted({r["setting"] for r in nums.get("all_settings", [])})
+    settings = sorted({r["setting"] for r in nums.get("all_settings", [])}, key=lambda st: setting_key(tool, st))
     if settings:
         L += ["## Settings in the table", ""]
-        L += [f"- `{st}`: {setting_words(tool, st)}" for st in settings]
+        L += [f"- {setting_label(tool, st)} (`{st}`): {setting_words(tool, st)}" for st in settings]
         L += [""]
     L += ["## Version, container, command", "",
           f"- Version: {t['version']}", f"- Container: `{t['container']}`", "",
-          "```bash", t["command"], "```", "", t["command_note"], ""]
+          "```bash", t["command"], "```", "", t["command_note"], "",
+          f"Tool id `{tool}`. Numbers from {src['repo']} commit `{src['commit'][:8]}`.", ""]
+    return "\n".join(T) + "\n", "\n".join(L) + "\n"
 
-    L += ["## Will it work for you?", ""]
-    L += questions(tool, nums)
-    return "\n".join(L) + "\n"
+
+def card_figure(tool: str, nums: dict, res: pl.DataFrame) -> str:
+    """Figure 2 of a card: Fmax by identity bin and by region length bin, this tool's best
+    setting against the best other tool in each bin, on one shared 0-to-max axis."""
+    if "best_setting" not in nums:
+        return ""
+    base = dict(truth_set="pfam", calls="raw", species=nums["species"])
+    others = res.filter(pl.col("tool") != tool)
+    groups = [("identity", "% identity to the closest same-family domain", [v for v, _ in IDENTITY]),
+              ("feature_length_bin", "length of the annotated region",
+               [v for v, _ in LENGTH_SHORT + LENGTH_DOMAIN] + ["whole_protein"])]
+    rows, few = [], []
+    for axis, title, order in groups:
+        mine = {r["stratum"]: r for r in best_by(res, tool=tool, setting=nums["best_setting"],
+                                                stratum_axis=axis, **base).iter_rows(named=True)}
+        g = []
+        for st in order:
+            r = mine.get(st)
+            if r is None:
+                continue
+            if r["n_truth_instances"] < MIN_N:
+                few.append(STRATUM_WORDS[axis].get(st, st))
+                continue
+            o = best_by(others, stratum_axis=axis, stratum=st, **base)
+            ob = o.sort(["fmax", "tool", "setting"], descending=[True, False, False]).row(0, named=True) if o.height else None
+            g.append((st, r, ob))
+        if g:
+            rows.append((title, axis, g))
+    if not rows:
+        return ""
+    vals = [r["fmax"] for _, _, g in rows for _, r, _ in g] + [ob["fmax"] for _, _, g in rows for _, _, ob in g if ob]
+    xmax = max(0.1, math.ceil(max(vals) * 10) / 10)
+    # Drawn at about phone width, so its 11-12 px text stays that size on a phone.
+    W, L, R, top = 360, 104, 122, 8
+    px = lambda v: L + v / xmax * (W - L - R)  # noqa: E731
+    color = f"var(--k-{TOOLS[tool]['kind']})"
+    parts, y = [], top
+    for title, axis, g in rows:
+        y += 14
+        parts.append(f'<text x="0" y="{y}" class="cf-h">{esc(title)}</text>')
+        y += 2
+        for st, r, ob in g:
+            y += 20
+            lab = "none in relative" if st == "no_homolog" else STRATUM_WORDS[axis].get(st, st)
+            parts.append(f'<line x1="{L}" x2="{W - R}" y1="{y}" y2="{y}" class="cf-row"/>')
+            parts.append(f'<text x="{L - 6}" y="{y + 4}" text-anchor="end" class="cf-l">{esc(lab)}</text>')
+            if ob:
+                oname = TOOLS[ob["tool"]]["name"]
+                parts.append(f'<path d="M{px(ob["fmax"]):.1f},{y - 5} l5,5 l-5,5 l-5,-5 z" class="cf-o">'
+                             f'<title>best other tool: {esc(oname)}, {esc(setting_label(ob["tool"], ob["setting"]))}, Fmax {ob["fmax"]:.3f}</title></path>')
+                parts.append(f'<text x="{W - R + 6}" y="{y + 4}" class="cf-n">{esc(oname)}</text>')
+            parts.append(f'<circle cx="{px(r["fmax"]):.1f}" cy="{y}" r="5" fill="{color}" stroke="var(--surface)" stroke-width="1">'
+                         f'<title>{esc(TOOLS[tool]["name"])}: Fmax {r["fmax"]:.3f}, n = {r["n_truth_instances"]:,}</title></circle>')
+        y += 14
+    axis_y = y
+    step = 0.1 if xmax <= 0.6 else 0.2
+    ticks = [round(k * step, 1) for k in range(int(round(xmax / step)) + 1)]
+    for tk in ticks:
+        parts.append(f'<line x1="{px(tk):.1f}" x2="{px(tk):.1f}" y1="{top + 20}" y2="{axis_y}" class="cf-grid"/>')
+        parts.append(f'<text x="{px(tk):.1f}" y="{axis_y + 14}" text-anchor="middle" class="cf-t">{tk:g}</text>')
+    parts.append(f'<text x="{(L + W - R) / 2}" y="{axis_y + 30}" text-anchor="middle" class="cf-l">Fmax (higher is better)</text>')
+    H = axis_y + 38
+    other_mark = '<svg width="14" height="14" aria-hidden="true"><path d="M7,2 l5,5 l-5,5 l-5,-5 z" class="cf-o"/></svg>'
+    mine_mark = f'<svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="{color}"/></svg>'
+    note = (f' Left out, under {MIN_N} true instances: {esc(", ".join(few))}.' if few else "")
+    where = ("Pfam truth set, raw calls, no relative" if nums["species"] == "all"
+             else "Pfam truth set, raw calls, zebrafish as the relative")
+    return f"""<figure class="cardfig">
+<figcaption><b>Figure 2.</b> Where {esc(TOOLS[tool]['name'])} is ahead and behind: its Fmax on each subset of the
+proteins, against the best other tool on that subset ({where}; its best setting,
+{esc(setting_label(tool, nums['best_setting']))}).{note}</figcaption>
+<div class="legend"><span class="item">{mine_mark}{esc(TOOLS[tool]['name'])}</span>
+<span class="item">{other_mark}best other tool on that subset, named at the right</span></div>
+<svg class="cf" viewBox="0 0 {W} {H}" role="img" aria-label="Fmax by subset for {esc(TOOLS[tool]['name'])} and the best other tool">{"".join(parts)}</svg>
+</figure>"""
 
 
 def questions(tool: str, nums: dict) -> list[str]:
@@ -887,16 +970,17 @@ def questions(tool: str, nums: dict) -> list[str]:
 
     base_words = ("Pfam truth set, raw calls, no relative searched" if nums["species"] == "all"
                   else DEFAULT_WORDS)
-    where = f"{base_words}, setting `{nums.get('best_setting')}`"
+    bs = nums.get("best_setting")
+    where = f"{base_words}, setting {setting_label(tool, bs) if bs else 'none'}"
     a1 = answer(nums.get("identity", {}), ["40-60%", "60-100%"], ["0-20%", "20-30%", "30-40%"],
                 STRATUM_WORDS["identity"])
     if a1:
         q.append("1. **Is the closest same-family domain in the relative you will search at least "
-                 f"40% identical, for most of your proteins?** {a1} ({where}; strata with at least "
+                 f"40% identical, for most of your proteins?** {a1} ({where}; subsets with at least "
                  f"{MIN_N} true instances.)")
     elif nums.get("identity"):
         q.append("1. **Is the closest same-family domain in the relative you will search at least "
-                 f"40% identical?** Too few true instances (under {MIN_N}) in the identity strata to say.")
+                 f"40% identical?** Too few true instances (under {MIN_N}) in the identity subsets to say.")
     else:
         q.append("1. **Is every family you expect to find already in Pfam?** If no, this tool "
                  "cannot find it: it only reports families that have a Pfam model.")
@@ -919,16 +1003,20 @@ def questions(tool: str, nums: dict) -> list[str]:
         else:
             q.append(f"3. **Can you spend about {ch['cpu_h_per_1000_queries']:.3g} core-hours{extra} "
                      "per 1,000 proteins for each relative you search?** That is the measured mean "
-                     "per relative; see \"Cost per 1,000 queries\" above.")
+                     "per relative; see \"Cost per 1,000 queries\" below.")
     else:
         q.append("3. **Can you afford the search?** Its cost was not measured in this run.")
     return q
 
 
-def page_card(tool: str, md: str, src: dict, cl: dict | None = None) -> str:
-    body_html = markdown.markdown(md, extensions=["fenced_code", "attr_list", "tables"])
-    body = (claims_card(cl, up="../") if cl else "") + f'<div class="card">{body_html}</div>\n<p><a href="index.html">All tool cards</a> · ' \
-           f'<a href="{tool}.md">this card as Markdown</a> · <a href="{tool}.json">as JSON</a></p>'
+def page_card(tool: str, md: tuple[str, str], src: dict, fig: str, cl: dict | None = None) -> str:
+    ext = ["fenced_code", "attr_list", "tables"]
+    top, rest = (markdown.markdown(x, extensions=ext) for x in md)
+    crumb = f'<nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Tool cards</a> › {esc(TOOLS[tool]["name"])}</nav>'
+    body = (f'{crumb}<div class="card">{top}{fig}</div>\n'
+            + (claims_card(cl, up="../") if cl else "")
+            + f'<div class="card card-rest">{rest}</div>\n<p><a href="index.html">All tool cards</a> · '
+            f'<a href="{tool}.md">this card as Markdown</a> · <a href="{tool}.json">as JSON</a></p>')
     return layout(f"{TOOLS[tool]['name']} card", "tools", body, src, depth=1,
                   description=f"What {TOOLS[tool]['name']} compares, what it needs, where it is strong and weak, and what it costs.")
 
@@ -939,120 +1027,145 @@ SHORT_KIND = {"letters": "aligns letters", "profiles": "family profiles", "shape
               "kmers": "reduced-alphabet k-mers", "models": "Pfam models"}
 
 
-def tool_tags(t: str, cl: dict | None) -> list[str]:
-    """Categories a reader filters by, all read from the tool facts or the claims file."""
+def tool_filters(t: str) -> dict:
+    """The three things a reader filters tool cards by, from the tool facts."""
     info = TOOLS[t]
-    tags = [SHORT_KIND[info["kind"]]]
-    needs = info["needs"]
-    tags.append("needs 3D structure prediction" if needs["3D structure prediction"] else "sequence only")
-    if needs["GPU"]:
-        tags.append("needs GPU")
     if info["licence_tag"] not in LICENCE_TAGS:
         raise SystemExit(f"{t}: licence_tag {info['licence_tag']!r} is not one of {LICENCE_TAGS}")
-    tags.append(info["licence_tag"])
-    if t == "hmmscan":
-        tags.append("reference")
-    if cl:
-        tags.append("has claims")
-    return tags
+    return {"structure": "needed" if info["needs"]["3D structure prediction"] else "not needed",
+            "gpu": "needed" if info["needs"]["GPU"] else "not needed",
+            "licence": info["licence_tag"]}
 
 
-def dot_grid(t: str, res: pl.DataFrame, rel_order: list[str]) -> str:
-    """One dot per relative, nearest first (rows of five), area proportional to the tool's best
-    Fmax there (Pfam domains, raw calls, all regions); an open ring where it was not run."""
-    q = res.filter((pl.col("tool") == t) & (pl.col("truth_set") == "pfam") & (pl.col("calls") == "raw")
-                   & (pl.col("stratum_axis") == "all"))
-    best = {r["species"]: r["fmax"] for r in q.group_by("species").agg(pl.col("fmax").max()).iter_rows(named=True)}
-    if list(best) == ["all"]:
-        return (f'<svg class="dg" viewBox="0 0 110 66" role="img" aria-label="searches no relative">'
-                f'<text x="55" y="37" text-anchor="middle" class="dg-t">no relative</text></svg>')
-    cells, labels = [], []
+def best_by_relative(res: pl.DataFrame) -> dict:
+    """tool -> {relative: best Fmax over its settings}, Pfam domains, raw calls, all proteins."""
+    q = res.filter((pl.col("truth_set") == "pfam") & (pl.col("calls") == "raw") & (pl.col("stratum_axis") == "all"))
+    out: dict = {}
+    for r in q.group_by("tool", "species").agg(pl.col("fmax").max()).iter_rows(named=True):
+        out.setdefault(r["tool"], {})[r["species"]] = r["fmax"]
+    return out
+
+
+def fmax_strip(t: str, best: dict, rel_order: list[str], mya: dict, ymax: float) -> str:
+    """One bar per relative, nearest to farthest, height = the tool's best Fmax there on the
+    0-to-ymax scale every card shares; a grey x where it was not run."""
+    mine = best.get(t, {})
+    if set(mine) <= {"all"}:
+        return ('<p class="strip-none">Searches Pfam\'s models, not a relative, so it has one number '
+                'and no bar per relative.</p>')
+    W, H, L, B = 300, 64, 30, 30
+    bw = (W - L) / len(rel_order)
+    sy = lambda v: 4 + (1 - v / ymax) * (H - B - 4)  # noqa: E731
+    parts = [f'<line x1="{L}" x2="{W}" y1="{sy(0):.1f}" y2="{sy(0):.1f}" class="st-base"/>',
+             f'<line x1="{L}" x2="{W}" y1="{sy(ymax):.1f}" y2="{sy(ymax):.1f}" class="st-grid"/>',
+             f'<text x="{L - 4}" y="{sy(ymax) + 4:.1f}" text-anchor="end" class="st-t">{ymax:.2f}</text>',
+             f'<text x="{L - 4}" y="{sy(0) + 4:.1f}" text-anchor="end" class="st-t">0</text>']
+    labels = []
     for k, sp in enumerate(rel_order):
-        cx, cy = 11 + 22 * (k % 5), 11 + 22 * (k // 5)
-        v = best.get(sp)
+        x = L + k * bw
+        v = mine.get(sp)
         if v is None:
-            cells.append(f'<circle cx="{cx}" cy="{cy}" r="3" fill="none" stroke="var(--muted)" stroke-width="1"/>')
-            labels.append(f"{SPECIES[sp]}: not run")
+            cx, cy = x + bw / 2, sy(0) - 6
+            parts.append(f'<path d="M{cx - 3.5:.1f},{cy - 3.5:.1f} l7,7 M{cx + 3.5:.1f},{cy - 3.5:.1f} l-7,7" class="st-nr"/>')
+            labels.append(f"{SPECIES[sp]} ({mya[sp]:,} Mya): not run")
         else:
-            r = 1.2 + 9 * (v / 0.5) ** 0.5   # area grows with Fmax; Fmax 0.5 fills the cell
-            cells.append(f'<circle cx="{cx}" cy="{cy}" r="{min(r, 10):.2f}" fill="var(--k-{TOOLS[t]["kind"]})"/>')
-            labels.append(f"{SPECIES[sp]}: {v:.3f}")
-    return (f'<svg class="dg" viewBox="0 0 110 66" role="img" aria-label="best Fmax by relative: {esc("; ".join(labels))}">'
-            f'<title>{esc("; ".join(labels))}</title>{"".join(cells)}</svg>')
+            parts.append(f'<rect x="{x + 1.5:.1f}" y="{sy(v):.1f}" width="{bw - 3:.1f}" height="{sy(0) - sy(v):.1f}" '
+                         f'fill="var(--k-{TOOLS[t]["kind"]})"><title>{esc(SPECIES[sp])}, {mya[sp]:,} Mya: Fmax {v:.3f}</title></rect>')
+            labels.append(f"{SPECIES[sp]} ({mya[sp]:,} Mya): {v:.3f}")
+    f, l = rel_order[0], rel_order[-1]
+    parts.append(f'<text x="{L}" y="{H - 12}" class="st-l">{esc(SPECIES[f])}, {mya[f]:,} Mya</text>')
+    parts.append(f'<text x="{W}" y="{H - 12}" text-anchor="end" class="st-l">{esc(SPECIES[l])}, {mya[l]:,} Mya</text>')
+    return (f'<svg class="strip" viewBox="0 0 {W} {H}" role="img" aria-label="best Fmax at each relative: {esc("; ".join(labels))}">'
+            f'{"".join(parts)}</svg>')
 
 
-def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, claims_by_tool: dict) -> str:
+FILTER_GROUPS = [("structure", "3D structure prediction"), ("gpu", "GPU"), ("licence", "Licence")]
+
+
+def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, comp: pl.DataFrame,
+                     claims_by_tool: dict) -> str:
     rel = res.filter(pl.col("species") != "all").select("species", "species_mya").unique().sort("species_mya", "species")
     rel_order = rel["species"].to_list()
     mya = {s: int(m) for s, m in rel.iter_rows()}
-    cards, all_tags = [], []
-    for kind in KINDS:
-        for t, info in TOOLS.items():
-            if info["kind"] != kind or t not in tools_used:
-                continue
-            cl = claims_by_tool.get(t)
-            tags = tool_tags(t, cl)
-            all_tags += [x for x in tags if x not in all_tags]
-            q = res.filter(pl.col("tool") == t)
-            n_set = q["setting"].n_unique()
-            n_rel = q.filter(pl.col("species") != "all")["species"].n_unique()
-            n_truth = q["truth_set"].n_unique()
-            stats = [f"<b>{n_set}</b> setting{'s' if n_set != 1 else ''}",
-                     f"<b>{n_rel}</b> relative{'s' if n_rel != 1 else ''}" if n_rel else "<b>0</b> relatives",
-                     f"<b>{n_truth}</b> truth set{'s' if n_truth != 1 else ''}"]
-            if cl:
-                c = cl["counts"]
-                stats.append(f'<b>{c["alive"]}</b> alive, <b>{c["retired"]}</b> retired, <b>{c["untested"]}</b> untested claims')
-            first = info["compares"].split(". ")[0].rstrip(".") + "."
-            cards.append(f"""<li class="tc" data-tags="{esc('|'.join(tags))}" data-text="{esc((info['name'] + ' ' + info['compares'] + ' ' + ' '.join(tags)).lower())}">
-<div class="tc-top"><div class="tc-tags">{"".join(f'<span class="tc-tag">{esc(x)}</span>' for x in tags)}</div>{dot_grid(t, res, rel_order)}</div>
-<h2 class="tc-name"><span class="kind k-{kind}" aria-hidden="true"></span><a href="{t}.html">{esc(info["name"])}</a></h2>
+    best = best_by_relative(res)
+    ymax = math.ceil(max(v for t in best.values() for sp, v in t.items() if sp != "all") * 20) / 20
+    entries = []
+    for t in tools_used:
+        nums = card_numbers(t, res, comp)
+        b = nums.get("best_all")
+        ch = nums.get("cost_here")
+        cost = (ch["cpu_h_per_1000_queries"] * R_CPU + ch["gpu_h_per_1000_queries"] * R_GPU) if ch else None
+        entries.append((t, nums, b["fmax"] if b else None, cost))
+    # Best Fmax first; hmmscan, which searches no relative, last.
+    entries.sort(key=lambda e: (e[0] == "hmmscan", -(e[2] or 0), e[0]))
+    cards = []
+    for t, nums, fmax, cost in entries:
+        info = TOOLS[t]
+        f = tool_filters(t)
+        cl = claims_by_tool.get(t)
+        tags = [f'<span class="tc-tag">needs 3D structure prediction</span>' if f["structure"] == "needed" else "",
+                f'<span class="tc-tag">needs GPU</span>' if f["gpu"] == "needed" else "",
+                f'<span class="tc-tag">{esc(f["licence"])}</span>',
+                '<span class="tag warn">graded on its own models under Pfam</span>' if t == "hmmscan" else "",
+                f'<span class="tc-tag">claims: {cl["counts"]["alive"]} hold, {cl["counts"]["retired"]} disproved</span>' if cl else ""]
+        where = "no relative" if nums["species"] == "all" else "zebrafish"
+        nums_html = (f'<div class="tc-nums"><span><b>{fmax:.3f}</b> best Fmax</span>'
+                     f'<span><b>{"$" + format(cost, ".3g") if cost is not None else "not measured"}</b> per 1,000 queries</span>'
+                     f'<span class="muted">Pfam, raw calls, {where}; {esc(setting_label(t, nums["best_setting"]))}</span></div>'
+                     if fmax is not None else '<div class="tc-nums"><span><span class="nr">×</span> not run</span></div>')
+        first = info["compares"].split(". ")[0].rstrip(".") + "."
+        data = " ".join(f'data-{k}="{esc(v)}"' for k, v in f.items())
+        cards.append(f"""<li class="tc" {data}>
+<h2 class="tc-name"><span class="kind k-{info['kind']}" aria-hidden="true"></span><a href="{t}.html">{esc(info["name"])}</a></h2>
+{nums_html}
 <p class="tc-desc">{esc(first)}</p>
-<div class="tc-foot">{" · ".join(stats)}</div></li>""")
-    group = ([SHORT_KIND[k] for k in KINDS] + ["sequence only", "needs 3D structure prediction", "needs GPU",
-                                              "permissive licence", "GPL-3.0", "reference", "has claims"])
-    all_tags = [x for x in group if x in all_tags] + [x for x in all_tags if x not in group]
-    chips = '<button type="button" class="chip" data-tag="" aria-pressed="true">All</button>' + "".join(
-        f'<button type="button" class="chip" data-tag="{esc(x)}" aria-pressed="false">{esc(x)}</button>' for x in all_tags)
+{fmax_strip(t, best, rel_order, mya, ymax)}
+<div class="tc-tags">{"".join(x for x in tags if x)}</div></li>""")
+    rows = []
+    for key, label in FILTER_GROUPS:
+        vals = sorted({tool_filters(t)[key] for t in tools_used})
+        chips = '<button type="button" class="chip" data-f="" aria-pressed="true">any</button>' + "".join(
+            f'<button type="button" class="chip" data-f="{esc(v)}" aria-pressed="false">{esc(v)}</button>' for v in vals)
+        rows.append(f'<div class="tc-frow" role="group" aria-label="{esc(label)}" data-key="{key}">'
+                    f'<span class="tc-flab">{esc(label)}</span>{chips}</div>')
+    x_mark = '<svg width="12" height="12" aria-hidden="true"><path d="M2.5,2.5 l7,7 M9.5,2.5 l-7,7" class="st-nr"/></svg>'
     body = f"""<h1>Tool cards</h1>
-<p class="lede">One card per tool: what it compares, what it needs, how to read its score, where it
-is strong and weak in the table, what it costs, its licence, and the exact command that was run.</p>
-<div class="tc-bar"><label class="tc-search"><span class="sr">Search tools</span>
-<input id="tc-q" type="search" placeholder="Search tools…" autocomplete="off"></label>
-<span id="tc-count" class="mono muted"></span></div>
-<div class="chips tc-chips" role="group" aria-label="Filter by category">{chips}</div>
+<p class="lede">One card per tool, best Fmax first: what it compares, whether it will work for your
+proteins, where it is strong and weak, what it costs, and the exact command that was run.</p>
+<details class="choices tc-filters"><summary><span class="choices-label">Filter the cards</span>
+<span class="choices-now" id="tc-count"></span></summary>
+<div class="tc-fbox">{"".join(rows)}</div></details>
+<figure class="tcfig">
+<figcaption><b>Figure 1.</b> Each tool's best Fmax at each of the {len(rel_order)} relatives, one bar per
+relative from the nearest ({esc(SPECIES[rel_order[0]])}, {mya[rel_order[0]]:,} Mya) to the farthest
+({esc(SPECIES[rel_order[-1]])}, {mya[rel_order[-1]]:,} Mya): Pfam domains, raw calls, all proteins, best
+over the tool's settings. Every card uses the same scale, 0 to {ymax:.2f}. Hover a bar for its relative and number.</figcaption>
 {legend_kinds(tools_used)}
-<div class="legend" aria-label="Key to the dots"><span class="item"><svg width="44" height="14" aria-hidden="true">
-<circle cx="7" cy="7" r="6" fill="var(--ink)"/><circle cx="24" cy="7" r="3" fill="var(--ink)"/><circle cx="38" cy="7" r="3" fill="none" stroke="var(--muted)"/></svg>
-dots: one per relative, nearest ({esc(SPECIES[rel_order[0]])}, {mya[rel_order[0]]:,} Mya) top left to farthest ({esc(SPECIES[rel_order[-1]])}, {mya[rel_order[-1]]:,} Mya) bottom right;
-larger means a higher best Fmax on Pfam domains (raw calls, all regions); an open ring means not run.
-Hover the dots for the numbers.</span></div>
+<div class="legend"><span class="item">{x_mark} not run at that relative</span></div>
 <ul class="tc-grid" id="tc-grid">{"".join(cards)}</ul>
+</figure>
 <script>
 (function () {{
-  const cards = [...document.querySelectorAll(".tc")], q = document.getElementById("tc-q");
-  const count = document.getElementById("tc-count");
-  let tag = "";
+  const cards = [...document.querySelectorAll(".tc")], count = document.getElementById("tc-count");
+  const want = {{}};
   function apply() {{
-    const s = q.value.trim().toLowerCase();
     let n = 0;
     for (const c of cards) {{
-      const ok = (!tag || c.dataset.tags.split("|").includes(tag)) && (!s || c.dataset.text.includes(s));
+      const ok = Object.entries(want).every(([k, v]) => !v || c.dataset[k] === v);
       c.hidden = !ok; n += ok;
     }}
-    count.textContent = "showing " + n + " of " + cards.length;
+    count.textContent = "showing " + n + " of " + cards.length + " tools";
   }}
-  document.querySelectorAll(".tc-chips .chip").forEach((b) => b.addEventListener("click", () => {{
-    tag = b.dataset.tag;
-    document.querySelectorAll(".tc-chips .chip").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  document.querySelectorAll(".tc-frow").forEach((row) => row.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {{
+    want[row.dataset.key] = b.dataset.f;
+    row.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b));
     apply();
-  }}));
-  q.addEventListener("input", apply);
+  }})));
   apply();
 }})();
 </script>"""
     return layout("Tool cards", "tools", body, src, depth=1,
-                  description="One card per protein annotation tool, filterable by category.")
+                  description="One card per protein annotation tool, best Fmax first, with its cost and a bar per relative searched.")
 
 
 def parse_tables(md: str) -> list[tuple[list[str], list[list[str]]]]:
@@ -2018,12 +2131,12 @@ def main() -> None:
     (out / "claims" / "schema.json").write_text((ROOT_DIR / "claims/schema.json").read_text())
     claims_by_tool = {c["tool"]: c for c in cards}
     (out / "claims.html").write_text(page_claims(src, cards))
-    (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, claims_by_tool))
+    (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, comp, claims_by_tool))
     (out / "claims-schema.html").write_text(page_claims_schema(src, cards, resolver.inv_src))
     for t in sorted(tools_used):
         nums = card_numbers(t, res, comp)
         md = card_markdown(t, nums, src)
-        (out / "tools" / f"{t}.md").write_text(md)
+        (out / "tools" / f"{t}.md").write_text(md[0] + "\n" + md[1])
         card = {
             "tool": t, "name": TOOLS[t]["name"], "kind": KINDS[TOOLS[t]["kind"]]["label"],
             "compares": TOOLS[t]["compares"], "needs": TOOLS[t]["needs"],
@@ -2047,7 +2160,7 @@ def main() -> None:
             "markdown": f"{t}.md",
         }
         (out / "tools" / f"{t}.json").write_text(json.dumps(card, indent=1, allow_nan=False) + "\n")
-        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, claims_by_tool.get(t)))
+        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, card_figure(t, nums, res), claims_by_tool.get(t)))
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
     if (a.data / "pileup/regions.parquet").exists():
         # The page credits its tables to this commit; without it, the copy is of unknown origin.

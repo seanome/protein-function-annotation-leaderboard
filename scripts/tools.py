@@ -3,7 +3,7 @@
 Every entry was read from the run itself on 2026-10-15: the command line from the task's
 .command.sh on Sherlock (the zebrafish search), the container from the Nextflow trace, and
 the container's version tag from quay.io's API by the digest the trace names. Numbers
-(scores, cost, strong and weak strata) are NOT here; build_site.py reads those from the
+(scores, cost, strong and weak subsets) are NOT here; build_site.py reads those from the
 tables so a card cannot disagree with the leaderboard.
 """
 
@@ -43,7 +43,7 @@ TOOLS = {
         ),
         "failure_modes": [
             "A feature shorter than k residues contains no complete k-mer, so it cannot be "
-            "found. The strata above show how Fmax changes with region "
+            "found. Figure 2 above shows how Fmax changes with region "
             "length.",
             "The task script records a kmerseek search that exits with an error as a search "
             "with no hits, so a crash would look like a miss. How often that happened in "
