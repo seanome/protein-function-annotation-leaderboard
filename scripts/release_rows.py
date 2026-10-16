@@ -31,7 +31,6 @@ COST_EXPERIMENTS = ["qfo_region_mini", "qfo_region_midi", "qfo_region_midi_plus"
 # The best-hit annotator runs (annotator_tools.nf): only the *BestHitSearch step is the search;
 # placing domains and scoring are not part of what the tool costs.
 ANNOTATOR_EXPERIMENTS = ["annotator_tools_midi_plus"]
-DIGEST = r"^[^@\s]+@sha256:[0-9a-f]{64}$"
 
 
 def schema_columns() -> list[dict]:
@@ -67,10 +66,10 @@ def build(data: Path) -> pl.DataFrame:
                 pl.col("stratum_axis").alias("stratum_key"),
                 pl.col("stratum_bin").alias("stratum_value"),
                 pl.col("n_instances").alias("n"),
-                # The annotator rows put the image digest in tool_version; it belongs in
-                # container_digest, and the version is then unknown rather than wrong.
-                pl.when(pl.col("tool_version").str.contains(DIGEST)).then(pl.col("tool_version"))
-                .alias("container_digest"),
+                # The annotator rows carry the image in their own container_digest column
+                # (bin/annotator_tool_rows.py); PR 148's tables have none, so it stays empty.
+                (pl.col("container_digest") if "container_digest" in res.columns
+                 else pl.lit(None, pl.Utf8)).alias("container_digest"),
                 pl.lit(None, pl.Float64).alias("ci95_low"),
                 pl.lit(None, pl.Float64).alias("ci95_high"),
                 pl.lit(None, pl.Utf8).alias("run_date"),
@@ -83,8 +82,6 @@ def build(data: Path) -> pl.DataFrame:
                 pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit(HARDWARE)).alias("hardware"),
                 pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit("measured")).alias("cost_provenance"),
             ))
-    rows = rows.with_columns(pl.when(~pl.col("tool_version").str.contains(DIGEST).fill_null(False))
-                             .then(pl.col("tool_version")).alias("tool_version"))
     cols = [c["name"] for c in schema_columns()]
     key = json.loads((ROOT / "schema/results_row.json").read_text())["key"]
     return rows.select(cols).sort(key, nulls_last=True)
