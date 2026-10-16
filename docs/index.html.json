@@ -67,6 +67,82 @@
   {
    "tag": "p",
    "text": "Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting each call: use it when you will rank calls and read down the list. The two can rank tools in opposite orders, because AUPRC pools every call of every protein while Fmax averages protein by protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from 0.333 to 0.457 and AUPRC from 0.029 to 0.111. Definitions: Methods."
+  },
+  {
+   "tag": "h2",
+   "text": "Where each tool stops"
+  },
+  {
+   "tag": "p",
+   "text": "These figures are drawn at fixed filters, named in each caption. The filters above change Table 1 only."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 11. Fmax against how long ago human and the relative shared an ancestor, one line per tool and setting, one dot per relative searched. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000. Pfam truth set, raw calls, all proteins. Hover or tap a dot for its numbers."
+  },
+  {
+   "tag": "p",
+   "text": "Every tool drawn in full scores lower at E. coli (2,000 Mya) than at chimpanzee (6 Mya) (Foldseek has no chimpanzee search). At chimpanzee the best is kmerseek (protein20, k = 6) at Fmax 0.443; at E. coli it is HH-suite (hhsearch) at 0.123. kmerseek at the setting on its tool card (gbmr4, k = 21) goes from 0.428 to 0.000."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 12. Fmax by how close the nearest same-family domain in the relative is, in % identity. Pfam truth set, raw calls, zebrafish as the relative. n = true domains in the bin, the same for every tool. The last bin is drawn apart: it has no identity value."
+  },
+  {
+   "tag": "p",
+   "text": "At 20–30% identity the best is phmmer at Fmax 0.359 (n = 93); at 60–100% it is phmmer at 0.308 (n = 1,289). Where the relative has no domain of the same family (n = 321), the best is HH-suite (hhsearch) at 0.032."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 13. Fmax by Swiss-Prot feature type, one bar per tool (its best setting there). After each bar: its Fmax, and n, the true features of that type. Swiss-Prot truth set, raw calls, zebrafish as the relative; one shared Fmax scale. These are the seven types asked for; the table's other Swiss-Prot types are in Table 1's filters."
+  },
+  {
+   "tag": "p",
+   "text": "Not drawn: the results table has no signal peptide subset."
+  },
+  {
+   "tag": "p",
+   "text": "Not drawn: the results table has no disordered region subset."
+  },
+  {
+   "tag": "p",
+   "text": "Best tool per feature type: membrane-spanning segment: HH-suite (hhsearch) 0.14 (n = 1,124); zinc finger: kmerseek (gbmr4, k = 21) 0.12 (n = 335); coiled coil: kmerseek (gbmr4, k = 21) 0.09 (n = 145); repeat: kmerseek (gbmr4, k = 21) 0.12 (n = 589); domain: MMseqs2, three rounds 0.32 (n = 1,107). Not in the tables: signal peptide, disordered region."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 15. Which tools found which true regions, as an UpSet plot: each column is one combination of tools, and its bar counts the regions found by those tools and no other. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 21), the one on its tool card. hmmscan is left out: Pfam's regions are defined by its models."
+  },
+  {
+   "tag": "p",
+   "text": "Click or tap a column to list its regions here, with their residues."
+  },
+  {
+   "tag": "p",
+   "text": "1,742 of the 2,435 true regions were found by at least one of these tools, and 693 by none. The most found by one tool alone: HH-suite (hhsearch), 115 regions. kmerseek (gbmr4, k = 21) alone found 76. 72 smaller combinations of two or more tools (258 regions) are not drawn."
+  },
+  {
+   "tag": "summary",
+   "text": "Figures not drawn, and what the tables lack"
+  },
+  {
+   "tag": "li",
+   "text": "Calibration (a tool's own E-value or score against the share of its calls that are correct): the per-call table behind the region pile-up page keeps one score per call and no E-value. It also keeps only calls that name the true region's own family. Calls naming another family are not in it, so the share of calls that are correct cannot be counted."
+  },
+  {
+   "tag": "li",
+   "text": "Wrong calls above the tool's recommended cutoff, per 1,000 proteins: needs the same wrong-family calls, and each tool's recommended cutoff in the unit its documentation uses (an E-value)."
+  },
+  {
+   "tag": "li",
+   "text": "Precision when two tools agree: needs the wrong-family calls too, for both tools."
+  },
+  {
+   "tag": "li",
+   "text": "Precision-recall curves: results.parquet keeps precision and recall at the Fmax cutoff only. The curve needs them at every cutoff tried. Each tool card shows the one point (Figure 14)."
+  },
+  {
+   "tag": "li",
+   "text": "Signal peptides and disordered regions in Figure 13: the Swiss-Prot feature types in the table do not include them."
   }
  ],
  "data": {

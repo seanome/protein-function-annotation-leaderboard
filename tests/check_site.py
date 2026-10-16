@@ -359,7 +359,7 @@ def main() -> int:
 
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "explainers.html", "tools/index.html"] + \
-        (["pileup.html"] if (a.site / "pileup.html").exists() else []) + \
+        [x for x in ("pileup.html", "proteins.html") if (a.site / x).exists()] + \
         [x for x in ("claims.html", "claims-schema.html") if (a.site / x).exists()] + \
             [f"tools/{t}.html" for t in sorted(meta["tools"])]
         files_ok = {str(q.relative_to(a.site)) for q in a.site.rglob("*") if q.is_file()}
