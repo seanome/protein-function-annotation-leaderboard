@@ -21,16 +21,16 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Protein annotation leaderboard"
   },
   {
    "tag": "p",
-   "text": "Which tool puts the known domains and features of human proteins in the right place, and what does it cost? Each row is one tool at one setting."
+   "text": "Which tool puts the known domains and features of human proteins in the right place, and what does it cost?"
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "summary",
@@ -42,19 +42,23 @@
   },
   {
    "tag": "figcaption",
-   "text": "Table 1. Tools ranked by Fmax, highest first: Click a column name to sort; rows with no value always sort last. On a narrow screen, scroll the table sideways; the tool name stays in place."
+   "text": "Table 1. Tools ranked by Fmax, highest first, best setting of each tool. Show every setting More columns"
   },
   {
    "tag": "summary",
-   "text": "Key to the marks in Table 1"
+   "text": "The marks and colours in Table 1, in full"
   },
   {
    "tag": "p",
-   "text": "Fmax is the best balance of precision and recall at any one score cutoff; AUPRC is precision summed over all cutoffs. Both run from 0 to 1, and higher is better. Median IoU is how well a correct call's ends match the true region: the overlap divided by the combined span, 1 for a perfect match. The ? beside each column name gives its definition, and How the scores work works each score through on a made-up protein you can change."
+   "text": "Fmax: the best balance of precision and recall at one score cutoff. AUPRC: precision over every cutoff. Median IoU: how well a correct call's ends match the true region. All run 0 to 1, higher is better; How the scores work works each through on a made-up protein."
   },
   {
    "tag": "p",
-   "text": "Each tool searched 998 human proteins against the proteome of one relative and copied the relative's annotations onto them. The scores say how many of the human proteins' known annotations it put in the right place. The queries are human proteins, most of them from chromosome 6 (see Methods); how the ranking holds for queries from other species is not measured."
+   "text": "Each tool searched 998 human proteins, most from chromosome 6, against one relative's proteome and copied its annotations (which proteins)."
+  },
+  {
+   "tag": "p",
+   "text": "Estimated cost = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries, for the search alone (how cost is counted)."
   },
   {
    "tag": "summary",
@@ -63,10 +67,6 @@
   {
    "tag": "p",
    "text": "Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting each call: use it when you will rank calls and read down the list. The two can rank tools in opposite orders, because AUPRC pools every call of every protein while Fmax averages protein by protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from 0.333 to 0.457 and AUPRC from 0.029 to 0.111. Definitions: Methods."
-  },
-  {
-   "tag": "p",
-   "text": "cost_usd_est = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries, pricing a reserved core-hour as one CPU-hour. Core-hours are cores reserved × wall time, for the search alone, as the mean over the relatives each tool searched; the run recorded them per tool, not per relative, so the same number appears for every relative. Building databases is on the tool cards. No search used a GPU; ProstT5's step that predicts 3Di shape letters used one while building its databases (see its card). Setting names, decoded: hover a setting, or see the tool's card. Definitions and worked examples: Methods."
   }
  ],
  "data": {
@@ -82,6 +82,7 @@
     "y": "fmax",
     "sort": "fmax",
     "dir": "desc",
+    "view": "best",
     "r_cpu": 0.044625,
     "r_gpu": 1.006
    },
@@ -374,7 +375,7 @@
      "kind": "stratum",
      "axis": "feature_type",
      "label": "Feature type",
-     "help": "Swiss-Prot feature key; only the Swiss-Prot truth set has these",
+     "help": "the kind of Swiss-Prot feature; only the Swiss-Prot truth set has these",
      "groups": [
       {
        "chips": [
@@ -384,63 +385,63 @@
         },
         {
          "value": "ACT_SITE",
-         "label": "ACT_SITE",
-         "title": "active site residue"
+         "label": "active site",
+         "title": "ACT_SITE: active site residue"
         },
         {
          "value": "BINDING",
-         "label": "BINDING",
-         "title": "binding site residue"
+         "label": "binding site",
+         "title": "BINDING: binding site residue"
         },
         {
          "value": "COILED",
-         "label": "COILED",
-         "title": "coiled coil"
+         "label": "coiled coil",
+         "title": "COILED: coiled coil"
         },
         {
          "value": "DNA_BIND",
-         "label": "DNA_BIND",
-         "title": "DNA-binding region"
+         "label": "DNA-binding region",
+         "title": "DNA_BIND: DNA-binding region"
         },
         {
          "value": "DOMAIN",
-         "label": "DOMAIN",
-         "title": "domain"
+         "label": "domain",
+         "title": "DOMAIN: domain"
         },
         {
          "value": "INTRAMEM",
-         "label": "INTRAMEM",
-         "title": "region inside the membrane that does not cross it"
+         "label": "in-membrane region",
+         "title": "INTRAMEM: region inside the membrane that does not cross it"
         },
         {
          "value": "MOTIF",
-         "label": "MOTIF",
-         "title": "short motif"
+         "label": "short motif",
+         "title": "MOTIF: short motif"
         },
         {
          "value": "REGION",
-         "label": "REGION",
-         "title": "region of interest"
+         "label": "region of interest",
+         "title": "REGION: region of interest"
         },
         {
          "value": "REPEAT",
-         "label": "REPEAT",
-         "title": "repeat"
+         "label": "repeat",
+         "title": "REPEAT: repeat"
         },
         {
          "value": "SITE",
-         "label": "SITE",
-         "title": "other single-residue site"
+         "label": "other site",
+         "title": "SITE: other single-residue site"
         },
         {
          "value": "TRANSMEM",
-         "label": "TRANSMEM",
-         "title": "membrane-spanning segment"
+         "label": "membrane-spanning",
+         "title": "TRANSMEM: membrane-spanning segment"
         },
         {
          "value": "ZN_FING",
-         "label": "ZN_FING",
-         "title": "zinc finger"
+         "label": "zinc finger",
+         "title": "ZN_FING: zinc finger"
         }
        ]
       }
@@ -452,6 +453,7 @@
      "tool": "hmmer3_phmmer",
      "setting": "default",
      "order": 0,
+     "label": "default options",
      "words": "phmmer's default options, E-value cutoff 10",
      "shape": "circle"
     },
@@ -459,6 +461,7 @@
      "tool": "mmseqs2_seqseq",
      "setting": "s7",
      "order": 1,
+     "label": "sensitivity 7",
      "words": "sensitivity 7 (-s 7), one round",
      "shape": "square"
     },
@@ -466,6 +469,7 @@
      "tool": "hmmer3_jackhmmer",
      "setting": "n3",
      "order": 2,
+     "label": "3 rounds",
      "words": "three rounds of search (-N 3)",
      "shape": "circle"
     },
@@ -473,6 +477,7 @@
      "tool": "mmseqs2_iterative",
      "setting": "s7",
      "order": 3,
+     "label": "sensitivity 7, 3 rounds",
      "words": "sensitivity 7 (-s 7), three rounds",
      "shape": "square"
     },
@@ -480,6 +485,7 @@
      "tool": "hhblits",
      "setting": "single_seq",
      "order": 4,
+     "label": "single-protein profiles",
      "words": "profiles built from single proteins, no family database",
      "shape": "triangle"
     },
@@ -487,6 +493,7 @@
      "tool": "foldseek",
      "setting": "3di_aa",
      "order": 5,
+     "label": "shape letters + amino acids",
      "words": "3Di shape letters and amino acids together",
      "shape": "circle"
     },
@@ -494,118 +501,135 @@
      "tool": "prostt5",
      "setting": "3di_from_seq",
      "order": 6,
+     "label": "shape letters from sequence",
      "words": "3Di letters predicted from sequence by ProstT5",
      "shape": "square"
     },
     {
      "tool": "kmerseek",
-     "setting": "gbmr4_k15_lcFalse",
-     "order": 7,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
-     "setting": "gbmr4_k17_lcFalse",
-     "order": 8,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 17, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
-     "setting": "gbmr4_k19_lcFalse",
-     "order": 9,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 19, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
-     "setting": "gbmr4_k21_lcFalse",
-     "order": 10,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 21, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k24_lcFalse",
-     "order": 11,
+     "order": 7,
+     "label": "hp_thomas_dill2, k = 24",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 24, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k27_lcFalse",
-     "order": 12,
+     "order": 8,
+     "label": "hp_thomas_dill2, k = 27",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 27, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k30_lcFalse",
-     "order": 13,
+     "order": 9,
+     "label": "hp_thomas_dill2, k = 30",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 30, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k33_lcFalse",
-     "order": 14,
+     "order": 10,
+     "label": "hp_thomas_dill2, k = 33",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 33, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
-     "setting": "protein20_k6_lcFalse",
-     "order": 15,
-     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 6, low-complexity k-mers kept",
-     "shape": "circle"
+     "setting": "gbmr4_k15_lcFalse",
+     "order": 11,
+     "label": "gbmr4, k = 15",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept",
+     "shape": "square"
     },
     {
      "tool": "kmerseek",
-     "setting": "protein20_k7_lcFalse",
-     "order": 16,
-     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 7, low-complexity k-mers kept",
-     "shape": "circle"
+     "setting": "gbmr4_k17_lcFalse",
+     "order": 12,
+     "label": "gbmr4, k = 17",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 17, low-complexity k-mers kept",
+     "shape": "square"
     },
     {
      "tool": "kmerseek",
-     "setting": "protein20_k8_lcFalse",
-     "order": 17,
-     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 8, low-complexity k-mers kept",
-     "shape": "circle"
+     "setting": "gbmr4_k19_lcFalse",
+     "order": 13,
+     "label": "gbmr4, k = 19",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 19, low-complexity k-mers kept",
+     "shape": "square"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "gbmr4_k21_lcFalse",
+     "order": 14,
+     "label": "gbmr4, k = 21",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 21, low-complexity k-mers kept",
+     "shape": "square"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k11_lcFalse",
-     "order": 18,
+     "order": 15,
+     "label": "wwmj5, k = 11",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 11, low-complexity k-mers kept",
      "shape": "triangle"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k12_lcFalse",
-     "order": 19,
+     "order": 16,
+     "label": "wwmj5, k = 12",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 12, low-complexity k-mers kept",
      "shape": "triangle"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k14_lcFalse",
-     "order": 20,
+     "order": 17,
+     "label": "wwmj5, k = 14",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 14, low-complexity k-mers kept",
      "shape": "triangle"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k15_lcFalse",
-     "order": 21,
+     "order": 18,
+     "label": "wwmj5, k = 15",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 15, low-complexity k-mers kept",
      "shape": "triangle"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "protein20_k6_lcFalse",
+     "order": 19,
+     "label": "protein20, k = 6",
+     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 6, low-complexity k-mers kept",
+     "shape": "circle"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "protein20_k7_lcFalse",
+     "order": 20,
+     "label": "protein20, k = 7",
+     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 7, low-complexity k-mers kept",
+     "shape": "circle"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "protein20_k8_lcFalse",
+     "order": 21,
+     "label": "protein20, k = 8",
+     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 8, low-complexity k-mers kept",
+     "shape": "circle"
     },
     {
      "tool": "hmmscan",
      "setting": "direct",
      "order": 22,
+     "label": "Pfam models",
      "words": "scans Pfam's models; no relative searched",
      "shape": "circle"
     }
@@ -1199,13 +1223,25 @@
      "cpu_rep": "<button type=\"button\" class=\"term\" data-term=\"cpu_rep\" aria-label=\"What is CPU-h reported?\" aria-expanded=\"false\" aria-controls=\"tip-cpu_rep-th\" aria-describedby=\"tip-cpu_rep-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cpu_rep-th\" hidden><b>CPU-h reported.</b> CPU-hours per 1,000 queries as reported by a tool's submitter, on hardware they name. None have been submitted yet. <a href=\"explainers.html#cost\">how it works →</a></span>",
      "ram": "<button type=\"button\" class=\"term\" data-term=\"ram\" aria-label=\"What is Peak RAM?\" aria-expanded=\"false\" aria-controls=\"tip-ram-th\" aria-describedby=\"tip-ram-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-ram-th\" hidden><b>Peak RAM.</b> The largest resident memory, in GB, of any of the search's tasks, from the run's task records. Memory is not priced in the cost. <a href=\"explainers.html#cost\">how it works →</a></span>",
      "gpu": "<button type=\"button\" class=\"term\" data-term=\"gpu\" aria-label=\"What is GPU-hours?\" aria-expanded=\"false\" aria-controls=\"tip-gpu-th\" aria-describedby=\"tip-gpu-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-gpu-th\" hidden><b>GPU-hours.</b> GPU time the search used, per 1,000 queries. No search here used a GPU. ProstT5 used one to predict 3Di shape letters while building its databases; that time is on its card. <a href=\"explainers.html#cost\">how it works →</a></span>",
-     "cost": "<button type=\"button\" class=\"term\" data-term=\"cost\" aria-label=\"What is cost_usd_est?\" aria-expanded=\"false\" aria-controls=\"tip-cost-th\" aria-describedby=\"tip-cost-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cost-th\" hidden><b>cost_usd_est.</b> Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand rates. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "cost": "<button type=\"button\" class=\"term\" data-term=\"cost\" aria-label=\"What is Estimated cost?\" aria-expanded=\"false\" aria-controls=\"tip-cost-th\" aria-describedby=\"tip-cost-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cost-th\" hidden><b>Estimated cost.</b> Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand rates. <a href=\"explainers.html#cost\">how it works →</a></span>",
      "calls": "<button type=\"button\" class=\"term\" data-term=\"calls\" aria-label=\"What is Raw or dedup?\" aria-expanded=\"false\" aria-controls=\"tip-calls-th\" aria-describedby=\"tip-calls-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-calls-th\" hidden><b>Raw or dedup.</b> Raw keeps every call a tool makes. Dedup merges calls of the same family on the same protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so one domain hit by many of the relative's proteins counts once. <a href=\"explainers.html#dedup\">how it works →</a></span>",
+     "wall": "<button type=\"button\" class=\"term\" data-term=\"wall\" aria-label=\"What is Wall-clock hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-wall-th\" aria-describedby=\"tip-wall-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-wall-th\" hidden><b>Wall-clock hours per 1,000 queries.</b> How long the search took from start to finish on the cores it was given (4 to 16), per relative searched, scaled to 1,000 human proteins. Less is faster. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "db": "<button type=\"button\" class=\"term\" data-term=\"db\" aria-label=\"What is Database build?\" aria-expanded=\"false\" aria-controls=\"tip-db-th\" aria-describedby=\"tip-db-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-db-th\" hidden><b>Database build.</b> Core-hours to build one relative's search database, done once before any search. The mean over the builds the run's task records hold. Not in the per-query cost. <a href=\"explainers.html#cost\">how it works →</a></span>",
      "measured": "<button type=\"button\" class=\"term\" data-term=\"measured\" aria-label=\"What is measured?\" aria-expanded=\"false\" aria-controls=\"tip-measured-th\" aria-describedby=\"tip-measured-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-measured-th\" hidden><b>measured.</b> Measured on Stanford's Sherlock cluster, from the run's own task records. <a href=\"explainers.html#cost\">how it works →</a></span>",
      "reported": "<button type=\"button\" class=\"term\" data-term=\"reported\" aria-label=\"What is reported?\" aria-expanded=\"false\" aria-controls=\"tip-reported-th\" aria-describedby=\"tip-reported-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-reported-th\" hidden><b>reported.</b> Reported by the tool's submitter, on the hardware they name. None yet. <a href=\"explainers.html#cost\">how it works →</a></span>"
     },
     "filters": {
      "calls": "<button type=\"button\" class=\"term\" data-term=\"calls\" aria-label=\"What is Raw or dedup?\" aria-expanded=\"false\" aria-controls=\"tip-calls-filters\" aria-describedby=\"tip-calls-filters\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-calls-filters\" hidden><b>Raw or dedup.</b> Raw keeps every call a tool makes. Dedup merges calls of the same family on the same protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so one domain hit by many of the relative's proteins counts once. <a href=\"explainers.html#dedup\">how it works →</a></span>"
+    },
+    "axes": {
+     "fmax": "<button type=\"button\" class=\"term\" data-term=\"fmax\" aria-label=\"What is Fmax?\" aria-expanded=\"false\" aria-controls=\"tip-fmax-ax\" aria-describedby=\"tip-fmax-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-fmax-ax\" hidden><b>Fmax.</b> The best balance of precision and recall at any one score cutoff, with both worked out protein by protein and averaged. Precision is the share of calls that are correct; recall is the share of true annotations found. 0 to 1, higher is better. <a href=\"explainers.html#fmax\">how it works →</a></span>",
+     "auprc": "<button type=\"button\" class=\"term\" data-term=\"auprc\" aria-label=\"What is AUPRC?\" aria-expanded=\"false\" aria-controls=\"tip-auprc-ax\" aria-describedby=\"tip-auprc-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-auprc-ax\" hidden><b>AUPRC.</b> Area under the precision-recall curve: precision summed over every score cutoff, weighted by the recall gained there. It pools every call of every protein into one list. 0 to 1, higher is better. <a href=\"explainers.html#auprc\">how it works →</a></span>",
+     "iou": "<button type=\"button\" class=\"term\" data-term=\"iou\" aria-label=\"What is Median IoU?\" aria-expanded=\"false\" aria-controls=\"tip-iou-ax\" aria-describedby=\"tip-iou-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-iou-ax\" hidden><b>Median IoU.</b> How well a correct call's ends match the true region. IoU is the residues the call and the region share divided by the residues either covers: 1 is a perfect match. The median is the middle IoU over all correct calls. <a href=\"explainers.html#iou\">how it works →</a></span>",
+     "cpu": "<button type=\"button\" class=\"term\" data-term=\"cpu\" aria-label=\"What is Core-hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-cpu-ax\" aria-describedby=\"tip-cpu-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cpu-ax\" hidden><b>Core-hours per 1,000 queries.</b> Cores the search reserved × its wall time, for the search alone, divided by the number of relatives searched and scaled to 1,000 human proteins. A task that sat partly idle still counts all its cores. Less is cheaper. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "cost": "<button type=\"button\" class=\"term\" data-term=\"cost\" aria-label=\"What is Estimated cost?\" aria-expanded=\"false\" aria-controls=\"tip-cost-ax\" aria-describedby=\"tip-cost-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cost-ax\" hidden><b>Estimated cost.</b> Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand rates. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "wall": "<button type=\"button\" class=\"term\" data-term=\"wall\" aria-label=\"What is Wall-clock hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-wall-ax\" aria-describedby=\"tip-wall-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-wall-ax\" hidden><b>Wall-clock hours per 1,000 queries.</b> How long the search took from start to finish on the cores it was given (4 to 16), per relative searched, scaled to 1,000 human proteins. Less is faster. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "ram": "<button type=\"button\" class=\"term\" data-term=\"ram\" aria-label=\"What is Peak RAM?\" aria-expanded=\"false\" aria-controls=\"tip-ram-ax\" aria-describedby=\"tip-ram-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-ram-ax\" hidden><b>Peak RAM.</b> The largest resident memory, in GB, of any of the search's tasks, from the run's task records. Memory is not priced in the cost. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "db": "<button type=\"button\" class=\"term\" data-term=\"db\" aria-label=\"What is Database build?\" aria-expanded=\"false\" aria-controls=\"tip-db-ax\" aria-describedby=\"tip-db-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-db-ax\" hidden><b>Database build.</b> Core-hours to build one relative's search database, done once before any search. The mean over the builds the run's task records hold. Not in the per-query cost. <a href=\"explainers.html#cost\">how it works →</a></span>"
     }
    }
   },

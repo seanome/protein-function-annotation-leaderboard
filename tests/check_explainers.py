@@ -229,10 +229,10 @@ def main() -> int:
         page.goto(base + "index.html")
         page.wait_for_load_state("networkidle")
         heads = page.eval_on_selector_all("#lb thead button.term", "es => es.map(e => e.dataset.term)")
-        for t in ("fmax", "auprc", "iou", "n", "cpu", "cpu_rep", "ram", "gpu", "cost"):
+        for t in ("fmax", "auprc", "iou", "n", "cpu", "ram", "cost"):
             if t not in heads:
                 fails.append(f"index.html: no definition button for {t} in Table 1")
-        page.focus("#lb thead th:nth-child(2) button")  # the Setting column's sort button
+        page.focus("#lb thead th:nth-child(1) button")  # the Tool column's sort button
         for _ in range(4):  # Tab onto the Fmax "?" (sort Fmax, then its "?")
             page.keyboard.press("Tab")
             if page.evaluate("document.activeElement.dataset.term") == "fmax":
@@ -264,9 +264,9 @@ def main() -> int:
             fails.append("tap: AUPRC definition did not hide on a tap elsewhere")
         # Clicking the "?" must not sort the column.
         before = page.evaluate("window.__lb.state().sort")
-        page.click("button.term[aria-controls='tip-n-th']")
+        page.click("button.term[aria-controls='tip-cost-th']")
         if page.evaluate("window.__lb.state().sort") != before:
-            fails.append("clicking the ? of True instances sorted the table")
+            fails.append("clicking the ? of the cost column sorted the table")
         # Every definition link on every page with definitions points at an explainer anchor.
         anchors = None
         for pg in ("index.html", "cost.html"):

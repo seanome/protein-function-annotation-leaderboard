@@ -21,16 +21,16 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Tool cards"
   },
   {
    "tag": "p",
    "text": "One card per tool: what it compares, what it needs, how to read its score, where it is strong and weak in the table, what it costs, its licence, and the exact command that was run."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "h2",

@@ -21,16 +21,16 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "How the scores work"
   },
   {
    "tag": "p",
    "text": "The leaderboard ranks tools by three scores and one cost. Each section below works one of them through on a made-up protein that you can change. Every number in Figures 1 to 4 is computed in your browser from that made-up example, not from the benchmark."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "h2",
@@ -458,7 +458,7 @@
     "definition": "GPU time the search used, per 1,000 queries. No search here used a GPU. ProstT5 used one to predict 3Di shape letters while building its databases; that time is on its card."
    },
    "cost": {
-    "name": "cost_usd_est",
+    "name": "Estimated cost",
     "explainer": "explainers.html#cost",
     "definition": "Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand rates."
    },
@@ -466,6 +466,16 @@
     "name": "Raw or dedup",
     "explainer": "explainers.html#dedup",
     "definition": "Raw keeps every call a tool makes. Dedup merges calls of the same family on the same protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so one domain hit by many of the relative's proteins counts once."
+   },
+   "wall": {
+    "name": "Wall-clock hours per 1,000 queries",
+    "explainer": "explainers.html#cost",
+    "definition": "How long the search took from start to finish on the cores it was given (4 to 16), per relative searched, scaled to 1,000 human proteins. Less is faster."
+   },
+   "db": {
+    "name": "Database build",
+    "explainer": "explainers.html#cost",
+    "definition": "Core-hours to build one relative's search database, done once before any search. The mean over the builds the run's task records hold. Not in the per-query cost."
    },
    "measured": {
     "name": "measured",

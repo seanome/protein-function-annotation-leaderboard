@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Claims</title>
 <meta name="description" content="Each tool&#x27;s claims, the test that would retire each one, and its verdict.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,21 +11,25 @@
 <link rel="stylesheet" href="assets/site.css">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <script defer src="assets/terms.js"></script>
+<script defer src="assets/nav.js"></script>
 
 </head>
 <body data-page="claims">
 <header class="site"><div class="wrap">
 <a class="brand" href="index.html">Protein annotation leaderboard</a>
-<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="pileup.html">Region pile-up</a><a href="claims.html" aria-current="page">Claims</a><a href="tools/index.html">Tool cards</a><a href="coverage.html">Coverage</a><a href="explainers.html">How the scores work</a><a href="methods.html">Methods</a></nav>
+<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><details class="navmore"><summary class="cur">More</summary>
+<div class="navpop"><a href="claims.html" aria-current="page">Claims</a><a href="coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Claims">Claims</summary>
+<div class="navpop"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><a href="claims.html" aria-current="page">Claims</a><a href="coverage.html">Coverage</a></div></details>
 </div></header>
 <main class="wrap" data-page="claims">
-<p class="source" id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <h1>Claims</h1>
 <p class="lede">What each tool's authors claim, the result that would retire each claim, and where it
 stands. A claim is <b>alive</b> when its test has run and did not retire it, <b>retired</b> when the
 test retired it, and <b>untested</b> when the test has not run or the data cannot decide it. The build
 recomputes every verdict from the tables or checks it against the recorded notebook output, so
 nothing on a card is typed in by hand.</p>
+<p class="asof">Data from 15 Oct 2026, commit <span class="mono">4a4b1171</span> (<a href="#source-commit">source</a>)</p>
 <div class="legend" aria-label="Key to the claims cards"><span class="item">● alive</span><span class="item">× retired</span>
 <span class="item">○ untested</span></div>
 <section class="cl-card" aria-label="Claims about kmerseek">
@@ -39,7 +43,7 @@ nothing on a card is typed in by hand.</p>
 </section>
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="claims.html.json">claims.html.json</a></p>
 </div></footer>

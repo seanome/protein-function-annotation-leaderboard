@@ -28,6 +28,7 @@
       y: (v) => M.axes.some((a) => a.id === v && a.kind === "score"),
       sort: (v) => COLS.some((c) => c.id === v),
       dir: (v) => v === "asc" || v === "desc",
+      view: (v) => v === "best" || v === "all",
     };
     for (const k of Object.keys(ok)) {
       if (h.has(k) && ok[k](h.get(k))) state[k] = h.get(k);
@@ -48,7 +49,7 @@
   }
   function writeHash() {
     const h = new URLSearchParams();
-    for (const k of ["truth", "calls", "species", "axis", "stratum", "x", "y", "sort", "dir", "r_cpu", "r_gpu"]) {
+    for (const k of ["truth", "calls", "species", "axis", "stratum", "x", "y", "sort", "dir", "view", "r_cpu", "r_gpu"]) {
       if (state[k] !== undefined && state[k] !== null) h.set(k, state[k]);
     }
     try { history.replaceState(null, "", "#" + h.toString()); } catch (e) { /* framed viewers may refuse */ }
@@ -165,19 +166,19 @@
   }
 
   // ---------- leaderboard table ----------
+  // "wide" columns show from 641 px up; "more" columns only after "More columns". Raw field
+  // names are the hover text of each column name (and are in the page's JSON).
   const COLS = [
     { id: "tool", label: "Tool", txt: true },
-    { id: "setting", label: "Setting", txt: true },
     { id: "fmax", label: "Fmax", key: "fmax", term: "fmax" },
-    { id: "auprc", label: "AUPRC", key: "auprc", term: "auprc" },
-    { id: "iou", label: "Median IoU", key: "median_iou_tp", term: "iou" },
-    { id: "n", label: "True instances", key: "n_truth_instances", term: "n" },
-    { id: "cpu", label: 'Core-hours per 1,000 queries, per relative <span class="prov measured">measured</span>', key: "cpu_h", term: "cpu" },
-    { id: "cpu_rep", label: 'CPU-h per 1,000 queries <span class="prov reported">reported</span>', key: "cpu_h_reported", term: "cpu_rep" },
-    { id: "ram", label: 'Peak RAM, GB <span class="prov measured">measured</span>', key: "peak_rss_gb", term: "ram" },
-    { id: "gpu", label: "GPU in search", key: "gpu", term: "gpu" },
-    { id: "cost", label: "Estimated cost, USD per 1,000 queries", key: "cost_usd_est", term: "cost" },
+    { id: "cost", label: "Estimated cost per 1,000 queries", key: "cost_usd_est", term: "cost" },
+    { id: "auprc", label: "AUPRC", key: "auprc", term: "auprc", cls: "c-wide" },
+    { id: "iou", label: "Median IoU", key: "median_iou_tp", term: "iou", cls: "c-wide" },
+    { id: "n", label: "True instances", key: "n_truth_instances", term: "n", cls: "c-more" },
+    { id: "cpu", label: "Core-hours per 1,000 queries", key: "cpu_h_per_1000", term: "cpu", cls: "c-more" },
+    { id: "ram", label: "Peak RAM, GB", key: "peak_rss_gb", term: "ram", cls: "c-more" },
   ];
+  const LOWER_FIRST = new Set(["tool", "cpu", "ram", "cost"]);
   function rowValues(s, row) {
     const r = lookup(s, row);
     const c = computeRow(s, row);
@@ -187,10 +188,10 @@
       // (any such call has IoU >= 0.5), so it is shown as words and sorts with the missing.
       fmax: r ? r[0] : null, auprc: r ? r[1] : null, iou: r && r[2] ? r[2] : null, n: r ? r[3] : null,
       cpu: c ? c.cpu_h_per_1000 : null,
-      cpu_rep: c ? c.cpu_h_reported_per_1000 : null,
       ram: c ? c.peak_rss_gb : null,
       gpu: c ? c.gpu : null,
-      cost: cost(c),
+      // A cost belongs to a row that has results: a search that was not scored was not run.
+      cost: r ? cost(c) : null,
     };
   }
   // Words for a median IoU of 0. Fmax above 0 means at least one call was correct; with no
@@ -201,8 +202,8 @@
   function sortRows(vals) {
     const k = state.sort, dir = state.dir === "asc" ? 1 : -1;
     return vals.sort((a, b) => {
-      let x = k === "tool" ? M.tools[a.row.tool].name : k === "setting" ? a.row.setting : a[k];
-      let y = k === "tool" ? M.tools[b.row.tool].name : k === "setting" ? b.row.setting : b[k];
+      let x = k === "tool" ? M.tools[a.row.tool].name : a[k];
+      let y = k === "tool" ? M.tools[b.row.tool].name : b[k];
       // Missing values always sort last, whichever way the column is sorted.
       if (x == null && y == null) return a.row.order - b.row.order;
       if (x == null) return 1;
@@ -214,44 +215,111 @@
   }
   // The caption's first words, from the current sort: "Tools ranked by Fmax, highest first".
   const SORT_NAMES = {
-    tool: "tool name", setting: "setting name", fmax: "Fmax", auprc: "AUPRC", iou: "median IoU",
-    n: "true instances", cpu: "measured core-hours per 1,000 queries", cpu_rep: "reported CPU-hours per 1,000 queries",
-    ram: "peak RAM", gpu: "GPU in search", cost: "estimated cost",
+    tool: "tool name", fmax: "Fmax", auprc: "AUPRC", iou: "median IoU", n: "true instances",
+    cpu: "core-hours per 1,000 queries", ram: "peak RAM", cost: "estimated cost",
   };
   function sortWords() {
     const asc = state.dir === "asc";
-    if (state.sort === "tool" || state.sort === "setting" || state.sort === "gpu") {
-      return `Tools sorted by ${SORT_NAMES[state.sort]}, ${asc ? "A to Z" : "Z to A"}`;
-    }
+    if (state.sort === "tool") return `Tools sorted by name, ${asc ? "A to Z" : "Z to A"}`;
     return `Tools ranked by ${SORT_NAMES[state.sort] || state.sort}, ${asc ? "lowest" : "highest"} first`;
   }
-  function missingCell(kind, words, span) {
+  const NR = '<span class="nr" aria-hidden="true">×</span> ';
+  function missingCell(col, kind, why) {
     const td = document.createElement("td");
     td.className = "missing";
+    td.dataset.col = col.id;
     td.dataset.missing = kind;
-    if (span) td.colSpan = span;
-    td.innerHTML = "— " + words;
+    if (col.cls) td.classList.add(col.cls);
+    // "not run" takes the site's one not-run mark; "not measured" is words only.
+    td.innerHTML = why === "not run" ? NR + '<span class="mw">not run</span>' : "<i>" + why + "</i>";
     return td;
   }
-  function numCell(text) {
+  function numCell(col, text) {
     const td = document.createElement("td");
     td.className = "num";
+    if (col.cls) td.classList.add(col.cls);
+    td.dataset.col = col.id;
     td.textContent = text;
     return td;
   }
+  function fmtCost(x) { return "$" + sig(x, 3); }
+  function toolCell(v, nOthers, open) {
+    const t = M.tools[v.row.tool];
+    const td = document.createElement("td");
+    td.className = "txt tool";
+    td.dataset.col = "tool";
+    const tags = (t.tags || []).map((x) => '<span class="tag">' + x + "</span>");
+    if (v.c && v.c.gpu_h_per_1000) tags.push('<span class="tag">GPU in search</span>');
+    if (v.row.tool === "hmmscan" && state.truth === "pfam") tags.push('<span class="tag warn">graded on its own models</span>');
+    td.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="tools/' + v.row.tool + '.html">' + t.name + "</a>" +
+      '<span class="set" title="' + v.row.setting + ": " + v.row.words + '">' + v.row.label + "</span>" +
+      (tags.length ? '<span class="tags">' + tags.join(" ") + "</span>" : "");
+    if (nOthers) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "moreset";
+      b.setAttribute("aria-expanded", open ? "true" : "false");
+      b.textContent = open ? "hide " + nOthers + " other setting" + (nOthers > 1 ? "s" : "") : "+" + nOthers + " more setting" + (nOthers > 1 ? "s" : "");
+      b.addEventListener("click", () => {
+        if (open) expanded.delete(v.row.tool); else expanded.add(v.row.tool);
+        update(false);
+      });
+      td.appendChild(b);
+    }
+    return td;
+  }
+  function rowEl(v, lead, nOthers, open) {
+    const tr = document.createElement("tr");
+    tr.dataset.tool = v.row.tool;
+    tr.dataset.setting = v.row.setting;
+    if (!lead) tr.className = "sub";
+    tr.appendChild(toolCell(v, lead ? nOthers : 0, open));
+    const why = v.r ? null : "not run";
+    const cwhy = v.r && !v.c ? (M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species) ? "not measured" : "not run") : why;
+    for (const col of COLS.slice(1)) {
+      if (["fmax", "auprc", "iou", "n"].includes(col.id)) {
+        if (!v.r) { tr.appendChild(missingCell(col, "results", "not run")); continue; }
+        if (col.id === "iou" && v.iou == null) {
+          const td = document.createElement("td");
+          td.className = "none " + (col.cls || "");
+          td.dataset.col = "iou";
+          td.dataset.none = "iou";
+          td.innerHTML = "<i>" + iouWords(v) + "</i>";
+          td.title = v.fmax > 0 ? "an IoU against one residue says nothing about where a call's ends are" : "no call was correct";
+          tr.appendChild(td);
+        } else tr.appendChild(numCell(col, col.id === "n" ? fmtInt(v.n) : fmt3(v[col.id])));
+      } else {
+        if (!v.r || !v.c) { tr.appendChild(missingCell(col, v.r ? "compute" : "results", cwhy)); continue; }
+        if (col.id === "cost") {
+          const td = numCell(col, fmtCost(v.cost));
+          if (v.c.gpu_h_per_1000) td.title = "includes " + sig(v.c.gpu_h_per_1000, 3) + " GPU-hours";
+          tr.appendChild(td);
+        } else if (col.id === "cpu") tr.appendChild(numCell(col, sig(v.cpu, 3)));
+        else tr.appendChild(numCell(col, v.ram.toFixed(1)));
+      }
+    }
+    return tr;
+  }
+  const expanded = new Set();
+  let allCols = false;
   function renderTable() {
-    const thead = document.querySelector("#lb thead tr");
+    const table = document.getElementById("lb");
+    table.classList.toggle("allcols", allCols);
+    const thead = table.querySelector("thead tr");
     thead.innerHTML = "";
     for (const col of COLS) {
       const th = document.createElement("th");
       th.scope = "col";
+      th.dataset.col = col.id;
       if (col.txt) th.className = "txt";
+      if (col.cls) th.classList.add(col.cls);
       if (state.sort === col.id) th.setAttribute("aria-sort", state.dir === "asc" ? "ascending" : "descending");
       const b = document.createElement("button");
-      b.innerHTML = col.label + '<span class="arrow"></span>' + (col.key ? '<span class="key">' + col.key + "</span>" : "");
+      b.innerHTML = col.label + '<span class="arrow"></span>';
+      if (col.key) b.title = "field " + col.key;
       b.addEventListener("click", () => {
         if (state.sort === col.id) state.dir = state.dir === "asc" ? "desc" : "asc";
-        else { state.sort = col.id; state.dir = col.txt || col.id === "cpu" || col.id === "cpu_rep" || col.id === "ram" || col.id === "cost" ? "asc" : "desc"; }
+        else { state.sort = col.id; state.dir = LOWER_FIRST.has(col.id) ? "asc" : "desc"; }
         update();
       });
       th.appendChild(b);
@@ -259,69 +327,77 @@
       if (col.term && M.terms) th.insertAdjacentHTML("beforeend", M.terms.th[col.term]);
       thead.appendChild(th);
     }
-    const tbody = document.querySelector("#lb tbody");
+    const tbody = table.querySelector("tbody");
     tbody.innerHTML = "";
     const vals = sortRows(M.rows.map((row) => rowValues(state, row)));
-    for (const v of vals) {
-      const tr = document.createElement("tr");
-      tr.dataset.tool = v.row.tool;
-      tr.dataset.setting = v.row.setting;
-      const t = M.tools[v.row.tool];
-      const td1 = document.createElement("td");
-      td1.className = "txt";
-      const tags = (t.tags || []).map((x) => '<span class="tag">' + x + "</span>");
-      if (v.row.tool === "hmmscan" && state.truth === "pfam") tags.push('<span class="tag warn">graded on its own models</span>');
-      td1.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="tools/' + v.row.tool + '.html">' + t.name + "</a>" +
-        (tags.length ? "<br>" + tags.join(" ") : "");
-      tr.appendChild(td1);
-      const td2 = document.createElement("td");
-      td2.className = "txt mono";
-      td2.textContent = v.row.setting;
-      td2.title = v.row.words;
-      tr.appendChild(td2);
-      if (v.r) {
-        tr.appendChild(numCell(fmt3(v.fmax)));
-        tr.appendChild(numCell(fmt3(v.auprc)));
-        if (v.iou == null) {
-          const td = document.createElement("td");
-          td.className = "none";
-          td.dataset.none = "iou";
-          td.innerHTML = "<i>" + iouWords(v) + "</i>";
-          td.title = v.fmax > 0 ? "an IoU against one residue says nothing about where a call's ends are" : "no call was correct";
-          tr.appendChild(td);
-        } else tr.appendChild(numCell(fmt3(v.iou)));
-        tr.appendChild(numCell(fmtInt(v.n)));
-      } else {
-        tr.appendChild(missingCell("results", "not run", 4));
+    // One row per tool: its first row in the current order (its best setting by the sorted
+    // column), then, when opened, its other settings right under it.
+    const byTool = new Map();
+    for (const v of vals) { if (!byTool.has(v.row.tool)) byTool.set(v.row.tool, []); byTool.get(v.row.tool).push(v); }
+    const shown = [];
+    if (state.view === "all") {
+      for (const v of vals) tbody.appendChild(rowEl(v, true, 0, false));
+    } else {
+      for (const [tool, list] of byTool) {
+        const open = expanded.has(tool);
+        tbody.appendChild(rowEl(list[0], true, list.length - 1, open));
+        shown.push(list[0]);
+        for (const v of list.slice(1)) {
+          const tr = rowEl(v, false, 0, false);
+          if (!open) tr.hidden = true;
+          tbody.appendChild(tr);
+        }
       }
-      if (v.c) {
-        const cc = numCell(sig(v.cpu, 3));
-        if (v.c.n_runs > 1) cc.innerHTML += ` <span class="muted runs">(${sig(v.c.cpu_min, 3)}–${sig(v.c.cpu_max, 3)}, ${v.c.n_runs} runs)</span>`;
-        tr.appendChild(cc);
-        tr.appendChild(v.cpu_rep == null ? missingCell("reported", "none reported") : numCell(sig(v.cpu_rep, 3)));
-        tr.appendChild(numCell(v.ram.toFixed(1)));
-        const g = numCell(v.c.gpu_h_per_1000 ? sig(v.c.gpu_h_per_1000, 3) + " GPU-h" : "none");
-        if (v.c.gpu_h_per_1000) g.title = "one GPU, while predicting 3Di letters for the queries";
-        tr.appendChild(g);
-        tr.appendChild(numCell("$" + sig(v.cost, 3)));
-      } else {
-        // "not measured" only when this tool searched this relative (it has result rows
-        // under some filter) but no trace row holds the search task.
-        const why = M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species) ? "not measured" : "not run";
-        tr.appendChild(missingCell("compute", why));
-        tr.appendChild(missingCell("reported", "none reported"));
-        tr.appendChild(missingCell("compute", why));
-        tr.appendChild(missingCell("compute", why));
-        tr.appendChild(missingCell("compute", why));
-      }
-      tbody.appendChild(tr);
     }
     const rank = document.getElementById("rankline");
-    if (rank) rank.textContent = sortWords();
+    if (rank) rank.textContent = sortWords() + (state.view === "all" ? ", every setting" : ", best setting of each tool") + ".";
     const nRun = vals.filter((v) => v.r).length;
+    const nTools = [...byTool.values()].filter((l) => l.some((v) => v.r)).length;
     document.getElementById("count").textContent = nRun
-      ? nRun + " of " + vals.length + " tool and setting rows have results for these filters."
-      : "No tool has results for these filters: either this stratum holds no regions for this relative, or it was not scored.";
+      ? `${nTools} of ${byTool.size} tools (${nRun} of ${vals.length} settings) have results for these filters.`
+      : "No tool has results for these filters: either this subset holds no regions for this relative, or it was not scored.";
+    const vb = document.getElementById("viewbtn");
+    if (vb) vb.textContent = state.view === "all" ? "One row per tool" : "Show every setting";
+    const cb = document.getElementById("colbtn");
+    if (cb) { cb.textContent = allCols ? "Fewer columns" : "More columns"; cb.setAttribute("aria-pressed", allCols); }
+    renderVerdict(vals);
+  }
+  // One sentence above the table, from the rows on screen: the best tool by Fmax, the
+  // cheapest tool within 0.01 of it, and the top tool by AUPRC when that is another tool.
+  function renderVerdict(vals) {
+    const box = document.getElementById("verdict");
+    if (!box) return;
+    const byOrder = (a, b) => a.row.order - b.row.order;
+    const top = (k) => vals.filter((v) => v[k] != null).sort((a, b) => b[k] - a[k] || byOrder(a, b))[0];
+    const best = top("fmax");
+    const name = (v) => `<b>${M.tools[v.row.tool].name}</b> (${v.row.label})`;
+    box.dataset.best = best ? best.row.tool + "|" + best.row.setting : "";
+    box.dataset.cheap = ""; box.dataset.auprc = "";
+    if (!best) { box.innerHTML = "No tool has results for these filters."; return; }
+    let t = `Highest Fmax: ${name(best)}, ${fmt3(best.fmax)}.`;
+    const near = vals.filter((v) => v.fmax != null && v.fmax >= best.fmax - 0.01 && v.cost != null)
+      .sort((a, b) => a.cost - b.cost || byOrder(a, b));
+    const cheap = near[0];
+    if (cheap && cheap !== best) {
+      box.dataset.cheap = cheap.row.tool + "|" + cheap.row.setting;
+      t += ` ${cheap.row.tool === best.row.tool ? "Its setting " + cheap.row.label : name(cheap)} is within 0.01 of it (${fmt3(cheap.fmax)})`;
+      if (best.cost != null && cheap.cost > 0) {
+        const r = best.cost / cheap.cost;
+        t += ` at ${r >= 1.95 ? "1/" + Math.round(r) + " of the cost" : "less cost"}: ${fmtCost(cheap.cost)} against ${fmtCost(best.cost)} per 1,000 queries.`;
+      } else t += ` for ${fmtCost(cheap.cost)} per 1,000 queries; the top tool's cost was not measured.`;
+    } else if (cheap) {
+      box.dataset.cheap = cheap.row.tool + "|" + cheap.row.setting;
+      t += ` No tool within 0.01 of it costs less (${fmtCost(cheap.cost)} per 1,000 queries).`;
+    }
+    const ap = top("auprc");
+    if (ap) {
+      box.dataset.auprc = ap.row.tool + "|" + ap.row.setting;
+      t += ap.row.tool !== best.row.tool
+        ? ` Ranked by AUPRC instead, ${name(ap)} comes first (${fmt3(ap.auprc)} against ${fmt3(best.auprc)}).`
+        : " AUPRC puts the same tool first.";
+    }
+    if (best.row.tool === "hmmscan" && state.truth === "pfam") t += " hmmscan is graded on its own models here, so read its row as an upper limit.";
+    box.innerHTML = t;
   }
 
   // ---------- prices ----------
@@ -453,7 +529,13 @@
         b.dataset.pick = ax.id;
         // The same column on both axes would put every marker on the diagonal.
         if (ax.id === other) { b.disabled = true; b.title = "already on the other axis"; }
-        chips.appendChild(b);
+        const wrapEl = document.createElement("span");
+        wrapEl.className = "pickchip";
+        wrapEl.appendChild(b);
+        // Its definition, as in Table 1's column names.
+        const tb = M.terms && M.terms.axes && M.terms.axes[ax.id];
+        if (tb) wrapEl.insertAdjacentHTML("beforeend", tb.replaceAll("-ax\"", "-ax-" + key + "\""));
+        chips.appendChild(wrapEl);
       }
       r.appendChild(chips);
       box.appendChild(r);
@@ -532,11 +614,11 @@
         m.dataset.x = String(p.x);
         m.dataset.y = String(p.y);
         m.style.cursor = "pointer";
-        m.setAttribute("aria-label", `${t.name} ${p.row.setting}: ${ya.short} ${fmtAxis(ya, p.y)}, ${xa.short} ${fmtAxis(xa, p.x)}`);
+        m.setAttribute("aria-label", `${t.name}, ${p.row.label}: ${ya.short} ${fmtAxis(ya, p.y)}, ${xa.short} ${fmtAxis(xa, p.x)}`);
         const show = (ev) => {
           const c = p.v.c;
           tip.style.display = "block";
-          tip.innerHTML = `<b>${t.name}</b> <span class="mono">${p.row.setting}</span><br>` +
+          tip.innerHTML = `<b>${t.name}</b>, ${p.row.label} <span class="mono muted">(${p.row.setting})</span><br>` +
             `Fmax ${fmt3(p.v.fmax)} · AUPRC ${fmt3(p.v.auprc)} · median IoU ${p.v.iou == null ? "— no correct calls" : fmt3(p.v.iou)}<br>` +
             `${fmtInt(p.v.n)} true instances<br>` +
             (c ? `${sig(c.cpu_h_per_1000, 3)} core-hours · $${sig(p.v.cost, 3)} · ${sig(c.wall_h_per_1000, 3)} wall-clock hours on ${c.cores} cores, per 1,000 queries per relative<br>` +
@@ -567,8 +649,6 @@
     // Caption and key follow the chosen axes.
     const fk = document.getElementById("frontier-key");
     if (fk) fk.hidden = !(pareto && fr.length > 1);
-    // Filled or open says where a cost came from; with two scores no cost is drawn.
-    document.querySelectorAll("[data-cost-key]").forEach((e) => (e.hidden = xa.kind === "score"));
     const fw = document.getElementById("frontier-words");
     if (fw && pareto) fw.textContent = `the line: no other tool is both ${xa.less} and better on ${ya.short}`;
     const cap = document.getElementById("plotcaption");
@@ -579,7 +659,7 @@
       if (!pareto) words += " No line is drawn: both axes are scores, where higher is better.";
       else if (fr.length === 1) {
         const p = fr[0];
-        words += ` No line is drawn: one marker, ${M.tools[p.row.tool].name} ${p.row.setting}, beats or ties every other on both axes.`;
+        words += ` No line is drawn: one marker, ${M.tools[p.row.tool].name} (${p.row.label}), beats or ties every other on both axes.`;
       }
       if (xa.kind === "score") words += " The two scores can rank tools in opposite orders.";
       cap.textContent = words;
@@ -587,7 +667,7 @@
     const np = document.getElementById("notplotted");
     np.innerHTML = notPlotted.length
       ? "<b>Not plotted:</b> " + notPlotted.map(([row, why]) =>
-        `<span class="np" data-tool="${row.tool}" data-setting="${row.setting}">${M.tools[row.tool].name} <span class="mono">${row.setting}</span> (— ${why})</span>`).join("; ") + "."
+        `<span class="np" data-tool="${row.tool}" data-setting="${row.setting}" title="${row.setting}">${M.tools[row.tool].name}, ${row.label} (${why === "not run" ? NR + "not run" : why})</span>`).join("; ") + "."
       : "";
   }
   function niceStep(raw) {
@@ -596,10 +676,10 @@
     return 10 * p;
   }
 
+  // The filters in words, printed once: in the "Change what is ranked" summary line.
   function describe() {
-    const d = document.getElementById("filterline");
     const short = document.getElementById("filtersummary");
-    if (!d) return;
+    if (!short) return;
     const sp = M.species[state.species];
     let strat = "all proteins";
     if (state.axis !== "all") {
@@ -607,9 +687,8 @@
       const c = row.groups.flatMap((g) => g.chips).find((c) => c.value === state.stratum);
       strat = row.label.toLowerCase() + ": " + (c ? c.label : state.stratum);
     }
-    d.textContent = `${M.truthNames[state.truth]}, ${state.calls === "dedup" ? "overlapping calls merged" : "raw calls"}, ` +
+    short.textContent = `${M.truthNames[state.truth]}, ${state.calls === "dedup" ? "overlapping calls merged" : "raw calls"}, ` +
       `relative searched: ${sp.name}${sp.mya != null ? " (" + sp.mya + " Mya)" : ""}, ${strat}.`;
-    if (short) short.textContent = "now: " + d.textContent;
   }
 
   function update(rebuildFilters = true) {
@@ -625,6 +704,8 @@
   window.__lb = {
     meta: M,
     set(s) { Object.assign(state, s); update(); },
+    // Open or close every tool's other settings (for the check); true opens all.
+    expandAll(on) { expanded.clear(); if (on) for (const r of M.rows) expanded.add(r.tool); update(false); },
     state: () => Object.assign({}, state),
     // What Figure 1 drew: one entry per marker, with the raw x and y values.
     plotted: () => plotted.map((p) => Object.assign({}, p)),
@@ -653,6 +734,10 @@
       pending = setTimeout(() => renderPlot(), 150);
     });
   }
+  const vb = document.getElementById("viewbtn");
+  if (vb) vb.addEventListener("click", () => { state.view = state.view === "all" ? "best" : "all"; update(false); });
+  const cb = document.getElementById("colbtn");
+  if (cb) cb.addEventListener("click", () => { allCols = !allCols; update(false); });
   renderPrices();
   update();
 })();

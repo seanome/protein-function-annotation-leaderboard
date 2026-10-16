@@ -21,10 +21,6 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Region pile-up"
   },
@@ -35,6 +31,10 @@
   {
    "tag": "p",
    "text": "Where each tool's calls fall around a known domain. A call is a stretch of a human protein that a tool matched to a zebrafish protein carrying a Pfam domain. The call names that domain and spans the whole matched stretch, which can be much wider than the domain itself. Every row below is one region: one of the 2,435 Pfam domains on the 998 human query proteins. Every panel is one tool and setting searching the zebrafish proteome (zebrafish and human last shared an ancestor about 430 million years ago), and every panel has the same rows."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "p",

@@ -41,11 +41,12 @@ TRUTH = {"swissprot": "Swiss-Prot features", "pfam": "Pfam", "pfamn": "Pfam-N"}
 DEFAULTS = {
     "truth": "pfam", "calls": "raw", "species": "zebrafish", "axis": "all",
     "stratum": "all", "x": "cpu", "y": "fmax", "sort": "fmax", "dir": "desc",
-    "r_cpu": R_CPU, "r_gpu": R_GPU,
+    "view": "best", "r_cpu": R_CPU, "r_gpu": R_GPU,
 }
 DEFAULT_WORDS = "Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched"
-# A stratum enters a card's comparisons and questions only with at least this many true
-# instances; below it one or two calls swing Fmax from 0 to 1.
+# A subset of the proteins (a stratum in the tables) enters a card's comparisons and
+# questions only with at least this many true instances; below it one or two calls swing
+# Fmax from 0 to 1.
 MIN_N = 30
 
 IDENTITY = [("0-20%", "0–20%"), ("20-30%", "20–30%"), ("30-40%", "30–40%"),
@@ -60,6 +61,14 @@ FEATURES = {
     "INTRAMEM": "region inside the membrane that does not cross it", "MOTIF": "short motif",
     "REGION": "region of interest", "REPEAT": "repeat", "SITE": "other single-residue site",
     "TRANSMEM": "membrane-spanning segment", "ZN_FING": "zinc finger",
+}
+# The same features as short words, for chips and figure labels; the Swiss-Prot key is
+# kept for the hover text and the JSON.
+FEATURE_WORDS = {
+    "ACT_SITE": "active site", "BINDING": "binding site", "COILED": "coiled coil",
+    "DNA_BIND": "DNA-binding region", "DOMAIN": "domain", "INTRAMEM": "in-membrane region",
+    "MOTIF": "short motif", "REGION": "region of interest", "REPEAT": "repeat",
+    "SITE": "other site", "TRANSMEM": "membrane-spanning", "ZN_FING": "zinc finger",
 }
 SPECIES_GROUPS = [
     ("mammals", ["ptroglodytes", "rnorvegicus", "clupus", "btaurus", "mouse", "mdomestica"]),
@@ -88,6 +97,40 @@ SETTING_WORDS = {
 }
 
 
+# kmerseek alphabets in size groups, smallest first: 2 letters, 4-5 letters, then the 20
+# amino acids unreduced. Every list, legend and panel of kmerseek settings uses this order.
+ALPHA_ORDER = ["hp_thomas_dill2", "gbmr4", "wwmj5", "protein20"]
+# Short plain names for settings, shown in tables and panels; the code name is the hover text.
+SETTING_LABEL = {
+    ("hmmer3_phmmer", "default"): "default options",
+    ("hmmer3_jackhmmer", "n3"): "3 rounds",
+    ("mmseqs2_seqseq", "s7"): "sensitivity 7",
+    ("mmseqs2_iterative", "s7"): "sensitivity 7, 3 rounds",
+    ("hhblits", "single_seq"): "single-protein profiles",
+    ("foldseek", "3di_aa"): "shape letters + amino acids",
+    ("prostt5", "3di_from_seq"): "shape letters from sequence",
+    ("hmmscan", "direct"): "Pfam models",
+}
+KMER_SETTING = re.compile(r"(.+)_k(\d+)_lc(False|True)")
+
+
+def setting_label(tool: str, setting: str) -> str:
+    """"gbmr4, k = 21" for kmerseek (plus a note when low-complexity k-mers were removed)."""
+    m = KMER_SETTING.fullmatch(setting)
+    if tool == "kmerseek" and m:
+        return f"{m[1]}, k = {m[2]}" + (", low-complexity removed" if m[3] == "True" else "")
+    return SETTING_LABEL.get((tool, setting), setting)
+
+
+def setting_key(tool: str, setting: str) -> tuple:
+    """Sort key: kmerseek by alphabet size group, then k; other tools by setting name."""
+    m = KMER_SETTING.fullmatch(setting)
+    if tool == "kmerseek" and m:
+        a = ALPHA_ORDER.index(m[1]) if m[1] in ALPHA_ORDER else len(ALPHA_ORDER)
+        return (a, int(m[2]), m[3], setting)
+    return (0, 0, "", setting)
+
+
 def setting_words(tool: str, setting: str) -> str:
     if (tool, setting) in SETTING_WORDS:
         return SETTING_WORDS[(tool, setting)]
@@ -99,8 +142,8 @@ def setting_words(tool: str, setting: str) -> str:
 
 
 # Marker shape for each kmerseek alphabet on Figure 1; other tools take theirs from TOOLS.
-KMERSEEK_SHAPES = {"protein20": "circle", "gbmr4": "square", "wwmj5": "triangle",
-                   "hp_thomas_dill2": "diamond"}
+KMERSEEK_SHAPES = {"hp_thomas_dill2": "diamond", "gbmr4": "square", "wwmj5": "triangle",
+                   "protein20": "circle"}
 
 METRICS = [
     {"id": "fmax", "label": "Fmax", "field": "fmax"},
@@ -161,7 +204,7 @@ TERMS = {
             "GPU time the search used, per 1,000 queries. No search here used a GPU. ProstT5 used "
             "one to predict 3Di shape letters while building its databases; that time is on its "
             "card."),
-    "cost": ("cost_usd_est", "explainers.html#cost",
+    "cost": ("Estimated cost", "explainers.html#cost",
              "Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × "
              "r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand "
              "rates."),
@@ -169,6 +212,12 @@ TERMS = {
               "Raw keeps every call a tool makes. Dedup merges calls of the same family on the same "
               "protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so "
               "one domain hit by many of the relative's proteins counts once."),
+    "wall": ("Wall-clock hours per 1,000 queries", "explainers.html#cost",
+             "How long the search took from start to finish on the cores it was given (4 to 16), "
+             "per relative searched, scaled to 1,000 human proteins. Less is faster."),
+    "db": ("Database build", "explainers.html#cost",
+           "Core-hours to build one relative's search database, done once before any search. "
+           "The mean over the builds the run's task records hold. Not in the per-query cost."),
     "measured": ("measured", "explainers.html#cost",
                  "Measured on Stanford's Sherlock cluster, from the run's own task records."),
     "reported": ("reported", "explainers.html#cost",
@@ -190,7 +239,7 @@ STRATUM_WORDS = {
     "identity": dict(IDENTITY),
     "feature_length_bin": dict(LENGTH_SHORT + LENGTH_DOMAIN + [("whole_protein", "whole protein")]),
     "plddt": dict(PLDDT),
-    "feature_type": {k: f"{k} ({v})" for k, v in FEATURES.items()},
+    "feature_type": dict(FEATURE_WORDS),
 }
 AXIS_WORDS = {
     "identity": "identity to the closest same-family domain in the relative",
@@ -250,8 +299,8 @@ def chiprows(species_mya: dict) -> list[dict]:
                  "low values mean disordered or unknown shape",
          "groups": [{"chips": [c("all", "any")] + [c(v, w) for v, w in PLDDT]}]},
         {"id": "ftype", "kind": "stratum", "axis": "feature_type", "label": "Feature type",
-         "help": "Swiss-Prot feature key; only the Swiss-Prot truth set has these",
-         "groups": [{"chips": [c("all", "any")] + [c(k, k, v) for k, v in FEATURES.items()]}]},
+         "help": "the kind of Swiss-Prot feature; only the Swiss-Prot truth set has these",
+         "groups": [{"chips": [c("all", "any")] + [c(k, FEATURE_WORDS[k], f"{k}: {v}") for k, v in FEATURES.items()]}]},
     ]
 
 
@@ -268,27 +317,43 @@ def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
     return rows
 
 
+# The site's pages in reading order. The last two sit under "More" in the header.
+NAV = [("index.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool cards", "tools"),
+       ("cost.html", "Compare two columns", "cost"), ("explainers.html", "How the scores work", "explainers"),
+       ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods")]
+NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage")]
+
+
 def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
            head: str = "", description: str = "") -> str:
     up = "../" * depth
-    nav = [("index.html", "Leaderboard", "leaderboard"), ("cost.html", "Compare two columns", "cost"),
-           ("pileup.html", "Region pile-up", "pileup"), ("claims.html", "Claims", "claims"),
-           ("tools/index.html", "Tool cards", "tools"), ("coverage.html", "Coverage", "coverage"),
-           ("explainers.html", "How the scores work", "explainers"), ("methods.html", "Methods", "methods")]
-    links = "".join(
-        f'<a href="{up}{h}"{" data-keep-filters" if p in ("leaderboard", "cost") else ""}'
-        f'{" aria-current=\"page\"" if p == page else ""}>{t}</a>' for h, t, p in nav)
+
+    def link(h, t, p):
+        keep = " data-keep-filters" if p in ("leaderboard", "cost") else ""
+        cur = ' aria-current="page"' if p == page else ""
+        return f'<a href="{up}{h}"{keep}{cur}>{t}</a>'
+
+    main_links = "".join(link(*x) for x in NAV)
+    more_links = "".join(link(*x) for x in NAV_MORE)
+    more_cur = ' class="cur"' if page in {p for _, _, p in NAV_MORE} else ""
+    here = next((t for _, t, p in NAV + NAV_MORE if p == page), "Pages")
     commit = src["commit"]
     src_line = (
         f'Numbers from <a href="https://github.com/{src["repo"]}/tree/{commit}/{src["path"]}">'
         f'{src["repo"]}</a> at commit <a class="mono" href="https://github.com/{src["repo"]}/commit/{commit}">'
         f'{commit[:8]}</a> (<span class="mono">{src["path"]}</span>), copied {src["copied_at"][:10]}.'
     )
+    # A short "data from" line right after the page's lede; the full source is in the footer.
+    asof = (f'<p class="asof">Data from {fmt_date(src.get("commit_date") or src["copied_at"])}, '
+            f'commit <span class="mono">{commit[:8]}</span> (<a href="#source-commit">source</a>)</p>')
+    m = re.search(r'<p class="lede">.*?</p>', body, flags=re.S)
+    if m:
+        body = body[:m.end()] + "\n" + asof + body[m.end():]
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -297,19 +362,22 @@ def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
 <link rel="stylesheet" href="{up}assets/site.css">
 <link rel="icon" href="{up}assets/favicon.svg" type="image/svg+xml">
 <script defer src="{up}assets/terms.js"></script>
+<script defer src="{up}assets/nav.js"></script>
 {head}
 </head>
 <body data-page="{page}">
 <header class="site"><div class="wrap">
 <a class="brand" href="{up}index.html">{SITE}</a>
-<nav class="site" aria-label="Pages">{links}</nav>
+<nav class="site" aria-label="Pages">{main_links}<details class="navmore"><summary{more_cur}>More</summary>
+<div class="navpop">{more_links}</div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: {esc(here)}">{esc(here)}</summary>
+<div class="navpop">{main_links}{more_links}</div></details>
 </div></header>
 <main class="wrap" data-page="{page}">
-<p class="source" id="source-commit" data-commit="{commit}">{src_line}</p>
 {body}
 </main>
 <footer class="site"><div class="wrap">
-<p>{src_line}</p>
+<p id="source-commit" data-commit="{commit}">{src_line}</p>
 <p>Site source: <a href="https://github.com/{REPO}">{REPO}</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 </div></footer>
 </body>
@@ -424,12 +492,13 @@ def row_order(res: pl.DataFrame) -> list[dict]:
     kinds = list(KINDS)
     pairs = res.select("tool", "setting").unique().to_dicts()
     pairs.sort(key=lambda r: (kinds.index(TOOLS[r["tool"]]["kind"]), list(TOOLS).index(r["tool"]),
-                              r["setting"]))
+                              setting_key(r["tool"], r["setting"])))
     out = []
     for i, p in enumerate(pairs):
-        alpha = re.fullmatch(r"(.+)_k\d+_lc(?:False|True)", p["setting"])
+        alpha = KMER_SETTING.fullmatch(p["setting"])
         shape = KMERSEEK_SHAPES.get(alpha[1], "circle") if p["tool"] == "kmerseek" and alpha else TOOLS[p["tool"]]["shape"]
-        out.append(dict(p, order=i, words=setting_words(p["tool"], p["setting"]), shape=shape))
+        out.append(dict(p, order=i, label=setting_label(p["tool"], p["setting"]),
+                        words=setting_words(p["tool"], p["setting"]), shape=shape))
     return out
 
 
@@ -468,11 +537,21 @@ def compute_json(comp: pl.DataFrame) -> dict:
 
 # --------------------------------------------------------------------------- pages
 
+def key_line(tools_used: set[str]) -> str:
+    """One line above Table 1: the kind colours and the marks inside the table."""
+    kinds = "".join(f'<span class="item"><span class="kind k-{k}" aria-hidden="true"></span>{esc(SHORT_KIND[k])}</span>'
+                    for k in KINDS if any(TOOLS[t]["kind"] == k for t in tools_used))
+    return (f'<div class="legend keyline" aria-label="Key to Table 1">{kinds}'
+            '<span class="item"><span class="nr" aria-hidden="true">×</span> not run</span>'
+            '<span class="item"><span class="tag warn">graded on its own models</span></span></div>')
+
+
 def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[str], dd: dict) -> str:
     body = f"""
 <h1>{SITE}</h1>
 <p class="lede">Which tool puts the known domains and features of human proteins in the right
-place, and what does it cost? Each row is one tool at one setting.</p>
+place, and what does it cost?</p>
+<p class="verdict" id="verdict" aria-live="polite"></p>
 <details class="choices" id="choices">
 <summary><span class="choices-label">Change what is ranked</span>
 <span class="choices-now" id="filtersummary"></span></summary>
@@ -491,16 +570,19 @@ price file</a>). CPU: a c7i.large costs $0.08925 per hour for 2 vCPU, so $0.0446
 GPU: a g5.xlarge with one NVIDIA A10G costs $1.006 per hour.</span>
 </div>
 </details>
-<figure>
-<figcaption><b>Table 1.</b> <span id="rankline">Tools ranked by Fmax, highest first</span>: <span id="filterline"></span> <span id="count"></span> Click a column name to sort; rows with no value always sort last. On a narrow screen, scroll the table sideways; the tool name stays in place.</figcaption>
-<details class="key"><summary>Key to the marks in Table 1</summary>
+<figure class="lbfig">
+<figcaption><b>Table 1.</b> <span id="rankline">Tools ranked by Fmax, highest first, best setting of each tool.</span>
+<span id="count"></span>
+<span class="tablebtns"><button type="button" class="chip" id="viewbtn">Show every setting</button>
+<button type="button" class="chip" id="colbtn" aria-pressed="false">More columns</button></span></figcaption>
+{key_line(tools_used)}
+<div class="tablebox"><table class="lb" id="lb"><thead><tr></tr></thead><tbody></tbody></table></div>
+</figure>
+<details class="key"><summary>The marks and colours in Table 1, in full</summary>
+{legend_kinds(tools_used)}
 <div class="legend">
-<span class="item"><span class="prov measured">measured</span> measured on Stanford's Sherlock
-cluster, from the run's own task records {term_btn("measured", "key")}</span>
-<span class="item"><span class="prov reported">reported</span> reported by the tool's submitter, on the
-hardware they name (none yet) {term_btn("reported", "key")}</span>
-<span class="item">— not run: no row in the results table for these filters</span>
-<span class="item">— not measured: the search ran, but no task record holds its cost</span>
+<span class="item"><span class="nr" aria-hidden="true">×</span> not run: no row in the results table for these filters</span>
+<span class="item"><i>not measured</i>: the search ran, but no task record holds its cost</span>
 <span class="item"><i>no correct calls</i>: no call was correct, so there is no median IoU</span>
 <span class="item"><i>correct calls only on single residues</i>: Fmax is above 0, but every correct
 call is on a one-residue annotation, where an IoU says nothing about where the ends are</span>
@@ -508,22 +590,18 @@ call is on a one-residue annotation, where an IoU says nothing about where the e
 what the tool needs besides the sequence</span>
 <span class="item"><span class="tag warn">graded on its own models</span> hmmscan under the Pfam truth
 set: Pfam's domains are defined by the models hmmscan runs, so read its row as an upper limit</span>
+<span class="item">Each row shows a tool's best setting for the column it is sorted by;
+"+N more settings" opens the rest. Click a column name to sort; rows with no value sort last.</span>
+<span class="item">Cost and core-hours are measured on Stanford's Sherlock cluster, from the run's own task records {term_btn("measured", "key")}</span>
 </div>
 </details>
-{legend_kinds(tools_used)}
-<div class="tablebox"><table class="lb" id="lb"><thead><tr></tr></thead><tbody></tbody></table></div>
-</figure>
-<p class="prose">Fmax is the best balance of precision and recall at any one score cutoff; AUPRC is precision
-summed over all cutoffs. Both run from 0 to 1, and higher is better. Median IoU is how well a
-correct call's ends match the true region: the overlap divided by the combined span, 1 for a
-perfect match. The ? beside each column name gives its definition, and
-<a href="explainers.html">How the scores work</a> works each score through on a made-up protein
-you can change.</p>
-<p class="prose">Each tool searched {n_queries:,} human proteins against the proteome of one
-relative and copied the relative's annotations onto them. The scores say how many of the human
-proteins' known annotations it put in the right place. The queries are human proteins, most of them
-from chromosome 6 (see <a href="methods.html">Methods</a>); how the ranking holds for queries from
-other species is not measured.</p>
+<p class="prose oneline">Fmax: the best balance of precision and recall at one score cutoff. AUPRC:
+precision over every cutoff. Median IoU: how well a correct call's ends match the true region.
+All run 0 to 1, higher is better; <a href="explainers.html">How the scores work</a> works each through on a made-up protein.</p>
+<p class="prose oneline">Each tool searched {n_queries:,} human proteins, most from chromosome 6, against one
+relative's proteome and copied its annotations (<a href="methods.html#data">which proteins</a>).</p>
+<p class="prose oneline">Estimated cost = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries,
+for the search alone (<a href="methods.html#cost">how cost is counted</a>).</p>
 <details class="prose"><summary>How to choose between Fmax and AUPRC, and raw against dedup</summary>
 <p>Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it
 when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting
@@ -531,14 +609,7 @@ each call: use it when you will rank calls and read down the list. The two can r
 opposite orders, because AUPRC pools every call of every protein while Fmax averages protein by
 protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from
 {dd['raw_fmax']:.3f} to {dd['dedup_fmax']:.3f} and AUPRC from {dd['raw_auprc']:.3f} to
-{dd['dedup_auprc']:.3f}. Definitions: <a href="methods.html">Methods</a>.</p></details>
-<p class="prose muted">cost_usd_est = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries,
-pricing a reserved core-hour as one CPU-hour. Core-hours are cores reserved × wall time, for the
-search alone, as the mean over the relatives each tool searched; the run recorded them per tool,
-not per relative, so the same number appears for every relative. Building databases is on the
-tool cards. No search used a GPU; ProstT5's step that predicts 3Di shape letters used one while
-building its databases (see its card). Setting names, decoded: hover a setting, or see the tool's card. Definitions and worked
-examples: <a href="methods.html">Methods</a>.</p>
+{dd['dedup_auprc']:.3f}. Definitions: <a href="methods.html#dedup">Methods</a>.</p></details>
 <script type="application/json" id="lb-data">{meta_json}</script>
 <script src="assets/app.js"></script>
 """
@@ -553,14 +624,17 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
             if info["kind"] != kind or t not in tools_used:
                 continue
             if t == "kmerseek":
-                for alpha, shape in KMERSEEK_SHAPES.items():
-                    legend.append(f'<span class="item">{svg_marker(shape, f"var(--k-{kind})")}kmerseek, {esc(alpha)}</span>')
+                # One entry: kmerseek's colour, with the shape of each alphabet, smallest first.
+                shapes = " ".join(f'<span class="sub">{svg_marker(KMERSEEK_SHAPES[a], f"var(--k-{kind})")}{esc(a)}</span>'
+                                  for a in ALPHA_ORDER)
+                legend.append(f'<span class="item">kmerseek, by alphabet: {shapes}</span>')
             else:
                 legend.append(f'<span class="item">{svg_marker(info["shape"], f"var(--k-{kind})")}{esc(info["name"])}</span>')
     body = f"""
 <h1>Compare two columns</h1>
 <p class="lede">Any two columns of the leaderboard, drawn against each other: a score against
-what the search cost, or one score against another. Pick the column for each axis below.</p>
+what the search cost, or one score against another. Pick the column for each axis below; the ?
+beside each gives its definition.</p>
 <div class="axispick" id="axispick" aria-label="Columns on the axes"></div>
 <details class="choices" id="choices">
 <summary><span class="choices-label">Change what is plotted</span>
@@ -580,26 +654,24 @@ $1.006 per GPU-hour (a g5.xlarge with one NVIDIA A10G).</span>
 </div>
 </details>
 <figure>
-<figcaption><b>Figure 1.</b> <span id="plotcaption"></span> One marker per tool and setting:
-<span id="filterline"></span> Hover or focus a marker to see its row; click it to open the tool's card.</figcaption>
+<figcaption><b>Figure 3.</b> <span id="plotcaption"></span> One marker per tool and setting, for
+the filters above. Hover or focus a marker to see its row; click it to open the tool's card.</figcaption>
 <div class="legend" aria-label="Key to Figure 1">
 {"".join(legend)}
 <span class="item" id="frontier-key"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.6"/></svg>
 <span id="frontier-words">no other tool is both cheaper and better</span></span>
-<span class="item" data-cost-key>{svg_marker("circle", "var(--ink)")} filled: cost measured on Sherlock</span>
-<span class="item" data-cost-key>{svg_marker("circle", "var(--ink)", False)} open: cost reported by a submitter (none yet)</span>
 </div>
 <div class="plotbox" id="plot"></div>
 </figure>
 <p id="notplotted" class="prose muted"></p>
 <p class="prose muted">Colour is the kind of method; within a kind, marker shape is the tool, and for
-kmerseek the alphabet. Core-hours, cost and wall-clock time are per 1,000 queries for searching
+kmerseek the alphabet. Every cost here was measured on Sherlock; none was reported by a submitter. Core-hours, cost and wall-clock time are per 1,000 queries for searching
 one relative, the mean over the relatives each tool searched, measured on Stanford's Sherlock
 cluster. Peak RAM is the largest memory any one search task used. Wall-clock
 time is on the cores each tool was given (between 4 and 16; hover a marker for the number), so it
 can rank tools differently from core-hours. The database build is the mean over the builds the run's task records
 hold; a database reused from an earlier run left no record. Definitions:
-<a href="methods.html">Methods</a>.</p>
+<a href="methods.html#cost">Methods</a>.</p>
 <script type="application/json" id="lb-data">{meta_json}</script>
 <script src="assets/app.js"></script>
 """
@@ -1910,7 +1982,8 @@ def main() -> None:
         "source": src,
         # "?" buttons with their definitions, drawn by app.js into Table 1's header and the
         # filter rows (terms.js shows them).
-        "terms": {"th": {t: term_btn(t, "th") for t in TERMS}, "filters": {"calls": term_btn("calls", "filters")}},
+        "terms": {"th": {t: term_btn(t, "th") for t in TERMS}, "filters": {"calls": term_btn("calls", "filters")},
+                  "axes": {a["id"]: term_btn(a["id"], "ax") for a in AXES if a["id"] in TERMS}},
     }
     payload = json.dumps({"meta": meta, "results": results_json(res), "compute": compute_json(comp)},
                          separators=(",", ":"), allow_nan=False)

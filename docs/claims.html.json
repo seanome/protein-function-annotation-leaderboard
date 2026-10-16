@@ -21,16 +21,16 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Claims"
   },
   {
    "tag": "p",
    "text": "What each tool's authors claim, the result that would retire each claim, and where it stands. A claim is alive when its test has run and did not retire it, retired when the test retired it, and untested when the test has not run or the data cannot decide it. The build recomputes every verdict from the tables or checks it against the recorded notebook output, so nothing on a card is typed in by hand."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "h2",

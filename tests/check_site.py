@@ -2,9 +2,11 @@
 """Headless check of the built site against data/results.parquet and data/compute.parquet.
 
 1. Leaderboard: render every chip combination (truth set x dedup x relative x stratum).
-   For each tool and setting row, the page must show the parquet's numbers when the
-   parquet has a row, and "—" with "not run" when it has none. Every "—" on the page
-   must be a cell marked missing, and every missing cell must be a missing row.
+   For each tool and setting row (all are in the page, the other settings hidden), the page
+   must show the parquet's numbers when the parquet has a row, and "× not run" in every cell
+   when it has none. The visible row of each tool must be its best setting by Fmax, and the
+   sentence above the table must name the best tool by Fmax, the cheapest within 0.01 of
+   it, and the best by AUPRC, all recomputed here. The every-setting view is checked too.
 2. Compare two columns (Figure 1 on cost.html): render every combination for each of the
    three scores against core-hours, and every combination with no stratum chosen for five
    more axis pairs (cost against AUPRC, peak RAM against median IoU, Fmax against AUPRC,
@@ -61,14 +63,15 @@ def combos(meta: dict) -> list[dict]:
 # Runs inside the page: render a batch of filter combinations and return what each shows.
 SNAP_TABLE = """(batch) => batch.map((s) => {
   window.__lb.set(s);
-  const rows = [...document.querySelectorAll('#lb tbody tr')].map((tr) => ({
-    tool: tr.dataset.tool, setting: tr.dataset.setting,
-    cells: [...tr.children].slice(2).map((td) => ({
-      text: td.textContent.trim(), missing: td.dataset.missing || null, none: td.dataset.none || null,
-      span: td.colSpan})),
-  }));
-  const dashes = (document.querySelector('#lb tbody').textContent.match(/—/g) || []).length;
-  return {s, rows, dashes};
+  const rows = [...document.querySelectorAll('#lb tbody tr')].map((tr) => {
+    const cells = {};
+    for (const td of tr.querySelectorAll('td[data-col]')) {
+      cells[td.dataset.col] = {text: td.textContent.trim(), missing: td.dataset.missing || null, none: td.dataset.none || null};
+    }
+    return {tool: tr.dataset.tool, setting: tr.dataset.setting, hidden: tr.hidden, cells};
+  });
+  const v = document.getElementById('verdict').dataset;
+  return {s, rows, verdict: {best: v.best, cheap: v.cheap, auprc: v.auprc}};
 })"""
 
 SNAP_PLOT = """(batch) => batch.map((s) => {
@@ -123,8 +126,8 @@ def main() -> int:
     cexp = {(k[5], k[6], k[2]): per_ts[(k[5], k[6])] for k in expect if (k[5], k[6]) in per_ts}
 
     failures: list[str] = []
-    stats = {"combinations": 0, "rows_checked": 0, "numbers_checked": 0, "dashes": 0,
-             "missing_results_cells": 0, "missing_compute_cells": 0, "missing_reported_cells": 0,
+    stats = {"combinations": 0, "rows_checked": 0, "numbers_checked": 0,
+             "missing_results_cells": 0, "missing_compute_cells": 0,
              "plot_renders": 0, "markers_checked": 0}
     httpd, base = serve(a.site)
     console_errors: list[str] = []
@@ -135,84 +138,107 @@ def main() -> int:
         page.on("pageerror", lambda e: console_errors.append(f"{page.url}: {e}"))
 
         # ---- 1. leaderboard ----
+        # Every row is in the page, the hidden "other settings" too, so every number is
+        # checked; then the one visible row per tool and the sentence above the table.
         page.goto(base + "index.html")
         meta = page.evaluate("window.__lb.meta")
+        order = {r["tool"] + "|" + r["setting"]: r["order"] for r in meta["rows"]}
+        tools_in_order = list(dict.fromkeys(r["tool"] for r in meta["rows"]))
         all_combos = combos(meta)
+
+        def cost_of(cw):
+            return cw["cpu_h_per_1000_queries"] * 0.044625 + cw["gpu_h_per_1000_queries"] * 1.006
+
+        def check_snap(snap, view):
+            s = snap["s"]
+            got_rows = {r["tool"] + "|" + r["setting"]: r for r in snap["rows"]}
+            if set(got_rows) != set(order) or len(snap["rows"]) != len(order):
+                failures.append(f"{s}: table rows {sorted(set(got_rows) ^ set(order))} differ from the tool-setting rows")
+            vals = {}
+            for row in snap["rows"]:
+                stats["rows_checked"] += 1
+                key = (s["truth"], s["calls"], s["species"], s["axis"], s["stratum"], row["tool"], row["setting"])
+                want = expect.get(key)
+                cells = row["cells"]
+                tag = f"{key}"
+                cw = cexp.get((row["tool"], row["setting"], s["species"]))
+                if want is None:
+                    bad = [c for c, v in cells.items() if c != "tool" and (v["missing"] != "results" or v["text"] != "× not run")]
+                    if bad:
+                        failures.append(f"{tag}: no parquet row but cells {bad} are not '× not run': {cells}")
+                    stats["missing_results_cells"] += 1
+                    continue
+                shown = [cells[c]["text"] for c in ("fmax", "auprc", "iou", "n")]
+                exp = [want.get("fmax"), want.get("auprc"), want.get("median_iou_tp")]
+                # Three decimals on the page: each value within half of the last
+                # digit (the page rounds halves up, Python's format rounds them to even).
+                bad = any(abs(float(t) - e) > 0.0005 + 1e-9 for t, e in zip(shown[:2], exp[:2]))
+                # A stored median IoU of 0 (no correct call longer than one residue)
+                # is shown as words, never as a number or a mark: with Fmax above 0
+                # some call was correct, so those correct calls are all on single
+                # residues; with Fmax 0 no call was correct.
+                if exp[2] is None or exp[2] == 0:
+                    words = ("correct calls only on single residues" if exp[0] > 0 else "no correct calls")
+                    bad |= cells["iou"]["none"] != "iou" or shown[2] != words
+                    k_iou = "iou_single_residue_words" if exp[0] > 0 else "iou_no_correct_words"
+                    stats[k_iou] = stats.get(k_iou, 0) + 1
+                else:
+                    bad |= abs(float(shown[2]) - exp[2]) > 0.0005 + 1e-9
+                if bad or shown[3] != f"{want['n_truth_instances']:,}" or any(cells[c]["missing"] for c in ("fmax", "auprc", "iou", "n")):
+                    failures.append(f"{tag}: page {shown} != parquet {exp + [want['n_truth_instances']]}")
+                stats["numbers_checked"] += 4
+                c_cost = None
+                if cw is None:
+                    # The search was scored here, so it ran: its cost is "not measured".
+                    bad = [c for c in ("cost", "cpu", "ram") if cells[c]["missing"] != "compute" or cells[c]["text"] != "not measured"]
+                    if bad:
+                        failures.append(f"{tag}: no compute row but cells {[cells[c] for c in bad]}")
+                    stats["missing_compute_cells"] += 3
+                else:
+                    c_cost = cost_of(cw)
+                    cost_shown = float(cells["cost"]["text"].lstrip("$"))
+                    if abs(cost_shown - c_cost) > 0.006 * c_cost + 1e-12:
+                        failures.append(f"{tag}: cost {cost_shown} != {c_cost}")
+                    cpu = float(cells["cpu"]["text"])
+                    if abs(cpu - cw["cpu_h_per_1000_queries"]) > 0.006 * cw["cpu_h_per_1000_queries"] + 1e-9:
+                        failures.append(f"{tag}: core-hours {cpu} != {cw['cpu_h_per_1000_queries']}")
+                    if cells["ram"]["text"] != f"{cw['peak_rss_gb']:.1f}":
+                        failures.append(f"{tag}: RAM {cells['ram']['text']} != {cw['peak_rss_gb']:.1f}")
+                    stats["numbers_checked"] += 3
+                vals[row["tool"] + "|" + row["setting"]] = (exp[0], exp[1], c_cost)
+            # Sorted by Fmax, highest first, ties and missing values by row order.
+            def best_of(keys, i):
+                have = [k for k in keys if k in vals and vals[k][i] is not None]
+                return min(have, key=lambda k: (-vals[k][i], order[k])) if have else None
+            visible = [r["tool"] + "|" + r["setting"] for r in snap["rows"] if not r["hidden"]]
+            if view == "best":
+                want_vis = []
+                for t in tools_in_order:
+                    ks = [k for k in order if k.split("|")[0] == t]
+                    want_vis.append(best_of(ks, 0) or min(ks, key=order.get))
+                if sorted(visible) != sorted(want_vis):
+                    failures.append(f"{s}: visible rows {sorted(set(visible) ^ set(want_vis))} are not each tool's best by Fmax")
+                stats["best_rows_checked"] = stats.get("best_rows_checked", 0) + len(want_vis)
+            elif sorted(visible) != sorted(order):
+                failures.append(f"{s}: every-setting view hides rows")
+            b = best_of(list(order), 0)
+            near = [k for k in vals if b and vals[k][0] is not None and vals[k][0] >= vals[b][0] - 0.01 and vals[k][2] is not None]
+            cheap = min(near, key=lambda k: (vals[k][2], order[k])) if near else None
+            want_v = {"best": b or "", "cheap": cheap or "", "auprc": best_of(list(order), 1) or ""}
+            if snap["verdict"] != want_v:
+                failures.append(f"{s}: sentence above Table 1 names {snap['verdict']}, expected {want_v}")
+            stats["sentences_checked"] = stats.get("sentences_checked", 0) + 1
+
         for i in range(0, len(all_combos), a.batch):
             for snap in page.evaluate(SNAP_TABLE, all_combos[i:i + a.batch]):
                 stats["combinations"] += 1
-                s = snap["s"]
-                n_missing_cells = 0
-                for row in snap["rows"]:
-                    stats["rows_checked"] += 1
-                    key = (s["truth"], s["calls"], s["species"], s["axis"], s["stratum"], row["tool"], row["setting"])
-                    want = expect.get(key)
-                    cells = row["cells"]
-                    tag = f"{key}"
-                    if want is None:
-                        c0 = cells[0]
-                        if not (c0["missing"] == "results" and c0["span"] == 4 and c0["text"] == "— not run"):
-                            failures.append(f"{tag}: no parquet row but page shows {c0}")
-                        stats["missing_results_cells"] += 1
-                        rest = cells[1:]
-                    else:
-                        shown = [c["text"] for c in cells[:4]]
-                        exp = [want.get("fmax"), want.get("auprc"), want.get("median_iou_tp")]
-                        # Three decimals on the page: each value within half of the last
-                        # digit (the page rounds halves up, Python's format rounds them to even).
-                        bad = any(abs(float(t) - e) > 0.0005 + 1e-9 for t, e in zip(shown[:2], exp[:2]))
-                        # A stored median IoU of 0 (no correct call longer than one residue)
-                        # is shown as words, never as a number or a dash: with Fmax above 0
-                        # some call was correct, so those correct calls are all on single
-                        # residues; with Fmax 0 no call was correct.
-                        if exp[2] is None or exp[2] == 0:
-                            words = ("correct calls only on single residues" if exp[0] > 0
-                                     else "no correct calls")
-                            bad |= cells[2]["none"] != "iou" or shown[2] != words
-                            k_iou = "iou_single_residue_words" if exp[0] > 0 else "iou_no_correct_words"
-                            stats[k_iou] = stats.get(k_iou, 0) + 1
-                        else:
-                            bad |= abs(float(shown[2]) - exp[2]) > 0.0005 + 1e-9
-                        if bad or shown[3] != f"{want['n_truth_instances']:,}" or any(c["missing"] for c in cells[:4]):
-                            failures.append(f"{tag}: page {shown} != parquet {exp + [want['n_truth_instances']]}")
-                        stats["numbers_checked"] += 4
-                        rest = cells[4:]
-                    cw = cexp.get((row["tool"], row["setting"], s["species"]))
-                    if cw is None:
-                        kinds = [c["missing"] for c in rest]
-                        if kinds != ["compute", "reported", "compute", "compute", "compute"]:
-                            failures.append(f"{tag}: no compute row but cells {rest}")
-                        stats["missing_compute_cells"] += 4
-                        stats["missing_reported_cells"] += 1
-                    else:
-                        cpu = rest[0]["text"].split()[0]
-                        if cw["n_completed_runs"] > 1 and f"{cw['n_completed_runs']} runs" not in rest[0]["text"]:
-                            failures.append(f"{tag}: {cw['n_completed_runs']} runs but no range shown")
-                        gpu_text = rest[3]["text"]
-                        if cw["gpu_h_per_1000_queries"] > 0:
-                            g = float(gpu_text.split()[0])
-                            if abs(g - cw["gpu_h_per_1000_queries"]) > 0.006 * cw["gpu_h_per_1000_queries"]:
-                                failures.append(f"{tag}: GPU {gpu_text} != {cw['gpu_h_per_1000_queries']}")
-                        elif gpu_text != "none":
-                            failures.append(f"{tag}: GPU {gpu_text} but parquet has none")
-                        cost_shown = float(rest[4]["text"].lstrip("$"))
-                        cost_want = cw["cpu_h_per_1000_queries"] * 0.044625 + cw["gpu_h_per_1000_queries"] * 1.006
-                        if abs(cost_shown - cost_want) > 0.006 * cost_want + 1e-12:
-                            failures.append(f"{tag}: cost {cost_shown} != {cost_want}")
-                        ram = rest[2]["text"]
-                        if abs(float(cpu) - cw["cpu_h_per_1000_queries"]) > 0.006 * cw["cpu_h_per_1000_queries"] + 1e-9:
-                            failures.append(f"{tag}: CPU-h {cpu} != {cw['cpu_h_per_1000_queries']}")
-                        if ram != f"{cw['peak_rss_gb']:.1f}":
-                            failures.append(f"{tag}: RAM {ram} != {cw['peak_rss_gb']:.1f}")
-                        if cw["cpu_h_reported"] is None and rest[1]["missing"] != "reported":
-                            failures.append(f"{tag}: reported CPU-h shown though parquet has none")
-                        if rest[1]["missing"]:
-                            stats["missing_reported_cells"] += 1
-                        stats["numbers_checked"] += 2
-                    n_missing_cells += sum(1 for c in cells if c["missing"])
-                stats["dashes"] += snap["dashes"]
-                if snap["dashes"] != n_missing_cells:
-                    failures.append(f"{s}: {snap['dashes']} dashes on the page but {n_missing_cells} missing cells")
+                check_snap(snap, "best")
+        # The every-setting view, with no subset chosen.
+        every = [dict(c, view="all") for c in all_combos if c["axis"] == "all"]
+        for snap in page.evaluate(SNAP_TABLE, every):
+            check_snap(snap, "all")
+        stats["every_setting_views"] = len(every)
+        page.evaluate("window.__lb.set({view: 'best'})")
 
         # ---- 2. compare two columns ----
         page.goto(base + "cost.html")
@@ -286,12 +312,13 @@ def main() -> int:
         defaults = meta["defaults"]
         n_rows = len(meta["rows"])
         for bad in ("species=Zebrafish", "axis=identity&stratum=nope", "axis=nope&stratum=all",
-                    "truth=pfam2", "metric=x&sort=evil&dir=up", "x=nope&y=cpu", "r_cpu=-1&r_gpu=abc"):
+                    "truth=pfam2", "metric=x&sort=evil&dir=up", "x=nope&y=cpu", "view=some", "r_cpu=-1&r_gpu=abc"):
             page.goto(base + "index.html#" + bad)
             got = page.evaluate("window.__lb.state()")
             shown = page.evaluate("document.querySelectorAll('#lb tbody tr').length")
             cost_cells = page.evaluate("[...document.querySelectorAll('#lb tbody td')].map(t => t.textContent).filter(t => t.startsWith('$-'))")
-            want = {k: defaults[k] for k in ("truth", "calls", "species", "axis", "stratum", "x", "y", "sort", "dir", "r_cpu", "r_gpu")}
+            shown = page.evaluate("document.querySelectorAll('#lb tbody tr').length")
+            want = {k: defaults[k] for k in ("truth", "calls", "species", "axis", "stratum", "x", "y", "sort", "dir", "view", "r_cpu", "r_gpu")}
             if {k: got[k] for k in want} != want or shown != n_rows or cost_cells:
                 failures.append(f"hash #{bad}: state {got}, {shown} rows, negative costs {cost_cells[:2]}")
             stats["bad_hashes_checked"] = stats.get("bad_hashes_checked", 0) + 1
@@ -302,7 +329,7 @@ def main() -> int:
         caption = page.evaluate("document.getElementById('rankline').textContent")
         if (got["truth"], got["stratum"], got["sort"]) != ("swissprot", "TRANSMEM", "auprc"):
             failures.append(f"hashchange not applied: {got}")
-        if caption != "Tools ranked by AUPRC, lowest first":
+        if caption != "Tools ranked by AUPRC, lowest first, best setting of each tool.":
             failures.append(f"caption after sorting by AUPRC ascending: {caption!r}")
         # Switching truth set to Pfam drops the Swiss-Prot-only feature-type stratum.
         page.evaluate("[...document.querySelectorAll('.chiprow[data-row=truth] .chip')].find(b => b.textContent === 'Pfam').click()")

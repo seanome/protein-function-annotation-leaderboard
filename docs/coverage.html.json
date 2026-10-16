@@ -21,16 +21,16 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Coverage"
   },
   {
    "tag": "p",
    "text": "What has been measured, across every experiment in the tables, and what has not. Every empty square is a run still to do."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "figcaption",

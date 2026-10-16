@@ -21,16 +21,16 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Compare two columns"
   },
   {
    "tag": "p",
-   "text": "Any two columns of the leaderboard, drawn against each other: a score against what the search cost, or one score against another. Pick the column for each axis below."
+   "text": "Any two columns of the leaderboard, drawn against each other: a score against what the search cost, or one score against another. Pick the column for each axis below; the ? beside each gives its definition."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "summary",
@@ -42,11 +42,11 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1. One marker per tool and setting: Hover or focus a marker to see its row; click it to open the tool's card."
+   "text": "Figure 3. One marker per tool and setting, for the filters above. Hover or focus a marker to see its row; click it to open the tool's card."
   },
   {
    "tag": "p",
-   "text": "Colour is the kind of method; within a kind, marker shape is the tool, and for kmerseek the alphabet. Core-hours, cost and wall-clock time are per 1,000 queries for searching one relative, the mean over the relatives each tool searched, measured on Stanford's Sherlock cluster. Peak RAM is the largest memory any one search task used. Wall-clock time is on the cores each tool was given (between 4 and 16; hover a marker for the number), so it can rank tools differently from core-hours. The database build is the mean over the builds the run's task records hold; a database reused from an earlier run left no record. Definitions: Methods."
+   "text": "Colour is the kind of method; within a kind, marker shape is the tool, and for kmerseek the alphabet. Every cost here was measured on Sherlock; none was reported by a submitter. Core-hours, cost and wall-clock time are per 1,000 queries for searching one relative, the mean over the relatives each tool searched, measured on Stanford's Sherlock cluster. Peak RAM is the largest memory any one search task used. Wall-clock time is on the cores each tool was given (between 4 and 16; hover a marker for the number), so it can rank tools differently from core-hours. The database build is the mean over the builds the run's task records hold; a database reused from an earlier run left no record. Definitions: Methods."
   }
  ],
  "data": {
@@ -183166,6 +183166,7 @@
     "tool": "hmmer3_phmmer",
     "setting": "default",
     "order": 0,
+    "label": "default options",
     "words": "phmmer's default options, E-value cutoff 10",
     "shape": "circle"
    },
@@ -183173,6 +183174,7 @@
     "tool": "mmseqs2_seqseq",
     "setting": "s7",
     "order": 1,
+    "label": "sensitivity 7",
     "words": "sensitivity 7 (-s 7), one round",
     "shape": "square"
    },
@@ -183180,6 +183182,7 @@
     "tool": "hmmer3_jackhmmer",
     "setting": "n3",
     "order": 2,
+    "label": "3 rounds",
     "words": "three rounds of search (-N 3)",
     "shape": "circle"
    },
@@ -183187,6 +183190,7 @@
     "tool": "mmseqs2_iterative",
     "setting": "s7",
     "order": 3,
+    "label": "sensitivity 7, 3 rounds",
     "words": "sensitivity 7 (-s 7), three rounds",
     "shape": "square"
    },
@@ -183194,6 +183198,7 @@
     "tool": "hhblits",
     "setting": "single_seq",
     "order": 4,
+    "label": "single-protein profiles",
     "words": "profiles built from single proteins, no family database",
     "shape": "triangle"
    },
@@ -183201,6 +183206,7 @@
     "tool": "foldseek",
     "setting": "3di_aa",
     "order": 5,
+    "label": "shape letters + amino acids",
     "words": "3Di shape letters and amino acids together",
     "shape": "circle"
    },
@@ -183208,118 +183214,135 @@
     "tool": "prostt5",
     "setting": "3di_from_seq",
     "order": 6,
+    "label": "shape letters from sequence",
     "words": "3Di letters predicted from sequence by ProstT5",
     "shape": "square"
    },
    {
     "tool": "kmerseek",
-    "setting": "gbmr4_k15_lcFalse",
-    "order": 7,
-    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept",
-    "shape": "square"
-   },
-   {
-    "tool": "kmerseek",
-    "setting": "gbmr4_k17_lcFalse",
-    "order": 8,
-    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 17, low-complexity k-mers kept",
-    "shape": "square"
-   },
-   {
-    "tool": "kmerseek",
-    "setting": "gbmr4_k19_lcFalse",
-    "order": 9,
-    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 19, low-complexity k-mers kept",
-    "shape": "square"
-   },
-   {
-    "tool": "kmerseek",
-    "setting": "gbmr4_k21_lcFalse",
-    "order": 10,
-    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 21, low-complexity k-mers kept",
-    "shape": "square"
-   },
-   {
-    "tool": "kmerseek",
     "setting": "hp_thomas_dill2_k24_lcFalse",
-    "order": 11,
+    "order": 7,
+    "label": "hp_thomas_dill2, k = 24",
     "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 24, low-complexity k-mers kept",
     "shape": "diamond"
    },
    {
     "tool": "kmerseek",
     "setting": "hp_thomas_dill2_k27_lcFalse",
-    "order": 12,
+    "order": 8,
+    "label": "hp_thomas_dill2, k = 27",
     "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 27, low-complexity k-mers kept",
     "shape": "diamond"
    },
    {
     "tool": "kmerseek",
     "setting": "hp_thomas_dill2_k30_lcFalse",
-    "order": 13,
+    "order": 9,
+    "label": "hp_thomas_dill2, k = 30",
     "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 30, low-complexity k-mers kept",
     "shape": "diamond"
    },
    {
     "tool": "kmerseek",
     "setting": "hp_thomas_dill2_k33_lcFalse",
-    "order": 14,
+    "order": 10,
+    "label": "hp_thomas_dill2, k = 33",
     "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 33, low-complexity k-mers kept",
     "shape": "diamond"
    },
    {
     "tool": "kmerseek",
-    "setting": "protein20_k6_lcFalse",
-    "order": 15,
-    "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 6, low-complexity k-mers kept",
-    "shape": "circle"
+    "setting": "gbmr4_k15_lcFalse",
+    "order": 11,
+    "label": "gbmr4, k = 15",
+    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept",
+    "shape": "square"
    },
    {
     "tool": "kmerseek",
-    "setting": "protein20_k7_lcFalse",
-    "order": 16,
-    "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 7, low-complexity k-mers kept",
-    "shape": "circle"
+    "setting": "gbmr4_k17_lcFalse",
+    "order": 12,
+    "label": "gbmr4, k = 17",
+    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 17, low-complexity k-mers kept",
+    "shape": "square"
    },
    {
     "tool": "kmerseek",
-    "setting": "protein20_k8_lcFalse",
-    "order": 17,
-    "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 8, low-complexity k-mers kept",
-    "shape": "circle"
+    "setting": "gbmr4_k19_lcFalse",
+    "order": 13,
+    "label": "gbmr4, k = 19",
+    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 19, low-complexity k-mers kept",
+    "shape": "square"
+   },
+   {
+    "tool": "kmerseek",
+    "setting": "gbmr4_k21_lcFalse",
+    "order": 14,
+    "label": "gbmr4, k = 21",
+    "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 21, low-complexity k-mers kept",
+    "shape": "square"
    },
    {
     "tool": "kmerseek",
     "setting": "wwmj5_k11_lcFalse",
-    "order": 18,
+    "order": 15,
+    "label": "wwmj5, k = 11",
     "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 11, low-complexity k-mers kept",
     "shape": "triangle"
    },
    {
     "tool": "kmerseek",
     "setting": "wwmj5_k12_lcFalse",
-    "order": 19,
+    "order": 16,
+    "label": "wwmj5, k = 12",
     "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 12, low-complexity k-mers kept",
     "shape": "triangle"
    },
    {
     "tool": "kmerseek",
     "setting": "wwmj5_k14_lcFalse",
-    "order": 20,
+    "order": 17,
+    "label": "wwmj5, k = 14",
     "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 14, low-complexity k-mers kept",
     "shape": "triangle"
    },
    {
     "tool": "kmerseek",
     "setting": "wwmj5_k15_lcFalse",
-    "order": 21,
+    "order": 18,
+    "label": "wwmj5, k = 15",
     "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 15, low-complexity k-mers kept",
     "shape": "triangle"
+   },
+   {
+    "tool": "kmerseek",
+    "setting": "protein20_k6_lcFalse",
+    "order": 19,
+    "label": "protein20, k = 6",
+    "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 6, low-complexity k-mers kept",
+    "shape": "circle"
+   },
+   {
+    "tool": "kmerseek",
+    "setting": "protein20_k7_lcFalse",
+    "order": 20,
+    "label": "protein20, k = 7",
+    "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 7, low-complexity k-mers kept",
+    "shape": "circle"
+   },
+   {
+    "tool": "kmerseek",
+    "setting": "protein20_k8_lcFalse",
+    "order": 21,
+    "label": "protein20, k = 8",
+    "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 8, low-complexity k-mers kept",
+    "shape": "circle"
    },
    {
     "tool": "hmmscan",
     "setting": "direct",
     "order": 22,
+    "label": "Pfam models",
     "words": "scans Pfam's models; no relative searched",
     "shape": "circle"
    }

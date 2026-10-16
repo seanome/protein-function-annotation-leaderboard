@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>hmmscan with Pfam card</title>
 <meta name="description" content="What hmmscan with Pfam compares, what it needs, where it is strong and weak, and what it costs.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,15 +11,18 @@
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <script defer src="../assets/terms.js"></script>
+<script defer src="../assets/nav.js"></script>
 
 </head>
 <body data-page="tools">
 <header class="site"><div class="wrap">
 <a class="brand" href="../index.html">Protein annotation leaderboard</a>
-<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../pileup.html">Region pile-up</a><a href="../claims.html">Claims</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../coverage.html">Coverage</a><a href="../explainers.html">How the scores work</a><a href="../methods.html">Methods</a></nav>
+<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><details class="navmore"><summary>More</summary>
+<div class="navpop"><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Tool cards">Tool cards</summary>
+<div class="navpop"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details>
 </div></header>
 <main class="wrap" data-page="tools">
-<p class="source" id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <div class="card"><h1>hmmscan with Pfam</h1>
 <p>Tool id <code>hmmscan</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>4a4b1171</code>.</p>
 <h2>What it compares</h2>
@@ -79,7 +82,7 @@ Building its databases for setting <code>direct</code>: not measured (no task re
 <p><a href="index.html">All tool cards</a> · <a href="hmmscan.md">this card as Markdown</a> · <a href="hmmscan.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="hmmscan.html.json">hmmscan.html.json</a></p>
 </div></footer>
