@@ -138,7 +138,7 @@ there and the tool card reads right. Your folder stays in the repository and is 
 at every release, so it is also graded on rows labs add later. The leaderboard table does not
 show submitted rows yet; until it does, they are on the pull request.
 
-The workflow runs the scorer from `main`, never code from your pull request, so a pull request
+The workflow runs the scorer from the branch your pull request goes into, never code from the pull request, so a pull request
 from a fork is scored the same way.
 
 ## Worked example: MMseqs2 against zebrafish
