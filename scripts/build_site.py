@@ -364,7 +364,7 @@ def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
 
 
 # The site's pages in reading order. The last two sit under "More" in the header.
-NAV = [("index.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool cards", "tools"),
+NAV = [("index.html", "Your organism", "organism"), ("leaderboard.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool cards", "tools"),
        ("cost.html", "Compare two columns", "cost"), ("explainers.html", "How the scores work", "explainers"),
        ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods")]
 NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage")]
@@ -2273,7 +2273,7 @@ def main() -> None:
     phm = res.filter((pl.col("tool") == "hmmer3_phmmer") & (pl.col("truth_set") == "pfam")
                      & (pl.col("species") == "zebrafish") & (pl.col("stratum_axis") == "all"))
     dd = {f"{k}_{m}": phm.filter(pl.col("calls") == k)[m][0] for k in ("raw", "dedup") for m in ("fmax", "auprc")}
-    (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used, dd))
+    (out / "leaderboard.html").write_text(page_leaderboard(payload, src, n_q, tools_used, dd))
     (out / "cost.html").write_text(page_cost(payload, src, n_q, tools_used))
     (out / "coverage.html").write_text(page_coverage(cov, src, species_mya))
     (out / "methods.html").write_text(page_methods(res, comp, src, prov))
@@ -2348,11 +2348,11 @@ def main() -> None:
 
     # Every page also as JSON at its path plus .json.
     full = json.loads(payload.replace("<\\/", "</"))
-    page_json(out, "index.html", src, {"note": "The table is drawn from these rows: results keyed "
+    page_json(out, "leaderboard.html", src, {"note": "The table is drawn from these rows: results keyed "
               "truth|calls|species|stratum_axis|stratum, then tool|setting -> [fmax, auprc, median_iou_tp, "
               "n_truth_instances]; compute keyed tool|setting|species.", **full,
               "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_PAGE, "price_file": PRICE_FILE}})
-    page_json(out, "cost.html", src, {"note": "Same rows as index.html.json. Figure 1 plots any two of "
+    page_json(out, "cost.html", src, {"note": "Same rows as leaderboard.html.json. Figure 1 plots any two of "
               "the columns in 'axes' for every tool and setting that has both: scores from results "
               "[fmax, auprc, median_iou_tp], cpu = cpu_h_per_1000, cost = cpu_h_per_1000 * r_cpu + "
               "gpu_h_per_1000 * r_gpu, wall = wall_h_per_1000, ram = peak_rss_gb, db = db_cpu_h_per_db.",
@@ -2380,6 +2380,15 @@ def main() -> None:
             "matrix": "data/pileup.json", "per_residue_recall_check": check, **pileup.readouts(data)})
     for t in sorted(tools_used):
         page_json(out, f"tools/{t}.html", src, json.loads((out / "tools" / f"{t}.json").read_text()))
+    # The organism pages: the home page and one page per pre-built species.
+    if (a.data / "organism/lookups.jsonl").exists():
+        sys.path.insert(0, str(ROOT_DIR / "scripts/organism"))
+        import build as organism_build
+        n_org = organism_build.build(a.data, out, sys.modules[__name__])
+        print(f"organism pages: {n_org} pre-built species")
+    else:
+        raise SystemExit("data/organism/lookups.jsonl is missing: run scripts/organism/fetch.py and "
+                         "lookups.py first (see the README), or the home page would not be written")
     print(f"built {out}: {len(rows)} tool-setting rows, {len(tools_used)} cards, payload {len(payload) / 1e6:.2f} MB")
 
 

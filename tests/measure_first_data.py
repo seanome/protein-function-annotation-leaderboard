@@ -19,7 +19,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 FIRST = {
-    "index.html": "#lb tbody tr:not([hidden])",
+    "leaderboard.html": "#lb tbody tr:not([hidden])",
     "pileup.html": "#pu-grid .pu-panel",
     "tools/index.html": "#tc-grid .tc",
 }

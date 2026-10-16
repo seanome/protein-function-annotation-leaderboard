@@ -1,0 +1,1567 @@
+[
+ {
+  "species": 29159,
+  "check": "nearest reviewed relative",
+  "page": 1736779,
+  "source": 1736779,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "its reviewed entries",
+  "page": 158,
+  "source": 158,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "shared ancestor",
+  "page": 6447,
+  "source": 6447,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "reviewed entries in the order",
+  "page": 31,
+  "source": 31,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "reviewed entries in the class",
+  "page": 270,
+  "source": 270,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "reviewed entries of the species",
+  "page": 16,
+  "source": 16,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "proteome entries with an AlphaFold model",
+  "page": 55875,
+  "source": 55875,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "proteome entries",
+  "page": 57874,
+  "source": 57874,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mean pLDDT estimate",
+  "page": 73.17308823776624,
+  "source": 73.17308823776624,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "on the Earth BioGenome list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "the three tools, in order",
+  "page": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "source": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "hmmer3_phmmer setting is its best at ciona",
+  "page": "default",
+  "source": "default",
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "hmmer3_phmmer fmax at ciona, pLDDT 70-90",
+  "page": 0.31212087444361103,
+  "source": 0.31212087444361103,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "hmmer3_phmmer fmax_recall at ciona, pLDDT 70-90",
+  "page": 0.3692430073525816,
+  "source": 0.3692430073525816,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "hmmer3_phmmer fmax_precision at ciona, pLDDT 70-90",
+  "page": 0.2703045804034957,
+  "source": 0.2703045804034957,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "hmmer3_phmmer median_iou_tp at ciona, pLDDT 70-90",
+  "page": 0.7410714285714286,
+  "source": 0.7410714285714286,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "hmmer3_phmmer n at ciona, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_seqseq setting is its best at ciona",
+  "page": "s7",
+  "source": "s7",
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_seqseq fmax at ciona, pLDDT 70-90",
+  "page": 0.30711036876653003,
+  "source": 0.30711036876653003,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_seqseq fmax_recall at ciona, pLDDT 70-90",
+  "page": 0.3818993317003393,
+  "source": 0.3818993317003393,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_seqseq fmax_precision at ciona, pLDDT 70-90",
+  "page": 0.25681683977501407,
+  "source": 0.25681683977501407,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_seqseq median_iou_tp at ciona, pLDDT 70-90",
+  "page": 0.746941858765047,
+  "source": 0.746941858765047,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_seqseq n at ciona, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_iterative setting is its best at ciona",
+  "page": "s7",
+  "source": "s7",
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_iterative fmax at ciona, pLDDT 70-90",
+  "page": 0.3019133093098938,
+  "source": 0.3019133093098938,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_iterative fmax_recall at ciona, pLDDT 70-90",
+  "page": 0.3957319445374773,
+  "source": 0.3957319445374773,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_iterative fmax_precision at ciona, pLDDT 70-90",
+  "page": 0.24405392601574888,
+  "source": 0.24405392601574888,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_iterative median_iou_tp at ciona, pLDDT 70-90",
+  "page": 0.7387727380108671,
+  "source": 0.7387727380108671,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "mmseqs2_iterative n at ciona, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "nearest reviewed relative",
+  "page": 45351,
+  "source": 45351,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "its reviewed entries",
+  "page": 144,
+  "source": 144,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "shared ancestor",
+  "page": 6102,
+  "source": 6102,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "reviewed entries in the order",
+  "page": 76,
+  "source": 76,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "reviewed entries in the class",
+  "page": 597,
+  "source": 597,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "reviewed entries of the species",
+  "page": 2,
+  "source": 2,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "proteome entries with an AlphaFold model",
+  "page": 23603,
+  "source": 23603,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "proteome entries",
+  "page": 25411,
+  "source": 25411,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mean pLDDT estimate",
+  "page": 68.4193746557641,
+  "source": 68.4193746557641,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "on the Earth BioGenome list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "the three tools, in order",
+  "page": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "source": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "hmmer3_phmmer setting is its best at zebrafish",
+  "page": "default",
+  "source": "default",
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "hmmer3_phmmer fmax at zebrafish, pLDDT 50-70",
+  "page": 0.3246883921695622,
+  "source": 0.3246883921695622,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "hmmer3_phmmer fmax_recall at zebrafish, pLDDT 50-70",
+  "page": 0.5621042013793831,
+  "source": 0.5621042013793831,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "hmmer3_phmmer fmax_precision at zebrafish, pLDDT 50-70",
+  "page": 0.2282728474089453,
+  "source": 0.2282728474089453,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "hmmer3_phmmer median_iou_tp at zebrafish, pLDDT 50-70",
+  "page": 0.6841298030351954,
+  "source": 0.6841298030351954,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "hmmer3_phmmer n at zebrafish, pLDDT 50-70",
+  "page": 748,
+  "source": 748,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_seqseq setting is its best at zebrafish",
+  "page": "s7",
+  "source": "s7",
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_seqseq fmax at zebrafish, pLDDT 50-70",
+  "page": 0.31014870966192065,
+  "source": 0.31014870966192065,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_seqseq fmax_recall at zebrafish, pLDDT 50-70",
+  "page": 0.4800247102773355,
+  "source": 0.4800247102773355,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_seqseq fmax_precision at zebrafish, pLDDT 50-70",
+  "page": 0.22907967633062276,
+  "source": 0.22907967633062276,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_seqseq median_iou_tp at zebrafish, pLDDT 50-70",
+  "page": 0.7529411764705882,
+  "source": 0.7529411764705882,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_seqseq n at zebrafish, pLDDT 50-70",
+  "page": 748,
+  "source": 748,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_iterative setting is its best at zebrafish",
+  "page": "s7",
+  "source": "s7",
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_iterative fmax at zebrafish, pLDDT 50-70",
+  "page": 0.307860160467433,
+  "source": 0.307860160467433,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_iterative fmax_recall at zebrafish, pLDDT 50-70",
+  "page": 0.4941462294942979,
+  "source": 0.4941462294942979,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_iterative fmax_precision at zebrafish, pLDDT 50-70",
+  "page": 0.22357542085689222,
+  "source": 0.22357542085689222,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_iterative median_iou_tp at zebrafish, pLDDT 50-70",
+  "page": 0.75,
+  "source": 0.75,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "mmseqs2_iterative n at zebrafish, pLDDT 50-70",
+  "page": 748,
+  "source": 748,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "nearest reviewed relative",
+  "page": 1514140,
+  "source": 1514140,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "its reviewed entries",
+  "page": 139,
+  "source": 139,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "shared ancestor",
+  "page": 2836,
+  "source": 2836,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "reviewed entries in the order",
+  "page": 125,
+  "source": 125,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "reviewed entries in the class",
+  "page": 135,
+  "source": 135,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "reviewed entries of the species",
+  "page": 125,
+  "source": 125,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "proteome entries with an AlphaFold model",
+  "page": 10144,
+  "source": 10144,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "proteome entries",
+  "page": 10465,
+  "source": 10465,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "mean pLDDT estimate",
+  "page": 75.66009719222463,
+  "source": 75.66009719222463,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "on the Earth BioGenome list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "the three tools, in order",
+  "page": [
+   "kmerseek",
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq"
+  ],
+  "source": [
+   "kmerseek",
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq"
+  ],
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "kmerseek setting is its best at mdomestica",
+  "page": "hp_thomas_dill2_k33_lcFalse",
+  "source": "hp_thomas_dill2_k33_lcFalse",
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "kmerseek fmax at mdomestica, pLDDT 70-90",
+  "page": 0.33663683905133723,
+  "source": 0.33663683905133723,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "kmerseek fmax_recall at mdomestica, pLDDT 70-90",
+  "page": 0.2346684672856353,
+  "source": 0.2346684672856353,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "kmerseek fmax_precision at mdomestica, pLDDT 70-90",
+  "page": 0.5953126916942708,
+  "source": 0.5953126916942708,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "kmerseek median_iou_tp at mdomestica, pLDDT 70-90",
+  "page": 0.6363896520146519,
+  "source": 0.6363896520146519,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "kmerseek n at mdomestica, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "hmmer3_phmmer setting is its best at mdomestica",
+  "page": "default",
+  "source": "default",
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "hmmer3_phmmer fmax at mdomestica, pLDDT 70-90",
+  "page": 0.32189586302283546,
+  "source": 0.32189586302283546,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "hmmer3_phmmer fmax_recall at mdomestica, pLDDT 70-90",
+  "page": 0.4162038689748482,
+  "source": 0.4162038689748482,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "hmmer3_phmmer fmax_precision at mdomestica, pLDDT 70-90",
+  "page": 0.2624313168352761,
+  "source": 0.2624313168352761,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "hmmer3_phmmer median_iou_tp at mdomestica, pLDDT 70-90",
+  "page": 0.6578073089700996,
+  "source": 0.6578073089700996,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "hmmer3_phmmer n at mdomestica, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "mmseqs2_seqseq setting is its best at mdomestica",
+  "page": "s7",
+  "source": "s7",
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "mmseqs2_seqseq fmax at mdomestica, pLDDT 70-90",
+  "page": 0.317381670377845,
+  "source": 0.317381670377845,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "mmseqs2_seqseq fmax_recall at mdomestica, pLDDT 70-90",
+  "page": 0.4158187645687646,
+  "source": 0.4158187645687646,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "mmseqs2_seqseq fmax_precision at mdomestica, pLDDT 70-90",
+  "page": 0.2566295586628572,
+  "source": 0.2566295586628572,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "mmseqs2_seqseq median_iou_tp at mdomestica, pLDDT 70-90",
+  "page": 0.6736171132238549,
+  "source": 0.6736171132238549,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "mmseqs2_seqseq n at mdomestica, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "nearest reviewed relative",
+  "page": 38033,
+  "source": 38033,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "its reviewed entries",
+  "page": 257,
+  "source": 257,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "shared ancestor",
+  "page": 5139,
+  "source": 5139,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "reviewed entries in the order",
+  "page": 1649,
+  "source": 1649,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "reviewed entries in the class",
+  "page": 4481,
+  "source": 4481,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "reviewed entries of the species",
+  "page": 985,
+  "source": 985,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "proteome entries with an AlphaFold model",
+  "page": 9845,
+  "source": 9845,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "proteome entries",
+  "page": 10255,
+  "source": 10255,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "mean pLDDT estimate",
+  "page": 70.77496342355523,
+  "source": 70.77496342355523,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "on the Earth BioGenome list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "the three tools, in order",
+  "page": [
+   "kmerseek",
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq"
+  ],
+  "source": [
+   "kmerseek",
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq"
+  ],
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "kmerseek setting is its best at mdomestica",
+  "page": "hp_thomas_dill2_k33_lcFalse",
+  "source": "hp_thomas_dill2_k33_lcFalse",
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "kmerseek fmax at mdomestica, pLDDT 70-90",
+  "page": 0.33663683905133723,
+  "source": 0.33663683905133723,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "kmerseek fmax_recall at mdomestica, pLDDT 70-90",
+  "page": 0.2346684672856353,
+  "source": 0.2346684672856353,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "kmerseek fmax_precision at mdomestica, pLDDT 70-90",
+  "page": 0.5953126916942708,
+  "source": 0.5953126916942708,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "kmerseek median_iou_tp at mdomestica, pLDDT 70-90",
+  "page": 0.6363896520146519,
+  "source": 0.6363896520146519,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "kmerseek n at mdomestica, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "hmmer3_phmmer setting is its best at mdomestica",
+  "page": "default",
+  "source": "default",
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "hmmer3_phmmer fmax at mdomestica, pLDDT 70-90",
+  "page": 0.32189586302283546,
+  "source": 0.32189586302283546,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "hmmer3_phmmer fmax_recall at mdomestica, pLDDT 70-90",
+  "page": 0.4162038689748482,
+  "source": 0.4162038689748482,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "hmmer3_phmmer fmax_precision at mdomestica, pLDDT 70-90",
+  "page": 0.2624313168352761,
+  "source": 0.2624313168352761,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "hmmer3_phmmer median_iou_tp at mdomestica, pLDDT 70-90",
+  "page": 0.6578073089700996,
+  "source": 0.6578073089700996,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "hmmer3_phmmer n at mdomestica, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "mmseqs2_seqseq setting is its best at mdomestica",
+  "page": "s7",
+  "source": "s7",
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "mmseqs2_seqseq fmax at mdomestica, pLDDT 70-90",
+  "page": 0.317381670377845,
+  "source": 0.317381670377845,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "mmseqs2_seqseq fmax_recall at mdomestica, pLDDT 70-90",
+  "page": 0.4158187645687646,
+  "source": 0.4158187645687646,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "mmseqs2_seqseq fmax_precision at mdomestica, pLDDT 70-90",
+  "page": 0.2566295586628572,
+  "source": 0.2566295586628572,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "mmseqs2_seqseq median_iou_tp at mdomestica, pLDDT 70-90",
+  "page": 0.6736171132238549,
+  "source": 0.6736171132238549,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "mmseqs2_seqseq n at mdomestica, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "nearest reviewed relative",
+  "page": 9031,
+  "source": 9031,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "its reviewed entries",
+  "page": 2318,
+  "source": 2318,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "shared ancestor",
+  "page": 8825,
+  "source": 8825,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "reviewed entries in the order",
+  "page": 115,
+  "source": 115,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "reviewed entries in the class",
+  "page": 3193,
+  "source": 3193,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "reviewed entries of the species",
+  "page": 39,
+  "source": 39,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "proteome entries with an AlphaFold model",
+  "page": 27720,
+  "source": 27720,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "proteome entries",
+  "page": 31341,
+  "source": 31341,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "mean pLDDT estimate",
+  "page": 71.5638346803338,
+  "source": 71.5638346803338,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "on the Earth BioGenome list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "the three tools, in order",
+  "page": [
+   "kmerseek",
+   "hhblits",
+   "hmmer3_phmmer"
+  ],
+  "source": [
+   "kmerseek",
+   "hhblits",
+   "hmmer3_phmmer"
+  ],
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "kmerseek setting is its best at btaurus",
+  "page": "gbmr4_k21_lcFalse",
+  "source": "gbmr4_k21_lcFalse",
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "kmerseek fmax at btaurus, pLDDT 70-90",
+  "page": 0.3796007309807351,
+  "source": 0.3796007309807351,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "kmerseek fmax_recall at btaurus, pLDDT 70-90",
+  "page": 0.2905266539067608,
+  "source": 0.2905266539067608,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "kmerseek fmax_precision at btaurus, pLDDT 70-90",
+  "page": 0.5474446240711709,
+  "source": 0.5474446240711709,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "kmerseek median_iou_tp at btaurus, pLDDT 70-90",
+  "page": 0.6231637215243773,
+  "source": 0.6231637215243773,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "kmerseek n at btaurus, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hhblits setting is its best at btaurus",
+  "page": "single_seq",
+  "source": "single_seq",
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hhblits fmax at btaurus, pLDDT 70-90",
+  "page": 0.31142083555763816,
+  "source": 0.31142083555763816,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hhblits fmax_recall at btaurus, pLDDT 70-90",
+  "page": 0.33464452214452217,
+  "source": 0.33464452214452217,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hhblits fmax_precision at btaurus, pLDDT 70-90",
+  "page": 0.29121132908246455,
+  "source": 0.29121132908246455,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hhblits median_iou_tp at btaurus, pLDDT 70-90",
+  "page": 0.725340517886544,
+  "source": 0.725340517886544,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hhblits n at btaurus, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hmmer3_phmmer setting is its best at btaurus",
+  "page": "default",
+  "source": "default",
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hmmer3_phmmer fmax at btaurus, pLDDT 70-90",
+  "page": 0.31043431041926967,
+  "source": 0.31043431041926967,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hmmer3_phmmer fmax_recall at btaurus, pLDDT 70-90",
+  "page": 0.48781884587828644,
+  "source": 0.48781884587828644,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hmmer3_phmmer fmax_precision at btaurus, pLDDT 70-90",
+  "page": 0.227653243020666,
+  "source": 0.227653243020666,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hmmer3_phmmer median_iou_tp at btaurus, pLDDT 70-90",
+  "page": 0.6711711711711712,
+  "source": 0.6711711711711712,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "hmmer3_phmmer n at btaurus, pLDDT 70-90",
+  "page": 1399,
+  "source": 1399,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: relative",
+  "page": 1736779,
+  "source": 1736779,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: order entries",
+  "page": {
+   "taxid": 6562,
+   "name": "Ostreida",
+   "entries": 31
+  },
+  "source": {
+   "taxid": 6562,
+   "name": "Ostreida",
+   "entries": 31
+  },
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: class entries",
+  "page": {
+   "taxid": 6544,
+   "name": "Bivalvia",
+   "entries": 270
+  },
+  "source": {
+   "taxid": 6544,
+   "name": "Bivalvia",
+   "entries": 270
+  },
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: proteome",
+  "page": "UP000005408",
+  "source": "UP000005408",
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: AlphaFold share",
+  "page": 0.9654594463835229,
+  "source": 0.9654594463835229,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: mean pLDDT estimate",
+  "page": 73.17308823776624,
+  "source": 73.17308823776624,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: EBP list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: verdict tools (same measured relative)",
+  "page": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "source": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "ok": true
+ },
+ {
+  "species": 29159,
+  "check": "live: distance (not compared; method differs)",
+  "page": [
+   534.25641443889,
+   "node",
+   "ciona",
+   [
+    "hmmer3_phmmer",
+    "mmseqs2_seqseq",
+    "mmseqs2_iterative"
+   ]
+  ],
+  "source": [
+   519.49346,
+   "pairwise",
+   "ciona",
+   [
+    "hmmer3_phmmer",
+    "mmseqs2_seqseq",
+    "mmseqs2_iterative"
+   ]
+  ],
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: relative",
+  "page": 45351,
+  "source": 45351,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: order entries",
+  "page": {
+   "taxid": 6125,
+   "name": "Scleractinia",
+   "entries": 76
+  },
+  "source": {
+   "taxid": 6125,
+   "name": "Scleractinia",
+   "entries": 76
+  },
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: class entries",
+  "page": {
+   "taxid": 6101,
+   "name": "Anthozoa",
+   "entries": 597
+  },
+  "source": {
+   "taxid": 6101,
+   "name": "Anthozoa",
+   "entries": 597
+  },
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: proteome",
+  "page": "UP000275408",
+  "source": "UP000275408",
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: AlphaFold share",
+  "page": 0.9288497107551847,
+  "source": 0.9288497107551847,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: mean pLDDT estimate",
+  "page": 68.4193746557641,
+  "source": 68.4193746557641,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: EBP list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: verdict tools (same measured relative)",
+  "page": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "source": [
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq",
+   "mmseqs2_iterative"
+  ],
+  "ok": true
+ },
+ {
+  "species": 46731,
+  "check": "live: distance (not compared; method differs)",
+  "page": [
+   446.87607,
+   "node",
+   "zebrafish",
+   [
+    "hmmer3_phmmer",
+    "mmseqs2_seqseq",
+    "mmseqs2_iterative"
+   ]
+  ],
+  "source": [
+   467.24451,
+   "pairwise",
+   "zebrafish",
+   [
+    "hmmer3_phmmer",
+    "mmseqs2_seqseq",
+    "mmseqs2_iterative"
+   ]
+  ],
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: relative",
+  "page": 1514140,
+  "source": 1514140,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: order entries",
+  "page": {
+   "taxid": 216751,
+   "name": "Surirellales",
+   "entries": 125
+  },
+  "source": {
+   "taxid": 216751,
+   "name": "Surirellales",
+   "entries": 125
+  },
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: class entries",
+  "page": {
+   "taxid": 33849,
+   "name": "Bacillariophyceae",
+   "entries": 135
+  },
+  "source": {
+   "taxid": 33849,
+   "name": "Bacillariophyceae",
+   "entries": 135
+  },
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: proteome",
+  "page": "UP000000759",
+  "source": "UP000000759",
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: AlphaFold share",
+  "page": 0.969326325848065,
+  "source": 0.969326325848065,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: mean pLDDT estimate",
+  "page": 75.66009719222463,
+  "source": 75.66009719222463,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: EBP list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 2850,
+  "check": "live: distance (not compared; method differs)",
+  "page": [
+   30.17072,
+   "node",
+   "ptroglodytes",
+   [
+    "kmerseek",
+    "hhblits",
+    "mmseqs2_iterative"
+   ]
+  ],
+  "source": [
+   147.94649,
+   "pairwise",
+   "mdomestica",
+   [
+    "kmerseek",
+    "hmmer3_phmmer",
+    "mmseqs2_seqseq"
+   ]
+  ],
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: relative",
+  "page": 38033,
+  "source": 38033,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: order entries",
+  "page": {
+   "taxid": 5139,
+   "name": "Sordariales",
+   "entries": 1649
+  },
+  "source": {
+   "taxid": 5139,
+   "name": "Sordariales",
+   "entries": 1649
+  },
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: class entries",
+  "page": {
+   "taxid": 147550,
+   "name": "Sordariomycetes",
+   "entries": 4481
+  },
+  "source": {
+   "taxid": 147550,
+   "name": "Sordariomycetes",
+   "entries": 4481
+  },
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: proteome",
+  "page": "UP000001805",
+  "source": "UP000001805",
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: AlphaFold share",
+  "page": 0.9600195026816187,
+  "source": 0.9600195026816187,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: mean pLDDT estimate",
+  "page": 70.77496342355523,
+  "source": 70.77496342355523,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: EBP list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: verdict tools (same measured relative)",
+  "page": [
+   "kmerseek",
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq"
+  ],
+  "source": [
+   "kmerseek",
+   "hmmer3_phmmer",
+   "mmseqs2_seqseq"
+  ],
+  "ok": true
+ },
+ {
+  "species": 5141,
+  "check": "live: distance (not compared; method differs)",
+  "page": [
+   131.93257,
+   "node_pair",
+   "mdomestica",
+   [
+    "kmerseek",
+    "hmmer3_phmmer",
+    "mmseqs2_seqseq"
+   ]
+  ],
+  "source": [
+   131.93257,
+   "pairwise",
+   "mdomestica",
+   [
+    "kmerseek",
+    "hmmer3_phmmer",
+    "mmseqs2_seqseq"
+   ]
+  ],
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: relative",
+  "page": 9031,
+  "source": 9031,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: order entries",
+  "page": {
+   "taxid": 9126,
+   "name": "Passeriformes",
+   "entries": 115
+  },
+  "source": {
+   "taxid": 9126,
+   "name": "Passeriformes",
+   "entries": 115
+  },
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: class entries",
+  "page": {
+   "taxid": 8782,
+   "name": "Aves",
+   "entries": 3193
+  },
+  "source": {
+   "taxid": 8782,
+   "name": "Aves",
+   "entries": 3193
+  },
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: proteome",
+  "page": "UP000007754",
+  "source": "UP000007754",
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: AlphaFold share",
+  "page": 0.8844644395520245,
+  "source": 0.8844644395520245,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: mean pLDDT estimate",
+  "page": 71.5638346803338,
+  "source": 71.5638346803338,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: EBP list",
+  "page": true,
+  "source": true,
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: verdict tools (same measured relative)",
+  "page": [
+   "kmerseek",
+   "hhblits",
+   "hmmer3_phmmer"
+  ],
+  "source": [
+   "kmerseek",
+   "hhblits",
+   "hmmer3_phmmer"
+  ],
+  "ok": true
+ },
+ {
+  "species": 59729,
+  "check": "live: distance (not compared; method differs)",
+  "page": [
+   96.406695716143,
+   "node",
+   "btaurus",
+   [
+    "kmerseek",
+    "hhblits",
+    "hmmer3_phmmer"
+   ]
+  ],
+  "source": [
+   96.4067,
+   "pairwise",
+   "btaurus",
+   [
+    "kmerseek",
+    "hhblits",
+    "hmmer3_phmmer"
+   ]
+  ],
+  "ok": true
+ }
+]
