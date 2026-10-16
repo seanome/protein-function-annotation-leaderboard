@@ -19,8 +19,10 @@ def main() -> None:
     shutil.copytree(site, out)
     html = (site / "index.html").read_text()
     head = re.search(r"<head>(.*?)</head>", html, re.S).group(1)
-    body = re.search(r"<body[^>]*>(.*)</body>", html, re.S).group(1)
-    keep = [m for m in re.findall(r"<title>.*?</title>|<link[^>]+>", head)]
+    m = re.search(r"<body([^>]*)>(.*)</body>", html, re.S)
+    # The body's data attributes (the organism page reads them) move to a wrapping div.
+    body = f"<div{m.group(1)}>{m.group(2)}</div>"
+    keep = [m for m in re.findall(r"<title>.*?</title>|<link[^>]+>|<script[^>]*></script>", head)]
     if not any(k.startswith("<title>") for k in keep):
         raise SystemExit("no <title> in index.html")
     (out / "index.html").write_text("\n".join(keep) + "\n" + body)

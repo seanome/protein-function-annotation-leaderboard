@@ -464,3 +464,47 @@ table.cov .mono,td.num{overflow-wrap:normal;white-space:nowrap}
   border-bottom:2px dashed var(--accent);cursor:ew-resize;touch-action:none;user-select:none;padding:0 2px}
 .scrub:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .scrub.scrubbing{background:var(--surface);border-bottom-style:solid}
+
+/* Organism pages. No new colours: tools keep their kind colour (--k-*), a caveat uses --warn,
+   an estimate is marked by a dashed outline and the word "estimate", never by a colour. */
+.small{font-size:.9rem}
+.hero{min-height:calc(100vh - 160px);min-height:calc(100svh - 160px);display:flex;flex-direction:column;justify-content:center;max-width:640px;margin:0 auto}
+.hero h1{font-size:2.4rem;margin:0 0 14px}
+.combo{position:relative}
+#species{width:100%;font:inherit;font-size:1.2rem;padding:12px 14px;border:1px solid var(--hair);border-radius:10px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+#species:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#suggest{list-style:none;margin:6px 0 0;padding:4px 0;background:var(--surface);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--shadow);position:absolute;left:0;right:0;z-index:5;max-height:60vh;overflow:auto}
+#suggest li a{display:flex;justify-content:space-between;gap:10px;padding:8px 14px;color:var(--ink);text-decoration:none}
+#suggest li[aria-selected="true"] a,#suggest li a:hover{background:var(--chip)}
+#suggest .tag{flex:none}
+.below{max-width:72ch;margin:0 auto}
+.three{font-size:1.12rem;max-width:75ch}
+.cmdrow{margin:10px 0 4px}
+button.copy{font:inherit;font-weight:600;border:1px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:8px;padding:6px 14px;cursor:pointer}
+button.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+pre.cmd{max-height:22em;font-size:.8rem}
+.mcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:10px 0}
+.mcard{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;min-width:0}
+.mtitle{font-weight:600;font-size:.92rem}
+.mvalue{font-family:Fraunces,Georgia,serif;font-size:1.7rem;line-height:1.15}
+.mvalue .unit{font-family:"Source Sans 3",sans-serif;font-size:.9rem;color:var(--muted)}
+.msub{font-size:.9rem;overflow-wrap:anywhere}
+.msrc{font-size:.8rem;color:var(--muted);border-top:1px solid var(--hair);padding-top:4px;margin-top:auto;overflow-wrap:anywhere}
+.est{display:inline-block;font-size:.75rem;line-height:1.3;border:1px dashed var(--ink);border-radius:3px;padding:0 4px;white-space:nowrap}
+.notice{background:var(--warn-bg);border-left:4px solid var(--warn);padding:8px 12px;border-radius:4px}
+ol.verdict{list-style:none;padding:0;margin:0}
+li.vtool{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:4px 16px 14px;margin:12px 0;box-shadow:var(--shadow)}
+li.vtool h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.thumb{margin:8px 0}
+.thumb figcaption{font-size:.85rem}
+.thumbsvg{width:100%;max-width:420px;height:auto;display:block}
+.figsvg{width:100%;max-width:640px;height:auto;display:block}
+svg .tk{font:11px "Source Sans 3",sans-serif;fill:var(--muted)}
+svg .lb{font:12px "Source Sans 3",sans-serif;fill:var(--ink)}
+.darkbox{background:var(--chip);border:1px solid var(--hair);border-radius:10px;padding:2px 16px 12px;margin:24px 0}
+.darkbox h2{border-bottom:none}
+table.mini{border-collapse:collapse;font-size:.9rem;margin:8px 0}
+table.mini th,table.mini td{border-bottom:1px solid var(--hair);padding:4px 10px 4px 0;text-align:left;vertical-align:top}
+.tablewrap{overflow-x:auto}
+.bignum{font-family:Fraunces,Georgia,serif;font-size:2rem}
+ul.splist{columns:3 240px;font-size:.92rem;padding-left:18px}

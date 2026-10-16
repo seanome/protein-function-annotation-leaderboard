@@ -14,7 +14,10 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 # In the order of the site's navigation.
 PAGES = {
-    "1_leaderboard": "index.html",
+    "0_organism_search": "index.html",
+    "0b_organism_oyster": "organism/magallana_gigas.html",
+    "0c_organism_diatom": "organism/phaeodactylum_tricornutum.html",
+    "1_leaderboard": "leaderboard.html",
     "2_tool_cards_index": "tools/index.html",
     "2b_tool_card_kmerseek": "tools/kmerseek.html",
     "3_compare_two_columns": "cost.html",
@@ -54,7 +57,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--site", type=Path, default=ROOT / "docs")
     ap.add_argument("--out", type=Path, default=ROOT / "screenshots")
+    ap.add_argument("--only", nargs="*", help="page names to shoot (default: all)")
     a = ap.parse_args()
+    pages = {k: v for k, v in PAGES.items() if not a.only or k in a.only}
     out = a.out
     out.mkdir(parents=True, exist_ok=True)
     httpd = socketserver.TCPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(a.site)))
@@ -66,14 +71,18 @@ def main() -> None:
             for scheme in SCHEMES:
                 page = b.new_page(viewport={"width": w, "height": 900 if w > 600 else 860}, color_scheme=scheme)
                 suffix = ("" if w > 600 else f"_{w}") + ("" if scheme == "light" else "_dark")
-                for name, path in PAGES.items():
+                for name, path in pages.items():
                     shoot(page, base, path, out / f"{name}{suffix}.png")
                 page.close()
+        if a.only:
+            b.close()
+            httpd.shutdown()
+            return
         page = b.new_page(viewport={"width": 1280, "height": 900}, color_scheme="light")
         for name, path in EXTRA.items():
             shoot(page, base, path, out / f"{name}.png")
         # A definition open, as it looks after a tap or Tab.
-        page.goto(base + "index.html")
+        page.goto(base + "leaderboard.html")
         page.wait_for_load_state("networkidle")
         page.focus("button.term[aria-controls='tip-fmax-th']")
         page.wait_for_timeout(200)

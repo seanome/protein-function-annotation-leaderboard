@@ -140,7 +140,7 @@ def main() -> int:
         # ---- 1. leaderboard ----
         # Every row is in the page, the hidden "other settings" too, so every number is
         # checked; then the one visible row per tool and the sentence above the table.
-        page.goto(base + "index.html")
+        page.goto(base + "leaderboard.html")
         meta = page.evaluate("window.__lb.meta")
         order = {r["tool"] + "|" + r["setting"]: r["order"] for r in meta["rows"]}
         tools_in_order = list(dict.fromkeys(r["tool"] for r in meta["rows"]))
@@ -313,7 +313,7 @@ def main() -> int:
         n_rows = len(meta["rows"])
         for bad in ("species=Zebrafish", "axis=identity&stratum=nope", "axis=nope&stratum=all",
                     "truth=pfam2", "metric=x&sort=evil&dir=up", "x=nope&y=cpu", "view=some", "r_cpu=-1&r_gpu=abc"):
-            page.goto(base + "index.html#" + bad)
+            page.goto(base + "leaderboard.html#" + bad)
             got = page.evaluate("window.__lb.state()")
             shown = page.evaluate("document.querySelectorAll('#lb tbody tr').length")
             cost_cells = page.evaluate("[...document.querySelectorAll('#lb tbody td')].map(t => t.textContent).filter(t => t.startsWith('$-'))")
@@ -322,7 +322,7 @@ def main() -> int:
             if {k: got[k] for k in want} != want or shown != n_rows or cost_cells:
                 failures.append(f"hash #{bad}: state {got}, {shown} rows, negative costs {cost_cells[:2]}")
             stats["bad_hashes_checked"] = stats.get("bad_hashes_checked", 0) + 1
-        page.goto(base + "index.html")
+        page.goto(base + "leaderboard.html")
         page.evaluate("location.hash = 'truth=swissprot&species=mouse&axis=feature_type&stratum=TRANSMEM&sort=auprc&dir=asc'")
         page.wait_for_function("window.__lb.state().species === 'mouse'", timeout=5000)
         got = page.evaluate("window.__lb.state()")
