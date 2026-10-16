@@ -138,7 +138,7 @@
   },
   {
    "tag": "p",
-   "text": "Hardware of the search (setting 3di_from_seq, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 9 nodes. CPU: AMD 7543 (4 tasks); not recorded, node no longer in SLURM (4 tasks); AMD 9754 (3 tasks); AMD 7742 (2 tasks); AMD 7763 (2 tasks). GPU: none allocated."
+   "text": "Hardware of the search (setting 3di_from_seq, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 9 nodes. CPU: AMD 7543 (4 tasks); not recorded, as scontrol no longer finds the node (4 tasks); AMD 9754 (3 tasks); AMD 7742 (2 tasks); AMD 7763 (2 tasks). GPU: none allocated."
   },
   {
    "tag": "p",
@@ -365,7 +365,8 @@
     "read_on": "2026-10-16",
     "experiment": "qfo_region_midi_plus",
     "traces": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/{run-midi-plus,run-midi-plus-all-qfo}/*trace*.txt",
-    "trace_has_hostname": false,
+    "trace_files_with_hostname_column": [],
+    "n_trace_files": 11,
     "node_from": "sacct -u olgabot -X -n -P -S 2026-08-31 -E 2026-09-14 --format=JobID,NodeList,Partition,AllocTRES, matched on the trace's native_id",
     "hardware_from": "scontrol -o show node <node>: AvailableFeatures CPU_MNF, CPU_SKU, GPU_SKU",
     "feature_names_documented_at": "https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/",

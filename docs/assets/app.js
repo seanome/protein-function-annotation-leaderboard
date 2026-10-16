@@ -340,7 +340,7 @@
     tbl.innerHTML = "";
     const head = tbl.createTHead().insertRow();
     for (const [h, cls] of [["Tool", "txt"], ["Settings within the budget", ""], [`Search cost, ${fmtInt(state.n)} proteins`, ""],
-      ["Core-hours", ""], ["Wall-clock hours, at the cores the run used", ""],
+      ["Core-hours reserved", ""], ["Wall-clock hours, at the cores the run used", ""],
       ["Database build, per relative's database (not in the budget)", ""]]) {
       const th = document.createElement("th");
       th.textContent = h;
@@ -367,11 +367,11 @@
       cell(range(m.map((r) => r.wall_h), (x) => sig(x, 3)) + ` on ${cores} cores`);
       const db = m.filter((r) => r.db_core_h_per_db != null);
       if (!db.length) {
-        const td = cell("— not measured", "missing");
+        const td = cell("— no build in the run's records", "missing");
         td.dataset.missing = "db";
       } else {
         const gpu = db.some((r) => r.db_gpu_h_per_db) ? ` + ${range(db.map((r) => r.db_gpu_h_per_db || 0), (x) => sig(x, 3))} GPU-h` : "";
-        cell(`${range(db.map((r) => r.db_core_h_per_db), (x) => sig(x, 3))} core-h${gpu}, ${range(db.map((r) => r.db_usd_per_db), money)}`);
+        cell(`${range(db.map((r) => r.db_core_h_per_db), (x) => sig(x, 3))} core-h${gpu}, ${range(db.map((r) => r.db_usd_per_db), money)}` + (db.length < m.length ? ` (${db.length} of ${m.length} settings have a recorded build)` : ""));
       }
     }
     const btn = document.getElementById("calc-json");
@@ -576,8 +576,10 @@
       fr = pareto ? frontier(pts) : [];
       if (fr.length > 1) el("polyline", { points: fr.map((p) => sx.f(p.x) + "," + sy.f(p.y)).join(" "), class: "frontier" }, svg);
       if (budgetLine) {
+        // Shade the costs above the budget, drawn under the grid and markers.
         const BX = sx.f(state.budget);
-        el("line", { x1: BX, x2: BX, y1: T, y2: H - B, class: "budget" }, svg);
+        const shade = el("rect", { x: BX, y: T, width: Math.max(0, W - R - BX), height: H - B - T, class: "overbudget" });
+        svg.insertBefore(shade, svg.firstChild);
         const lab = el("text", { x: BX + 4, y: T + 12, "font-size": 12, "text-anchor": BX > W - 120 ? "end" : "start" }, svg);
         if (BX > W - 120) lab.setAttribute("x", BX - 4);
         lab.textContent = "budget " + money(state.budget);
@@ -635,7 +637,7 @@
     const fk = document.getElementById("frontier-key");
     if (fk) fk.hidden = !(pareto && fr.length > 1);
     const bk = document.getElementById("budget-key");
-    if (bk) bk.hidden = !box.querySelector("line.budget");
+    if (bk) bk.hidden = !box.querySelector("rect.overbudget");
     const nk = document.getElementById("nocost-key");
     if (nk) nk.hidden = !plotted.some((p) => p.fit === "unknown");
     const res = renderCalc();

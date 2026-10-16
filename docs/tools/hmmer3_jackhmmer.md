@@ -49,7 +49,7 @@ The per-query cost counts the search only. The run recorded cost per tool and se
 
 ## Hardware
 
-Hardware of the search (setting `n3`, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 14 nodes. CPU: AMD 8224P (8 tasks); not recorded, node no longer in SLURM (3 tasks); AMD 7742 (2 tasks); AMD 7543 (1 task); AMD 9754 (1 task). GPU: none allocated.
+Hardware of the search (setting `n3`, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 14 nodes. CPU: AMD 8224P (8 tasks); not recorded, as scontrol no longer finds the node (3 tasks); AMD 7742 (2 tasks); AMD 7543 (1 task); AMD 9754 (1 task). GPU: none allocated.
 
 Hardware of the database build: not recorded, since the run's task records hold no such task.
 

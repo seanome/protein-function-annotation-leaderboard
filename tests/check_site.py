@@ -314,7 +314,7 @@ def main() -> int:
             snap = page.evaluate("""(s) => { window.__lb.set(s);
               return {calc: window.__lb.calc(), plotted: window.__lb.plotted(),
                       fitline: document.getElementById('fitline').textContent,
-                      budget: !!document.querySelector('#plot line.budget'),
+                      budget: !!document.querySelector('#plot rect.overbudget'),
                       filled: [...document.querySelectorAll('#plot [data-tool]')].map((m) =>
                         [m.dataset.tool + '|' + m.dataset.setting, m.getAttribute('fill') !== 'var(--surface)'])}; }""", s)
             f = n_prot / 1000
@@ -360,7 +360,7 @@ def main() -> int:
                 if nm not in fit_part:
                     failures.append(f"calc {s}: caption does not name {nm} among the tools that fit")
             if not snap["budget"]:
-                failures.append(f"calc {s}: no budget line on the cost axis")
+                failures.append(f"calc {s}: no shaded over-budget area on the cost axis")
             stats["calculator_rows_checked"] = stats.get("calculator_rows_checked", 0) + rows_seen
 
         # By hand (PR 7's number x 20): phmmer, Pfam, raw calls, zebrafish, 20,000 proteins.
@@ -432,6 +432,14 @@ def main() -> int:
     if set(twin["fit"]) != want_fit:
         failures.append(f"cost.html.json: fit {twin['fit']} != {sorted(want_fit)}")
     stats["json_twin_rows"] = len(twin["rows"])
+    # The twin's rule at the budget's edge: build_site.calculator() must also keep "at most".
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from build_site import calculator  # noqa: E402
+    cj = json.loads((a.site / "cost.html.json").read_text())["data"]
+    for b, fits in ((edge_usd, True), (edge_usd * 0.95, False)):
+        got = calculator(cj["results"], cj["compute"], cj["rows"], dict(d, species="zebrafish", budget=b))
+        if ("hmmer3_phmmer|default" in got["fit"]) != fits:
+            failures.append(f"build_site.calculator(): phmmer at budget {b} fits={not fits}, expected {fits}")
 
     # ---- 6. hardware line on every tool card, recounted from data/hardware.parquet ----
     hwp = a.data / "hardware.parquet"

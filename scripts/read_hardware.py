@@ -89,12 +89,26 @@ def ssh(cmd: str) -> str:
 def read_trace_rows() -> pl.DataFrame:
     # Columns by name from each file's header, so a file with a different order still reads.
     awk = (r"""awk -F'\t' -v OFS='\t' 'FNR==1{for(i=1;i<=NF;i++)c[$i]=i; next}"""
-           r"""{print FILENAME,$c["native_id"],$c["process"],$c["tag"],$c["status"],$c["complete"],$c["queue"]}'""")
+           r"""{print FILENAME,$c["native_id"],$c["process"],$c["tag"],$c["status"],$c["complete"],$c["queue"],"""
+           r"""(("hostname" in c) ? $c["hostname"] : "")}'""")
     files = " ".join(f"{f}/*trace*.txt" for f in RUN_FOLDERS)
     text = ssh(f"cd {RUN_DIR} && {awk} {files}")
     df = pl.read_csv(io.StringIO(text), separator="\t", has_header=False, infer_schema=False, quote_char=None,
-                     new_columns=["trace_file", "native_id", "process", "tag", "status", "complete", "queue"])
-    return df.with_columns(pl.col("process").str.split(":").list.last().alias("step"))
+                     new_columns=["trace_file", "native_id", "process", "tag", "status", "complete", "queue",
+                                  "trace_hostname"])
+    return df.with_columns(pl.col("process").str.split(":").list.last().alias("step"),
+                           pl.col("trace_hostname").replace("", None))
+
+
+def trace_headers() -> dict[str, list[str]]:
+    """Each trace file's column names, to record whether any has a `hostname` column."""
+    files = " ".join(f"{f}/*trace*.txt" for f in RUN_FOLDERS)
+    text = ssh(f"cd {RUN_DIR} && for f in {files}; do printf '%s\\t' \"$f\"; head -n1 \"$f\"; done")
+    out = {}
+    for line in text.splitlines():
+        name, *cols = line.split("\t")
+        out[name] = cols
+    return out
 
 
 def main() -> None:
@@ -107,6 +121,7 @@ def main() -> None:
     # query-side database builds ("human-<hash>"), as the table builder does.
     scored = set(pl.read_parquet(a.data / "results.parquet").filter(pl.col("experiment") == EXPERIMENT)
                  ["target_db"].str.strip_prefix("QfO ").unique().to_list()) | {"all"}
+    headers = trace_headers()
     tr = read_trace_rows().filter(pl.col("status") == "COMPLETED")
     rows = []
     for r in tr.iter_rows(named=True):
@@ -114,7 +129,7 @@ def main() -> None:
         if k and (k[2] in scored or k[2].startswith("human")):
             rows.append({"tool": k[0], "setting": k[1], "step": r["step"], "target": k[2],
                          "complete": r["complete"], "native_id": r["native_id"], "partition": r["queue"],
-                         "trace_file": f"{RUN_DIR}/{r['trace_file']}"})
+                         "trace_file": f"{RUN_DIR}/{r['trace_file']}", "trace_hostname": r["trace_hostname"]})
     tasks = (pl.DataFrame(rows).sort("complete", nulls_last=True)
              .unique(["tool", "setting", "step", "target"], keep="last", maintain_order=True))
     # A tool's cost is kept only where the experiment scored it (Reseek and Folddisco searched
@@ -150,11 +165,15 @@ def main() -> None:
 
     # scontrol: each node's features (CPU_SKU, CPU_MNF, GPU_SKU ...).
     nodes = sorted({n for n in acct["node"].drop_nulls().to_list() if n != "None assigned"})
-    # One node at a time: a node retired since the run is no longer in SLURM, and asking for
-    # it fails the whole call. Such a node keeps a null CPU and GPU ("not recorded").
-    out = ssh("for n in " + " ".join(nodes) + "; do scontrol -o show node $n 2>/dev/null; done; true")
+    # One node at a time: scontrol fails the whole call when one node is not in its node list.
+    # Such a node keeps a null CPU and GPU, with scontrol's own words in scontrol_status.
+    out = ssh("for n in " + " ".join(nodes) + "; do scontrol -o show node $n 2>&1; done; true")
     feats = []
     for line in out.splitlines():
+        miss = re.fullmatch(r"Node (\S+) not found", line.strip())
+        if miss:
+            feats.append({"node": miss[1], "scontrol_status": "Node not found"})
+            continue
         kv = dict(re.findall(r"(\w+)=(\S*)", line))
         if "NodeName" not in kv:
             print(f"skipped a line that names no node: {line[:120]}", file=sys.stderr)
@@ -162,8 +181,11 @@ def main() -> None:
         f = dict(x.split(":", 1) for x in kv.get("AvailableFeatures", "").split(",") if ":" in x)
         feats.append({"node": kv["NodeName"], "cpu_mnf": f.get("CPU_MNF"), "cpu_sku": f.get("CPU_SKU"),
                       "cpu_gen": f.get("CPU_GEN"), "gpu_brd": f.get("GPU_BRD"), "gpu_sku": f.get("GPU_SKU"),
-                      "node_class": f.get("CLASS")})
-    feats = pl.DataFrame(feats)
+                      "node_class": f.get("CLASS"), "scontrol_status": "found"})
+    feats = pl.DataFrame(feats, infer_schema_length=None)
+    unread = set(nodes) - set(feats["node"].to_list())
+    if unread:
+        raise SystemExit(f"scontrol said nothing about {len(unread)} nodes: {sorted(unread)[:5]}")
 
     hw = (tasks.join(acct, on="native_id", how="left").join(feats, on="node", how="left")
           .with_columns(
@@ -172,7 +194,6 @@ def main() -> None:
               .then(pl.concat_str(pl.col("cpu_mnf"), pl.col("cpu_sku"), separator=" "))
               .alias("cpu_model"),
               pl.col("alloc_tres").str.extract(r"gres/gpu=(\d+)", 1).cast(pl.Int64).fill_null(0).alias("gpus_allocated"),
-              pl.lit(None, dtype=pl.String).alias("trace_hostname"),
           )
           .with_columns(
               pl.when(pl.col("gpus_allocated") > 0).then(pl.col("gpu_sku")).alias("gpu_model"))
@@ -182,7 +203,9 @@ def main() -> None:
         "read_on": dt.date.today().isoformat(),
         "experiment": EXPERIMENT,
         "traces": f"{RUN_DIR}/{{{','.join(RUN_FOLDERS)}}}/*trace*.txt",
-        "trace_has_hostname": False,
+        # Read from each trace file's header line, not assumed.
+        "trace_files_with_hostname_column": sorted(f for f, cols in headers.items() if "hostname" in cols),
+        "n_trace_files": len(headers),
         "node_from": f"sacct -u {SLURM_USER} -X -n -P -S {SACCT_FROM} -E {SACCT_TO} "
                      "--format=JobID,NodeList,Partition,AllocTRES, matched on the trace's native_id",
         "hardware_from": "scontrol -o show node <node>: AvailableFeatures CPU_MNF, CPU_SKU, GPU_SKU",

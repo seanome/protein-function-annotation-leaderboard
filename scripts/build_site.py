@@ -47,9 +47,8 @@ DEFAULTS = {
     "n": 20000, "budget": 10,
 }
 # One sentence, printed on the page and in its JSON twin.
-SCALING = ("Every core-hour, cost and wall-clock number scales in a straight line with the number "
-           "of proteins: N proteins cost N / 1,000 times the measured cost per 1,000 queries. "
-           "Nothing else is scaled: peak RAM and database build are shown as measured.")
+SCALING = ("Core-hours, cost and wall-clock time scale in a straight line with the number of "
+           "proteins, N / 1,000 times the measured value per 1,000 queries; nothing else is scaled.")
 DEFAULT_WORDS = "Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched"
 # A stratum enters a card's comparisons and questions only with at least this many true
 # instances; below it one or two calls swing Fmax from 0 to 1.
@@ -334,8 +333,8 @@ def hardware_words(h: dict, what: str) -> str:
     if not h.get("recorded"):
         return f"Hardware of {what}: not recorded, since the run's task records hold no such task."
     parts = ", ".join(f"{p['value']}" for p in h["partitions"])
-    # A null CPU is a node that `scontrol` no longer finds ("Node ... not found").
-    cpu = "; ".join(f"{c['value'] or 'not recorded, node no longer in SLURM'} "
+    # A null CPU is a node that `scontrol` answers "Node ... not found" for today.
+    cpu = "; ".join(f"{c['value'] or 'not recorded, as scontrol no longer finds the node'} "
                     f"({c['n_tasks']} task{'s' if c['n_tasks'] != 1 else ''})"
                     for c in h["cpu_models"])
     gpu = ("none allocated" if not h["n_tasks_with_gpu"] else
@@ -571,6 +570,10 @@ examples: <a href="methods.html">Methods</a>.</p>
 
 
 def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -> str:
+    # Colour and shape name the tool; filled or open is the budget. So each tool's key shows
+    # its marker both ways, and fill is never read as part of the tool.
+    def pair(shape, color):
+        return svg_marker(shape, color) + svg_marker(shape, color, False)
     legend = []
     for kind, k in KINDS.items():
         for t, info in TOOLS.items():
@@ -578,9 +581,20 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
                 continue
             if t == "kmerseek":
                 for alpha, shape in KMERSEEK_SHAPES.items():
-                    legend.append(f'<span class="item">{svg_marker(shape, k["color"])}kmerseek, {esc(alpha)}</span>')
+                    legend.append(f'<span class="item">{pair(shape, k["color"])}kmerseek, {esc(alpha)}</span>')
             else:
-                legend.append(f'<span class="item">{svg_marker(info["shape"], k["color"])}{esc(info["name"])}</span>')
+                legend.append(f'<span class="item">{pair(info["shape"], k["color"])}{esc(info["name"])}</span>')
+    # Tools whose "database build" includes the query side (the human proteins), which grows
+    # with the number of proteins. Read from hardware.parquet's targets.
+    query_side = []
+    if HW is not None:
+        qs = HW.filter(pl.col("target").str.starts_with("human") & (pl.col("setting") == "database build")
+                       & (pl.col("gpus_allocated") > 0))
+        query_side = sorted({TOOLS[t]["name"] for t in qs["tool"].unique().to_list() if t in TOOLS})
+    qs_words = "".join(
+        f" {name}'s database build includes one GPU task that converts the human query proteins. "
+        "That step grows with the number of proteins. The run's table sums it with the builds for "
+        f"the relatives, so it is not in {name}'s search cost or the budget." for name in query_side)
     body = f"""
 <h1>Compare two columns</h1>
 <p class="lede">Any two columns of the leaderboard, drawn against each other: a score against
@@ -590,8 +604,8 @@ you can spend, and the figure shows which tools fit.</p>
 <div class="prices">
 <label>Proteins to annotate <input id="calc_n" type="number" min="1" step="1" inputmode="numeric"></label>
 <label>Budget, USD <input id="calc_budget" type="number" min="0" step="any" inputmode="decimal"></label>
-<label>r_cpu, USD per CPU-hour <input id="r_cpu" type="number" min="0" step="0.001" inputmode="decimal"></label>
-<label>r_gpu, USD per GPU-hour <input id="r_gpu" type="number" min="0" step="0.01" inputmode="decimal"></label>
+<label>Price per CPU-hour, USD <input id="r_cpu" type="number" min="0" step="0.001" inputmode="decimal"></label>
+<label>Price per GPU-hour, USD <input id="r_gpu" type="number" min="0" step="0.01" inputmode="decimal"></label>
 </div>
 <p class="muted calcnote">{esc(SCALING)} Costs are for searching your proteins against one relative's
 proteome; the budget counts the search only. The default prices are AWS on-demand, US East (N. Virginia),
@@ -616,8 +630,8 @@ so picking a value in one of them sets the other three back to "any".</p>
 {"".join(legend)}
 <span class="item">{svg_marker("circle", "var(--ink)")} filled: search fits the budget</span>
 <span class="item">{svg_marker("circle", "var(--ink)", False)} open: search costs more than the budget</span>
-<span class="item" id="nocost-key"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="2 2"/></svg> dashed: cost not measured</span>
-<span class="item" id="budget-key"><svg width="12" height="22" aria-hidden="true"><line x1="6" y1="1" x2="6" y2="21" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="5 3"/></svg> the budget</span>
+<span class="item" id="nocost-key"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="2 2"/></svg> dashed outline: cost not measured</span>
+<span class="item" id="budget-key"><svg width="22" height="16" aria-hidden="true"><rect x="1" y="1" width="20" height="14" class="overbudget"/></svg> shaded: more than the budget</span>
 <span class="item" id="frontier-key"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.6"/></svg>
 <span id="frontier-words">no other tool is both cheaper and better</span></span>
 </div>
@@ -628,8 +642,10 @@ so picking a value in one of them sets the other three back to "any".</p>
 <p class="prose muted">One row per tool, for the filters above. Search cost is for your proteins against
 one relative; where a tool has several settings, the row gives the cheapest and the dearest. Building a
 relative's database is paid once per relative, not per protein, so it is shown on its own and is not in
-the budget. "Not measured" means the run's task records hold no build for that tool: a database
-reused from an earlier run left no record.</p>
+the budget. "No build in the run's records" means the run's task records hold no build for that
+tool. Either it reads the relative's FASTA file directly, or its database was reused from an earlier
+run.{esc(qs_words)} Core-hours are reserved cores times wall time, each priced as one
+CPU-hour.</p>
 <div class="tablebox"><table class="lb calc-table" id="calc-table"></table></div>
 <p><button type="button" class="chip" id="calc-json">Download these inputs and outputs as JSON</button>
 <span class="muted">The same numbers for the default inputs are in <a href="cost.html.json">cost.html.json</a>, under "data", then "calculator".</span></p>
