@@ -54,7 +54,7 @@ def main():
     ap.add_argument("--raw", required=True, type=pathlib.Path)
     args = ap.parse_args()
     nums = pl.read_parquet(OUT / "numbers.parquet")
-    verdicts = OUT / "verification" / "verdicts.parquet"
+    verdicts = OUT / "verification" / "verdicts.parquet"  # from the second agent's recompute.py
     vmap = dict(pl.read_parquet(verdicts).select("id", "verdict").iter_rows()) if verdicts.exists() else {}
     sources = json.loads((OUT / "sources.json").read_text())
     V = {r["id"]: fmt(r["value"], r["unit"]) for r in nums.iter_rows(named=True)}
@@ -82,7 +82,9 @@ def main():
         "- Of {col_species_Animalia} described animal species (Catalogue of Life), {sp_species_Animalia} have a Swiss-Prot entry "
         "({sp_species_share_Animalia}%).\n"
         "- In the Pacific oyster, {oyster_no_interpro_no_sprot_pct}% of proteins have neither an InterPro match nor a "
-        "Swiss-Prot hit above 30% identity; in human, {human_no_interpro_no_sprot_pct}%. An AlphaFold DB model exists for "
+        "Swiss-Prot hit above 30% identity; in human, {human_no_interpro_no_sprot_pct}%. Both count a hit to the protein's own "
+        "Swiss-Prot entry; without it, human rises to {human_no_interpro_no_sprot_nonself_pct}% and oyster is "
+        "{oyster_no_interpro_no_sprot_nonself_pct}%, since few oyster proteins are Swiss-Prot entries. An AlphaFold DB model of the protein's own sequence exists for "
         "{oyster_af_model_pct}% of oyster and {human_af_model_pct}% of human proteins, so with the model counted as a label "
         "only {oyster_no_label_pct}% and {human_no_label_pct}% have none.\n"
     ))
@@ -163,6 +165,16 @@ def main():
         "described species. Those rows are marked as estimates and are read from the notebook that tables them.\n"
         "- WoRMS matched " + V["worms_matched_species"] + " of " + V["sp_metazoa_species"] + " animal species names. WoRMS lists "
         "marine species and many others, but not all land and freshwater ones, so an unmatched name was counted as not marine.\n"
+        "- Larsen et al. 2017 estimate " + V["larsen2017_estimated_species_Plants"] + " plant species in all, fewer than the "
+        + V["col_species_Plantae"] + " Plantae species the Catalogue of Life already lists as described.\n"
+        "- The Archaea (" + V["sp_species_share_Archaea"] + "%) and Protozoa (" + V["sp_species_share_Protozoa"] + "%) ratios in step 3 divide "
+        "NCBI species counts by Catalogue of Life counts; the two sources draw these groups differently, so the two ratios are not comparable to the others.\n"
+        "- 'Above 30% identity' is MMseqs2's identity strictly greater than 0.30. Counting 0.30 itself adds " + V["oyster_sprot_hit_at_exactly_30pct"] + " oyster and " + V["human_sprot_hit_at_exactly_30pct"] + " human proteins.\n"
+        "- The antifreeze glycoprotein P24856 is a Swiss-Prot entry, yet MMseqs2 returned no hit for it, not even to itself. "
+        "Its sequence is mostly the repeat AAT; low-complexity masking in MMseqs2 is the likely cause, not tested here.\n"
+        "- The InterPro API listing of the oyster proteome, meant as a check on UniProt's cross-references, timed out (HTTP 408) on "
+        "three tries over two days, so that check was not done.\n"
+        "- In `proteome_labels.parquet`, `sprot_best_target` is the hit with the highest bit score, not the highest identity.\n"
         "- MMseqs2 18.8cc5c (-s 7.5, E ≤ 0.001) and BUSCO 6.1.0 (metazoa_odb12) ran on Sherlock as job 47961379, from "
         "`scripts/why/sherlock_labels.sbatch`.\n"
     )

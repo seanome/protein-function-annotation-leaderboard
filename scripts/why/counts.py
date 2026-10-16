@@ -58,6 +58,8 @@ def annotate(df, tax):
     info = pl.DataFrame(
         {
             "taxid": taxids,
+            # NCBI has merged some ids UniProt still uses; group organisms by the current id.
+            "taxid_ncbi": [tax.resolve(t) for t in taxids],
             "species_taxid": [tax.species(t) for t in taxids],
             "superkingdom": [tax.superkingdom(t) for t in taxids],
             "col_group": [tax.col_group(t) for t in taxids],
@@ -72,9 +74,12 @@ def annotate(df, tax):
     )
 
 
-def top_share(counts, key, value, n=5):
+def top_share(counts, key, value, n=5, total=None):
+    """Share held by the n largest groups. total: the denominator, all entries by default;
+    pass it when rows without a group (no species) were filtered out, so every share in a
+    step divides by the same number of entries."""
     c = counts.group_by(key).agg(pl.col(value).sum()).sort([value, key], descending=[True, False])
-    total = c[value].sum()
+    total = c[value].sum() if total is None else total
     top = c.head(n)
     return c, total, top, 100 * top[value].sum() / total
 
@@ -85,7 +90,9 @@ def load_worms(path):
     with gzip.open(path, "rt") as fh:
         for line in fh:
             row = json.loads(line)
-            exact = [m for m in row["matches"] if m.get("match_type") == "exact"]
+            # The WoRMS name must equal the species name: "Penaeus sp." matched to the genus
+            # Penaeus is not a species match.
+            exact = [m for m in row["matches"] if m.get("match_type") == "exact" and m.get("scientificname") == row["query"]]
             exact.sort(key=lambda m: m.get("status") != "accepted")
             if exact:
                 m = exact[0]
@@ -123,9 +130,9 @@ def main():
     # ---- Step 1: Swiss-Prot by organism -------------------------------------------------
     N.add("sp_entries", 1, "Swiss-Prot reviewed entries", sp.height, "entries", src_sp, rel)
     sp = sp.with_columns(one=pl.lit(1))
-    for key, label in (("taxid", "organism (UniProt OX taxon)"), ("species_taxid", "species (NCBI rank species)")):
-        c, total, top, share = top_share(sp.filter(pl.col(key).is_not_null()), key, "one")
-        unit = "organisms" if key == "taxid" else "species"
+    for key, label in (("taxid_ncbi", "organism (UniProt OX taxon, merged NCBI ids resolved)"), ("species_taxid", "species (NCBI rank species)")):
+        c, total, top, share = top_share(sp.filter(pl.col(key).is_not_null()), key, "one", total=sp.height)
+        unit = "organisms" if key == "taxid_ncbi" else "species"
         N.add(f"sp_{unit}", 1, f"{unit} with at least one Swiss-Prot entry", c.height, unit, src_sp, rel, note=f"grouped by {label}")
         N.add(f"sp_top5_share_by_{unit}", 1, f"share of Swiss-Prot entries held by the five largest {unit}", round(share, 2), "% of entries", src_sp, rel,
               note="top five: " + "; ".join(f"{tax.name.get(t)} {v:,}" for t, v in top.iter_rows()))
@@ -141,7 +148,8 @@ def main():
     met_species = met["species_name"].drop_nulls().unique().to_list()
     matched = [s for s in met_species if s in worms]
     marine = {s for s in matched if worms[s]["isMarine"] == 1}
-    marine_only = {s for s in marine if not worms[s]["isFreshwater"] and not worms[s]["isTerrestrial"]}
+    # Both flags must be 0; an empty flag means WoRMS does not say, so the species is left out.
+    marine_only = {s for s in marine if worms[s]["isFreshwater"] == 0 and worms[s]["isTerrestrial"] == 0}
     src_w = "worms_matches"
     N.add("sp_metazoa_entries", 1, "Swiss-Prot entries from animals (NCBI Metazoa)", met.height, "entries", src_sp, rel)
     N.add("sp_metazoa_species", 1, "animal species with at least one Swiss-Prot entry", len(met_species), "species", src_sp, rel)
@@ -152,14 +160,14 @@ def main():
     N.add("sp_marine_animal_entries", 1, "Swiss-Prot entries from animal species WoRMS flags as marine", n_marine, "entries", src_w, "WoRMS REST API + UniProt 2026_03")
     N.add("sp_marine_animal_share", 1, "share of all Swiss-Prot entries from animal species WoRMS flags as marine", round(100 * n_marine / sp.height, 2), "% of entries", src_w, "WoRMS REST API + UniProt 2026_03",
           note="marine = isMarine 1; a species may also live in brackish or fresh water")
-    N.add("sp_marine_only_animal_share", 1, "same, counting only species WoRMS flags as marine and not freshwater or terrestrial", round(100 * n_marine_only / sp.height, 2), "% of entries", src_w, "WoRMS REST API + UniProt 2026_03")
+    N.add("sp_marine_only_animal_share", 1, "same, counting only species WoRMS flags as marine with its freshwater and terrestrial flags both 0", round(100 * n_marine_only / sp.height, 2), "% of entries", src_w, "WoRMS REST API + UniProt 2026_03")
     pl.DataFrame([{"species_name": s, **worms.get(s, {})} for s in met_species]).write_parquet(OUT / "tables" / "metazoan_species_worms.parquet")
 
     # ---- Step 2: experimental structures ------------------------------------------------
     sp_pdb = sp.filter(pl.col("n_pdb") > 0)
     N.add("sp_pdb_entries", 2, "Swiss-Prot entries citing at least one PDB entry", sp_pdb.height, "entries", src_sp, rel)
-    for key, unit in (("taxid", "organisms"), ("species_taxid", "species")):
-        c, total, top, share = top_share(sp_pdb.filter(pl.col(key).is_not_null()), key, "one")
+    for key, unit in (("taxid_ncbi", "organisms"), ("species_taxid", "species")):
+        c, total, top, share = top_share(sp_pdb.filter(pl.col(key).is_not_null()), key, "one", total=sp_pdb.height)
         N.add(f"sp_pdb_{unit}", 2, f"{unit} with a Swiss-Prot entry citing a PDB entry", c.height, unit, src_sp, rel)
         N.add(f"sp_pdb_top5_share_by_{unit}", 2, f"share of those entries held by the five largest {unit}", round(share, 2), "% of entries", src_sp, rel,
               note="top five: " + "; ".join(f"{tax.name.get(t)} {v:,}" for t, v in top.iter_rows()))
@@ -176,10 +184,10 @@ def main():
     N.add("kb_pdb_entries", 2, "same, cellular life only (the deck's scope)", cell.height, "entries", src_kb, kb_rel)
     for key, unit, how in (
         ("organism_name", "organism names", "the deck's method: summed by organism name"),
-        ("taxid", "organisms", "summed by UniProt OX taxon"),
+        ("taxid_ncbi", "organisms", "summed by UniProt OX taxon, merged NCBI ids resolved"),
         ("species_taxid", "species", "summed by NCBI species"),
     ):
-        c, total, top, share = top_share(cell.filter(pl.col(key).is_not_null()), key, "one")
+        c, total, top, share = top_share(cell.filter(pl.col(key).is_not_null()), key, "one", total=cell.height)
         names = [r[0] if key == "organism_name" else tax.name.get(r[0]) for r in top.iter_rows()]
         N.add(f"kb_pdb_{key}", 2, f"{unit} with a UniProtKB entry citing a PDB entry, cellular life", c.height, unit, src_kb, kb_rel, note=how)
         N.add(f"kb_pdb_top5_share_by_{key}", 2, f"share held by the five largest {unit}, cellular life", round(share, 2), "% of entries", src_kb, kb_rel,
