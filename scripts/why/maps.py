@@ -20,10 +20,9 @@ import pubfig as pf  # noqa: E402
 
 OUT = pathlib.Path("results/why/maps")
 COLS = 150  # tiles per row, both species
-# Light teal for lit and dark teal for dark: one hue, lightness carries the meaning. The
-# light teal is greener and paler than the sky blue that means pLDDT 70-90 in the residue
-# figures on the same page.
-LIT, DARK = "#BFE0DC", "#1D4E5A"
+# Seanome style guide colours, chosen by Olga on 2026-10-16: Soft Teal for lit, Seanome Blue
+# for dark. Lightness carries the meaning, so the maps also read in greyscale.
+LIT, DARK = "#89C2BA", "#1E3D6B"
 SPECIES = {"human": "Human (Homo sapiens)", "oyster": "Pacific oyster (Crassostrea gigas)"}
 LABEL_SETS = {
     "proteome_map_human_oyster_any_label_uniprot_2026_03": (
