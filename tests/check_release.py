@@ -102,6 +102,29 @@ with tempfile.TemporaryDirectory() as tmp:
     man = sorted(x.split()[0] for x in out.splitlines() if x.startswith("  ") and "sha256" in x)
     check(len(man) + 1 == len(built), f"every built file is listed: {len(man) + 1} listed, {len(built)} built")
 
+# 6. The DIAMOND module as the worked example. tests/fixtures/annotator_stub/ holds the rows
+#    and cost table of `make stub` for annotator_tools.nf (seanome/2024-kmerseek-analysis,
+#    branch olgabot/submission-guide at 767b2dc5, which merges G1's olgabot/annotator-tools
+#    at 19955d54): real DIAMOND and MMseqs2 output for 60 human queries against 120 yeast
+#    proteins, with stub timings (all zero). The rows must build and pass the schema, the
+#    image digest must land in container_digest, and --submitted must still refuse them,
+#    for the columns the stub cannot fill.
+stub = release_rows.build(ROOT / "tests/fixtures/annotator_stub")
+e, empty = validate_rows.validate(stub, SCHEMA, submitted=False)
+check(not e and stub.height == 168, f"DIAMOND stub rows pass the schema: {stub.height} rows, {e}")
+dia = stub.filter(pl.col("tool") == "diamond_besthit")
+check(dia["container_digest"].unique().to_list()
+      == ["quay.io/biocontainers/diamond@sha256:e02013280712f1295e59339dc6ea162adf8a6bbdd730e73a9c00700c03c3e556"],
+      f"DIAMOND digest moved to container_digest: {dia['container_digest'].unique().to_list()}")
+check(dia["cost_provenance"].unique().to_list() == ["measured"],
+      f"DIAMOND search step gives a measured cost: {dia['cost_provenance'].unique().to_list()}")
+e, _ = validate_rows.validate(stub, SCHEMA, submitted=True)
+missing = sorted(x.split(":")[0] for x in e)
+# peak_rss_gb is empty because Nextflow reports no memory for a task on macOS without a
+# container; a Sherlock run fills it.
+check(missing == ["ci95_high", "ci95_low", "peak_rss_gb", "run_date", "tool_version"],
+      f"--submitted refuses the stub rows only for interval, peak memory, run date and version: {missing}")
+
 if failures:
     print(f"{len(failures)} FAILURES")
     sys.exit(1)

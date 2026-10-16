@@ -28,6 +28,10 @@ from build_site import BUILD_TOOL, HARDWARE, PRICE_FILE, PRICE_PAGE, R_CPU, R_GP
 RATE_SOURCE = (f"AWS on-demand, US East (N. Virginia), Linux, read 2026-10-15: c7i.large $0.08925/h for 2 vCPU, "
                f"g5.xlarge $1.006/h for 1 A10G GPU ({PRICE_PAGE}; {PRICE_FILE})")
 COST_EXPERIMENTS = ["qfo_region_mini", "qfo_region_midi", "qfo_region_midi_plus"]
+# The best-hit annotator runs (annotator_tools.nf): only the *BestHitSearch step is the search;
+# placing domains and scoring are not part of what the tool costs.
+ANNOTATOR_EXPERIMENTS = ["annotator_tools_midi_plus"]
+DIGEST = r"^[^@\s]+@sha256:[0-9a-f]{64}$"
 
 
 def schema_columns() -> list[dict]:
@@ -40,7 +44,9 @@ def search_cost(comp: pl.DataFrame) -> pl.DataFrame:
     # The same split into search and database build as the Cost page (build_site.load), so
     # it is only applied to the QfO region runs, whose step names that split was written for.
     is_build = (pl.col("setting") == "database build") | pl.col("step").str.contains("Index|Db|DB")
-    s = comp.filter(pl.col("experiment").is_in(COST_EXPERIMENTS), ~is_build, pl.col("n_queries").is_not_null(),
+    qfo = pl.col("experiment").is_in(COST_EXPERIMENTS) & ~is_build
+    annot = pl.col("experiment").is_in(ANNOTATOR_EXPERIMENTS) & pl.col("step").str.ends_with("BestHitSearch")
+    s = comp.filter(qfo | annot, pl.col("n_queries").is_not_null(),
                     pl.col("n_target_dbs") > 0, pl.col("cpu_h").is_not_null())
     per = s.with_columns(
         (pl.col("cpu_h") / pl.col("n_target_dbs") * 1000 / pl.col("n_queries")).alias("cpu_h_per_1000"),
@@ -61,7 +67,10 @@ def build(data: Path) -> pl.DataFrame:
                 pl.col("stratum_axis").alias("stratum_key"),
                 pl.col("stratum_bin").alias("stratum_value"),
                 pl.col("n_instances").alias("n"),
-                pl.lit(None, pl.Utf8).alias("container_digest"),
+                # The annotator rows put the image digest in tool_version; it belongs in
+                # container_digest, and the version is then unknown rather than wrong.
+                pl.when(pl.col("tool_version").str.contains(DIGEST)).then(pl.col("tool_version"))
+                .alias("container_digest"),
                 pl.lit(None, pl.Float64).alias("ci95_low"),
                 pl.lit(None, pl.Float64).alias("ci95_high"),
                 pl.lit(None, pl.Utf8).alias("run_date"),
@@ -74,6 +83,8 @@ def build(data: Path) -> pl.DataFrame:
                 pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit(HARDWARE)).alias("hardware"),
                 pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit("measured")).alias("cost_provenance"),
             ))
+    rows = rows.with_columns(pl.when(~pl.col("tool_version").str.contains(DIGEST).fill_null(False))
+                             .then(pl.col("tool_version")).alias("tool_version"))
     cols = [c["name"] for c in schema_columns()]
     key = json.loads((ROOT / "schema/results_row.json").read_text())["key"]
     return rows.select(cols).sort(key, nulls_last=True)
