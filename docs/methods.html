@@ -33,7 +33,8 @@ how the truth sets were built.</p>
 <li><a href="#scores">The scores</a>: <a href="#fmax">Fmax</a>, <a href="#auprc">AUPRC</a>, <a href="#iou">median IoU</a>,
 <a href="#n">true instances</a>, <a href="#cpu">core-hours</a>, <a href="#cost">estimated cost</a></li>
 <li><a href="#truth">Truth sets</a></li><li><a href="#dedup">Dedup against raw</a></li>
-<li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#checks">Checks on this site</a></li>
+<li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#no-search">No-search baselines</a></li>
+<li><a href="#checks">Checks on this site</a></li>
 <li><a href="#experiments">Experiments in the tables</a></li></ol></nav>
 <div class="prose">
 <h2 id="data">The benchmark run</h2>
@@ -209,6 +210,26 @@ marks regions without a fixed shape.</li>
 <p>The run computed each subset on its own, so two subsets cannot be combined; a combination with
 no row shows × and "not run".</p>
 
+<h2 id="no-search">No-search baselines</h2>
+<p>A baseline row reads only the query sequence: it searches no relative and copies nothing.
+It answers what score a reader gets with no database at all. Gillis and Pavlidis (2013) asked
+every function benchmark for such a row, after a method that gave every protein the same
+annotation scored well in the first CAFA. Each baseline is scored by the same code and
+against the same truth tables as the search tools.</p>
+<ul><li><b>Kyte-Doolittle scan</b>: Hydropathy (Kyte and Doolittle 1982) averaged over 19-residue windows; windows above 1.6 are called membrane-spanning. The scan of notebook 231. Can address: Swiss-Prot TRANSMEM and INTRAMEM features. Swiss-Prot features, INTRAMEM: Fmax 0.333 (n = 9, fewer than 30: too few to read); Swiss-Prot features, TRANSMEM: Fmax 0.778 (n = 1,124).</li><li><b>IUPred long</b>: IUPred 1.0, long mode; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet.</li><li><b>metapredict</b>: metapredict 3.0.1; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet.</li><li><b>SEG</b>: segmasker from BLAST+ 2.16.0 at its default settings (window 12, locut 2.2, hicut 2.5); each masked stretch is a call. Can address: Swiss-Prot COMPBIAS and REPEAT features. Not in this build's table yet.</li><li><b>Pfam family frequency</b>: Every query gets, over its whole length, the Pfam family held by the most human proteins of its length, the queries themselves left out. Can address: Pfam and Pfam-N. Pfam, all proteins: Fmax 0.035 (n = 2,435).</li></ul>
+<p>Each baseline can address only some cells: a hydropathy scan can call a membrane-spanning
+segment but not a Pfam family. Every other cell shows <i>not applicable</i>, never 0. In Table 1
+the baselines sit under the search tools, whatever the sort.</p>
+<p><b>Reading a tool below a baseline.</b> Where a search tool's Fmax is below a baseline's on
+the same truth set and subset, the search has found nothing there that the query sequence
+alone does not give. On Swiss-Prot TRANSMEM, for example, a tool below the Kyte-Doolittle scan
+calls membrane-spanning segments less well than a hydropathy average does, so its score there
+says nothing about whether it found related proteins. On Pfam, a tool below the Pfam family
+frequency row does no better than giving every protein the most common family of its length.</p>
+<p>A baseline row is the same under every relative and under raw and dedup, since it searches
+no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000
+queries, from the run's task records; where the table holds none, the cost reads
+<i>not measured</i>. Source of these rows: laptop check: tables/no_search_baselines_laptop_check (committed code, midi-plus truth tables copied from Sherlock).</p>
 <h2 id="checks">Checks on this site</h2>
 <p>A headless browser renders every filter combination and confirms that each × on the
 leaderboard is a missing row in results.parquet, and that every number matches the tables. The
@@ -224,7 +245,7 @@ them. Their ids: <span class="mono">alphabet_ranking_three_cases</span>, <span c
 
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-16.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="methods.html.json">methods.html.json</a></p>
 </div></footer>
