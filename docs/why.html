@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Why this project</title>
+<meta name="description" content="Why ocean animal proteins need measuring, in four screens: the gap, why it exists, what funding buys, who is behind it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<script defer src="assets/terms.js"></script>
+<script defer src="assets/nav.js"></script>
+<script defer src="assets/why.js"></script>
+</head>
+<body data-page="why">
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><a href="why.html" aria-current="page">Why this project</a><details class="navmore"><summary>More</summary>
+<div class="navpop"><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Why this project">Why this project</summary>
+<div class="navpop"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><a href="why.html" aria-current="page">Why this project</a><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a></div></details>
+</div></header>
+<main class="wrap" data-page="why">
+<section class="screen s1" id="argument">
+<h1 class="headline">Curators have reviewed <b>575,748</b> proteins by hand, only <b>0.47% to 1.18%</b> from ocean animals, and <b>19.4%</b> of a Pacific oyster's proteins match no known family or described protein.</h1>
+<div class="cards">
+<div class="card"><div class="big">575,748</div>
+<p>proteins whose entry a curator has reviewed by hand (Swiss-Prot, the reviewed part of UniProt)</p>
+<p class="src"><a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz">Swiss-Prot</a>, UniProt 2026_03 (02-Sep-2026)</p></div>
+<div class="card"><div class="big">0.47% to 1.18%</div>
+<p>come from ocean animals: 2,702 proteins from species the World Register of Marine Species (WoRMS) lists as marine only, up to 6,792 counting species that also live in fresh water or on land</p>
+<p class="src"><a href="https://www.marinespecies.org/rest/AphiaRecordsByMatchNames?scientificnames[]=...&amp;marine_only=false">WoRMS</a>, WoRMS REST API + UniProt 2026_03</p></div>
+<div class="card"><div class="big">19.4%</div>
+<p>of a Pacific oyster's proteins get no label: 5,879 of 30,272 have no family in InterPro (the catalogue of known protein families) and no other Swiss-Prot protein at least 30% identical</p>
+<p class="src">InterPro as UniProt 2026_03 lists it; MMseqs2, E-value 0.001 or less; proteome UP000005408</p></div>
+</div>
+<figure class="maps" id="figure-1">
+<div class="legend" aria-label="Key to Figure 1">
+<span class="item"><span class="tile lit" aria-hidden="true"></span>lit: the protein has an InterPro family, or another Swiss-Prot protein at least 30% identical</span>
+<span class="item"><span class="tile unlit" aria-hidden="true"></span>dark: neither</span>
+<span class="item muted">one tile = one protein, 480 tiles per row in both maps</span></div>
+<div class="mapgrid">
+<div class="map"><h3>Human <small>20,652 proteins</small></h3>
+<p class="frac"><b>97.2%</b> lit, 574 dark</p>
+<canvas style="aspect-ratio:480/44" data-species="human" aria-label="Human proteome map: 20,078 lit tiles, 574 dark"></canvas></div>
+<div class="map"><h3>Pacific oyster <small>30,272 proteins</small></h3>
+<p class="frac"><b>80.6%</b> lit, 5,879 dark</p>
+<canvas style="aspect-ratio:480/64" data-species="oyster" aria-label="Pacific oyster proteome map: 24,393 lit tiles, 5,879 dark"></canvas></div>
+</div>
+<div class="tip" id="maptip" hidden></div>
+<figcaption><b>Figure 1.</b> Every protein of two animals, one tile each. Like Earth seen from space at night,
+lit tiles show where knowledge reaches, and ocean animals are the dark continents. The oyster has 10 times
+as many dark proteins as human (5,879 against 574). A match to a protein's own Swiss-Prot entry does not count.
+Hover or tap a tile to see the protein. Proteomes: UP000005640 and UP000005408, UniProt 2026_03, one protein per gene.</figcaption>
+</figure>
+<p class="does">This site measures, for every software tool and every kind of organism, which proteins get a label
+and what the run costs, and tells each lab which tool to run. Today it scores 9 tools on human proteins.
+The first organism page will be the Pacific oyster's; it is not built yet, so there is no link to it.</p>
+</section><section class="screen" id="dark">
+<h2>Why ocean animals are dark</h2>
+<p class="prose">Science describes proteins where people work on them. Five species hold more reviewed proteins than all ocean animals put together, many times over.</p>
+<figure id="figure-2">
+<div class="legend" aria-label="Key to Figure 2"><span class="item"><span class="swatch bar" aria-hidden="true"></span>reviewed proteins (Swiss-Prot), counted by species</span></div>
+<div class="figpair"><svg viewBox="0 0 560 246" role="img" aria-label="a. Reviewed proteins"><text class="ptitle" x="0" y="16">a. Reviewed proteins</text><text class="rlab" x="192" y="43" text-anchor="end">E. coli (bacterium)</text><rect class="bar" x="200" y="33" width="13.0" height="18"/><text class="val" x="218.0" y="43">23,292</text><text class="rlab" x="192" y="69" text-anchor="end">Human</text><rect class="bar" x="200" y="59" width="11.4" height="18"/><text class="val" x="216.4" y="69">20,432</text><text class="rlab" x="192" y="95" text-anchor="end">Mouse</text><rect class="bar" x="200" y="85" width="9.7" height="18"/><text class="val" x="214.7" y="95">17,290</text><text class="rlab" x="192" y="121" text-anchor="end">Thale cress (plant)</text><rect class="bar" x="200" y="111" width="9.2" height="18"/><text class="val" x="214.2" y="121">16,421</text><text class="rlab" x="192" y="147" text-anchor="end">Salmonella (bacterium)</text><rect class="bar" x="200" y="137" width="7.2" height="18"/><text class="val" x="212.2" y="147">12,883</text><text class="rlab strong" x="192" y="183" text-anchor="end">Ocean animals (564 species)</text><rect class="bar" x="200" y="173" width="1.5" height="18"/><text class="val" x="206.5" y="183">2,702</text><text class="rlab" x="192" y="209" text-anchor="end">All other species (11,201)</text><rect class="bar" x="200" y="199" width="270.0" height="18"/><text class="val" x="475.0" y="209">482,669</text><line class="axis" x1="200" x2="200" y1="30" y2="222"/><text class="unit" x="200" y="238">reviewed proteins, bar length to scale from 0</text></svg><svg viewBox="0 0 560 246" role="img" aria-label="b. Reviewed proteins per species"><text class="ptitle" x="0" y="16">b. Reviewed proteins per species</text><text class="rlab" x="192" y="43" text-anchor="end">E. coli (bacterium)</text><rect class="bar" x="200" y="33" width="270.0" height="18"/><text class="val" x="475.0" y="43">23,292</text><text class="rlab" x="192" y="69" text-anchor="end">Human</text><rect class="bar" x="200" y="59" width="236.8" height="18"/><text class="val" x="441.8" y="69">20,432</text><text class="rlab" x="192" y="95" text-anchor="end">Mouse</text><rect class="bar" x="200" y="85" width="200.4" height="18"/><text class="val" x="405.4" y="95">17,290</text><text class="rlab" x="192" y="121" text-anchor="end">Thale cress (plant)</text><rect class="bar" x="200" y="111" width="190.4" height="18"/><text class="val" x="395.4" y="121">16,421</text><text class="rlab" x="192" y="147" text-anchor="end">Salmonella (bacterium)</text><rect class="bar" x="200" y="137" width="149.3" height="18"/><text class="val" x="354.3" y="147">12,883</text><text class="rlab strong" x="192" y="183" text-anchor="end">Ocean animals (564 species)</text><rect class="bar" x="200" y="173" width="1.0" height="18"/><text class="val" x="206.0" y="183">4.8</text><text class="rlab" x="192" y="209" text-anchor="end">All other species (11,201)</text><rect class="bar" x="200" y="199" width="1.0" height="18"/><text class="val" x="206.0" y="209">43</text><line class="axis" x1="200" x2="200" y1="30" y2="222"/><text class="unit" x="200" y="238">reviewed proteins per species, bar length to scale from 0</text></svg></div>
+<figcaption><b>Figure 2.</b> The five best-studied species hold 90,318 reviewed proteins
+(15.7% of all), about 18,064 each. The 564 ocean animal species
+(the low end of Card 2) hold 2,702 together, 4.8 each on average.
+The other 11,201 species hold 482,669. 59 entries have no species
+and are left out. Human has 20,432 reviewed entries here; Figure 1 counts the 20,652 proteins of the
+human reference proteome, one per gene, reviewed or not. Source: Swiss-Prot, UniProt 2026_03 (02-Sep-2026); World Register of Marine Species habitat flags.</figcaption>
+</figure>
+<figure id="figure-3">
+<div class="legend" aria-label="Key to Figure 3">
+<span class="item"><span class="swatch backbone" aria-hidden="true"></span>the protein, residue 1 on the left, all four at one scale</span>
+<span class="item"><span class="swatch ipr" aria-hidden="true"></span>where an InterPro family matches</span>
+<span class="item"><span class="swatch hit" aria-hidden="true"></span>where another Swiss-Prot protein at least 30% identical aligns</span>
+<span class="item"><span class="swatch nomark" aria-hidden="true"></span>none found</span></div>
+<div class="prots"><article class="prot" id="p-Q25460">
+<h3>Mussel foot protein <small><i>Mytilus edulis</i>, Blue mussel, <a href="https://www.uniprot.org/uniprotkb/Q25460/entry">Q25460</a></small></h3>
+<p class="gave">Blue mussels use it to glue their threads to wet rock. Its repeated 10-residue stretches carry DOPA, a modified tyrosine, and chemists copy that chemistry to make glues that set under water.</p>
+<svg class="track" viewBox="0 0 560 72" role="img" aria-label="Where the labels fall on the protein"><text class="tlab" x="104" y="16" text-anchor="end">Protein</text><line class="backbone" x1="112" x2="472.0" y1="12" y2="12"/><text class="val" x="477.0" y="16">875 residues</text><text class="tlab" x="104" y="40" text-anchor="end">InterPro match</text><rect class="ipr" x="131.3" y="30" width="7.4" height="12"/><rect class="ipr" x="140.8" y="30" width="8.2" height="12"/><text class="tlab" x="104" y="60" text-anchor="end">Swiss-Prot hit</text><rect class="hit" x="112.0" y="50" width="353.4" height="12"/></svg>
+<ul class="says"><li><b>A tool labels it today.</b></li><li>InterPro (a catalogue of protein families): matches <i>Adhesive plaque protein</i> on 38 of 875 residues</li><li>MMseqs2 against Swiss-Prot: 2 other Swiss-Prot proteins at least 30% identical; the closest, Q27409, is 71% identical over residues 1-859</li><li>AlphaFold DB 3D model: mean confidence 41 of 100 (below 50 often means the chain has no fixed shape)</li><li>The other 8 tools on the leaderboard: not yet measured on this protein</li></ul>
+<details class="res"><summary>All 875 residues</summary><pre class="residues"><span class="pos">   1</span> TKHEPVYKPV KTSYSAPYKP PTYQPLKKKV DYRPTKSYPP TYGSKTNYLP LAKKLSSYKP
+<span class="pos">  61</span> IKTTYNAKTN YPPVYKPKMT YPPTYKPKPS YPPTYKSKPT YKPKITYPPT YKAKPSYPSS
+<span class="pos"> 121</span> YKPKKTYPPT YKPKLTYPPT YKPKPSYPPT YKPKPSYPPS YKTKKTYPSS YKAKPSYPPT
+<span class="pos"> 181</span> YKAKPSYPPT YKAKPSYPPT YKAKPTYKAK PTYPSTYKAK PSYPPTYKAK PTYKAKPSYP
+<span class="pos"> 241</span> PTYKAKPSYP PTYKAKPSYP PTYKAKPTYK AKPTYKAKPT YKAKPSYPPT YKAKPSYPPT
+<span class="pos"> 301</span> YKAKPSYPPT YKAKPSYPPT YKAKPSYPPT YKAKPSYPPT YKAKPTYKAK PTYPSTYKAK
+<span class="pos"> 361</span> PSYPPTYKAK PSYPPTYKAK PTYKAKPSYP PTYKAKPSYP PTYKAKPSYP PTYKAKPTYK
+<span class="pos"> 421</span> AKPTYPSTYK AKPSYPPSYK AKPSYPPTYK AKPTYKAKPT YPSTYKAKPS YPASYKAKPS
+<span class="pos"> 481</span> YPPTYKSKSS YPSSYKPKKT YPPTYKPKLT YKPTYKPKPS YPPSYKPKTT YPPTYKPKIS
+<span class="pos"> 541</span> YPPTYKAKPS YPATYKAKPS YPPTYKAKPS YPPTYKAKPS YPPTYKAKPS YKAKPTYPST
+<span class="pos"> 601</span> YKAKPSYPPT YKAKPSYPPT YKAKPSYPPT YKAKPTYPST YKAKPSYPPT YKPKISYPPT
+<span class="pos"> 661</span> YKAKPSYPPT YKAKPSYPPT YKAKPTYKAK PTNPSTYKAK PSYPPTYKAK PSYPPTYKAK
+<span class="pos"> 721</span> PSYPPTYKAK PTYKAKPTYP STYKAKPTYK AKPTYPPTYK AKPSYPPTYK PKPSYPPTYK
+<span class="pos"> 781</span> SKSIYPSSYK PKKTYPPTYK PKLTYPPTYK PKPSYPPSYK PKITYPSTYK LKPSYPPTYK
+<span class="pos"> 841</span> SKTSYPPTYN KKISYPSSYK AKTSYPPAYK PTNRY</pre></details>
+</article><article class="prot" id="p-P24856">
+<h3>Fish antifreeze glycoprotein <small><i>Notothenia neglecta</i>, Yellowbelly rockcod, <a href="https://www.uniprot.org/uniprotkb/P24856/entry">P24856</a></small></h3>
+<p class="gave">Antarctic rockcod make it to keep their blood from freezing in sea water below 0 °C. The chain is cut into 46 short glycopeptides, nearly all repeats of Ala-Ala-Thr, that stop ice crystals from growing.</p>
+<svg class="track" viewBox="0 0 560 72" role="img" aria-label="Where the labels fall on the protein"><text class="tlab" x="104" y="16" text-anchor="end">Protein</text><line class="backbone" x1="112" x2="437.0" y1="12" y2="12"/><text class="val" x="442.0" y="16">790 residues</text><text class="tlab" x="104" y="40" text-anchor="end">InterPro match</text><circle class="nomark" cx="115" cy="36" r="2"/><text class="none" x="122" y="40">none</text><text class="tlab" x="104" y="60" text-anchor="end">Swiss-Prot hit</text><circle class="nomark" cx="115" cy="56" r="2"/><text class="none" x="122" y="60">none</text></svg>
+<ul class="says"><li><b>No tool here labels it today.</b></li><li>InterPro (a catalogue of protein families): no match</li><li>MMseqs2 against Swiss-Prot: no other Swiss-Prot protein at least 30% identical</li><li>AlphaFold DB 3D model: mean confidence 53 of 100 (below 50 often means the chain has no fixed shape)</li><li>The other 8 tools on the leaderboard: not yet measured on this protein</li></ul>
+<details class="res"><summary>All 790 residues</summary><pre class="residues"><span class="pos">   1</span> VTAAPAATAA TAATPATAAL NFAATAATPA TPATPALIFA ATAATAATPA TAALNFAATA
+<span class="pos">  61</span> ATPATAATPA LIFAAAAATA ATPATAALNF AATAATPATA ATPALIFAAT AATAATPATP
+<span class="pos"> 121</span> AFHFAATAAT PATAATPALI FAATAATAAT PATPAFHFAA TAATPATAAT PALIFAATAA
+<span class="pos"> 181</span> TAATPATAAL NFAATAATPA TAATPALIFA ATAATAATPA TAALNFAATA ATAATPATAA
+<span class="pos"> 241</span> CNFAATAATP ATAATPALIF AATAATAATP ATAACNFAAT AATPATAATP ALIFAATAAT
+<span class="pos"> 301</span> AATPATAALN FAATAATPAT AATPALIFAA TAATAATPAT AALNFAATAA TPATAATPAL
+<span class="pos"> 361</span> IFAATAATAA TPATAALNFA ATAATAATPA TPAFNFAATA ATPATAATPA LIFAATAATA
+<span class="pos"> 421</span> ATPATAALNF AATAATPATA ATPALIFAAT AATAATPATA ALHFAATAAT AATPATAALN
+<span class="pos"> 481</span> FAATAATPAT AATPALIFAA TAATAATPAT AAFNFAATAA TAATPATAAL NFAATAATPA
+<span class="pos"> 541</span> TAATPALIFA ATAATAATPA TAALNFAATA ATPATAATPA LIFAATAATA ATPATPAFHF
+<span class="pos"> 601</span> AATAATPATA ATPALIFAAT AATAATPATA ALNFAATAAT AATPATAALN FAATAATPAT
+<span class="pos"> 661</span> AATPALIFAA TAATAATPAT AALNFAATAA TPATAATPAL IFAATAATAA TPATAAFNFA
+<span class="pos"> 721</span> ATAATAATPA TAATPALIFA ATAATAATPA TPATPALIFA ATAATAATPA TPALNFAATA
+<span class="pos"> 781</span> ATAATTAARG</pre></details>
+</article><article class="prot" id="p-P05484">
+<h3>Cone snail toxin (omega-conotoxin MVIIA) <small><i>Conus magus</i>, Magical cone, <a href="https://www.uniprot.org/uniprotkb/P05484/entry">P05484</a></small></h3>
+<p class="gave">The 25-residue toxin of a cone snail is the painkiller ziconotide (sold as Prialt), given to patients whom opiates no longer help.</p>
+<svg class="track" viewBox="0 0 560 72" role="img" aria-label="Where the labels fall on the protein"><text class="tlab" x="104" y="16" text-anchor="end">Protein</text><line class="backbone" x1="112" x2="141.2" y1="12" y2="12"/><text class="val" x="146.2" y="16">71 residues</text><text class="tlab" x="104" y="40" text-anchor="end">InterPro match</text><rect class="ipr" x="112.0" y="30" width="28.8" height="12"/><text class="tlab" x="104" y="60" text-anchor="end">Swiss-Prot hit</text><rect class="hit" x="112.0" y="50" width="29.2" height="12"/></svg>
+<ul class="says"><li><b>A tool labels it today.</b></li><li>InterPro (a catalogue of protein families): matches <i>Conotoxin; Conotoxin, omega-type, conserved site</i> on 70 of 71 residues</li><li>MMseqs2 against Swiss-Prot: 139 other Swiss-Prot proteins at least 30% identical; the closest, P0DKQ5, is 90% identical over residues 1-71</li><li>AlphaFold DB 3D model: mean confidence 71 of 100 (below 50 often means the chain has no fixed shape)</li><li>The other 8 tools on the leaderboard: not yet measured on this protein</li></ul>
+<details class="res"><summary>All 71 residues</summary><pre class="residues"><span class="pos">   1</span> MKLTCVVIVA VLLLTACQLI TADDSRGTQK HRALRSTTKL STSTRCKGKG AKCSRLMYDC
+<span class="pos">  61</span> CTGSCRSGKC G</pre></details>
+</article><article class="prot" id="p-P42212">
+<h3>Green fluorescent protein (GFP) <small><i>Aequorea victoria</i>, Water jellyfish, <a href="https://www.uniprot.org/uniprotkb/P42212/entry">P42212</a></small></h3>
+<p class="gave">A jellyfish protein that glows green. Labs worldwide fuse it to other proteins to watch them inside living cells; its discovery and development won the 2008 Nobel Prize in Chemistry.</p>
+<svg class="track" viewBox="0 0 560 72" role="img" aria-label="Where the labels fall on the protein"><text class="tlab" x="104" y="16" text-anchor="end">Protein</text><line class="backbone" x1="112" x2="209.9" y1="12" y2="12"/><text class="val" x="214.9" y="16">238 residues</text><text class="tlab" x="104" y="40" text-anchor="end">InterPro match</text><rect class="ipr" x="112.0" y="30" width="97.9" height="12"/><text class="tlab" x="104" y="60" text-anchor="end">Swiss-Prot hit</text><rect class="hit" x="112.0" y="50" width="82.7" height="12"/></svg>
+<ul class="says"><li><b>A tool labels it today.</b></li><li>InterPro (a catalogue of protein families): matches <i>Green fluorescent protein; Green fluorescent protein, GFP; Green fluorescent protein-related</i> on 238 of 238 residues</li><li>MMseqs2 against Swiss-Prot: 5 other Swiss-Prot proteins at least 30% identical; the closest, Q9U6Y6, is 37% identical over residues 18-140</li><li>AlphaFold DB 3D model: mean confidence 97 of 100 (below 50 often means the chain has no fixed shape)</li><li>The other 8 tools on the leaderboard: not yet measured on this protein</li></ul>
+<details class="res"><summary>All 238 residues</summary><pre class="residues"><span class="pos">   1</span> MSKGEELFTG VVPILVELDG DVNGHKFSVS GEGEGDATYG KLTLKFICTT GKLPVPWPTL
+<span class="pos">  61</span> VTTFSYGVQC FSRYPDHMKQ HDFFKSAMPE GYVQERTIFF KDDGNYKTRA EVKFEGDTLV
+<span class="pos"> 121</span> NRIELKGIDF KEDGNILGHK LEYNYNSHNV YIMADKQKNG IKVNFKIRHN IEDGSVQLAD
+<span class="pos"> 181</span> HYQQNTPIGD GPVLLPDNHY LSTQSALSKD PNEKRDHMVL LEFVTAAGIT HGMDELYK</pre></details>
+</article></div>
+<figcaption><b>Figure 3.</b> Four ocean proteins that changed medicine and biology, and what the tools find on
+them today. Residues and features: UniProt 2026_03. Matches: the InterPro web service, and MMseqs2 against Swiss-Prot 2026_03.</figcaption>
+</figure>
+<p class="prose tie">The proteins that gave us underwater glue, antifreeze, a painkiller and the green light of cell biology were all found at the bench, by people, not by a tool. The three that tools label today are found by their likeness to proteins people described first; the antifreeze protein still gets no label. Three of the four are built from repeats or short peptides. On the leaderboard, the best tool finds 7 in 100 known features 2 to 15 residues long, against 28 in 100 features of any length. Repeats are found about as often as other features (30 in 100), and stretches with no fixed shape are not yet measured.</p>
+<figure id="figure-4">
+<div class="legend" aria-label="Key to Figure 4"><span class="item"><span class="swatch bar" aria-hidden="true"></span>share of known features the best tool finds, out of 100, bar to scale from 0 to 100</span>
+<span class="item"><span class="swatch nomark" aria-hidden="true"></span>not yet measured</span></div>
+<div class="tablewrap"><table class="strata"><thead><tr><th>Known Swiss-Prot features on human proteins (how many)</th><th>Found, out of 100</th><th>Best tool</th></tr></thead>
+<tbody><tr><th scope="row">All known features <small>(7,185)</small></th><td class="barcell"><span class="hbar" style="width:28.2%"></span><span class="v">28 in 100</span></td><td class="muted">HH-suite (hhsearch)</td></tr><tr><th scope="row">Features 2 to 15 residues long <small>(546)</small></th><td class="barcell"><span class="hbar" style="width:6.9%"></span><span class="v">7 in 100</span></td><td class="muted">kmerseek</td></tr><tr><th scope="row">Repeats <small>(589)</small></th><td class="barcell"><span class="hbar" style="width:30.3%"></span><span class="v">30 in 100</span></td><td class="muted">HH-suite (hhsearch)</td></tr><tr><th scope="row">Features where AlphaFold&#x27;s confidence is 50 to 70 <small>(2,027)</small></th><td class="barcell"><span class="hbar" style="width:30.8%"></span><span class="v">31 in 100</span></td><td class="muted">HH-suite (hhsearch)</td></tr><tr><th scope="row">Features where AlphaFold&#x27;s confidence is below 50 (often disordered)</th><td class="barcell"><span class="nomark" aria-hidden="true"></span> — not yet measured: the leaderboard does not yet group features with confidence below 50</td><td></td></tr></tbody></table></div>
+<figcaption><b>Figure 4.</b> For each group of known features (Swiss-Prot annotations on human proteins), the
+share found by the tool that does best on that group. Each tool uses the score cut-off that suits it best. Picking the best tool for each row raises every row. Each tool
+labelled human proteins by searching the proteins of zebrafish (a freshwater fish), the relative in the leaderboard's <a href="index.html">default view</a>. Source: the leaderboard tables (footer).</figcaption>
+</figure>
+</section><section class="screen" id="funding">
+<h2>What funding buys</h2>
+<p class="prose">Each unit below is a count anyone can check on this site. None has been measured yet, so each shows a dash.</p>
+<div class="tablewrap"><table class="units"><thead><tr><th>Unit</th><th>Count today</th><th>How it is counted</th></tr></thead>
+<tbody><tr><th scope="row">Organism pages for ocean animals, each measured on its own proteins</th><td class="num"><span class="nym">— <small>not yet measured</small></span></td><td>built so far</td></tr><tr><th scope="row">Cost per page in CPU-hours (processor hours)</th><td class="num"><span class="nym">— <small>not yet measured</small></span></td><td>to be measured on the first three pages</td></tr><tr><th scope="row">Cost per page in curator hours (a person checking the page)</th><td class="num"><span class="nym">— <small>not yet measured</small></span></td><td>to be measured on the first three pages</td></tr><tr><th scope="row">Tools scored on each page</th><td class="num"><span class="nym">— <small>not yet measured</small></span></td><td>the leaderboard scores 9 tools today, on human proteins only</td></tr><tr><th scope="row">Copy command button on each page</th><td class="num"><span class="nym">— <small>not yet measured</small></span></td><td>one click copies the command that runs the best tool on that organism&#x27;s proteins, so a lab can run it the same day; not built yet</td></tr><tr><th scope="row">Lab results sent in: a protein and what an experiment showed it does</th><td class="num"><span class="nym">— <small>not yet measured</small></span></td><td>counted through a way to send results in that is not built yet</td></tr><tr><th scope="row">Labs that used a page</th><td class="num"><span class="nym">— <small>not yet measured</small></span></td><td>counted by clicks on the Copy command button, with no record of who clicked</td></tr></tbody></table></div>
+<p class="ask"><b>The ask:</b> fund the first 100 ocean animal pages, at the cost per page measured on the first three (— not yet measured).</p>
+<p class="prose">For scale: <a href="https://biofunctionprediction.org/cafa/">CAFA</a>, the Critical Assessment of protein Function Annotation,
+has run as a community challenge since 2010. <a href="https://doi.org/10.1038/s41587-025-02694-w">Open Problems</a> (Luecken et al., Nature
+Biotechnology 2025, co-authored by Olga Botvinnik) does the same for single-cell analysis tools.</p>
+</section><section class="screen" id="who">
+<h2>Who is behind it</h2>
+<ul class="who">
+<li><a href="https://seanome.org">Seanome Inc.</a>, a nonprofit.</li>
+<li>The maintainers of <a href="https://nf-co.re/proteinannotator">nf-core/proteinannotator</a>, the pipeline that labels a proteome's proteins.</li>
+<li>If the proposed fork goes ahead (nothing agreed yet): the LAFA / CAFA group, who run <a href="https://functionbench.net/">functionbench.net</a> (<a href="https://github.com/anphan0828/CAFA_forever">source</a>).</li>
+</ul>
+<p><b>Licence:</b> the site's own repository has no licence file yet. Each tool keeps its own licence, listed on its <a href="tools/index.html">tool card</a>.</p>
+<p><b>Contact:</b> open an issue at <a href="https://github.com/seanome/protein-function-annotation-leaderboard/issues">github.com/seanome/protein-function-annotation-leaderboard/issues</a>, or write to <span class="mono sel">info@seanome.org</span>.</p>
+</section><section class="screen" id="sources"><details><summary>The files behind these numbers</summary>
+<p class="prose">Counts: <span class="mono">results/why/numbers.parquet</span> and <span class="mono">results/why/proteome_labels.parquet</span>, built by <span class="mono">scripts/why/</span> from the files below.
+Missing parts: none.</p><ul class="srclist"><li><a href="https://alphafold.ebi.ac.uk/files/AF-P05484-F1-confidence_v6.json">afdb_confidence_P05484.json</a>, AlphaFold DB v6, fetched 2026-10-15</li><li><a href="https://alphafold.ebi.ac.uk/files/AF-P24856-F1-confidence_v6.json">afdb_confidence_P24856.json</a>, AlphaFold DB v6, fetched 2026-10-15</li><li><a href="https://alphafold.ebi.ac.uk/files/AF-P42212-F1-confidence_v6.json">afdb_confidence_P42212.json</a>, AlphaFold DB v6, fetched 2026-10-15</li><li><a href="https://alphafold.ebi.ac.uk/files/AF-Q25460-F1-confidence_v6.json">afdb_confidence_Q25460.json</a>, AlphaFold DB v6, fetched 2026-10-15</li><li><a href="https://alphafold.ebi.ac.uk/api/prediction/{accession}">afdb_predictions.jsonl.gz</a>, AlphaFold DB API (version per model in latestVersion), fetched 2026-10-15</li><li><a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz">UP000005640_9606.fasta.gz</a>, Last-Modified Tue, 15 Sep 2026 09:21:31 GMT, fetched 2026-10-15</li><li><a href="https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP000005640&amp;fields=accession%2Cxref_interpro%2Cxref_pfam%2Cxref_panther%2Cxref_cdd%2Cxref_gene3d%2Cxref_supfam%2Cxref_smart%2Cxref_prosite%2Cxref_prints%2Cxref_pirsf%2Cxref_hamap%2Cxref_sfld%2Cxref_ncbifam&amp;format=tsv&amp;size=500">human_interpro_xrefs.tsv.gz</a>, UniProt 2026_03 (02-September-2026), fetched 2026-10-15</li><li><a href="https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P05484/?page_size=200">interpro_matches_P05484.json</a>, InterPro 110.0 (2026-09-03), fetched 2026-10-15</li><li><a href="https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P24856/?page_size=200">interpro_matches_P24856.json</a>, InterPro 110.0 (2026-09-03), fetched 2026-10-15</li><li><a href="https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P42212/?page_size=200">interpro_matches_P42212.json</a>, InterPro 110.0 (2026-09-03), fetched 2026-10-15</li><li><a href="https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/Q25460/?page_size=200">interpro_matches_Q25460.json</a>, InterPro 110.0 (2026-09-03), fetched 2026-10-15</li><li><a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005408/UP000005408_29159.fasta.gz">UP000005408_29159.fasta.gz</a>, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15</li><li><a href="https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP000005408&amp;fields=accession%2Cxref_interpro%2Cxref_pfam%2Cxref_panther%2Cxref_cdd%2Cxref_gene3d%2Cxref_supfam%2Cxref_smart%2Cxref_prosite%2Cxref_prints%2Cxref_pirsf%2Cxref_hamap%2Cxref_sfld%2Cxref_ncbifam&amp;format=tsv&amp;size=500">oyster_interpro_xrefs.tsv.gz</a>, UniProt 2026_03 (02-September-2026), fetched 2026-10-15</li><li><a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz">uniprot_sprot.dat.gz</a>, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15</li><li><a href="https://rest.uniprot.org/uniprotkb/P05484.json">uniprot_P05484.json</a>, UniProt 2026_03, fetched 2026-10-15</li><li><a href="https://rest.uniprot.org/uniprotkb/P24856.json">uniprot_P24856.json</a>, UniProt 2026_03, fetched 2026-10-15</li><li><a href="https://rest.uniprot.org/uniprotkb/P42212.json">uniprot_P42212.json</a>, UniProt 2026_03, fetched 2026-10-15</li><li><a href="https://rest.uniprot.org/uniprotkb/Q25460.json">uniprot_Q25460.json</a>, UniProt 2026_03, fetched 2026-10-15</li><li><a href="https://www.marinespecies.org/rest/AphiaRecordsByMatchNames?scientificnames[]=...&amp;marine_only=false">worms_matches.jsonl.gz</a>, World Register of Marine Species REST API, queried 2026-10-15T14:11:27Z, fetched 2026-10-15</li></ul></details></section>
+</main>
+<footer class="site"><div class="wrap">
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+<p>This page as JSON, for scripts and agents: <a class="mono" href="why.html.json">why.html.json</a></p>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,742 @@
+{
+ "page": "why.html",
+ "title": "Why this project",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T13:44:05Z",
+  "sha256": {
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+ },
+ "text": [
+  {
+   "tag": "h1",
+   "text": "Curators have reviewed 575,748 proteins by hand, only 0.47% to 1.18% from ocean animals, and 19.4% of a Pacific oyster's proteins match no known family or described protein."
+  },
+  {
+   "tag": "p",
+   "text": "proteins whose entry a curator has reviewed by hand (Swiss-Prot, the reviewed part of UniProt)"
+  },
+  {
+   "tag": "p",
+   "text": "Swiss-Prot, UniProt 2026_03 (02-Sep-2026)"
+  },
+  {
+   "tag": "p",
+   "text": "come from ocean animals: 2,702 proteins from species the World Register of Marine Species (WoRMS) lists as marine only, up to 6,792 counting species that also live in fresh water or on land"
+  },
+  {
+   "tag": "p",
+   "text": "WoRMS, WoRMS REST API + UniProt 2026_03"
+  },
+  {
+   "tag": "p",
+   "text": "of a Pacific oyster's proteins get no label: 5,879 of 30,272 have no family in InterPro (the catalogue of known protein families) and no other Swiss-Prot protein at least 30% identical"
+  },
+  {
+   "tag": "p",
+   "text": "InterPro as UniProt 2026_03 lists it; MMseqs2, E-value 0.001 or less; proteome UP000005408"
+  },
+  {
+   "tag": "h3",
+   "text": "Human 20,652 proteins"
+  },
+  {
+   "tag": "p",
+   "text": "97.2% lit, 574 dark"
+  },
+  {
+   "tag": "h3",
+   "text": "Pacific oyster 30,272 proteins"
+  },
+  {
+   "tag": "p",
+   "text": "80.6% lit, 5,879 dark"
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 1. Every protein of two animals, one tile each. Like Earth seen from space at night, lit tiles show where knowledge reaches, and ocean animals are the dark continents. The oyster has 10 times as many dark proteins as human (5,879 against 574). A match to a protein's own Swiss-Prot entry does not count. Hover or tap a tile to see the protein. Proteomes: UP000005640 and UP000005408, UniProt 2026_03, one protein per gene."
+  },
+  {
+   "tag": "p",
+   "text": "This site measures, for every software tool and every kind of organism, which proteins get a label and what the run costs, and tells each lab which tool to run. Today it scores 9 tools on human proteins. The first organism page will be the Pacific oyster's; it is not built yet, so there is no link to it."
+  },
+  {
+   "tag": "h2",
+   "text": "Why ocean animals are dark"
+  },
+  {
+   "tag": "p",
+   "text": "Science describes proteins where people work on them. Five species hold more reviewed proteins than all ocean animals put together, many times over."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 2. The five best-studied species hold 90,318 reviewed proteins (15.7% of all), about 18,064 each. The 564 ocean animal species (the low end of Card 2) hold 2,702 together, 4.8 each on average. The other 11,201 species hold 482,669. 59 entries have no species and are left out. Human has 20,432 reviewed entries here; Figure 1 counts the 20,652 proteins of the human reference proteome, one per gene, reviewed or not. Source: Swiss-Prot, UniProt 2026_03 (02-Sep-2026); World Register of Marine Species habitat flags."
+  },
+  {
+   "tag": "h3",
+   "text": "Mussel foot protein Mytilus edulis, Blue mussel, Q25460"
+  },
+  {
+   "tag": "p",
+   "text": "Blue mussels use it to glue their threads to wet rock. Its repeated 10-residue stretches carry DOPA, a modified tyrosine, and chemists copy that chemistry to make glues that set under water."
+  },
+  {
+   "tag": "li",
+   "text": "A tool labels it today."
+  },
+  {
+   "tag": "li",
+   "text": "InterPro (a catalogue of protein families): matches Adhesive plaque protein on 38 of 875 residues"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2 against Swiss-Prot: 2 other Swiss-Prot proteins at least 30% identical; the closest, Q27409, is 71% identical over residues 1-859"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold DB 3D model: mean confidence 41 of 100 (below 50 often means the chain has no fixed shape)"
+  },
+  {
+   "tag": "li",
+   "text": "The other 8 tools on the leaderboard: not yet measured on this protein"
+  },
+  {
+   "tag": "summary",
+   "text": "All 875 residues"
+  },
+  {
+   "tag": "pre",
+   "text": "1 TKHEPVYKPV KTSYSAPYKP PTYQPLKKKV DYRPTKSYPP TYGSKTNYLP LAKKLSSYKP 61 IKTTYNAKTN YPPVYKPKMT YPPTYKPKPS YPPTYKSKPT YKPKITYPPT YKAKPSYPSS 121 YKPKKTYPPT YKPKLTYPPT YKPKPSYPPT YKPKPSYPPS YKTKKTYPSS YKAKPSYPPT 181 YKAKPSYPPT YKAKPSYPPT YKAKPTYKAK PTYPSTYKAK PSYPPTYKAK PTYKAKPSYP 241 PTYKAKPSYP PTYKAKPSYP PTYKAKPTYK AKPTYKAKPT YKAKPSYPPT YKAKPSYPPT 301 YKAKPSYPPT YKAKPSYPPT YKAKPSYPPT YKAKPSYPPT YKAKPTYKAK PTYPSTYKAK 361 PSYPPTYKAK PSYPPTYKAK PTYKAKPSYP PTYKAKPSYP PTYKAKPSYP PTYKAKPTYK 421 AKPTYPSTYK AKPSYPPSYK AKPSYPPTYK AKPTYKAKPT YPSTYKAKPS YPASYKAKPS 481 YPPTYKSKSS YPSSYKPKKT YPPTYKPKLT YKPTYKPKPS YPPSYKPKTT YPPTYKPKIS 541 YPPTYKAKPS YPATYKAKPS YPPTYKAKPS YPPTYKAKPS YPPTYKAKPS YKAKPTYPST 601 YKAKPSYPPT YKAKPSYPPT YKAKPSYPPT YKAKPTYPST YKAKPSYPPT YKPKISYPPT 661 YKAKPSYPPT YKAKPSYPPT YKAKPTYKAK PTNPSTYKAK PSYPPTYKAK PSYPPTYKAK 721 PSYPPTYKAK PTYKAKPTYP STYKAKPTYK AKPTYPPTYK AKPSYPPTYK PKPSYPPTYK 781 SKSIYPSSYK PKKTYPPTYK PKLTYPPTYK PKPSYPPSYK PKITYPSTYK LKPSYPPTYK 841 SKTSYPPTYN KKISYPSSYK AKTSYPPAYK PTNRY"
+  },
+  {
+   "tag": "h3",
+   "text": "Fish antifreeze glycoprotein Notothenia neglecta, Yellowbelly rockcod, P24856"
+  },
+  {
+   "tag": "p",
+   "text": "Antarctic rockcod make it to keep their blood from freezing in sea water below 0 °C. The chain is cut into 46 short glycopeptides, nearly all repeats of Ala-Ala-Thr, that stop ice crystals from growing."
+  },
+  {
+   "tag": "li",
+   "text": "No tool here labels it today."
+  },
+  {
+   "tag": "li",
+   "text": "InterPro (a catalogue of protein families): no match"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2 against Swiss-Prot: no other Swiss-Prot protein at least 30% identical"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold DB 3D model: mean confidence 53 of 100 (below 50 often means the chain has no fixed shape)"
+  },
+  {
+   "tag": "li",
+   "text": "The other 8 tools on the leaderboard: not yet measured on this protein"
+  },
+  {
+   "tag": "summary",
+   "text": "All 790 residues"
+  },
+  {
+   "tag": "pre",
+   "text": "1 VTAAPAATAA TAATPATAAL NFAATAATPA TPATPALIFA ATAATAATPA TAALNFAATA 61 ATPATAATPA LIFAAAAATA ATPATAALNF AATAATPATA ATPALIFAAT AATAATPATP 121 AFHFAATAAT PATAATPALI FAATAATAAT PATPAFHFAA TAATPATAAT PALIFAATAA 181 TAATPATAAL NFAATAATPA TAATPALIFA ATAATAATPA TAALNFAATA ATAATPATAA 241 CNFAATAATP ATAATPALIF AATAATAATP ATAACNFAAT AATPATAATP ALIFAATAAT 301 AATPATAALN FAATAATPAT AATPALIFAA TAATAATPAT AALNFAATAA TPATAATPAL 361 IFAATAATAA TPATAALNFA ATAATAATPA TPAFNFAATA ATPATAATPA LIFAATAATA 421 ATPATAALNF AATAATPATA ATPALIFAAT AATAATPATA ALHFAATAAT AATPATAALN 481 FAATAATPAT AATPALIFAA TAATAATPAT AAFNFAATAA TAATPATAAL NFAATAATPA 541 TAATPALIFA ATAATAATPA TAALNFAATA ATPATAATPA LIFAATAATA ATPATPAFHF 601 AATAATPATA ATPALIFAAT AATAATPATA ALNFAATAAT AATPATAALN FAATAATPAT 661 AATPALIFAA TAATAATPAT AALNFAATAA TPATAATPAL IFAATAATAA TPATAAFNFA 721 ATAATAATPA TAATPALIFA ATAATAATPA TPATPALIFA ATAATAATPA TPALNFAATA 781 ATAATTAARG"
+  },
+  {
+   "tag": "h3",
+   "text": "Cone snail toxin (omega-conotoxin MVIIA) Conus magus, Magical cone, P05484"
+  },
+  {
+   "tag": "p",
+   "text": "The 25-residue toxin of a cone snail is the painkiller ziconotide (sold as Prialt), given to patients whom opiates no longer help."
+  },
+  {
+   "tag": "li",
+   "text": "A tool labels it today."
+  },
+  {
+   "tag": "li",
+   "text": "InterPro (a catalogue of protein families): matches Conotoxin; Conotoxin, omega-type, conserved site on 70 of 71 residues"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2 against Swiss-Prot: 139 other Swiss-Prot proteins at least 30% identical; the closest, P0DKQ5, is 90% identical over residues 1-71"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold DB 3D model: mean confidence 71 of 100 (below 50 often means the chain has no fixed shape)"
+  },
+  {
+   "tag": "li",
+   "text": "The other 8 tools on the leaderboard: not yet measured on this protein"
+  },
+  {
+   "tag": "summary",
+   "text": "All 71 residues"
+  },
+  {
+   "tag": "pre",
+   "text": "1 MKLTCVVIVA VLLLTACQLI TADDSRGTQK HRALRSTTKL STSTRCKGKG AKCSRLMYDC 61 CTGSCRSGKC G"
+  },
+  {
+   "tag": "h3",
+   "text": "Green fluorescent protein (GFP) Aequorea victoria, Water jellyfish, P42212"
+  },
+  {
+   "tag": "p",
+   "text": "A jellyfish protein that glows green. Labs worldwide fuse it to other proteins to watch them inside living cells; its discovery and development won the 2008 Nobel Prize in Chemistry."
+  },
+  {
+   "tag": "li",
+   "text": "A tool labels it today."
+  },
+  {
+   "tag": "li",
+   "text": "InterPro (a catalogue of protein families): matches Green fluorescent protein; Green fluorescent protein, GFP; Green fluorescent protein-related on 238 of 238 residues"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2 against Swiss-Prot: 5 other Swiss-Prot proteins at least 30% identical; the closest, Q9U6Y6, is 37% identical over residues 18-140"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold DB 3D model: mean confidence 97 of 100 (below 50 often means the chain has no fixed shape)"
+  },
+  {
+   "tag": "li",
+   "text": "The other 8 tools on the leaderboard: not yet measured on this protein"
+  },
+  {
+   "tag": "summary",
+   "text": "All 238 residues"
+  },
+  {
+   "tag": "pre",
+   "text": "1 MSKGEELFTG VVPILVELDG DVNGHKFSVS GEGEGDATYG KLTLKFICTT GKLPVPWPTL 61 VTTFSYGVQC FSRYPDHMKQ HDFFKSAMPE GYVQERTIFF KDDGNYKTRA EVKFEGDTLV 121 NRIELKGIDF KEDGNILGHK LEYNYNSHNV YIMADKQKNG IKVNFKIRHN IEDGSVQLAD 181 HYQQNTPIGD GPVLLPDNHY LSTQSALSKD PNEKRDHMVL LEFVTAAGIT HGMDELYK"
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 3. Four ocean proteins that changed medicine and biology, and what the tools find on them today. Residues and features: UniProt 2026_03. Matches: the InterPro web service, and MMseqs2 against Swiss-Prot 2026_03."
+  },
+  {
+   "tag": "p",
+   "text": "The proteins that gave us underwater glue, antifreeze, a painkiller and the green light of cell biology were all found at the bench, by people, not by a tool. The three that tools label today are found by their likeness to proteins people described first; the antifreeze protein still gets no label. Three of the four are built from repeats or short peptides. On the leaderboard, the best tool finds 7 in 100 known features 2 to 15 residues long, against 28 in 100 features of any length. Repeats are found about as often as other features (30 in 100), and stretches with no fixed shape are not yet measured."
+  },
+  {
+   "tag": "th",
+   "text": "Known Swiss-Prot features on human proteins (how many)"
+  },
+  {
+   "tag": "th",
+   "text": "Found, out of 100"
+  },
+  {
+   "tag": "th",
+   "text": "Best tool"
+  },
+  {
+   "tag": "th",
+   "text": "All known features (7,185)"
+  },
+  {
+   "tag": "td",
+   "text": "28 in 100"
+  },
+  {
+   "tag": "td",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "th",
+   "text": "Features 2 to 15 residues long (546)"
+  },
+  {
+   "tag": "td",
+   "text": "7 in 100"
+  },
+  {
+   "tag": "td",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "th",
+   "text": "Repeats (589)"
+  },
+  {
+   "tag": "td",
+   "text": "30 in 100"
+  },
+  {
+   "tag": "td",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "th",
+   "text": "Features where AlphaFold's confidence is 50 to 70 (2,027)"
+  },
+  {
+   "tag": "td",
+   "text": "31 in 100"
+  },
+  {
+   "tag": "td",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "th",
+   "text": "Features where AlphaFold's confidence is below 50 (often disordered)"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured: the leaderboard does not yet group features with confidence below 50"
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 4. For each group of known features (Swiss-Prot annotations on human proteins), the share found by the tool that does best on that group. Each tool uses the score cut-off that suits it best. Picking the best tool for each row raises every row. Each tool labelled human proteins by searching the proteins of zebrafish (a freshwater fish), the relative in the leaderboard's default view. Source: the leaderboard tables (footer)."
+  },
+  {
+   "tag": "h2",
+   "text": "What funding buys"
+  },
+  {
+   "tag": "p",
+   "text": "Each unit below is a count anyone can check on this site. None has been measured yet, so each shows a dash."
+  },
+  {
+   "tag": "th",
+   "text": "Unit"
+  },
+  {
+   "tag": "th",
+   "text": "Count today"
+  },
+  {
+   "tag": "th",
+   "text": "How it is counted"
+  },
+  {
+   "tag": "th",
+   "text": "Organism pages for ocean animals, each measured on its own proteins"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured"
+  },
+  {
+   "tag": "td",
+   "text": "built so far"
+  },
+  {
+   "tag": "th",
+   "text": "Cost per page in CPU-hours (processor hours)"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured"
+  },
+  {
+   "tag": "td",
+   "text": "to be measured on the first three pages"
+  },
+  {
+   "tag": "th",
+   "text": "Cost per page in curator hours (a person checking the page)"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured"
+  },
+  {
+   "tag": "td",
+   "text": "to be measured on the first three pages"
+  },
+  {
+   "tag": "th",
+   "text": "Tools scored on each page"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured"
+  },
+  {
+   "tag": "td",
+   "text": "the leaderboard scores 9 tools today, on human proteins only"
+  },
+  {
+   "tag": "th",
+   "text": "Copy command button on each page"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured"
+  },
+  {
+   "tag": "td",
+   "text": "one click copies the command that runs the best tool on that organism's proteins, so a lab can run it the same day; not built yet"
+  },
+  {
+   "tag": "th",
+   "text": "Lab results sent in: a protein and what an experiment showed it does"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured"
+  },
+  {
+   "tag": "td",
+   "text": "counted through a way to send results in that is not built yet"
+  },
+  {
+   "tag": "th",
+   "text": "Labs that used a page"
+  },
+  {
+   "tag": "td",
+   "text": "— not yet measured"
+  },
+  {
+   "tag": "td",
+   "text": "counted by clicks on the Copy command button, with no record of who clicked"
+  },
+  {
+   "tag": "p",
+   "text": "The ask: fund the first 100 ocean animal pages, at the cost per page measured on the first three (— not yet measured)."
+  },
+  {
+   "tag": "p",
+   "text": "For scale: CAFA, the Critical Assessment of protein Function Annotation, has run as a community challenge since 2010. Open Problems (Luecken et al., Nature Biotechnology 2025, co-authored by Olga Botvinnik) does the same for single-cell analysis tools."
+  },
+  {
+   "tag": "h2",
+   "text": "Who is behind it"
+  },
+  {
+   "tag": "li",
+   "text": "Seanome Inc., a nonprofit."
+  },
+  {
+   "tag": "li",
+   "text": "The maintainers of nf-core/proteinannotator, the pipeline that labels a proteome's proteins."
+  },
+  {
+   "tag": "li",
+   "text": "If the proposed fork goes ahead (nothing agreed yet): the LAFA / CAFA group, who run functionbench.net (source)."
+  },
+  {
+   "tag": "p",
+   "text": "Licence: the site's own repository has no licence file yet. Each tool keeps its own licence, listed on its tool card."
+  },
+  {
+   "tag": "p",
+   "text": "Contact: open an issue at github.com/seanome/protein-function-annotation-leaderboard/issues, or write to info@seanome.org."
+  },
+  {
+   "tag": "summary",
+   "text": "The files behind these numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Counts: results/why/numbers.parquet and results/why/proteome_labels.parquet, built by scripts/why/ from the files below. Missing parts: none."
+  },
+  {
+   "tag": "li",
+   "text": "afdb_confidence_P05484.json, AlphaFold DB v6, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "afdb_confidence_P24856.json, AlphaFold DB v6, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "afdb_confidence_P42212.json, AlphaFold DB v6, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "afdb_confidence_Q25460.json, AlphaFold DB v6, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "afdb_predictions.jsonl.gz, AlphaFold DB API (version per model in latestVersion), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "UP000005640_9606.fasta.gz, Last-Modified Tue, 15 Sep 2026 09:21:31 GMT, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "human_interpro_xrefs.tsv.gz, UniProt 2026_03 (02-September-2026), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "interpro_matches_P05484.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "interpro_matches_P24856.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "interpro_matches_P42212.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "interpro_matches_Q25460.json, InterPro 110.0 (2026-09-03), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "UP000005408_29159.fasta.gz, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "oyster_interpro_xrefs.tsv.gz, UniProt 2026_03 (02-September-2026), fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_sprot.dat.gz, Last-Modified Thu, 03 Sep 2026 18:00:00 GMT, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_P05484.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_P24856.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_P42212.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "uniprot_Q25460.json, UniProt 2026_03, fetched 2026-10-15"
+  },
+  {
+   "tag": "li",
+   "text": "worms_matches.jsonl.gz, World Register of Marine Species REST API, queried 2026-10-15T14:11:27Z, fetched 2026-10-15"
+  }
+ ],
+ "data": {
+  "note": "Numbers from results/why/ (see scripts/why_page.py); null means not yet measured. The proteome maps are data/why_map.json.",
+  "headline": "Curators have reviewed 575,748 proteins by hand, only 0.47% to 1.18% from ocean animals, and 19.4% of a Pacific oyster's proteins match no known family or described protein.",
+  "numbers": {
+   "swissprot_entries": 575748.0,
+   "ocean_animal_entries": 2702,
+   "ocean_animal_species": 564,
+   "ocean_animal_share_pct": 0.47,
+   "top5_species": [
+    [
+     "Escherichia coli",
+     23292
+    ],
+    [
+     "Homo sapiens",
+     20432
+    ],
+    [
+     "Mus musculus",
+     17290
+    ],
+    [
+     "Arabidopsis thaliana",
+     16421
+    ],
+    [
+     "Salmonella enterica",
+     12883
+    ]
+   ],
+   "top5_share_pct": 15.69,
+   "oyster_no_function_label_pct": 19.42,
+   "human_no_function_label_pct": 2.78,
+   "oyster_proteins": 30272
+  },
+  "maps": {
+   "human": {
+    "n": 20652,
+    "lit": 20078,
+    "dark": 574,
+    "dark_pct": 2.78,
+    "lit_pct": 97.22,
+    "dark_counting_self_hits": 181,
+    "dark_pct_counting_self_hits": 0.88
+   },
+   "oyster": {
+    "n": 30272,
+    "lit": 24393,
+    "dark": 5879,
+    "dark_pct": 19.42,
+    "lit_pct": 80.58,
+    "dark_counting_self_hits": 5877,
+    "dark_pct_counting_self_hits": 19.41
+   }
+  },
+  "four_proteins": {
+   "Q25460": {
+    "ipr_names": [
+     "Adhesive plaque protein"
+    ],
+    "ipr_spans": [
+     [
+      48,
+      65
+     ],
+     [
+      71,
+      90
+     ]
+    ],
+    "ipr_residues": 38,
+    "n_hits": 2,
+    "hit_spans": [
+     [
+      1,
+      859
+     ]
+    ],
+    "hit_residues": 859,
+    "best": {
+     "target": "Q27409",
+     "identity": 0.71,
+     "start": 1,
+     "end": 859
+    },
+    "af_mean_plddt": 41.47190857142857
+   },
+   "P24856": {
+    "ipr_names": [],
+    "ipr_spans": [],
+    "ipr_residues": 0,
+    "n_hits": 0,
+    "hit_spans": [],
+    "hit_residues": 0,
+    "best": null,
+    "af_mean_plddt": 52.70206329113924
+   },
+   "P05484": {
+    "ipr_names": [
+     "Conotoxin",
+     "Conotoxin, omega-type, conserved site"
+    ],
+    "ipr_spans": [
+     [
+      1,
+      70
+     ]
+    ],
+    "ipr_residues": 70,
+    "n_hits": 139,
+    "hit_spans": [
+     [
+      1,
+      71
+     ]
+    ],
+    "hit_residues": 71,
+    "best": {
+     "target": "P0DKQ5",
+     "identity": 0.901,
+     "start": 1,
+     "end": 71
+    },
+    "af_mean_plddt": 70.96661971830986
+   },
+   "P42212": {
+    "ipr_names": [
+     "Green fluorescent protein",
+     "Green fluorescent protein, GFP",
+     "Green fluorescent protein-related"
+    ],
+    "ipr_spans": [
+     [
+      1,
+      238
+     ]
+    ],
+    "ipr_residues": 238,
+    "n_hits": 5,
+    "hit_spans": [
+     [
+      1,
+      201
+     ]
+    ],
+    "hit_residues": 201,
+    "best": {
+     "target": "Q9U6Y6",
+     "identity": 0.365,
+     "start": 18,
+     "end": 140
+    },
+    "af_mean_plddt": 96.63991596638655
+   }
+  },
+  "strata": [
+   {
+    "label": "All known features",
+    "value": 0.28211062566974837,
+    "tool": "HH-suite (hhsearch)",
+    "tool_key": "hhblits",
+    "setting": "single_seq",
+    "n": 7185,
+    "axis": "all",
+    "stratum": "all"
+   },
+   {
+    "label": "Features 2 to 15 residues long",
+    "value": 0.06903892944038928,
+    "tool": "kmerseek",
+    "tool_key": "kmerseek",
+    "setting": "protein20_k6_lcFalse",
+    "n": 546,
+    "axis": "feature_length_bin",
+    "stratum": "2-15"
+   },
+   {
+    "label": "Repeats",
+    "value": 0.3025704894752514,
+    "tool": "HH-suite (hhsearch)",
+    "tool_key": "hhblits",
+    "setting": "single_seq",
+    "n": 589,
+    "axis": "feature_type",
+    "stratum": "REPEAT"
+   },
+   {
+    "label": "Features where AlphaFold's confidence is 50 to 70",
+    "value": 0.30823091011278536,
+    "tool": "HH-suite (hhsearch)",
+    "tool_key": "hhblits",
+    "setting": "single_seq",
+    "n": 2027,
+    "axis": "plddt",
+    "stratum": "50-70"
+   },
+   {
+    "label": "Features where AlphaFold's confidence is below 50 (often disordered)",
+    "value": null,
+    "why": "the leaderboard does not yet group features with confidence below 50"
+   }
+  ],
+  "not_yet_measured": [
+   "organism pages built",
+   "cost per page (CPU-hours, curator hours)",
+   "tools scored per page",
+   "wet-lab truth rows contributed",
+   "labs that used a page"
+  ]
+ }
+}
