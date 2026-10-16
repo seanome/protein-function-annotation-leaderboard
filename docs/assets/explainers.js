@@ -1,6 +1,6 @@
 /* "How the scores work": five small widgets on a made-up example (#toy-data, written by
    build_site.py). Every number shown is computed here from that example; nothing comes
-   from the benchmark tables except the default core-hours and prices in Figure 5.
+   from the benchmark tables except the default core-hours and prices in Figure 8.
    tests/check_explainers.py recomputes the same numbers in Python and compares.
 
    Marks, the same in every figure:

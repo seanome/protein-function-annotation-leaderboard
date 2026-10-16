@@ -26,11 +26,35 @@
   },
   {
    "tag": "p",
-   "text": "The leaderboard ranks tools by three scores and one cost. Each section below works one of them through on a made-up protein that you can change. Every number in Figures 1 to 4 is computed in your browser from that made-up example, not from the benchmark."
+   "text": "The leaderboard ranks tools by three scores and one cost. Each section below works one of them through on a made-up protein that you can change. Every number in Figures 4 to 7 is computed in your browser from that made-up example, not from the benchmark."
   },
   {
    "tag": "p",
    "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
+  },
+  {
+   "tag": "li",
+   "text": "The made-up example"
+  },
+  {
+   "tag": "li",
+   "text": "Fmax: the best single score cutoff (Figure 4)"
+  },
+  {
+   "tag": "li",
+   "text": "AUPRC: every cutoff at once (Figure 5)"
+  },
+  {
+   "tag": "li",
+   "text": "Median IoU: are the ends in the right place? (Figure 6)"
+  },
+  {
+   "tag": "li",
+   "text": "Raw or dedup: one domain, many calls (Figure 7)"
+  },
+  {
+   "tag": "li",
+   "text": "Cost: core-hours, GPU-hours and the price of an hour (Figure 8)"
   },
   {
    "tag": "h2",
@@ -42,7 +66,7 @@
   },
   {
    "tag": "p",
-   "text": "A call is correct when it names the family of a true domain and overlaps that domain with an IoU of at least 0.5 (Figure 3 shows IoU). Each true domain can be found once. If two calls find the same domain, the higher-scoring one is correct and the other counts as wrong, as on the leaderboard."
+   "text": "A call is correct when it names the family of a true domain and overlaps that domain with an IoU of at least 0.5 (Figure 6 shows IoU). Each true domain can be found once. If two calls find the same domain, the higher-scoring one is correct and the other counts as wrong, as on the leaderboard."
   },
   {
    "tag": "p",
@@ -62,15 +86,23 @@
   },
   {
    "tag": "p",
-   "text": "Fmax is the highest F over all cutoffs: the score of the tool at its best single cutoff. Move the slider in Figure 1 to try each cutoff."
+   "text": "Fmax is the highest F over all cutoffs: the score of the tool at its best single cutoff. Move the slider in Figure 4 to try each cutoff."
+  },
+  {
+   "tag": "summary",
+   "text": "How to read Figure 4"
   },
   {
    "tag": "figcaption",
-   "text": "made-up exampleFigure 1. Fmax on protein A. Top: the protein as a line with its three true domains as boxes. Each call is a bar below it, at the residues it covers, labelled with its family and score. Bottom: F at each cutoff. Move the cutoff and read off which calls are kept and what F they give; the ring marks the highest F, which is the Fmax."
+   "text": "made-up exampleFigure 4. Fmax on protein A. Top: the protein as a line with its three true domains as boxes. Each call is a bar below it, at the residues it covers, labelled with its family and score. Bottom: F at each cutoff. Move the cutoff and read off which calls are kept and what F they give; the ring marks the highest F, which is the Fmax."
   },
   {
    "tag": "p",
    "text": "Kept: calls, of them correct. Precision = correct ÷ kept = . Recall = domains found ÷ true domains = ÷ = . F = .Highest F over all cutoffs (Fmax): , for any cutoff in ."
+  },
+  {
+   "tag": "summary",
+   "text": "How the leaderboard does this over many proteins"
   },
   {
    "tag": "p",
@@ -93,8 +125,12 @@
    "text": "Here \\(P_k\\) and \\(R_k\\) are the precision and recall after the \\(k\\)-th call of the list. A wrong call adds no area itself, but it lowers the precision, and so the height of every strip after it. AUPRC runs from 0 to 1, and higher is better."
   },
   {
+   "tag": "summary",
+   "text": "How to read Figure 5"
+  },
+  {
    "tag": "figcaption",
-   "text": "made-up exampleFigure 2. The precision-recall curve of protein A's calls, and what happens when protein B is added. Each point is one call, taken in score order; its position is the precision and recall after taking it. The shaded strips add up to the AUPRC. Lower the cutoff to add calls one by one, and switch protein B on to see Fmax and AUPRC move in opposite directions."
+   "text": "made-up exampleFigure 5. The precision-recall curve of protein A's calls, and what happens when protein B is added. Each point is one call, taken in score order; its position is the precision and recall after taking it. The shaded strips add up to the AUPRC. Lower the cutoff to add calls one by one, and switch protein B on to see Fmax and AUPRC move in opposite directions."
   },
   {
    "tag": "p",
@@ -149,6 +185,10 @@
    "text": "area added"
   },
   {
+   "tag": "summary",
+   "text": "Why adding protein B moves Fmax up and AUPRC down"
+  },
+  {
    "tag": "p",
    "text": "Protein B has five Ig domains, and its five calls are all correct, but they score 45 to 60. Fmax averages protein by protein, so protein B counts as one protein of two, whatever its number of domains. On its own protein B is perfect, so Fmax goes up. AUPRC pools every call of every protein into one list. Protein B's domains are five of the eight true domains. In the list its calls come after one or two of protein A's wrong calls (scores 70 and 55), so AUPRC goes down. Use Fmax when you will keep every call above one cutoff. Use AUPRC when you will rank calls and read down the list."
   },
@@ -165,8 +205,12 @@
    "text": "\\[\\text{IoU} = \\frac{|\\text{call} \\cap \\text{true domain}|}{|\\text{call} \\cup \\text{true domain}|}\\]"
   },
   {
+   "tag": "summary",
+   "text": "How to read Figure 6"
+  },
+  {
    "tag": "figcaption",
-   "text": "made-up exampleFigure 3. IoU of one call with one true domain. Top: a 200-residue protein with one true domain, and the call below it; the brackets underneath show the shared residues and the residues covered by either. It starts at the example on the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU of each correct call of protein A in Figure 1, with your call added when it is correct; the dashed line is their median."
+   "text": "made-up exampleFigure 6. IoU of one call with one true domain. Top: a 200-residue protein with one true domain, and the call below it; the brackets underneath show the shared residues and the residues covered by either. It starts at the example on the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU of each correct call of protein A in Figure 4, with your call added when it is correct; the dashed line is their median."
   },
   {
    "tag": "p",
@@ -175,6 +219,10 @@
   {
    "tag": "p",
    "text": "Median IoU of the correct calls: ."
+  },
+  {
+   "tag": "summary",
+   "text": "Median IoU on the leaderboard"
   },
   {
    "tag": "p",
@@ -189,8 +237,12 @@
    "text": "A tool often finds the same domain through several proteins of the relative, and reports one call for each. Raw keeps every call: the first copy can be correct, and every other copy counts as wrong. Dedup merges calls of the same family on the same protein that overlap each other with an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by side barely overlap, so both are kept."
   },
   {
+   "tag": "summary",
+   "text": "How to read Figure 7"
+  },
+  {
    "tag": "figcaption",
-   "text": "made-up exampleFigure 4. Protein A's seven calls, raw and after dedup. Switch between the two: dedup merges the two lower-scoring PH calls into the PH call scoring 95, and the table shows how the scores change."
+   "text": "made-up exampleFigure 7. Protein A's seven calls, raw and after dedup. Switch between the two: dedup merges the two lower-scoring PH calls into the PH call scoring 95, and the table shows how the scores change."
   },
   {
    "tag": "th",
@@ -221,6 +273,10 @@
    "text": "AUPRC"
   },
   {
+   "tag": "summary",
+   "text": "When dedup raises a score, and when it lowers one"
+  },
+  {
    "tag": "p",
    "text": "Here both merged calls were wrong copies, so recall does not change, and precision, Fmax and AUPRC go up. Dedup can also lower a score: when the higher-scoring call misses the domain's ends and a lower-scoring copy matches them, dedup keeps the one that misses. Comparing raw with dedup separates finding a domain from reporting it many times."
   },
@@ -245,8 +301,12 @@
    "text": "per 1,000 queries, where \\(r_\\text{cpu}\\) is the price of one CPU-hour and \\(r_\\text{gpu}\\) of one GPU-hour, in US dollars. A core-hour is priced as one CPU-hour."
   },
   {
+   "tag": "summary",
+   "text": "How to read Figure 8"
+  },
+  {
    "tag": "figcaption",
-   "text": "Figure 5. The cost formula with your own numbers. It starts at phmmer's measured core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any box to see the cost change."
+   "text": "Figure 8. The cost formula with your own numbers. It starts at phmmer's measured core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any box to see the cost change."
   },
   {
    "tag": "p",
