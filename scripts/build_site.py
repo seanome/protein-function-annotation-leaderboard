@@ -366,7 +366,8 @@ def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
 # The site's pages in reading order. The last two sit under "More" in the header.
 NAV = [("index.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool cards", "tools"),
        ("cost.html", "Compare two columns", "cost"), ("explainers.html", "How the scores work", "explainers"),
-       ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods")]
+       ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods"),
+       ("why.html", "Why this project", "why")]
 NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage")]
 
 
@@ -2225,6 +2226,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", type=Path, default=Path("data"))
     ap.add_argument("--out", type=Path, default=Path("docs"))
+    ap.add_argument("--why", type=Path, default=ROOT_DIR / "results/why",
+                    help="the why-page numbers (Prompt E); a missing file shows as not yet measured")
     a = ap.parse_args()
     global DATA_DIR
     DATA_DIR = a.data
@@ -2346,6 +2349,19 @@ def main() -> None:
         for stale in ("pileup.html", "pileup.html.json", "data/pileup.json", "data/pileup_check.json"):
             (out / stale).unlink(missing_ok=True)
 
+    # The "Why this project" page, from results/why/ (Prompt E) and data/why/.
+    import why_page
+    wy = why_page.Why(a.why, a.data)
+    why_body, why_data, why_map = why_page.page(wy, res, TOOLS, len(tools_used))
+    (out / "why.html").write_text(layout(
+        "Why this project", "why", why_body, src, head='<script defer src="assets/why.js"></script>',
+        description="Why ocean animal proteins need measuring, in four screens: the gap, why it exists, "
+                    "what funding buys, who is behind it."))
+    if why_map:
+        (out / "data" / "why_map.json").write_text(json.dumps(why_map, separators=(",", ":")))
+    else:
+        (out / "data" / "why_map.json").unlink(missing_ok=True)
+
     # Every page also as JSON at its path plus .json.
     full = json.loads(payload.replace("<\\/", "</"))
     page_json(out, "index.html", src, {"note": "The table is drawn from these rows: results keyed "
@@ -2367,6 +2383,7 @@ def main() -> None:
     else:
         (out / "data" / "inventory.md").unlink(missing_ok=True)
     page_json(out, "methods.html", src, None)
+    page_json(out, "why.html", src, {"note": "Numbers from results/why/ (see scripts/why_page.py); null means not yet measured. The proteome maps are data/why_map.json.", **why_data})
     page_json(out, "explainers.html", src, {"made_up_example": TOY, "terms": {
         k: {"name": n, "in_plain_words": PLAIN[k][1], "short": PLAIN[k][0], "explainer": h, "definition": w}
         for k, (n, h, w) in TERMS.items()}})
