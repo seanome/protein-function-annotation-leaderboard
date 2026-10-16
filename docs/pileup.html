@@ -94,11 +94,11 @@ domain of its family. Domains with no such domain, or no matching AlphaFold mode
 <figure>
 <figcaption><b>Figure 10.</b> Among the aligners, 45% (phmmer) to
 60% (ProstT5 + Foldseek) of calls start more than 100 residues before the
-domain, because a call spans the whole matched stretch; hmmscan's calls start on the domain, whose
-ends its own models define. Each panel is one tool: for each domain with a call, the call that
-overlaps it most (ties to the higher score, then the earlier start), its first residue minus the
-domain's first residue, as a share of that tool's domains with a call (n on the panel), in 5-residue
-steps; the end bins hold everything beyond 100 residues. kmerseek is drawn at
+domain, because a call spans the whole matched stretch. hmmscan's calls start on the domain, whose
+ends its own models define. Each panel is one tool. For each domain with a call, it takes the call
+that overlaps the domain most (ties to the higher score, then the earlier start). It plots that
+call's first residue minus the domain's first residue, as a share of the tool's domains with a call
+(n on the panel), in 5-residue steps. The end bins hold everything beyond 100 residues. kmerseek is drawn at
 gbmr4, k = 21 (<span class="mono">gbmr4_k21_lcFalse</span>). All panels share one
 vertical scale except hmmscan's, whose peak near 1 would flatten the rest. Where calls end is not drawn.</figcaption>
 <div class="legend" aria-label="Key to Figure 10"><span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--k-letters)" stroke-width="2"/></svg> this panel's tool, in its colour</span>

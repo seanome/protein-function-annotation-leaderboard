@@ -1645,11 +1645,11 @@ domain of its family. Domains with no such domain, or no matching AlphaFold mode
 <figure>
 <figcaption><b>Figure 10.</b> Among the aligners, {100 * early[lo_t]:.0f}% ({esc(TOOLS[lo_t]["name"])}) to
 {100 * early[hi_t]:.0f}% ({esc(TOOLS[hi_t]["name"])}) of calls start more than 100 residues before the
-domain, because a call spans the whole matched stretch; hmmscan's calls start on the domain, whose
-ends its own models define. Each panel is one tool: for each domain with a call, the call that
-overlaps it most (ties to the higher score, then the earlier start), its first residue minus the
-domain's first residue, as a share of that tool's domains with a call (n on the panel), in 5-residue
-steps; the end bins hold everything beyond 100 residues. kmerseek is drawn at
+domain, because a call spans the whole matched stretch. hmmscan's calls start on the domain, whose
+ends its own models define. Each panel is one tool. For each domain with a call, it takes the call
+that overlaps the domain most (ties to the higher score, then the earlier start). It plots that
+call's first residue minus the domain's first residue, as a share of the tool's domains with a call
+(n on the panel), in 5-residue steps. The end bins hold everything beyond 100 residues. kmerseek is drawn at
 {esc(setting_label("kmerseek", km["setting"]))} (<span class="mono">{esc(km["setting"])}</span>). All panels share one
 vertical scale except hmmscan's, whose peak near 1 would flatten the rest. Where calls end is not drawn.</figcaption>
 <div class="legend" aria-label="Key to Figure 10"><span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--k-letters)" stroke-width="2"/></svg> this panel's tool, in its colour</span>
@@ -1762,7 +1762,7 @@ def claims_card(cl: dict, up: str = "") -> str:
             verdict = f'<span class="cl-st {status}">{STATUS_WORDS[status].lower()}{when}</span> · {esc(plain_refs(x["verdict"]))}'
             if href:
                 verdict += f' · <a href="{esc(href)}">{esc(plain_refs(ev["label"]))}</a>'
-            ctx = "".join(f'<li>{esc(k["label"])}: <span class="mono">{esc(k["text"])}</span></li>' for k in x["context"])
+            ctx = "".join(f'<li>{esc(plain_refs(k["label"]))}: <span class="mono">{esc(k["text"])}</span></li>' for k in x["context"])
             more = (f'<details class="cl-more"><summary>Scope and related numbers</summary>'
                     f'<p>{esc(plain_refs(x.get("scope") or ""))}</p><ul>{ctx}</ul>'
                     + (f'<p class="muted">Source: <span class="mono">{esc(x["source"])}</span></p>' if x.get("source") else "")
@@ -2128,7 +2128,8 @@ is updated.</li>
 filled in. Without one, the line is the test's own result.</p>
 <p>A claim retired by a record test is dated with the date of that inventory record. A claim retired
 by a table test has no date, because the tables are recomputed on every build and the build cannot
-tell when the kill first held. The "last kill" date on a card counts only dated kills.</p>
+tell when the claim was first disproved. The "last disproved" date on a card counts only dated
+results.</p>
 <p>The full schema: <a class="mono" href="claims/schema.json">claims/schema.json</a>. The first claim of
 <a class="mono" href="claims/kmerseek.yaml">claims/kmerseek.yaml</a>:</p>
 <pre><code>{esc(example)}</code></pre>
