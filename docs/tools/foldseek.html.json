@@ -94,6 +94,26 @@
   },
   {
    "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "p",
+   "text": "each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push."
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the elm_cover run (notebook 253, PR 72) · commit ca051a6 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model. It cannot search those, so its share of motifs found is low for a reason that is not the search.open · the number: The source does not count the orthologs with no AlphaFold model. · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 148What to do: Score a structure tool only on proteins that have a structure, and print how many proteins were left out.Foldseek and Reseek were scored on orthologs with no AlphaFold model too, so their shares are low for a reason that is not the searchseanome/2024-kmerseek-analysis results/leaderboard/inventory.md at 6df20c1f"
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {
@@ -134,7 +154,7 @@
   },
   {
    "tag": "h2",
-   "text": "Known failure modes"
+   "text": "Caveats of how this run was set up"
   },
   {
    "tag": "li",
@@ -217,11 +237,49 @@
   },
   "reference": "AlphaFold models of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04 accessions), as a Foldseek database.",
   "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
-  "failure_modes": [
+  "caveats": [
    "A protein with no AlphaFold model cannot be searched. Five relatives have no Foldseek rows at all (chimpanzee, cow, dog, opossum, western clawed frog): not run.",
    "AlphaFold models of long proteins come in overlapping pieces (F1, F2, ...). The task script moves piece n's coordinates 200 x (n - 1) residues along the protein; if a piece started elsewhere, its calls would land in the wrong place. Checked against the real piece starts: not measured."
   ],
   "version": "Foldseek 10.941cd33",
+  "known_failure_modes": [
+   {
+    "tool": "foldseek",
+    "tool_name": "Foldseek",
+    "file": "failure_modes/foldseek.yaml",
+    "id": "scored-without-a-structure",
+    "shown_on_cards": [
+     "foldseek"
+    ],
+    "finding": "In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model. It cannot search those, so its share of motifs found is low for a reason that is not the search.",
+    "number": null,
+    "number_note": "The source does not count the orthologs with no AlphaFold model.",
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis results/leaderboard/inventory.md at 6df20c1f",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/blob/6df20c1f290fc123781df8d58097bf7b836535ac/results/leaderboard/inventory.md",
+      "quote": "Foldseek and Reseek were scored on orthologs with no AlphaFold model too, so their shares are low for a reason that is not the search"
+     }
+    ],
+    "run": "the elm_cover run (notebook 253, PR 72)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "ca051a6",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/ca051a6"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 148,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/148"
+     }
+    ],
+    "what_to_do": "Score a structure tool only on proteins that have a structure, and print how many proteins were left out.",
+    "date": "2026-10-15",
+    "status": "open",
+    "fixed": false
+   }
+  ],
   "licence": "GPL-3.0",
   "commercial_use": "Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.",
   "licence_url": "https://github.com/steineggerlab/foldseek",

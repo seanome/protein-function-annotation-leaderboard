@@ -16,6 +16,8 @@ site:
 check:
 	$(PY) scripts/claims.py --data data --check
 	$(PY) tests/check_claims.py
+	$(PY) scripts/failure_modes.py --check
+	$(PY) tests/check_failure_modes.py --site docs --live
 	$(PY) tests/check_build.py --data data
 	$(PY) tests/check_site.py --site docs
 	$(PY) tests/check_pileup.py --site docs --data data

@@ -12,6 +12,10 @@ Predicted 3-D shapes.
 
 Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is shape letters + amino acids (`3di_aa`): Fmax 0.250 over 2,435 true instances. Searching costs about $0.00574 per 1,000 queries (0.129 core-hours), for each relative searched.
 
+## Known failure modes
+
+- In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model. It cannot search those, so its share of motifs found is low for a reason that is not the search. The number: The source does not count the orthologs with no AlphaFold model.. Status: open. What to do: Score a structure tool only on proteins that have a structure, and print how many proteins were left out. Source: [seanome/2024-kmerseek-analysis results/leaderboard/inventory.md at 6df20c1f](https://github.com/seanome/2024-kmerseek-analysis/blob/6df20c1f290fc123781df8d58097bf7b836535ac/results/leaderboard/inventory.md).
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -47,7 +51,7 @@ AlphaFold models of the relative's proteome (Quest for Orthologs reference prote
 
 Bit score: higher ranks first. The E-value cutoff was 10.
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
 - A protein with no AlphaFold model cannot be searched. Five relatives have no Foldseek rows at all (chimpanzee, cow, dog, opossum, western clawed frog): not run.
 - AlphaFold models of long proteins come in overlapping pieces (F1, F2, ...). The task script moves piece n's coordinates 200 x (n - 1) residues along the protein; if a piece started elsewhere, its calls would land in the wrong place. Checked against the real piece starts: not measured.

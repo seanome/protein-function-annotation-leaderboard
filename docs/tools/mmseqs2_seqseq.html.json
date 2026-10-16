@@ -94,6 +94,26 @@
   },
   {
    "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "p",
+   "text": "each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push."
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: make leaderboard-pileup and the region pile-up page (Figures 3 and 4) · commit 39d81ec9 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch.open · the number: median 5 to 21 residues early; 66–78% of flank residues · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 146, PR 3Also on the cards of: jackhmmer, MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch)What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch.seanome/2024-kmerseek-analysis PR 146Flanks: aligner calls cover 66–78% of flank residues, so their curves never fall to 0.2 within 100 residues.PR 3"
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {
@@ -134,7 +154,7 @@
   },
   {
    "tag": "h2",
-   "text": "Known failure modes"
+   "text": "Caveats of how this run was set up"
   },
   {
    "tag": "li",
@@ -213,10 +233,62 @@
   },
   "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an MMseqs2 database.",
   "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
-  "failure_modes": [
+  "caveats": [
    "At most 1,000 target proteins are kept per query (--max-seqs 1000), so a query from a very large family can lose hits. How often: not measured."
   ],
   "version": "MMseqs2 18.8cc5c",
+  "known_failure_modes": [
+   {
+    "tool": "hmmer3_phmmer",
+    "tool_name": "phmmer",
+    "file": "failure_modes/hmmer3_phmmer.yaml",
+    "id": "calls-run-past-domain-edges",
+    "shown_on_cards": [
+     "hmmer3_phmmer",
+     "hmmer3_jackhmmer",
+     "mmseqs2_seqseq",
+     "mmseqs2_iterative",
+     "hhblits"
+    ],
+    "finding": "Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch.",
+    "number": "median 5 to 21 residues early; 66–78% of flank residues",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 146",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
+      "quote": "Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+     },
+     {
+      "source": "PR 3",
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3",
+      "quote": "**Flanks:** aligner calls cover 66–78% of flank residues, so their curves never fall to 0.2 within 100 residues."
+     }
+    ],
+    "run": "`make leaderboard-pileup` and the region pile-up page (Figures 3 and 4)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "39d81ec9",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec9"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 146,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146"
+     },
+     {
+      "repo": "seanome/protein-function-annotation-leaderboard",
+      "number": 3,
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3"
+     }
+    ],
+    "what_to_do": "Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.",
+    "date": "2026-10-15",
+    "status": "open",
+    "fixed": false
+   }
+  ],
   "licence": "MIT",
   "commercial_use": "Yes.",
   "licence_url": "https://github.com/soedinglab/MMseqs2",

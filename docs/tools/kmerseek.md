@@ -12,6 +12,11 @@ Short words of k letters (k-mers) shared between two proteins.
 
 Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is gbmr4, k = 21 (`gbmr4_k21_lcFalse`): Fmax 0.192 over 2,435 true instances. Searching costs about $0.00246 per 1,000 queries (0.0552 core-hours), for each relative searched.
 
+## Known failure modes
+
+- kmerseek 0.4.0 keys each index entry by its k-mer set, so two different sequences with the same k-mer set become one entry. In a regions-index pilot, 6 of 99_232 rows showed another sequence's residues. In an index of 125 ribonucleases, 31 are missing under cys2 and 7 under cys_hp3. The number: 6 of 99_232 rows; 31 of the 125 ribonucleases. Status: open. What to do: Rebuild every 0.4.0 index once kmerseek PR 141 is merged; it keys each entry by its sequence. Until then, a recall number from a 0.4.0 index is measured against a reference that may be missing targets. Source: [seanome/kmerseek PR 141](https://github.com/seanome/kmerseek/pull/141); [seanome/kmerseek PR 141](https://github.com/seanome/kmerseek/pull/141); [seanome/kmerseek PR 148](https://github.com/seanome/kmerseek/pull/148).
+- The exact Poisson score (`region_poisson_score`) stops at 307.65, where the p-value underflows. In 102 of 107 exact settings, decoy pairs reach that ceiling, so the decoy-matched cutoff sits above it and those settings find nothing. The number: 307.65. Status: open. What to do: Compute the p-value in log space inside kmerseek. Until then, score exact settings on `region_tfidf`, as notebook 280 now does. Source: [seanome/2024-kmerseek-analysis PR 121, comment 6169347124](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6169347124); [seanome/2024-kmerseek-analysis PR 121, comment 6170231005](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6170231005).
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -47,7 +52,7 @@ An index of the relative's proteome (Quest for Orthologs reference proteomes, re
 
 region_enrichment: the number of k-mers the region shares with the target divided by the number expected by chance (fold enrichment). Higher ranks first. A region was kept when either test passed: its own score was at least 1.3, or the whole query protein's p-value was at most 0.05.
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
 - A feature shorter than k residues contains no complete k-mer, so it cannot be found. Figure 2 above shows how Fmax changes with region length.
 - The task script records a kmerseek search that exits with an error as a search with no hits, so a crash would look like a miss. How often that happened in this run: not measured.

@@ -60,3 +60,14 @@ tests are recomputed from `data/results.parquet`, record tests must quote the ex
 inventory (`data/experiments.json`, from seanome/2024-kmerseek-analysis PR 97) exactly. The
 `claims` GitHub Action runs `python scripts/claims.py --check` on every push; the build writes
 `docs/badges/claims-<tool>.svg`.
+
+## Known failure modes
+
+`failure_modes/<tool>.yaml` lists the ways a tool (or an input, such as the Pfam truth set)
+is known to fail: the finding, its number, the run and commit that showed it, the PR that
+reports it, what to do, and whether it is fixed (schema: `failure_modes/schema.json`). Every
+entry quotes its source. `python scripts/failure_modes.py --check` fetches each PR body, PR
+comment or file from GitHub and fails if a quote is not in it character for character, or a
+number in a finding is not in a quote. `tests/check_failure_modes.py --live` also checks that a
+wrong number fails. The `failure-modes` GitHub Action runs both on every push and weekly. The
+entries show on each tool card and on `failure-modes.html`.

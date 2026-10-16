@@ -1,0 +1,69 @@
+# Known failure modes of phmmer, and of the other aligners where also_tools says so.
+# Each quote must match its source character for character: scripts/failure_modes.py --check.
+# Schema: failure_modes/schema.json.
+
+tool: hmmer3_phmmer
+name: phmmer
+updated: "2026-10-16"
+
+entries:
+  - id: whole-alignment-call-misses-repeats
+    finding: >-
+      A call is the whole alignment, not the target's domain placed on the query, so a
+      long alignment over repeats never lands on one repeat. On a 23-aa LRR_1 repeat,
+      every MMseqs2 and phmmer call was 47 aa or longer, so none landed.
+    number: 47 aa or longer, on a 23-aa repeat
+    evidence:
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6154499159}
+        quote: >-
+          But every one of their calls is 47 aa or longer, so under half of it lies inside a
+          23-aa repeat, and the landing rule (at least half the call inside the domain)
+          rejects it.
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6154499159}
+        quote: >-
+          a call is the whole alignment, not the target's domain projected onto the query, so
+          long alignments over repeats never land on one repeat.
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6169102356}
+        quote: >-
+          Olga's decision (2026-10-14, before the test half was read): a call is the target
+          domain placed on the query through the hit, and MMseqs2 runs one round (2067fa1;
+          recorded in nb 280's first cell).
+    run: >-
+      the time-split pilot's tune half (notebook 280), rapeseed protein A0A078HBQ0, LRR_1
+      repeats 64-86 and 88-110
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 787bc31}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 121}
+    what_to_do: >-
+      Place the target's domain on the query through the alignment before scoring.
+      Notebook 280 switched to this rule.
+    date: "2026-10-13"
+    status: open
+    also_tools: [mmseqs2_iterative]
+
+  - id: calls-run-past-domain-edges
+    finding: >-
+      Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of
+      the flank residues (the 100 residues either side of the domain), because a call spans
+      the whole aligned stretch.
+    number: median 5 to 21 residues early; 66–78% of flank residues
+    evidence:
+      - source: {kind: pr_body, repo: seanome/2024-kmerseek-analysis, pr: 146}
+        quote: >-
+          Aligners start a median 5 to 21 residues early, because a call spans the whole
+          aligned stretch.
+      - source: {kind: pr_body, repo: seanome/protein-function-annotation-leaderboard, pr: 3}
+        quote: >-
+          **Flanks:** aligner calls cover 66–78% of flank residues, so their curves never
+          fall to 0.2 within 100 residues.
+    run: "`make leaderboard-pileup` and the region pile-up page (Figures 3 and 4)"
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 39d81ec9}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 146}
+      - {repo: seanome/protein-function-annotation-leaderboard, number: 3}
+    what_to_do: >-
+      Read a call's ends as the alignment's ends, not the domain's. To score where a domain
+      sits, place the target's domain through the alignment.
+    date: "2026-10-15"
+    status: open
+    also_tools: [hmmer3_jackhmmer, mmseqs2_seqseq, mmseqs2_iterative, hhblits]

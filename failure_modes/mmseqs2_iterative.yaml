@@ -1,0 +1,31 @@
+# Known failure modes of MMseqs2 run with more than one round of profile search.
+# Each quote must match its source character for character: scripts/failure_modes.py --check.
+# Schema: failure_modes/schema.json.
+
+tool: mmseqs2_iterative
+name: MMseqs2, three rounds
+updated: "2026-10-16"
+
+entries:
+  - id: profile-drift-decoy-hits
+    finding: >-
+      Three rounds of profile search gave dipeptide-shuffled decoy proteins hits as strong as
+      E 1e-22. One round gave them none below E 0.026. A cutoff set from decoys under three
+      rounds is therefore set by the profile drifting toward a family, not by the search.
+    number: E 1e-22 (three rounds) vs E 0.026 (one round)
+    evidence:
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6155881035}
+        quote: >-
+          The 3-round profile search gave dipeptide-shuffled decoys hits down to E 1e-22, and
+          one round gives none below E 0.026.
+    run: >-
+      `make mmseqs-one-round`, Slurm job 47690191, on the time-split pilot's tune half;
+      tables in `pilot_partial_2026-10-13/mmseqs_one_round/`
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 3a12009}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 121}
+    what_to_do: >-
+      Run one round (`--num-iterations 1`) when a cutoff is matched to decoys, or set the
+      cutoff separately for each number of rounds.
+    date: "2026-10-13"
+    status: open

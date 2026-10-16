@@ -246,6 +246,38 @@
   },
   {
    "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "p",
+   "text": "each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push."
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the regions-index pilot (kmerseek v0.4.0, protein20, k=5), and the 125 test ribonucleases searched with topi ribonuclease (P00659) · commit d3046f8 in seanome/kmerseek"
+  },
+  {
+   "tag": "li",
+   "text": "kmerseek 0.4.0 keys each index entry by its k-mer set, so two different sequences with the same k-mer set become one entry. In a regions-index pilot, 6 of 99_232 rows showed another sequence's residues. In an index of 125 ribonucleases, 31 are missing under cys2 and 7 under cys_hp3.open · the number: 6 of 99_232 rows; 31 of the 125 ribonucleases · reported 10 Oct 2026 in seanome/kmerseek PR 141, seanome/kmerseek PR 148What to do: Rebuild every 0.4.0 index once kmerseek PR 141 is merged; it keys each entry by its sequence. Until then, a recall number from a 0.4.0 index is measured against a reference that may be missing targets.In the 2024-kmerseek-analysis regions-index pilot (kmerseek v0.4.0, protein20, k=5), 6 of 99_232 rows had a target_subseq that is not target[target_start:target_end].seanome/kmerseek PR 141Two different sequences with the same k-mer set get the same sum. So the second entry's hits came out with the first entry's coordinates and residues.seanome/kmerseek PR 141That is why 31 of the 125 ribonucleases are absent under cys2 and 7 under cys_hp3.seanome/kmerseek PR 148"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: the time-split pilot's tune half, 186 settings (notebook 280) · commit f918447 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "The exact Poisson score (region_poisson_score) stops at 307.65, where the p-value underflows. In 102 of 107 exact settings, decoy pairs reach that ceiling, so the decoy-matched cutoff sits above it and those settings find nothing.open · the number: 307.65 · reported 14 Oct 2026 in seanome/2024-kmerseek-analysis PR 121What to do: Compute the p-value in log space inside kmerseek. Until then, score exact settings on region_tfidf, as notebook 280 now does.region_poisson_score stops at 307.65, which is -log10 of the smallest normal double: the Poisson p-value underflows. In 102 of 107 exact settings, at least two tune decoy-family pairs reach that ceiling. The matched cutoff then sits just above it, and those settings find nothing at all.seanome/2024-kmerseek-analysis PR 121, comment 6169347124b215e87 scores the exact arm on region_tfidf (Olga, 2026-10-14; recorded in notebook 280's first cell).seanome/2024-kmerseek-analysis PR 121, comment 6170231005"
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {
@@ -286,7 +318,7 @@
   },
   {
    "tag": "h2",
-   "text": "Known failure modes"
+   "text": "Caveats of how this run was set up"
   },
   {
    "tag": "li",
@@ -429,12 +461,106 @@
   },
   "reference": "An index of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), built once per alphabet and k-mer length.",
   "score": "region_enrichment: the number of k-mers the region shares with the target divided by the number expected by chance (fold enrichment). Higher ranks first. A region was kept when either test passed: its own score was at least 1.3, or the whole query protein's p-value was at most 0.05.",
-  "failure_modes": [
+  "caveats": [
    "A feature shorter than k residues contains no complete k-mer, so it cannot be found. Figure 2 above shows how Fmax changes with region length.",
    "The task script records a kmerseek search that exits with an error as a search with no hits, so a crash would look like a miss. How often that happened in this run: not measured.",
    "Setting hp_thomas_dill2 k33 was scored, but no trace row holds its search task, so its cost is not measured, and the scoring task for it was not found either."
   ],
   "version": "kmerseek 0.3.1 (printed in the search log)",
+  "known_failure_modes": [
+   {
+    "tool": "kmerseek",
+    "tool_name": "kmerseek",
+    "file": "failure_modes/kmerseek.yaml",
+    "id": "index-merges-equal-kmer-sets",
+    "shown_on_cards": [
+     "kmerseek"
+    ],
+    "finding": "kmerseek 0.4.0 keys each index entry by its k-mer set, so two different sequences with the same k-mer set become one entry. In a regions-index pilot, 6 of 99_232 rows showed another sequence's residues. In an index of 125 ribonucleases, 31 are missing under cys2 and 7 under cys_hp3.",
+    "number": "6 of 99_232 rows; 31 of the 125 ribonucleases",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/kmerseek PR 141",
+      "url": "https://github.com/seanome/kmerseek/pull/141",
+      "quote": "In the 2024-kmerseek-analysis regions-index pilot (kmerseek v0.4.0, protein20, k=5), 6 of 99_232 rows had a `target_subseq` that is not `target[target_start:target_end]`."
+     },
+     {
+      "source": "seanome/kmerseek PR 141",
+      "url": "https://github.com/seanome/kmerseek/pull/141",
+      "quote": "Two different sequences with the same k-mer set get the same sum. So the second entry's hits came out with the first entry's coordinates and residues."
+     },
+     {
+      "source": "seanome/kmerseek PR 148",
+      "url": "https://github.com/seanome/kmerseek/pull/148",
+      "quote": "That is why 31 of the 125 ribonucleases are absent under `cys2` and 7 under `cys_hp3`."
+     }
+    ],
+    "run": "the regions-index pilot (kmerseek v0.4.0, protein20, k=5), and the 125 test ribonucleases searched with topi ribonuclease (P00659)",
+    "commit": {
+     "repo": "seanome/kmerseek",
+     "sha": "d3046f8",
+     "url": "https://github.com/seanome/kmerseek/commit/d3046f8"
+    },
+    "pr": [
+     {
+      "repo": "seanome/kmerseek",
+      "number": 141,
+      "url": "https://github.com/seanome/kmerseek/pull/141"
+     },
+     {
+      "repo": "seanome/kmerseek",
+      "number": 148,
+      "url": "https://github.com/seanome/kmerseek/pull/148"
+     }
+    ],
+    "what_to_do": "Rebuild every 0.4.0 index once kmerseek PR 141 is merged; it keys each entry by its sequence. Until then, a recall number from a 0.4.0 index is measured against a reference that may be missing targets.",
+    "date": "2026-10-10",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "kmerseek",
+    "tool_name": "kmerseek",
+    "file": "failure_modes/kmerseek.yaml",
+    "id": "poisson-score-ceiling",
+    "shown_on_cards": [
+     "kmerseek"
+    ],
+    "finding": "The exact Poisson score (`region_poisson_score`) stops at 307.65, where the p-value underflows. In 102 of 107 exact settings, decoy pairs reach that ceiling, so the decoy-matched cutoff sits above it and those settings find nothing.",
+    "number": "307.65",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6169347124",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6169347124",
+      "quote": "`region_poisson_score` stops at 307.65, which is -log10 of the smallest normal double: the Poisson p-value underflows. In 102 of 107 exact settings, at least two tune decoy-family pairs reach that ceiling. The matched cutoff then sits just above it, and those settings find nothing at all."
+     },
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 121, comment 6170231005",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6170231005",
+      "quote": "b215e87 scores the exact arm on `region_tfidf` (Olga, 2026-10-14; recorded in nb 280's first cell)."
+     }
+    ],
+    "run": "the time-split pilot's tune half, 186 settings (notebook 280)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "f918447",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/f918447"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 121,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/121"
+     }
+    ],
+    "what_to_do": "Compute the p-value in log space inside kmerseek. Until then, score exact settings on `region_tfidf`, as notebook 280 now does.",
+    "date": "2026-10-14",
+    "status": "open",
+    "fixed": false
+   }
+  ],
   "licence": "MIT",
   "commercial_use": "Yes.",
   "licence_url": "https://github.com/seanome/kmerseek",

@@ -94,6 +94,18 @@
   },
   {
    "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "p",
+   "text": "each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push."
+  },
+  {
+   "tag": "p",
+   "text": "None recorded yet."
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {
@@ -134,7 +146,7 @@
   },
   {
    "tag": "h2",
-   "text": "Known failure modes"
+   "text": "Caveats of how this run was set up"
   },
   {
    "tag": "li",
@@ -217,11 +229,12 @@
   },
   "reference": "3Di letters predicted by ProstT5 for the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a Foldseek database.",
   "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
-  "failure_modes": [
+  "caveats": [
    "Proteins longer than 6,000 residues are skipped before the 3Di letters are predicted, and are listed in a skipped-proteins file.",
    "Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the 998 queries that step is counted in the GPU column and the cost; for each relative's proteome it is a one-off database build and is not counted."
   ],
   "version": "Foldseek 10.941cd33 with ProstT5 weights",
+  "known_failure_modes": [],
   "licence": "GPL-3.0 (Foldseek); MIT (ProstT5 model weights)",
   "commercial_use": "Yes. Foldseek's GPL-3.0 applies to changed versions you distribute.",
   "licence_url": "https://huggingface.co/Rostlab/ProstT5",

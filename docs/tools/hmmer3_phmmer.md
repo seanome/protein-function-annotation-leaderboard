@@ -12,6 +12,12 @@ Amino-acid letters, one query protein against each protein of the relative, scor
 
 Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is default options (`default`): Fmax 0.333 over 2,435 true instances. Searching costs about $0.0186 per 1,000 queries (0.417 core-hours), for each relative searched.
 
+## Known failure modes
+
+- A call is the whole alignment, not the target's domain placed on the query, so a long alignment over repeats never lands on one repeat. On a 23-aa LRR_1 repeat, every MMseqs2 and phmmer call was 47 aa or longer, so none landed. The number: 47 aa or longer, on a 23-aa repeat. Status: open. What to do: Place the target's domain on the query through the alignment before scoring. Notebook 280 switched to this rule. Source: [seanome/2024-kmerseek-analysis PR 121, comment 6154499159](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6154499159); [seanome/2024-kmerseek-analysis PR 121, comment 6154499159](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6154499159); [seanome/2024-kmerseek-analysis PR 121, comment 6169102356](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6169102356).
+- Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch. The number: median 5 to 21 residues early; 66–78% of flank residues. Status: open. What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment. Source: [seanome/2024-kmerseek-analysis PR 146](https://github.com/seanome/2024-kmerseek-analysis/pull/146); [PR 3](https://github.com/seanome/protein-function-annotation-leaderboard/pull/3).
+- HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that no search tool hits below the cutoff. The number: 2 to 222. Status: open. What to do: Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared. Source: [seanome/2024-kmerseek-analysis PR 57, comment 6151921382](https://github.com/seanome/2024-kmerseek-analysis/pull/57#issuecomment-6151921382).
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -47,9 +53,9 @@ The relative's proteome (Quest for Orthologs reference proteomes, release 2020_0
 
 Domain bit score: higher ranks first. The E-value cutoff was 10.
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
-- Failure modes specific to phmmer: not measured in this run.
+- None recorded for this run.
 
 ## Cost per 1,000 queries
 

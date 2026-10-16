@@ -12,6 +12,10 @@ Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protei
 
 Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is shape letters from sequence (`3di_from_seq`): Fmax 0.223 over 2,435 true instances. Searching costs about $0.00486 per 1,000 queries (0.109 core-hours), for each relative searched.
 
+## Known failure modes
+
+None recorded yet.
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -47,7 +51,7 @@ Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protei
 
 Bit score: higher ranks first. The E-value cutoff was 10.
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
 - Proteins longer than 6,000 residues are skipped before the 3Di letters are predicted, and are listed in a skipped-proteins file.
 - Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the 998 queries that step is counted in the GPU column and the cost; for each relative's proteome it is a one-off database build and is not counted.

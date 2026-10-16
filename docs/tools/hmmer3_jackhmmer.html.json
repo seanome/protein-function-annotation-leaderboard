@@ -94,6 +94,38 @@
   },
   {
    "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "p",
+   "text": "each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push."
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: make leaderboard-pileup and the region pile-up page (Figures 3 and 4) · commit 39d81ec9 in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "phmmer Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch.open · the number: median 5 to 21 residues early; 66–78% of flank residues · reported 15 Oct 2026 in seanome/2024-kmerseek-analysis PR 146, PR 3Also on the cards of: jackhmmer, MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch)What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch.seanome/2024-kmerseek-analysis PR 146Flanks: aligner calls cover 66–78% of flank residues, so their curves never fall to 0.2 within 100 residues.PR 3"
+  },
+  {
+   "tag": "summary",
+   "text": "The source text, the run and its commit"
+  },
+  {
+   "tag": "p",
+   "text": "Run: notebook 289, dark set and kmerseek reach at E < 1 vs E < 10 · commit 029c47a in seanome/2024-kmerseek-analysis"
+  },
+  {
+   "tag": "li",
+   "text": "hmmscan with Pfam HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that no search tool hits below the cutoff.open · the number: 2 to 222 · reported 13 Oct 2026 in seanome/2024-kmerseek-analysis PR 57Also on the cards of: phmmer, jackhmmerWhat to do: Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared.The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus at E ≤ 10 is 2_039.seanome/2024-kmerseek-analysis PR 57, comment 6151921382"
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {
@@ -134,7 +166,7 @@
   },
   {
    "tag": "h2",
-   "text": "Known failure modes"
+   "text": "Caveats of how this run was set up"
   },
   {
    "tag": "li",
@@ -213,10 +245,100 @@
   },
   "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a FASTA file.",
   "score": "Domain bit score: higher ranks first. The E-value cutoff was 10.",
-  "failure_modes": [
+  "caveats": [
    "Each round can pull in proteins from a different family, which then pull in more. How often that happened here: not measured."
   ],
   "version": "HMMER 3.4",
+  "known_failure_modes": [
+   {
+    "tool": "hmmer3_phmmer",
+    "tool_name": "phmmer",
+    "file": "failure_modes/hmmer3_phmmer.yaml",
+    "id": "calls-run-past-domain-edges",
+    "shown_on_cards": [
+     "hmmer3_phmmer",
+     "hmmer3_jackhmmer",
+     "mmseqs2_seqseq",
+     "mmseqs2_iterative",
+     "hhblits"
+    ],
+    "finding": "Aligner calls start a median 5 to 21 residues before the domain, and cover 66–78% of the flank residues (the 100 residues either side of the domain), because a call spans the whole aligned stretch.",
+    "number": "median 5 to 21 residues early; 66–78% of flank residues",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 146",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
+      "quote": "Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+     },
+     {
+      "source": "PR 3",
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3",
+      "quote": "**Flanks:** aligner calls cover 66–78% of flank residues, so their curves never fall to 0.2 within 100 residues."
+     }
+    ],
+    "run": "`make leaderboard-pileup` and the region pile-up page (Figures 3 and 4)",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "39d81ec9",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec9"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 146,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146"
+     },
+     {
+      "repo": "seanome/protein-function-annotation-leaderboard",
+      "number": 3,
+      "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3"
+     }
+    ],
+    "what_to_do": "Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.",
+    "date": "2026-10-15",
+    "status": "open",
+    "fixed": false
+   },
+   {
+    "tool": "hmmscan",
+    "tool_name": "hmmscan with Pfam",
+    "file": "failure_modes/hmmscan.yaml",
+    "id": "evalue-two-significant-figures",
+    "shown_on_cards": [
+     "hmmscan",
+     "hmmer3_phmmer",
+     "hmmer3_jackhmmer"
+    ],
+    "finding": "HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that no search tool hits below the cutoff.",
+    "number": "2 to 222",
+    "number_note": null,
+    "evidence": [
+     {
+      "source": "seanome/2024-kmerseek-analysis PR 57, comment 6151921382",
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/57#issuecomment-6151921382",
+      "quote": "The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus at E ≤ 10 is 2_039."
+     }
+    ],
+    "run": "notebook 289, dark set and kmerseek reach at E < 1 vs E < 10",
+    "commit": {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "sha": "029c47a",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/029c47a"
+    },
+    "pr": [
+     {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "number": 57,
+      "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/57"
+     }
+    ],
+    "what_to_do": "Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared.",
+    "date": "2026-10-13",
+    "status": "open",
+    "fixed": false
+   }
+  ],
   "licence": "BSD 3-clause (HMMER)",
   "commercial_use": "Yes.",
   "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",
