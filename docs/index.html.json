@@ -6,7 +6,7 @@
   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
   "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:44:05Z",
+  "copied_at": "2026-10-16T19:08:43Z",
   "sha256": {
    "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -15,9 +15,12 @@
    "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
-   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+   "weak_hits/weak_hits.parquet": "cec1343e6d18f9dc35eb732e606828462899193ccf10249e2fd15a38b8c7a548",
+   "weak_hits/provenance.json": "8ce807cf60210caf83a9cc9177513ca8ef1a084b93eb65b37a3fb54b12b3cc16"
   },
-  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "weak_hits_commit": "6796441365084293be3be4c740d1679fbec5aab1"
  },
  "text": [
   {
@@ -1200,7 +1203,7 @@
     "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
     "commit_date": "2026-10-15T13:12:56Z",
     "path": "results/leaderboard",
-    "copied_at": "2026-10-15T13:44:05Z",
+    "copied_at": "2026-10-16T19:08:43Z",
     "sha256": {
      "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
      "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -1209,10 +1212,185 @@
      "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
      "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
      "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
-     "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+     "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+     "weak_hits/weak_hits.parquet": "cec1343e6d18f9dc35eb732e606828462899193ccf10249e2fd15a38b8c7a548",
+     "weak_hits/provenance.json": "8ce807cf60210caf83a9cc9177513ca8ef1a084b93eb65b37a3fb54b12b3cc16"
     },
-    "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+    "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+    "weak_hits_commit": "6796441365084293be3be4c740d1679fbec5aab1"
    },
+   "weak": {
+    "hmmer3_jackhmmer": {
+     "human": {
+      "k": 9,
+      "n": 401,
+      "lo": 0.011851843421566963,
+      "hi": 0.0420988041767566,
+      "loose": 16,
+      "source": "jackhmmer",
+      "setting": "jackhmmer, 3 rounds (-N 3), E ≤ 10"
+     },
+     "worm": {
+      "k": 13,
+      "n": 730,
+      "lo": 0.010436284220604589,
+      "hi": 0.03022843773008458,
+      "loose": 25,
+      "source": "jackhmmer",
+      "setting": "jackhmmer, 3 rounds (-N 3), E ≤ 10"
+     },
+     "yeast": {
+      "k": 4,
+      "n": 132,
+      "lo": 0.011846060415340337,
+      "hi": 0.07532510940876738,
+      "loose": 5,
+      "source": "jackhmmer",
+      "setting": "jackhmmer, 3 rounds (-N 3), E ≤ 10"
+     },
+     "borrelia": {
+      "k": 0,
+      "n": 65,
+      "lo": 0.0,
+      "hi": 0.05580153215404492,
+      "loose": 0,
+      "source": "jackhmmer",
+      "setting": "jackhmmer, 3 rounds (-N 3), E ≤ 10"
+     }
+    },
+    "hmmer3_phmmer": {
+     "human": {
+      "k": 9,
+      "n": 401,
+      "lo": 0.011851843421566963,
+      "hi": 0.0420988041767566,
+      "loose": 16,
+      "source": "phmmer",
+      "setting": "phmmer, default options, E ≤ 10"
+     },
+     "worm": {
+      "k": 13,
+      "n": 729,
+      "lo": 0.010450639681040243,
+      "hi": 0.030269571381868046,
+      "loose": 25,
+      "source": "phmmer",
+      "setting": "phmmer, default options, E ≤ 10"
+     },
+     "yeast": {
+      "k": 4,
+      "n": 132,
+      "lo": 0.011846060415340337,
+      "hi": 0.07532510940876738,
+      "loose": 5,
+      "source": "phmmer",
+      "setting": "phmmer, default options, E ≤ 10"
+     },
+     "borrelia": {
+      "k": 0,
+      "n": 65,
+      "lo": 0.0,
+      "hi": 0.05580153215404492,
+      "loose": 0,
+      "source": "phmmer",
+      "setting": "phmmer, default options, E ≤ 10"
+     }
+    },
+    "kmerseek": {
+     "human": {
+      "k": 0,
+      "n": 292,
+      "lo": 0.0,
+      "hi": 0.012984856469482713,
+      "loose": 2,
+      "source": "kmerseek:wass14.k6.s1",
+      "setting": "alphabet wass14, k = 6, scaled 1"
+     },
+     "worm": {
+      "k": 0,
+      "n": 38,
+      "lo": 0.0,
+      "hi": 0.09180986954097846,
+      "loose": 0,
+      "source": "kmerseek:hp_lehninger_hpc3.k25.s10",
+      "setting": "alphabet hp_lehninger_hpc3, k = 25, scaled 10"
+     },
+     "yeast": {
+      "k": 0,
+      "n": 106,
+      "lo": 0.0,
+      "hi": 0.03497275910589831,
+      "loose": 1,
+      "source": "kmerseek:hp_pbotc_1st_ed2.k23.s1",
+      "setting": "alphabet hp_pbotc_1st_ed2, k = 23, scaled 1"
+     },
+     "borrelia": {
+      "k": 0,
+      "n": 51,
+      "lo": 0.0,
+      "hi": 0.07004662092616488,
+      "loose": 0,
+      "source": "kmerseek:uniprot18.k5.s1",
+      "setting": "alphabet uniprot18, k = 5, scaled 1"
+     }
+    },
+    "mmseqs2_iterative": {
+     "human": {
+      "k": 5,
+      "n": 85,
+      "lo": 0.025385159872728325,
+      "hi": 0.13041438524494056,
+      "loose": 5,
+      "source": "mmseqs2",
+      "setting": "MMseqs2, sensitivity 7, 3 rounds, E ≤ 10"
+     },
+     "worm": {
+      "k": 4,
+      "n": 96,
+      "lo": 0.016320707422926933,
+      "hi": 0.10228191531493394,
+      "loose": 13,
+      "source": "mmseqs2",
+      "setting": "MMseqs2, sensitivity 7, 3 rounds, E ≤ 10"
+     },
+     "yeast": {
+      "k": 1,
+      "n": 31,
+      "lo": 0.005717221462126484,
+      "hi": 0.16194105315828217,
+      "loose": 1,
+      "source": "mmseqs2",
+      "setting": "MMseqs2, sensitivity 7, 3 rounds, E ≤ 10"
+     },
+     "borrelia": {
+      "k": 0,
+      "n": 13,
+      "lo": 0.0,
+      "hi": 0.22809537513180025,
+      "loose": 0,
+      "source": "mmseqs2",
+      "setting": "MMseqs2, sensitivity 7, 3 rounds, E ≤ 10"
+     }
+    }
+   },
+   "weakSpecies": [
+    {
+     "id": "human",
+     "name": "human"
+    },
+    {
+     "id": "worm",
+     "name": "C. elegans"
+    },
+    {
+     "id": "yeast",
+     "name": "S. cerevisiae"
+    },
+    {
+     "id": "borrelia",
+     "name": "B. burgdorferi"
+    }
+   ],
    "terms": {
     "th": {
      "fmax": "<button type=\"button\" class=\"term\" data-term=\"fmax\" aria-label=\"What is Fmax?\" aria-expanded=\"false\" aria-controls=\"tip-fmax-th\" aria-describedby=\"tip-fmax-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-fmax-th\" hidden><b>Fmax.</b> Does the tool find the real domains and features without adding wrong ones? Fmax balances the two at the tool's best score cutoff. 1 is perfect; 0 means it found none.<span class=\"term-detail\"><b>In detail:</b> The best balance of precision and recall at any one score cutoff, with both worked out protein by protein and averaged. Precision is the share of calls that are correct; recall is the share of true annotations found. 0 to 1, higher is better.</span> <a href=\"explainers.html#fmax\">how it works →</a></span>",
@@ -1227,6 +1405,7 @@
      "calls": "<button type=\"button\" class=\"term\" data-term=\"calls\" aria-label=\"What is Raw or dedup?\" aria-expanded=\"false\" aria-controls=\"tip-calls-th\" aria-describedby=\"tip-calls-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-calls-th\" hidden><b>Raw or dedup.</b> Raw counts every call. Dedup counts a domain once, even when several of the relative's proteins point to it.<span class=\"term-detail\"><b>In detail:</b> Raw keeps every call a tool makes. Dedup merges calls of the same family on the same protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so one domain hit by many of the relative's proteins counts once.</span> <a href=\"explainers.html#dedup\">how it works →</a></span>",
      "wall": "<button type=\"button\" class=\"term\" data-term=\"wall\" aria-label=\"What is Wall-clock hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-wall-th\" aria-describedby=\"tip-wall-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-wall-th\" hidden><b>Wall-clock hours per 1,000 queries.</b> How long you wait for the search to finish, for 1,000 proteins against one relative.<span class=\"term-detail\"><b>In detail:</b> How long the search took from start to finish on the cores it was given (4 to 16), per relative searched, scaled to 1,000 human proteins. Less is faster.</span> <a href=\"explainers.html#cost\">how it works →</a></span>",
      "db": "<button type=\"button\" class=\"term\" data-term=\"db\" aria-label=\"What is Database build?\" aria-expanded=\"false\" aria-controls=\"tip-db-th\" aria-describedby=\"tip-db-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-db-th\" hidden><b>Database build.</b> Time to get the relative's proteins ready to search. It is done once, before any search.<span class=\"term-detail\"><b>In detail:</b> Core-hours to build one relative's search database, done once before any search. The mean over the builds the run's task records hold. Not in the per-query cost.</span> <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "weak": "<button type=\"button\" class=\"term\" data-term=\"weak\" aria-label=\"What is Weak hits right?\" aria-expanded=\"false\" aria-controls=\"tip-weak-th\" aria-describedby=\"tip-weak-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-weak-th\" hidden><b>Weak hits right.</b> When the tool's best hit on a protein no other search can place is weak (E 1 to 10), how often does it point to a protein of the right family?<span class=\"term-detail\"><b>In detail:</b> Of the dark proteins of one species (no phmmer, jackhmmer or MMseqs2 hit at E ≤ 1) whose best hit from this tool has E between 1 and 10 and a target with a Pfam family: the share where the target shares a Pfam family with the query and the hit covers a domain of that family on the query. Test half of the proteins; n in brackets; grey under 30. Measured on the dark set, not on the benchmark above, so it does not change with the filters.</span> <a href=\"methods.html#weak-hits\">how it works →</a></span>",
      "measured": "<button type=\"button\" class=\"term\" data-term=\"measured\" aria-label=\"What is measured?\" aria-expanded=\"false\" aria-controls=\"tip-measured-th\" aria-describedby=\"tip-measured-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-measured-th\" hidden><b>measured.</b> We timed it ourselves, on Stanford's Sherlock computer cluster.<span class=\"term-detail\"><b>In detail:</b> Measured on Stanford's Sherlock cluster, from the run's own task records.</span> <a href=\"explainers.html#cost\">how it works →</a></span>",
      "reported": "<button type=\"button\" class=\"term\" data-term=\"reported\" aria-label=\"What is reported?\" aria-expanded=\"false\" aria-controls=\"tip-reported-th\" aria-describedby=\"tip-reported-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-reported-th\" hidden><b>reported.</b> The tool's authors timed it on their own computers.<span class=\"term-detail\"><b>In detail:</b> Reported by the tool's submitter, on the hardware they name. None yet.</span> <a href=\"explainers.html#cost\">how it works →</a></span>"
     },
@@ -1243,6 +1422,7 @@
      "calls": "count each domain once?",
      "wall": "time to finish",
      "db": "set-up time",
+     "weak": "is a weak best hit right?",
      "measured": "timed by us",
      "reported": "timed by the authors"
     },

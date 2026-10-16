@@ -28,6 +28,37 @@ Where it is furthest behind the best other tool:
 
 Swiss-Prot features, raw calls, zebrafish, setting 3 rounds: best feature type active site, Fmax 0.287 (n = 176); worst short motif, Fmax 0.002 (n = 190).
 
+## Can its weak hits be trusted? {#weak-hits}
+
+When this tool's best hit on a protein is weak, is it right? It was measured on the dark set of four species, each searched against Swiss-Prot without its own clade. Dark proteins have no phmmer, jackhmmer or MMseqs2 hit at E ≤ 1; placed proteins are the rest. A best hit is right when the target shares a Pfam family with the query and the hit covers a Pfam domain of that family on the query. n counts the best hits whose target has any Pfam family. Test half of the proteins only. Grey: fewer than 30 judged hits ([how it was measured](../methods.html#weak-hits)).
+
+**Dark proteins**, best hit right:
+
+| species | E ≤ 0.001 | 0.001 < E ≤ 1 | 1 < E ≤ 10 |
+|---|---:|---:|---:|
+| human | <span class="few">no judged hits (n = 0)</span> | <span class="few">no judged hits (n = 0)</span> | 2.2% (9 of 401; 95% CI 1.2–4.2%) |
+| C. elegans | <span class="few">no judged hits (n = 0)</span> | <span class="few">no judged hits (n = 0)</span> | 1.8% (13 of 730; 95% CI 1.0–3.0%) |
+| S. cerevisiae | <span class="few">no judged hits (n = 0)</span> | <span class="few">no judged hits (n = 0)</span> | 3.0% (4 of 132; 95% CI 1.2–7.5%) |
+| B. burgdorferi | <span class="few">no judged hits (n = 0)</span> | <span class="few">no judged hits (n = 0)</span> | 0.0% (0 of 65; 95% CI 0.0–5.6%) |
+
+**Placed proteins**, best hit right:
+
+| species | E ≤ 0.001 | 0.001 < E ≤ 1 | 1 < E ≤ 10 |
+|---|---:|---:|---:|
+| human | 92.1% (7,800 of 8,473; 95% CI 91.5–92.6%) | 14.9% (80 of 537; 95% CI 12.1–18.2%) | <span class="few">10.0% (2 of 20; 95% CI 2.8–30.1%)</span> |
+| C. elegans | 91.8% (4,547 of 4,953; 95% CI 91.0–92.5%) | 12.6% (119 of 945; 95% CI 10.6–14.9%) | <span class="few">3.7% (1 of 27; 95% CI 0.7–18.3%)</span> |
+| S. cerevisiae | 92.4% (2,051 of 2,220; 95% CI 91.2–93.4%) | 12.2% (22 of 181; 95% CI 8.2–17.7%) | <span class="few">0.0% (0 of 10; 95% CI 0.0–27.8%)</span> |
+| B. burgdorferi | 92.7% (303 of 327; 95% CI 89.3–95.0%) | 3.8% (4 of 106; 95% CI 1.5–9.3%) | <span class="few">0.0% (0 of 2; 95% CI 0.0–65.8%)</span> |
+
+Setting in the dark-set run: jackhmmer, 3 rounds (-N 3), E ≤ 10.
+
+[PR 133](https://github.com/seanome/2024-kmerseek-analysis/pull/133)'s looser test counts a shared Pfam family or clan anywhere on the two proteins. By that test, on dark proteins at E 1–10:
+
+- human 4.0% (16 of 401)
+- C. elegans 3.4% (25 of 730)
+- S. cerevisiae 3.8% (5 of 132)
+- B. burgdorferi 0.0% (0 of 65)
+
 
 ## What it compares
 

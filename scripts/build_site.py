@@ -218,6 +218,13 @@ TERMS = {
     "db": ("Database build", "explainers.html#cost",
            "Core-hours to build one relative's search database, done once before any search. "
            "The mean over the builds the run's task records hold. Not in the per-query cost."),
+    "weak": ("Weak hits right", "methods.html#weak-hits",
+             "Of the dark proteins of one species (no phmmer, jackhmmer or MMseqs2 hit at E ≤ 1) "
+             "whose best hit from this tool has E between 1 and 10 and a target with a Pfam "
+             "family: the share where the target shares a Pfam family with the query and the hit "
+             "covers a domain of that family on the query. Test half of the proteins; n in "
+             "brackets; grey under 30. Measured on the dark set, not on the benchmark above, so "
+             "it does not change with the filters."),
     "measured": ("measured", "explainers.html#cost",
                  "Measured on Stanford's Sherlock cluster, from the run's own task records."),
     "reported": ("reported", "explainers.html#cost",
@@ -263,6 +270,9 @@ PLAIN = {
              "How long you wait for the search to finish, for 1,000 proteins against one relative."),
     "db": ("set-up time",
            "Time to get the relative's proteins ready to search. It is done once, before any search."),
+    "weak": ("is a weak best hit right?",
+             "When the tool's best hit on a protein no other search can place is weak (E 1 to "
+             "10), how often does it point to a protein of the right family?"),
     "measured": ("timed by us",
                  "We timed it ourselves, on Stanford's Sherlock computer cluster."),
     "reported": ("timed by the authors",
@@ -581,6 +591,138 @@ def compute_json(comp: pl.DataFrame) -> dict:
     return out
 
 
+# --------------------------------------------------------------------------- weak hits
+# "Can its weak hits be trusted?": the best hit's precision on the dark set, from
+# data/weak_hits/weak_hits.parquet (seanome/2024-kmerseek-analysis,
+# nextflow-runs/invertebrate-dark-set/weak-hits/). Every value on the site is the test
+# half: kmerseek's setting was picked on the other half.
+WEAK = None  # set in main() when data/weak_hits/ exists
+WEAK_SPECIES = [("human", "human"), ("worm", "C. elegans"), ("yeast", "S. cerevisiae"),
+                ("borrelia", "B. burgdorferi")]
+WEAK_BANDS = [("le_0.001", "E ≤ 0.001"), ("0.001_1", "0.001 < E ≤ 1"), ("1_10", "1 < E ≤ 10")]
+WEAK_SOURCE_WORDS = {"hmmer3_phmmer": "phmmer, default options, E ≤ 10",
+                     "hmmer3_jackhmmer": "jackhmmer, 3 rounds (-N 3), E ≤ 10",
+                     "mmseqs2_iterative": "MMseqs2, sensitivity 7, 3 rounds, E ≤ 10"}
+WEAK_MIN_N = 30
+
+
+def wilson(k: int, n: int, z: float = 1.959964) -> tuple:
+    """95% Wilson interval of k right out of n."""
+    if n == 0:
+        return (None, None)
+    p = k / n
+    d = 1 + z * z / n
+    c = (p + z * z / (2 * n)) / d
+    h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return (max(0.0, c - h), min(1.0, c + h))
+
+
+def load_weak(data: Path, src: dict):
+    p = data / "weak_hits" / "weak_hits.parquet"
+    if not p.exists():
+        return None
+    if not src.get("weak_hits_commit"):
+        raise SystemExit("data/weak_hits/ exists but data/SOURCE.json has no weak_hits_commit; "
+                         "re-run `make tables` so the weak-hit table is credited to its commit")
+    return pl.read_parquet(p)
+
+
+def weak_setting(src_name: str) -> str:
+    """kmerseek's source name in the table (kmerseek:hp_lehninger2.k17.s1) in words."""
+    m = re.fullmatch(r"kmerseek:(.+)\.k(\d+)\.s(\d+)", src_name)
+    if not m:
+        return WEAK_SOURCE_WORDS.get(src_name, src_name)
+    return f"alphabet {m[1]}, k = {m[2]}, scaled {m[3]}"
+
+
+def weak_cell(r: dict | None) -> dict | None:
+    if r is None:
+        return None
+    lo, hi = wilson(r["right_strict"], r["n_judged"])
+    return {"k": r["right_strict"], "n": r["n_judged"], "lo": lo, "hi": hi,
+            "loose": r["right_loose"], "source": r["source"],
+            "setting": weak_setting(r["source"]) if r["tool"] == "kmerseek"
+            else WEAK_SOURCE_WORDS.get(r["tool"], r["source"])}
+
+
+def weak_lookup(tool: str, species: str, qset: str, band: str) -> dict | None:
+    if WEAK is None:
+        return None
+    r = WEAK.filter((pl.col("tool") == tool) & (pl.col("species") == species)
+                    & (pl.col("query_set") == qset) & (pl.col("split") == "test")
+                    & (pl.col("band") == band))
+    if r.height > 1:
+        raise SystemExit(f"weak_hits.parquet has {r.height} rows for {tool} {species} {qset} {band}")
+    return weak_cell(r.row(0, named=True)) if r.height else None
+
+
+def weak_json() -> dict:
+    """tool -> species -> the leaderboard column's value: dark proteins, best hit at E 1-10."""
+    if WEAK is None:
+        return {}
+    out: dict = {}
+    for t in sorted(WEAK["tool"].unique().to_list()):
+        for sp, _ in WEAK_SPECIES:
+            c = weak_lookup(t, sp, "dark", "1_10")
+            if c is not None:
+                out.setdefault(t, {})[sp] = c
+    return out
+
+
+def weak_pct(c: dict | None) -> str:
+    """'3.1% (24 of 770; 95% CI 2.0–4.6%)', grey under 30 judged hits."""
+    if c is None:
+        return '<span class="few">not run</span>'
+    if c["n"] == 0:
+        return '<span class="few">no judged hits (n = 0)</span>'
+    txt = (f"{100 * c['k'] / c['n']:.1f}% ({c['k']:,} of {c['n']:,}; 95% CI "
+           f"{100 * c['lo']:.1f}–{100 * c['hi']:.1f}%)")
+    return f'<span class="few">{txt}</span>' if c["n"] < WEAK_MIN_N else txt
+
+
+def weak_card_md(tool: str) -> list[str]:
+    T = ["## Can its weak hits be trusted? {#weak-hits}", ""]
+    if WEAK is None or tool not in set(WEAK["tool"].to_list()):
+        T += ['<span class="few">Not run on the dark set.</span> The weak-hit test so far covers '
+              "phmmer, jackhmmer, MMseqs2 (3 rounds) and kmerseek "
+              "([how it was measured](../methods.html#weak-hits)).", ""]
+        return T
+    T += ["When this tool's best hit on a protein is weak, is it right? It was measured on the "
+          "dark set of four species, each searched against Swiss-Prot without its own clade. "
+          "Dark proteins have no phmmer, jackhmmer or MMseqs2 hit at E ≤ 1; placed proteins "
+          "are the rest. A best hit is right when the target shares a Pfam family with the query "
+          "and the hit covers a Pfam domain of that family on the query. n counts the best "
+          "hits whose target has any Pfam family. Test half of the proteins only. Grey: "
+          f"fewer than {WEAK_MIN_N} judged hits ([how it was measured](../methods.html#weak-hits)).", ""]
+    for qset, words in (("dark", "Dark proteins"), ("placed", "Placed proteins")):
+        T += [f"**{words}**, best hit right:", "",
+              "| species | " + " | ".join(b for _, b in WEAK_BANDS) + " |",
+              "|---|" + "---:|" * len(WEAK_BANDS)]
+        for sp, name in WEAK_SPECIES:
+            cells = [weak_pct(weak_lookup(tool, sp, qset, b)) for b, _ in WEAK_BANDS]
+            T.append(f"| {name} | " + " | ".join(cells) + " |")
+        T.append("")
+    sett = {sp: (weak_lookup(tool, sp, "dark", "1_10") or {}).get("setting") for sp, _ in WEAK_SPECIES}
+    if tool == "kmerseek":
+        T += ["The kmerseek setting for each species was picked on the other half of the "
+              "proteins, as the one with the highest share right at E 1–10 on dark proteins:", ""]
+        T += [f"- {name}: {sett[sp]}" for sp, name in WEAK_SPECIES if sett[sp]] + [""]
+    else:
+        s = next((v for v in sett.values() if v), None)
+        if s:
+            T += [f"Setting in the dark-set run: {s}.", ""]
+    loose = []
+    for sp, name in WEAK_SPECIES:
+        c = weak_lookup(tool, sp, "dark", "1_10")
+        if c and c["n"]:
+            loose.append(f"{name} {100 * c['loose'] / c['n']:.1f}% ({c['loose']:,} of {c['n']:,})")
+    if loose:
+        T += ["[PR 133](https://github.com/seanome/2024-kmerseek-analysis/pull/133)'s looser test counts a shared Pfam family or clan anywhere on the two "
+              "proteins. By that test, on dark proteins at E 1–10:", ""]
+        T += [f"- {x}" for x in loose] + [""]
+    return T
+
+
 # --------------------------------------------------------------------------- pages
 
 def key_line(tools_used: set[str]) -> str:
@@ -870,6 +1012,7 @@ def card_markdown(tool: str, nums: dict, src: dict) -> tuple[str, str]:
                   f"(n = {sw['n_truth_instances']:,}).", ""]
         else:
             T += ["Swiss-Prot feature types: not run.", ""]
+    T += weak_card_md(tool)
 
     L = ["## What it compares", "", t["compares"], "", "## What it needs", ""]
     for k, v in t["needs"].items():
@@ -1551,6 +1694,23 @@ marks regions without a fixed shape.</li>
 <p>The run computed each subset on its own, so two subsets cannot be combined; a combination with
 no row shows × and "not run".</p>
 
+<h2 id="weak-hits">Can a tool's weak hits be trusted?</h2>
+<p>A separate test from the benchmark above, on the dark set of the kmerseek analysis
+(<a href="https://github.com/seanome/2024-kmerseek-analysis/pull/133">PR 133</a>,
+<a href="https://github.com/seanome/2024-kmerseek-analysis/pull/163">PR 163</a>).
+Each protein of four species (human, <i>C. elegans</i>, <i>S. cerevisiae</i>,
+<i>B. burgdorferi</i>) was searched against Swiss-Prot with the species' own clade removed.
+A protein is dark when no phmmer, jackhmmer or MMseqs2 hit has E ≤ 1, placed otherwise; only
+proteins with a known Pfam family count. A tool's best hit on a protein (smallest E-value) is
+right when the target's Swiss-Prot entry lists a Pfam family the query has, and the stretch of
+the query the hit covers overlaps a Pfam domain of that family on the query by at least one
+residue. n counts the best hits whose target has any Pfam family. The share right is given with
+a 95% Wilson interval, and grey under 30 judged hits. For the sequence tools the stretch of the
+query comes from aligning the query to its best target again with phmmer, because their hit
+files keep only the target's positions. kmerseek ran many settings (alphabet, k and scaled). The
+one shown for each species was picked on one half of the proteins, split by the accession. It
+is scored here on the other half, and so are the other tools. <i>Botryllus</i> is left out: it has no Pfam
+annotation. hhblits, one-round MMseqs2, hmmscan, Foldseek and ProstT5 have no dark-set run yet.</p>
 <h2 id="checks">Checks on this site</h2>
 <p>A headless browser renders every filter combination and confirms that each × on the
 leaderboard is a missing row in results.parquet, and that every number matches the tables. The
@@ -2229,6 +2389,8 @@ def main() -> None:
     global DATA_DIR
     DATA_DIR = a.data
     res, comp, src, prov, cov = load(a.data)
+    global WEAK
+    WEAK = load_weak(a.data, src)
 
     unknown = set(res["tool"].unique()) - set(TOOLS)
     if unknown:
@@ -2256,6 +2418,9 @@ def main() -> None:
         "axes": AXES,
         "searched": searched,
         "source": src,
+        # Weak hits right: tool -> species -> {k, n, lo, hi, ...}, dark proteins, E 1-10, test half
+        "weak": weak_json(),
+        "weakSpecies": [{"id": s, "name": n} for s, n in WEAK_SPECIES],
         # "?" buttons with their definitions, drawn by app.js into Table 1's header and the
         # filter rows (terms.js shows them).
         "terms": {"th": {t: term_btn(t, "th") for t in TERMS}, "short": {t: PLAIN[t][0] for t in PLAIN}, "filters": {"calls": term_btn("calls", "filters")},

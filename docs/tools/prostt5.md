@@ -28,6 +28,10 @@ Where it is furthest behind the best other tool:
 
 Swiss-Prot features, raw calls, zebrafish, setting shape letters from sequence: best feature type active site, Fmax 0.278 (n = 176); worst membrane-spanning, Fmax 0.000 (n = 1,124).
 
+## Can its weak hits be trusted? {#weak-hits}
+
+<span class="few">Not run on the dark set.</span> The weak-hit test so far covers phmmer, jackhmmer, MMseqs2 (3 rounds) and kmerseek ([how it was measured](../methods.html#weak-hits)).
+
 
 ## What it compares
 

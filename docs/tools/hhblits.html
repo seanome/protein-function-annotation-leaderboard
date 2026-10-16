@@ -45,7 +45,9 @@
 <li>regions 16–30 aa long: Fmax 0.066 (n = 271); best other: kmerseek, wwmj5, k = 11, 0.330.</li>
 <li>regions 31–60 aa long: Fmax 0.085 (n = 420); best other: kmerseek, gbmr4, k = 21, 0.232.</li>
 </ul>
-<p>Swiss-Prot features, raw calls, zebrafish, setting single-protein profiles: best feature type domain, Fmax 0.294 (n = 1,107); worst short motif, Fmax 0.003 (n = 190).</p><figure class="cardfig">
+<p>Swiss-Prot features, raw calls, zebrafish, setting single-protein profiles: best feature type domain, Fmax 0.294 (n = 1,107); worst short motif, Fmax 0.003 (n = 190).</p>
+<h2 id="weak-hits">Can its weak hits be trusted?</h2>
+<p><span class="few">Not run on the dark set.</span> The weak-hit test so far covers phmmer, jackhmmer, MMseqs2 (3 rounds) and kmerseek (<a href="../methods.html#weak-hits">how it was measured</a>).</p><figure class="cardfig">
 <figcaption><b>Figure 2.</b> Where HH-suite (hhsearch) is ahead and behind: its Fmax on each subset of the
 proteins, against the best other tool on that subset (Pfam truth set, raw calls, zebrafish as the relative; its best setting,
 single-protein profiles). Left out, under 30 true instances: 0–20%.</figcaption>
@@ -98,7 +100,7 @@ This covers the 7 database builds the task records hold; the search used 15 rela
 <p><a href="index.html">All tool cards</a> · <a href="hhblits.md">this card as Markdown</a> · <a href="hhblits.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-16.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="hhblits.html.json">hhblits.html.json</a></p>
 </div></footer>

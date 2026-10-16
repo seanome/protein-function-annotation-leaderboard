@@ -19,6 +19,12 @@ https://seanome.github.io/protein-function-annotation-leaderboard/
 | `coverage.md` | tool by stratum: measured or not run |
 | `provenance.json` | sha256 of every input and output |
 
+`data/weak_hits/` (`weak_hits.parquet`, `provenance.json`) comes from
+`results/leaderboard/weak_hits/` at `WEAK_HITS_COMMIT`: for phmmer, jackhmmer, MMseqs2 and
+kmerseek on the dark set of four species, how often the best hit is right in each E-value
+band. It feeds the "Weak hits right" columns of Table 1 and the "Can its weak hits be
+trusted?" block on every tool card. A tool with no rows there shows "not run" in grey.
+
 `data/SOURCE.json` records the commit, and every page prints it. The site never fills a gap:
 where the table has no row, the page shows "—" and "not run".
 

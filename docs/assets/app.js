@@ -177,6 +177,12 @@
     { id: "n", label: "True instances", key: "n_truth_instances", term: "n", cls: "c-more" },
     { id: "cpu", label: "Core-hours per 1,000 queries", key: "cpu_h_per_1000", term: "cpu", cls: "c-more" },
     { id: "ram", label: "Peak RAM, GB", key: "peak_rss_gb", term: "ram", cls: "c-more" },
+    // Weak hits right, one column per dark-set species: from the dark set, not this
+    // benchmark, so the value does not change with the filters (meta.weak).
+    { id: "wh_human", label: "Weak hits right, human", key: "weak", term: "weak", cls: "c-wide", weak: "human" },
+    { id: "wh_worm", label: "Weak hits right, <i>C. elegans</i>", key: "weak", term: "weak", cls: "c-more", weak: "worm" },
+    { id: "wh_yeast", label: "Weak hits right, <i>S. cerevisiae</i>", key: "weak", term: "weak", cls: "c-more", weak: "yeast" },
+    { id: "wh_borrelia", label: "Weak hits right, <i>B. burgdorferi</i>", key: "weak", term: "weak", cls: "c-more", weak: "borrelia" },
   ];
   const LOWER_FIRST = new Set(["tool", "cpu", "ram", "cost"]);
   function rowValues(s, row) {
@@ -192,7 +198,39 @@
       gpu: c ? c.gpu : null,
       // A cost belongs to a row that has results: a search that was not scored was not run.
       cost: r ? cost(c) : null,
+      wh_human: weakShare(row.tool, "human"), wh_worm: weakShare(row.tool, "worm"),
+      wh_yeast: weakShare(row.tool, "yeast"), wh_borrelia: weakShare(row.tool, "borrelia"),
     };
+  }
+  // Weak hits right: share of judged best hits, or null when not run or nothing was judged.
+  function weakEntry(tool, sp) {
+    return (M.weak && M.weak[tool] && M.weak[tool][sp]) || null;
+  }
+  function weakShare(tool, sp) {
+    const w = weakEntry(tool, sp);
+    return w && w.n > 0 ? w.k / w.n : null;
+  }
+  function weakCell(col, tool) {
+    const w = weakEntry(tool, col.weak);
+    if (!w) {
+      const td = missingCell(col, "weak", "not run");
+      td.classList.add("few");
+      td.title = "not run on the dark set";
+      return td;
+    }
+    if (w.n === 0) {
+      const td = document.createElement("td");
+      td.className = "none few " + (col.cls || "");
+      td.dataset.col = col.id;
+      td.dataset.none = "weak";
+      td.innerHTML = "<i>no judged hits</i>";
+      return td;
+    }
+    const td = numCell(col, (100 * w.k / w.n).toFixed(1) + "% (" + fmtInt(w.k) + "/" + fmtInt(w.n) + ")");
+    if (w.n < 30) td.classList.add("few");
+    td.title = "95% CI " + (100 * w.lo).toFixed(1) + "–" + (100 * w.hi).toFixed(1) + "%; " + w.setting +
+      (w.n < 30 ? "; fewer than 30 judged hits" : "");
+    return td;
   }
   // Words for a median IoU of 0. Fmax above 0 means at least one call was correct; with no
   // IoU those correct calls were all on single-residue annotations.
@@ -217,6 +255,8 @@
   const SORT_NAMES = {
     tool: "tool name", fmax: "Fmax", auprc: "AUPRC", iou: "median IoU", n: "true instances",
     cpu: "core-hours per 1,000 queries", ram: "peak RAM", cost: "estimated cost",
+    wh_human: "weak hits right (human)", wh_worm: "weak hits right (C. elegans)",
+    wh_yeast: "weak hits right (S. cerevisiae)", wh_borrelia: "weak hits right (B. burgdorferi)",
   };
   function sortWords() {
     const asc = state.dir === "asc";
@@ -277,6 +317,7 @@
     const why = v.r ? null : "not run";
     const cwhy = v.r && !v.c ? (M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species) ? "not measured" : "not run") : why;
     for (const col of COLS.slice(1)) {
+      if (col.weak) { tr.appendChild(weakCell(col, v.row.tool)); continue; }
       if (["fmax", "auprc", "iou", "n"].includes(col.id)) {
         if (!v.r) { tr.appendChild(missingCell(col, "results", "not run")); continue; }
         if (col.id === "iou" && v.iou == null) {

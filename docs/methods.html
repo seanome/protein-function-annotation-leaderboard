@@ -207,6 +207,23 @@ marks regions without a fixed shape.</li>
 <p>The run computed each subset on its own, so two subsets cannot be combined; a combination with
 no row shows × and "not run".</p>
 
+<h2 id="weak-hits">Can a tool's weak hits be trusted?</h2>
+<p>A separate test from the benchmark above, on the dark set of the kmerseek analysis
+(<a href="https://github.com/seanome/2024-kmerseek-analysis/pull/133">PR 133</a>,
+<a href="https://github.com/seanome/2024-kmerseek-analysis/pull/163">PR 163</a>).
+Each protein of four species (human, <i>C. elegans</i>, <i>S. cerevisiae</i>,
+<i>B. burgdorferi</i>) was searched against Swiss-Prot with the species' own clade removed.
+A protein is dark when no phmmer, jackhmmer or MMseqs2 hit has E ≤ 1, placed otherwise; only
+proteins with a known Pfam family count. A tool's best hit on a protein (smallest E-value) is
+right when the target's Swiss-Prot entry lists a Pfam family the query has, and the stretch of
+the query the hit covers overlaps a Pfam domain of that family on the query by at least one
+residue. n counts the best hits whose target has any Pfam family. The share right is given with
+a 95% Wilson interval, and grey under 30 judged hits. For the sequence tools the stretch of the
+query comes from aligning the query to its best target again with phmmer, because their hit
+files keep only the target's positions. kmerseek ran many settings (alphabet, k and scaled). The
+one shown for each species was picked on one half of the proteins, split by the accession. It
+is scored here on the other half, and so are the other tools. <i>Botryllus</i> is left out: it has no Pfam
+annotation. hhblits, one-round MMseqs2, hmmscan, Foldseek and ProstT5 have no dark-set run yet.</p>
 <h2 id="checks">Checks on this site</h2>
 <p>A headless browser renders every filter combination and confirms that each × on the
 leaderboard is a missing row in results.parquet, and that every number matches the tables. The
@@ -222,7 +239,7 @@ them. Their ids: <span class="mono">alphabet_ranking_three_cases</span>, <span c
 
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-16.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="methods.html.json">methods.html.json</a></p>
 </div></footer>
