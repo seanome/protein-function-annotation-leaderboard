@@ -3,10 +3,10 @@
  "title": "phmmer card",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "31c412584a7d00504b8b16dbf09ead27759aaff5",
-  "commit_date": "2026-10-16T19:30:21Z",
+  "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
+  "commit_date": "2026-10-16T19:47:35Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-16T19:31:03Z",
+  "copied_at": "2026-10-16T19:47:54Z",
   "sha256": {
    "results.parquet": "50a9ea98f3110eb3fffc4e9bbca2de714278118cc2d89c2dd59ac985b323e752",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -16,12 +16,12 @@
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
-   "query_strata/query_strata.tsv": "3e9623749c0adbbbd5071224f0e79226df389d293d97ba1b4138b8791260cf9f",
+   "query_strata/query_strata.tsv": "90cac50229e65df8bda83a26dd256e28e6461b4aa9655391cfaf7ab3d1954024",
    "query_strata/query_nearest_hits.tsv": "d4ceb1e7a762820fea492cc3a01c810293cf910d2e9a9c51d131a111e3a3862b",
    "query_strata/busco_summary.json": "16475186c75d9e4bab2dfe060d77f39127a93be7f3590fb16adc2474b07f9736",
-   "query_strata/commands.sh": "0338a4021995a18daac718525efc66c2689f9a465f0b6558130636dbcb39f5ab",
-   "query_strata/RULES.md": "dd9eb20e3eb0e6b5e14f2219e58256835ffe17169321b99ca8766bee6e4a1d59",
-   "query_strata/provenance.json": "98d2e53603c89abae9035bf9d18c476cb811c0cdb0b84798ddbe116abe68ebed"
+   "query_strata/commands.sh": "62a48445c2a07a927e44c2704c85f505c4d337aa608fb17aa8b6cebab42e55a4",
+   "query_strata/RULES.md": "da15ff78a41ca8a43a64a5cf0cf738569776f274b938be776218923490a44bae",
+   "query_strata/provenance.json": "136f4e6d55028117591cd069e83b63ae543687f0f758630f846e3d703aa4cb0b"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
  },
@@ -200,7 +200,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool id hmmer3_phmmer. Numbers from seanome/2024-kmerseek-analysis commit 31c41258."
+   "text": "Tool id hmmer3_phmmer. Numbers from seanome/2024-kmerseek-analysis commit 26a778cb."
   },
   {
    "tag": "p",
@@ -230,7 +230,7 @@
   "command": "phmmer \\\n    --domtblout /dev/stdout \\\n    --tblout /dev/null \\\n    -o /dev/stderr \\\n    --noali \\\n    -E 10.0 \\\n    --cpu 8 \\\n    UP000005640_9606.fasta UP000000437_7955.fasta",
   "numbers_from": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "31c412584a7d00504b8b16dbf09ead27759aaff5",
+   "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
    "filters": "pfam, raw, zebrafish"
   },
   "best_setting": "default",

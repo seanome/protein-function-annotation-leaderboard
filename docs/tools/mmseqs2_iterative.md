@@ -86,5 +86,5 @@ mmseqs search \
 
 Followed by mmseqs convertalis to write the table of hits.
 
-Tool id `mmseqs2_iterative`. Numbers from seanome/2024-kmerseek-analysis commit `31c41258`.
+Tool id `mmseqs2_iterative`. Numbers from seanome/2024-kmerseek-analysis commit `26a778cb`.
 

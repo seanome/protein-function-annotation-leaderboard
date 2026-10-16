@@ -12,12 +12,12 @@
    "status": "alive",
    "verdict": "−0.042 to +0.013 across 6 of 6",
    "date": null,
-   "source": "seanome/2024-kmerseek-analysis@31c41258 results.parquet",
+   "source": "seanome/2024-kmerseek-analysis@26a778cb results.parquet",
    "context": [
     {
      "label": "on Pfam domains, the best kmerseek setting for each mammal",
      "text": "−0.193 to +0.130 across 6 of 6; furthest: clupus −0.193",
-     "source": "seanome/2024-kmerseek-analysis@31c41258 results.parquet"
+     "source": "seanome/2024-kmerseek-analysis@26a778cb results.parquet"
     },
     {
      "label": "settings that pass on Swiss-Prot features (raw or dedup)",
@@ -170,8 +170,8 @@
  "source": {
   "tables": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "31c412584a7d00504b8b16dbf09ead27759aaff5",
-   "commit_date": "2026-10-16T19:30:21Z"
+   "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
+   "commit_date": "2026-10-16T19:47:35Z"
   },
   "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
  }

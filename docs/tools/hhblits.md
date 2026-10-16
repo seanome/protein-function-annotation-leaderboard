@@ -82,5 +82,5 @@ ffindex_apply \
 
 One hhsearch per query protein, run through ffindex_apply.
 
-Tool id `hhblits`. Numbers from seanome/2024-kmerseek-analysis commit `31c41258`.
+Tool id `hhblits`. Numbers from seanome/2024-kmerseek-analysis commit `26a778cb`.
 

@@ -3,10 +3,10 @@
  "title": "Methods",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "31c412584a7d00504b8b16dbf09ead27759aaff5",
-  "commit_date": "2026-10-16T19:30:21Z",
+  "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
+  "commit_date": "2026-10-16T19:47:35Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-16T19:31:03Z",
+  "copied_at": "2026-10-16T19:47:54Z",
   "sha256": {
    "results.parquet": "50a9ea98f3110eb3fffc4e9bbca2de714278118cc2d89c2dd59ac985b323e752",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -16,12 +16,12 @@
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
-   "query_strata/query_strata.tsv": "3e9623749c0adbbbd5071224f0e79226df389d293d97ba1b4138b8791260cf9f",
+   "query_strata/query_strata.tsv": "90cac50229e65df8bda83a26dd256e28e6461b4aa9655391cfaf7ab3d1954024",
    "query_strata/query_nearest_hits.tsv": "d4ceb1e7a762820fea492cc3a01c810293cf910d2e9a9c51d131a111e3a3862b",
    "query_strata/busco_summary.json": "16475186c75d9e4bab2dfe060d77f39127a93be7f3590fb16adc2474b07f9736",
-   "query_strata/commands.sh": "0338a4021995a18daac718525efc66c2689f9a465f0b6558130636dbcb39f5ab",
-   "query_strata/RULES.md": "dd9eb20e3eb0e6b5e14f2219e58256835ffe17169321b99ca8766bee6e4a1d59",
-   "query_strata/provenance.json": "98d2e53603c89abae9035bf9d18c476cb811c0cdb0b84798ddbe116abe68ebed"
+   "query_strata/commands.sh": "62a48445c2a07a927e44c2704c85f505c4d337aa608fb17aa8b6cebab42e55a4",
+   "query_strata/RULES.md": "da15ff78a41ca8a43a64a5cf0cf738569776f274b938be776218923490a44bae",
+   "query_strata/provenance.json": "136f4e6d55028117591cd069e83b63ae543687f0f758630f846e3d703aa4cb0b"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
  },
@@ -36,7 +36,7 @@
   },
   {
    "tag": "p",
-   "text": "Data from 16 Oct 2026, commit 31c41258 (source)"
+   "text": "Data from 16 Oct 2026, commit 26a778cb (source)"
   },
   {
    "tag": "li",
@@ -84,7 +84,7 @@
   },
   {
    "tag": "p",
-   "text": "Everything on this site except the coverage page comes from one experiment, qfo_region_midi_plus, a single benchmark run. It searched 998 human proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes, release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock cluster. It has 235,032 of the 4,386,981 rows of results.parquet, one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative, truth set, raw or dedup, and subset. Its cost is in compute.parquet. Both tables were built by make leaderboard-tables in seanome/2024-kmerseek-analysis at commit 31c41258. These 998 proteins are not a random sample of the human proteome."
+   "text": "Everything on this site except the coverage page comes from one experiment, qfo_region_midi_plus, a single benchmark run. It searched 998 human proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes, release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock cluster. It has 235,032 of the 4,386,981 rows of results.parquet, one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative, truth set, raw or dedup, and subset. Its cost is in compute.parquet. Both tables were built by make leaderboard-tables in seanome/2024-kmerseek-analysis at commit 26a778cb. These 998 proteins are not a random sample of the human proteome."
   },
   {
    "tag": "h2",
@@ -292,7 +292,7 @@
   },
   {
    "tag": "pre",
-   "text": "# Compute the leaderboard's query-side strata for your own proteome. # These are the commands scripts/query_strata/0*.sbatch ran on the 998 human queries, with # the Sherlock paths replaced by the three names below. Bins: RULES.md next to this file. QUERY=query.faa # the proteins you want to annotate TARGET=target.faa # the annotated proteome you copy annotations from (one per relative) PROTEOME=proteome.faa # your whole proteome, for BUSCO # 1. Identity to the nearest protein in the target: best hit per query by E-value, column 3. # MMseqs2 from quay.io/biocontainers/mmseqs2@sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef mmseqs easy-search \"$QUERY\" \"$TARGET\" hits.m8 tmp -s 7.0 -e 1e-3 --threads 8 sort -t $'\\t' -k1,1 -k11,11g -k12,12gr -k2,2 hits.m8 | awk -F'\\t' '$1 != prev {print; prev = $1}' > best_hits.m8 # 2. Membrane class: DeepTMHMM's predicted type (TM, SP+TM, BETA, SP, GLOB) per protein. # Image docker.io/deeptmhmm/deeptmhmm@sha256:e527883fd2114007c6208c3d764fece40016cc95e209eab93016644c3e7ccb16 for f in deeptmhmm_cv_0.model deeptmhmm_cv_1.model deeptmhmm_cv_2.model deeptmhmm_cv_3.model deeptmhmm_cv_4.model esm_model_alphabet.pt esm_model_args.pt esm_model_state_dict.pt; do ln -sfn \"/openprotein/$f\" \"$f\"; done apptainer exec --writable-tmpfs --bind \"$PWD\" --pwd \"$PWD\" docker://deeptmhmm/deeptmhmm@sha256:e527883fd2114007c6208c3d764fece40016cc95e209eab93016644c3e7ccb16 python3 /openprotein/predict.py --fasta \"$QUERY\" # 3. Low complexity: residues SEG masks (NCBI segmasker, SEG's defaults), divided by length. # segmasker from quay.io/biocontainers/blast@sha256:9dfc69f990c0aeb936276ee591ed32919a79f46dfa34060055e05a050a17959c (BLAST+ 2.16.0) segmasker -in \"$QUERY\" -infmt fasta -outfmt interval -out query.seg.intervals # 4. Length of each protein. (Region length is end - start + 1 of each region you score.) awk '/^>/{if(id)print id\"\\t\"n; id=substr($1,2); n=0; next}{n+=length($0)}END{print id\"\\t\"n}' \"$QUERY\" > query.length.tsv # 5. Pfam family breadth: find the Pfam families on your proteins, then look each one up in # pfam_family_breadth.tsv (superkingdoms and phyla, from Pfam 38's reference proteomes). # The leaderboard's own regions come from Pfam's region table, so this hmmscan step was # not run for it; the lookup table was made by scripts/query_strata/05_pfam_breadth.sbatch. hmmscan --cut_ga --domtblout query.domtbl Pfam-A.hmm \"$QUERY\" # 6. Gene-model completeness: BUSCO on the whole proteome; read each protein's rows of # full_table.tsv (Complete or Duplicated = complete; Fragmented only = fragmented). # BUSCO 6.1.0 from quay.io/biocontainers/busco@sha256:acf4e2f5bf6eb5c195b4165b4261e233974df5b23795319e2e4185569c9c903c busco --download primates_odb12 --download_path busco_downloads busco -i \"$PROTEOME\" -m proteins -l primates_odb12 -c 8 -o busco_out --offline --download_path busco_downloads"
+   "text": "# Compute the leaderboard's query-side strata for your own proteome. # These are the commands scripts/query_strata/0*.sbatch ran on the 998 human queries, with # the Sherlock paths replaced by the three names below. Bins: RULES.md next to this file. QUERY=query.faa # the proteins you want to annotate TARGET=target.faa # the annotated proteome you copy annotations from (one per relative) PROTEOME=proteome.faa # your whole proteome, for BUSCO # 1. Identity to the nearest protein in the target: best hit per query by E-value, column 3. # MMseqs2 from quay.io/biocontainers/mmseqs2@sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef mmseqs easy-search \"$QUERY\" \"$TARGET\" hits.m8 tmp -s 7.0 -e 1e-3 --threads 8 sort -t $'\\t' -k1,1 -k11,11g -k12,12gr -k2,2 hits.m8 | awk -F'\\t' '$1 != prev {print; prev = $1}' > best_hits.m8 # 2. Membrane class: DeepTMHMM's predicted type (TM, SP+TM, BETA, SP, GLOB) per protein. # Image docker.io/deeptmhmm/deeptmhmm@sha256:e527883fd2114007c6208c3d764fece40016cc95e209eab93016644c3e7ccb16 for f in deeptmhmm_cv_0.model deeptmhmm_cv_1.model deeptmhmm_cv_2.model deeptmhmm_cv_3.model deeptmhmm_cv_4.model esm_model_alphabet.pt esm_model_args.pt esm_model_state_dict.pt; do ln -sfn \"/openprotein/$f\" \"$f\"; done apptainer exec --writable-tmpfs --bind \"$PWD\" --pwd \"$PWD\" docker://deeptmhmm/deeptmhmm@sha256:e527883fd2114007c6208c3d764fece40016cc95e209eab93016644c3e7ccb16 python3 /openprotein/predict.py --fasta \"$QUERY\" # 3. Low complexity: residues SEG masks (NCBI segmasker, SEG's defaults), divided by length. # segmasker from quay.io/biocontainers/blast@sha256:9dfc69f990c0aeb936276ee591ed32919a79f46dfa34060055e05a050a17959c (BLAST+ 2.16.0) segmasker -in \"$QUERY\" -infmt fasta -outfmt interval -out query.seg.intervals # 4. Length of each protein. (Region length is end - start + 1 of each region you score.) awk '/^>/{if(id)print id\"\\t\"n; id=substr($1,2); n=0; next}{n+=length($0)}END{print id\"\\t\"n}' \"$QUERY\" > query.length.tsv # 5. Pfam family breadth: find the Pfam families on your proteins, then look each one up in # pfam_family_breadth.tsv (superkingdoms and phyla, from Pfam 38's reference proteomes). # The leaderboard's own regions come from Pfam's region table, so this hmmscan step was # not run for it; the lookup table was made by scripts/query_strata/05_pfam_breadth.sbatch. hmmscan --cut_ga --domtblout query.domtbl Pfam-A.hmm \"$QUERY\" # 6. Gene-model completeness: BUSCO on the whole proteome; read each protein's rows of # full_table.tsv (Complete or Duplicated = complete; Fragmented only = fragmented). # BUSCO 6.1.0 from quay.io/biocontainers/busco@sha256:acf4e2f5bf6eb5c195b4165b4261e233974df5b23795319e2e4185569c9c903c busco --download primates_odb12 --download_path busco_downloads busco -i \"$PROTEOME\" -m proteins -l primates_odb12 -c 8 -o busco_out --offline --download_path busco_downloads -f"
   },
   {
    "tag": "th",
@@ -352,7 +352,7 @@
   },
   {
    "tag": "td",
-   "text": "378"
+   "text": "379"
   },
   {
    "tag": "td",
@@ -364,7 +364,7 @@
   },
   {
    "tag": "td",
-   "text": "475"
+   "text": "480"
   },
   {
    "tag": "td",
@@ -376,7 +376,7 @@
   },
   {
    "tag": "td",
-   "text": "145"
+   "text": "139"
   },
   {
    "tag": "td",

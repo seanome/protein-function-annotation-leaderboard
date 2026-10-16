@@ -64,3 +64,22 @@ A bin with fewer than 30 truth instances is shown grey on the site.
    tool.
 4. Fewer than 5% of the 998 queries are `fragmented` BUSCO genes: they come from the
    reference human proteome, whose gene models are among the best there are.
+
+## Found after the rules were written
+
+- 2026-10-16, smoke test (Sherlock job 48149070, one scoring task rescored): in the QfO
+  region runs the Pfam-N answer key is every human protein's Pfam-N regions (44,315
+  regions on 18,724 proteins), not only the queries' (2,218 regions). So on Pfam-N the
+  protein-level bins, which hold queries only, add up to 2,218, not to the whole-set
+  44,315. The region-level axes still add up. check_query_strata.py lists Pfam-N's
+  protein-level axes apart and checks only that they agree with each other. Whether
+  Pfam-N's whole-set scores should count the non-query proteins is a separate question,
+  not changed here.
+- No query is a fragmented BUSCO gene (0 of 998; the human proteome has 30 fragmented
+  BUSCO genes of 11,834) and none is a beta-barrel. Those bins exist but hold nothing.
+- 2026-10-16, adversarial check: segmasker writes overlapping intervals for 162 of the 998
+  queries (A1A5C7: 51-63 and 63-77). The first build summed interval lengths and counted
+  shared residues twice (378 / 475 / 145 queries under 5% / 5-20% / over 20%); residues are
+  now counted once, as the rule says (379 / 480 / 139).
+- MMseqs2 prints `fident` to three decimals, so identity is known to 0.1%: a protein at
+  29.95% is written 0.300 and lands in 30-50%. The bins are read from what MMseqs2 prints.
