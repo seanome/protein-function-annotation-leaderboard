@@ -14,5 +14,17 @@
   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
  },
- "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+ "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+ "alphabets_commit": "98e9bccb9a4e2c7fda2583065730e3a51291ee22",
+ "alphabets_commit_date": "2026-10-16T17:14:15Z",
+ "alphabets_sha256": {
+  "alphabets/classes.parquet": "ba64bbfba0c5804f0e6181dfc95a93444e3e6dd8ef1cf6a6f40deef041a3285a",
+  "alphabets/evidence.parquet": "947b79a951cde9015f7e1de8eab40964e82990d8de34617eb604f2ec8714c49e",
+  "alphabets/kappa.parquet": "fc07558b430578a41afc7bb03c632a7f777ba6ff4383f7de326f9aeec5ba83b7",
+  "alphabets/usable_k.parquet": "7c5a1b4e7d20c0194ac4c0113ecbef888ee77117cee44b07a5573e0ec10f1659",
+  "alphabets/k_reach.parquet": "1f96063abf11db04948837c2e5783d733659b7e1629077a492ba5a9d6f2ed4c2",
+  "alphabets/provenance.json": "e8adcff2584cc73a425b303e22eb89606d921da2f3abda70de83ea4a9061b929",
+  "alphabets/hp_borderline_residues.csv": "a9ee91d6c88db8e4343bd337de297626106720c4c7bf9a36d1194099ffdf0a38"
+ },
+ "alphabets_copied_at": "2026-10-16T17:21:13Z"
 }

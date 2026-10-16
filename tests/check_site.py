@@ -88,6 +88,147 @@ def fmt3(x):
     return f"{x:.3f}"
 
 
+# Runs inside alphabets.html: everything the page shows, with the data attributes behind it.
+SNAP_ALPHABETS = """() => {
+  const D = (el) => Object.assign({}, el.dataset);
+  const rows = [...document.querySelectorAll('table.al tbody tr[data-alphabet]')].map((tr) => ({
+    alphabet: tr.dataset.alphabet,
+    classes: [...tr.querySelectorAll('td.classes .cls')].map((c) => ({
+      letters: [...c.querySelectorAll('.sq')].map((s) => s.textContent).join(''),
+      hp: ['h', 'p', 'c'].find((k) => c.classList.contains('hp-' + k)) || null})),
+    ev: [...tr.querySelectorAll('td.ev')].map((td) => ({...D(td), text: td.querySelector('.v').textContent,
+                                                        grey: td.classList.contains('grey')})),
+    kp: [...tr.querySelectorAll('td.kp')].map((td) => ({...D(td), text: td.textContent.trim(),
+                                                        grey: td.classList.contains('grey')})),
+    uk: [...tr.querySelectorAll('td.uk .kb')].map((s) => ({...D(s), text: s.querySelector('.v').textContent,
+                                                           hidden: s.hidden})),
+  }));
+  const evHead = [...document.querySelectorAll('th.evh')].map((th) => ({...D(th), text: th.querySelector('.key').textContent}));
+  const kpHead = [...document.querySelectorAll('th.kph')].map((th) => ({...D(th), text: th.querySelector('.key').textContent}));
+  const hp = [...document.querySelectorAll('table.hp116 td.sq116')].map((td) => ({...D(td), text: td.textContent}));
+  const hpN = [...document.querySelectorAll('table.hp116 tbody tr')].map((tr) => ({
+    alphabet: tr.querySelector('th').textContent, n: tr.querySelector('td.num').textContent}));
+  const full = [...document.querySelectorAll('table.full td.full')].map((td) => ({...D(td), text: td.textContent}));
+  return {rows, evHead, kpHead, hp, hpN, full, lead: document.getElementById('al-lead').textContent.replace(/\\s+/g, ' '),
+          kbinN: document.getElementById('kbin-n').textContent};
+}"""
+
+
+def check_alphabets(page, base: str, data: Path, failures: list, stats: dict) -> None:
+    """alphabets.html against data/alphabets/*.parquet and PR 116's CSV, read here directly."""
+    import csv
+    d = data / "alphabets"
+    ev = pl.read_parquet(d / "evidence.parquet")
+    kp = pl.read_parquet(d / "kappa.parquet")
+    uk = pl.read_parquet(d / "usable_k.parquet")
+    reach = pl.read_parquet(d / "k_reach.parquet")
+    cl = pl.read_parquet(d / "classes.parquet")
+    with open(d / "hp_borderline_residues.csv") as f:
+        hp116 = list(csv.DictReader(f))
+    page.goto(base + "alphabets.html")
+    snap = page.evaluate(SNAP_ALPHABETS)
+    n = {"numbers": 0}
+    fair = ev.filter(pl.col("mode") == "low_half")
+    groups = ["Pfam seed", "SCOPe: same family", "SCOPe: same superfamily, different family"]
+    alphabets = sorted(cl["alphabet"].unique())
+    if sorted(r["alphabet"] for r in snap["rows"]) != alphabets:
+        failures.append(f"alphabets.html: rows {[r['alphabet'] for r in snap['rows']]} are not the 19 alphabets")
+    for row in snap["rows"]:
+        a = row["alphabet"]
+        # classes: the same residues grouped together as classes.parquet
+        want = {frozenset(m) for m in cl.filter(pl.col("alphabet") == a)["class_members"].unique()}
+        got = {frozenset(c["letters"]) for c in row["classes"]}
+        if got != want or sum(len(c["letters"]) for c in row["classes"]) != 20:
+            failures.append(f"alphabets.html {a}: classes {sorted(map(sorted, got))} != {sorted(map(sorted, want))}")
+        for c in row["classes"]:
+            hp = cl.filter((pl.col("alphabet") == a) & (pl.col("residue") == c["letters"][0]))["hp_class"][0]
+            if c["hp"] != hp:
+                failures.append(f"alphabets.html {a}: class {c['letters']} drawn as {c['hp']}, table says {hp}")
+        # evidence, fair test
+        if [e["group"] for e in row["ev"]] != groups:
+            failures.append(f"alphabets.html {a}: evidence columns {[e['group'] for e in row['ev']]}")
+        for e in row["ev"]:
+            r = fair.filter((pl.col("group") == e["group"]) & (pl.col("alphabet") == a)).row(0, named=True)
+            text = f"{r['ratio_to_20aa']:.3f} ({r['lo']:.3f}–{r['hi']:.3f})"
+            if (e["text"] != text or float(e["ratio"]) != r["ratio_to_20aa"] or float(e["lo"]) != r["lo"]
+                    or float(e["hi"]) != r["hi"] or int(e["n"]) != r["n_items"] or int(e["clusters"]) != r["n_clusters"]
+                    or e["grey"] != (r["n_items"] < 30)):
+                failures.append(f"alphabets.html {a} {e['group']}: page {e} != parquet {text}, n {r['n_items']}")
+            n["numbers"] += 3
+        # kappa
+        bins = ["<20%", "20-30%", "30-40%", "40-60%", ">=60%"]
+        if [k["bin"] for k in row["kp"]] != bins:
+            failures.append(f"alphabets.html {a}: kappa bins {[k['bin'] for k in row['kp']]}")
+        for k in row["kp"]:
+            r = kp.filter((pl.col("alphabet") == a) & (pl.col("identity_bin") == k["bin"])).row(0, named=True)
+            if (k["text"] != f"{r['kappa']:.2f}" or float(k["kappa"]) != r["kappa"] or int(k["n"]) != r["n_pairs"]
+                    or float(k["agreement"]) != r["agreement"] or float(k["chance"]) != r["chance"]
+                    or k["grey"] != (r["n_pairs"] < 30)):
+                failures.append(f"alphabets.html {a} kappa {k['bin']}: page {k} != parquet {r}")
+            n["numbers"] += 1
+        # usable k, all three bins (two hidden)
+        for s in row["uk"]:
+            r = uk.filter((pl.col("alphabet") == a) & (pl.col("identity_bin") == s["bin"])).row(0, named=True)
+            # recomputed from the share of pairs reached at each k: inside notebook 274's range and >= 5%
+            rr = reach.filter((pl.col("alphabet") == a) & (pl.col("identity_bin") == s["bin"]))
+            ok = rr.filter(pl.col("k").is_between(r["k_min"], r["k_max"]) & (pl.col("share_reached") >= 0.05))["k"]
+            most = rr.filter(pl.col("k").is_between(r["k_min"], r["k_max"]) & (pl.col("share_reached") >= 0.20))["k"]
+            lo, hi = ok.min(), ok.max()
+            text = str(lo) if lo == hi else f"{lo}–{hi}"
+            if (s["text"] != text or int(s["kLo"]) != lo or int(s["kHi"]) != hi or (lo, hi) != (r["k_use_lo"], r["k_use_hi"])
+                    or (s["kMost"] or None) != (str(most.max()) if most.len() else None)
+                    or int(s["kMin"]) != r["k_min"] or int(s["kMax"]) != r["k_max"] or int(s["n"]) != r["n_pairs"]
+                    or s["hidden"] != (s["bin"] != "20-30%")):
+                failures.append(f"alphabets.html {a} usable k {s['bin']}: page {s} != {text}, {r}")
+            n["numbers"] += 2
+        if [s["bin"] for s in row["uk"]] != ["20-30%", "30-40%", "40-60%"]:
+            failures.append(f"alphabets.html {a}: usable k bins {[s['bin'] for s in row['uk']]}")
+    for h in snap["evHead"]:
+        e = fair.filter(pl.col("group") == h["group"])
+        if not h["text"].startswith(f"{e['n_items'][0]:,} pair-halves, {e['n_clusters'][0]:,} "):
+            failures.append(f"alphabets.html header {h}: n is not {e['n_items'][0]:,}")
+    for h in snap["kpHead"]:
+        if h["text"] != f"{kp.filter((pl.col('identity_bin') == h['bin']) & (pl.col('alphabet') == 'protein20'))['n_pairs'][0]:,}":
+            failures.append(f"alphabets.html kappa header {h}")
+    if snap["kbinN"] != f"n = {uk.filter(pl.col('identity_bin') == '20-30%')['n_pairs'][0]:,} pairs":
+        failures.append(f"alphabets.html usable k header n {snap['kbinN']}")
+    # PR 99's comment of 2026-10-14, Pfam seed fair test: sdm12 1.032 (1.027-1.038), hp_thomas_dill2 0.79
+    by = {(r["alphabet"], e["group"]): e["text"] for r in snap["rows"] for e in r["ev"]}
+    pr99 = {"sdm12": by[("sdm12", "Pfam seed")], "hp_thomas_dill2": by[("hp_thomas_dill2", "Pfam seed")]}
+    if pr99["sdm12"] != "1.032 (1.027–1.038)" or not pr99["hp_thomas_dill2"].startswith("0.790 "):
+        failures.append(f"alphabets.html: Pfam fair-test rows {pr99} differ from PR 99's comment")
+    if "1.032" not in snap["lead"] or "1.027–1.038" not in snap["lead"] or "0.79 " not in snap["lead"]:
+        failures.append(f"alphabets.html: lead sentence {snap['lead']!r}")
+    above = fair.filter((pl.col("group") == "Pfam seed") & (pl.col("lo") > 1) & (pl.col("alphabet") != "protein20")).sort("rank")
+    if f"({', '.join(above['alphabet'])})" not in snap["lead"]:
+        failures.append(f"alphabets.html: lead sentence does not list {list(above['alphabet'])}")
+    stats["alphabets_pr99_rows"] = pr99
+    # PR 116's CSV, all 140 squares, and the residues-in-h column
+    want = {(r["alphabet"], r["residue"]): r["class"] for r in hp116}
+    got = {(s["alphabet"], s["residue"]): (s["class"], s["text"]) for s in snap["hp"]}
+    if len(snap["hp"]) != 140 or len(want) != 140 or {k: v[0] for k, v in got.items()} != want \
+            or any(c != t for c, t in got.values()):
+        failures.append(f"alphabets.html: H/P squares differ from PR 116's CSV ({len(snap['hp'])} squares)")
+    n_h = {r["alphabet"]: r["n_residues_in_h"] for r in hp116}
+    if {r["alphabet"]: r["n"] for r in snap["hpN"]} != n_h:
+        failures.append(f"alphabets.html: residues in h {snap['hpN']} != {n_h}")
+    stats["alphabets_hp116_squares_matched"] = sum(1 for k, v in got.items() if want.get(k) == v[0])
+    # every group and pair selection
+    for c in snap["full"]:
+        r = ev.filter((pl.col("group") == c["group"]) & (pl.col("mode") == c["mode"]) & (pl.col("alphabet") == c["alphabet"])).row(0, named=True)
+        if c["text"] != f"{r['ratio_to_20aa']:.2f}" or int(c["n"]) != r["n_items"]:
+            failures.append(f"alphabets.html full table {c} != {r['ratio_to_20aa']}")
+        n["numbers"] += 1
+    if len(snap["full"]) != ev.height:
+        failures.append(f"alphabets.html: full table has {len(snap['full'])} cells, parquet {ev.height} rows")
+    # the chips switch the usable-k bin
+    page.click('.kbins .chip[data-kbin="40-60%"]')
+    vis = page.evaluate("[...document.querySelectorAll('td.uk .kb')].filter(s => !s.hidden).map(s => s.dataset.bin)")
+    if set(vis) != {"40-60%"} or len(vis) != 19:
+        failures.append(f"alphabets.html: after the 40-60% chip, visible bins {set(vis)} ({len(vis)})")
+    stats["alphabets_numbers_checked"] = n["numbers"]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--site", type=Path, default=ROOT / "docs")
@@ -357,9 +498,14 @@ def main() -> int:
         stats["dark_mode_marker"] = col["marker"]
         page.emulate_media(color_scheme="light")
 
+        # ---- 2d. the alphabet page ----
+        if (a.site / "alphabets.html").exists():
+            check_alphabets(page, base, a.data, failures, stats)
+
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "explainers.html", "tools/index.html"] + \
         (["pileup.html"] if (a.site / "pileup.html").exists() else []) + \
+        (["alphabets.html"] if (a.site / "alphabets.html").exists() else []) + \
         [x for x in ("claims.html", "claims-schema.html") if (a.site / x).exists()] + \
             [f"tools/{t}.html" for t in sorted(meta["tools"])]
         files_ok = {str(q.relative_to(a.site)) for q in a.site.rglob("*") if q.is_file()}
@@ -385,14 +531,17 @@ def main() -> int:
     httpd.shutdown()
 
     # ---- 4. every page has its JSON twin, naming the same source commit ----
-    commit = json.loads((a.site / "data/SOURCE.json").read_text())["commit"]
+    site_src = json.loads((a.site / "data/SOURCE.json").read_text())
+    commit = site_src["commit"]
     for pg in pages:
         jp = a.site / (pg + ".json")
         if not jp.exists():
             failures.append(f"{pg}: no {pg}.json")
             continue
         doc = json.loads(jp.read_text())
-        if doc["source"]["commit"] != commit or not doc["text"]:
+        # The alphabet page's numbers come from their own commit.
+        want_commit = site_src.get("alphabets_commit") if pg == "alphabets.html" else commit
+        if doc["source"]["commit"] != want_commit or not doc["text"]:
             failures.append(f"{pg}.json: wrong commit or no text")
     stats["json_pages"] = len(pages)
     failures += [f"console: {e}" for e in console_errors]
