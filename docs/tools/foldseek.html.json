@@ -118,7 +118,7 @@
   },
   {
    "tag": "li",
-   "text": "⊘Foldseek is sensitiveThe authors' words: “Foldseek enables fast and sensitive comparisons of large protein structure sets” (github.com/steineggerlab/foldseek, fetched 16 Oct 2026)Disproved if: Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searcheddisproved · −0.100 to −0.000 across 10 of 10; furthest: fly −0.100 · leaderboard"
+   "text": "⊘Foldseek is sensitiveThe authors' words: “Foldseek enables fast and sensitive comparisons of large protein structure sets” (github.com/steineggerlab/foldseek, fetched 16 Oct 2026)Disproved if: Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searcheddisproved · −0.100 to +0.000 across 10 of 10; furthest: fly −0.100 · leaderboard"
   },
   {
    "tag": "h2",

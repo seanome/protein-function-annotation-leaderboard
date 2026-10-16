@@ -86,7 +86,7 @@
   },
   {
    "tag": "li",
-   "text": "⊘Foldseek is sensitiveThe authors' words: “Foldseek enables fast and sensitive comparisons of large protein structure sets” (github.com/steineggerlab/foldseek, fetched 16 Oct 2026)Disproved if: Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searcheddisproved · −0.100 to −0.000 across 10 of 10; furthest: fly −0.100 · leaderboard"
+   "text": "⊘Foldseek is sensitiveThe authors' words: “Foldseek enables fast and sensitive comparisons of large protein structure sets” (github.com/steineggerlab/foldseek, fetched 16 Oct 2026)Disproved if: Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searcheddisproved · −0.100 to +0.000 across 10 of 10; furthest: fly −0.100 · leaderboard"
   },
   {
    "tag": "h2",
@@ -106,7 +106,7 @@
   },
   {
    "tag": "p",
-   "text": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict."
+   "text": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict. The identity bins come from an MMseqs2 search (-s 7.5) between the domains, so a pair MMseqs2 cannot align is in no bin; this favours MMseqs2 in this comparison."
   },
   {
    "tag": "p",
@@ -350,7 +350,7 @@
       "kill": "Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searched",
       "scope": "Pfam-A domain instances, raw calls, 998 human queries, the 10 relatives with Foldseek rows (setting 3di_aa against AlphaFold structures). Tests the \"sensitive\" half only; speed is on the Cost page and is not part of this test. Pfam domains are defined from sequence, which favours sequence searches like phmmer; a structure-based truth set would be the fairer test and is not on this site yet.",
       "status": "retired",
-      "verdict": "−0.100 to −0.000 across 10 of 10; furthest: fly −0.100",
+      "verdict": "−0.100 to +0.000 across 10 of 10; furthest: fly −0.100",
       "date": null,
       "source": "seanome/2024-kmerseek-analysis@4a4b1171 results.parquet",
       "context": [],
@@ -390,7 +390,7 @@
       "id": "remote-homologs",
       "claim": "phmmer finds distant homologs at least as well as a fast sequence search",
       "kill": "phmmer's Fmax is more than 0.05 below MMseqs2's on Pfam domains at 20 to 30% identity, on any relative with at least 30 such domains",
-      "scope": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict.",
+      "scope": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict. The identity bins come from an MMseqs2 search (-s 7.5) between the domains, so a pair MMseqs2 cannot align is in no bin; this favours MMseqs2 in this comparison.",
       "status": "retired",
       "verdict": "−0.137 to +0.057 across 10 of 15 (5 with fewer than 30 truth regions left out: btaurus, mdomestica, mouse, ptroglodytes, rnorvegicus); furthest: ecoli −0.137",
       "date": null,

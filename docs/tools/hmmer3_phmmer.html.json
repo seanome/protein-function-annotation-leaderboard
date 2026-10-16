@@ -110,7 +110,7 @@
   },
   {
    "tag": "p",
-   "text": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict."
+   "text": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict. The identity bins come from an MMseqs2 search (-s 7.5) between the domains, so a pair MMseqs2 cannot align is in no bin; this favours MMseqs2 in this comparison."
   },
   {
    "tag": "p",

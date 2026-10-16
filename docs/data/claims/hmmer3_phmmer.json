@@ -8,7 +8,7 @@
    "id": "remote-homologs",
    "claim": "phmmer finds distant homologs at least as well as a fast sequence search",
    "kill": "phmmer's Fmax is more than 0.05 below MMseqs2's on Pfam domains at 20 to 30% identity, on any relative with at least 30 such domains",
-   "scope": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict.",
+   "scope": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict. The identity bins come from an MMseqs2 search (-s 7.5) between the domains, so a pair MMseqs2 cannot align is in no bin; this favours MMseqs2 in this comparison.",
    "status": "retired",
    "verdict": "−0.137 to +0.057 across 10 of 15 (5 with fewer than 30 truth regions left out: btaurus, mdomestica, mouse, ptroglodytes, rnorvegicus); furthest: ecoli −0.137",
    "date": null,

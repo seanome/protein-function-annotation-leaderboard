@@ -73,8 +73,9 @@ python scripts/fetch_quote.py --text-url <raw page URL> --url <page a reader ope
 
 The script fetches the page, refuses a quote that is not on it, and prints the `author_claim`
 block with the quote's sha256. Paste it into the claim. The build fails if the quote is later
-edited without fetching the page again. `make quotes-online` fetches every page again and
-checks that each quote is still there. The format is on the
+edited without fetching the page again. `make quotes-online`, and the `quotes` GitHub Action
+(on every change to `claims/` and weekly), fetch every page again and check that each quote is
+still there, which also catches a quote reworded together with its sha256. The format is on the
 [claims.yaml page](https://seanome.github.io/protein-function-annotation-leaderboard/claims-schema.html).
 
 ## Disputing a row
@@ -98,8 +99,8 @@ nothing). Cite the version you compared against.
 ## The other way in
 
 In the second path you run the tool yourself and send its predictions and a timing log in a
-pull request to this repository; a workflow scores them (`CONTRIBUTING.md`, once that is
-merged). Both paths use the same scorer and the same row layout. They differ in who ran the
-tool: rows from that path have `cost_provenance` = `reported`, shown with your hardware as
-reported, and rows from this path have `measured`, from the host's trace. Only measured rows
-are compared on cost.
+pull request to this repository, and a workflow scores them. That path is on the
+`olgabot/contribute` branch and is not merged yet. Both paths use the same scorer. They differ
+in who ran the tool, which the `cost_provenance` column of a release row records: `measured`
+for a host run from the trace, `reported` for an author's timing log. The site does not yet
+separate the two on its cost pages; until it does, only host-run rows carry cost.

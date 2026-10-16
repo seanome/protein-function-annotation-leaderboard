@@ -1,0 +1,23 @@
+# Fetches every author's page named in claims/*.yaml and fails when a quote is not on it.
+# The sha256 check in claims.yml stops a quote edited by hand; it cannot stop someone who also
+# recomputes the sha256. This check can, and also notices when an author changes their page.
+# It needs the network, so it runs when a claims file changes and once a week, not on every push.
+name: quotes
+on:
+  pull_request:
+    paths: ["claims/**"]
+  push:
+    paths: ["claims/**"]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+jobs:
+  quotes-online:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install polars==1.44.2 pyarrow==26.0.0 pyyaml==6.0.2 jsonschema==4.23.0
+      - run: python scripts/fetch_quote.py --check-all

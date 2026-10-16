@@ -43,6 +43,9 @@ def num(text: str) -> float:
 
 
 def signed(x: float, d: int = 3) -> str:
+    # A value that rounds to zero prints as +0.000, not −0.000.
+    if round(x, d) == 0:
+        x = 0.0
     return f"{x:+.{d}f}".replace("-", "−")
 
 
