@@ -1,15 +1,24 @@
 # Scores a tool submission (a pull request that adds or changes submissions/<name>/) with the
 # leaderboard's own scorer and posts the resulting rows on the pull request.
 #
-# pull_request_target, not pull_request: a pull request from a fork gets a read-only token
-# under pull_request, so it could not post its comment. pull_request_target runs the workflow
-# and the code of the BASE branch, with a token that can comment. The pull request's own code
-# is never run: only the three data files of each submission folder are copied out of the
-# pull request's commit (git show), and scripts/score_submission.py reads them as data
-# (polars CSV and yaml.safe_load). Any other file name in the folder is refused.
+# Two triggers, one job, never both on one pull request:
+#   pull_request_target  pull requests from forks. Under plain pull_request a fork gets a
+#                        read-only token and could not post its comment. GitHub runs
+#                        pull_request_target from the workflow file on the DEFAULT branch, so
+#                        this path works once this file is on main.
+#   pull_request         pull requests from branches of this repository, which already have
+#                        write access. Runs from the pull request's own workflow file, so it
+#                        also works before this file reaches main.
+# Either way the scorer is checked out from the BASE commit, and the pull request's own code is
+# never run: only the three data files of each submission folder are copied out of the pull
+# request's commit (git show), and scripts/score_submission.py reads them as data (polars CSV
+# and yaml.safe_load). Any other file name in the folder is refused.
 name: score-submission
 on:
   pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths: ["submissions/**"]
+  pull_request:
     types: [opened, synchronize, reopened]
     paths: ["submissions/**"]
 permissions:
@@ -20,6 +29,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   score:
+    if: >-
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -29,6 +41,8 @@ jobs:
       HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
