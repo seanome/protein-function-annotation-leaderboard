@@ -44,12 +44,16 @@ def afdb_table(path):
         for line in fh:
             r = json.loads(line)
             models = r.get("models") or []
-            # A whole-protein model (F1 starting at residue 1) when there is one.
-            m = next((m for m in models if (m.get("entryId") or "").endswith("-F1")), models[0] if models else None)
+            # The model for this accession is AF-<accession>-F1. Some long proteins
+            # are served only as models of a shorter isoform (AF-<accession>-2-F1, ...); those
+            # do not count as a model of this protein.
+            own = f"AF-{r['accession']}-F1"
+            m = next((m for m in models if m.get("entryId") == own), None)
             rows.append(
                 {
                     "accession": r["accession"],
-                    "af_model": bool(models),
+                    "af_model": m is not None,
+                    "af_isoform_model_only": m is None and bool(models),
                     "af_mean_plddt": m["globalMetricValue"] if m else None,
                     "af_version": m["latestVersion"] if m else None,
                     "af_model_sequence": m["sequence"] if m else None,
@@ -124,6 +128,9 @@ def main():
     raw, sh = args.raw, args.sherlock
 
     af = afdb_table(raw / "afdb_predictions.jsonl.gz")
+    cols = ["query", "target", "fident", "alnlen", "qstart", "qend", "tstart", "tend", "evalue", "bits", "qlen", "tlen"]
+    at_least = set(pl.read_csv(sh / "mmseqs_vs_sprot.tsv.gz", separator="\t", has_header=False, new_columns=cols)
+                   .filter(pl.col("fident") >= MIN_FIDENT).select(acc_of("query"))["query"])
     _, best = mmseqs_table(sh / "mmseqs_vs_sprot.tsv.gz")
     N = Numbers()
     frames = []
@@ -144,6 +151,7 @@ def main():
             .with_columns(
                 interpro_match=pl.col("accession").is_in(list(ipr)),
                 af_model=pl.col("af_model").fill_null(False),
+                af_isoform_model_only=pl.col("af_isoform_model_only").fill_null(False),
                 af_model_matches_sequence=pl.col("af_model_sequence") == pl.col("sequence"),
                 sprot_hit=pl.col("sprot_best_target").is_not_null(),
                 sprot_hit_nonself=pl.col("sprot_best_nonself_target").is_not_null(),
@@ -162,7 +170,8 @@ def main():
         rel = "UniProt 2026_03"
         N.add(f"{tag}_proteins", 4, f"{tag}: proteins in the one-protein-per-gene reference set", n, "proteins", src, rel)
         for col, what, source in (
-            ("af_model", "with an AlphaFold DB model", "afdb_predictions"),
+            ("af_model", "with an AlphaFold DB model for this accession (AF-accession-F1)", "afdb_predictions"),
+            ("af_isoform_model_only", "with AlphaFold DB models only of another isoform (not counted as a model)", "afdb_predictions"),
             ("interpro_match", "with any InterPro match (InterPro entry or member-database signature, as UniProt cross-references them)", f"{tag}_interpro_xrefs"),
             ("sprot_hit", "with a Swiss-Prot hit above 30% identity (MMseqs2, self-hits count)", "sherlock_mmseqs"),
             ("sprot_hit_nonself", "with a Swiss-Prot hit above 30% identity other than the protein itself", "sherlock_mmseqs"),
@@ -182,13 +191,22 @@ def main():
             N.add("oyster_interpro_api_and_xref", 4, "oyster: proteins with a match by both the InterPro API listing and UniProt's cross-references", both, "proteins", "interpro_oyster", "InterPro API")
             N.add("oyster_interpro_xref_only", 4, "oyster: proteins with a match by UniProt's cross-references only", x_only, "proteins", "interpro_oyster", "InterPro API")
             N.add("oyster_interpro_api_only", 4, "oyster: proteins with a match in the InterPro API listing only", api_only, "proteins", "interpro_oyster", "InterPro API")
+        k = df.filter(pl.col("af_model") & ~pl.col("af_model_matches_sequence")).height
+        N.add(f"{tag}_af_model_other_sequence", 4, f"{tag}: proteins whose AlphaFold DB model (AF-accession-F1) was built on a sequence different from today's UniProt sequence; still counted as a model", k, "proteins", "afdb_predictions", rel)
+        extra = len(set(df.filter(~pl.col("sprot_hit"))["accession"]) & at_least)
+        N.add(f"{tag}_sprot_hit_at_exactly_30pct", 4, f"{tag}: proteins whose best Swiss-Prot identity is exactly 0.30, so counted only by >= 0.30, not by > 0.30", extra, "proteins", "sherlock_mmseqs", rel)
+        no_self = df.filter(~pl.col("af_model") & ~pl.col("interpro_match") & ~pl.col("sprot_hit_nonself")).height
+        N.add(f"{tag}_no_label_nonself_pct", 4, f"{tag}: share of proteins with none of the three labels, a hit to the protein's own Swiss-Prot entry not counted", round(100 * no_self / n, 2), "% of proteins", "sherlock_mmseqs", rel)
+        fn_ns = df.filter(~pl.col("interpro_match") & ~pl.col("sprot_hit_nonself")).height
+        N.add(f"{tag}_no_interpro_no_sprot_nonself_pct", 4, f"{tag}: share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity to another entry (its own entry not counted)", round(100 * fn_ns / n, 2), "% of proteins", "sherlock_mmseqs", rel)
         fn = df.filter(~pl.col("interpro_match") & ~pl.col("sprot_hit")).height
-        N.add(f"{tag}_no_interpro_no_sprot_pct", 4, f"{tag}: share of proteins with neither an InterPro match nor a Swiss-Prot hit", round(100 * fn / n, 2), "% of proteins", "sherlock_mmseqs", rel,
+        N.add(f"{tag}_no_interpro_no_sprot_pct", 4, f"{tag}: share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)", round(100 * fn / n, 2), "% of proteins", "sherlock_mmseqs", rel,
               note="the two labels that name a function; AlphaFold DB models nearly every UniProt sequence")
         N.add(f"{tag}_af_mean_plddt_median", 4, f"{tag}: median of per-protein mean pLDDT, proteins with a model", round(df["af_mean_plddt"].median(), 2), "pLDDT", "afdb_predictions", "AlphaFold DB API")
         for status in ("Complete", "Duplicated", "Fragmented"):
             k = df.filter(pl.col("busco_status") == status).height
-            N.add(f"{tag}_busco_{status.lower()}", 4, f"{tag}: proteins BUSCO metazoa_odb12 calls {status}", k, "proteins", f"sherlock_busco_{tag}", "BUSCO 6.1.0, metazoa_odb12")
+            what = {"Complete": "Complete, single copy", "Duplicated": "Complete, duplicated", "Fragmented": "Fragmented"}[status]
+            N.add(f"{tag}_busco_{status.lower()}", 4, f"{tag}: proteins BUSCO metazoa_odb12 calls {what}", k, "proteins", f"sherlock_busco_{tag}", "BUSCO 6.1.0, metazoa_odb12")
 
     table = pl.concat(frames)
     table.drop("sequence").write_parquet(OUT / "proteome_labels.parquet")
