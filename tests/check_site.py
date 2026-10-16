@@ -14,6 +14,10 @@
    exactly the rows with a value on both axes, each marker's x and y must equal the value
    computed here from the parquet files, every other row must be listed as not plotted, and
    the line through the best trade-offs must be drawn only for a cost against a score.
+2d. Query-side subsets (data/query_strata/): one chip row per axis with a chip for every bin
+   the queries fall in; on Methods, the commands box is commands.sh byte for byte and every
+   count of queries per bin is recounted here from the two TSV files with the csv module.
+   A leaderboard row whose subset has fewer than 30 true instances is grey, and no other.
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
    at phone width (375 px).
 
@@ -52,7 +56,8 @@ def combos(meta: dict) -> list[dict]:
     rows = {r["id"]: r for r in meta["chiprows"]}
     vals = lambda rid: [c["value"] for g in rows[rid]["groups"] for c in g["chips"]]  # noqa: E731
     strata = [("all", "all")]
-    for rid in ("identity", "length", "plddt", "ftype"):
+    # Every stratum row: the four the run always had, then the query-side ones.
+    for rid in [r["id"] for r in meta["chiprows"] if r["kind"] == "stratum"]:
         strata += [(rows[rid]["axis"], v) for v in vals(rid) if v != "all"]
     return [
         {"truth": t, "calls": c, "species": s, "axis": a, "stratum": st}
@@ -68,7 +73,7 @@ SNAP_TABLE = """(batch) => batch.map((s) => {
     for (const td of tr.querySelectorAll('td[data-col]')) {
       cells[td.dataset.col] = {text: td.textContent.trim(), missing: td.dataset.missing || null, none: td.dataset.none || null};
     }
-    return {tool: tr.dataset.tool, setting: tr.dataset.setting, hidden: tr.hidden, cells};
+    return {tool: tr.dataset.tool, setting: tr.dataset.setting, hidden: tr.hidden, few: tr.classList.contains('few'), cells};
   });
   const v = document.getElementById('verdict').dataset;
   return {s, rows, verdict: {best: v.best, cheap: v.cheap, auprc: v.auprc}};
@@ -166,6 +171,8 @@ def main() -> int:
                     bad = [c for c, v in cells.items() if c != "tool" and (v["missing"] != "results" or v["text"] != "× not run")]
                     if bad:
                         failures.append(f"{tag}: no parquet row but cells {bad} are not '× not run': {cells}")
+                    if row["few"]:
+                        failures.append(f"{tag}: no parquet row but drawn grey as a small subset")
                     stats["missing_results_cells"] += 1
                     continue
                 shown = [cells[c]["text"] for c in ("fmax", "auprc", "iou", "n")]
@@ -184,6 +191,9 @@ def main() -> int:
                     stats[k_iou] = stats.get(k_iou, 0) + 1
                 else:
                     bad |= abs(float(shown[2]) - exp[2]) > 0.0005 + 1e-9
+                if row["few"] != (want["n_truth_instances"] < 30):
+                    failures.append(f"{tag}: {want['n_truth_instances']} true instances but grey={row['few']}")
+                stats["grey_checked"] = stats.get("grey_checked", 0) + 1
                 if bad or shown[3] != f"{want['n_truth_instances']:,}" or any(cells[c]["missing"] for c in ("fmax", "auprc", "iou", "n")):
                     failures.append(f"{tag}: page {shown} != parquet {exp + [want['n_truth_instances']]}")
                 stats["numbers_checked"] += 4
@@ -356,6 +366,46 @@ def main() -> int:
             failures.append(f"dark mode cost.html: marker {col['marker']} vs token {col['tok']}, hex legend strokes {col['legendHex']}")
         stats["dark_mode_marker"] = col["marker"]
         page.emulate_media(color_scheme="light")
+
+        # ---- 2d. query-side subsets ----
+        qs = a.data / "query_strata"
+        if (qs / "query_strata.tsv").exists():
+            import csv
+            from collections import Counter
+            q_rows = list(csv.DictReader(open(qs / "query_strata.tsv"), delimiter="\t"))
+            h_rows = list(csv.DictReader(open(qs / "query_nearest_hits.tsv"), delimiter="\t"))
+            by_axis = {r["axis"]: r for r in meta["chiprows"] if r["kind"] == "stratum"}
+            seen = {ax: Counter(r[ax] for r in q_rows)
+                    for ax in ("membrane", "low_complexity", "protein_length", "busco")}
+            seen["nearest_identity"] = Counter(r["nearest_identity"] for r in h_rows)
+            for ax in ("nearest_identity", "membrane", "low_complexity", "protein_length",
+                       "region_length", "family_superkingdoms", "family_phyla", "busco"):
+                if ax not in by_axis:
+                    failures.append(f"no chip row for the query-side axis {ax}")
+                    continue
+                chips = {c["value"] for g in by_axis[ax]["groups"] for c in g["chips"]}
+                missing = set(seen.get(ax, {})) - chips
+                if missing:
+                    failures.append(f"chip row {ax} has no chip for bins {sorted(missing)}")
+            page.goto(base + "methods.html")
+            box = page.evaluate("document.getElementById('qs-commands') && document.getElementById('qs-commands').textContent")
+            if box != (qs / "commands.sh").read_text():
+                failures.append("methods.html: the commands box is not commands.sh verbatim")
+            got = page.evaluate("[...document.querySelectorAll('#qs-counts tbody tr')].map(t => [t.dataset.axis, t.dataset.bin, t.lastElementChild.textContent])")
+            for ax_, b, n in got:
+                want_n = seen[ax_].get(b, 0)
+                if n != f"{want_n:,}":
+                    failures.append(f"methods.html: {ax_} {b} shows {n} queries, recount {want_n}")
+            if sum(int(n.replace(",", "")) for ax_, _, n in got if ax_ == "busco") != len(q_rows):
+                failures.append("methods.html: BUSCO bins do not add up to the queries")
+            ident = Counter((r["species"], r["nearest_identity"]) for r in h_rows)
+            cells = page.evaluate("[...document.querySelectorAll('#qs-ident tbody tr')].flatMap(t => [...t.querySelectorAll('td[data-bin]')].map(td => [t.dataset.species, td.dataset.bin, td.textContent]))")
+            for sp, b, n in cells:
+                if n != f"{ident.get((sp, b), 0):,}":
+                    failures.append(f"methods.html: {sp} {b} shows {n}, recount {ident.get((sp, b), 0)}")
+            stats["query_strata_counts_checked"] = len(got) + len(cells)
+            if not cells or not got:
+                failures.append("methods.html: query-strata tables are empty")
 
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "explainers.html", "tools/index.html"] + \

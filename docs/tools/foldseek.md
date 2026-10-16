@@ -84,5 +84,5 @@ foldseek search \
 
 Followed by foldseek convertalis to write the table of hits.
 
-Tool id `foldseek`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Tool id `foldseek`. Numbers from seanome/2024-kmerseek-analysis commit `31c41258`.
 

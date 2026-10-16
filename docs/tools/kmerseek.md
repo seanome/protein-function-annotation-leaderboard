@@ -103,5 +103,5 @@ kmerseek search \
 
 Shown for setting hp_thomas_dill2 k24. Other settings change --alphabet and --ksize only.
 
-Tool id `kmerseek`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Tool id `kmerseek`. Numbers from seanome/2024-kmerseek-analysis commit `31c41258`.
 

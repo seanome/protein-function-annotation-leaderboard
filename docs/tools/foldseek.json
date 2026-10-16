@@ -22,7 +22,7 @@
  "command": "foldseek search \\\n    human-38fdd87d_fsdb/db zebrafish_fsdb/db result foldseek_tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit": "31c412584a7d00504b8b16dbf09ead27759aaff5",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "3di_aa",
