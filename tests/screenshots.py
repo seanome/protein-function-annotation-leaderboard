@@ -20,13 +20,15 @@ PAGES = {
     "7_claims": "claims.html",
     "4_coverage": "coverage.html",
     "5_methods": "methods.html",
+    "8_how_the_scores_work": "explainers.html",
 }
 EXTRA = {
     "2b_compare_cost_usd_auprc": "cost.html#x=cost&y=auprc",
     "2c_compare_fmax_auprc": "cost.html#x=fmax&y=auprc",
     "2d_compare_ram_iou": "cost.html#x=ram&y=iou",
 }
-PHONE = {"2e_compare_two_columns_400px": "cost.html"}
+# Also at phone width (400 px), as <name>_400.png.
+PHONE = {"1_leaderboard", "2_compare_two_columns", "8_how_the_scores_work"}
 
 
 class Quiet(http.server.SimpleHTTPRequestHandler):
@@ -58,13 +60,22 @@ def main() -> None:
             page.wait_for_timeout(800)
             page.screenshot(path=str(out / f"{name}.png"), full_page=True)
             print(out / f"{name}.png")
-        phone = b.new_page(viewport={"width": 400, "height": 900}, color_scheme="light")
-        for name, path in PHONE.items():
+        phone = b.new_page(viewport={"width": 400, "height": 860}, color_scheme="light")
+        for name, path in PAGES.items():
+            if name not in PHONE:
+                continue
             phone.goto(base + path)
             phone.wait_for_load_state("networkidle")
             phone.wait_for_timeout(800)
-            phone.screenshot(path=str(out / f"{name}.png"), full_page=True)
-            print(out / f"{name}.png")
+            phone.screenshot(path=str(out / f"{name}_400.png"), full_page=True)
+            print(out / f"{name}_400.png")
+        # A definition open, as it looks after a tap or Tab.
+        page.goto(base + "index.html")
+        page.wait_for_load_state("networkidle")
+        page.focus("button.term[aria-controls='tip-fmax-th']")
+        page.wait_for_timeout(200)
+        page.screenshot(path=str(out / "9_definition_fmax.png"), clip={"x": 0, "y": 0, "width": 1280, "height": 700})
+        print(out / "9_definition_fmax.png")
         b.close()
     httpd.shutdown()
 

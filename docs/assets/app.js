@@ -116,7 +116,8 @@
       r.dataset.row = row.id;
       const a = document.createElement("div");
       a.className = "axis";
-      a.innerHTML = row.label + (row.help ? "<small>" + row.help + "</small>" : "");
+      a.innerHTML = row.label + (M.terms && M.terms.filters[row.id] ? " " + M.terms.filters[row.id] : "") +
+        (row.help ? "<small>" + row.help + "</small>" : "");
       r.appendChild(a);
       const chips = document.createElement("div");
       chips.className = "chips";
@@ -167,15 +168,15 @@
   const COLS = [
     { id: "tool", label: "Tool", txt: true },
     { id: "setting", label: "Setting", txt: true },
-    { id: "fmax", label: "Fmax", key: "fmax" },
-    { id: "auprc", label: "AUPRC", key: "auprc" },
-    { id: "iou", label: "Median IoU", key: "median_iou_tp" },
-    { id: "n", label: "True instances", key: "n_truth_instances" },
-    { id: "cpu", label: 'Core-hours per 1,000 queries, per relative <span class="prov measured">measured</span>', key: "cpu_h" },
-    { id: "cpu_rep", label: 'CPU-h per 1,000 queries <span class="prov reported">reported</span>', key: "cpu_h_reported" },
-    { id: "ram", label: 'Peak RAM, GB <span class="prov measured">measured</span>', key: "peak_rss_gb" },
-    { id: "gpu", label: "GPU in search", key: "gpu" },
-    { id: "cost", label: "Estimated cost, USD per 1,000 queries", key: "cost_usd_est" },
+    { id: "fmax", label: "Fmax", key: "fmax", term: "fmax" },
+    { id: "auprc", label: "AUPRC", key: "auprc", term: "auprc" },
+    { id: "iou", label: "Median IoU", key: "median_iou_tp", term: "iou" },
+    { id: "n", label: "True instances", key: "n_truth_instances", term: "n" },
+    { id: "cpu", label: 'Core-hours per 1,000 queries, per relative <span class="prov measured">measured</span>', key: "cpu_h", term: "cpu" },
+    { id: "cpu_rep", label: 'CPU-h per 1,000 queries <span class="prov reported">reported</span>', key: "cpu_h_reported", term: "cpu_rep" },
+    { id: "ram", label: 'Peak RAM, GB <span class="prov measured">measured</span>', key: "peak_rss_gb", term: "ram" },
+    { id: "gpu", label: "GPU in search", key: "gpu", term: "gpu" },
+    { id: "cost", label: "Estimated cost, USD per 1,000 queries", key: "cost_usd_est", term: "cost" },
   ];
   function rowValues(s, row) {
     const r = lookup(s, row);
@@ -254,6 +255,8 @@
         update();
       });
       th.appendChild(b);
+      // The "?" sits beside the sort button, not inside it, so it never sorts.
+      if (col.term && M.terms) th.insertAdjacentHTML("beforeend", M.terms.th[col.term]);
       thead.appendChild(th);
     }
     const tbody = document.querySelector("#lb tbody");

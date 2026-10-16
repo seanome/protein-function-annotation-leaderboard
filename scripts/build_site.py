@@ -128,6 +128,64 @@ AXES = [
     {"id": "db", "label": "Database build, core-hours per database built", "short": "database build time",
      "kind": "cost", "better": "lower", "less": "quicker to build its databases"},
 ]
+# Definitions shown beside a column name or label (docs/assets/terms.js). The wording follows
+# the Methods page and Table 1's text, so the site says one thing. Each links to its section of
+# explainers.html. Values are HTML.
+TERMS = {
+    "fmax": ("Fmax", "explainers.html#fmax",
+             "The best balance of precision and recall at any one score cutoff, with both worked "
+             "out protein by protein and averaged. Precision is the share of calls that are correct; recall is "
+             "the share of true annotations found. 0 to 1, higher is better."),
+    "auprc": ("AUPRC", "explainers.html#auprc",
+              "Area under the precision-recall curve: precision summed over every score cutoff, "
+              "weighted by the recall gained there. It pools every call of every protein into one "
+              "list. 0 to 1, higher is better."),
+    "iou": ("Median IoU", "explainers.html#iou",
+            "How well a correct call's ends match the true region. IoU is the residues the call and "
+            "the region share divided by the residues either covers: 1 is a perfect match. The "
+            "median is the middle IoU over all correct calls."),
+    "n": ("True instances", "explainers.html#fmax",
+          "The number of known annotations on the human proteins in this slice, whether or not the "
+          "relative could supply them. Recall in Fmax is counted out of these."),
+    "cpu": ("Core-hours per 1,000 queries", "explainers.html#cost",
+            "Cores the search reserved × its wall time, for the search alone, divided by the number "
+            "of relatives searched and scaled to 1,000 human proteins. A task that sat partly idle "
+            "still counts all its cores. Less is cheaper."),
+    "cpu_rep": ("CPU-h reported", "explainers.html#cost",
+                "CPU-hours per 1,000 queries as reported by a tool's submitter, on hardware they "
+                "name. None have been submitted yet."),
+    "ram": ("Peak RAM", "explainers.html#cost",
+            "The largest resident memory, in GB, of any of the search's tasks, from the run's task "
+            "records. Memory is not priced in the cost."),
+    "gpu": ("GPU-hours", "explainers.html#cost",
+            "GPU time the search used, per 1,000 queries. No search here used a GPU. ProstT5 used "
+            "one to predict 3Di shape letters while building its databases; that time is on its "
+            "card."),
+    "cost": ("cost_usd_est", "explainers.html#cost",
+             "Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × "
+             "r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand "
+             "rates."),
+    "calls": ("Raw or dedup", "explainers.html#dedup",
+              "Raw keeps every call a tool makes. Dedup merges calls of the same family on the same "
+              "protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so "
+              "one domain hit by many of the relative's proteins counts once."),
+    "measured": ("measured", "explainers.html#cost",
+                 "Measured on Stanford's Sherlock cluster, from the run's own task records."),
+    "reported": ("reported", "explainers.html#cost",
+                 "Reported by the tool's submitter, on the hardware they name. None yet."),
+}
+
+
+def term_btn(term: str, where: str, up: str = "") -> str:
+    """A "?" button and its definition, for terms.js. `where` makes the id unique on the page."""
+    name, href, words = TERMS[term]
+    tid = f"tip-{term}-{where}"
+    return (f'<button type="button" class="term" data-term="{term}" aria-label="What is {esc(name)}?" '
+            f'aria-expanded="false" aria-controls="{tid}" aria-describedby="{tid}">?</button>'
+            f'<span class="term-tip" role="tooltip" id="{tid}" hidden><b>{esc(name)}.</b> {words} '
+            f'<a href="{up}{href}">how it works →</a></span>')
+
+
 STRATUM_WORDS = {
     "identity": dict(IDENTITY),
     "feature_length_bin": dict(LENGTH_SHORT + LENGTH_DOMAIN + [("whole_protein", "whole protein")]),
@@ -216,7 +274,7 @@ def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
     nav = [("index.html", "Leaderboard", "leaderboard"), ("cost.html", "Compare two columns", "cost"),
            ("pileup.html", "Region pile-up", "pileup"), ("claims.html", "Claims", "claims"),
            ("tools/index.html", "Tool cards", "tools"), ("coverage.html", "Coverage", "coverage"),
-           ("methods.html", "Methods", "methods")]
+           ("explainers.html", "How the scores work", "explainers"), ("methods.html", "Methods", "methods")]
     links = "".join(
         f'<a href="{up}{h}"{" data-keep-filters" if p in ("leaderboard", "cost") else ""}'
         f'{" aria-current=\"page\"" if p == page else ""}>{t}</a>' for h, t, p in nav)
@@ -238,6 +296,7 @@ def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="{up}assets/site.css">
 <link rel="icon" href="{up}assets/favicon.svg" type="image/svg+xml">
+<script defer src="{up}assets/terms.js"></script>
 {head}
 </head>
 <body data-page="{page}">
@@ -423,6 +482,7 @@ place, and what does it cost? Each row is one tool at one setting.</p>
 so picking a value in one of them sets the other three back to "any".</p>
 </form>
 <div class="prices" aria-label="Prices used for the cost column">
+<span class="pricehead">Prices for the estimated cost {term_btn("cost", "prices")}</span>
 <label>r_cpu, USD per CPU-hour <input id="r_cpu" type="number" min="0" step="0.001" inputmode="decimal"></label>
 <label>r_gpu, USD per GPU-hour <input id="r_gpu" type="number" min="0" step="0.01" inputmode="decimal"></label>
 <span class="muted">Default prices are AWS on-demand rates for US East (N. Virginia), Linux, read
@@ -436,9 +496,9 @@ GPU: a g5.xlarge with one NVIDIA A10G costs $1.006 per hour.</span>
 <details class="key"><summary>Key to the marks in Table 1</summary>
 <div class="legend">
 <span class="item"><span class="prov measured">measured</span> measured on Stanford's Sherlock
-cluster, from the run's own task records</span>
+cluster, from the run's own task records {term_btn("measured", "key")}</span>
 <span class="item"><span class="prov reported">reported</span> reported by the tool's submitter, on the
-hardware they name (none yet)</span>
+hardware they name (none yet) {term_btn("reported", "key")}</span>
 <span class="item">— not run: no row in the results table for these filters</span>
 <span class="item">— not measured: the search ran, but no task record holds its cost</span>
 <span class="item"><i>no correct calls</i>: no call was correct, so there is no median IoU</span>
@@ -456,7 +516,9 @@ set: Pfam's domains are defined by the models hmmscan runs, so read its row as a
 <p class="prose">Fmax is the best balance of precision and recall at any one score cutoff; AUPRC is precision
 summed over all cutoffs. Both run from 0 to 1, and higher is better. Median IoU is how well a
 correct call's ends match the true region: the overlap divided by the combined span, 1 for a
-perfect match.</p>
+perfect match. The ? beside each column name gives its definition, and
+<a href="explainers.html">How the scores work</a> works each score through on a made-up protein
+you can change.</p>
 <p class="prose">Each tool searched {n_queries:,} human proteins against the proteome of one
 relative and copied the relative's annotations onto them. The scores say how many of the human
 proteins' known annotations it put in the right place. The queries are human proteins, most of them
@@ -1475,6 +1537,300 @@ nothing on a card is typed in by hand.</p>
     return layout("Claims", "claims", body, src, description="Each tool's claims, the test that would retire each one, and its verdict.")
 
 
+# The made-up example on explainers.html. The page's widgets compute every number from it, and
+# tests/check_explainers.py recomputes them in Python. Coordinates are residues, inclusive;
+# scores are the tool's score, higher meaning more confident. Family names are only labels.
+TOY = {
+    "note": "A made-up example for explaining the scores. Not benchmark data.",
+    "proteins": {
+        "A": {"name": "protein A", "short": "A", "length": 400,
+              "true": [{"family": "PH", "start": 20, "end": 120},
+                       {"family": "SH2", "start": 150, "end": 230},
+                       {"family": "SH3", "start": 280, "end": 340}],
+              "calls": [{"id": "a1", "family": "PH", "start": 25, "end": 118, "score": 95},
+                        {"id": "a2", "family": "SH2", "start": 155, "end": 228, "score": 80},
+                        {"id": "a3", "family": "PH", "start": 30, "end": 115, "score": 70},
+                        {"id": "a4", "family": "PDZ", "start": 160, "end": 225, "score": 55},
+                        {"id": "a5", "family": "SH3", "start": 285, "end": 338, "score": 40},
+                        {"id": "a6", "family": "SH3", "start": 200, "end": 260, "score": 25},
+                        {"id": "a7", "family": "PH", "start": 22, "end": 120, "score": 15}]},
+        "B": {"name": "protein B", "short": "B", "length": 600,
+              "true": [{"family": "Ig", "start": s, "end": s + 90} for s in (20, 130, 240, 350, 460)],
+              "calls": [{"id": f"b{i + 1}", "family": "Ig", "start": s + 2, "end": s + 88, "score": sc}
+                        for i, (s, sc) in enumerate(zip((20, 130, 240, 350, 460), (60, 58, 52, 50, 45)))]},
+    },
+    "iou": {"length": 200, "true": {"start": 10, "end": 109}, "call": {"start": 30, "end": 129}},
+}
+
+
+def legend_svg(kind: str) -> str:
+    """Small key marks for the explainer figures, drawn with the same classes as the figures."""
+    inner = {
+        "true": '<line x1="0" y1="8" x2="30" y2="8" class="ex-backbone"/><rect x="7" y="2" width="16" height="12" rx="2" class="ex-true"/>',
+        "kept": '<rect x="2" y="3" width="26" height="10" rx="2" class="ex-kept"/>',
+        "drop": '<rect x="2" y="3" width="26" height="10" rx="2" class="ex-drop"/>',
+        "cut": '<line x1="15" y1="0" x2="15" y2="16" class="ex-cut"/>',
+        "ring": '<circle cx="15" cy="8" r="6" class="ex-ring"/>',
+        "dot": '<circle cx="15" cy="8" r="4" class="ex-dot"/>',
+        "dot-off": '<circle cx="15" cy="8" r="4" class="ex-dot-off"/>',
+        "area": '<rect x="2" y="2" width="26" height="12" class="ex-area"/>',
+        "area-off": '<rect x="2" y="2" width="26" height="12" class="ex-area-off"/>',
+        "line": '<path d="M1,12 H10 V6 H20 V3 H29" class="ex-line"/>',
+        "bracket": '<path d="M2,4 V11 H28 V4" class="ex-bracket"/>',
+        "your": '<circle cx="15" cy="8" r="4.5" class="ex-ring-small"/>',
+        "median": '<line x1="15" y1="0" x2="15" y2="16" class="ex-median"/>',
+    }[kind]
+    return f'<svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true">{inner}</svg>'
+
+
+def page_explainers(src: dict, comp: pl.DataFrame) -> str:
+    cx = comp.filter((pl.col("tool") == "hmmer3_phmmer") & (pl.col("species") == "zebrafish")).row(0, named=True)
+    per1k = cx["cores"] * cx["wall_s"] / 3600 / cx["n_relatives"] * 1000 / cx["n_queries"]
+    li = lambda kind, words: f'<span class="item">{legend_svg(kind)} {words}</span>'  # noqa: E731
+    glyphs = '<span class="item"><b>✓</b> correct</span><span class="item"><b>✗</b> wrong</span>'
+    toy_json = json.dumps(TOY, separators=(",", ":")).replace("</", "<\\/")
+    body = r"""<h1>How the scores work</h1>
+<p class="lede">The leaderboard ranks tools by three scores and one cost. Each section below
+works one of them through on a made-up protein that you can change. Every number in Figures 1 to
+4 is computed in your browser from that made-up example, not from the benchmark.</p>
+
+<h2 id="example">The made-up example</h2>
+<div class="prose">
+<p>Protein A is 400 residues (aa) long and has three true domains: the known annotations a tool
+should find. A tool searched it and made seven <b>calls</b>. A call is a region the tool says
+carries a domain of a given family, copied from a protein of the relative it searched. Each call
+has the tool's <b>score</b>: higher means the tool is more sure. The family names are only labels.</p>
+<p>A call is <b>correct</b> when it names the family of a true domain and overlaps that domain
+with an IoU of at least 0.5 (Figure 3 shows IoU). Each true domain can be found once. If two calls
+find the same domain, the higher-scoring one is correct and the other counts as wrong, as on the
+leaderboard.</p>
+<p>In this example every domain can be found in the relative, and every call lies on an annotated
+part of the protein. So the small differences in what Fmax and AUPRC count (see
+<a href="methods.html">Methods</a>) do not arise here.</p>
+</div>
+
+<h2 id="fmax">Fmax: the best single score cutoff</h2>
+<div class="prose">
+<p>To use a tool's calls you pick a <b>score cutoff</b>: you keep every call scoring at least that
+much and drop the rest. At a cutoff, <b>precision</b> is the share of kept calls that are correct.
+<b>Recall</b> is the share of true domains that a kept, correct call found. A high cutoff keeps
+few calls, mostly correct; a low cutoff finds more domains but keeps more wrong calls. <b>F</b>
+combines the two into one number, high only when both are high:</p>
+<p>\[F = \frac{2 \times \text{precision} \times \text{recall}}{\text{precision} + \text{recall}}\]</p>
+<p><b>Fmax</b> is the highest F over all cutoffs: the score of the tool at its best single cutoff.
+Move the slider in Figure 1 to try each cutoff.</p>
+</div>
+<figure class="ex-fig" id="fig1">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 1.</b> Fmax on protein A. Top: the
+protein as a line with its three true domains as boxes. Each call is a bar below it, at the
+residues it covers, labelled with its family and score. Bottom: F at each cutoff. Move the cutoff
+and read off which calls are kept and what F they give; the ring marks the highest F, which is the
+Fmax.</figcaption>
+<div class="ex-legend" aria-label="Key to Figure 1">
+@@LEG1@@
+</div>
+<div class="ex-controls">
+<label for="f1-cut"><span>Score cutoff: keep calls scoring at least <span class="v mono" id="f1-t"></span></span>
+<input type="range" id="f1-cut" min="0" max="100" step="1" value="50"></label>
+<button type="button" class="chip" id="f1-go">Go to the best cutoff</button>
+</div>
+<div class="ex-box" id="f1-track"></div>
+<p class="ex-read" id="f1-read">Kept: <span class="v" id="f1-kept"></span> calls, <span class="v" id="f1-correct"></span> of them
+correct. Precision = correct ÷ kept = <span class="v" id="f1-p"></span>. Recall = domains found ÷ true domains
+= <span class="v" id="f1-found"></span> ÷ <span class="v" id="f1-ntrue"></span> = <span class="v" id="f1-r"></span>.
+F = <span class="v" id="f1-f"></span>.<br>Highest F over all cutoffs (Fmax): <span class="v" id="f1-fmax"></span>,
+for any cutoff in <span class="v" id="f1-best"></span>.</p>
+<div class="ex-box" id="f1-curve"></div>
+</figure>
+<div class="prose">
+<p>The leaderboard has many proteins, not one. At each cutoff it works out precision and recall
+for each protein, then averages them over proteins; F comes from the two averages. This is the
+protein-by-protein Fmax of the CAFA function-prediction challenge. Precision is averaged over the
+proteins with at least one call kept; recall over every protein with a true annotation. The
+<b>true instances</b> (n) on the leaderboard are those true annotations, the denominator of
+recall. The leaderboard tries 101 cutoffs, evenly spaced through the tool's own scores; here
+every whole-number cutoff from 0 to 100 is tried.</p>
+</div>
+
+<h2 id="auprc">AUPRC: every cutoff at once</h2>
+<div class="prose">
+<p>Fmax keeps one cutoff. <b>AUPRC</b>, the area under the precision-recall curve, looks at every
+cutoff. Put every call in one list, best score first. Take the calls one at a time; after each,
+write down the precision and recall so far. Each call that finds a new domain adds a strip of
+area: its width is the recall gained and its height is the precision at that point.</p>
+<p>\[\text{AUPRC} = \sum_k (R_k - R_{k-1})\,P_k\]</p>
+<p>Here \(P_k\) and \(R_k\) are the precision and recall after the \(k\)-th call of the list.
+A wrong call adds no area itself, but it lowers the precision, and so the height of every strip
+after it. AUPRC runs from 0 to 1, and higher is better.</p>
+</div>
+<figure class="ex-fig" id="fig2">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 2.</b> The precision-recall curve
+of protein A's calls, and what happens when protein B is added. Each point is one call, taken in
+score order; its position is the precision and recall after taking it. The shaded strips add up to
+the AUPRC. Lower the cutoff to add calls one by one, and switch protein B on to see Fmax and
+AUPRC move in opposite directions.</figcaption>
+<div class="ex-legend" aria-label="Key to Figure 2">
+@@LEG2@@
+</div>
+<div class="ex-controls">
+<label for="f2-cut"><span>Score cutoff: take calls scoring at least <span class="v mono" id="f2-t"></span></span>
+<input type="range" id="f2-cut" min="0" max="100" step="1" value="0"></label>
+<span class="chipgroup" id="f2-which" role="group" aria-label="Proteins in the list">
+<button type="button" class="chip" data-b="0" aria-pressed="true">protein A only</button>
+<button type="button" class="chip" data-b="1" aria-pressed="false">add protein B</button></span>
+</div>
+<div class="ex-box" id="f2-curve"></div>
+<p class="ex-read">Area of the calls taken so far: <span class="v" id="f2-area"></span>. AUPRC, with every
+call taken: <span class="v" id="f2-auprc"></span>. Fmax of the same proteins: <span class="v" id="f2-fmax"></span>.</p>
+<div class="ex-scroll"><table class="ex-t" id="f2-table"><thead><tr><th>score</th><th data-col="a">protein A only</th><th data-col="ab">A and B</th></tr></thead>
+<tbody><tr><td>Fmax</td><td class="mono" data-col="a" id="f2-a-only-fmax"></td><td class="mono" data-col="ab" id="f2-ab-fmax"></td></tr>
+<tr><td>AUPRC</td><td class="mono" data-col="a" id="f2-a-only-auprc"></td><td class="mono" data-col="ab" id="f2-ab-auprc"></td></tr></tbody></table></div>
+<p class="ex-read">The list behind the curve, best score first. Grey rows score below the cutoff.</p>
+<div class="ex-scroll"><table class="ex-t" id="f2-list"><thead><tr><th>rank</th><th>protein</th><th>call</th><th></th>
+<th>precision</th><th>recall</th><th>area added</th></tr></thead><tbody></tbody></table></div>
+</figure>
+<div class="prose">
+<p>Protein B has five Ig domains, and its five calls are all correct, but they score 45 to 60.
+Fmax averages protein by protein, so protein B counts as one protein of two, whatever its number
+of domains. On its own protein B is perfect, so Fmax goes up. AUPRC pools every call of every
+protein into one list. Protein B's domains are five of the eight true domains. In the list its
+calls come after one or two of protein A's wrong calls (scores 70 and 55), so AUPRC goes down.
+Use Fmax when
+you will keep every call above one cutoff. Use AUPRC when you will rank calls and read down the
+list.</p>
+</div>
+
+<h2 id="iou">Median IoU: are the ends in the right place?</h2>
+<div class="prose">
+<p><b>IoU</b> (intersection over union) is the number of residues the call and the true domain
+share, divided by the number of residues covered by either. It is 1 when the call starts and ends
+where the domain does, and 0 when they do not overlap. A call needs an IoU of 0.5 or more to be correct.</p>
+<p>\[\text{IoU} = \frac{|\text{call} \cap \text{true domain}|}{|\text{call} \cup \text{true domain}|}\]</p>
+</div>
+<figure class="ex-fig" id="fig3">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 3.</b> IoU of one call with one true
+domain. Top: a 200-residue protein with one true domain, and the call below it; the brackets
+underneath show the shared residues and the residues covered by either. It starts at the example on
+the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU
+of each correct call of protein A in Figure 1, with your call added when it is correct; the dashed
+line is their median.</figcaption>
+<div class="ex-legend" aria-label="Key to Figure 3">
+@@LEG3@@
+</div>
+<div class="ex-controls">
+<label for="f3-start"><span>Call starts at residue <span class="v mono" id="f3-start-v"></span></span>
+<input type="range" id="f3-start" min="1" max="200" step="1" value="@@S@@"></label>
+<label for="f3-end"><span>Call ends at residue <span class="v mono" id="f3-end-v"></span></span>
+<input type="range" id="f3-end" min="1" max="200" step="1" value="@@E@@"></label>
+</div>
+<div class="ex-box" id="f3-track"></div>
+<p class="ex-read">IoU = shared ÷ covered by either = <span class="v" id="f3-inter"></span> ÷
+<span class="v" id="f3-union"></span> = <span class="v" id="f3-iou"></span>: <span id="f3-verdict"></span>.</p>
+<div class="ex-box" id="f3-strip"></div>
+<p class="ex-read">Median IoU of the <span class="v" id="f3-n"></span> correct calls:
+<span class="v" id="f3-median"></span>. <span id="f3-mine"></span></p>
+</figure>
+<div class="prose">
+<p><b>Median IoU</b> on the leaderboard is the middle IoU of all of a tool's correct calls. Half of
+the correct calls match their domain at least that well. Since a correct call has an IoU of at least
+0.5, the median runs from 0.5 to 1. Single-residue annotations, such as an active site, are left
+out: an IoU against one residue says nothing about where the ends are.</p>
+</div>
+
+<h2 id="dedup">Raw or dedup: one domain, many calls</h2>
+<div class="prose">
+<p>A tool often finds the same domain through several proteins of the relative, and reports one
+call for each. <b>Raw</b> keeps every call: the first copy can be correct, and every other copy
+counts as wrong. <b>Dedup</b> merges calls of the same family on the same protein that overlap each
+other with an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by
+side barely overlap, so both are kept.</p>
+</div>
+<figure class="ex-fig" id="fig4">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 4.</b> Protein A's seven calls, raw
+and after dedup. Switch between the two: dedup merges the two lower-scoring PH calls into the PH
+call scoring 95, and the table shows how the scores change.</figcaption>
+<div class="ex-legend" aria-label="Key to Figure 4">
+@@LEG4@@
+</div>
+<div class="ex-controls">
+<span class="chipgroup" id="f4-which" role="group" aria-label="Raw or dedup">
+<button type="button" class="chip" data-mode="raw" aria-pressed="true">raw</button>
+<button type="button" class="chip" data-mode="dedup" aria-pressed="false">dedup</button></span>
+</div>
+<div class="ex-box" id="f4-track"></div>
+<div class="ex-scroll"><table class="ex-t" id="f4-table"><thead><tr><th>score</th><th data-col="raw">raw</th><th data-col="dedup">dedup</th></tr></thead>
+<tbody><tr><td>calls</td><td class="mono" data-col="raw" id="f4-raw-n"></td><td class="mono" data-col="dedup" id="f4-dedup-n"></td></tr>
+<tr><td>precision, every call kept</td><td class="mono" data-col="raw" id="f4-raw-p0"></td><td class="mono" data-col="dedup" id="f4-dedup-p0"></td></tr>
+<tr><td>Fmax</td><td class="mono" data-col="raw" id="f4-raw-fmax"></td><td class="mono" data-col="dedup" id="f4-dedup-fmax"></td></tr>
+<tr><td>AUPRC</td><td class="mono" data-col="raw" id="f4-raw-auprc"></td><td class="mono" data-col="dedup" id="f4-dedup-auprc"></td></tr></tbody></table></div>
+</figure>
+<div class="prose">
+<p>Here both merged calls were wrong copies, so recall does not change, and precision, Fmax and
+AUPRC go up. Dedup can also lower a score: when the higher-scoring call misses the domain's ends
+and a lower-scoring copy matches them, dedup keeps the one that misses. Comparing raw with dedup
+separates finding a domain from reporting it many times.</p>
+</div>
+
+<h2 id="cost">Cost: core-hours, GPU-hours and the price of an hour</h2>
+<div class="prose">
+<p><b>Core-hours</b> are the cores a search reserved multiplied by its wall time, so a task that sat
+partly idle still counts all its cores. They come from the run's own task records on Stanford's
+Sherlock cluster, so they are marked <span class="prov measured">measured</span>. Numbers a tool's
+submitter gives, on hardware they name, would be marked <span class="prov reported">reported</span>
+(CPU-h reported); none have been submitted yet. The leaderboard divides the search's core-hours by
+the number of relatives searched and scales them to 1,000 human proteins (queries). <b>GPU-hours</b>
+are the same for GPU time; no search here used a GPU. <b>Peak RAM</b> is the largest memory any of
+the search's tasks held, in GB; it is not priced.</p>
+<p>The estimated cost, cost_usd_est, puts a price on each hour:</p>
+<p>\[\begin{aligned}\text{cost\_usd\_est} &= \text{core-hours} \times r_\text{cpu}\\ &+ \text{GPU-hours} \times r_\text{gpu}\end{aligned}\]</p>
+<p>per 1,000 queries, where \(r_\text{cpu}\) is the price of one CPU-hour and \(r_\text{gpu}\) of one
+GPU-hour, in US dollars. A core-hour is priced as one CPU-hour.</p>
+</div>
+<figure class="ex-fig" id="fig5">
+<figcaption><b>Figure 5.</b> The cost formula with your own numbers. It starts at phmmer's measured
+core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These
+are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any
+box to see the cost change.</figcaption>
+<div class="ex-controls">
+<label for="f5-cpu">core-hours per 1,000 queries <input type="number" id="f5-cpu" min="0" step="any" inputmode="decimal" value="@@CPU@@"></label>
+<label for="f5-gpu">GPU-hours per 1,000 queries <input type="number" id="f5-gpu" min="0" step="any" inputmode="decimal" value="0"></label>
+<label for="f5-rcpu">r_cpu, USD per CPU-hour <input type="number" id="f5-rcpu" min="0" step="any" inputmode="decimal" value="@@RCPU@@"></label>
+<label for="f5-rgpu">r_gpu, USD per GPU-hour <input type="number" id="f5-rgpu" min="0" step="any" inputmode="decimal" value="@@RGPU@@"></label>
+</div>
+<p class="ex-read">cost_usd_est = <span class="v" id="f5-line"></span> = <span class="v" id="f5-out"></span>
+per 1,000 queries.</p>
+</figure>
+<p class="prose muted">The made-up example is also in this page's JSON copy. Definitions of every
+score as the benchmark computes them, with a worked example from the real data, are on
+<a href="methods.html">Methods</a>.</p>
+<script type="application/json" id="toy-data">@@TOY@@</script>
+<script defer src="assets/explainers.js"></script>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+"""
+    leg1 = "".join([li("true", "true domain on the protein line"), li("kept", "call kept at this cutoff"),
+                    li("drop", "call below the cutoff: not counted"), glyphs, li("line", "F at each cutoff"),
+                    li("cut", "your cutoff"), li("ring", "highest F (Fmax)")])
+    leg2 = "".join([li("dot", "call taken: precision and recall after it"), li("dot-off", "call below the cutoff"),
+                    li("area", "area of the calls taken"), li("area-off", "area the lower-scoring calls would add")])
+    leg3 = "".join([li("true", "true domain"), li("kept", "the call you set"),
+                    li("bracket", "shared residues, and residues covered by either"),
+                    li("dot", "IoU of a correct call of protein A"), li("your", "IoU of your call"),
+                    li("median", "median")])
+    leg4 = "".join([li("true", "true domain"), li("kept", "call that counts"),
+                    li("drop", "call merged into a higher-scoring one: not counted"), glyphs])
+    for k, v in {"@@LEG1@@": leg1, "@@LEG2@@": leg2, "@@LEG3@@": leg3, "@@LEG4@@": leg4,
+                 "@@S@@": str(TOY["iou"]["call"]["start"]), "@@E@@": str(TOY["iou"]["call"]["end"]),
+                 "@@CPU@@": f"{per1k:.4f}", "@@RCPU@@": f"{R_CPU:.6g}", "@@RGPU@@": f"{R_GPU}",
+                 "@@TOY@@": toy_json}.items():
+        body = body.replace(k, v)
+    return layout("How the scores work", "explainers", body, src,
+                  description="Fmax, AUPRC, median IoU, raw against dedup and the cost formula, each worked "
+                              "through on a made-up protein you can change.")
+
+
 def page_claims_schema(src: dict, cards: list[dict], inv: dict) -> str:
     example = (ROOT_DIR / "claims" / "kmerseek.yaml").read_text().split("claims:\n", 1)[1].split("\n\n  - id:", 1)[0]
     badges = "".join(f'<p><img src="badges/claims-{c["tool"]}.svg" alt="claims for {esc(c["tool"])}: '
@@ -1552,6 +1908,9 @@ def main() -> None:
         "axes": AXES,
         "searched": searched,
         "source": src,
+        # "?" buttons with their definitions, drawn by app.js into Table 1's header and the
+        # filter rows (terms.js shows them).
+        "terms": {"th": {t: term_btn(t, "th") for t in TERMS}, "filters": {"calls": term_btn("calls", "filters")}},
     }
     payload = json.dumps({"meta": meta, "results": results_json(res), "compute": compute_json(comp)},
                          separators=(",", ":"), allow_nan=False)
@@ -1569,6 +1928,7 @@ def main() -> None:
     (out / "cost.html").write_text(page_cost(payload, src, n_q, tools_used))
     (out / "coverage.html").write_text(page_coverage(cov, src, species_mya))
     (out / "methods.html").write_text(page_methods(res, comp, src, prov))
+    (out / "explainers.html").write_text(page_explainers(src, comp))
     import claims as claims_mod
     schema = json.loads((ROOT_DIR / "claims/schema.json").read_text())
     resolver = claims_mod.Resolver(a.data)
@@ -1657,6 +2017,8 @@ def main() -> None:
     else:
         (out / "data" / "inventory.md").unlink(missing_ok=True)
     page_json(out, "methods.html", src, None)
+    page_json(out, "explainers.html", src, {"made_up_example": TOY, "terms": {
+        k: {"name": n, "explainer": h, "definition": w} for k, (n, h, w) in TERMS.items()}})
     page_json(out, "tools/index.html", src, {"cards": [f"{t}.json" for t in sorted(tools_used)]})
     page_json(out, "claims.html", src, {"claims": cards})
     page_json(out, "claims-schema.html", src, {"schema": json.loads((ROOT_DIR / "claims/schema.json").read_text())})

@@ -331,7 +331,7 @@ def main() -> int:
         page.emulate_media(color_scheme="light")
 
         # ---- 3. every page: links, errors, phone width ----
-        pages = ["index.html", "cost.html", "coverage.html", "methods.html", "tools/index.html"] + \
+        pages = ["index.html", "cost.html", "coverage.html", "methods.html", "explainers.html", "tools/index.html"] + \
         (["pileup.html"] if (a.site / "pileup.html").exists() else []) + \
         [x for x in ("claims.html", "claims-schema.html") if (a.site / x).exists()] + \
             [f"tools/{t}.html" for t in sorted(meta["tools"])]
