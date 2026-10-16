@@ -53,6 +53,15 @@
   "sha256": "31037e4c1d84d2c44cf7bf9b527ca5ec97e7156143b62323fa86a1a63dc4a425",
   "url": "https://api.checklistbank.org/dataset/316321"
  },
+ "darkset_midi_trace": {
+  "bytes": 2836492,
+  "computed": true,
+  "fetched_utc": "2026-10-16T17:46:39Z",
+  "file": "trace.ladder-0.4-midi.txt",
+  "release": "computed",
+  "sha256": "aba305259fe1c39e1ce868947dd525fad1e479421ac5acd866890447963e25be",
+  "url": "sherlock:/scratch/users/olgabot/2024-kmerseek-invertebrate-dark-set-0.4/nextflow-runs/invertebrate-dark-set/runs/ladder-0.4-midi/trace.ladder-0.4-midi.txt"
+ },
  "deck_parquet": {
   "bytes": 29430048,
   "computed": true,
@@ -124,6 +133,15 @@
   "sha256": "393271d1543b4e226298d0bc88eab941950e0b22738b5de1acf006d8f4d46b68",
   "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/Q25460/?page_size=200"
  },
+ "kappa_by_alphabet": {
+  "bytes": 1726,
+  "computed": true,
+  "fetched_utc": "2026-10-16T17:46:39Z",
+  "file": "kappa_by_alphabet.tsv",
+  "release": "computed",
+  "sha256": "3900d33e684a264050024ca6375f9f1940abc4a282e0d0555050bf9ee2a5f24b",
+  "url": "https://github.com/seanome/2024-kmerseek-analysis/blob/ec91da53b26d88474679989205045de45e38a162/nextflow-runs/invertebrate-dark-set/assets/kappa_by_alphabet.tsv"
+ },
  "larsen2017_notebook": {
   "bytes": 30274,
   "computed": true,
@@ -132,6 +150,15 @@
   "release": "computed",
   "sha256": "66ba1d1b4f4215e8c9187332346a79d96a55b092970e65b9a0e667690aeb13c9",
   "url": "https://github.com/seanome/2025-biodata-wealth-inequality/blob/d6b68a0f31c8d26014360b556113f7571fc86a31/notebooks/03_make_predicted_n_proteins.ipynb"
+ },
+ "nb291_dark_fmax_metrics": {
+  "bytes": 3174903,
+  "computed": true,
+  "fetched_utc": "2026-10-16T17:46:39Z",
+  "file": "dark_fmax_metrics_2026-10-14.csv",
+  "release": "computed",
+  "sha256": "613416fb127b87230353238b01d926b6fe14f2c07cef47c9708b830d76d31beb",
+  "url": "sherlock:/scratch/users/olgabot/invertebrate-dark-set/results-0.4/dark-fmax-2026-10-14/dark_fmax_metrics.csv (analysis notebook 291, PR 133 branch)"
  },
  "ncbi_taxdump": {
   "bytes": 79828323,
