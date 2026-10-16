@@ -70,6 +70,14 @@ def validate(df: pl.DataFrame, schema: dict, submitted: bool) -> tuple[list[str]
     bad_ci = ci.filter(~((pl.col("ci95_low") <= pl.col("value")) & (pl.col("value") <= pl.col("ci95_high"))).fill_null(False))
     if bad_ci.height:
         errors.append(f"{bad_ci.height:,} rows where ci95_low <= value <= ci95_high does not hold")
+    cost_cols = ["cpu_h_per_1000", "peak_rss_gb", "gpu_h_per_1000"]
+    unlabelled = df.filter(pl.any_horizontal(pl.col(cost_cols).is_not_null()) & pl.col("cost_provenance").is_null())
+    if unlabelled.height:
+        errors.append(f"{unlabelled.height:,} rows have cost columns but no cost_provenance (measured or reported)")
+    if submitted:
+        rep = df.filter(pl.col("cost_provenance") != "measured")
+        if rep.height:
+            errors.append(f"{rep.height:,} rows have cost_provenance other than measured; a host-run row is measured")
     usd = df.filter(pl.col("usd_per_1000_from_rate").is_not_null())
     if usd.height:
         need = ["cpu_h_per_1000", "gpu_h_per_1000", "usd_rate_cpu_h", "usd_rate_gpu_h", "usd_rate_source"]

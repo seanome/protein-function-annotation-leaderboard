@@ -69,6 +69,8 @@ cases = {
     "dollars not hours x rates": rows.filter(pl.col("usd_per_1000_from_rate").is_not_null()).head(5)
         .with_columns((pl.col("usd_per_1000_from_rate") * 2).alias("usd_per_1000_from_rate")),
     "empty key column": small.with_columns(pl.lit(None, pl.Utf8).alias("tool")),
+    "cost with no provenance": got.with_columns(pl.lit(None, pl.Utf8).alias("cost_provenance")),
+    "unknown provenance": got.with_columns(pl.lit("estimated").alias("cost_provenance")),
 }
 for what, df in cases.items():
     e, _ = validate_rows.validate(df, SCHEMA, submitted=False)
@@ -83,6 +85,8 @@ full = got.with_columns(
     pl.lit("2026-10-16").alias("run_date"), pl.lit("3.4").alias("tool_version"))
 e, _ = validate_rows.validate(full, SCHEMA, submitted=True)
 check(not e, f"--submitted accepts a complete row: {e}")
+e, _ = validate_rows.validate(full.with_columns(pl.lit("reported").alias("cost_provenance")), SCHEMA, submitted=True)
+check(bool(e), "--submitted refuses a reported cost: a host-run row is measured")
 
 # 5. Dry run: builds, sends nothing (no token needed), lists the uploads.
 with tempfile.TemporaryDirectory() as tmp:

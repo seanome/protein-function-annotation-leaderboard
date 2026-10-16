@@ -24,6 +24,7 @@
   {"name": "cpu_h_per_1000", "type": "f64", "nullable": true, "min": 0, "submitted_required": true, "description": "Measured: reserved core-hours (cores x wall time from the Nextflow trace) for the search step against one relative, per 1,000 queries."},
   {"name": "peak_rss_gb", "type": "f64", "nullable": true, "min": 0, "submitted_required": true, "description": "Measured: largest peak_rss of any search task in the trace, GB."},
   {"name": "gpu_h_per_1000", "type": "f64", "nullable": true, "min": 0, "submitted_required": true, "description": "Measured: GPU-hours per relative per 1,000 queries; 0 for a CPU-only tool."},
+  {"name": "cost_provenance", "type": "str", "nullable": true, "enum": ["measured", "reported"], "submitted_required": true, "description": "measured: the host ran the tool and the cost columns come from its Nextflow trace. reported: the author ran it and sent a timing log (CONTRIBUTING.md, the author-run path); shown as reported, never as measured. Empty when there are no cost columns."},
   {"name": "usd_per_1000_from_rate", "type": "f64", "nullable": true, "min": 0, "description": "Not measured: cpu_h_per_1000 x usd_rate_cpu_h + gpu_h_per_1000 x usd_rate_gpu_h, from a price list."},
   {"name": "usd_rate_cpu_h", "type": "f64", "nullable": true, "min": 0, "description": "Dollars per core-hour used for usd_per_1000_from_rate."},
   {"name": "usd_rate_gpu_h", "type": "f64", "nullable": true, "min": 0, "description": "Dollars per GPU-hour used for usd_per_1000_from_rate."},

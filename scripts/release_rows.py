@@ -72,6 +72,7 @@ def build(data: Path) -> pl.DataFrame:
                 pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit(R_GPU)).alias("usd_rate_gpu_h"),
                 pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit(RATE_SOURCE)).alias("usd_rate_source"),
                 pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit(HARDWARE)).alias("hardware"),
+                pl.when(pl.col("cpu_h_per_1000").is_not_null()).then(pl.lit("measured")).alias("cost_provenance"),
             ))
     cols = [c["name"] for c in schema_columns()]
     key = json.loads((ROOT / "schema/results_row.json").read_text())["key"]

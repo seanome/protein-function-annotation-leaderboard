@@ -97,6 +97,9 @@ nothing). Cite the version you compared against.
 
 ## The other way in
 
-A second path, where you run the tool yourself and send predictions to be scored, is described
-in this repository's `CONTRIBUTING.md` when that is merged. Rows from that path have no
-host-measured cost, so their cost columns stay empty.
+In the second path you run the tool yourself and send its predictions and a timing log in a
+pull request to this repository; a workflow scores them (`CONTRIBUTING.md`, once that is
+merged). Both paths use the same scorer and the same row layout. They differ in who ran the
+tool: rows from that path have `cost_provenance` = `reported`, shown with your hardware as
+reported, and rows from this path have `measured`, from the host's trace. Only measured rows
+are compared on cost.
