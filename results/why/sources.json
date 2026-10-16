@@ -175,6 +175,33 @@
   "sha256": "6addba1761cc9d6e251140972cf079377736145632f465e5e0033f8e5dc6e88c",
   "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/README"
  },
+ "sherlock_busco_human": {
+  "bytes": 93241,
+  "computed": true,
+  "fetched_utc": "2026-10-16T16:49:58Z",
+  "file": "full_table.tsv",
+  "release": "computed",
+  "sha256": "14bd1daf8ad12953074bb272fc9b574c33dbf14e2709dc81c6f26173909818c7",
+  "url": "Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch"
+ },
+ "sherlock_busco_oyster": {
+  "bytes": 98573,
+  "computed": true,
+  "fetched_utc": "2026-10-16T16:49:58Z",
+  "file": "full_table.tsv",
+  "release": "computed",
+  "sha256": "ed19c9625aef9fc618526a9bfdba51be9188b0663b450f5a8d2eae10216d5eb7",
+  "url": "Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch"
+ },
+ "sherlock_mmseqs": {
+  "bytes": 117883518,
+  "computed": true,
+  "fetched_utc": "2026-10-16T16:49:58Z",
+  "file": "mmseqs_vs_sprot.tsv.gz",
+  "release": "computed",
+  "sha256": "71467410052402aee148636e67babbeff251e2bf49afc80422e203ef599ff3a7",
+  "url": "Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch"
+ },
  "sifts_uniprot_pdb": {
   "bytes": 1424469,
   "fetched_utc": "2026-10-15T13:33:14Z",

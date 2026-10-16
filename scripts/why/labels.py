@@ -75,7 +75,7 @@ def acc_of(col):
     """MMseqs2 writes the accession alone ("P42212"); a full "sp|P42212|GFP_AEQVI" header is
     reduced to its accession too."""
     c = pl.col(col)
-    return pl.when(c.str.contains("|", literal=True)).then(c.str.split("|").list.get(1)).otherwise(c)
+    return c.str.split("|").list.get(1, null_on_oob=True).fill_null(c)
 
 
 def mmseqs_table(path):
@@ -106,7 +106,7 @@ def busco_table(path):
         if len(f) > 2 and f[2]:
             rows.append({"busco_id": f[0], "busco_status": f[1], "protein": f[2]})
     df = pl.DataFrame(rows)
-    df = df.with_columns(accession=pl.col("protein").str.split("|").list.get(1).fill_null(pl.col("protein")))
+    df = df.with_columns(accession=acc_of("protein"))
     # A protein can hold more than one BUSCO gene: keep the best status (Complete before
     # Duplicated before Fragmented) and how many BUSCO genes point at it.
     order = {"Complete": 0, "Duplicated": 1, "Fragmented": 2}
@@ -133,7 +133,7 @@ def main():
             accession="Entry", reviewed="Reviewed", gene="Gene Names (primary)", protein_name="Protein names", interpro_xref="InterPro",
         )
         ipr = interpro_xref_set(raw / f"{tag}_interpro_xrefs.tsv.gz")
-        busco = busco_table(next((sh / f"busco_{tag}").glob("run_*/full_table.tsv")))
+        busco = busco_table(sh / f"busco_{tag}" / "run_metazoa_odb12" / "full_table.tsv")
         df = (
             pl.DataFrame({"accession": list(seqs), "sequence": list(seqs.values())})
             .with_columns(species=pl.lit(tag), length=pl.col("sequence").str.len_chars())
@@ -164,17 +164,18 @@ def main():
         for col, what, source in (
             ("af_model", "with an AlphaFold DB model", "afdb_predictions"),
             ("interpro_match", "with any InterPro match (InterPro entry or member-database signature, as UniProt cross-references them)", f"{tag}_interpro_xrefs"),
-            ("sprot_hit", "with a Swiss-Prot hit above 30% identity (MMseqs2, self-hits count)", src),
-            ("sprot_hit_nonself", "with a Swiss-Prot hit above 30% identity other than the protein itself", src),
-            ("any_label", "with at least one of the three labels", src),
+            ("sprot_hit", "with a Swiss-Prot hit above 30% identity (MMseqs2, self-hits count)", "sherlock_mmseqs"),
+            ("sprot_hit_nonself", "with a Swiss-Prot hit above 30% identity other than the protein itself", "sherlock_mmseqs"),
+            ("any_label", "with at least one of the three labels", "sherlock_mmseqs"),
         ):
             k = int(df[col].sum())
             N.add(f"{tag}_{col}", 4, f"{tag}: proteins {what}", k, "proteins", source, rel)
             N.add(f"{tag}_{col}_pct", 4, f"{tag}: share of proteins {what}", round(100 * k / n, 2), "% of proteins", source, rel)
         k = int((~df["any_label"]).sum())
-        N.add(f"{tag}_no_label", 4, f"{tag}: proteins with none of the three labels", k, "proteins", src, rel)
-        N.add(f"{tag}_no_label_pct", 4, f"{tag}: share of proteins with none of the three labels", round(100 * k / n, 2), "% of proteins", src, rel)
-        if tag == "oyster":
+        three = "AlphaFold DB model, InterPro match, Swiss-Prot hit; also uses afdb_predictions and the InterPro cross-references"
+        N.add(f"{tag}_no_label", 4, f"{tag}: proteins with none of the three labels", k, "proteins", "sherlock_mmseqs", rel, note=three)
+        N.add(f"{tag}_no_label_pct", 4, f"{tag}: share of proteins with none of the three labels", round(100 * k / n, 2), "% of proteins", "sherlock_mmseqs", rel, note=three)
+        if tag == "oyster" and "interpro_oyster" in N.sources:
             api = interpro_set(raw / "interpro_oyster_proteins_with_match.jsonl.gz")
             accs = set(df["accession"])
             both, x_only, api_only = len(ipr & api & accs), len((ipr - api) & accs), len((api - ipr) & accs)
@@ -182,12 +183,12 @@ def main():
             N.add("oyster_interpro_xref_only", 4, "oyster: proteins with a match by UniProt's cross-references only", x_only, "proteins", "interpro_oyster", "InterPro API")
             N.add("oyster_interpro_api_only", 4, "oyster: proteins with a match in the InterPro API listing only", api_only, "proteins", "interpro_oyster", "InterPro API")
         fn = df.filter(~pl.col("interpro_match") & ~pl.col("sprot_hit")).height
-        N.add(f"{tag}_no_interpro_no_sprot_pct", 4, f"{tag}: share of proteins with neither an InterPro match nor a Swiss-Prot hit", round(100 * fn / n, 2), "% of proteins", src, rel,
+        N.add(f"{tag}_no_interpro_no_sprot_pct", 4, f"{tag}: share of proteins with neither an InterPro match nor a Swiss-Prot hit", round(100 * fn / n, 2), "% of proteins", "sherlock_mmseqs", rel,
               note="the two labels that name a function; AlphaFold DB models nearly every UniProt sequence")
         N.add(f"{tag}_af_mean_plddt_median", 4, f"{tag}: median of per-protein mean pLDDT, proteins with a model", round(df["af_mean_plddt"].median(), 2), "pLDDT", "afdb_predictions", "AlphaFold DB API")
         for status in ("Complete", "Duplicated", "Fragmented"):
             k = df.filter(pl.col("busco_status") == status).height
-            N.add(f"{tag}_busco_{status.lower()}", 4, f"{tag}: proteins BUSCO metazoa_odb12 calls {status}", k, "proteins", src, rel)
+            N.add(f"{tag}_busco_{status.lower()}", 4, f"{tag}: proteins BUSCO metazoa_odb12 calls {status}", k, "proteins", f"sherlock_busco_{tag}", "BUSCO 6.1.0, metazoa_odb12")
 
     table = pl.concat(frames)
     table.drop("sequence").write_parquet(OUT / "proteome_labels.parquet")

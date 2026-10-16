@@ -34,6 +34,9 @@ LABEL_SETS = {
 }
 
 
+PX = 10  # pixels per tile in the image, the last one white so single tiles stay visible
+
+
 def grid(lit):
     """Lit tiles first, then dark, filled row by row; cells past the last protein are NaN."""
     lit = np.sort(lit.astype(float))[::-1]
@@ -41,6 +44,14 @@ def grid(lit):
     g = np.full(rows * COLS, np.nan)
     g[: len(lit)] = lit
     return g.reshape(rows, COLS)
+
+
+def tiles_image(g):
+    """Each tile becomes PX x PX pixels with a one-pixel white gap on its right and bottom."""
+    img = np.repeat(np.repeat(g, PX, axis=0), PX, axis=1)
+    img[PX - 1 :: PX, :] = np.nan
+    img[:, PX - 1 :: PX] = np.nan
+    return img
 
 
 def draw(table, name, cols, what):
@@ -52,30 +63,31 @@ def draw(table, name, cols, what):
         grids[sp] = grid(lit)
         stats[sp] = (int(lit.sum()), len(lit))
     max_rows = max(g.shape[0] for g in grids.values())
-    # Same tile size in both panels: each axis is as tall as its own number of rows.
-    tile_mm = 80 / COLS
-    fig = plt.figure(figsize=(pf.TWO_COLUMN_MM / 25.4, (max_rows * tile_mm + 34) / 25.4))
-    fig_w_mm, fig_h_mm = pf.TWO_COLUMN_MM, max_rows * tile_mm + 34
+    tile_mm = 85 / COLS  # same tile size in both maps
+    top_mm = 15  # legend, then two lines of text per map, then the tiles
+    fig_w_mm, fig_h_mm = pf.TWO_COLUMN_MM, top_mm + max_rows * tile_mm + 2
+    fig = plt.figure(figsize=(fig_w_mm / 25.4, fig_h_mm / 25.4))
     cmap = ListedColormap([DARK, LIT])
     cmap.set_bad("white")
     fig.legend(
         handles=[Patch(facecolor=LIT, label=f"lit: the protein has {what}"), Patch(facecolor=DARK, label="dark: none of these")],
-        loc="upper left", bbox_to_anchor=(6 / fig_w_mm, 1 - 2 / fig_h_mm), frameon=False, ncol=1,
-        title=f"One tile = one protein ({COLS} tiles per row, same tile size in both maps)", title_fontsize=6, alignment="left",
+        loc="upper left", bbox_to_anchor=(2 / fig_w_mm, 1 - 1 / fig_h_mm), frameon=False, ncol=1, borderaxespad=0,
+        title=f"One tile = one protein; {COLS} tiles per row and the same tile size in both maps; lit tiles first, then dark",
+        title_fontsize=6, alignment="left",
     )
     for i, sp in enumerate(SPECIES):
         g = grids[sp]
-        left_mm, top_mm = 6 + i * 91, 22
+        left_mm = 3 + i * 92
         ax = fig.add_axes([
             left_mm / fig_w_mm, 1 - (top_mm + g.shape[0] * tile_mm) / fig_h_mm,
             COLS * tile_mm / fig_w_mm, g.shape[0] * tile_mm / fig_h_mm,
         ])
-        ax.imshow(np.ma.masked_invalid(g), cmap=cmap, vmin=0, vmax=1, interpolation="nearest", aspect="equal")
+        ax.imshow(np.ma.masked_invalid(tiles_image(g)), cmap=cmap, vmin=0, vmax=1, interpolation="nearest", aspect="auto")
         ax.set_axis_off()
         k, n = stats[sp]
-        fig.text(left_mm / fig_w_mm, 1 - (top_mm - 1.2) / fig_h_mm,
-                 f"{SPECIES[sp]}: {k:,} of {n:,} proteins lit ({100 * k / n:.1f}%), {n - k:,} dark ({100 * (n - k) / n:.1f}%)",
-                 fontsize=6, va="bottom", ha="left")
+        fig.text(left_mm / fig_w_mm, 1 - (top_mm - 0.8) / fig_h_mm,
+                 f"{SPECIES[sp]}, {n:,} proteins\n{k:,} lit ({100 * k / n:.1f}%), {n - k:,} dark ({100 * (n - k) / n:.1f}%)",
+                 fontsize=6, va="bottom", ha="left", linespacing=1.3)
     OUT.mkdir(parents=True, exist_ok=True)
     pf.save(fig, str(OUT / name), formats=("svg", "png", "pdf"))
     return stats
