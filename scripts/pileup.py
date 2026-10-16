@@ -109,8 +109,9 @@ def build(data: Path, panels: list[dict]) -> tuple[dict, dict]:
                     best_key, d = key, a - s
             prow.append({
                 "r": runs(val, cov),
-                "c": merge([(max(a, 1), min(b, r["protein_length"])) for a, b, _ in cs
-                            if b >= s and a <= e]),
+                # Every call in the window, merged, so the hover's list matches its count n
+                # (a call can sit in the flank without touching the domain).
+                "c": merge([(max(a, 1), min(b, r["protein_length"])) for a, b, _ in cs]),
                 "n": len(cs),
                 "d": d,
             })
