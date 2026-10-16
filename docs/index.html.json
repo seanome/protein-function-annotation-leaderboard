@@ -82,7 +82,7 @@
   },
   {
    "tag": "p",
-   "text": "All 7 lines drawn in full that have both ends end lower at E. coli (2,000 Mya) than they start at chimpanzee (6 Mya); Foldseek did not search both. At chimpanzee the best is kmerseek (protein20, k = 6) at Fmax 0.443; at E. coli it is HH-suite (hhsearch) at 0.123. kmerseek's best setting (hp_thomas_dill2, k = 33) goes from 0.401 to 0.000."
+   "text": "Every tool drawn in full scores lower at E. coli (2,000 Mya) than at chimpanzee (6 Mya) (Foldseek has no chimpanzee search). At chimpanzee the best is kmerseek (protein20, k = 6) at Fmax 0.443; at E. coli it is HH-suite (hhsearch) at 0.123. kmerseek at the setting on its tool card (gbmr4, k = 21) goes from 0.428 to 0.000."
   },
   {
    "tag": "figcaption",
@@ -94,7 +94,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 13. Fmax by Swiss-Prot feature type, one bar per tool (its best setting there). After each bar: its Fmax, and n, the true features of that type. Swiss-Prot truth set, raw calls, zebrafish as the relative; one shared Fmax scale."
+   "text": "Figure 13. Fmax by Swiss-Prot feature type, one bar per tool (its best setting there). After each bar: its Fmax, and n, the true features of that type. Swiss-Prot truth set, raw calls, zebrafish as the relative; one shared Fmax scale. These are the seven types asked for; the table's other Swiss-Prot types are in Table 1's filters."
   },
   {
    "tag": "p",
@@ -106,11 +106,11 @@
   },
   {
    "tag": "p",
-   "text": "Best tool per feature type: membrane-spanning segment: kmerseek (wwmj5, k = 11) 0.36 (n = 1,124); zinc finger: kmerseek (wwmj5, k = 12) 0.15 (n = 335); coiled coil: kmerseek (gbmr4, k = 21) 0.09 (n = 145); repeat: kmerseek (gbmr4, k = 19) 0.13 (n = 589); domain: MMseqs2, three rounds 0.32 (n = 1,107). kmerseek's bar is the best of its 15 settings in each panel, which favours it; every other tool ran one setting. Not in the tables: signal peptide, disordered region."
+   "text": "Best tool per feature type: membrane-spanning segment: HH-suite (hhsearch) 0.14 (n = 1,124); zinc finger: kmerseek (gbmr4, k = 21) 0.12 (n = 335); coiled coil: kmerseek (gbmr4, k = 21) 0.09 (n = 145); repeat: kmerseek (gbmr4, k = 21) 0.12 (n = 589); domain: MMseqs2, three rounds 0.32 (n = 1,107). Not in the tables: signal peptide, disordered region."
   },
   {
    "tag": "figcaption",
-   "text": "Figure 15. Which tools found which true regions, as an UpSet plot: each column is one combination of tools, and its bar counts the regions found by those tools and no other. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 15), the one that found the most of these regions, which favours it. hmmscan is left out: Pfam's regions are defined by its models."
+   "text": "Figure 15. Which tools found which true regions, as an UpSet plot: each column is one combination of tools, and its bar counts the regions found by those tools and no other. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 21), the one on its tool card. hmmscan is left out: Pfam's regions are defined by its models."
   },
   {
    "tag": "p",
@@ -118,7 +118,7 @@
   },
   {
    "tag": "p",
-   "text": "1,752 of the 2,435 true regions were found by at least one of these tools, and 683 by none. The most found by one tool alone: HH-suite (hhsearch), 112 regions. kmerseek (gbmr4, k = 15) alone found 86. 73 smaller combinations of two or more tools (275 regions) are not drawn."
+   "text": "1,742 of the 2,435 true regions were found by at least one of these tools, and 693 by none. The most found by one tool alone: HH-suite (hhsearch), 115 regions. kmerseek (gbmr4, k = 21) alone found 76. 72 smaller combinations of two or more tools (258 regions) are not drawn."
   },
   {
    "tag": "summary",

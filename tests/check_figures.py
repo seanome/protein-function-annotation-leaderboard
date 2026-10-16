@@ -86,6 +86,12 @@ def main() -> None:
             raise SystemExit(f"{q.height} rows for {tool} {setting} {target} {axis} {bin_} {metric}")
         return q.row(0, named=True)
 
+    # The one kmerseek setting all figures draw in full: its best Fmax on Pfam, raw,
+    # zebrafish, all proteins (the setting its tool card reports).
+    pick = (long.filter((pl.col("tool") == "kmerseek") & (pl.col("truth_source") == "Pfam-A domain instances")
+                        & (pl.col("dedup_or_raw") == "raw") & (pl.col("target_db") == "QfO zebrafish")
+                        & (pl.col("stratum_axis") == "all") & (pl.col("metric") == "fmax"))
+            .sort(["value", "setting"], descending=[True, False])["setting"][0])
     t = tips(a.site / "index.html")
     # Figure 11
     rx = re.compile(r"(.+?): (.+) \(([\d,]+) Mya\), Fmax ([\d.]+), n = ([\d,]+) true domains")
@@ -102,6 +108,11 @@ def main() -> None:
         if f"{r['value']:.3f}" != m[5] or r["n_instances"] != int(m[6].replace(",", "")) \
                 or int(r["target_mya_to_human"]) != int(m[4].replace(",", "")):
             errors.append(f"Figure 11: {s} but table has {r['value']:.3f}, n {r['n_instances']}")
+    for fid in ("fig-distance", "fig-identity"):
+        drawn = {split_name(s)[1].split(":")[0] for s in t.get(fid, []) if s.startswith("kmerseek, ")}
+        want_label = re.sub(r"(.+)_k(\d+)_lc\w+", r"\1, k = \2", pick)
+        if drawn != {want_label}:
+            errors.append(f"{fid}: kmerseek drawn in full at {drawn}, not the card's setting {want_label}")
     full = long.filter((pl.col("truth_source") == "Pfam-A domain instances") & (pl.col("dedup_or_raw") == "raw")
                        & (pl.col("stratum_axis") == "all") & (pl.col("metric") == "fmax")
                        & pl.col("target_db").str.starts_with("QfO ") & (pl.col("tool") != "kmerseek"))
@@ -136,13 +147,8 @@ def main() -> None:
         n_checked += 1
         if f"{r['value']:.3f}" != m[2] or r["n_instances"] != int(m[3].replace(",", "")):
             errors.append(f"Figure 13: {s} but table has {r['value']:.3f}")
-        if tool == "kmerseek":
-            best = long.filter((pl.col("tool") == "kmerseek") & (pl.col("truth_source") == "Swiss-Prot features")
-                               & (pl.col("dedup_or_raw") == "raw") & (pl.col("target_db") == "QfO zebrafish")
-                               & (pl.col("stratum_axis") == "feature_type") & (pl.col("stratum_bin") == keys[m[4]])
-                               & (pl.col("metric") == "fmax"))["value"].max()
-            if abs(best - r["value"]) > 1e-12:
-                errors.append(f"Figure 13: kmerseek bar for {m[4]} is not its best setting")
+        if tool == "kmerseek" and setting != pick:
+            errors.append(f"Figure 13: kmerseek bar for {m[4]} is {setting}, not the card's setting {pick}")
     # Figure 14 on each card
     rx = re.compile(r"(.+?): precision ([\d.]+), recall ([\d.]+), Fmax ([\d.]+), n = ([\d,]+) true domains")
     for card in sorted((a.site / "tools").glob("*.html")):
@@ -177,7 +183,7 @@ def main() -> None:
         union = np.maximum(ov, c["true_end"].to_numpy()) - np.minimum(c["call_start"].to_numpy(), c["true_start"].to_numpy()) + 1
         c = c.with_columns(pl.Series("hit", c["is_tp"].to_numpy() & (inter / union >= 0.5)))
         per_set = c.filter("hit").group_by("tool", "setting").agg(pl.col("row_id").n_unique().alias("n"))
-        ks = per_set.filter(pl.col("tool") == "kmerseek").sort(["n", "setting"], descending=[True, False])["setting"][0]
+        ks = pick
         use = c.filter((pl.col("tool") != "hmmscan") & ((pl.col("tool") != "kmerseek") | (pl.col("setting") == ks)))
         found = use.filter("hit").group_by("row_id").agg(pl.col("tool").unique().sort().alias("tools"))
         combo = reg.select("row_id").join(found, on="row_id", how="left").with_columns(
@@ -202,7 +208,7 @@ def main() -> None:
         sent = (a.site / "proteins.html").read_text()
         for label, val in (("none found", prot.filter(pl.col("k") == 0).height),
                            ("found by all four kinds", prot.filter(pl.col("k") == 4).height)):
-            pat = (f"{val:,} had none found" if label == "none found" else f"{val:,} had a region found by all four kinds")
+            pat = (f"{val:,} had no region found" if label == "none found" else f"{val:,} had regions found, between them, by all four kinds")
             n_checked += 1
             if pat not in sent:
                 errors.append(f"Figure 17: expected '{pat}'")

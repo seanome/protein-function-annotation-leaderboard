@@ -99,7 +99,7 @@ def draw_distance(t: pl.DataFrame) -> tuple[str, str]:
     Table columns: tool, setting, name, label, kind, shape, highlight, organism, mya, fmax,
     n. One line per tool and setting, one dot per relative searched.
     """
-    W, H, L, R, T, B = 760, 400, 52, 168, 44, 50
+    W, H, L, R, T, B = 760, 414, 52, 168, 58, 50
     mya = sorted(set(t["mya"].to_list()))
     lo, hi = math.log10(min(mya) * 0.8), math.log10(max(mya) * 1.1)
     px = lambda m: L + (math.log10(m) - lo) / (hi - lo) * (W - L - R)  # noqa: E731
@@ -122,16 +122,22 @@ def draw_distance(t: pl.DataFrame) -> tuple[str, str]:
     p.append(f'<line x1="{L}" x2="{W - R}" y1="{H - B}" y2="{H - B}" class="fg-axis"/>')
     p.append(f'<text x="{(L + W - R) / 2:.0f}" y="{H - 10}" text-anchor="middle" class="fg-ax">'
              'million years since human and the relative shared an ancestor (Mya)</text>')
-    # relatives named along the top, where their names fit; every one is in the hover text
-    orgs = t.select("organism", "mya").unique().sort("mya", "organism")
-    last_end = -1e9
+    # relatives named along the top in two rows, where their names fit; every one is in the
+    # hover text of its dots
+    # shortest names are placed first, so more of them fit
+    orgs = (t.select("organism", "mya").unique()
+            .sort(pl.col("organism").str.split(" (").list.first().str.len_chars(), "mya", "organism"))
+    placed: list[list[tuple[float, float]]] = [[], []]
     for o in orgs.iter_rows(named=True):
         x = px(o["mya"])
-        p.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{T - 6}" y2="{H - B}" class="fg-rel"/>')
-        w = text_w(o["organism"], 6)
-        if x - w / 2 > last_end + 6 and x + w / 2 < W - 4:
-            p.append(f'<text x="{x:.1f}" y="{T - 12}" text-anchor="middle" class="fg-small">{esc(o["organism"])}</text>')
-            last_end = x + w / 2
+        name = o["organism"].split(" (")[0]
+        w = text_w(name, 6)
+        a_, b_ = x - w / 2 - 4, x + w / 2 + 4
+        row = next((i for i in (0, 1) if b_ < W and all(b_ < c or a_ > d for c, d in placed[i])), None)
+        p.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{T - 6 - (14 if row == 1 else 0)}" y2="{H - B}" class="fg-rel"/>')
+        if row is not None:
+            p.append(f'<text x="{x:.1f}" y="{T - 12 - 14 * row}" text-anchor="middle" class="fg-small">{esc(name)}</text>')
+            placed[row].append((a_, b_))
     # pale kmerseek settings first, full-strength lines on top
     ends = []
     for hl in (False, True):
@@ -169,17 +175,23 @@ def draw_distance(t: pl.DataFrame) -> tuple[str, str]:
     a_far = hl.filter(pl.col("mya") == far).select("tool", "setting", pl.col("fmax").alias("f_far"))
     both = a_near.join(a_far, on=["tool", "setting"], how="inner")
     lower = both.filter(pl.col("f_far") < pl.col("f_near")).height
-    one_end = sorted(set(hl["name"].to_list()) - set(hl.join(both, on=["tool", "setting"], how="semi")["name"].to_list()))
+    missing = []
+    for r in hl.select("tool", "setting", "name").unique(maintain_order=True).iter_rows(named=True):
+        have = hl.filter((pl.col("tool") == r["tool"]) & (pl.col("setting") == r["setting"]))["mya"].to_list()
+        gone = [bn["organism"] if near not in have else None, bf["organism"] if far not in have else None]
+        gone = [g_ for g_ in gone if g_]
+        if gone:
+            missing.append(f"{r['name']} has no {' or '.join(gone)} search")
     nm = lambda r: r["name"] + (f" ({r['label']})" if r["tool"] == "kmerseek" else "")  # noqa: E731
-    count = f"All {lower}" if lower == both.height else f"{lower} of the {both.height}"
-    s = (f"{count} lines drawn in full that have both ends end lower at {bf['organism']} "
-         f"({far:,.0f} Mya) than they start at {bn['organism']} ({near:,.0f} Mya)"
-         + (f"; {', '.join(one_end)} did not search both" if one_end else "") + ". "
+    who = "Every tool drawn in full" if lower == both.height else f"{lower} of the {both.height} tools drawn in full"
+    s = (f"{who} scores lower at {bf['organism']} ({far:,.0f} Mya) than at {bn['organism']} ({near:,.0f} Mya)"
+         + (f" ({'; '.join(missing)})" if missing else "") + ". "
          f"At {bn['organism']} the best is {nm(bn)} at Fmax {bn['fmax']:.3f}; at {bf['organism']} it is {nm(bf)} at "
          f"{bf['fmax']:.3f}.")
     if ks.height:
         k0, k1 = ks.row(0, named=True), ks.row(ks.height - 1, named=True)
-        s += (f" kmerseek's best setting ({k0['label']}) goes from {k0['fmax']:.3f} to {k1['fmax']:.3f}.")
+        s += (f" kmerseek at the setting on its tool card ({k0['label']}) goes from {k0['fmax']:.3f} to "
+              f"{k1['fmax']:.3f}.")
     return tool_legend(t, note) + svg, s
 
 
@@ -305,7 +317,7 @@ def draw_feature_types(t: pl.DataFrame) -> tuple[str, str]:
             p.append(f'<rect x="{L}" y="{y + 2}" width="{max(px(r["fmax"]) - L, 0.8):.1f}" height="14" '
                      f'fill="var(--k-{r["kind"]})" data-tip="{esc(tip)}" tabindex="0"/>')
             p.append(f'<text x="{px(r["fmax"]) + 4:.1f}" y="{y + 13}" class="fg-small">{r["fmax"]:.2f} (n = {r["n"]:,})</text>')
-        p.append(f'<text x="{L + BW / 2:.0f}" y="{H}" text-anchor="middle" class="fg-small">Fmax</text>')
+        p.append(f'<text x="{L + BW / 2:.0f}" y="{H}" text-anchor="middle" class="fg-small">Fmax (higher is better)</text>')
         panels.append(f'<div class="fg-panel"><h4>{esc(r0["panel_label"])} <span class="muted">n = {n:,}</span></h4>'
                       f'<svg class="fg" viewBox="0 0 {W} {H}" role="img" aria-label="Fmax per tool, {esc(r0["panel_label"])}">'
                       f'{"".join(p)}</svg></div>')
@@ -316,7 +328,7 @@ def draw_feature_types(t: pl.DataFrame) -> tuple[str, str]:
     missing = t.filter(~pl.col("measured"))["panel_label"].to_list()
     s = "Best tool per feature type: " + "; ".join(parts) + "."
     ns = ms.filter(pl.col("tool") == "kmerseek")["n_settings"]
-    if ns.len():
+    if ns.len() and ns.max() > 1:
         s += (f" kmerseek's bar is the best of its {ns.max()} settings in each panel, which favours it; every other "
               "tool ran one setting.")
     if missing:
@@ -379,6 +391,10 @@ def draw_pr_points(t: pl.DataFrame) -> tuple[str, str]:
     s = (f"On all proteins {a['name']} reaches precision {a['precision']:.3f} and recall {a['recall']:.3f} at its "
          f"Fmax cutoff (Fmax {F:.3f}, n = {a['n']:,}).")
     if hi and lo:
-        s += (f" Its best subset is {hi['stratum_label']} (Fmax {hi['fmax']:.3f}, n = {hi['n']:,}), its worst "
-              f"{lo['stratum_label']} ({lo['fmax']:.3f}, n = {lo['n']:,}).")
+        s += f" Its best subset is {hi['stratum_label']} (Fmax {hi['fmax']:.3f}, n = {hi['n']:,})"
+        tied = sub.filter(pl.col("fmax") == lo["fmax"])
+        if tied.height > 1:
+            s += f"; its lowest Fmax, {lo['fmax']:.3f}, is shared by {tied.height} subsets."
+        else:
+            s += f", its worst {lo['stratum_label']} ({lo['fmax']:.3f}, n = {lo['n']:,})."
     return leg + svg, s

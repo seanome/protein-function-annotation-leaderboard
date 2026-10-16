@@ -1024,9 +1024,24 @@ def series_cols(df: pl.DataFrame) -> pl.DataFrame:
     return df.join(info, on=["tool", "setting"], how="left")
 
 
+# The one kmerseek setting every figure draws in full: its best Fmax on the leaderboard's
+# default view (Pfam truth set, raw calls, zebrafish, all proteins), the setting its tool
+# card reports. Set in main() from the table; one setting across Figures 11-17 so they can
+# be compared, and not picked per figure on the figure's own numbers.
+KMER_PICK: str | None = None
+
+
+def kmerseek_pick(res: pl.DataFrame) -> str | None:
+    q = res.filter((pl.col("tool") == "kmerseek") & (pl.col("truth_set") == "pfam") & (pl.col("calls") == "raw")
+                   & (pl.col("species") == "zebrafish") & (pl.col("stratum_axis") == "all"))
+    return q.sort(["fmax", "setting"], descending=[True, False])["setting"][0] if q.height else None
+
+
 def best_kmerseek_setting(q: pl.DataFrame) -> str | None:
-    """kmerseek's setting with the highest mean Fmax over the rows given; ties by name."""
+    """KMER_PICK when the rows hold it, else kmerseek's setting with the highest mean Fmax."""
     k = q.filter(pl.col("tool") == "kmerseek").group_by("setting").agg(pl.col("fmax").mean())
+    if KMER_PICK in k["setting"].to_list():
+        return KMER_PICK
     return k.sort(["fmax", "setting"], descending=[True, False])["setting"][0] if k.height else None
 
 
@@ -1079,6 +1094,8 @@ def feature_table(res: pl.DataFrame, species: str = "zebrafish") -> pl.DataFrame
     q = res.filter((pl.col("truth_set") == "swissprot") & (pl.col("calls") == "raw") & (pl.col("species") == species)
                    & (pl.col("stratum_axis") == "feature_type") & pl.col("fmax").is_not_null())
     q = series_cols(q)
+    ks = best_kmerseek_setting(q)
+    q = q.filter((pl.col("tool") != "kmerseek") | (pl.col("setting") == ks))
     n_set = q.group_by("tool", "stratum").agg(pl.col("setting").n_unique().alias("n_settings"))
     q = q.join(n_set, on=["tool", "stratum"], how="left")
     frames = []
@@ -1157,7 +1174,8 @@ def leaderboard_figures(res: pl.DataFrame, upset: str = "") -> str:
                     "every tool. The last bin is drawn apart: it has no identity value.", i, is_, "fig-identity")
         + fig_block(13, "Fmax by Swiss-Prot feature type, one bar per tool (its best setting there). After each bar: "
                     "its Fmax, and n, the true features of that type.",
-                    "Swiss-Prot truth set, raw calls, zebrafish as the relative; one shared Fmax scale.", f, fs,
+                    "Swiss-Prot truth set, raw calls, zebrafish as the relative; one shared Fmax scale. These are the "
+                    "seven types asked for; the table's other Swiss-Prot types are in Table 1's filters.", f, fs,
                     "fig-features")
         + upset + NOT_DRAWN)
 
@@ -1177,14 +1195,13 @@ def pileup_sets(calls: pl.DataFrame, regions: pl.DataFrame) -> tuple[list[dict],
     IoU against its own region and whether it finds that region (column hit).
 
     hmmscan is left out: it scans Pfam's own models, which define these true regions, and
-    searches no relative. kmerseek enters with one setting, the one that found the most
-    regions here (ties by name); that choice is made on these same regions, so it favours
-    kmerseek, and the sentences say which setting it is."""
+    searches no relative. kmerseek enters with one setting, KMER_PICK, the one its card and
+    Figures 11-13 use (if the pile-up lacks it: the one that found the most regions here)."""
     calls = with_iou(calls, regions).with_columns((pl.col("is_tp") & (pl.col("iou") >= IOU_FOUND)).alias("hit"))
     found = (calls.filter(pl.col("hit")).group_by("tool", "setting")
              .agg(pl.col("row_id").n_unique().alias("n")))
     k = found.filter(pl.col("tool") == "kmerseek").sort(["n", "setting"], descending=[True, False])
-    ks = k["setting"][0] if k.height else None
+    ks = KMER_PICK if KMER_PICK in k["setting"].to_list() else (k["setting"][0] if k.height else None)
     use = calls.filter((pl.col("tool") != "hmmscan") & ((pl.col("tool") != "kmerseek") | (pl.col("setting") == ks)))
     pairs = sorted(use.select("tool", "setting").unique().iter_rows(),
                    key=lambda ts: (list(KINDS).index(TOOLS[ts[0]]["kind"]), list(TOOLS).index(ts[0])))
@@ -1224,7 +1241,8 @@ def identity_bin(pident) -> str:
 
 def gallery_table(sets: list[dict], use: pl.DataFrame, regions: pl.DataFrame) -> pl.DataFrame:
     """Figure 16: per identity bin, the region with the highest best-correct IoU, the one at
-    the middle of the bin's found regions (lower middle for an even count), and a region no
+    the middle of the bin's found regions (the lower of the two middle ones for an even
+    count; median_iou is the bin's true median), and a region no
     tool found (the one with calls from the most tools, then the lowest row). Ties go to the
     lowest row. One row per example and tool, with that tool's call of the highest IoU."""
     c = use
@@ -1257,7 +1275,7 @@ def gallery_table(sets: list[dict], use: pl.DataFrame, regions: pl.DataFrame) ->
                 cr = cc.row(0, named=True) if cc.height else {}
                 picks.append({
                     "stratum": st, "stratum_label": words[st], "stratum_order": i, "n_regions": g.height,
-                    "n_found": found.height, "case": case,
+                    "n_found": found.height, "median_iou": found["best_iou"].median(), "case": case,
                     **{k: row[k] for k in ("row_id", "symbol", "accession", "pfam_id", "true_start", "true_end",
                                            "window_seq", "window_offset", "best_iou")},
                     "set_name": pileup_figures.set_name(s), "kind": s["kind"],
@@ -1300,8 +1318,8 @@ def pileup_figures_html(data: Path) -> dict:
     ks = next(s for s in sets if s["tool"] == "kmerseek")
     where = (f"The {regions.height:,} true Pfam regions on {regions['accession'].n_unique():,} human proteins of the "
              "region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the "
-             f"tool made a correct call that overlaps it with an IoU of at least {IOU_FOUND}. kmerseek is shown at one setting ({esc(ks['label'])}), the one that found "
-             "the most of these regions, which favours it. hmmscan is left out: Pfam's regions are defined by its models.")
+             f"tool made a correct call that overlaps it with an IoU of at least {IOU_FOUND}. kmerseek is shown at one setting ({esc(ks['label'])}), the "
+             "one on its tool card. hmmscan is left out: Pfam's regions are defined by its models.")
     return {
         "upset": fig_block(15, "Which tools found which true regions, as an UpSet plot: each column is one combination "
                            "of tools, and its bar counts the regions found by those tools and no other.", where, u, us,
@@ -2581,6 +2599,8 @@ def main() -> None:
     global DATA_DIR
     DATA_DIR = a.data
     res, comp, src, prov, cov = load(a.data)
+    global KMER_PICK
+    KMER_PICK = kmerseek_pick(res)
 
     unknown = set(res["tool"].unique()) - set(TOOLS)
     if unknown:

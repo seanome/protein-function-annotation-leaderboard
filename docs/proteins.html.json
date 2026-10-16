@@ -38,11 +38,11 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 17. Every protein of the pile-up set as a tile, coloured by which kinds of tool found one of its true regions. Tiles with more kinds come first. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 15), the one that found the most of these regions, which favours it. hmmscan is left out: Pfam's regions are defined by its models."
+   "text": "Figure 17. Every protein of the pile-up set as a tile, coloured by which kinds of tool found one of its true regions. Tiles with more kinds come first. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 21), the one on its tool card. hmmscan is left out: Pfam's regions are defined by its models."
   },
   {
    "tag": "p",
-   "text": "Of the 998 proteins, 118 had a region found by all four kinds of tool and 119 had none found; 14 had regions found only by the k-mer tool."
+   "text": "Of the 998 proteins, 110 had regions found, between them, by all four kinds of tool, and 117 had no region found. For 16, the k-mer tool was the only kind that found any of its regions."
   }
  ],
  "data": {

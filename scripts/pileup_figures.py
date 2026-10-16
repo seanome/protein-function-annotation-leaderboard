@@ -43,7 +43,7 @@ def draw_upset(t: pl.DataFrame, sets: list[dict], max_cols: int = 24) -> tuple[s
     left_out = rest[room:]
     size = {k: t.filter(pl.col("found_by").list.contains(k)).height for k in keys}
     by_key = {s["key"]: s for s in sets}
-    LW, SW, CW, top, rowh = 190, 70, 24, 150, 22
+    LW, SW, CW, top, rowh = 230, 70, 24, 150, 22
     W = LW + SW + CW * len(cols) + 10
     H = top + rowh * len(keys) + 14
     nmax = max(r["n"] for r in cols)
@@ -84,10 +84,11 @@ def draw_upset(t: pl.DataFrame, sets: list[dict], max_cols: int = 24) -> tuple[s
         p.append('</g>')
     for j, s in enumerate(sets):
         y = top + rowh * j + rowh / 2
-        p.append(f'<text x="{LW - 6}" y="{y + 4:.1f}" text-anchor="end" class="fg-small">{esc(set_name(s))}</text>')
+        p.append(f'<text x="{LW - 40}" y="{y + 4:.1f}" text-anchor="end" class="fg-small">{esc(set_name(s))}</text>')
         w = size[s["key"]] / smax * (SW - 8)
         p.append(f'<rect x="{LW + SW - 4 - w:.1f}" y="{y - 6:.1f}" width="{w:.1f}" height="12" fill="var(--k-{s["kind"]})" '
                  f'data-tip="{esc(set_name(s))} found {size[s["key"]]:,} of the {t.height:,} regions" tabindex="0"/>')
+        p.append(f'<text x="{LW + SW - 8 - w:.1f}" y="{y + 4:.1f}" text-anchor="end" class="fg-tick">{size[s["key"]]:,}</text>')
     svg = (f'<div class="figscroll"><svg class="fg fg-upset" viewBox="0 0 {W} {H}" style="min-width:{min(W, 720)}px;'
            f'max-width:{W * 1.2:.0f}px" role="img" aria-label="UpSet plot: true regions found by each combination of tools">'
            f'{"".join(p)}</svg></div>')
@@ -97,7 +98,7 @@ def draw_upset(t: pl.DataFrame, sets: list[dict], max_cols: int = 24) -> tuple[s
            '<span class="item"><svg width="16" height="14" aria-hidden="true"><circle cx="8" cy="7" r="3.5" fill="var(--hair)"/></svg>'
            'it did not</span>'
            '<span class="item"><svg width="14" height="14" aria-hidden="true"><rect x="2" y="1" width="10" height="12" fill="var(--k-letters)"/></svg>'
-           'bar in a tool\'s colour: found by that tool alone</span>'
+           'bar in the colour of a kind of tool: found by one tool alone (its dot says which)</span>'
            '<span class="item"><svg width="14" height="14" aria-hidden="true"><rect x="2" y="1" width="10" height="12" fill="var(--muted)"/></svg>'
            'found by two or more</span>'
            '<span class="item"><svg width="14" height="14" aria-hidden="true"><rect x="2" y="1" width="10" height="12" fill="none" '
@@ -174,14 +175,14 @@ def protein_line_svg(r0: dict, calls: list[dict], W: int = 640) -> str:
 
 
 CASE_WORDS = {"best": "Best case: the highest overlap of a correct call",
-              "median": "Median case: the middle overlap among regions a tool found",
+              "median": "Middle case: the region in the middle when the found regions are ordered by overlap",
               "missed": "Missed: no tool made a correct call"}
 
 
 def draw_gallery(t: pl.DataFrame) -> tuple[str, str]:
     """Figure 16: three real regions per identity bin.
 
-    Table columns: stratum, stratum_label, stratum_order, n_regions, n_found, case, row_id,
+    Table columns: stratum, stratum_label, stratum_order, n_regions, n_found, median_iou, case, row_id,
     symbol, accession, pfam_id, true_start, true_end, window_seq, window_offset, best_iou,
     set_name, kind, call_start, call_end, iou, is_tp, score: one row per example and tool,
     with the call columns null where the tool made no call of the family. is_tp here means
@@ -209,7 +210,7 @@ def draw_gallery(t: pl.DataFrame) -> tuple[str, str]:
                       f'{"".join(cards)}</details>')
         m = g.filter(pl.col("case") == "median")
         if m.height:
-            lines.append(f"{g0['stratum_label']} {m['best_iou'][0]:.2f} ({g0['n_found']:,} found)")
+            lines.append(f"{g0['stratum_label']} {g0['median_iou']:.2f} ({g0['n_found']:,} found)")
     leg = ('<div class="legend">'
            '<span class="item"><svg width="40" height="16" aria-hidden="true"><line x1="0" x2="40" y1="8" y2="8" '
            'stroke="var(--ink)" stroke-width="1.2"/><rect x="12" y="2" width="16" height="12" fill="var(--surface)" '
@@ -266,6 +267,7 @@ def draw_proteome_map(t: pl.DataFrame, kinds: dict) -> tuple[str, str]:
     none = t.filter(pl.col("n_kinds") == 0).height
     allk = t.filter(pl.col("n_kinds") == len(QUAD)).height
     only_k = t.filter(pl.col("kmers") & (pl.col("n_kinds") == 1)).height
-    s = (f"Of the {n:,} proteins, {allk:,} had a region found by all four kinds of tool and {none:,} had none found; "
-         f"{only_k:,} had regions found only by the k-mer tool.")
+    s = (f"Of the {n:,} proteins, {allk:,} had regions found, between them, by all four kinds of tool, and "
+         f"{none:,} had no region found. For {only_k:,}, the k-mer tool was the only kind that found any of its "
+         "regions.")
     return leg + svg, s
