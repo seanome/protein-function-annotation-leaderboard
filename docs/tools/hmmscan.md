@@ -1,6 +1,25 @@
 # hmmscan with Pfam
 
-Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Each query protein against the curated profile models of every Pfam family, without searching any relative.
+
+## Will it work for you?
+
+1. **Is every family you expect to find already in Pfam?** If no, this tool cannot find it: it only reports families that have a Pfam model.
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting Pfam models.)
+3. **Can you spend about 0.389 core-hours per 1,000 proteins?** That is the measured cost of scanning them against Pfam's models.
+
+## Best Fmax and cost
+
+Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is Pfam models (`direct`): Fmax 0.886 over 2,435 true instances. Searching costs about $0.0173 per 1,000 queries (0.389 core-hours), for scanning Pfam's models.
+
+## Where it is strong and weak
+
+Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
+
+No other tool was scored on the same subsets, so no comparison: not run.
+
+Swiss-Prot feature types: not run.
+
 
 ## What it compares
 
@@ -19,14 +38,6 @@ Pfam-A 38.2 family models (30,134 models).
 ## How to read its score
 
 Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).
-
-## Strong and weak strata
-
-Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is `direct`: Fmax 0.886 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
-
-No other tool was scored in the same strata, so no comparison: not run.
-
-Swiss-Prot feature types: not run.
 
 ## Known failure modes {#failure-modes}
 
@@ -47,7 +58,7 @@ The per-query cost counts the search only. The run recorded cost per tool and se
 
 ## Settings in the table
 
-- `direct`: scans Pfam's models; no relative searched
+- Pfam models (`direct`): scans Pfam's models; no relative searched
 
 ## Version, container, command
 
@@ -66,8 +77,5 @@ hmmscan \
 
 Query: the same 998 human proteins.
 
-## Will it work for you?
+Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
 
-1. **Is every family you expect to find already in Pfam?** If no, this tool cannot find it: it only reports families that have a Pfam model.
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)
-3. **Can you spend about 0.389 core-hours per 1,000 proteins?** That is the measured cost of scanning them against Pfam's models.

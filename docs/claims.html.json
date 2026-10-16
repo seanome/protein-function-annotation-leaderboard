@@ -21,16 +21,20 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Claims"
   },
   {
    "tag": "p",
-   "text": "What each tool's authors claim, the result that would retire each claim, and where it stands. A claim is alive when its test has run and did not retire it, retired when the test retired it, and untested when the test has not run or the data cannot decide it. The build recomputes every verdict from the tables or checks it against the recorded notebook output, so nothing on a card is typed in by hand."
+   "text": "What each tool's authors claim, the result that would disprove each claim, and where it stands. Only kmerseek has filed claims so far."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
+  },
+  {
+   "tag": "p",
+   "text": "The build recomputes every verdict from the tables or checks it against the recorded notebook output, so nothing on a card is typed in by hand."
   },
   {
    "tag": "h2",
@@ -38,7 +42,11 @@
   },
   {
    "tag": "p",
-   "text": "each row: the claim, the test that kills it, the verdict with its number, the evidence"
+   "text": "each row: the claim, the result that would disprove it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "h3",
+   "text": "● Holds (1)"
   },
   {
    "tag": "summary",
@@ -62,7 +70,11 @@
   },
   {
    "tag": "li",
-   "text": "●Parity with phmmer inside mammalskill: Fmax more than 0.05 from phmmer's on any of the 6 mammalsalive · −0.042 to +0.013 across 6 of 6 · leaderboard"
+   "text": "●Parity with phmmer inside mammalsDisproved if: Fmax more than 0.05 from phmmer's on any of the 6 mammalsholds · −0.042 to +0.013 across 6 of 6 · leaderboard"
+  },
+  {
+   "tag": "h3",
+   "text": "○ Not yet tested (3)"
   },
   {
    "tag": "summary",
@@ -82,7 +94,47 @@
   },
   {
    "tag": "li",
-   "text": "○Exact HP seeds find homologs below 40% identitykill: Fmax under 0.05 in the under-40% identity bins on Pfam-N, for every hydrophobic-polar settinguntested · the 0-20%, 20-30%, 30-40% bins hold at most 1 region for any setting and relative; at least 30 are needed to decide · nb 230 to 232"
+   "text": "○Exact HP seeds find homologs below 40% identityDisproved if: Fmax under 0.05 in the under-40% identity bins on Pfam-N, for every hydrophobic-polar settingnot yet tested · the 0-20%, 20-30%, 30-40% bins hold at most 1 region for any setting and relative; at least 30 are needed to decide · notebook 230 to 232"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "the 87 short Swiss-Prot features of notebook 244 where kmerseek drew the boundary and every other tool's call ran past it"
+  },
+  {
+   "tag": "li",
+   "text": "short features passing every criterion in notebook 244: 87"
+  },
+  {
+   "tag": "li",
+   "text": "across all Swiss-Prot features, not only short ones, kmerseek settings above a Kyte-Doolittle scan: 0 of 406"
+  },
+  {
+   "tag": "li",
+   "text": "○Short features under 60 aa placed at 50 to 90% identityDisproved if: a Kyte-Doolittle hydrophobicity window, with no search, lands on as many of the 87 casesnot yet tested · the Kyte-Doolittle window was not run on the 87 cases · notebook 244"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Botryllus histocompatibility factor (BHF)"
+  },
+  {
+   "tag": "li",
+   "text": "best E-value of any human protein for BHF, any kmerseek setting (notebook 241): 0.609548"
+  },
+  {
+   "tag": "li",
+   "text": "○The BHF membrane tether is a find other tools missDisproved if: a Kyte-Doolittle window on BHF calls the same regionnot yet tested · no Kyte-Doolittle window has been run on BHF · notebook 241"
+  },
+  {
+   "tag": "h3",
+   "text": "⊘ Disproved (2)"
   },
   {
    "tag": "summary",
@@ -106,7 +158,7 @@
   },
   {
    "tag": "li",
-   "text": "×Faster per query than MMseqs2kill: kmerseek answers fewer queries per second than MMseqs2 on the same 1,000 Swiss-Prot queriesretired 13 Sep 2026 · 2.29 queries per second against MMseqs2's 78.6 · nb 239"
+   "text": "⊘Faster per query than MMseqs2Disproved if: kmerseek answers fewer queries per second than MMseqs2 on the same 1,000 Swiss-Prot queriesdisproved 13 Sep 2026 · 2.29 queries per second against MMseqs2's 78.6 · notebook 239"
   },
   {
    "tag": "summary",
@@ -134,43 +186,7 @@
   },
   {
    "tag": "li",
-   "text": "×Outperforms Foldseek on SCOPekill: inside FoldSeek's 5,713-query SCOPe40 benchmark, kmerseek detects no query that FoldSeek missesretired 30 Aug 2026 · fired on 188 of 5,713 benchmark queries (3.3%); 0 that FoldSeek missed · nb 076"
-  },
-  {
-   "tag": "summary",
-   "text": "Scope and related numbers"
-  },
-  {
-   "tag": "p",
-   "text": "the 87 short Swiss-Prot features of nb 244 where kmerseek drew the boundary and every other tool's call ran past it"
-  },
-  {
-   "tag": "li",
-   "text": "short features passing every criterion in nb 244: 87"
-  },
-  {
-   "tag": "li",
-   "text": "across all Swiss-Prot features, not only short ones, kmerseek settings above a Kyte-Doolittle scan: 0 of 406"
-  },
-  {
-   "tag": "li",
-   "text": "○Short features under 60 aa placed at 50 to 90% identitykill: a Kyte-Doolittle hydrophobicity window, with no search, lands on as many of the 87 casesuntested · the Kyte-Doolittle window was not run on the 87 cases · nb 244"
-  },
-  {
-   "tag": "summary",
-   "text": "Scope and related numbers"
-  },
-  {
-   "tag": "p",
-   "text": "Botryllus histocompatibility factor (BHF)"
-  },
-  {
-   "tag": "li",
-   "text": "best E-value of any human protein for BHF, any kmerseek setting (nb 241): 0.609548"
-  },
-  {
-   "tag": "li",
-   "text": "○The BHF membrane tether is a find other tools misskill: a Kyte-Doolittle window on BHF calls the same regionuntested · no Kyte-Doolittle window has been run on BHF · nb 241"
+   "text": "⊘Outperforms Foldseek on SCOPeDisproved if: inside FoldSeek's 5,713-query SCOPe40 benchmark, kmerseek detects no query that FoldSeek missesdisproved 30 Aug 2026 · fired on 188 of 5,713 benchmark queries (3.3%); 0 that FoldSeek missed · notebook 076"
   }
  ],
  "data": {

@@ -91,9 +91,22 @@ def main() -> int:
 
     # 4. Licence tags from licence_tag, never from a substring of the licence text.
     for t, info in TOOLS.items():
-        tags = build_site.tool_tags(t, None)
-        check(info["licence_tag"] in tags and sum(x in tags for x in build_site.LICENCE_TAGS) == 1,
-              f"{t}: licence tag {info['licence_tag']!r} ({info['licence']})")
+        f = build_site.tool_filters(t)
+        check(f["licence"] == info["licence_tag"] and f["licence"] in build_site.LICENCE_TAGS,
+              f"{t}: licence filter {info['licence_tag']!r} ({info['licence']})")
+
+    # 4b. Figure 1 of the tool cards: bar height is proportional to Fmax on the shared scale,
+    # so 0.48 and 0.9 do not draw the same (the old dots stopped growing at about 0.48).
+    import re as _re
+    rel = ["a", "b", "c"]
+    build_site.SPECIES.update({"a": "A", "b": "B", "c": "C"})
+    svg = build_site.fmax_strip("hmmer3_phmmer", {"hmmer3_phmmer": {"a": 0.24, "b": 0.48, "c": 0.9}},
+                                rel, {"a": 1, "b": 2, "c": 3}, 1.0)
+    hs = [float(h) for h in _re.findall(r'<rect [^>]*height="([0-9.]+)"', svg)]
+    check(len(hs) == 3 and abs(hs[1] / hs[0] - 2) < 0.02 and abs(hs[2] / hs[1] - 0.9 / 0.48) < 0.02,
+          f"bar heights proportional to Fmax: {hs}")
+    svg = build_site.fmax_strip("hmmer3_phmmer", {"hmmer3_phmmer": {"a": 0.3}}, rel, {"a": 1, "b": 2, "c": 3}, 1.0)
+    check(svg.count('class="st-nr"') == 2, "a relative with no row gets the grey x, not a bar")
 
     # 5. Deterministic builds.
     with tempfile.TemporaryDirectory() as tmp:

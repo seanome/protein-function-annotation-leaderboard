@@ -21,16 +21,16 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Protein annotation leaderboard"
   },
   {
    "tag": "p",
-   "text": "Which tool puts the known domains and features of human proteins in the right place, and what does it cost? Each row is one tool at one setting."
+   "text": "Which tool puts the known domains and features of human proteins in the right place, and what does it cost?"
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
   },
   {
    "tag": "summary",
@@ -42,19 +42,23 @@
   },
   {
    "tag": "figcaption",
-   "text": "Table 1. Tools ranked by Fmax, highest first: Click a column name to sort; rows with no value always sort last. On a narrow screen, scroll the table sideways; the tool name stays in place."
+   "text": "Table 1. Tools ranked by Fmax, highest first, best setting of each tool. Show every setting More columns"
   },
   {
    "tag": "summary",
-   "text": "Key to the marks in Table 1"
+   "text": "The marks and colours in Table 1, in full"
   },
   {
    "tag": "p",
-   "text": "Fmax is the best balance of precision and recall at any one score cutoff; AUPRC is precision summed over all cutoffs. Both run from 0 to 1, and higher is better. Median IoU is how well a correct call's ends match the true region: the overlap divided by the combined span, 1 for a perfect match."
+   "text": "Fmax: the best balance of precision and recall at one score cutoff. AUPRC: precision over every cutoff. Median IoU: how well a correct call's ends match the true region. All run 0 to 1, higher is better; How the scores work works each through on a made-up protein."
   },
   {
    "tag": "p",
-   "text": "Each tool searched 998 human proteins against the proteome of one relative and copied the relative's annotations onto them. The scores say how many of the human proteins' known annotations it put in the right place. The queries are human proteins, most of them from chromosome 6 (see Methods); how the ranking holds for queries from other species is not measured."
+   "text": "Each tool searched 998 human proteins, most from chromosome 6, against one relative's proteome and copied its annotations (which proteins)."
+  },
+  {
+   "tag": "p",
+   "text": "Estimated cost = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries, for the search alone (how cost is counted)."
   },
   {
    "tag": "summary",
@@ -63,10 +67,6 @@
   {
    "tag": "p",
    "text": "Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting each call: use it when you will rank calls and read down the list. The two can rank tools in opposite orders, because AUPRC pools every call of every protein while Fmax averages protein by protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from 0.333 to 0.457 and AUPRC from 0.029 to 0.111. Definitions: Methods."
-  },
-  {
-   "tag": "p",
-   "text": "cost_usd_est = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries, pricing a reserved core-hour as one CPU-hour. Core-hours are cores reserved × wall time, for the search alone, as the mean over the relatives each tool searched; the run recorded them per tool, not per relative, so the same number appears for every relative. Building databases is on the tool cards. No search used a GPU; ProstT5's step that predicts 3Di shape letters used one while building its databases (see its card). Setting names, decoded: hover a setting, or see the tool's card. Definitions and worked examples: Methods."
   }
  ],
  "data": {
@@ -78,9 +78,11 @@
     "species": "zebrafish",
     "axis": "all",
     "stratum": "all",
-    "metric": "fmax",
+    "x": "cpu",
+    "y": "fmax",
     "sort": "fmax",
     "dir": "desc",
+    "view": "best",
     "r_cpu": 0.044625,
     "r_gpu": 1.006
    },
@@ -373,7 +375,7 @@
      "kind": "stratum",
      "axis": "feature_type",
      "label": "Feature type",
-     "help": "Swiss-Prot feature key; only the Swiss-Prot truth set has these",
+     "help": "the kind of Swiss-Prot feature; only the Swiss-Prot truth set has these",
      "groups": [
       {
        "chips": [
@@ -383,63 +385,63 @@
         },
         {
          "value": "ACT_SITE",
-         "label": "ACT_SITE",
-         "title": "active site residue"
+         "label": "active site",
+         "title": "ACT_SITE: active site residue"
         },
         {
          "value": "BINDING",
-         "label": "BINDING",
-         "title": "binding site residue"
+         "label": "binding site",
+         "title": "BINDING: binding site residue"
         },
         {
          "value": "COILED",
-         "label": "COILED",
-         "title": "coiled coil"
+         "label": "coiled coil",
+         "title": "COILED: coiled coil"
         },
         {
          "value": "DNA_BIND",
-         "label": "DNA_BIND",
-         "title": "DNA-binding region"
+         "label": "DNA-binding region",
+         "title": "DNA_BIND: DNA-binding region"
         },
         {
          "value": "DOMAIN",
-         "label": "DOMAIN",
-         "title": "domain"
+         "label": "domain",
+         "title": "DOMAIN: domain"
         },
         {
          "value": "INTRAMEM",
-         "label": "INTRAMEM",
-         "title": "region inside the membrane that does not cross it"
+         "label": "in-membrane region",
+         "title": "INTRAMEM: region inside the membrane that does not cross it"
         },
         {
          "value": "MOTIF",
-         "label": "MOTIF",
-         "title": "short motif"
+         "label": "short motif",
+         "title": "MOTIF: short motif"
         },
         {
          "value": "REGION",
-         "label": "REGION",
-         "title": "region of interest"
+         "label": "region of interest",
+         "title": "REGION: region of interest"
         },
         {
          "value": "REPEAT",
-         "label": "REPEAT",
-         "title": "repeat"
+         "label": "repeat",
+         "title": "REPEAT: repeat"
         },
         {
          "value": "SITE",
-         "label": "SITE",
-         "title": "other single-residue site"
+         "label": "other site",
+         "title": "SITE: other single-residue site"
         },
         {
          "value": "TRANSMEM",
-         "label": "TRANSMEM",
-         "title": "membrane-spanning segment"
+         "label": "membrane-spanning",
+         "title": "TRANSMEM: membrane-spanning segment"
         },
         {
          "value": "ZN_FING",
-         "label": "ZN_FING",
-         "title": "zinc finger"
+         "label": "zinc finger",
+         "title": "ZN_FING: zinc finger"
         }
        ]
       }
@@ -451,6 +453,7 @@
      "tool": "hmmer3_phmmer",
      "setting": "default",
      "order": 0,
+     "label": "default options",
      "words": "phmmer's default options, E-value cutoff 10",
      "shape": "circle"
     },
@@ -458,6 +461,7 @@
      "tool": "mmseqs2_seqseq",
      "setting": "s7",
      "order": 1,
+     "label": "sensitivity 7",
      "words": "sensitivity 7 (-s 7), one round",
      "shape": "square"
     },
@@ -465,6 +469,7 @@
      "tool": "hmmer3_jackhmmer",
      "setting": "n3",
      "order": 2,
+     "label": "3 rounds",
      "words": "three rounds of search (-N 3)",
      "shape": "circle"
     },
@@ -472,6 +477,7 @@
      "tool": "mmseqs2_iterative",
      "setting": "s7",
      "order": 3,
+     "label": "sensitivity 7, 3 rounds",
      "words": "sensitivity 7 (-s 7), three rounds",
      "shape": "square"
     },
@@ -479,6 +485,7 @@
      "tool": "hhblits",
      "setting": "single_seq",
      "order": 4,
+     "label": "single-protein profiles",
      "words": "profiles built from single proteins, no family database",
      "shape": "triangle"
     },
@@ -486,6 +493,7 @@
      "tool": "foldseek",
      "setting": "3di_aa",
      "order": 5,
+     "label": "shape letters + amino acids",
      "words": "3Di shape letters and amino acids together",
      "shape": "circle"
     },
@@ -493,118 +501,135 @@
      "tool": "prostt5",
      "setting": "3di_from_seq",
      "order": 6,
+     "label": "shape letters from sequence",
      "words": "3Di letters predicted from sequence by ProstT5",
      "shape": "square"
     },
     {
      "tool": "kmerseek",
-     "setting": "gbmr4_k15_lcFalse",
-     "order": 7,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
-     "setting": "gbmr4_k17_lcFalse",
-     "order": 8,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 17, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
-     "setting": "gbmr4_k19_lcFalse",
-     "order": 9,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 19, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
-     "setting": "gbmr4_k21_lcFalse",
-     "order": 10,
-     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 21, low-complexity k-mers kept",
-     "shape": "square"
-    },
-    {
-     "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k24_lcFalse",
-     "order": 11,
+     "order": 7,
+     "label": "hp_thomas_dill2, k = 24",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 24, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k27_lcFalse",
-     "order": 12,
+     "order": 8,
+     "label": "hp_thomas_dill2, k = 27",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 27, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k30_lcFalse",
-     "order": 13,
+     "order": 9,
+     "label": "hp_thomas_dill2, k = 30",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 30, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
      "setting": "hp_thomas_dill2_k33_lcFalse",
-     "order": 14,
+     "order": 10,
+     "label": "hp_thomas_dill2, k = 33",
      "words": "alphabet hp_thomas_dill2 (2 letters, hydrophobic ACFILMVWY and polar DEGHKNPQRST (Thomas and Dill 1996)), k = 33, low-complexity k-mers kept",
      "shape": "diamond"
     },
     {
      "tool": "kmerseek",
-     "setting": "protein20_k6_lcFalse",
-     "order": 15,
-     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 6, low-complexity k-mers kept",
-     "shape": "circle"
+     "setting": "gbmr4_k15_lcFalse",
+     "order": 11,
+     "label": "gbmr4, k = 15",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 15, low-complexity k-mers kept",
+     "shape": "square"
     },
     {
      "tool": "kmerseek",
-     "setting": "protein20_k7_lcFalse",
-     "order": 16,
-     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 7, low-complexity k-mers kept",
-     "shape": "circle"
+     "setting": "gbmr4_k17_lcFalse",
+     "order": 12,
+     "label": "gbmr4, k = 17",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 17, low-complexity k-mers kept",
+     "shape": "square"
     },
     {
      "tool": "kmerseek",
-     "setting": "protein20_k8_lcFalse",
-     "order": 17,
-     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 8, low-complexity k-mers kept",
-     "shape": "circle"
+     "setting": "gbmr4_k19_lcFalse",
+     "order": 13,
+     "label": "gbmr4, k = 19",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 19, low-complexity k-mers kept",
+     "shape": "square"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "gbmr4_k21_lcFalse",
+     "order": 14,
+     "label": "gbmr4, k = 21",
+     "words": "alphabet gbmr4 (4 letters: ADKERNTSQ, YFLIVMCWH, G, P (Solis and Rackovsky 2000)), k = 21, low-complexity k-mers kept",
+     "shape": "square"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k11_lcFalse",
-     "order": 18,
+     "order": 15,
+     "label": "wwmj5, k = 11",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 11, low-complexity k-mers kept",
      "shape": "triangle"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k12_lcFalse",
-     "order": 19,
+     "order": 16,
+     "label": "wwmj5, k = 12",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 12, low-complexity k-mers kept",
      "shape": "triangle"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k14_lcFalse",
-     "order": 20,
+     "order": 17,
+     "label": "wwmj5, k = 14",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 14, low-complexity k-mers kept",
      "shape": "triangle"
     },
     {
      "tool": "kmerseek",
      "setting": "wwmj5_k15_lcFalse",
-     "order": 21,
+     "order": 18,
+     "label": "wwmj5, k = 15",
      "words": "alphabet wwmj5 (5 letters: CMFILVWY, ATH, GP, DE, SNQRK (Wang and Wang 1999)), k = 15, low-complexity k-mers kept",
      "shape": "triangle"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "protein20_k6_lcFalse",
+     "order": 19,
+     "label": "protein20, k = 6",
+     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 6, low-complexity k-mers kept",
+     "shape": "circle"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "protein20_k7_lcFalse",
+     "order": 20,
+     "label": "protein20, k = 7",
+     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 7, low-complexity k-mers kept",
+     "shape": "circle"
+    },
+    {
+     "tool": "kmerseek",
+     "setting": "protein20_k8_lcFalse",
+     "order": 21,
+     "label": "protein20, k = 8",
+     "words": "alphabet protein20 (the 20 amino acids, not reduced), k = 8, low-complexity k-mers kept",
+     "shape": "circle"
     },
     {
      "tool": "hmmscan",
      "setting": "direct",
      "order": 22,
+     "label": "Pfam models",
      "words": "scans Pfam's models; no relative searched",
      "shape": "circle"
     }
@@ -777,6 +802,69 @@
      "id": "iou",
      "label": "Median IoU",
      "field": "iou"
+    }
+   ],
+   "axes": [
+    {
+     "id": "fmax",
+     "label": "Fmax, 0 to 1",
+     "short": "Fmax",
+     "kind": "score",
+     "better": "higher"
+    },
+    {
+     "id": "auprc",
+     "label": "AUPRC, 0 to 1",
+     "short": "AUPRC",
+     "kind": "score",
+     "better": "higher"
+    },
+    {
+     "id": "iou",
+     "label": "Median IoU of correct calls, 0 to 1",
+     "short": "median IoU",
+     "kind": "score",
+     "better": "higher"
+    },
+    {
+     "id": "cpu",
+     "label": "Core-hours per 1,000 queries, per relative searched",
+     "short": "core-hours",
+     "kind": "cost",
+     "better": "lower",
+     "less": "cheaper in core-hours"
+    },
+    {
+     "id": "cost",
+     "label": "Estimated cost, USD per 1,000 queries, per relative searched",
+     "short": "cost",
+     "kind": "cost",
+     "better": "lower",
+     "less": "cheaper"
+    },
+    {
+     "id": "wall",
+     "label": "Wall-clock hours per 1,000 queries, per relative searched",
+     "short": "wall-clock time",
+     "kind": "cost",
+     "better": "lower",
+     "less": "faster"
+    },
+    {
+     "id": "ram",
+     "label": "Peak RAM of the search, GB",
+     "short": "peak RAM",
+     "kind": "cost",
+     "better": "lower",
+     "less": "lighter on memory"
+    },
+    {
+     "id": "db",
+     "label": "Database build, core-hours per database built",
+     "short": "database build time",
+     "kind": "cost",
+     "better": "lower",
+     "less": "quicker to build its databases"
     }
    ],
    "searched": [
@@ -1124,6 +1212,37 @@
      "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
     },
     "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+   },
+   "terms": {
+    "th": {
+     "fmax": "<button type=\"button\" class=\"term\" data-term=\"fmax\" aria-label=\"What is Fmax?\" aria-expanded=\"false\" aria-controls=\"tip-fmax-th\" aria-describedby=\"tip-fmax-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-fmax-th\" hidden><b>Fmax.</b> The best balance of precision and recall at any one score cutoff, with both worked out protein by protein and averaged. Precision is the share of calls that are correct; recall is the share of true annotations found. 0 to 1, higher is better. <a href=\"explainers.html#fmax\">how it works →</a></span>",
+     "auprc": "<button type=\"button\" class=\"term\" data-term=\"auprc\" aria-label=\"What is AUPRC?\" aria-expanded=\"false\" aria-controls=\"tip-auprc-th\" aria-describedby=\"tip-auprc-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-auprc-th\" hidden><b>AUPRC.</b> Area under the precision-recall curve: precision summed over every score cutoff, weighted by the recall gained there. It pools every call of every protein into one list. 0 to 1, higher is better. <a href=\"explainers.html#auprc\">how it works →</a></span>",
+     "iou": "<button type=\"button\" class=\"term\" data-term=\"iou\" aria-label=\"What is Median IoU?\" aria-expanded=\"false\" aria-controls=\"tip-iou-th\" aria-describedby=\"tip-iou-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-iou-th\" hidden><b>Median IoU.</b> How well a correct call's ends match the true region. IoU is the residues the call and the region share divided by the residues either covers: 1 is a perfect match. The median is the middle IoU over all correct calls. <a href=\"explainers.html#iou\">how it works →</a></span>",
+     "n": "<button type=\"button\" class=\"term\" data-term=\"n\" aria-label=\"What is True instances?\" aria-expanded=\"false\" aria-controls=\"tip-n-th\" aria-describedby=\"tip-n-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-n-th\" hidden><b>True instances.</b> The number of known annotations on the human proteins in this slice, whether or not the relative could supply them. Recall in Fmax is counted out of these. <a href=\"explainers.html#fmax\">how it works →</a></span>",
+     "cpu": "<button type=\"button\" class=\"term\" data-term=\"cpu\" aria-label=\"What is Core-hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-cpu-th\" aria-describedby=\"tip-cpu-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cpu-th\" hidden><b>Core-hours per 1,000 queries.</b> Cores the search reserved × its wall time, for the search alone, divided by the number of relatives searched and scaled to 1,000 human proteins. A task that sat partly idle still counts all its cores. Less is cheaper. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "cpu_rep": "<button type=\"button\" class=\"term\" data-term=\"cpu_rep\" aria-label=\"What is CPU-h reported?\" aria-expanded=\"false\" aria-controls=\"tip-cpu_rep-th\" aria-describedby=\"tip-cpu_rep-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cpu_rep-th\" hidden><b>CPU-h reported.</b> CPU-hours per 1,000 queries as reported by a tool's submitter, on hardware they name. None have been submitted yet. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "ram": "<button type=\"button\" class=\"term\" data-term=\"ram\" aria-label=\"What is Peak RAM?\" aria-expanded=\"false\" aria-controls=\"tip-ram-th\" aria-describedby=\"tip-ram-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-ram-th\" hidden><b>Peak RAM.</b> The largest resident memory, in GB, of any of the search's tasks, from the run's task records. Memory is not priced in the cost. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "gpu": "<button type=\"button\" class=\"term\" data-term=\"gpu\" aria-label=\"What is GPU-hours?\" aria-expanded=\"false\" aria-controls=\"tip-gpu-th\" aria-describedby=\"tip-gpu-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-gpu-th\" hidden><b>GPU-hours.</b> GPU time the search used, per 1,000 queries. No search here used a GPU. ProstT5 used one to predict 3Di shape letters while building its databases; that time is on its card. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "cost": "<button type=\"button\" class=\"term\" data-term=\"cost\" aria-label=\"What is Estimated cost?\" aria-expanded=\"false\" aria-controls=\"tip-cost-th\" aria-describedby=\"tip-cost-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cost-th\" hidden><b>Estimated cost.</b> Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand rates. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "calls": "<button type=\"button\" class=\"term\" data-term=\"calls\" aria-label=\"What is Raw or dedup?\" aria-expanded=\"false\" aria-controls=\"tip-calls-th\" aria-describedby=\"tip-calls-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-calls-th\" hidden><b>Raw or dedup.</b> Raw keeps every call a tool makes. Dedup merges calls of the same family on the same protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so one domain hit by many of the relative's proteins counts once. <a href=\"explainers.html#dedup\">how it works →</a></span>",
+     "wall": "<button type=\"button\" class=\"term\" data-term=\"wall\" aria-label=\"What is Wall-clock hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-wall-th\" aria-describedby=\"tip-wall-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-wall-th\" hidden><b>Wall-clock hours per 1,000 queries.</b> How long the search took from start to finish on the cores it was given (4 to 16), per relative searched, scaled to 1,000 human proteins. Less is faster. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "db": "<button type=\"button\" class=\"term\" data-term=\"db\" aria-label=\"What is Database build?\" aria-expanded=\"false\" aria-controls=\"tip-db-th\" aria-describedby=\"tip-db-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-db-th\" hidden><b>Database build.</b> Core-hours to build one relative's search database, done once before any search. The mean over the builds the run's task records hold. Not in the per-query cost. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "measured": "<button type=\"button\" class=\"term\" data-term=\"measured\" aria-label=\"What is measured?\" aria-expanded=\"false\" aria-controls=\"tip-measured-th\" aria-describedby=\"tip-measured-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-measured-th\" hidden><b>measured.</b> Measured on Stanford's Sherlock cluster, from the run's own task records. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "reported": "<button type=\"button\" class=\"term\" data-term=\"reported\" aria-label=\"What is reported?\" aria-expanded=\"false\" aria-controls=\"tip-reported-th\" aria-describedby=\"tip-reported-th\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-reported-th\" hidden><b>reported.</b> Reported by the tool's submitter, on the hardware they name. None yet. <a href=\"explainers.html#cost\">how it works →</a></span>"
+    },
+    "filters": {
+     "calls": "<button type=\"button\" class=\"term\" data-term=\"calls\" aria-label=\"What is Raw or dedup?\" aria-expanded=\"false\" aria-controls=\"tip-calls-filters\" aria-describedby=\"tip-calls-filters\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-calls-filters\" hidden><b>Raw or dedup.</b> Raw keeps every call a tool makes. Dedup merges calls of the same family on the same protein that overlap with an IoU of 0.5 or more, keeping the highest-scoring one, so one domain hit by many of the relative's proteins counts once. <a href=\"explainers.html#dedup\">how it works →</a></span>"
+    },
+    "axes": {
+     "fmax": "<button type=\"button\" class=\"term\" data-term=\"fmax\" aria-label=\"What is Fmax?\" aria-expanded=\"false\" aria-controls=\"tip-fmax-ax\" aria-describedby=\"tip-fmax-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-fmax-ax\" hidden><b>Fmax.</b> The best balance of precision and recall at any one score cutoff, with both worked out protein by protein and averaged. Precision is the share of calls that are correct; recall is the share of true annotations found. 0 to 1, higher is better. <a href=\"explainers.html#fmax\">how it works →</a></span>",
+     "auprc": "<button type=\"button\" class=\"term\" data-term=\"auprc\" aria-label=\"What is AUPRC?\" aria-expanded=\"false\" aria-controls=\"tip-auprc-ax\" aria-describedby=\"tip-auprc-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-auprc-ax\" hidden><b>AUPRC.</b> Area under the precision-recall curve: precision summed over every score cutoff, weighted by the recall gained there. It pools every call of every protein into one list. 0 to 1, higher is better. <a href=\"explainers.html#auprc\">how it works →</a></span>",
+     "iou": "<button type=\"button\" class=\"term\" data-term=\"iou\" aria-label=\"What is Median IoU?\" aria-expanded=\"false\" aria-controls=\"tip-iou-ax\" aria-describedby=\"tip-iou-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-iou-ax\" hidden><b>Median IoU.</b> How well a correct call's ends match the true region. IoU is the residues the call and the region share divided by the residues either covers: 1 is a perfect match. The median is the middle IoU over all correct calls. <a href=\"explainers.html#iou\">how it works →</a></span>",
+     "cpu": "<button type=\"button\" class=\"term\" data-term=\"cpu\" aria-label=\"What is Core-hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-cpu-ax\" aria-describedby=\"tip-cpu-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cpu-ax\" hidden><b>Core-hours per 1,000 queries.</b> Cores the search reserved × its wall time, for the search alone, divided by the number of relatives searched and scaled to 1,000 human proteins. A task that sat partly idle still counts all its cores. Less is cheaper. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "cost": "<button type=\"button\" class=\"term\" data-term=\"cost\" aria-label=\"What is Estimated cost?\" aria-expanded=\"false\" aria-controls=\"tip-cost-ax\" aria-describedby=\"tip-cost-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-cost-ax\" hidden><b>Estimated cost.</b> Estimated cost in US dollars per 1,000 queries: core-hours × r_cpu + GPU-hours × r_gpu, where r_cpu and r_gpu are prices per hour. The default prices are AWS on-demand rates. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "wall": "<button type=\"button\" class=\"term\" data-term=\"wall\" aria-label=\"What is Wall-clock hours per 1,000 queries?\" aria-expanded=\"false\" aria-controls=\"tip-wall-ax\" aria-describedby=\"tip-wall-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-wall-ax\" hidden><b>Wall-clock hours per 1,000 queries.</b> How long the search took from start to finish on the cores it was given (4 to 16), per relative searched, scaled to 1,000 human proteins. Less is faster. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "ram": "<button type=\"button\" class=\"term\" data-term=\"ram\" aria-label=\"What is Peak RAM?\" aria-expanded=\"false\" aria-controls=\"tip-ram-ax\" aria-describedby=\"tip-ram-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-ram-ax\" hidden><b>Peak RAM.</b> The largest resident memory, in GB, of any of the search's tasks, from the run's task records. Memory is not priced in the cost. <a href=\"explainers.html#cost\">how it works →</a></span>",
+     "db": "<button type=\"button\" class=\"term\" data-term=\"db\" aria-label=\"What is Database build?\" aria-expanded=\"false\" aria-controls=\"tip-db-ax\" aria-describedby=\"tip-db-ax\">?</button><span class=\"term-tip\" role=\"tooltip\" id=\"tip-db-ax\" hidden><b>Database build.</b> Core-hours to build one relative's search database, done once before any search. The mean over the builds the run's task records hold. Not in the per-query cost. <a href=\"explainers.html#cost\">how it works →</a></span>"
+    }
    }
   },
   "results": {
@@ -180132,7 +180251,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|chicken": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180141,7 +180264,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|ciona": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180150,7 +180277,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|ecoli": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180159,7 +180290,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|fly": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180168,7 +180303,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|mouse": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180177,7 +180316,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|rnorvegicus": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180186,7 +180329,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|worm": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180195,7 +180342,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|yeast": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180204,7 +180355,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "foldseek|3di_aa|zebrafish": {
     "cpu_h_per_1000": 0.1287018481407259,
@@ -180213,7 +180368,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 10
+    "n_relatives": 10,
+    "cores": 16,
+    "wall_h_per_1000": 0.00804386550879537,
+    "db_cpu_h_per_db": 0.13333333333333333,
+    "db_n": 2
    },
    "hhblits|single_seq|arabidopsis": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180222,7 +180381,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|btaurus": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180231,7 +180394,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|chicken": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180240,7 +180407,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|ciona": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180249,7 +180420,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|clupus": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180258,7 +180433,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|ecoli": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180267,7 +180446,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|fly": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180276,7 +180459,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|mdomestica": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180285,7 +180472,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|mouse": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180294,7 +180485,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|ptroglodytes": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180303,7 +180498,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|rnorvegicus": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180312,7 +180511,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|worm": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180321,7 +180524,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|xtropicalis": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180330,7 +180537,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|yeast": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180339,7 +180550,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hhblits|single_seq|zebrafish": {
     "cpu_h_per_1000": 24.83871446596897,
@@ -180348,7 +180563,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 1.5524196541230608,
+    "db_cpu_h_per_db": 4.41047619047619,
+    "db_n": 7
    },
    "hmmer3_jackhmmer|n3|arabidopsis": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180357,7 +180576,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|btaurus": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180366,7 +180589,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|chicken": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180375,7 +180602,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|ciona": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180384,7 +180615,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|clupus": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180393,7 +180628,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|ecoli": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180402,7 +180641,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|fly": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180411,7 +180654,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|mdomestica": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180420,7 +180667,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|mouse": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180429,7 +180680,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|ptroglodytes": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180438,7 +180693,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|rnorvegicus": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180447,7 +180706,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|worm": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180456,7 +180719,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|xtropicalis": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180465,7 +180732,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|yeast": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180474,7 +180745,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_jackhmmer|n3|zebrafish": {
     "cpu_h_per_1000": 2.4450382245973428,
@@ -180483,7 +180758,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.30562977807466785,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|arabidopsis": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180492,7 +180771,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|btaurus": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180501,7 +180784,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|chicken": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180510,7 +180797,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|ciona": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180519,7 +180810,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|clupus": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180528,7 +180823,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|ecoli": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180537,7 +180836,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|fly": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180546,7 +180849,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|mdomestica": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180555,7 +180862,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|mouse": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180564,7 +180875,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|ptroglodytes": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180573,7 +180888,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|rnorvegicus": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180582,7 +180901,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|worm": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180591,7 +180914,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|xtropicalis": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180600,7 +180927,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|yeast": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180609,7 +180940,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmer3_phmmer|default|zebrafish": {
     "cpu_h_per_1000": 0.41653677725822014,
@@ -180618,7 +180953,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 8,
+    "wall_h_per_1000": 0.052067097157277524,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "hmmscan|direct|all": {
     "cpu_h_per_1000": 0.38855488755288353,
@@ -180627,7 +180966,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 1
+    "n_relatives": 1,
+    "cores": 4,
+    "wall_h_per_1000": 0.09713872188822088,
+    "db_cpu_h_per_db": null,
+    "db_n": null
    },
    "kmerseek|gbmr4_k15_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180636,7 +180979,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180645,7 +180992,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|chicken": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180654,7 +181005,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|ciona": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180663,7 +181018,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|clupus": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180672,7 +181031,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180681,7 +181044,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|fly": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180690,7 +181057,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180699,7 +181070,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|mouse": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180708,7 +181083,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180717,7 +181096,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180726,7 +181109,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|worm": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180735,7 +181122,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180744,7 +181135,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|yeast": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180753,7 +181148,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k15_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.20965634973651004,
@@ -180762,7 +181161,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.05241408743412751,
+    "db_cpu_h_per_db": 0.019962962962962964,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180771,7 +181174,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180780,7 +181187,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|chicken": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180789,7 +181200,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|ciona": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180798,7 +181213,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|clupus": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180807,7 +181226,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180816,7 +181239,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|fly": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180825,7 +181252,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180834,7 +181265,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|mouse": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180843,7 +181278,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180852,7 +181291,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180861,7 +181304,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|worm": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180870,7 +181317,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180879,7 +181330,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|yeast": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180888,7 +181343,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k17_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.10268685519186521,
@@ -180897,7 +181356,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.025671713797966303,
+    "db_cpu_h_per_db": 0.023685185185185188,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180906,7 +181369,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180915,7 +181382,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|chicken": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180924,7 +181395,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|ciona": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180933,7 +181408,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|clupus": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180942,7 +181421,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180951,7 +181434,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|fly": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180960,7 +181447,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180969,7 +181460,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|mouse": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180978,7 +181473,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180987,7 +181486,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -180996,7 +181499,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|worm": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -181005,7 +181512,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -181014,7 +181525,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|yeast": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -181023,7 +181538,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k19_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.06264380613078008,
@@ -181032,7 +181551,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01566095153269502,
+    "db_cpu_h_per_db": 0.024055555555555552,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181041,7 +181564,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181050,7 +181577,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|chicken": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181059,7 +181590,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|ciona": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181068,7 +181603,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|clupus": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181077,7 +181616,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181086,7 +181629,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|fly": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181095,7 +181642,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181104,7 +181655,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|mouse": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181113,7 +181668,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181122,7 +181681,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181131,7 +181694,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|worm": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181140,7 +181707,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181149,7 +181720,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|yeast": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181158,7 +181733,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|gbmr4_k21_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.0551695984561716,
@@ -181167,7 +181746,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013792399614042902,
+    "db_cpu_h_per_db": 0.024444444444444446,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181176,7 +181759,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181185,7 +181772,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|chicken": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181194,7 +181785,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|ciona": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181203,7 +181798,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|clupus": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181212,7 +181811,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181221,7 +181824,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|fly": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181230,7 +181837,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181239,7 +181850,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|mouse": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181248,7 +181863,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181257,7 +181876,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181266,7 +181889,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|worm": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181275,7 +181902,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181284,7 +181915,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|yeast": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181293,7 +181928,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k24_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.0975432346173829,
@@ -181302,7 +181941,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.02438580865434573,
+    "db_cpu_h_per_db": 0.02151851851851852,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181311,7 +181954,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181320,7 +181967,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|chicken": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181329,7 +181980,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|ciona": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181338,7 +181993,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|clupus": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181347,7 +182006,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181356,7 +182019,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|fly": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181365,7 +182032,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181374,7 +182045,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|mouse": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181383,7 +182058,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181392,7 +182071,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181401,7 +182084,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|worm": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181410,7 +182097,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181419,7 +182110,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|yeast": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181428,7 +182123,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k27_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.06527128330735545,
@@ -181437,7 +182136,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.016317820826838865,
+    "db_cpu_h_per_db": 0.024555555555555553,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181446,7 +182149,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181455,7 +182162,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|chicken": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181464,7 +182175,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|ciona": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181473,7 +182188,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|clupus": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181482,7 +182201,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181491,7 +182214,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|fly": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181500,7 +182227,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181509,7 +182240,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|mouse": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181518,7 +182253,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181527,7 +182266,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181536,7 +182279,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|worm": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181545,7 +182292,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181554,7 +182305,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|yeast": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181563,7 +182318,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|hp_thomas_dill2_k30_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.0517627848289171,
@@ -181572,7 +182331,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012940696207229273,
+    "db_cpu_h_per_db": 0.025703703703703704,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181581,7 +182344,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181590,7 +182357,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|chicken": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181599,7 +182370,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|ciona": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181608,7 +182383,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|clupus": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181617,7 +182396,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181626,7 +182409,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|fly": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181635,7 +182422,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181644,7 +182435,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|mouse": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181653,7 +182448,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181662,7 +182461,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181671,7 +182474,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|worm": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181680,7 +182487,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181689,7 +182500,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|yeast": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181698,7 +182513,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k6_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.0584725005566689,
@@ -181707,7 +182526,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.014618125139167224,
+    "db_cpu_h_per_db": 0.025462962962962965,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181716,7 +182539,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181725,7 +182552,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|chicken": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181734,7 +182565,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|ciona": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181743,7 +182578,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|clupus": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181752,7 +182591,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181761,7 +182604,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|fly": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181770,7 +182617,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181779,7 +182630,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|mouse": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181788,7 +182643,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181797,7 +182656,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181806,7 +182669,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|worm": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181815,7 +182682,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181824,7 +182695,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|yeast": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181833,7 +182708,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k7_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.048259481926816596,
@@ -181842,7 +182721,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.012064870481704149,
+    "db_cpu_h_per_db": 0.024388888888888887,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181851,7 +182734,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181860,7 +182747,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|chicken": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181869,7 +182760,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|ciona": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181878,7 +182773,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|clupus": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181887,7 +182786,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181896,7 +182799,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|fly": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181905,7 +182812,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181914,7 +182825,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|mouse": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181923,7 +182838,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181932,7 +182851,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181941,7 +182864,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|worm": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181950,7 +182877,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181959,7 +182890,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|yeast": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181968,7 +182903,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|protein20_k8_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.037393305128776075,
@@ -181977,7 +182916,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.009348326282194019,
+    "db_cpu_h_per_db": 0.02785185185185185,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -181986,7 +182929,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -181995,7 +182942,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|chicken": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182004,7 +182955,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|ciona": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182013,7 +182968,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|clupus": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182022,7 +182981,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182031,7 +182994,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|fly": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182040,7 +183007,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182049,7 +183020,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|mouse": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182058,7 +183033,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182067,7 +183046,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182076,7 +183059,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|worm": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182085,7 +183072,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182094,7 +183085,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|yeast": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182103,7 +183098,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k11_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.061330067542492386,
@@ -182112,7 +183111,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.015332516885623095,
+    "db_cpu_h_per_db": 0.020851851851851854,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182121,7 +183124,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182130,7 +183137,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|chicken": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182139,7 +183150,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|ciona": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182148,7 +183163,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|clupus": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182157,7 +183176,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182166,7 +183189,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|fly": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182175,7 +183202,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182184,7 +183215,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|mouse": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182193,7 +183228,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182202,7 +183241,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182211,7 +183254,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|worm": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182220,7 +183267,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182229,7 +183280,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|yeast": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182238,7 +183293,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k12_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.0557411118533363,
@@ -182247,7 +183306,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.013935277963334075,
+    "db_cpu_h_per_db": 0.023407407407407408,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182256,7 +183319,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182265,7 +183332,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|chicken": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182274,7 +183345,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|ciona": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182283,7 +183358,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|clupus": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182292,7 +183371,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182301,7 +183384,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|fly": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182310,7 +183397,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182319,7 +183410,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|mouse": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182328,7 +183423,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182337,7 +183436,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182346,7 +183449,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|worm": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182355,7 +183462,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182364,7 +183475,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|yeast": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182373,7 +183488,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k14_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.04022860535886588,
@@ -182382,7 +183501,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.01005715133971647,
+    "db_cpu_h_per_db": 0.026777777777777775,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|arabidopsis": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182391,7 +183514,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|btaurus": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182400,7 +183527,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|chicken": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182409,7 +183540,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|ciona": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182418,7 +183553,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|clupus": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182427,7 +183566,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|ecoli": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182436,7 +183579,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|fly": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182445,7 +183592,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|mdomestica": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182454,7 +183605,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|mouse": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182463,7 +183618,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|ptroglodytes": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182472,7 +183631,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|rnorvegicus": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182481,7 +183644,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|worm": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182490,7 +183657,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|xtropicalis": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182499,7 +183670,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|yeast": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182508,7 +183683,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "kmerseek|wwmj5_k15_lcFalse|zebrafish": {
     "cpu_h_per_1000": 0.03815037482372152,
@@ -182517,7 +183696,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 4,
+    "wall_h_per_1000": 0.00953759370593038,
+    "db_cpu_h_per_db": 0.024240740740740743,
+    "db_n": 6
    },
    "mmseqs2_iterative|s7|arabidopsis": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182526,7 +183709,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|btaurus": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182535,7 +183722,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|chicken": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182544,7 +183735,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|ciona": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182553,7 +183748,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|clupus": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182562,7 +183761,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|ecoli": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182571,7 +183774,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|fly": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182580,7 +183787,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|mdomestica": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182589,7 +183800,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|mouse": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182598,7 +183813,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|ptroglodytes": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182607,7 +183826,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|rnorvegicus": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182616,7 +183839,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|worm": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182625,7 +183852,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|xtropicalis": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182634,7 +183865,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|yeast": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182643,7 +183878,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_iterative|s7|zebrafish": {
     "cpu_h_per_1000": 0.07867587025903659,
@@ -182652,7 +183891,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.004917241891189787,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|arabidopsis": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182661,7 +183904,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|btaurus": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182670,7 +183917,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|chicken": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182679,7 +183930,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|ciona": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182688,7 +183943,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|clupus": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182697,7 +183956,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|ecoli": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182706,7 +183969,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|fly": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182715,7 +183982,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|mdomestica": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182724,7 +183995,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|mouse": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182733,7 +184008,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|ptroglodytes": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182742,7 +184021,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|rnorvegicus": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182751,7 +184034,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|worm": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182760,7 +184047,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|xtropicalis": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182769,7 +184060,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|yeast": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182778,7 +184073,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "mmseqs2_seqseq|s7|zebrafish": {
     "cpu_h_per_1000": 0.02523565649818155,
@@ -182787,7 +184086,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.0015772285311363469,
+    "db_cpu_h_per_db": 0.0012698412698412698,
+    "db_n": 7
    },
    "prostt5|3di_from_seq|arabidopsis": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182796,7 +184099,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|btaurus": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182805,7 +184112,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|chicken": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182814,7 +184125,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|ciona": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182823,7 +184138,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|clupus": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182832,7 +184151,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|ecoli": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182841,7 +184164,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|fly": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182850,7 +184177,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|mdomestica": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182859,7 +184190,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|mouse": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182868,7 +184203,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|ptroglodytes": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182877,7 +184216,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|rnorvegicus": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182886,7 +184229,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|worm": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182895,7 +184242,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|xtropicalis": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182904,7 +184255,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|yeast": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182913,7 +184268,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    },
    "prostt5|3di_from_seq|zebrafish": {
     "cpu_h_per_1000": 0.10895865805685447,
@@ -182922,7 +184281,11 @@
     "gpu": "none",
     "gpu_h_per_1000": 0.0,
     "hardware": "Stanford Sherlock, SLURM partition hns",
-    "n_relatives": 15
+    "n_relatives": 15,
+    "cores": 16,
+    "wall_h_per_1000": 0.006809916128553403,
+    "db_cpu_h_per_db": 1.771111111111111,
+    "db_n": 3
    }
   },
   "prices": {

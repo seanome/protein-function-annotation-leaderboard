@@ -21,16 +21,60 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Methods"
   },
   {
    "tag": "p",
-   "text": "The tables hold 3,975,483 rows from 12 experiments (alphabet_ranking_three_cases, dark_set_accuracy, dark_set_gain, dark_set_pfam_fmax, deep_twilight, elm_cover, qfo_region_midi, qfo_region_midi_plus, qfo_region_mini, scope40_v040, scope40_v040_below_kmin, scope40_v040_shuffled_k2_seed1); the coverage page counts all of them. Everything else on this site comes from one of those experiments, qfo_region_midi_plus, a single benchmark run. It searched 998 human proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes, release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock cluster. It has 205,653 of the 3,975,483 rows of results.parquet, one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative, truth set, raw or dedup, and stratum. Its cost is in compute.parquet. Both tables were built by make leaderboard-tables in seanome/2024-kmerseek-analysis at commit 4a4b1171. These 998 proteins are not a random sample of the human proteome."
+   "text": "How each score and cost on this site is computed, which proteins were searched, and how the truth sets were built."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
+  },
+  {
+   "tag": "li",
+   "text": "The benchmark run"
+  },
+  {
+   "tag": "li",
+   "text": "No tool wins everywhere"
+  },
+  {
+   "tag": "li",
+   "text": "From a search hit to a call"
+  },
+  {
+   "tag": "li",
+   "text": "The scores: Fmax, AUPRC, median IoU, true instances, core-hours, estimated cost"
+  },
+  {
+   "tag": "li",
+   "text": "Truth sets"
+  },
+  {
+   "tag": "li",
+   "text": "Dedup against raw"
+  },
+  {
+   "tag": "li",
+   "text": "Subsets of the proteins"
+  },
+  {
+   "tag": "li",
+   "text": "Checks on this site"
+  },
+  {
+   "tag": "li",
+   "text": "Experiments in the tables"
+  },
+  {
+   "tag": "h2",
+   "text": "The benchmark run"
+  },
+  {
+   "tag": "p",
+   "text": "Everything on this site except the coverage page comes from one experiment, qfo_region_midi_plus, a single benchmark run. It searched 998 human proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes, release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock cluster. It has 205,653 of the 3,975,483 rows of results.parquet, one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative, truth set, raw or dedup, and subset. Its cost is in compute.parquet. Both tables were built by make leaderboard-tables in seanome/2024-kmerseek-analysis at commit 4a4b1171. These 998 proteins are not a random sample of the human proteome."
   },
   {
    "tag": "h2",
@@ -38,7 +82,7 @@
   },
   {
    "tag": "p",
-   "text": "No tool wins everywhere. So this board ranks tools within a stratum, a slice of the proteins by relative, identity, region length, disorder or feature type, and gives no overall score. Two earlier community benchmarks found the same. The Quest for Orthologs benchmark ran 15 orthology methods on 20 benchmarks. Among the balanced methods, \"no method consistently obtained a better balance than the other methods across all data sets\". Its authors chose not to compute a combined score, because the right trade-off depends on the application (Altenhoff et al. 2016). The Massive Text Embedding Benchmark (MTEB), for text embedding models, reported that \"no particular text embedding method dominates across all tasks\" (Muennighoff et al. 2023)."
+   "text": "No tool wins everywhere. So this board ranks tools within a subset of the proteins (by relative, identity, region length, disorder or feature type), and gives no overall score. Two earlier community benchmarks found the same. The Quest for Orthologs benchmark ran 15 orthology methods on 20 benchmarks. Among the balanced methods, \"no method consistently obtained a better balance than the other methods across all data sets\". Its authors chose not to compute a combined score, because the right trade-off depends on the application (Altenhoff et al. 2016). The Massive Text Embedding Benchmark (MTEB), for text embedding models, reported that \"no particular text embedding method dominates across all tasks\" (Muennighoff et al. 2023)."
   },
   {
    "tag": "p",
@@ -58,7 +102,7 @@
   },
   {
    "tag": "p",
-   "text": "For example, a call on residues 30–129 and a true domain on residues 10–109 share 80 residues (30–109). Together they cover 120 (10–129). So IoU = 80 / 120 = 0.67, and the call counts as correct. A call of the right family that misses the region counts as wrong."
+   "text": "For example, a call on residues 30–129 and a true domain on residues 10–109 share 80 residues (30–109). Together they cover 120 (10–129). So IoU = 80 / 120 = 0.67, and the call counts as correct. A call of the right family that misses the region counts as wrong. The IoU is drawn as bars on a protein line, with ends you can move, on How the scores work."
   },
   {
    "tag": "p",
@@ -78,7 +122,15 @@
   },
   {
    "tag": "p",
-   "text": "\\[\\text{Pr}(t) = \\frac{1}{m(t)}\\sum_{i} \\frac{\\text{correct}_i(t)}{\\text{calls}_i(t)}, \\qquad \\text{Rc}(t) = \\frac{1}{n}\\sum_{i} \\frac{\\text{found}_i(t)}{\\text{true}_i}, \\qquad F_{\\max} = \\max_t \\frac{2\\,\\text{Pr}(t)\\,\\text{Rc}(t)}{\\text{Pr}(t)+\\text{Rc}(t)}\\]"
+   "text": "\\[\\text{Pr}(t) = \\frac{1}{m(t)}\\sum_{i} \\frac{\\text{correct}_i(t)}{\\text{calls}_i(t)}\\]"
+  },
+  {
+   "tag": "p",
+   "text": "\\[\\text{Rc}(t) = \\frac{1}{n}\\sum_{i} \\frac{\\text{found}_i(t)}{\\text{true}_i}\\]"
+  },
+  {
+   "tag": "p",
+   "text": "\\[F_{\\max} = \\max_t \\frac{2\\,\\text{Pr}(t)\\,\\text{Rc}(t)}{\\text{Pr}(t)+\\text{Rc}(t)}\\]"
   },
   {
    "tag": "p",
@@ -114,7 +166,7 @@
   },
   {
    "tag": "p",
-   "text": "True instances (n) is the number of annotations on the human proteins in the stratum, reachable or not. Same row: 2,435."
+   "text": "True instances (n) is the number of annotations on the human proteins in the subset, reachable or not. Same row: 2,435."
   },
   {
    "tag": "h3",
@@ -174,11 +226,15 @@
   },
   {
    "tag": "p",
-   "text": "Raw keeps every call a tool makes. One human region that matches 300 mouse kinases becomes 300 kinase calls on nearly the same residues, and all but one count as wrong. Dedup merges calls of the same family on the same human protein that overlap each other with an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by side barely overlap, so both are kept. Comparing the two separates finding a domain from reporting it many times. For phmmer on zebrafish (Pfam, all proteins): Fmax 0.333 raw and 0.457 dedup."
+   "text": "Raw keeps every call a tool makes. One human region that matches 300 mouse kinases becomes 300 kinase calls on nearly the same residues, and all but one count as wrong. Dedup merges calls of the same family on the same human protein that overlap each other with an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by side barely overlap, so both are kept. Comparing the two separates finding a domain from reporting it many times. For phmmer on zebrafish (Pfam, all proteins): Fmax 0.333 raw and 0.457 dedup. The same calls drawn raw and after dedup, on a made-up protein: How the scores work."
   },
   {
    "tag": "h2",
-   "text": "Strata"
+   "text": "Subsets of the proteins"
+  },
+  {
+   "tag": "p",
+   "text": "The tables call each subset a stratum. There are four ways to cut the proteins:"
   },
   {
    "tag": "li",
@@ -202,7 +258,7 @@
   },
   {
    "tag": "p",
-   "text": "The run computed each stratum on its own, so two strata cannot be combined; a combination with no row shows \"—\" and \"not run\"."
+   "text": "The run computed each subset on its own, so two subsets cannot be combined; a combination with no row shows × and \"not run\"."
   },
   {
    "tag": "h2",
@@ -210,7 +266,15 @@
   },
   {
    "tag": "p",
-   "text": "A headless browser renders every filter combination and confirms that each \"—\" on the leaderboard is a missing row in results.parquet or compute.parquet. The source table checksums are in data/SOURCE.json of the site repository."
+   "text": "A headless browser renders every filter combination and confirms that each × on the leaderboard is a missing row in results.parquet, and that every number matches the tables. The source table checksums are in data/SOURCE.json of the site repository."
+  },
+  {
+   "tag": "h2",
+   "text": "Experiments in the tables"
+  },
+  {
+   "tag": "p",
+   "text": "The tables hold 3,975,483 rows from 12 experiments; the coverage page counts all of them. Their ids: alphabet_ranking_three_cases, dark_set_accuracy, dark_set_gain, dark_set_pfam_fmax, deep_twilight, elm_cover, qfo_region_midi, qfo_region_midi_plus, qfo_region_mini, scope40_v040, scope40_v040_below_kmin, scope40_v040_shuffled_k2_seed1."
   }
  ],
  "data": null

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>jackhmmer card</title>
 <meta name="description" content="What jackhmmer compares, what it needs, where it is strong and weak, and what it costs.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,18 +10,50 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script defer src="../assets/terms.js"></script>
+<script defer src="../assets/nav.js"></script>
 
 </head>
 <body data-page="tools">
 <header class="site"><div class="wrap">
 <a class="brand" href="../index.html">Protein annotation leaderboard</a>
-<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../cost.html" data-keep-filters>Score against cost</a><a href="../pileup.html">Region pile-up</a><a href="../claims.html">Claims</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../coverage.html">Coverage</a><a href="../methods.html">Methods</a></nav>
+<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><details class="navmore"><summary>More</summary>
+<div class="navpop"><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Tool cards">Tool cards</summary>
+<div class="navpop"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details>
 </div></header>
 <main class="wrap" data-page="tools">
-<p class="source" id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
-<div class="card"><h1>jackhmmer</h1>
-<p>Tool id <code>hmmer3_jackhmmer</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>4a4b1171</code>.</p>
-<h2>What it compares</h2>
+<nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Tool cards</a> › jackhmmer</nav><div class="card"><h1>jackhmmer</h1>
+<p>A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all.</p>
+<h2>Will it work for you?</h2>
+<ol>
+<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.217 (n = 563), 60–100% 0.264 (n = 1,289). If no, 20–30% 0.327 (n = 93), 30–40% 0.175 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting 3 rounds; subsets with at least 30 true instances.)</li>
+<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.210 (n = 963), 121–250 aa 0.333 (n = 504), 251 aa or more 0.427 (n = 277). If no, 16–30 aa 0.029 (n = 271), 31–60 aa 0.066 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting 3 rounds.)</li>
+<li><strong>Can you spend about 2.45 core-hours per 1,000 proteins for each relative you search?</strong> That is the measured mean per relative; see "Cost per 1,000 queries" below.</li>
+</ol>
+<h2>Best Fmax and cost</h2>
+<p>Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is 3 rounds (<code>n3</code>): Fmax 0.290 over 2,435 true instances. Searching costs about $0.109 per 1,000 queries (2.45 core-hours), for each relative searched.</p>
+<h2>Where it is strong and weak</h2>
+<p>Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.</p>
+<p>Where it is closest to, or furthest ahead of, the best other tool:</p>
+<ul>
+<li>regions 121–250 aa long: Fmax 0.333 (n = 504); best other: phmmer, default options, 0.329.</li>
+<li>no same-family domain in the relative: Fmax 0.023 (n = 321); best other: HH-suite (hhsearch), single-protein profiles, 0.032.</li>
+</ul>
+<p>Where it is furthest behind the best other tool:</p>
+<ul>
+<li>regions 16–30 aa long: Fmax 0.029 (n = 271); best other: kmerseek, wwmj5, k = 11, 0.330.</li>
+<li>regions 31–60 aa long: Fmax 0.066 (n = 420); best other: kmerseek, gbmr4, k = 21, 0.232.</li>
+</ul>
+<p>Swiss-Prot features, raw calls, zebrafish, setting 3 rounds: best feature type active site, Fmax 0.287 (n = 176); worst short motif, Fmax 0.002 (n = 190).</p><figure class="cardfig">
+<figcaption><b>Figure 2.</b> Where jackhmmer is ahead and behind: its Fmax on each subset of the
+proteins, against the best other tool on that subset (Pfam truth set, raw calls, zebrafish as the relative; its best setting,
+3 rounds). Left out, under 30 true instances: 0–20%.</figcaption>
+<div class="legend"><span class="item"><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="var(--k-profiles)"/></svg>jackhmmer</span>
+<span class="item"><svg width="14" height="14" aria-hidden="true"><path d="M7,2 l5,5 l-5,5 l-5,-5 z" class="cf-o"/></svg>best other tool on that subset, named at the right</span></div>
+<svg class="cf" viewBox="0 0 360 306" role="img" aria-label="Fmax by subset for jackhmmer and the best other tool"><text x="0" y="22" class="cf-h">% identity to the closest same-family domain</text><line x1="104" x2="238" y1="44" y2="44" class="cf-row"/><text x="98" y="48" text-anchor="end" class="cf-l">20–30%</text><path d="M200.1,39 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: phmmer, default options, Fmax 0.359</title></path><text x="244" y="48" class="cf-n">phmmer</text><circle cx="191.7" cy="44" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.327, n = 93</title></circle><line x1="104" x2="238" y1="64" y2="64" class="cf-row"/><text x="98" y="68" text-anchor="end" class="cf-l">30–40%</text><path d="M160.0,59 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: MMseqs2, three rounds, sensitivity 7, 3 rounds, Fmax 0.209</title></path><text x="244" y="68" class="cf-n">MMseqs2, three rounds</text><circle cx="150.8" cy="64" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.175, n = 165</title></circle><line x1="104" x2="238" y1="84" y2="84" class="cf-row"/><text x="98" y="88" text-anchor="end" class="cf-l">40–60%</text><path d="M171.5,79 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: phmmer, default options, Fmax 0.252</title></path><text x="244" y="88" class="cf-n">phmmer</text><circle cx="162.1" cy="84" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.217, n = 563</title></circle><line x1="104" x2="238" y1="104" y2="104" class="cf-row"/><text x="98" y="108" text-anchor="end" class="cf-l">60–100%</text><path d="M186.6,99 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: phmmer, default options, Fmax 0.308</title></path><text x="244" y="108" class="cf-n">phmmer</text><circle cx="174.9" cy="104" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.264, n = 1,289</title></circle><line x1="104" x2="238" y1="124" y2="124" class="cf-row"/><text x="98" y="128" text-anchor="end" class="cf-l">none in relative</text><path d="M112.7,119 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: HH-suite (hhsearch), single-protein profiles, Fmax 0.032</title></path><text x="244" y="128" class="cf-n">HH-suite (hhsearch)</text><circle cx="110.1" cy="124" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.023, n = 321</title></circle><text x="0" y="152" class="cf-h">length of the annotated region</text><line x1="104" x2="238" y1="174" y2="174" class="cf-row"/><text x="98" y="178" text-anchor="end" class="cf-l">16–30 aa</text><path d="M192.4,169 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: kmerseek, wwmj5, k = 11, Fmax 0.330</title></path><text x="244" y="178" class="cf-n">kmerseek</text><circle cx="111.6" cy="174" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.029, n = 271</title></circle><line x1="104" x2="238" y1="194" y2="194" class="cf-row"/><text x="98" y="198" text-anchor="end" class="cf-l">31–60 aa</text><path d="M166.2,189 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: kmerseek, gbmr4, k = 21, Fmax 0.232</title></path><text x="244" y="198" class="cf-n">kmerseek</text><circle cx="121.7" cy="194" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.066, n = 420</title></circle><line x1="104" x2="238" y1="214" y2="214" class="cf-row"/><text x="98" y="218" text-anchor="end" class="cf-l">61–120 aa</text><path d="M170.9,209 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: phmmer, default options, Fmax 0.250</title></path><text x="244" y="218" class="cf-n">phmmer</text><circle cx="160.3" cy="214" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.210, n = 963</title></circle><line x1="104" x2="238" y1="234" y2="234" class="cf-row"/><text x="98" y="238" text-anchor="end" class="cf-l">121–250 aa</text><path d="M192.3,229 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: phmmer, default options, Fmax 0.329</title></path><text x="244" y="238" class="cf-n">phmmer</text><circle cx="193.2" cy="234" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.333, n = 504</title></circle><line x1="104" x2="238" y1="254" y2="254" class="cf-row"/><text x="98" y="258" text-anchor="end" class="cf-l">251 aa or more</text><path d="M231.8,249 l5,5 l-5,5 l-5,-5 z" class="cf-o"><title>best other tool: phmmer, default options, Fmax 0.477</title></path><text x="244" y="258" class="cf-n">phmmer</text><circle cx="218.4" cy="254" r="5" fill="var(--k-profiles)" stroke="var(--surface)" stroke-width="1"><title>jackhmmer: Fmax 0.427, n = 277</title></circle><line x1="104.0" x2="104.0" y1="28" y2="268" class="cf-grid"/><text x="104.0" y="282" text-anchor="middle" class="cf-t">0</text><line x1="130.8" x2="130.8" y1="28" y2="268" class="cf-grid"/><text x="130.8" y="282" text-anchor="middle" class="cf-t">0.1</text><line x1="157.6" x2="157.6" y1="28" y2="268" class="cf-grid"/><text x="157.6" y="282" text-anchor="middle" class="cf-t">0.2</text><line x1="184.4" x2="184.4" y1="28" y2="268" class="cf-grid"/><text x="184.4" y="282" text-anchor="middle" class="cf-t">0.3</text><line x1="211.2" x2="211.2" y1="28" y2="268" class="cf-grid"/><text x="211.2" y="282" text-anchor="middle" class="cf-t">0.4</text><line x1="238.0" x2="238.0" y1="28" y2="268" class="cf-grid"/><text x="238.0" y="282" text-anchor="middle" class="cf-t">0.5</text><text x="171.0" y="298" text-anchor="middle" class="cf-l">Fmax (higher is better)</text></svg>
+</figure></div>
+<div class="card card-rest"><h2>What it compares</h2>
 <p>A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all.</p>
 <h2>What it needs</h2>
 <ul>
@@ -33,19 +65,6 @@
 <p>The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a FASTA file.</p>
 <h2>How to read its score</h2>
 <p>Domain bit score: higher ranks first. The E-value cutoff was 10.</p>
-<h2>Strong and weak strata</h2>
-<p>Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is <code>n3</code>: Fmax 0.290 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.</p>
-<p>Where it is closest to, or furthest ahead of, the best other tool:</p>
-<ul>
-<li>regions 121–250 aa long: Fmax 0.333 (n = 504); best other: phmmer <code>default</code>, 0.329.</li>
-<li>no same-family domain in the relative: Fmax 0.023 (n = 321); best other: HH-suite (hhsearch) <code>single_seq</code>, 0.032.</li>
-</ul>
-<p>Where it is furthest behind the best other tool:</p>
-<ul>
-<li>regions 16–30 aa long: Fmax 0.029 (n = 271); best other: kmerseek <code>wwmj5_k11_lcFalse</code>, 0.330.</li>
-<li>regions 31–60 aa long: Fmax 0.066 (n = 420); best other: kmerseek <code>gbmr4_k21_lcFalse</code>, 0.232.</li>
-</ul>
-<p>Swiss-Prot features, raw calls, zebrafish, setting <code>n3</code>: best feature type ACT_SITE (active site residue), Fmax 0.287 (n = 176); worst MOTIF (short motif), Fmax 0.002 (n = 190).</p>
 <h2 id="failure-modes">Known failure modes</h2>
 <ul>
 <li>Each round can pull in proteins from a different family, which then pull in more. How often that happened here: not measured.</li>
@@ -61,7 +80,7 @@ Building its databases for setting <code>n3</code>: not measured (no task record
 </ul>
 <h2>Settings in the table</h2>
 <ul>
-<li><code>n3</code>: three rounds of search (-N 3)</li>
+<li>3 rounds (<code>n3</code>): three rounds of search (-N 3)</li>
 </ul>
 <h2>Version, container, command</h2>
 <ul>
@@ -79,16 +98,11 @@ Building its databases for setting <code>n3</code>: not measured (no task record
     UP000005640_9606.fasta UP000000437_7955.fasta
 </code></pre>
 <p>Query: 998 human proteins. Target: the zebrafish proteome.</p>
-<h2>Will it work for you?</h2>
-<ol>
-<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.217 (n = 563), 60–100% 0.264 (n = 1,289). If no, 20–30% 0.327 (n = 93), 30–40% 0.175 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting <code>n3</code>; strata with at least 30 true instances.)</li>
-<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.210 (n = 963), 121–250 aa 0.333 (n = 504), 251 aa or more 0.427 (n = 277). If no, 16–30 aa 0.029 (n = 271), 31–60 aa 0.066 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting <code>n3</code>.)</li>
-<li><strong>Can you spend about 2.45 core-hours per 1,000 proteins for each relative you search?</strong> That is the measured mean per relative; see "Cost per 1,000 queries" above.</li>
-</ol></div>
+<p>Tool id <code>hmmer3_jackhmmer</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>4a4b1171</code>.</p></div>
 <p><a href="index.html">All tool cards</a> · <a href="hmmer3_jackhmmer.md">this card as Markdown</a> · <a href="hmmer3_jackhmmer.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="hmmer3_jackhmmer.html.json">hmmer3_jackhmmer.html.json</a></p>
 </div></footer>

@@ -21,16 +21,24 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "Tool cards"
   },
   {
    "tag": "p",
-   "text": "One card per tool: what it compares, what it needs, how to read its score, where it is strong and weak in the table, what it costs, its licence, and the exact command that was run."
+   "text": "One card per tool, best Fmax first: what it compares, whether it will work for your proteins, where it is strong and weak, what it costs, and the exact command that was run."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
+  },
+  {
+   "tag": "summary",
+   "text": "Filter the cards"
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 1. Each tool's best Fmax at each of the 15 relatives, one bar per relative from the nearest (chimpanzee, 6 Mya) to the farthest (E. coli, 2,000 Mya): Pfam domains, raw calls, all proteins, best over the tool's settings. Every card uses the same scale, 0 to 0.45. Hover a bar for its relative and number."
   },
   {
    "tag": "h2",
@@ -42,7 +50,7 @@
   },
   {
    "tag": "li",
-   "text": "aligns letterssequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
+   "text": "0.333 best Fmax$0.0186 per 1,000 queriesPfam, raw calls, zebrafish; default options permissive licence"
   },
   {
    "tag": "h2",
@@ -54,19 +62,7 @@
   },
   {
    "tag": "li",
-   "text": "aligns letterssequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
-  },
-  {
-   "tag": "h2",
-   "text": "jackhmmer"
-  },
-  {
-   "tag": "p",
-   "text": "A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all."
-  },
-  {
-   "tag": "li",
-   "text": "family profilessequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
+   "text": "0.327 best Fmax$0.00113 per 1,000 queriesPfam, raw calls, zebrafish; sensitivity 7 permissive licence"
   },
   {
    "tag": "h2",
@@ -78,7 +74,7 @@
   },
   {
    "tag": "li",
-   "text": "family profilessequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
+   "text": "0.324 best Fmax$0.00351 per 1,000 queriesPfam, raw calls, zebrafish; sensitivity 7, 3 rounds permissive licence"
   },
   {
    "tag": "h2",
@@ -90,7 +86,19 @@
   },
   {
    "tag": "li",
-   "text": "family profilessequence onlyGPL-3.0 1 setting · 15 relatives · 3 truth sets"
+   "text": "0.313 best Fmax$1.11 per 1,000 queriesPfam, raw calls, zebrafish; single-protein profiles GPL-3.0"
+  },
+  {
+   "tag": "h2",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "p",
+   "text": "A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all."
+  },
+  {
+   "tag": "li",
+   "text": "0.290 best Fmax$0.109 per 1,000 queriesPfam, raw calls, zebrafish; 3 rounds permissive licence"
   },
   {
    "tag": "h2",
@@ -102,7 +110,7 @@
   },
   {
    "tag": "li",
-   "text": "3-D shape lettersneeds 3D structure predictionGPL-3.0 1 setting · 10 relatives · 3 truth sets"
+   "text": "0.250 best Fmax$0.00574 per 1,000 queriesPfam, raw calls, zebrafish; shape letters + amino acids needs 3D structure predictionGPL-3.0"
   },
   {
    "tag": "h2",
@@ -114,7 +122,7 @@
   },
   {
    "tag": "li",
-   "text": "3-D shape letterssequence onlyneeds GPUGPL-3.0 1 setting · 15 relatives · 3 truth sets"
+   "text": "0.223 best Fmax$0.00486 per 1,000 queriesPfam, raw calls, zebrafish; shape letters from sequence needs GPUGPL-3.0"
   },
   {
    "tag": "h2",
@@ -126,7 +134,7 @@
   },
   {
    "tag": "li",
-   "text": "reduced-alphabet k-merssequence onlypermissive licencehas claims 15 settings · 15 relatives · 3 truth sets · 1 alive, 2 retired, 3 untested claims"
+   "text": "0.192 best Fmax$0.00246 per 1,000 queriesPfam, raw calls, zebrafish; gbmr4, k = 21 permissive licenceclaims: 1 holds, 2 disproved"
   },
   {
    "tag": "h2",
@@ -137,8 +145,12 @@
    "text": "Each query protein against the curated profile models of every Pfam family, without searching any relative."
   },
   {
+   "tag": "p",
+   "text": "Searches Pfam's models, not a relative, so it has one number and no bar per relative."
+  },
+  {
    "tag": "li",
-   "text": "Pfam modelssequence onlypermissive licencereference 1 setting · 0 relatives · 1 truth set"
+   "text": "0.886 best Fmax$0.0173 per 1,000 queriesPfam, raw calls, no relative; Pfam models permissive licencegraded on its own models under Pfam"
   }
  ],
  "data": {

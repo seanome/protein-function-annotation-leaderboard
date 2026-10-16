@@ -21,16 +21,56 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 4a4b1171 (results/leaderboard), copied 2026-10-15."
-  },
-  {
    "tag": "h1",
    "text": "hmmscan with Pfam"
   },
   {
    "tag": "p",
-   "text": "Tool id hmmscan. Numbers from seanome/2024-kmerseek-analysis commit 4a4b1171."
+   "text": "Each query protein against the curated profile models of every Pfam family, without searching any relative."
+  },
+  {
+   "tag": "h2",
+   "text": "Will it work for you?"
+  },
+  {
+   "tag": "li",
+   "text": "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model."
+  },
+  {
+   "tag": "li",
+   "text": "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting Pfam models.)"
+  },
+  {
+   "tag": "li",
+   "text": "Can you spend about 0.389 core-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
+  },
+  {
+   "tag": "h2",
+   "text": "Best Fmax and cost"
+  },
+  {
+   "tag": "p",
+   "text": "Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is Pfam models (direct): Fmax 0.886 over 2,435 true instances. Searching costs about $0.0173 per 1,000 queries (0.389 core-hours), for scanning Pfam's models."
+  },
+  {
+   "tag": "h2",
+   "text": "Where it is strong and weak"
+  },
+  {
+   "tag": "p",
+   "text": "Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared."
+  },
+  {
+   "tag": "p",
+   "text": "No other tool was scored on the same subsets, so no comparison: not run."
+  },
+  {
+   "tag": "p",
+   "text": "Swiss-Prot feature types: not run."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 2. Where hmmscan with Pfam is ahead and behind: its Fmax on each subset of the proteins, against the best other tool on that subset (Pfam truth set, raw calls, no relative; its best setting, Pfam models)."
   },
   {
    "tag": "h2",
@@ -74,22 +114,6 @@
   },
   {
    "tag": "h2",
-   "text": "Strong and weak strata"
-  },
-  {
-   "tag": "p",
-   "text": "Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is direct: Fmax 0.886 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared."
-  },
-  {
-   "tag": "p",
-   "text": "No other tool was scored in the same strata, so no comparison: not run."
-  },
-  {
-   "tag": "p",
-   "text": "Swiss-Prot feature types: not run."
-  },
-  {
-   "tag": "h2",
    "text": "Known failure modes"
   },
   {
@@ -130,7 +154,7 @@
   },
   {
    "tag": "li",
-   "text": "direct: scans Pfam's models; no relative searched"
+   "text": "Pfam models (direct): scans Pfam's models; no relative searched"
   },
   {
    "tag": "h2",
@@ -153,20 +177,8 @@
    "text": "Query: the same 998 human proteins."
   },
   {
-   "tag": "h2",
-   "text": "Will it work for you?"
-  },
-  {
-   "tag": "li",
-   "text": "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model."
-  },
-  {
-   "tag": "li",
-   "text": "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting direct.)"
-  },
-  {
-   "tag": "li",
-   "text": "Can you spend about 0.389 core-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
+   "tag": "p",
+   "text": "Tool id hmmscan. Numbers from seanome/2024-kmerseek-analysis commit 4a4b1171."
   },
   {
    "tag": "p",
@@ -213,7 +225,7 @@
   },
   "questions": [
    "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model.",
-   "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)",
+   "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting Pfam models.)",
    "Can you spend about 0.389 core-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
   ],
   "markdown": "hmmscan.md"

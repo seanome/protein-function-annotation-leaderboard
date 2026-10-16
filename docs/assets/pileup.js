@@ -12,7 +12,7 @@
   // A kind's colour from the CSS tokens at draw time, so the canvases, curves and legends
   // agree in light and dark mode.
   const kindColor = (kind) => tok("--k-" + kind) || META.kinds[kind];
-  let D, R, P, N, ALL_ROWS, FAMILY_ROWS, COV = [], state = { sort: "coverage", focus: 0, color: "coverage" };
+  let D, R, P, N, ALL_ROWS, FAMILY_ROWS, COV = [], state = { sort: "coverage", focus: 0, color: "coverage", all: false };
 
   // ---------- matrix ----------
   function isNull(r, j) { return r.c0 === null || j < r.c0 || j > r.c1; }
@@ -79,11 +79,13 @@
   }
   function range(a, b, s) { const o = []; for (let i = a; s > 0 ? i < b : i > b; i += s) o.push(i); return o; }
   function readoutText(ro) {
-    return `${ro.missed.toLocaleString("en-US")} of ${ro.rowsScored.toLocaleString("en-US")} regions missed (${(100 * ro.missedFrac).toFixed(1)}%). ` +
-      `Mean coverage ${ro.bodyMean.toFixed(3)} inside the region and ${ro.flankMean.toFixed(3)} in the flanks. ` +
-      `Curve from 0.8 to 0.2: start ${ro.startAbs.text}, end ${ro.endAbs.text}. ` +
-      `From 80% to 20% of the curve's own height inside the region (${ro.plateau.toFixed(2)}): start ${ro.startRel.text}, end ${ro.endRel.text}`;
+    return `${ro.missed.toLocaleString("en-US")} of ${ro.rowsScored.toLocaleString("en-US")} domains missed (${(100 * ro.missedFrac).toFixed(1)}%). ` +
+      `Mean coverage ${ro.bodyMean.toFixed(3)} inside the domain and ${ro.flankMean.toFixed(3)} in the flanks. ` +
+      `Edge sharpness, residues for the curve to fall from 0.8 to 0.2: start ${ro.startAbs.text}, end ${ro.endAbs.text}. ` +
+      `From 80% to 20% of the curve's own height inside the domain (${ro.plateau.toFixed(2)}): start ${ro.startRel.text}, end ${ro.endRel.text}`;
   }
+  // The edge in a small panel: a number of residues, or "none" (the panel below says why).
+  const edgeShort = (w) => (w.value == null ? "none" : w.text);
 
   // ---------- order ----------
   function order() {
@@ -152,40 +154,49 @@
   const STRIP = 10, FOCUS_L = 46, FOCUS_W = FOCUS_L + STRIP + 2 * NCOL;
   function drawCurve(svg, curve, color, big, capped) {
     svg.innerHTML = "";
-    const H = big ? 150 : 56, T = 6, B = big ? 22 : 14;
-    const L = big ? FOCUS_L + STRIP : 22, CW = big ? 2 : 1, W = big ? FOCUS_W : L + NCOL + 4;
+    // A small panel is stretched to its box (90 px tall) and carries no text: its numbers
+    // are printed under it, and its lines keep their width (non-scaling strokes).
+    const H = big ? 150 : 90, T = big ? 6 : 3, B = big ? 22 : 3;
+    const L = big ? FOCUS_L + STRIP : 0, CW = big ? 2 : 1, W = big ? FOCUS_W : NCOL;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    if (!big) svg.setAttribute("preserveAspectRatio", "none");
+    const ns = big ? {} : { "vector-effect": "non-scaling-stroke" };
     const sx = (j) => L + (j + 0.5) * CW, edge = (j) => L + j * CW, sy = (v) => T + (1 - v) * (H - T - B);
     for (const v of [0, 0.5, 1]) {
-      el("line", { x1: L, x2: L + NCOL * CW, y1: sy(v), y2: sy(v), class: "grid" }, svg);
-      el("text", { x: L - 4, y: sy(v) + 4, "text-anchor": "end", class: "tk" }, svg).textContent = v;
+      el("line", Object.assign({ x1: L, x2: L + NCOL * CW, y1: sy(v), y2: sy(v), class: "grid" }, ns), svg);
+      if (big) el("text", { x: L - 4, y: sy(v) + 4, "text-anchor": "end", class: "tk" }, svg).textContent = v;
     }
     for (const [j, lab] of [[0, "−100 aa"], [FL, "start"], [FL + 100, "end"], [NCOL - 1, "+100 aa"]]) {
       const x = j === FL || j === FL + 100 ? edge(j) : sx(j);
-      el("line", { x1: x, x2: x, y1: T, y2: H - B, class: j === FL || j === FL + 100 ? "edge" : "grid" }, svg);
-      if (big || j === FL || j === FL + 100) el("text", { x, y: H - 4, "text-anchor": j === 0 ? "start" : j === NCOL - 1 ? "end" : "middle", class: "tk" }, svg).textContent = lab;
+      if (!big && !(j === FL || j === FL + 100)) continue;
+      el("line", Object.assign({ x1: x, x2: x, y1: T, y2: H - B, class: j === FL || j === FL + 100 ? "edge" : "grid" }, ns), svg);
+      if (big) el("text", { x, y: H - 4, "text-anchor": j === 0 ? "start" : j === NCOL - 1 ? "end" : "middle", class: "tk" }, svg).textContent = lab;
     }
     let d = "";
     for (let j = 0; j < NCOL; j++) if (!isNaN(curve[j])) d += (d ? "L" : "M") + sx(j).toFixed(1) + "," + sy(curve[j]).toFixed(1);
-    el("path", { d, fill: "none", stroke: color, "stroke-width": big ? 2 : 1.5 }, svg);
+    el("path", Object.assign({ d, fill: "none", stroke: color, "stroke-width": big ? 2 : 2 }, ns), svg);
     if (capped) {
       let d2 = "";
       for (let j = 0; j < NCOL; j++) if (!isNaN(capped[j])) d2 += (d2 ? "L" : "M") + sx(j).toFixed(1) + "," + sy(capped[j]).toFixed(1);
-      el("path", { d: d2, fill: "none", stroke: tok("--ink") || "#1c211f", "stroke-width": big ? 1.6 : 1.2, class: "pu-cap" }, svg);
+      el("path", Object.assign({ d: d2, fill: "none", stroke: tok("--ink") || "#1c211f", "stroke-width": big ? 1.2 : 1, class: "pu-cap" }, ns), svg);
     }
-    if (big) el("text", { x: 10, y: (T + H - B) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(T + H - B) / 2})`, class: "lab" }, svg).textContent = "fraction of regions covered";
+    if (big) el("text", { x: 10, y: (T + H - B) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(T + H - B) / 2})`, class: "lab" }, svg).textContent = "share covered";
   }
 
   // ---------- page ----------
   function panelTitle(p) {
     const ref = p.tool === "hmmscan" ? ' <span class="tag warn">reference: graded on its own models</span>' : "";
-    return `${META.names[p.tool]} <span class="mono">${p.setting}</span>${ref}<span class="pu-w">${META.words[p.tool + "|" + p.setting] || ""}</span>`;
+    const k = p.tool + "|" + p.setting;
+    return `${META.names[p.tool]}, <span title="${p.setting}: ${META.words[k] || ""}">${META.labels[k] || p.setting}</span>${ref}`;
   }
   function render() {
     const ord = order();
     const grid = document.getElementById("pu-grid");
     grid.innerHTML = "";
+    const shown = new Set(META.default_panels);
+    if (!shown.has(P[state.focus].tool + "|" + P[state.focus].setting)) shown.add(P[state.focus].tool + "|" + P[state.focus].setting);
     P.forEach((p, k) => {
+      if (!state.all && !shown.has(p.tool + "|" + p.setting)) return;
       const ro = readouts(COV[k]);
       const card = document.createElement("button");
       card.type = "button";
@@ -196,14 +207,14 @@
       card.appendChild(svg);
       drawCurve(svg, ro.curve, kindColor(p.kind), false, readouts(COV[k], FAMILY_ROWS).curve);
       const cv = document.createElement("canvas");
-      cv.width = NCOL; cv.height = 180; cv.className = "pu-ov";
+      cv.width = NCOL; cv.height = 150; cv.className = "pu-ov";
       card.appendChild(cv);
       drawOverview(cv, COV[k], p, ord);
       const r = document.createElement("span");
       r.className = "pu-ro";
       r.dataset.missed = ro.missedFrac; r.dataset.body = ro.bodyMean; r.dataset.flank = ro.flankMean;
-      r.innerHTML = `missed ${(100 * ro.missedFrac).toFixed(1)}% · inside ${ro.bodyMean.toFixed(2)} · flanks ${ro.flankMean.toFixed(2)}<br>` +
-        `0.8→0.2: start ${ro.startAbs.text}, end ${ro.endAbs.text}`;
+      r.innerHTML = `missed ${(100 * ro.missedFrac).toFixed(0)}% · inside ${ro.bodyMean.toFixed(2)} · flanks ${ro.flankMean.toFixed(2)}<br>` +
+        `edge sharpness: start ${edgeShort(ro.startAbs)}, end ${edgeShort(ro.endAbs)}`;
       card.appendChild(r);
       card.addEventListener("click", () => { state.focus = k; render(); });
       grid.appendChild(card);
@@ -221,9 +232,12 @@
     drawFocus(fc, m, s, p, ord, sr);
     fc.dataset.order = ""; window.__pileup.order = ord;
     const famText = `With one domain per Pfam family (${FAMILY_ROWS.length.toLocaleString("en-US")} families): ${readoutText(rf)}.`;
-    document.getElementById("pu-fro").textContent = readoutText(ro) + ". " + famText;
+    document.getElementById("pu-fro").textContent = "All domains: " + readoutText(ro) + ". " + famText;
     document.getElementById("pu-caption-numbers").textContent =
-      `All domains: ${readoutText(ro)}. ${famText}`;
+      `It misses ${(100 * ro.missedFrac).toFixed(0)}% of the domains and covers ${(100 * ro.bodyMean).toFixed(0)}% inside them on average, ` +
+      `and ${(100 * ro.flankMean).toFixed(0)}% of the 100 residues either side.`;
+    const allb = document.getElementById("pu-all");
+    if (allb) { allb.setAttribute("aria-pressed", state.all); allb.textContent = state.all ? "One panel per tool" : `Show all ${P.length} settings`; }
     const sb = document.getElementById("pu-scorebar");
     sb.hidden = state.color !== "score";
     sb.querySelector(".name").textContent = `${META.names[p.tool]}: ${META.scores[p.tool]}, higher is better.`;
@@ -261,10 +275,11 @@
       `<span class="muted">Top line: the human residues of the domain. Under each, | marks a residue inside a call; this is not an alignment. The zebrafish residues each call matched are not stored in the run's call tables.</span>`;
   }
 
-  // ---------- histogram ----------
+  // ---------- histogram: one small panel per tool ----------
+  // Each panel is drawn at its box's own width, so its 12 px text stays 12 px on a phone.
   function drawHist() {
-    const svg = document.getElementById("pu-hist"); svg.innerHTML = "";
-    const W = 760, H = 300, L = 54, Rr = 12, T = 10, B = 44, edges = [];
+    const box = document.getElementById("pu-hist"); box.innerHTML = "";
+    const edges = [];
     for (let x = -100; x <= 100; x += 5) edges.push(x);
     const nb = edges.length + 1; // underflow, 40 bins of 5 aa, overflow
     const series = META.hist.map((h) => {
@@ -277,26 +292,38 @@
       }
       return { h, p, frac: cnt.map((c) => c / Math.max(1, n)), n };
     });
-    const top = Math.max(...series.flatMap((s) => s.frac));
-    const ystep = top > 0.5 ? 0.2 : top > 0.2 ? 0.1 : 0.05;
-    const ymax = Math.ceil(top / ystep) * ystep;
-    const bw = (W - L - Rr) / nb, sx = (b) => L + b * bw, sy = (v) => T + (1 - v / ymax) * (H - T - B);
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    for (let v = 0; v <= ymax + 1e-9; v += ystep) {
-      el("line", { x1: L, x2: W - Rr, y1: sy(v), y2: sy(v), class: "grid" }, svg);
-      el("text", { x: L - 6, y: sy(v) + 4, "text-anchor": "end", class: "tk" }, svg).textContent = v.toFixed(ystep < 0.1 ? 2 : 1);
-    }
-    for (const [b, lab] of [[0, "< −100"], [11, "−50"], [21, "0"], [31, "+50"], [nb - 1, "> +100"]]) {
-      const x = b === 0 || b === nb - 1 ? sx(b) + bw / 2 : sx(b);
-      el("text", { x, y: H - B + 16, "text-anchor": "middle", class: "tk" }, svg).textContent = lab;
-      if (b === 21) el("line", { x1: x, x2: x, y1: T, y2: H - B, class: "edge" }, svg);
-    }
-    el("text", { x: (L + W) / 2, y: H - 6, "text-anchor": "middle", class: "lab" }, svg).textContent = "call start minus region start, residues (negative: the call starts early)";
-    el("text", { x: 12, y: (T + H - B) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(T + H - B) / 2})`, class: "lab" }, svg).textContent = "share of regions with a call";
+    // One vertical scale for every tool that searched a relative. hmmscan's calls almost all
+    // start on the domain (its peak is near 1), so it gets its own scale and is left out of
+    // the grey lines in the other panels.
+    const own = (s) => s.h.tool === "hmmscan";
+    const scaleOf = (list) => {
+      const top = Math.max(...list.flatMap((s) => s.frac));
+      const ystep = top > 0.5 ? 0.2 : top > 0.2 ? 0.1 : 0.05;
+      return [Math.ceil(top / ystep) * ystep, ystep];
+    };
+    const shared = scaleOf(series.filter((s) => !own(s)));
     for (const s of series) {
-      let d = "";
-      s.frac.forEach((v, b) => { d += (b ? "L" : "M") + sx(b).toFixed(1) + "," + sy(v).toFixed(1) + "H" + (sx(b) + bw).toFixed(1); });
-      el("path", { d, fill: "none", stroke: kindColor(s.p.kind), "stroke-width": 1.8, "stroke-dasharray": s.h.dash || "", class: "pu-hs", "data-tool": s.h.tool }, svg);
+      const [ymax, ystep] = own(s) ? scaleOf([s]) : shared;
+      const cell = document.createElement("div");
+      cell.className = "pu-hcell";
+      box.appendChild(cell);
+      const W = Math.max(150, Math.round(cell.clientWidth || 240)), H = 150, L = 34, Rr = 6, T = 22, B = 22;
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+        "aria-label": `${META.names[s.h.tool]}: call start minus domain start` }, cell);
+      const bw = (W - L - Rr) / nb, sx = (b) => L + b * bw, sy = (v) => T + (1 - v / ymax) * (H - T - B);
+      el("text", { x: 0, y: 14, class: "lab" }, svg).textContent = `${META.names[s.h.tool]} (n = ${s.n.toLocaleString("en-US")})${own(s) ? ", own scale" : ""}`;
+      for (let v = 0; v <= ymax + 1e-9; v += ystep) {
+        el("line", { x1: L, x2: W - Rr, y1: sy(v), y2: sy(v), class: "grid" }, svg);
+        el("text", { x: L - 4, y: sy(v) + 4, "text-anchor": "end", class: "tk" }, svg).textContent = v.toFixed(ystep < 0.1 ? 2 : 1);
+      }
+      for (const [b, lab] of [[0, "< −100"], [21, "0"], [nb - 1, "> +100"]]) {
+        const x = b === 0 || b === nb - 1 ? sx(b) + bw / 2 : sx(b);
+        el("text", { x, y: H - 6, "text-anchor": b === 0 ? "start" : b === nb - 1 ? "end" : "middle", class: "tk" }, svg).textContent = lab;
+        if (b === 21) el("line", { x1: x, x2: x, y1: T, y2: H - B, class: "edge" }, svg);
+      }
+      const path = (frac) => frac.map((v, b) => (b ? "L" : "M") + sx(b).toFixed(1) + "," + sy(v).toFixed(1) + "H" + (sx(b) + bw).toFixed(1)).join("");
+      for (const o of series) if (o !== s && !own(o) && !own(s)) el("path", { d: path(o.frac), fill: "none", stroke: tok("--hair") || "#d9ddda", "stroke-width": 1.2, class: "pu-ctx" }, svg);
+      el("path", { d: path(s.frac), fill: "none", stroke: kindColor(s.p.kind), "stroke-width": 2, class: "pu-hs", "data-tool": s.h.tool }, svg);
     }
     window.__pileup.hist = series.map((s) => ({ tool: s.h.tool, n: s.n }));
   }
@@ -320,6 +347,10 @@
       startAbs: ro.startAbs.text, endAbs: ro.endAbs.text, startRel: ro.startRel.text, endRel: ro.endRel.text }; };
     document.querySelectorAll("button[data-sort]").forEach((b) => b.addEventListener("click", () => { state.sort = b.dataset.sort; render(); }));
     document.querySelectorAll("button[data-color]").forEach((b) => b.addEventListener("click", () => { state.color = b.dataset.color; render(); }));
+    const allb = document.getElementById("pu-all");
+    if (allb) allb.addEventListener("click", () => { state.all = !state.all; render(); });
+    let pending = null;
+    window.addEventListener("resize", () => { clearTimeout(pending); pending = setTimeout(drawHist, 150); });
     const fc = document.getElementById("pu-fheat"), tip = document.getElementById("pu-tip");
     const show = (ev) => {
       const rect = fc.getBoundingClientRect();
