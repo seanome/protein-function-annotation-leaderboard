@@ -73,7 +73,7 @@
  "cost_per_1000_queries": {
   "core_h_reserved_per_relative": 0.07867587025903659,
   "n_relatives": 15,
-  "database_build_core_h": null,
+  "database_build_core_h": 0.008888888888888889,
   "database_build_gpu_h": null,
   "peak_rss_gb": 1.1,
   "hardware": "Stanford Sherlock, SLURM partition hns"

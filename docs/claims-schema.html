@@ -29,11 +29,18 @@ runs each test and sets the status:</p>
 <li><b>table</b>, <b>table_bins</b>, <b>table_max</b>, <b>table_count_passing</b>: recomputed from
 <span class="mono">results.parquet</span> on every build.</li>
 <li><b>record</b>, <b>record_compare</b>: a number quoted from the experiment inventory
-(<span class="mono">data/experiments.json</span>, seanome/2024-kmerseek-analysis PR 97). The quote must
+(<span class="mono">data/experiments.json</span>, copied from seanome/2024-kmerseek-analysis at commit
+<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/blob/fe72334b6c6c34ae19728ae292ad0ff1c4ae95d9/data/experiments.json">fe72334b</a>,
+PR 97; recorded in <span class="mono">data/experiments.SOURCE.json</span>). The quote must
 match the recorded value character for character, so a notebook that changes a number fails the check until the claim
 is updated.</li>
 <li><b>not_run</b>: no test yet; the claim is untested and the reason is shown.</li>
 </ul>
+<p>A test may carry a <b>verdict</b>: the wording of its verdict line, with the resolved numbers
+filled in. Without one, the line is the test's own result.</p>
+<p>A claim retired by a record test is dated with the date of that inventory record. A claim retired
+by a table test has no date, because the tables are recomputed on every build and the build cannot
+tell when the kill first held. The "last kill" date on a card counts only dated kills.</p>
 <p>The full schema: <a class="mono" href="claims/schema.json">claims/schema.json</a>. The first claim of
 <a class="mono" href="claims/kmerseek.yaml">claims/kmerseek.yaml</a>:</p>
 <pre><code>  - id: phmmer-parity-mammals
@@ -68,7 +75,7 @@ is updated.</li>
           against: {tool: hmmer3_phmmer, setting: default}
           targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica]
           kill_if: {abs_difference_above: 0.05}
-      - label: settings of 22 that pass on Swiss-Prot features (raw or dedup)
+      - label: settings that pass on Swiss-Prot features (raw or dedup)
         test:
           kind: table_count_passing
           experiment: qfo_region_midi_plus
@@ -85,7 +92,8 @@ is updated.</li>
 <p>Every push and pull request runs <span class="mono">python scripts/claims.py --check</span> in a GitHub
 Action (<a class="mono" href="https://github.com/seanome/protein-function-annotation-leaderboard/blob/main/.github/workflows/claims.yml">.github/workflows/claims.yml</a>).
 It fails when a file breaks the schema, a quote no longer matches its record, or a table test cannot
-find its rows. The build also writes a badge per tool from the same verdicts:</p>
+find its rows. A second job rebuilds the site from <span class="mono">data/</span> and fails if any
+page differs from the committed one. The build also writes a badge per tool from the same verdicts:</p>
 <p><img src="badges/claims-kmerseek.svg" alt="claims for kmerseek: 1 alive, 2 retired, 3 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-kmerseek.svg)</code></pre>
 </div>
 </main>

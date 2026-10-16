@@ -45,6 +45,7 @@ Swiss-Prot features, raw calls, zebrafish, setting `3di_aa`: best feature type A
 
 Setting `3di_aa`, searching one relative (mean over the 10 relatives it searched): 0.129 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.5 GB. That is about $0.00574 at $0.044625 per CPU-hour.
 Building its databases took 0.267 core-hours over 2 databases. A database is built once and reused, so this is not in the per-query cost.
+This covers the 2 database builds the task records hold; the search used 10 relatives.
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
