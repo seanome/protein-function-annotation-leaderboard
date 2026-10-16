@@ -1195,68 +1195,103 @@ def parse_coverage(md: str):
 AXIS_TITLES = {"target species": "whole set, per relative", "identity": "% identity to nearest relative",
                "plddt": "AlphaFold pLDDT", "feature_type": "Swiss-Prot feature type",
                "feature_length_bin": "region length"}
+# One-line titles for the experiment ids in coverage.md, from data/inventory.md (the id is the
+# hover text and stays in the page's JSON).
+EXPERIMENT_TITLES = {
+    "alphabet_ranking_three_cases": "Alphabets ranked on three test proteins (notebook 241)",
+    "dark_set_accuracy": "Invertebrate dark set: accuracy of the best kmerseek setting",
+    "dark_set_gain": "Invertebrate dark set: what kmerseek reaches",
+    "dark_set_pfam_fmax": "Invertebrate dark set: Fmax against Pfam (notebook 291)",
+    "deep_twilight": "Deep-twilight controls, 16 proteins (notebook 252)",
+    "elm_cover": "Short linear motifs (ELM) covered (notebook 253)",
+    "qfo_region_midi": "Domain finding, 9 relatives",
+    "qfo_region_midi_plus": "Domain finding, 15 relatives (this leaderboard)",
+    "qfo_region_mini": "Domain finding, test set of 2 relatives",
+    "scope40_v040": "SCOPe40 structural classes, kmerseek 0.4 (notebook 277)",
+    "scope40_v040_below_kmin": "SCOPe40, kmerseek 0.4, k below the usual minimum",
+    "scope40_v040_shuffled_k2_seed1": "SCOPe40 control: alphabet letters shuffled",
+}
+# Rows of coverage.md with no tool card: a plain name instead of the id.
+NO_CARD_NAMES = {"mmseqs2": "MMseqs2, search mode not recorded", "folddisco": "Folddisco", "reseek": "Reseek"}
+NULL_CONTROL = "scope40_v040_shuffled_k2_seed1"
+
+
+def does_not_apply(tool: str, col: str) -> bool:
+    """A square no run could fill: hmmscan searches no relative, so it has no identity to a
+    relative; the shuffled-alphabet SCOPe run is a control for kmerseek only."""
+    return (tool == "hmmscan" and col == "identity") or (col == NULL_CONTROL and tool != "kmerseek")
 
 
 def page_coverage(cov_md: str, src: dict, species_mya: dict) -> str:
     tables = parse_tables(cov_md)
     kinds = list(KINDS)
 
+    def name(t):
+        return TOOLS[t]["name"] if t in TOOLS else NO_CARD_NAMES.get(t, t)
+
     def tool_cell(t):
         if t in TOOLS:
             return (f'<span class="kind k-{TOOLS[t]["kind"]}" aria-hidden="true"></span>'
                     f'<a href="tools/{t}.html">{esc(TOOLS[t]["name"])}</a>')
-        return f'{esc(t)} <span class="muted">(no card yet)</span>'
+        return f'<span title="{esc(t)}">{esc(name(t))}</span> <span class="muted">(no card)</span>'
 
     def order(t):
-        return (kinds.index(TOOLS[t]["kind"]), list(TOOLS).index(t)) if t in TOOLS else (len(kinds), 0)
+        return (kinds.index(TOOLS[t]["kind"]), list(TOOLS).index(t)) if t in TOOLS else (len(kinds), name(t))
 
-    figs, todo, n_on, n_off = [], {}, 0, 0
+    figs, todo, n_on, n_off, n_na = [], {}, 0, 0, 0
     for k, (head, rows) in enumerate(tables[:2]):
         cols = head[1:]
-        labels = [AXIS_TITLES.get(c, c) for c in cols]
-        th = "".join(f'<th scope="col">{esc(x)}</th>' for x in labels)
+        labels = [(AXIS_TITLES.get(c, c) if k == 0 else EXPERIMENT_TITLES.get(c, c), c) for c in cols]
+        th = "".join(f'<th scope="col" title="{esc(c)}">{esc(x)}</th>' for x, c in labels)
         body = []
         for r in sorted(rows, key=lambda r: order(r[0])):
             tds = []
             for c, v in zip(cols, r[1:]):
                 on = v != ""
+                na = not on and does_not_apply(r[0], c)
                 n_on += on
-                n_off += not on
-                # The shuffled-alphabet SCOPe run is a null control for kmerseek, not a gap.
-                if not on and not c.endswith("shuffled_k2_seed1"):
-                    todo.setdefault(r[0], []).append(AXIS_TITLES.get(c, c) if k == 0 else f"experiment {c}")
-                tds.append(f'<td data-measured="{"1" if on else "0"}"><span class="sq{" on" if on else ""}" role="img" '
-                           f'aria-label="{"measured" if on else "not run"}"></span>'
-                           f'{"<br><span class=mono>" + esc(v) + "</span>" if on else ""}</td>')
+                n_na += na
+                n_off += not on and not na
+                if not on and not na and k == 1:
+                    todo.setdefault(c, []).append(r[0])
+                if on:
+                    mark = f'<span class="sq on" role="img" aria-label="measured"></span><br><span class="mono">{esc(v)}</span>'
+                elif na:
+                    mark = '<span class="na" role="img" aria-label="does not apply">–</span>'
+                else:
+                    mark = '<span class="nr" role="img" aria-label="not run">×</span>'
+                tds.append(f'<td data-measured="{"1" if on else "na" if na else "0"}">{mark}</td>')
             body.append(f'<tr><td class="txt">{tool_cell(r[0])}</td>{"".join(tds)}</tr>')
-        title = ("Figure 2a. Tool by stratum axis" if k == 0 else "Figure 2b. Tool by experiment")
+        title = ("Table 2a. Tool by subset of the proteins" if k == 0 else "Table 2b. Tool by experiment")
         summed = ("experiments, query sets, relatives and truth sets" if k == 0
-                  else "the query sets, relatives, truth sets and strata of that experiment")
+                  else "the query sets, relatives, truth sets and subsets of that experiment")
         figs.append(f"""<figure>
-<figcaption><b>{title}.</b> A filled square means the tables hold measured rows for that tool there.
-The number under it is the count of true instances scored, summed over {summed}. An empty square
-means not run.{" The last column, scope40_v040_shuffled_k2_seed1, is a null control for kmerseek (alphabet letters shuffled), not a run other tools need." if k == 1 else ""}</figcaption>
-<div class="tablebox"><table class="cov"><thead><tr><th class="txt" scope="col">Tool</th>{th}</tr></thead>
+<figcaption><b>{title}.</b> The number under each filled square is the count of true instances scored,
+summed over {summed}. Hover a column name for its id in the tables.</figcaption>
+<div class="tablebox"><table class="cov{" cov-exp" if k == 1 else ""}"><thead><tr><th class="txt" scope="col">Tool</th>{th}</tr></thead>
 <tbody>{"".join(body)}</tbody></table></div>
 </figure>""")
-    todo_html = "".join(f"<li><b>{esc(TOOLS[t]['name'] if t in TOOLS else t)}</b>: {esc('; '.join(v))}.</li>"
-                        for t, v in sorted(todo.items(), key=lambda kv: order(kv[0])))
+    todo_html = "".join(
+        f'<li><b title="{esc(c)}">{esc(EXPERIMENT_TITLES.get(c, c))}</b>: {esc(", ".join(name(t) for t in sorted(ts, key=order)))}</li>'
+        for c, ts in todo.items())
     body = f"""<h1>Coverage</h1>
 <p class="lede">What has been measured, across every experiment in the tables, and what has not.
-Every empty square is a run still to do.</p>
-<div class="legend" aria-label="Key to Figure 2">
+Every × is a run still to do.</p>
+<div class="legend" aria-label="Key to Tables 2a and 2b">
 <span class="item"><span class="sq on"></span> measured, with the number of true instances scored</span>
-<span class="item"><span class="sq"></span> not run</span>
+<span class="item"><span class="nr">×</span> not run</span>
+<span class="item"><span class="na">–</span> does not apply: hmmscan searches no relative, and the shuffled-alphabet run is a control for kmerseek only</span>
 </div>
 {legend_kinds(set(TOOLS))}
 {"".join(figs)}
-<p class="prose muted">{n_on} squares are filled and {n_off} are empty. Where each experiment's output
-came from, and which outputs were left out and why: <a href="data/inventory.md">inventory.md</a>
-(copied with the tables).</p>
+<p class="prose muted">{n_on} squares are filled, {n_off} are not run and {n_na} do not apply. Where each
+experiment's output came from, and which outputs were left out and why:
+<a href="data/inventory.md">inventory.md</a> (copied with the tables).</p>
 <h2>What to run next</h2>
-<ul class="prose">{todo_html}</ul>"""
+<p class="prose">One line per experiment: the tools it has not run yet.</p>
+<ul class="prose todo">{todo_html}</ul>"""
     return layout("Coverage", "coverage", body, src,
-                  description="Which tool, stratum and experiment combinations have been measured and which have not been run.")
+                  description="Which tool, subset and experiment combinations have been measured and which have not been run.")
 
 
 def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict) -> str:
@@ -1669,57 +1704,73 @@ def fmt_date(d):
     return f"{int(dd)} {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][int(m) - 1]} {y}"
 
 
-MARK = {"alive": "●", "retired": "×", "untested": "○"}
+# Claim status marks. The grey x is kept for "not run" across the site, so a disproved
+# claim gets its own mark.
+MARK = {"alive": "●", "untested": "○", "retired": "⊘"}
+STATUS_WORDS = {"alive": "Holds", "untested": "Not yet tested", "retired": "Disproved"}
+
+
+def plain_refs(text: str) -> str:
+    """"nb 239" -> "notebook 239" in text shown to readers."""
+    return re.sub(r"\bnb (\d{3})", r"notebook \1", text)
 
 
 def claims_card(cl: dict, up: str = "") -> str:
-    """One tool's claims, as resolved by scripts/claims.py: the claim, the test that kills it,
-    the verdict with its number, and the evidence."""
+    """One tool's claims, as resolved by scripts/claims.py, grouped by where they stand: the
+    claim, the result that would disprove it, the verdict with its number, and the evidence."""
     c = cl["counts"]
-    pills = (f'<span class="cl-pill alive">● {c["alive"]} alive</span>'
-             f'<span class="cl-pill retired">× {c["retired"]} retired</span>'
-             f'<span class="cl-pill untested">○ {c["untested"]} untested</span>'
-             + (f'<span class="cl-pill plain">last kill {fmt_date(cl["last_kill"])}</span>' if cl["last_kill"] else ""))
-    rows = []
-    for x in cl["claims"]:
-        ev = x.get("evidence") or {}
-        href = ev.get("href", "")
-        if href and not href.startswith("http"):
-            href = up + href
-        when = f' {fmt_date(x["date"])}' if x["status"] == "retired" and x.get("date") else ""
-        verdict = f'<span class="cl-st {x["status"]}">{x["status"]}{when}</span> · {esc(x["verdict"])}'
-        if href:
-            verdict += f' · <a href="{esc(href)}">{esc(ev["label"])}</a>'
-        ctx = "".join(f'<li>{esc(k["label"])}: <span class="mono">{esc(k["text"])}</span></li>' for k in x["context"])
-        more = (f'<details class="cl-more"><summary>Scope and related numbers</summary>'
-                f'<p>{esc(x.get("scope") or "")}</p><ul>{ctx}</ul>'
-                + (f'<p class="muted">Source: <span class="mono">{esc(x["source"])}</span></p>' if x.get("source") else "")
-                + '</details>')
-        rows.append(f'<li class="cl-row" data-status="{x["status"]}"><span class="cl-mark" aria-hidden="true">{MARK[x["status"]]}</span>'
-                    f'<div><div class="cl-claim">{esc(x["claim"])}</div><div class="cl-kill">kill: {esc(x["kill"])}</div>'
-                    f'<div class="cl-verdict">{verdict}</div>{more}</div></li>')
+    pills = (f'<span class="cl-pill alive">{MARK["alive"]} {c["alive"]} hold{"s" if c["alive"] == 1 else ""}</span>'
+             f'<span class="cl-pill untested">{MARK["untested"]} {c["untested"]} not yet tested</span>'
+             f'<span class="cl-pill retired">{MARK["retired"]} {c["retired"]} disproved</span>'
+             + (f'<span class="cl-pill plain">last disproved {fmt_date(cl["last_kill"])}</span>' if cl["last_kill"] else ""))
+    groups = []
+    for status in ("alive", "untested", "retired"):
+        rows = []
+        for x in [x for x in cl["claims"] if x["status"] == status]:
+            ev = x.get("evidence") or {}
+            href = ev.get("href", "")
+            if href and not href.startswith("http"):
+                href = up + href
+            when = f' {fmt_date(x["date"])}' if status == "retired" and x.get("date") else ""
+            verdict = f'<span class="cl-st {status}">{STATUS_WORDS[status].lower()}{when}</span> · {esc(plain_refs(x["verdict"]))}'
+            if href:
+                verdict += f' · <a href="{esc(href)}">{esc(plain_refs(ev["label"]))}</a>'
+            ctx = "".join(f'<li>{esc(k["label"])}: <span class="mono">{esc(k["text"])}</span></li>' for k in x["context"])
+            more = (f'<details class="cl-more"><summary>Scope and related numbers</summary>'
+                    f'<p>{esc(plain_refs(x.get("scope") or ""))}</p><ul>{ctx}</ul>'
+                    + (f'<p class="muted">Source: <span class="mono">{esc(x["source"])}</span></p>' if x.get("source") else "")
+                    + '</details>')
+            rows.append(f'<li class="cl-row" data-status="{status}"><span class="cl-mark" aria-hidden="true">{MARK[status]}</span>'
+                        f'<div><div class="cl-claim">{esc(plain_refs(x["claim"]))}</div>'
+                        f'<div class="cl-kill">Disproved if: {esc(plain_refs(x["kill"]))}</div>'
+                        f'<div class="cl-verdict">{verdict}</div>{more}</div></li>')
+        if rows:
+            groups.append(f'<h3 class="cl-group">{MARK[status]} {STATUS_WORDS[status]} ({len(rows)})</h3>'
+                          f'<ul class="cl-rows">{"".join(rows)}</ul>')
     return f"""<section class="cl-card" aria-label="Claims about {esc(cl['title'])}">
 <div class="cl-head"><h2 class="cl-title">{esc(cl['title'])}</h2>
 <span class="cl-file"><a class="mono" href="{up}claims/{cl['tool']}.yaml">claims/{cl['tool']}.yaml</a>, updated {fmt_date(cl['updated'])}</span></div>
 <div class="cl-pills">{pills}</div>
-<p class="cl-sub">each row: the claim, the test that kills it, the verdict with its number, the evidence</p>
-<ul class="cl-rows">{"".join(rows)}</ul>
+<p class="cl-sub">each row: the claim, the result that would disprove it, the verdict with its number, the evidence</p>
+{"".join(groups)}
 <div class="cl-buttons"><a class="cl-btn" href="{up}claims-schema.html">claims.yaml schema ↗</a>
 <a class="cl-btn" href="{up}claims-schema.html#badge">badge and CI check ↗</a></div>
 </section>"""
 
 
 def page_claims(src: dict, cards: list[dict]) -> str:
+    who = ("Only kmerseek has filed claims so far." if [c["tool"] for c in cards] == ["kmerseek"]
+           else f"{len(cards)} tools have filed claims so far.")
     body = f"""<h1>Claims</h1>
-<p class="lede">What each tool's authors claim, the result that would retire each claim, and where it
-stands. A claim is <b>alive</b> when its test has run and did not retire it, <b>retired</b> when the
-test retired it, and <b>untested</b> when the test has not run or the data cannot decide it. The build
-recomputes every verdict from the tables or checks it against the recorded notebook output, so
-nothing on a card is typed in by hand.</p>
-<div class="legend" aria-label="Key to the claims cards"><span class="item">● alive</span><span class="item">× retired</span>
-<span class="item">○ untested</span></div>
+<p class="lede">What each tool's authors claim, the result that would disprove each claim, and where
+it stands. {who}</p>
+<div class="legend" aria-label="Key to the claims"><span class="item">{MARK["alive"]} holds: its test ran and did not disprove it</span>
+<span class="item">{MARK["untested"]} not yet tested: the test has not run, or the data cannot decide it</span>
+<span class="item">{MARK["retired"]} disproved: the test disproved it</span></div>
+<p class="prose muted">The build recomputes every verdict from the tables or checks it against the
+recorded notebook output, so nothing on a card is typed in by hand.</p>
 {"".join(claims_card(c) for c in cards)}"""
-    return layout("Claims", "claims", body, src, description="Each tool's claims, the test that would retire each one, and its verdict.")
+    return layout("Claims", "claims", body, src, description="Each tool's claims, the result that would disprove each one, and its verdict.")
 
 
 # The made-up example on explainers.html. The page's widgets compute every number from it, and

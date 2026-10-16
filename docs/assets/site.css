@@ -402,3 +402,13 @@ svg.cf{display:block;width:100%;max-width:440px;height:auto}
 .cf-row{stroke:var(--hair)}
 .cf-grid{stroke:var(--hair);stroke-dasharray:2 2}
 .cf-o{fill:var(--muted)}
+.cl-group{font-size:1rem;margin:14px 0 0;padding:6px 0;border-bottom:1px solid var(--hair)}
+.cl-pill.retired,.cl-row[data-status="retired"] .cl-mark{color:var(--ink)}
+.na{color:var(--muted);font-weight:700}
+table.cov .nr,table.cov .na{font-size:1rem;line-height:1}
+
+.todo li{margin:3px 0}
+table.cov.cov-exp{font-size:.8rem}
+table.cov.cov-exp thead th{min-width:0;width:6.2em;max-width:7em;font-size:.74rem;line-height:1.2}
+table.cov.cov-exp td{padding:3px 4px}
+table.cov td.txt{white-space:normal;min-width:9em;max-width:14em}

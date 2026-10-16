@@ -26,7 +26,7 @@
   },
   {
    "tag": "p",
-   "text": "What has been measured, across every experiment in the tables, and what has not. Every empty square is a run still to do."
+   "text": "What has been measured, across every experiment in the tables, and what has not. Every × is a run still to do."
   },
   {
    "tag": "p",
@@ -34,7 +34,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 2a. Tool by stratum axis. A filled square means the tables hold measured rows for that tool there. The number under it is the count of true instances scored, summed over experiments, query sets, relatives and truth sets. An empty square means not run."
+   "text": "Table 2a. Tool by subset of the proteins. The number under each filled square is the count of true instances scored, summed over experiments, query sets, relatives and truth sets. Hover a column name for its id in the tables."
   },
   {
    "tag": "th",
@@ -262,7 +262,15 @@
   },
   {
    "tag": "td",
+   "text": "–"
+  },
+  {
+   "tag": "td",
    "text": "8,234"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -270,7 +278,7 @@
   },
   {
    "tag": "td",
-   "text": "folddisco (no card yet)"
+   "text": "Folddisco (no card)"
   },
   {
    "tag": "td",
@@ -294,7 +302,7 @@
   },
   {
    "tag": "td",
-   "text": "mmseqs2 (no card yet)"
+   "text": "MMseqs2, search mode not recorded (no card)"
   },
   {
    "tag": "td",
@@ -302,7 +310,23 @@
   },
   {
    "tag": "td",
-   "text": "reseek (no card yet)"
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "Reseek (no card)"
   },
   {
    "tag": "td",
@@ -326,7 +350,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 2b. Tool by experiment. A filled square means the tables hold measured rows for that tool there. The number under it is the count of true instances scored, summed over the query sets, relatives, truth sets and strata of that experiment. An empty square means not run. The last column, scope40_v040_shuffled_k2_seed1, is a null control for kmerseek (alphabet letters shuffled), not a run other tools need."
+   "text": "Table 2b. Tool by experiment. The number under each filled square is the count of true instances scored, summed over the query sets, relatives, truth sets and subsets of that experiment. Hover a column name for its id in the tables."
   },
   {
    "tag": "th",
@@ -334,51 +358,51 @@
   },
   {
    "tag": "th",
-   "text": "alphabet_ranking_three_cases"
+   "text": "Alphabets ranked on three test proteins (notebook 241)"
   },
   {
    "tag": "th",
-   "text": "dark_set_accuracy"
+   "text": "Invertebrate dark set: accuracy of the best kmerseek setting"
   },
   {
    "tag": "th",
-   "text": "dark_set_gain"
+   "text": "Invertebrate dark set: what kmerseek reaches"
   },
   {
    "tag": "th",
-   "text": "dark_set_pfam_fmax"
+   "text": "Invertebrate dark set: Fmax against Pfam (notebook 291)"
   },
   {
    "tag": "th",
-   "text": "deep_twilight"
+   "text": "Deep-twilight controls, 16 proteins (notebook 252)"
   },
   {
    "tag": "th",
-   "text": "elm_cover"
+   "text": "Short linear motifs (ELM) covered (notebook 253)"
   },
   {
    "tag": "th",
-   "text": "qfo_region_midi"
+   "text": "Domain finding, 9 relatives"
   },
   {
    "tag": "th",
-   "text": "qfo_region_midi_plus"
+   "text": "Domain finding, 15 relatives (this leaderboard)"
   },
   {
    "tag": "th",
-   "text": "qfo_region_mini"
+   "text": "Domain finding, test set of 2 relatives"
   },
   {
    "tag": "th",
-   "text": "scope40_v040"
+   "text": "SCOPe40 structural classes, kmerseek 0.4 (notebook 277)"
   },
   {
    "tag": "th",
-   "text": "scope40_v040_below_kmin"
+   "text": "SCOPe40, kmerseek 0.4, k below the usual minimum"
   },
   {
    "tag": "th",
-   "text": "scope40_v040_shuffled_k2_seed1"
+   "text": "SCOPe40 control: alphabet letters shuffled"
   },
   {
    "tag": "td",
@@ -386,7 +410,15 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "159,304"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -414,7 +446,39 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
+  },
+  {
+   "tag": "td",
    "text": "MMseqs2"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -431,6 +495,18 @@
   {
    "tag": "td",
    "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
   },
   {
    "tag": "td",
@@ -438,7 +514,15 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "159,304"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -446,6 +530,10 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "24,818"
   },
   {
@@ -459,6 +547,18 @@
   {
    "tag": "td",
    "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
   },
   {
    "tag": "td",
@@ -466,6 +566,26 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "24,818"
   },
   {
@@ -479,6 +599,18 @@
   {
    "tag": "td",
    "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
   },
   {
    "tag": "td",
@@ -486,6 +618,26 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "24,818"
   },
   {
@@ -502,7 +654,35 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
+  },
+  {
+   "tag": "td",
    "text": "Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -526,7 +706,39 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
+  },
+  {
+   "tag": "td",
    "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -543,6 +755,18 @@
   {
    "tag": "td",
    "text": "344,906"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
   },
   {
    "tag": "td",
@@ -602,6 +826,30 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "6,998"
   },
   {
@@ -614,7 +862,43 @@
   },
   {
    "tag": "td",
-   "text": "folddisco (no card yet)"
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
+  },
+  {
+   "tag": "td",
+   "text": "Folddisco (no card)"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -622,15 +906,39 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "344,906"
   },
   {
    "tag": "td",
-   "text": "mmseqs2 (no card yet)"
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
+  },
+  {
+   "tag": "td",
+   "text": "MMseqs2, search mode not recorded (no card)"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
    "text": "159,304"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -642,7 +950,55 @@
   },
   {
    "tag": "td",
-   "text": "reseek (no card yet)"
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
+  },
+  {
+   "tag": "td",
+   "text": "Reseek (no card)"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
   },
   {
    "tag": "td",
@@ -654,59 +1010,79 @@
   },
   {
    "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
    "text": "344,906"
   },
   {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "×"
+  },
+  {
+   "tag": "td",
+   "text": "–"
+  },
+  {
    "tag": "p",
-   "text": "111 squares are filled and 93 are empty. Where each experiment's output came from, and which outputs were left out and why: inventory.md (copied with the tables)."
+   "text": "111 squares are filled, 81 are not run and 12 do not apply. Where each experiment's output came from, and which outputs were left out and why: inventory.md (copied with the tables)."
   },
   {
    "tag": "h2",
    "text": "What to run next"
   },
   {
-   "tag": "li",
-   "text": "phmmer: experiment alphabet_ranking_three_cases; experiment dark_set_gain; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "tag": "p",
+   "text": "One line per experiment: the tools it has not run yet."
   },
   {
    "tag": "li",
-   "text": "MMseqs2: experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment deep_twilight; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Alphabets ranked on three test proteins (notebook 241): phmmer, MMseqs2, jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + Foldseek, hmmscan with Pfam, Folddisco, MMseqs2, search mode not recorded, Reseek"
   },
   {
    "tag": "li",
-   "text": "jackhmmer: experiment alphabet_ranking_three_cases; experiment dark_set_gain; experiment deep_twilight; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Invertebrate dark set: what kmerseek reaches: phmmer, MMseqs2, jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + Foldseek, hmmscan with Pfam, Folddisco, MMseqs2, search mode not recorded, Reseek"
   },
   {
    "tag": "li",
-   "text": "MMseqs2, three rounds: experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment deep_twilight; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "SCOPe40 structural classes, kmerseek 0.4 (notebook 277): phmmer, MMseqs2, jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + Foldseek, hmmscan with Pfam, Folddisco, MMseqs2, search mode not recorded, Reseek"
   },
   {
    "tag": "li",
-   "text": "HH-suite (hhsearch): experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment deep_twilight; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "SCOPe40, kmerseek 0.4, k below the usual minimum: phmmer, MMseqs2, jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + Foldseek, hmmscan with Pfam, Folddisco, MMseqs2, search mode not recorded, Reseek"
   },
   {
    "tag": "li",
-   "text": "Foldseek: experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Invertebrate dark set: accuracy of the best kmerseek setting: MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + Foldseek, hmmscan with Pfam, Folddisco, Reseek"
   },
   {
    "tag": "li",
-   "text": "ProstT5 + Foldseek: experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment deep_twilight; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Invertebrate dark set: Fmax against Pfam (notebook 291): MMseqs2, MMseqs2, three rounds, HH-suite (hhsearch), Foldseek, ProstT5 + Foldseek, hmmscan with Pfam, Folddisco, Reseek"
   },
   {
    "tag": "li",
-   "text": "hmmscan with Pfam: % identity to nearest relative; Swiss-Prot feature type; experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment deep_twilight; experiment elm_cover; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Deep-twilight controls, 16 proteins (notebook 252): MMseqs2, jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch), ProstT5 + Foldseek, hmmscan with Pfam, Folddisco, Reseek"
   },
   {
    "tag": "li",
-   "text": "mmseqs2: % identity to nearest relative; AlphaFold pLDDT; Swiss-Prot feature type; region length; experiment alphabet_ranking_three_cases; experiment dark_set_gain; experiment elm_cover; experiment qfo_region_midi; experiment qfo_region_midi_plus; experiment qfo_region_mini; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Short linear motifs (ELM) covered (notebook 253): hmmscan with Pfam, Folddisco, MMseqs2, search mode not recorded"
   },
   {
    "tag": "li",
-   "text": "folddisco: experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment deep_twilight; experiment elm_cover; experiment qfo_region_midi_plus; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Domain finding, 15 relatives (this leaderboard): Folddisco, MMseqs2, search mode not recorded, Reseek"
   },
   {
    "tag": "li",
-   "text": "reseek: experiment alphabet_ranking_three_cases; experiment dark_set_accuracy; experiment dark_set_gain; experiment dark_set_pfam_fmax; experiment deep_twilight; experiment qfo_region_midi_plus; experiment scope40_v040; experiment scope40_v040_below_kmin."
+   "text": "Domain finding, 9 relatives: MMseqs2, search mode not recorded"
+  },
+  {
+   "tag": "li",
+   "text": "Domain finding, test set of 2 relatives: MMseqs2, search mode not recorded"
   }
  ],
  "data": {
