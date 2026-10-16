@@ -225,3 +225,16 @@ details.prose summary{cursor:pointer;color:var(--accent)}
 .tc-desc{color:var(--muted);margin:0 0 12px;flex:1}
 .tc-foot{border-top:1px solid var(--hair);margin:0 -18px;padding:10px 18px;font-family:"Fantasque Sans Mono",monospace;font-size:.82rem;color:var(--muted)}
 .tc-foot b{color:var(--ink);font-weight:600}
+
+/* Leaderboard: the table comes first; filters and prices fold away above it. */
+details.choices{background:var(--surface);border:1px solid var(--hair);border-radius:10px;margin:12px 0 10px;box-shadow:var(--shadow)}
+details.choices>summary{cursor:pointer;padding:10px 14px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;list-style:none}
+details.choices>summary::-webkit-details-marker{display:none}
+details.choices>summary::before{content:"▸";color:var(--accent)}
+details.choices[open]>summary::before{content:"▾"}
+.choices-label{font-weight:600;color:var(--accent)}
+.choices-now{color:var(--muted);font-size:.92rem;min-width:0}
+details.choices>.filters{box-shadow:none;border:0;border-top:1px solid var(--hair);border-radius:0;margin:0}
+details.choices>.prices{padding:0 14px 12px}
+details.key{margin:4px 0 8px}
+details.key>summary{cursor:pointer;color:var(--accent);font-size:.92rem}

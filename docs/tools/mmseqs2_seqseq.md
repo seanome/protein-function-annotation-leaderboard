@@ -9,7 +9,7 @@ Amino-acid letters: it first keeps target proteins that share similar short word
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: no
 
 ## Reference searched

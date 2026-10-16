@@ -50,7 +50,7 @@
   },
   {
    "tag": "li",
-   "text": "AlphaFold model: no"
+   "text": "3D structure prediction: no"
   },
   {
    "tag": "li",
@@ -196,7 +196,7 @@
   "compares": "Amino-acid letters: it first keeps target proteins that share similar short words with the query, then aligns only those, which makes it much faster than aligning every pair.",
   "needs": {
    "sequence only": true,
-   "AlphaFold model": false,
+   "3D structure prediction": false,
    "GPU": false
   },
   "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an MMseqs2 database.",

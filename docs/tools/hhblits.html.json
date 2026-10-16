@@ -50,7 +50,7 @@
   },
   {
    "tag": "li",
-   "text": "AlphaFold model: no"
+   "text": "3D structure prediction: no"
   },
   {
    "tag": "li",
@@ -196,7 +196,7 @@
   "compares": "Two profiles against each other. Here each profile was built from a single protein, not from a family alignment, because no UniRef30 database was given.",
   "needs": {
    "sequence only": true,
-   "AlphaFold model": false,
+   "3D structure prediction": false,
    "GPU": false
   },
   "reference": "Single-protein profiles of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an HH-suite database.",

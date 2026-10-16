@@ -392,6 +392,7 @@
 
   function describe() {
     const d = document.getElementById("filterline");
+    const short = document.getElementById("filtersummary");
     if (!d) return;
     const sp = M.species[state.species];
     let strat = "all proteins";
@@ -402,6 +403,7 @@
     }
     d.textContent = `${M.truthNames[state.truth]}, ${state.calls === "dedup" ? "overlapping calls merged" : "raw calls"}, ` +
       `relative searched: ${sp.name}${sp.mya != null ? " (" + sp.mya + " Mya)" : ""}, ${strat}.`;
+    if (short) short.textContent = "now: " + d.textContent;
   }
 
   function update(rebuildFilters = true) {

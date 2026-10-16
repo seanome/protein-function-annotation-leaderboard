@@ -30,7 +30,7 @@ TOOLS = {
             "hydrophobic and P for polar. Two proteins can then match where their residues "
             "differ but their pattern of residue types is the same."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": False},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": (
             f"An index of the relative's proteome ({QFO}), built once per alphabet and "
             "k-mer length."
@@ -78,7 +78,7 @@ TOOLS = {
             "scored with a substitution matrix the way BLAST does but with HMMER's model "
             "of insertions and deletions."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": False},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as a FASTA file.",
         "score": "Domain bit score: higher ranks first. The E-value cutoff was 10.",
         "failure_modes": ["Failure modes specific to phmmer: not measured in this run."],
@@ -107,7 +107,7 @@ TOOLS = {
             "A profile of a protein family: it searches with one protein, builds a profile "
             "from the hits, and searches again with that profile, three rounds in all."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": False},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as a FASTA file.",
         "score": "Domain bit score: higher ranks first. The E-value cutoff was 10.",
         "failure_modes": [
@@ -141,7 +141,7 @@ TOOLS = {
             "words with the query, then aligns only those, which makes it much faster than "
             "aligning every pair."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": False},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as an MMseqs2 database.",
         "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
         "failure_modes": [
@@ -171,7 +171,7 @@ TOOLS = {
             "A profile of a protein family, built by MMseqs2 from its own hits over three "
             "rounds of search, as jackhmmer does."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": False},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as an MMseqs2 database.",
         "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
         "failure_modes": [
@@ -204,7 +204,7 @@ TOOLS = {
             "Two profiles against each other. Here each profile was built from a single "
             "protein, not from a family alignment, because no UniRef30 database was given."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": False},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": (
             f"Single-protein profiles of the relative's proteome ({QFO}), as an HH-suite "
             "database."
@@ -237,7 +237,7 @@ TOOLS = {
             "letters (3Di) from its local fold. The shape letters are aligned together with "
             "the amino acids."
         ),
-        "needs": {"sequence only": False, "AlphaFold model": True, "GPU": False},
+        "needs": {"sequence only": False, "3D structure prediction": True, "GPU": False},
         "reference": (
             f"AlphaFold models of the relative's proteome ({QFO} accessions), as a Foldseek "
             "database."
@@ -265,7 +265,7 @@ TOOLS = {
         "commercial": 'Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.',
         "licence_url": 'https://github.com/steineggerlab/foldseek',
         "requirement_question": (
-            "Do you have an AlphaFold model for every protein you want to annotate?",
+            "Do you have a 3D structure prediction for every protein you want to annotate?",
             "If not, Foldseek cannot search the proteins without one.",
         ),
     },
@@ -278,7 +278,7 @@ TOOLS = {
             "protein language model, then searched with Foldseek, so no AlphaFold model "
             "is needed."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": True},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": True},
         "reference": (
             f"3Di letters predicted by ProstT5 for the relative's proteome ({QFO}), as a "
             "Foldseek database."
@@ -320,7 +320,7 @@ foldseek search \\
             "Each query protein against the curated profile models of every Pfam family, "
             "without searching any relative."
         ),
-        "needs": {"sequence only": True, "AlphaFold model": False, "GPU": False},
+        "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": "Pfam-A 38.2 family models (30,134 models).",
         "score": "Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).",
         "failure_modes": [

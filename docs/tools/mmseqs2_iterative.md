@@ -9,7 +9,7 @@ A profile of a protein family, built by MMseqs2 from its own hits over three rou
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: no
 
 ## Reference searched
