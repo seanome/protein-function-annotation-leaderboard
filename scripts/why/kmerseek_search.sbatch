@@ -44,5 +44,20 @@ if [[ ${status[0]} -ne 0 ]] && grep -q "no Karlin-Altschul fit" "$SLUG.log"; the
 elif [[ ${status[0]} -ne 0 || ${status[1]} -ne 0 || ${status[2]} -ne 0 ]]; then
     echo "search failed: exit codes ${status[*]}; see $OUTD/$SLUG.log"; exit 1
 fi
+# The small file the analysis reads: one row per region with E <= 1, only the columns
+# needed (coordinates are 0-based, end-exclusive, as kmerseek writes them).
+if [[ ! -f "$SLUG.nofit" ]]; then
+    run zstd -dc "$SLUG.regions.csv.zst" | awk -F, -v OFS=, '
+        NR==1 { for (i=1;i<=NF;i++) col[$i]=i
+                n = split("query_name target_name region_start region_end target_start target_end region_length region_ka_bits region_evalue region_n_chained", want, " ")
+                for (j=1;j<=n;j++) if (!(want[j] in col)) { print "missing column " want[j] > "/dev/stderr"; exit 3 }
+                for (j=1;j<=n;j++) printf "%s%s", want[j], (j<n ? OFS : "\n"); next }
+        { e = $col["region_evalue"] }
+        # awk reads "inf" and "nan" as 0, which would pass a region with no evidence (0 bits,
+        # E = inf) as the best possible hit; drop them before comparing.
+        e ~ /inf|nan/ { next }
+        (e + 0) <= 1 { for (j=1;j<=n;j++) printf "%s%s", $col[want[j]], (j<n ? OFS : "\n") }' \
+      | gzip > "$SLUG.hits.csv.gz"
+fi
 date -u +%FT%TZ > "$SLUG.DONE"
 echo "searched $SLUG"
