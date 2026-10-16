@@ -46,6 +46,10 @@
   },
   {
    "tag": "p",
+   "text": "A claim about another group's tool carries author_claim: the authors' own words, under 15, with the link to their paper, README or website. scripts/fetch_quote.py fetches the page, refuses a quote that is not on it, and records the quote's sha256. The build fails when a quote no longer matches that sha256, so a quote cannot be edited by hand. A table test may also carry min_instances (a relative with fewer truth regions in the stratum is left out and named) and a one-sided kill, below_by_more_than, where only a shortfall against the other tool counts."
+  },
+  {
+   "tag": "p",
    "text": "A claim retired by a record test is dated with the date of that inventory record. A claim retired by a table test has no date, because the tables are recomputed on every build and the build cannot tell when the claim was first disproved. The \"last disproved\" date on a card counts only dated results."
   },
   {
@@ -66,7 +70,23 @@
   },
   {
    "tag": "pre",
+   "text": "![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-diamond.svg)"
+  },
+  {
+   "tag": "pre",
+   "text": "![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-foldseek.svg)"
+  },
+  {
+   "tag": "pre",
+   "text": "![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-hmmer3_phmmer.svg)"
+  },
+  {
+   "tag": "pre",
    "text": "![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-kmerseek.svg)"
+  },
+  {
+   "tag": "pre",
+   "text": "![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-mmseqs2_seqseq.svg)"
   }
  ],
  "data": {
@@ -126,6 +146,43 @@
       "kill": {
        "type": "string",
        "description": "The result that would retire the claim."
+      },
+      "author_claim": {
+       "type": "object",
+       "required": [
+        "quote",
+        "url",
+        "text_url",
+        "fetched",
+        "sha256"
+       ],
+       "additionalProperties": false,
+       "description": "The tool authors' own words for this claim, copied from their paper, README or website. Written by scripts/fetch_quote.py, which fetches text_url and refuses a quote that is not on the page; scripts/claims.py fails when the quote no longer matches sha256.",
+       "properties": {
+        "quote": {
+         "type": "string",
+         "description": "Verbatim, under 15 words."
+        },
+        "url": {
+         "type": "string",
+         "pattern": "^https://",
+         "description": "The page a reader opens."
+        },
+        "text_url": {
+         "type": "string",
+         "pattern": "^https?://",
+         "description": "The page as fetched (a raw README, for example)."
+        },
+        "fetched": {
+         "type": "string",
+         "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "sha256": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{64}$",
+         "description": "sha256 of the quote with runs of whitespace collapsed to one space."
+        }
+       }
       },
       "scope": {
        "type": "string",

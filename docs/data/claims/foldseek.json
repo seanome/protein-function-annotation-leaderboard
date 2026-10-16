@@ -1,0 +1,42 @@
+{
+ "tool": "foldseek",
+ "title": "Foldseek",
+ "updated": "2026-10-16",
+ "file": "claims/foldseek.yaml",
+ "claims": [
+  {
+   "id": "fast-and-sensitive",
+   "claim": "Foldseek is sensitive",
+   "kill": "Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searched",
+   "scope": "Pfam-A domain instances, raw calls, 998 human queries, the 10 relatives with Foldseek rows (setting 3di_aa against AlphaFold structures). Tests the \"sensitive\" half only; speed is on the Cost page and is not part of this test. Pfam domains are defined from sequence, which favours sequence searches like phmmer; a structure-based truth set would be the fairer test and is not on this site yet.",
+   "status": "retired",
+   "verdict": "−0.100 to +0.000 across 10 of 10; furthest: fly −0.100",
+   "date": null,
+   "source": "seanome/2024-kmerseek-analysis@4a4b1171 results.parquet",
+   "context": [],
+   "evidence": {
+    "label": "leaderboard",
+    "href": "index.html"
+   },
+   "author_claim": {
+    "quote": "Foldseek enables fast and sensitive comparisons of large protein structure sets",
+    "url": "https://github.com/steineggerlab/foldseek",
+    "fetched": "2026-10-16"
+   }
+  }
+ ],
+ "counts": {
+  "alive": 0,
+  "retired": 1,
+  "untested": 0
+ },
+ "last_kill": null,
+ "source": {
+  "tables": {
+   "repo": "seanome/2024-kmerseek-analysis",
+   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+   "commit_date": "2026-10-15T13:12:56Z"
+  },
+  "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
+ }
+}

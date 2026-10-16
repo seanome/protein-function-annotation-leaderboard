@@ -1,0 +1,39 @@
+{
+ "tool": "diamond",
+ "title": "DIAMOND",
+ "updated": "2026-10-16",
+ "file": "claims/diamond.yaml",
+ "claims": [
+  {
+   "id": "blast-speed",
+   "claim": "DIAMOND aligns proteins 100 to 10,000 times faster than BLAST",
+   "kill": "DIAMOND's CPU-hours per 1,000 queries are more than 1/100 of BLASTP's, on the same queries, relatives and machine",
+   "scope": "The 998 human queries against the 15 relatives, both tools run by the host on Sherlock with their traces. Needs DIAMOND rows (the DIAMOND module, branch olgabot/annotator-tools) and a BLASTP module, which this site does not have yet.",
+   "status": "untested",
+   "verdict": "DIAMOND and BLASTP have not been run on the QfO relatives",
+   "date": null,
+   "source": null,
+   "context": [],
+   "evidence": null,
+   "author_claim": {
+    "quote": "Pairwise alignment of proteins and translated DNA at 100x-10,000x speed of BLAST.",
+    "url": "https://github.com/bbuchfink/diamond",
+    "fetched": "2026-10-16"
+   }
+  }
+ ],
+ "counts": {
+  "alive": 0,
+  "retired": 0,
+  "untested": 1
+ },
+ "last_kill": null,
+ "source": {
+  "tables": {
+   "repo": "seanome/2024-kmerseek-analysis",
+   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+   "commit_date": "2026-10-15T13:12:56Z"
+  },
+  "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
+ }
+}

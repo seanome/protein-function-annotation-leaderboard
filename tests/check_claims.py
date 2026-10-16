@@ -134,6 +134,42 @@ with tempfile.TemporaryDirectory() as tmp:
     check(body["source"]["inventory"].endswith("(PR 97)") and "fe72334b" in body["source"]["inventory"],
           f"inventory source read from data/experiments.SOURCE.json: {body['source']['inventory']}")
 
+# 8. An author's quote altered by one word fails; the quote as fetched passes.
+for f in sorted((ROOT / "claims").glob("*.yaml")):
+    for c in yaml.safe_load(f.read_text())["claims"]:
+        if "author_claim" not in c:
+            continue
+        claims.check_author_quote(c)  # the committed quote passes
+        words = c["author_claim"]["quote"].split()
+        altered = dict(c, author_claim=dict(c["author_claim"], quote=" ".join(words[:-1] + ["probably"])))
+        try:
+            claims.check_author_quote(altered)
+            check(False, f"{f.name} {c['id']}: an altered quote fails")
+        except ValueError:
+            check(True, f"{f.name} {c['id']}: an altered quote fails")
+        # Line breaks inside a quote are not a change.
+        claims.check_author_quote(dict(c, author_claim=dict(c["author_claim"], quote="\n  ".join(words))))
+n_quoted = sum("author_claim" in c for f in (ROOT / "claims").glob("*.yaml")
+               for c in yaml.safe_load(f.read_text())["claims"])
+check(n_quoted >= 4, f"at least 4 claims quote their authors: {n_quoted}")
+
+# 9. One-sided kill: a tool far ABOVE the other is not disproved; far below is.
+one = dict(tab, kill_if={"below_by_more_than": 0.05}, stratum_bin="0-20%")
+up = pl.concat([rows(("hp_k24", "0-20%", 40, 0.9, "QfO fly")),
+                rows(("d", "0-20%", 40, 0.5, "QfO fly")).with_columns(pl.lit("other").alias("tool"))])
+check(resolver(up).table(one)["status"] == "alive", "below_by_more_than ignores a lead")
+check(resolver(long).table(one)["status"] == "retired", "below_by_more_than kills a shortfall")
+
+# 10. min_instances in a table test: a small relative is left out and named; all small is untested.
+two = pl.concat([rows(("hp_k24", "0-20%", 40, 0.5, "QfO fly"), ("hp_k24", "0-20%", 5, 0.0, "QfO worm")),
+                 rows(("d", "0-20%", 40, 0.5, "QfO fly"), ("d", "0-20%", 5, 0.9, "QfO worm"))
+                 .with_columns(pl.lit("other").alias("tool"))])
+mi = dict(one, targets=["QfO fly", "QfO worm"], min_instances=30)
+r = resolver(two).table(mi)
+check(r["status"] == "alive" and "left out: worm" in r["text"], f"small relative left out and named: {r}")
+r = resolver(two).table(dict(mi, targets=["QfO worm"]))
+check(r["status"] == "untested", f"only small relatives: untested: {r}")
+
 if failures:
     print(f"{len(failures)} FAILURES")
     sys.exit(1)

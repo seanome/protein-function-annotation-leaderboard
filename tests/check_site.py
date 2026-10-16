@@ -395,6 +395,21 @@ def main() -> int:
         if doc["source"]["commit"] != commit or not doc["text"]:
             failures.append(f"{pg}.json: wrong commit or no text")
     stats["json_pages"] = len(pages)
+
+    # ---- 5. every author's quote is on the claims page, with its link ----
+    import html as html_mod
+    import yaml
+    claims_page = (a.site / "claims.html").read_text() if (a.site / "claims.html").exists() else ""
+    n_quotes = 0
+    for f in sorted(Path(__file__).resolve().parents[1].joinpath("claims").glob("*.yaml")):
+        for c in yaml.safe_load(f.read_text())["claims"]:
+            q = c.get("author_claim")
+            if not q:
+                continue
+            n_quotes += 1
+            if html_mod.escape(q["quote"]) not in claims_page or html_mod.escape(q["url"]) not in claims_page:
+                failures.append(f"claims.html: {f.name} {c['id']} quote or link missing")
+    stats["author_quotes_on_claims_page"] = n_quotes
     failures += [f"console: {e}" for e in console_errors]
 
     print(json.dumps(stats, indent=1))
