@@ -40,6 +40,14 @@ Building its databases: not measured.
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
+## Hardware
+
+Hardware of the search (setting `direct`, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 1 task on 1 node. CPU: AMD 9754 (1 task). GPU: none allocated.
+
+Hardware of the database build: not recorded, since the run's task records hold no such task.
+
+Sources, read 2026-10-16: the partition is the `queue` column of the run's Nextflow traces. The traces have no `hostname` column, so the node is the one SLURM's job record (`sacct`) gives for the trace's job id. CPU and GPU are that node's features in SLURM (`scontrol show node`: CPU_MNF, CPU_SKU, GPU_SKU), named as on Sherlock's [node features page](https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/). Partition hns is owned by a research group, and Sherlock's [tech specs page](https://www.sherlock.stanford.edu/docs/tech/) lists no CPU models for such partitions. Script: `scripts/read_hardware.py`.
+
 ## Licence
 
 - Licence: BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes) ([source](https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE))

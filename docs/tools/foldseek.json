@@ -78,6 +78,84 @@
   "peak_rss_gb": 1.5,
   "hardware": "Stanford Sherlock, SLURM partition hns"
  },
+ "hardware": {
+  "search": {
+   "recorded": true,
+   "n_tasks": 10,
+   "partitions": [
+    {
+     "value": "hns",
+     "n_tasks": 10
+    }
+   ],
+   "hostname_in_trace": false,
+   "n_nodes": 9,
+   "n_tasks_without_node": 0,
+   "cpu_models": [
+    {
+     "value": "AMD 7763",
+     "n_tasks": 3
+    },
+    {
+     "value": "AMD 8224P",
+     "n_tasks": 3
+    },
+    {
+     "value": "AMD 7742",
+     "n_tasks": 2
+    },
+    {
+     "value": "AMD 7543",
+     "n_tasks": 1
+    },
+    {
+     "value": "AMD 9754",
+     "n_tasks": 1
+    }
+   ],
+   "gpu_models": [],
+   "n_tasks_with_gpu": 0
+  },
+  "database_build": {
+   "recorded": true,
+   "n_tasks": 2,
+   "partitions": [
+    {
+     "value": "hns",
+     "n_tasks": 2
+    }
+   ],
+   "hostname_in_trace": false,
+   "n_nodes": 2,
+   "n_tasks_without_node": 0,
+   "cpu_models": [
+    {
+     "value": "AMD 7742",
+     "n_tasks": 1
+    },
+    {
+     "value": null,
+     "n_tasks": 1
+    }
+   ],
+   "gpu_models": [],
+   "n_tasks_with_gpu": 0
+  },
+  "source": {
+   "read_on": "2026-10-16",
+   "experiment": "qfo_region_midi_plus",
+   "traces": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/{run-midi-plus,run-midi-plus-all-qfo}/*trace*.txt",
+   "trace_files_with_hostname_column": [],
+   "n_trace_files": 11,
+   "node_from": "sacct -u olgabot -X -n -P -S 2026-08-31 -E 2026-09-14 --format=JobID,NodeList,Partition,AllocTRES, matched on the trace's native_id",
+   "hardware_from": "scontrol -o show node <node>: AvailableFeatures CPU_MNF, CPU_SKU, GPU_SKU",
+   "feature_names_documented_at": "https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/",
+   "partition_specs": "https://www.sherlock.stanford.edu/docs/tech/",
+   "n_tasks": 6260,
+   "n_tasks_with_node": 6260,
+   "n_nodes": 131
+  }
+ },
  "questions": [
   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.164 (n = 563), 60\u2013100% 0.241 (n = 1,289). If no, 20\u201330% 0.268 (n = 93), 30\u201340% 0.167 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_aa`; strata with at least 30 true instances.)",
   "Do you have a 3D structure prediction for every protein you want to annotate? If not, Foldseek cannot search the proteins without one.",

@@ -40,9 +40,15 @@ R_GPU = 1.006
 TRUTH = {"swissprot": "Swiss-Prot features", "pfam": "Pfam", "pfamn": "Pfam-N"}
 DEFAULTS = {
     "truth": "pfam", "calls": "raw", "species": "zebrafish", "axis": "all",
-    "stratum": "all", "x": "cpu", "y": "fmax", "sort": "fmax", "dir": "desc",
+    "stratum": "all", "x": "cost", "y": "fmax", "sort": "fmax", "dir": "desc",
     "r_cpu": R_CPU, "r_gpu": R_GPU,
+    # The cost calculator on cost.html: proteins to annotate, and a budget in USD. The budget
+    # default was set before any tool's fit was looked at (see the PR); it is only a start.
+    "n": 20000, "budget": 10,
 }
+# One sentence, printed on the page and in its JSON twin.
+SCALING = ("Core-hours, cost and wall-clock time scale in a straight line with the number of "
+           "proteins, N / 1,000 times the measured value per 1,000 queries; nothing else is scaled.")
 DEFAULT_WORDS = "Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched"
 # A stratum enters a card's comparisons and questions only with at least this many true
 # instances; below it one or two calls swing Fmax from 0 to 1.
@@ -117,12 +123,13 @@ AXES = [
     {"id": "auprc", "label": "AUPRC, 0 to 1", "short": "AUPRC", "kind": "score", "better": "higher"},
     {"id": "iou", "label": "Median IoU of correct calls, 0 to 1", "short": "median IoU", "kind": "score",
      "better": "higher"},
-    {"id": "cpu", "label": "Core-hours per 1,000 queries, per relative searched", "short": "core-hours",
-     "kind": "cost", "better": "lower", "less": "cheaper in core-hours"},
-    {"id": "cost", "label": "Estimated cost, USD per 1,000 queries, per relative searched", "short": "cost",
-     "kind": "cost", "better": "lower", "less": "cheaper"},
-    {"id": "wall", "label": "Wall-clock hours per 1,000 queries, per relative searched", "short": "wall-clock time",
-     "kind": "cost", "better": "lower", "less": "faster"},
+    # "{n}" is the calculator's number of proteins; these three scale with it.
+    {"id": "cost", "label": "Estimated cost, USD, to search {n} proteins against one relative", "short": "cost",
+     "kind": "cost", "better": "lower", "less": "cheaper", "scales": True},
+    {"id": "cpu", "label": "Core-hours to search {n} proteins against one relative", "short": "core-hours",
+     "kind": "cost", "better": "lower", "less": "cheaper in core-hours", "scales": True},
+    {"id": "wall", "label": "Wall-clock hours to search {n} proteins against one relative, at the cores the run used",
+     "short": "wall-clock time", "kind": "cost", "better": "lower", "less": "faster", "scales": True},
     {"id": "ram", "label": "Peak RAM of the search, GB", "short": "peak RAM", "kind": "cost", "better": "lower",
      "less": "lighter on memory"},
     {"id": "db", "label": "Database build, core-hours per database built", "short": "database build time",
@@ -285,9 +292,59 @@ def svg_marker(shape: str, color: str, filled: bool = True) -> str:
 
 EXPERIMENT = "qfo_region_midi_plus"
 DATA_DIR = Path("data")
+HW: pl.DataFrame | None = None
+HW_PROV: dict | None = None
 TRUTH_FROM_LONG = {"Pfam-A domain instances": "pfam", "Pfam-N domain instances": "pfamn",
                    "Swiss-Prot features": "swissprot"}
 HARDWARE = "Stanford Sherlock, SLURM partition hns"
+NODE_FEATURES_PAGE = "https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/"
+TECH_SPECS_PAGE = "https://www.sherlock.stanford.edu/docs/tech/"
+
+
+def hardware_summary(hw: pl.DataFrame | None, tool: str, setting: str | None, build: bool) -> dict:
+    """Partition, nodes, CPU and GPU models of one tool's search tasks (or its database build
+    tasks), from data/hardware.parquet (scripts/read_hardware.py). Counts are tasks."""
+    if hw is None:
+        return {"recorded": False}
+    is_build = (pl.col("setting") == "database build") | pl.col("step").str.contains("Index|Db|DB")
+    q = hw.filter(pl.col("tool").is_in([tool, tool.split("_")[0]]) & (is_build if build else ~is_build))
+    if setting is not None:
+        q = q.filter(pl.col("setting").is_in([setting, "database build"]))
+    if q.height == 0:
+        return {"recorded": False}
+
+    def counts(col):
+        return [{"value": v, "n_tasks": n} for v, n in
+                q.group_by(col).len().sort(["len", col], descending=[True, False], nulls_last=True).iter_rows()]
+    return {
+        "recorded": True, "n_tasks": q.height,
+        "partitions": counts("partition"),
+        "hostname_in_trace": bool(q["trace_hostname"].drop_nulls().len()),
+        "n_nodes": q["node"].drop_nulls().n_unique(),
+        "n_tasks_without_node": q["node"].null_count(),
+        "cpu_models": counts("cpu_model"),
+        "gpu_models": [g for g in counts("gpu_model") if g["value"] is not None],
+        "n_tasks_with_gpu": int((q["gpus_allocated"] > 0).sum()),
+    }
+
+
+def hardware_words(h: dict, what: str) -> str:
+    """One plain sentence (or two) from hardware_summary."""
+    if not h.get("recorded"):
+        return f"Hardware of {what}: not recorded, since the run's task records hold no such task."
+    parts = ", ".join(f"{p['value']}" for p in h["partitions"])
+    # A null CPU is a node that `scontrol` answers "Node ... not found" for today.
+    cpu = "; ".join(f"{c['value'] or 'not recorded, as scontrol no longer finds the node'} "
+                    f"({c['n_tasks']} task{'s' if c['n_tasks'] != 1 else ''})"
+                    for c in h["cpu_models"])
+    gpu = ("none allocated" if not h["n_tasks_with_gpu"] else
+           f"{h['n_tasks_with_gpu']} task{'s' if h['n_tasks_with_gpu'] != 1 else ''} had one: "
+           + "; ".join(f"{g['value']} ({g['n_tasks']})" for g in h["gpu_models"]))
+    host = ("Host name: from the trace." if h["hostname_in_trace"]
+            else "Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives.")
+    return (f"Hardware of {what}: Sherlock partition {parts}, from the trace. {host} "
+            f"{h['n_tasks']} task{'s' if h['n_tasks'] != 1 else ''} on {h['n_nodes']} "
+            f"node{'s' if h['n_nodes'] != 1 else ''}. CPU: {cpu}. GPU: {gpu}.")
 
 
 def load(data: Path):
@@ -342,6 +399,14 @@ def load(data: Path):
     # pages can key cost by relative; a relative it did not search gets no row ("not run").
     searched = res.select("tool", "setting", "species").unique()
     comp = searched.join(comp_ts, on=["tool", "setting"], how="inner")
+    # Figure 1 now uses filled and open markers for "fits the budget" and "over it". A cost
+    # reported by a submitter would need its own mark first.
+    if comp["cpu_h_reported"].drop_nulls().len():
+        raise SystemExit("a reported cost exists: give it a mark on cost.html before building")
+    global HW, HW_PROV
+    hp = data / "hardware.parquet"
+    HW = pl.read_parquet(hp) if hp.exists() else None
+    HW_PROV = json.loads((data / "hardware_provenance.json").read_text()) if hp.exists() else None
     src = json.loads((data / "SOURCE.json").read_text())
     prov = json.loads((data / "provenance.json").read_text())
     prov["n_queries"] = int(comp_ts["n_queries"].max())
@@ -390,9 +455,43 @@ def compute_json(comp: pl.DataFrame) -> dict:
             # Mean core-hours to build one relative's database, over the builds the run's task
             # records hold (a build reused from an earlier run left no record).
             "db_cpu_h_per_db": None if r["db_cpu_h"] is None else r["db_cpu_h"] / r["db_n"],
+            "db_gpu_h_per_db": None if r["db_gpu_h"] is None else r["db_gpu_h"] / r["db_n"],
             "db_n": r["db_n"],
         }
     return out
+
+
+def calculator(results: dict, compute: dict, rows: list[dict], s: dict) -> dict:
+    """The cost calculator for one set of inputs: the same rules as calc() in app.js.
+
+    A row is a tool and setting with a result for the filters. Its search cost scales in a
+    straight line from the measured value per 1,000 queries: x N / 1000. It fits when that
+    cost is at most the budget. The database build is per relative's database, not scaled.
+    """
+    key = "|".join([s["truth"], s["calls"], s["species"], s["axis"], s["stratum"]])
+    block = results.get(key, {})
+    f = s["n"] / 1000
+    out = []
+    for r in rows:
+        if f'{r["tool"]}|{r["setting"]}' not in block:
+            continue
+        c = compute.get(f'{r["tool"]}|{r["setting"]}|{s["species"]}')
+        if c is None or c["cpu_h_per_1000"] is None:
+            out.append({"tool": r["tool"], "setting": r["setting"], "measured": False})
+            continue
+        usd = (c["cpu_h_per_1000"] * s["r_cpu"] + (c["gpu_h_per_1000"] or 0) * s["r_gpu"]) * f
+        db = None if c["db_cpu_h_per_db"] is None else \
+            c["db_cpu_h_per_db"] * s["r_cpu"] + (c["db_gpu_h_per_db"] or 0) * s["r_gpu"]
+        out.append({"tool": r["tool"], "setting": r["setting"], "measured": True,
+                    "core_h": c["cpu_h_per_1000"] * f, "gpu_h": (c["gpu_h_per_1000"] or 0) * f,
+                    "usd": usd, "wall_h": c["wall_h_per_1000"] * f, "cores": c["cores"],
+                    "fits": usd <= s["budget"],
+                    "db_core_h_per_db": c["db_cpu_h_per_db"], "db_gpu_h_per_db": c["db_gpu_h_per_db"],
+                    "db_usd_per_db": db})
+    return {"inputs": {k: s[k] for k in ("n", "budget", "r_cpu", "r_gpu", "truth", "calls", "species",
+                                         "axis", "stratum")},
+            "scaling": SCALING, "rows": out,
+            "fit": sorted({f'{x["tool"]}|{x["setting"]}' for x in out if x.get("fits")})}
 
 
 # --------------------------------------------------------------------------- pages
@@ -471,6 +570,10 @@ examples: <a href="methods.html">Methods</a>.</p>
 
 
 def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -> str:
+    # Colour and shape name the tool; filled or open is the budget. So each tool's key shows
+    # its marker both ways, and fill is never read as part of the tool.
+    def pair(shape, color):
+        return svg_marker(shape, color) + svg_marker(shape, color, False)
     legend = []
     for kind, k in KINDS.items():
         for t, info in TOOLS.items():
@@ -478,13 +581,38 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
                 continue
             if t == "kmerseek":
                 for alpha, shape in KMERSEEK_SHAPES.items():
-                    legend.append(f'<span class="item">{svg_marker(shape, k["color"])}kmerseek, {esc(alpha)}</span>')
+                    legend.append(f'<span class="item">{pair(shape, k["color"])}kmerseek, {esc(alpha)}</span>')
             else:
-                legend.append(f'<span class="item">{svg_marker(info["shape"], k["color"])}{esc(info["name"])}</span>')
+                legend.append(f'<span class="item">{pair(info["shape"], k["color"])}{esc(info["name"])}</span>')
+    # Tools whose "database build" includes the query side (the human proteins), which grows
+    # with the number of proteins. Read from hardware.parquet's targets.
+    query_side = []
+    if HW is not None:
+        qs = HW.filter(pl.col("target").str.starts_with("human") & (pl.col("setting") == "database build")
+                       & (pl.col("gpus_allocated") > 0))
+        query_side = sorted({TOOLS[t]["name"] for t in qs["tool"].unique().to_list() if t in TOOLS})
+    qs_words = "".join(
+        f" {name}'s database build includes one GPU task that converts the human query proteins. "
+        "That step grows with the number of proteins. The run's table sums it with the builds for "
+        f"the relatives, so it is not in {name}'s search cost or the budget." for name in query_side)
     body = f"""
 <h1>Compare two columns</h1>
 <p class="lede">Any two columns of the leaderboard, drawn against each other: a score against
-what the search cost, or one score against another. Pick the column for each axis below.</p>
+what the search cost, or one score against another. Enter how many proteins you have and what
+you can spend, and the figure shows which tools fit.</p>
+<section class="calc" id="calc" aria-label="Cost calculator">
+<div class="prices">
+<label>Proteins to annotate <input id="calc_n" type="number" min="1" step="1" inputmode="numeric"></label>
+<label>Budget, USD <input id="calc_budget" type="number" min="0" step="any" inputmode="decimal"></label>
+<label>Price per CPU-hour, USD <input id="r_cpu" type="number" min="0" step="0.001" inputmode="decimal"></label>
+<label>Price per GPU-hour, USD <input id="r_gpu" type="number" min="0" step="0.01" inputmode="decimal"></label>
+</div>
+<p class="muted calcnote">{esc(SCALING)} Costs are for searching your proteins against one relative's
+proteome; the budget counts the search only. The default prices are AWS on-demand, US East (N. Virginia),
+Linux, from AWS's <a href="{PRICE_FILE}">public price file</a> published 2026-10-12 and read 2026-10-15
+(<a href="{PRICE_PAGE}">price page</a>). CPU: $0.044625 per CPU-hour (a c7i.large, $0.08925 per hour for 2 vCPU).
+GPU: $1.006 per GPU-hour (a g5.xlarge with one NVIDIA A10G). Both can be changed.</p>
+</section>
 <div class="axispick" id="axispick" aria-label="Columns on the axes"></div>
 <details class="choices" id="choices">
 <summary><span class="choices-label">Change what is plotted</span>
@@ -494,32 +622,37 @@ what the search cost, or one score against another. Pick the column for each axi
 <p class="axisnote">The benchmark split the proteins along one of the last four rows at a time,
 so picking a value in one of them sets the other three back to "any".</p>
 </form>
-<div class="prices" aria-label="Prices used for the estimated cost">
-<label>r_cpu, USD per CPU-hour <input id="r_cpu" type="number" min="0" step="0.001" inputmode="decimal"></label>
-<label>r_gpu, USD per GPU-hour <input id="r_gpu" type="number" min="0" step="0.01" inputmode="decimal"></label>
-<span class="muted">Used only when the horizontal axis is the estimated cost. Default prices are AWS
-on-demand rates for US East (N. Virginia), Linux, read 2026-10-15 from the
-<a href="{PRICE_PAGE}">EC2 on-demand price page</a>: $0.044625 per CPU-hour (a c7i.large, $0.08925 per hour for 2 vCPU) and
-$1.006 per GPU-hour (a g5.xlarge with one NVIDIA A10G).</span>
-</div>
 </details>
 <figure>
 <figcaption><b>Figure 1.</b> <span id="plotcaption"></span> One marker per tool and setting:
-<span id="filterline"></span> Hover or focus a marker to see its row; click it to open the tool's card.</figcaption>
+<span id="filterline"></span> <span id="fitline"></span> Hover or focus a marker to see its row; click it to open the tool's card.</figcaption>
 <div class="legend" aria-label="Key to Figure 1">
 {"".join(legend)}
+<span class="item">{svg_marker("circle", "var(--ink)")} filled: search fits the budget</span>
+<span class="item">{svg_marker("circle", "var(--ink)", False)} open: search costs more than the budget</span>
+<span class="item" id="nocost-key"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="2 2"/></svg> dashed outline: cost not measured</span>
+<span class="item" id="budget-key"><svg width="22" height="16" aria-hidden="true"><rect x="1" y="1" width="20" height="14" class="overbudget"/></svg> shaded: more than the budget</span>
 <span class="item" id="frontier-key"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.6"/></svg>
 <span id="frontier-words">no other tool is both cheaper and better</span></span>
-<span class="item" data-cost-key>{svg_marker("circle", "var(--ink)")} filled: cost measured on Sherlock</span>
-<span class="item" data-cost-key>{svg_marker("circle", "var(--ink)", False)} open: cost reported by a submitter (none yet)</span>
 </div>
 <div class="plotbox" id="plot"></div>
 </figure>
 <p id="notplotted" class="prose muted"></p>
+<h2 id="per-tool">Each tool at this size and budget</h2>
+<p class="prose muted">One row per tool, for the filters above. Search cost is for your proteins against
+one relative; where a tool has several settings, the row gives the cheapest and the dearest. Building a
+relative's database is paid once per relative, not per protein, so it is shown on its own and is not in
+the budget. "No build in the run's records" means the run's task records hold no build for that
+tool. Either it reads the relative's FASTA file directly, or its database was reused from an earlier
+run.{esc(qs_words)} Core-hours are reserved cores times wall time, each priced as one
+CPU-hour.</p>
+<div class="tablebox"><table class="lb calc-table" id="calc-table"></table></div>
+<p><button type="button" class="chip" id="calc-json">Download these inputs and outputs as JSON</button>
+<span class="muted">The same numbers for the default inputs are in <a href="cost.html.json">cost.html.json</a>, under "data", then "calculator".</span></p>
 <p class="prose muted">Colour is the kind of method; within a kind, marker shape is the tool, and for
-kmerseek the alphabet. Core-hours, cost and wall-clock time are per 1,000 queries for searching
-one relative, the mean over the relatives each tool searched, measured on Stanford's Sherlock
-cluster. Peak RAM is the largest memory any one search task used. Wall-clock
+kmerseek the alphabet. Core-hours, cost and wall-clock time start from the value measured on
+Stanford's Sherlock cluster per 1,000 queries for searching one relative. That value is the mean
+over the relatives each tool searched. The page scales it to the number of proteins entered above. Peak RAM is the largest memory any one search task used. Wall-clock
 time is on the cores each tool was given (between 4 and 16; hover a marker for the number), so it
 can rank tools differently from core-hours. The database build is the mean over the builds the run's task records
 hold; a database reused from an earlier run left no record. Definitions:
@@ -681,7 +814,11 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
               f"measured on Sherlock. Peak memory {ch['peak_rss_gb']:.1f} GB. That is about ${cost:.3g} "
               f"at ${R_CPU:.6g} per CPU-hour."]
         if ch["db_cpu_h"] is not None:
-            gtxt = (f", plus {ch['db_gpu_h']:.3g} GPU-hours ({ch['db_gpu_type']})" if ch["db_gpu_h"] else "")
+            # The trace names no GPU model; the node SLURM ran the task on does (see Hardware).
+            hbg = hardware_summary(HW, tool, nums.get("best_setting"), build=True)
+            gname = ("1 GPU per task: " + ", ".join(g["value"] for g in hbg["gpu_models"])
+                     if hbg.get("gpu_models") else ch["db_gpu_type"])
+            gtxt = (f", plus {ch['db_gpu_h']:.3g} GPU-hours ({gname})" if ch["db_gpu_h"] else "")
             L += [f"Building its databases took {ch['db_cpu_h']:.3g} core-hours over {ch['db_n']} "
                   f"database{'s' if ch['db_n'] != 1 else ''}{gtxt}. A database is built once and reused, "
                   "so this is not in the per-query cost."]
@@ -694,6 +831,20 @@ def card_markdown(tool: str, nums: dict, src: dict) -> str:
         L += ["Not run.", ""]
     L += ["The per-query cost counts the search only. The run recorded cost per tool and setting, "
           "summed over all relatives, so the cost for one relative is the mean.", ""]
+
+    L += ["## Hardware", ""]
+    hs = hardware_summary(HW, tool, nums.get("best_setting"), build=False)
+    hb = hardware_summary(HW, tool, nums.get("best_setting"), build=True)
+    L += [hardware_words(hs, f"the search (setting `{nums.get('best_setting')}`, every task)"), ""]
+    L += [hardware_words(hb, "the database build"), ""]
+    if HW_PROV:
+        L += [f"Sources, read {HW_PROV['read_on']}: the partition is the `queue` column of the run's "
+              "Nextflow traces. The traces have no `hostname` column, so the node is the one SLURM's job "
+              "record (`sacct`) gives for the trace's job id. CPU and GPU are that node's features in SLURM "
+              f"(`scontrol show node`: CPU_MNF, CPU_SKU, GPU_SKU), named as on Sherlock's [node features page]"
+              f"({NODE_FEATURES_PAGE}). Partition hns is owned by a research group, and Sherlock's "
+              f"[tech specs page]({TECH_SPECS_PAGE}) lists no CPU models for such partitions. "
+              "Script: `scripts/read_hardware.py`.", ""]
 
     L += ["## Licence", "",
           f"- Licence: {t['licence']} ([source]({t['licence_url']}))",
@@ -1505,6 +1656,7 @@ def main() -> None:
         "truthNames": TRUTH,
         "metrics": METRICS,
         "axes": AXES,
+        "scaling": SCALING,
         "searched": searched,
         "source": src,
     }
@@ -1565,6 +1717,11 @@ def main() -> None:
                 "database_build_gpu_h": nums["cost_here"]["db_gpu_h"],
                 "peak_rss_gb": nums["cost_here"]["peak_rss_gb"],
                 "hardware": nums["cost_here"]["hardware"]},
+            "hardware": {
+                "search": hardware_summary(HW, t, nums.get("best_setting"), build=False),
+                "database_build": hardware_summary(HW, t, nums.get("best_setting"), build=True),
+                "source": HW_PROV,
+            },
             "questions": [re.sub(r"\*\*", "", q[3:]) for q in questions(t, nums)],
             "markdown": f"{t}.md",
         }
@@ -1591,9 +1748,14 @@ def main() -> None:
               "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_PAGE, "price_file": PRICE_FILE}})
     page_json(out, "cost.html", src, {"note": "Same rows as index.html.json. Figure 1 plots any two of "
               "the columns in 'axes' for every tool and setting that has both: scores from results "
-              "[fmax, auprc, median_iou_tp], cpu = cpu_h_per_1000, cost = cpu_h_per_1000 * r_cpu + "
-              "gpu_h_per_1000 * r_gpu, wall = wall_h_per_1000, ram = peak_rss_gb, db = db_cpu_h_per_db.",
-              "axes": AXES, "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU}, "results": full["results"],
+              "[fmax, auprc, median_iou_tp], cpu = cpu_h_per_1000 * n / 1000, cost = (cpu_h_per_1000 * r_cpu + "
+              "gpu_h_per_1000 * r_gpu) * n / 1000, wall = wall_h_per_1000 * n / 1000, ram = peak_rss_gb, "
+              "db = db_cpu_h_per_db. A marker is filled when its cost is at most the budget. 'calculator' "
+              "holds the calculator's inputs and outputs at the default inputs.",
+              "axes": AXES, "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_FILE,
+                                        "published": "2026-10-12", "read": "2026-10-15"},
+              "calculator": calculator(full["results"], full["compute"], full["meta"]["rows"], DEFAULTS),
+              "results": full["results"],
               "compute": full["compute"], "rows": full["meta"]["rows"]})
     page_json(out, "coverage.html", src, {"tables": [
         {"columns": h[1:], "rows": [{"tool": r[0], "instances": {c: (int(v.replace(",", "")) if v else None)

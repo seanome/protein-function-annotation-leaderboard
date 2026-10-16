@@ -19,13 +19,14 @@
     }
     // Links made before both axes could be chosen name the score as "metric".
     if (h.has("metric") && !h.has("y")) state.y = h.get("metric");
-    for (const k of ["r_cpu", "r_gpu"]) {
-      if (h.has(k) && isFinite(parseFloat(h.get(k)))) state[k] = parseFloat(h.get(k));
+    for (const k of ["r_cpu", "r_gpu", "budget"]) {
+      if (h.has(k) && isFinite(parseFloat(h.get(k))) && parseFloat(h.get(k)) >= 0) state[k] = parseFloat(h.get(k));
     }
+    if (h.has("n") && parseInt(h.get("n"), 10) >= 1) state.n = parseInt(h.get("n"), 10);
   }
   function writeHash() {
     const h = new URLSearchParams();
-    for (const k of ["truth", "calls", "species", "axis", "stratum", "x", "y", "sort", "dir", "r_cpu", "r_gpu"]) {
+    for (const k of ["truth", "calls", "species", "axis", "stratum", "x", "y", "sort", "dir", "r_cpu", "r_gpu", "n", "budget"]) {
       if (state[k] !== undefined && state[k] !== null) h.set(k, state[k]);
     }
     try { history.replaceState(null, "", "#" + h.toString()); } catch (e) { /* framed viewers may refuse */ }
@@ -263,17 +264,126 @@
       : "No tool has results for these filters: either this stratum holds no regions for this relative, or it was not scored.";
   }
 
-  // ---------- prices ----------
+  // ---------- prices and the calculator's inputs ----------
   function renderPrices() {
-    for (const k of ["r_cpu", "r_gpu"]) {
-      const el = document.getElementById(k);
+    for (const [id, k] of [["r_cpu", "r_cpu"], ["r_gpu", "r_gpu"], ["calc_n", "n"], ["calc_budget", "budget"]]) {
+      const el = document.getElementById(id);
       if (!el) continue;
       el.value = state[k];
       el.oninput = () => {
-        const v = parseFloat(el.value);
-        if (isFinite(v) && v >= 0) { state[k] = v; update(false); }
+        const v = k === "n" ? parseInt(el.value, 10) : parseFloat(el.value);
+        if (isFinite(v) && (k === "n" ? v >= 1 : v >= 0)) { state[k] = v; update(false); }
       };
     }
+  }
+
+  // ---------- the cost calculator ----------
+  // A proteome of n proteins costs n / 1000 times the measured value per 1,000 queries. Nothing
+  // else is scaled. Same rules as calculator() in build_site.py, which writes cost.html.json.
+  const per1000 = () => state.n / 1000;
+  function calcRow(v) {
+    const c = v.c;
+    if (!c || c.cpu_h_per_1000 == null) return { tool: v.row.tool, setting: v.row.setting, measured: false };
+    const f = per1000();
+    const usd = (c.cpu_h_per_1000 * state.r_cpu + (c.gpu_h_per_1000 || 0) * state.r_gpu) * f;
+    return {
+      tool: v.row.tool, setting: v.row.setting, measured: true,
+      core_h: c.cpu_h_per_1000 * f, gpu_h: (c.gpu_h_per_1000 || 0) * f, usd,
+      wall_h: c.wall_h_per_1000 * f, cores: c.cores, fits: usd <= state.budget,
+      db_core_h_per_db: c.db_cpu_h_per_db, db_gpu_h_per_db: c.db_gpu_h_per_db,
+      db_usd_per_db: c.db_cpu_h_per_db == null ? null : c.db_cpu_h_per_db * state.r_cpu + (c.db_gpu_h_per_db || 0) * state.r_gpu,
+    };
+  }
+  function calc() {
+    const rows = [];
+    for (const row of M.rows) {
+      const v = rowValues(state, row);
+      if (v.r) rows.push(calcRow(v));
+    }
+    const inputs = {};
+    for (const k of ["n", "budget", "r_cpu", "r_gpu", "truth", "calls", "species", "axis", "stratum"]) inputs[k] = state[k];
+    return { inputs, scaling: M.scaling, rows,
+      fit: rows.filter((r) => r.fits).map((r) => r.tool + "|" + r.setting).sort() };
+  }
+  const money = (x) => "$" + (x >= 100 ? fmtInt(Math.round(x)) : x >= 1 ? x.toFixed(2) : sig(x, 3));
+  const range = (xs, f) => {
+    const lo = Math.min(...xs), hi = Math.max(...xs);
+    return lo === hi ? f(lo) : f(lo) + " to " + f(hi);
+  };
+  // Which tools fit: "phmmer; kmerseek, 12 of 30 settings". Settings with no measured cost are
+  // left out of both lists and named separately.
+  function fitWords(res) {
+    const by = {};
+    for (const r of res.rows) (by[r.tool] = by[r.tool] || []).push(r);
+    const fit = [], over = [], unknown = [];
+    for (const t of Object.keys(by).sort((a, b) => M.tools[a].name.localeCompare(M.tools[b].name))) {
+      const rs = by[t], n = rs.filter((r) => r.measured).length, k = rs.filter((r) => r.fits).length;
+      const name = M.tools[t].name, u = rs.length - n;
+      const part = (j) => (n > 1 ? `${name}, ${j} of ${n} settings` : name);
+      if (k) fit.push(part(k));
+      if (k < n) over.push(part(n - k));
+      if (u) unknown.push(n ? `${name}, ${u} setting${u > 1 ? "s" : ""}` : name);
+    }
+    let w = `At a budget of ${money(state.budget)} for ${fmtInt(state.n)} proteins against one relative, ` +
+      (fit.length ? "these fit: " + fit.join("; ") + "." : "no tool fits.");
+    if (over.length) w += " Over the budget: " + over.join("; ") + ".";
+    if (unknown.length) w += " Cost not measured: " + unknown.join("; ") + ".";
+    return w;
+  }
+  function renderCalc() {
+    const tbl = document.getElementById("calc-table");
+    if (!tbl) return null;
+    const res = calc();
+    const by = {};
+    for (const r of res.rows) (by[r.tool] = by[r.tool] || []).push(r);
+    const order = M.rows.map((r) => r.tool).filter((t, i, a) => a.indexOf(t) === i && by[t]);
+    tbl.innerHTML = "";
+    const head = tbl.createTHead().insertRow();
+    for (const [h, cls] of [["Tool", "txt"], ["Settings within the budget", ""], [`Search cost, ${fmtInt(state.n)} proteins`, ""],
+      ["Core-hours reserved", ""], ["Wall-clock hours, at the cores the run used", ""],
+      ["Database build, per relative's database (not in the budget)", ""]]) {
+      const th = document.createElement("th");
+      th.textContent = h;
+      if (cls) th.className = cls;
+      head.appendChild(th);
+    }
+    const body = tbl.createTBody();
+    for (const t of order) {
+      const rs = by[t], m = rs.filter((r) => r.measured);
+      const tr = body.insertRow();
+      tr.dataset.tool = t;
+      const cell = (text, cls) => { const td = tr.insertCell(); td.textContent = text; td.className = cls || "num"; return td; };
+      cell(M.tools[t].name, "txt");
+      if (!m.length) {
+        const td = cell("— not measured", "missing");
+        td.colSpan = 5;
+        td.dataset.missing = "compute";
+        continue;
+      }
+      cell(`${m.filter((r) => r.fits).length} of ${m.length}`);
+      cell(range(m.map((r) => r.usd), money));
+      cell(range(m.map((r) => r.core_h), (x) => sig(x, 3)));
+      const cores = [...new Set(m.map((r) => r.cores))].sort((a, b) => a - b).join(" or ");
+      cell(range(m.map((r) => r.wall_h), (x) => sig(x, 3)) + ` on ${cores} cores`);
+      const db = m.filter((r) => r.db_core_h_per_db != null);
+      if (!db.length) {
+        const td = cell("— no build in the run's records", "missing");
+        td.dataset.missing = "db";
+      } else {
+        const gpu = db.some((r) => r.db_gpu_h_per_db) ? ` + ${range(db.map((r) => r.db_gpu_h_per_db || 0), (x) => sig(x, 3))} GPU-h` : "";
+        cell(`${range(db.map((r) => r.db_core_h_per_db), (x) => sig(x, 3))} core-h${gpu}, ${range(db.map((r) => r.db_usd_per_db), money)}` + (db.length < m.length ? ` (${db.length} of ${m.length} settings have a recorded build)` : ""));
+      }
+    }
+    const btn = document.getElementById("calc-json");
+    if (btn) btn.onclick = () => {
+      const blob = new Blob([JSON.stringify(Object.assign({ source: M.source }, calc()), null, 1)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `cost-calculator-n${state.n}-budget${state.budget}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    };
+    return res;
   }
 
   // ---------- Figure 1: any two columns against each other ----------
@@ -298,7 +408,8 @@
       .sort((a, b) => a.x - b.x);
   }
   function axisDef(id, fallback) {
-    return M.axes.find((a) => a.id === id) || M.axes.find((a) => a.id === fallback);
+    const a = M.axes.find((a) => a.id === id) || M.axes.find((a) => a.id === fallback);
+    return Object.assign({}, a, { label: a.label.replace("{n}", fmtInt(state.n)) });
   }
   // The value a row has on one axis, or the reason it has none ("— not run" and so on).
   function axisValue(ax, v) {
@@ -312,7 +423,9 @@
       const searched = M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species);
       return { why: searched ? ax.short + " not measured" : "not run" };
     }
-    const val = { cpu: v.cpu, cost: v.cost, wall: v.c.wall_h_per_1000, ram: v.ram, db: v.c.db_cpu_h_per_db }[ax.id];
+    let val = { cpu: v.cpu, cost: v.cost, wall: v.c.wall_h_per_1000, ram: v.ram, db: v.c.db_cpu_h_per_db }[ax.id];
+    // Core-hours, cost and wall-clock time are for the calculator's n proteins.
+    if (val != null && ax.scales) val *= per1000();
     if (val == null) return { why: ax.id === "db" ? "no database build in the run's records" : ax.short + " not measured" };
     // An axis where each step is ten times the last has no place for zero.
     if (val <= 0) return { why: ax.short + " is zero, which this axis cannot show" };
@@ -388,7 +501,7 @@
         const b = chip(ax.short.charAt(0).toUpperCase() + ax.short.slice(1), state[key] === ax.id, () => {
           state[key] = ax.id;
           update(false);
-        }, ax.label);
+        }, ax.label.replace("{n}", fmtInt(state.n)));
         b.dataset.pick = ax.id;
         // The same column on both axes would put every marker on the diagonal.
         if (ax.id === other) { b.disabled = true; b.title = "already on the other axis"; }
@@ -434,7 +547,9 @@
       for (const [i, line] of wrap(`No tool has both ${ya.short} and ${xa.short} for these filters.`, maxChars).entries())
         el("text", { x: W / 2, y: H / 2 + i * 18, "text-anchor": "middle" }, svg).textContent = line;
     } else {
-      const sx = scale(xa, pts.map((p) => p.x), L, W - R);
+      // On the cost axis the budget gets a line, so the axis always reaches it.
+      const budgetLine = xa.id === "cost" && state.budget > 0;
+      const sx = scale(xa, pts.map((p) => p.x).concat(budgetLine ? [state.budget] : []), L, W - R);
       const sy = scale(ya, pts.map((p) => p.y), H - B, T);
       const g = el("g", { class: "tick" }, svg);
       let lastRight = -1e9;
@@ -460,10 +575,23 @@
         ya.label + " (higher is better)";
       fr = pareto ? frontier(pts) : [];
       if (fr.length > 1) el("polyline", { points: fr.map((p) => sx.f(p.x) + "," + sy.f(p.y)).join(" "), class: "frontier" }, svg);
+      if (budgetLine) {
+        // Shade the costs above the budget, drawn under the grid and markers.
+        const BX = sx.f(state.budget);
+        const shade = el("rect", { x: BX, y: T, width: Math.max(0, W - R - BX), height: H - B - T, class: "overbudget" });
+        svg.insertBefore(shade, svg.firstChild);
+        const lab = el("text", { x: BX + 4, y: T + 12, "font-size": 12, "text-anchor": BX > W - 120 ? "end" : "start" }, svg);
+        if (BX > W - 120) lab.setAttribute("x", BX - 4);
+        lab.textContent = "budget " + money(state.budget);
+      }
       for (const p of pts) {
         const t = M.tools[p.row.tool];
         const X = sx.f(p.x), Y = sy.f(p.y);
-        const m = marker(p.row.shape, X, Y, narrow ? 5 : 6, M.kinds[t.kind].color, true, svg);
+        // Filled: the search fits the budget. Open: it costs more. Dashed: no measured cost.
+        p.calc = calcRow(p.v);
+        const m = marker(p.row.shape, X, Y, narrow ? 5 : 6, M.kinds[t.kind].color, !!p.calc.fits, svg);
+        m.dataset.fit = p.calc.measured ? (p.calc.fits ? "fits" : "over") : "unknown";
+        if (!p.calc.measured) m.setAttribute("stroke-dasharray", "2 2");
         m.setAttribute("tabindex", "0");
         m.setAttribute("role", "link");
         m.dataset.tool = p.row.tool;
@@ -478,10 +606,11 @@
           tip.innerHTML = `<b>${t.name}</b> <span class="mono">${p.row.setting}</span><br>` +
             `Fmax ${fmt3(p.v.fmax)} · AUPRC ${fmt3(p.v.auprc)} · median IoU ${p.v.iou == null ? "— no correct calls" : fmt3(p.v.iou)}<br>` +
             `${fmtInt(p.v.n)} true instances<br>` +
-            (c ? `${sig(c.cpu_h_per_1000, 3)} core-hours · $${sig(p.v.cost, 3)} · ${sig(c.wall_h_per_1000, 3)} wall-clock hours on ${c.cores} cores, per 1,000 queries per relative<br>` +
+            (c ? `${fmtInt(state.n)} proteins against one relative: ${sig(p.calc.core_h, 3)} core-hours · ${money(p.calc.usd)} ` +
+              `(${p.calc.fits ? "within" : "over"} the budget) · ${sig(p.calc.wall_h, 3)} wall-clock hours on ${c.cores} cores<br>` +
               `peak RAM ${p.v.ram.toFixed(1)} GB · database build ` +
               (c.db_cpu_h_per_db == null ? "— no record" : `${sig(c.db_cpu_h_per_db, 3)} core-hours per database (${c.db_n} recorded)`) +
-              (c.gpu_h_per_1000 ? `<br>plus ${sig(c.gpu_h_per_1000, 3)} GPU-h` : "")
+              (c.gpu_h_per_1000 ? `<br>plus ${sig(p.calc.gpu_h, 3)} GPU-h` : "")
               : "cost — not measured") +
             (fr.includes(p) ? `<br>On the line: no other tool is both ${xa.less} and better.` : "");
           const bb = box.getBoundingClientRect();
@@ -501,13 +630,19 @@
     }
     box.dataset.nPlotted = pts.length;
     box.dataset.nFrontier = fr.length;
-    plotted = pts.map((p) => ({ tool: p.row.tool, setting: p.row.setting, x: p.x, y: p.y, frontier: fr.includes(p) }));
+    plotted = pts.map((p) => ({ tool: p.row.tool, setting: p.row.setting, x: p.x, y: p.y, frontier: fr.includes(p),
+      fit: p.calc ? (p.calc.measured ? (p.calc.fits ? "fits" : "over") : "unknown") : null }));
 
     // Caption and key follow the chosen axes.
     const fk = document.getElementById("frontier-key");
     if (fk) fk.hidden = !(pareto && fr.length > 1);
-    // Filled or open says where a cost came from; with two scores no cost is drawn.
-    document.querySelectorAll("[data-cost-key]").forEach((e) => (e.hidden = xa.kind === "score"));
+    const bk = document.getElementById("budget-key");
+    if (bk) bk.hidden = !box.querySelector("rect.overbudget");
+    const nk = document.getElementById("nocost-key");
+    if (nk) nk.hidden = !plotted.some((p) => p.fit === "unknown");
+    const res = renderCalc();
+    const fl = document.getElementById("fitline");
+    if (fl && res) fl.textContent = fitWords(res);
     const fw = document.getElementById("frontier-words");
     if (fw && pareto) fw.textContent = `the line: no other tool is both ${xa.less} and better on ${ya.short}`;
     const cap = document.getElementById("plotcaption");
@@ -567,6 +702,8 @@
     state: () => Object.assign({}, state),
     // What Figure 1 drew: one entry per marker, with the raw x and y values.
     plotted: () => plotted.map((p) => Object.assign({}, p)),
+    // The calculator's inputs and outputs for the current state (the JSON download).
+    calc: () => calc(),
   };
 
   readHash();

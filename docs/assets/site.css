@@ -105,6 +105,11 @@ td.missing{color:var(--muted);font-family:"Source Sans 3",sans-serif !important;
 .plotbox .tick text{font-family:"Fantasque Sans Mono",monospace;font-size:12px;fill:var(--muted)}
 .plotbox .grid{stroke:var(--hair)}
 .plotbox .frontier{stroke:var(--ink);stroke-width:1.6;fill:none}
+
+.overbudget{fill:var(--ink);fill-opacity:.08}
+.calc{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:4px 14px 8px;margin:12px 0 10px;box-shadow:var(--shadow)}
+.calcnote{font-size:.88rem;margin:6px 0 4px;max-width:95ch}
+table.calc-table{min-width:720px}
 .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--ink);border-radius:6px;padding:6px 9px;font-size:.85rem;
   box-shadow:var(--shadow);max-width:280px;display:none;z-index:2}
 .axispick{margin:10px 0 4px}

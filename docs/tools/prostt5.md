@@ -44,9 +44,17 @@ Swiss-Prot features, raw calls, zebrafish, setting `3di_from_seq`: best feature 
 ## Cost per 1,000 queries
 
 Setting `3di_from_seq`, searching one relative (mean over the 15 relatives it searched): 0.109 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.5 GB. That is about $0.00486 at $0.044625 per CPU-hour.
-Building its databases took 5.31 core-hours over 3 databases, plus 0.664 GPU-hours (1 GPU via --gres=gpu:1 (model not recorded)). A database is built once and reused, so this is not in the per-query cost.
+Building its databases took 5.31 core-hours over 3 databases, plus 0.664 GPU-hours (1 GPU per task: H100_SXM5, L40S). A database is built once and reused, so this is not in the per-query cost.
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
+
+## Hardware
+
+Hardware of the search (setting `3di_from_seq`, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 9 nodes. CPU: AMD 7543 (4 tasks); not recorded, as scontrol no longer finds the node (4 tasks); AMD 9754 (3 tasks); AMD 7742 (2 tasks); AMD 7763 (2 tasks). GPU: none allocated.
+
+Hardware of the database build: Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 3 tasks on 2 nodes. CPU: INTEL 8462Y+ (2 tasks); INTEL 6426Y (1 task). GPU: 3 tasks had one: H100_SXM5 (2); L40S (1).
+
+Sources, read 2026-10-16: the partition is the `queue` column of the run's Nextflow traces. The traces have no `hostname` column, so the node is the one SLURM's job record (`sacct`) gives for the trace's job id. CPU and GPU are that node's features in SLURM (`scontrol show node`: CPU_MNF, CPU_SKU, GPU_SKU), named as on Sherlock's [node features page](https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/). Partition hns is owned by a research group, and Sherlock's [tech specs page](https://www.sherlock.stanford.edu/docs/tech/) lists no CPU models for such partitions. Script: `scripts/read_hardware.py`.
 
 ## Licence
 
