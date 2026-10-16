@@ -1,0 +1,3 @@
+query_set	relative	setting	step	wall_s	cores	peak_ram_gb	gpu_model	hardware
+human_midi_plus	zebrafish	s7	database_build	0.1	1	0.035	none	Apple M4 Max
+human_midi_plus	zebrafish	s7	search	13.6	8	1.096	none	Apple M4 Max
