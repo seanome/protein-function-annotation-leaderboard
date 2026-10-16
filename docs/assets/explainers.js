@@ -167,7 +167,13 @@
   function put(id, v) {
     const e = document.getElementById(id);
     if (!e) return;
-    e.textContent = typeof v === "number" ? f3(v) : v;
+    const text = typeof v === "number" ? f3(v) : v;
+    // A number that changes flashes once, so the eye goes to what the slider moved.
+    if (e.textContent && e.textContent !== text && e.closest(".ex-tile")) {
+      const tile = e.closest(".ex-tile");
+      tile.classList.remove("flash"); void tile.offsetWidth; tile.classList.add("flash");
+    }
+    e.textContent = text;
     if (typeof v === "number") e.dataset.value = String(v);
   }
   function onResize(fn) {

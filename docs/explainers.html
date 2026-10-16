@@ -76,12 +76,19 @@ Fmax.</details></figcaption>
 <input type="range" id="f1-cut" min="0" max="100" step="1" value="50"></label>
 <button type="button" class="chip" id="f1-go">Go to the best cutoff</button>
 </div>
+<div class="ex-tiles" id="f1-read" aria-live="polite">
+<div class="ex-tile"><span class="ex-tl">Calls kept</span><span class="ex-tv" id="f1-kept"></span>
+<span class="ex-ts"><span class="v" id="f1-correct"></span> of them correct</span></div>
+<div class="ex-tile"><span class="ex-tl">Precision</span><span class="ex-tv" id="f1-p"></span>
+<span class="ex-ts">correct ÷ kept: how many of the kept calls are right</span></div>
+<div class="ex-tile"><span class="ex-tl">Recall</span><span class="ex-tv" id="f1-r"></span>
+<span class="ex-ts">domains found ÷ true domains = <span class="v" id="f1-found"></span> ÷ <span class="v" id="f1-ntrue"></span></span></div>
+<div class="ex-tile now"><span class="ex-tl">F at your cutoff</span><span class="ex-tv" id="f1-f"></span>
+<span class="ex-ts">the balance of precision and recall</span></div>
+<div class="ex-tile best"><span class="ex-tl">○ Highest F (Fmax)</span><span class="ex-tv" id="f1-fmax"></span>
+<span class="ex-ts">at any cutoff in <span class="v" id="f1-best"></span>; it does not move with the slider</span></div>
+</div>
 <div class="ex-box" id="f1-track"></div>
-<p class="ex-read" id="f1-read">Kept: <span class="v" id="f1-kept"></span> calls, <span class="v" id="f1-correct"></span> of them
-correct. Precision = correct ÷ kept = <span class="v" id="f1-p"></span>. Recall = domains found ÷ true domains
-= <span class="v" id="f1-found"></span> ÷ <span class="v" id="f1-ntrue"></span> = <span class="v" id="f1-r"></span>.
-F = <span class="v" id="f1-f"></span>.<br>Highest F over all cutoffs (Fmax): <span class="v" id="f1-fmax"></span>,
-for any cutoff in <span class="v" id="f1-best"></span>.</p>
 <div class="ex-box" id="f1-curve"></div>
 </figure>
 <details class="prose ex-more"><summary>How the leaderboard does this over many proteins</summary>
