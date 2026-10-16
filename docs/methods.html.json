@@ -109,6 +109,186 @@
    "text": "A true annotation is reachable when its family occurs somewhere in the relative's proteome. A family the relative lacks cannot be copied from it by any tool."
   },
   {
+   "tag": "h3",
+   "text": "Real examples"
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 16. Three real regions per identity bin, with each tool's best call drawn under the protein. Identity is that of the closest same-family domain in zebrafish. The tables do not hold the aligned residues of each call, so the residues of the true region are shown instead. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 15), the one that found the most of these regions, which favours it. hmmscan is left out: Pfam's regions are defined by its models."
+  },
+  {
+   "tag": "summary",
+   "text": "0–20% identity (4 regions, 2 found by a tool)"
+  },
+  {
+   "tag": "p",
+   "text": "PGBD1 (UniProt Q96JS3), Pfam PF13843, residues 418-775; best correct overlap (IoU) 0.98"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: NPVELFELFFDDETFNLIVNETNNYASQKNVSLEVTVQEMRCVFGVLLLSGFMRHPRREMYWEVSDTDQNLVRDAIRRDRFELIFSNLHFADNGHLDQKDKFTKLRPLIKQMNKNFLLYAPLEEYYCFDKSMCECFDSDQFLNGKPIRIGYKIWCGTTTQGYLVWFEPYQEESTMKVDEDPDLGLGGNLVMNFADVLLERGQYPYHLCFDSFFTSVKLLSALKKKGVRATGTIRENRTEKCPLMNVEHMKKMKRGYFDFRIEENNEIILCRWYGDGIISLCSNAVGIEPVNEVSCCDADNEEIPQISQPSIVKVYDECKEGVAKMDQIISKYRVRIRSKKWYSILVSYMIDVAMNNAW"
+  },
+  {
+   "tag": "p",
+   "text": "RARS2 (UniProt Q5T160), Pfam PF05746, residues 463-578; best correct overlap (IoU) 0.95"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: LQYTHARLHSLEETFGCGYLNDFNTACLQEPQSVSILQHLLRFDEVLYKSSQDFQPRHIVSYLLTLSHLAAVAHKTLQIKDSPPEVAGARLHLFKAVRSVLANGMKLLGITPVCRM"
+  },
+  {
+   "tag": "p",
+   "text": "HLA-DMB (UniProt P28068), Pfam PF00969, residues 1-106"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: MITFLPLLLGLSLGCTGAGGFVAHVESTCLLDDAGTPKDFTYCISFNKDLLTCWDPEENKMAPCEFGVLNSLANVLSQHLNQKDTLMQRLRNGLQNCATHTQPFWG"
+  },
+  {
+   "tag": "summary",
+   "text": "20–30% identity (93 regions, 72 found by a tool)"
+  },
+  {
+   "tag": "p",
+   "text": "RAET1L (UniProt Q5VY80), Pfam PF00129, residues 29-205; best correct overlap (IoU) 0.99"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: DPHSLCYDITVIPKFRPGPRWCAVQGQVDEKTFLHYDCGNKTVTPVSPLGKKLNVTMAWKAQNPVLREVVDILTEQLLDIQLENYTPKEPLTLQARMSCEQKAEGHSSGSWQFSIDGQTFLLFDSEKRMWTTVHPGARKMKEKWENDKDVAMSFHYISMGDCIGWLEDFLMGMDSTL"
+  },
+  {
+   "tag": "p",
+   "text": "CUL9 (UniProt Q8IWT3), Pfam PF03256, residues 1,159-1,318; best correct overlap (IoU) 0.85"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: GSSVEVKEDKCWEKVEVSSNPHRASKLTDHNPKTYWESNGSTGSHYITLHMHRGVLVRQLTLLVASEDSSYMPARVVVFGGDSTSCIGTELNTVNVMPSASRVILLENLNRFWPIIQIRIKRCQQGGIDTRVRGVEVLGPKPTFWPLFREQLCRRTCLFY"
+  },
+  {
+   "tag": "p",
+   "text": "LAMA2 (UniProt P24043), Pfam PF00052, residues 583-722"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: YWSAPAPYLGNKLPAVGGQLTFTISYDLEEEEEDTERVLQLMIILEGNDLSISTAQDEVYLHPSEEHTNVLLLKEESFTIHGTHFPVRRKEFMTVLANLKRVLLQITYSFGMDAIFRLSSVNLESAVSYPTDGSIAAAVE"
+  },
+  {
+   "tag": "summary",
+   "text": "30–40% identity (165 regions, 120 found by a tool)"
+  },
+  {
+   "tag": "p",
+   "text": "MYCT1 (UniProt Q8N699), Pfam PF15179, residues 49-234; best correct overlap (IoU) 1.00"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: MANNTTSLGSPWPENFWEDLIMSFTVSMAIGLVLGGFIWAVFICLSRRRRASAPISQWSSSRRSRSSYTHGLNRTGFYRHSGCERRSNLSLASLTFQRQASLEQANSFPRKSSFRASTFHPFLQCPPLPVETESQLVTLPSSNISPTISTSHSLSRPDYWSSNSLRVGLSTPPPPAYESIIKAFPD"
+  },
+  {
+   "tag": "p",
+   "text": "COL12A1 (UniProt Q99715), Pfam PF01391, residues 2,745-2,802; best correct overlap (IoU) 0.80"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: SVGPPGPPGPAGGPGAKGPRGERGISGAIGPPGPRGDIGPPGPQGPPGPQGPNGLSIP"
+  },
+  {
+   "tag": "p",
+   "text": "ZC3H12D (UniProt A2A288), Pfam PF18039, residues 3-44"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: HPSKMEFFQKLGYDREDVLRVLGKLGEGALVNDVLQELIRTG"
+  },
+  {
+   "tag": "summary",
+   "text": "40–60% identity (563 regions, 436 found by a tool)"
+  },
+  {
+   "tag": "p",
+   "text": "SCGN (UniProt O76038), Pfam PF00036, residues 109-137; best correct overlap (IoU) 1.00"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: EFMQIWRKYDADSSGFISAAELRNFLRDL"
+  },
+  {
+   "tag": "p",
+   "text": "HLA-DRB5 (UniProt Q30154), Pfam PF07654, residues 128-209; best correct overlap (IoU) 0.80"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: VTVYPARTQTLQHHNLLVCSVNGFYPGSIEVRWFRNSQEEKAGVVSTGLIQNGDWTFQTLVMLETVPRSGEVYTCQVEHPSV"
+  },
+  {
+   "tag": "p",
+   "text": "ANKS1A (UniProt Q92625), Pfam PF00023, residues 182-212"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: FETPLDLAALYGRLEVVKMLLNAHPNLLSCN"
+  },
+  {
+   "tag": "summary",
+   "text": "60–100% identity (1,289 regions, 1,089 found by a tool)"
+  },
+  {
+   "tag": "p",
+   "text": "SASH1 (UniProt O94885), Pfam PF07653, residues 558-613; best correct overlap (IoU) 1.00"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: RARVHTDFTPSPYDTDSLKLKKGDIIDIISKPPMGTWMGLLNNKVGTFKFIYVDVL"
+  },
+  {
+   "tag": "p",
+   "text": "RANBP9 (UniProt Q96S59), Pfam PF10607, residues 586-711; best correct overlap (IoU) 0.79"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: KHDHEMEDCDTEMEVDSSQLRRQLCGGSQAAIERMIHFGRELQAMSEQLRRDCGKNTANKKMLKDAFSLLAYSDPWNSPVGNQLDPIQREPVCSALNSAILETHNLPKQPPLALAMGQATQCLGLM"
+  },
+  {
+   "tag": "p",
+   "text": "KPNA5 (UniProt O15131), Pfam PF00514, residues 201-242"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: CRDFVLNCEILPPLLELLTNSNRLTTTRNAVWALSNLCRGKN"
+  },
+  {
+   "tag": "summary",
+   "text": "no same-family domain in the relative (321 regions, 33 found by a tool)"
+  },
+  {
+   "tag": "p",
+   "text": "GGNBP1 (UniProt Q5YKI7), Pfam PF14836, residues 7-108; best correct overlap (IoU) 0.99"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: SFKLCVPGIVALQSPPNKAFRSTDTVGFLESELKKLLGMQQESRLWKLGSQEGRELLTRPEITVVEGEGYEVQRRLRHLPSPISVAQCLLLEEKGEMGNWPP"
+  },
+  {
+   "tag": "p",
+   "text": "GPSM3 (UniProt Q9Y4H4), Pfam PF02188, residues 133-155; best correct overlap (IoU) 0.80"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: QELLELLLRVQGGGRMEEQRSRP"
+  },
+  {
+   "tag": "p",
+   "text": "ZSCAN12 (UniProt O43309), Pfam PF00096, residues 581-603"
+  },
+  {
+   "tag": "p",
+   "text": "Residues of the true region: PQAGVNLLLSSLIPEWQSCFRRD"
+  },
+  {
+   "tag": "p",
+   "text": "Median overlap (IoU) of the best correct call, by identity bin: 0–20% identity 0.95 (2 found); 20–30% identity 0.85 (72 found); 30–40% identity 0.80 (120 found); 40–60% identity 0.80 (436 found); 60–100% identity 0.79 (1,089 found); no same-family domain in the relative 0.80 (33 found)."
+  },
+  {
    "tag": "h2",
    "text": "The scores"
   },

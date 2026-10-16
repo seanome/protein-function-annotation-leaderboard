@@ -488,3 +488,18 @@ svg.fg [data-tip]:focus{outline:none;stroke:var(--ink);stroke-width:2}
 .fg-none{color:var(--muted);font-size:.9rem;margin:10px 0}
 svg.fg-sq{max-width:420px;background:var(--surface);border:1px solid var(--hair);border-radius:8px}
 .fg-tip{white-space:normal}
+svg.fg g.fg-col.on rect:first-child{fill:var(--chip)}
+svg.fg g.fg-col:focus{outline:none}
+svg.fg g.fg-col:focus rect:first-child{stroke:var(--accent);stroke-width:1.5}
+.fg-list{margin-top:10px}
+table.fg-regions{border-collapse:collapse;font-size:.88rem;width:100%}
+table.fg-regions th,table.fg-regions td{padding:4px 8px;border-bottom:1px solid var(--hair);text-align:left;vertical-align:top}
+table.fg-regions td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+table.fg-regions td.seq{overflow-wrap:anywhere;min-width:16ch;font-size:.82rem}
+details.fg-stratum{margin:8px 0;background:var(--surface);border:1px solid var(--hair);border-radius:8px;padding:6px 10px}
+details.fg-stratum>summary{cursor:pointer;font-weight:600}
+.fg-ex{margin:10px 0 16px}
+.fg-ex h4{font-family:"Source Sans 3",sans-serif;font-size:.95rem;margin:6px 0 2px}
+.fg-exhead{font-size:.9rem;margin:0 0 4px}
+.fg-res{font-size:.85rem;margin:4px 0 0}
+.fg-res .mono{overflow-wrap:anywhere}

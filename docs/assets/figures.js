@@ -35,4 +35,35 @@
   });
   document.addEventListener("focusout", (e) => { if (target(e)) hide(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+
+  /* Figure 15: a click (or Enter) on a column lists its regions under the figure, from
+     data/upset.json: combination -> [[symbol, accession, Pfam, start, end, residues], ...]. */
+  let lists = null;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const listCol = async (g) => {
+    const box = document.getElementById("upset-list");
+    if (!box) return;
+    document.querySelectorAll("g.fg-col.on").forEach((x) => x.classList.remove("on"));
+    g.classList.add("on");
+    if (!lists) {
+      box.innerHTML = '<p class="muted">Loading…</p>';
+      try { lists = await (await fetch("data/upset.json")).json(); }
+      catch (err) { box.innerHTML = '<p class="muted">Could not load data/upset.json.</p>'; return; }
+    }
+    const rows = lists[g.getAttribute("data-combo")] || [];
+    const head = g.getAttribute("data-tip").replace(/ Click to list them\.$/, "");
+    box.innerHTML = `<p><b>${esc(head)}</b></p><div class="tablebox"><table class="fg-regions"><thead><tr>` +
+      "<th>gene</th><th>UniProt</th><th>Pfam</th><th>residues</th><th>residues of the true region</th></tr></thead><tbody>" +
+      rows.map((r) => `<tr><td>${esc(r[0])}</td><td class="mono">${esc(r[1])}</td><td class="mono">${esc(r[2])}</td>` +
+        `<td class="num">${r[3].toLocaleString("en-US")}–${r[4].toLocaleString("en-US")}</td>` +
+        `<td class="mono seq">${esc(r[5])}</td></tr>`).join("") + "</tbody></table></div>";
+  };
+  document.addEventListener("click", (e) => {
+    const g = e.target.closest && e.target.closest("g.fg-col");
+    if (g) listCol(g);
+  });
+  document.addEventListener("keydown", (e) => {
+    const g = e.target.closest && e.target.closest("g.fg-col");
+    if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); listCol(g); }
+  });
 })();

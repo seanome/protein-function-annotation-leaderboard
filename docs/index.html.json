@@ -109,12 +109,24 @@
    "text": "Best tool per feature type: membrane-spanning segment: kmerseek (wwmj5, k = 11) 0.36 (n = 1,124); zinc finger: kmerseek (wwmj5, k = 12) 0.15 (n = 335); coiled coil: kmerseek (gbmr4, k = 21) 0.09 (n = 145); repeat: kmerseek (gbmr4, k = 19) 0.13 (n = 589); domain: MMseqs2, three rounds 0.32 (n = 1,107). kmerseek's bar is the best of its 15 settings in each panel, which favours it; every other tool ran one setting. Not in the tables: signal peptide, disordered region."
   },
   {
+   "tag": "figcaption",
+   "text": "Figure 15. Which tools found which true regions, as an UpSet plot: each column is one combination of tools, and its bar counts the regions found by those tools and no other. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 15), the one that found the most of these regions, which favours it. hmmscan is left out: Pfam's regions are defined by its models."
+  },
+  {
+   "tag": "p",
+   "text": "Click or tap a column to list its regions here, with their residues."
+  },
+  {
+   "tag": "p",
+   "text": "1,752 of the 2,435 true regions were found by at least one of these tools, and 683 by none. The most found by one tool alone: HH-suite (hhsearch), 112 regions. kmerseek (gbmr4, k = 15) alone found 86. 73 smaller combinations of two or more tools (275 regions) are not drawn."
+  },
+  {
    "tag": "summary",
    "text": "Figures not drawn, and what the tables lack"
   },
   {
    "tag": "li",
-   "text": "Calibration (a tool's own E-value or score against the share of its calls that are correct): the per-call table (the one behind the region pile-up page) keeps one score per call and no E-value, and it keeps only calls that name the true region's own family. Calls naming another family are not in it, so the share of calls that are correct cannot be counted."
+   "text": "Calibration (a tool's own E-value or score against the share of its calls that are correct): the per-call table behind the region pile-up page keeps one score per call and no E-value. It also keeps only calls that name the true region's own family. Calls naming another family are not in it, so the share of calls that are correct cannot be counted."
   },
   {
    "tag": "li",

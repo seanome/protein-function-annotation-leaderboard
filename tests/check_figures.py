@@ -164,6 +164,50 @@ def main() -> None:
             n_checked += 1
             if hits.height == 0:
                 errors.append(f"{card.name} Figure 14: no table row with {s}")
+    # Figures 15 and 17, recomputed here from the pile-up tables with their own code.
+    if (a.data / "pileup/calls.parquet").exists():
+        c = pl.read_parquet(a.data / "pileup/calls.parquet")
+        reg = pl.read_parquet(a.data / "pileup/regions.parquet")
+        c = c.join(reg.select("row_id", "accession", "true_start", "true_end"), on="row_id")
+        ov = (c["call_end"].clip(upper_bound=None).to_numpy())
+        import numpy as np
+        s_ = np.maximum(c["call_start"].to_numpy(), c["true_start"].to_numpy())
+        e_ = np.minimum(ov, c["true_end"].to_numpy())
+        inter = np.clip(e_ - s_ + 1, 0, None)
+        union = np.maximum(ov, c["true_end"].to_numpy()) - np.minimum(c["call_start"].to_numpy(), c["true_start"].to_numpy()) + 1
+        c = c.with_columns(pl.Series("hit", c["is_tp"].to_numpy() & (inter / union >= 0.5)))
+        per_set = c.filter("hit").group_by("tool", "setting").agg(pl.col("row_id").n_unique().alias("n"))
+        ks = per_set.filter(pl.col("tool") == "kmerseek").sort(["n", "setting"], descending=[True, False])["setting"][0]
+        use = c.filter((pl.col("tool") != "hmmscan") & ((pl.col("tool") != "kmerseek") | (pl.col("setting") == ks)))
+        found = use.filter("hit").group_by("row_id").agg(pl.col("tool").unique().sort().alias("tools"))
+        combo = reg.select("row_id").join(found, on="row_id", how="left").with_columns(
+            pl.col("tools").fill_null([]).list.join("+").alias("k")).group_by("k").agg(pl.len())
+        want = sorted(combo["len"].to_list(), reverse=True)
+        got = []
+        for s in t.get("fig-upset", []):
+            m = re.match(r"([\d,]+) regions (found only by|found by [^.]* and no other tool|found by none)", s)
+            if m:
+                got.append(int(m[1].replace(",", "")))
+        n_checked += len(got)
+        # every drawn column must be one of the recomputed combination sizes, the largest ones
+        if not got or sorted(got, reverse=True)[0] != want[0] or any(g not in want for g in got):
+            errors.append(f"Figure 15 columns {sorted(got, reverse=True)[:5]} vs recomputed {want[:5]}")
+        n_none = reg.height - found.height
+        if f"{n_none:,} regions found by none" not in " ".join(t.get("fig-upset", [])):
+            errors.append(f"Figure 15: the none column is not {n_none:,}")
+        kinds = {tl: TOOLS[tl]["kind"] for tl in TOOLS}
+        pk = use.filter("hit").with_columns(pl.col("tool").replace_strict(kinds).alias("kind")) \
+            .group_by("accession").agg(pl.col("kind").n_unique().alias("k"))
+        prot = reg.select("accession").unique().join(pk, on="accession", how="left").with_columns(pl.col("k").fill_null(0))
+        sent = (a.site / "proteins.html").read_text()
+        for label, val in (("none found", prot.filter(pl.col("k") == 0).height),
+                           ("found by all four kinds", prot.filter(pl.col("k") == 4).height)):
+            pat = (f"{val:,} had none found" if label == "none found" else f"{val:,} had a region found by all four kinds")
+            n_checked += 1
+            if pat not in sent:
+                errors.append(f"Figure 17: expected '{pat}'")
+        if len(tips(a.site / "proteins.html").get("fig-map", [])) != prot.height:
+            errors.append("Figure 17: tile count differs from the protein count")
     if not t.get("fig-distance") or not t.get("fig-identity") or not t.get("fig-features"):
         errors.append("a figure on index.html has no hover marks")
     for e in errors:
