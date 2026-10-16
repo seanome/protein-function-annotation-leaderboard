@@ -44,7 +44,7 @@ def afdb_table(path):
         for line in fh:
             r = json.loads(line)
             models = r.get("models") or []
-            # The model of this entry's own sequence is AF-<accession>-F1. Some long proteins
+            # The model for this accession is AF-<accession>-F1. Some long proteins
             # are served only as models of a shorter isoform (AF-<accession>-2-F1, ...); those
             # do not count as a model of this protein.
             own = f"AF-{r['accession']}-F1"
@@ -170,7 +170,7 @@ def main():
         rel = "UniProt 2026_03"
         N.add(f"{tag}_proteins", 4, f"{tag}: proteins in the one-protein-per-gene reference set", n, "proteins", src, rel)
         for col, what, source in (
-            ("af_model", "with an AlphaFold DB model of its own sequence (AF-accession-F1)", "afdb_predictions"),
+            ("af_model", "with an AlphaFold DB model for this accession (AF-accession-F1)", "afdb_predictions"),
             ("af_isoform_model_only", "with AlphaFold DB models only of another isoform (not counted as a model)", "afdb_predictions"),
             ("interpro_match", "with any InterPro match (InterPro entry or member-database signature, as UniProt cross-references them)", f"{tag}_interpro_xrefs"),
             ("sprot_hit", "with a Swiss-Prot hit above 30% identity (MMseqs2, self-hits count)", "sherlock_mmseqs"),
@@ -191,6 +191,8 @@ def main():
             N.add("oyster_interpro_api_and_xref", 4, "oyster: proteins with a match by both the InterPro API listing and UniProt's cross-references", both, "proteins", "interpro_oyster", "InterPro API")
             N.add("oyster_interpro_xref_only", 4, "oyster: proteins with a match by UniProt's cross-references only", x_only, "proteins", "interpro_oyster", "InterPro API")
             N.add("oyster_interpro_api_only", 4, "oyster: proteins with a match in the InterPro API listing only", api_only, "proteins", "interpro_oyster", "InterPro API")
+        k = df.filter(pl.col("af_model") & ~pl.col("af_model_matches_sequence")).height
+        N.add(f"{tag}_af_model_other_sequence", 4, f"{tag}: proteins whose AlphaFold DB model (AF-accession-F1) was built on a sequence different from today's UniProt sequence; still counted as a model", k, "proteins", "afdb_predictions", rel)
         extra = len(set(df.filter(~pl.col("sprot_hit"))["accession"]) & at_least)
         N.add(f"{tag}_sprot_hit_at_exactly_30pct", 4, f"{tag}: proteins whose best Swiss-Prot identity is exactly 0.30, so counted only by >= 0.30, not by > 0.30", extra, "proteins", "sherlock_mmseqs", rel)
         no_self = df.filter(~pl.col("af_model") & ~pl.col("interpro_match") & ~pl.col("sprot_hit_nonself")).height

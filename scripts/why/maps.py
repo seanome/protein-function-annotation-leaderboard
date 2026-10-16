@@ -25,7 +25,7 @@ SPECIES = {"human": "Human (Homo sapiens)", "oyster": "Pacific oyster (Crassostr
 LABEL_SETS = {
     "proteome_map": (
         ["af_model", "interpro_match", "sprot_hit"],
-        "an AlphaFold DB model of its own sequence, an InterPro match, or a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+        "an AlphaFold DB model for that accession, an InterPro match, or a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
     ),
     "proteome_map_function_labels": (
         ["interpro_match", "sprot_hit"],

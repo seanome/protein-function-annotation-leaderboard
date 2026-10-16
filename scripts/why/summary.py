@@ -84,7 +84,7 @@ def main():
         "- In the Pacific oyster, {oyster_no_interpro_no_sprot_pct}% of proteins have neither an InterPro match nor a "
         "Swiss-Prot hit above 30% identity; in human, {human_no_interpro_no_sprot_pct}%. Both count a hit to the protein's own "
         "Swiss-Prot entry; without it, human rises to {human_no_interpro_no_sprot_nonself_pct}% and oyster is "
-        "{oyster_no_interpro_no_sprot_nonself_pct}%, since few oyster proteins are Swiss-Prot entries. An AlphaFold DB model of the protein's own sequence exists for "
+        "{oyster_no_interpro_no_sprot_nonself_pct}%, since few oyster proteins are Swiss-Prot entries. An AlphaFold DB model for the protein's accession exists for "
         "{oyster_af_model_pct}% of oyster and {human_af_model_pct}% of human proteins, so with the model counted as a label "
         "only {oyster_no_label_pct}% and {human_no_label_pct}% have none.\n"
     ))
