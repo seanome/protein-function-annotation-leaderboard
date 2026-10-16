@@ -20,9 +20,10 @@ import pubfig as pf  # noqa: E402
 
 OUT = pathlib.Path("results/why/maps")
 COLS = 150  # tiles per row, both species
-# Deep teal for lit: orange, blue, sky blue, yellow, green and purple already mean
-# AlphaFold DB pLDDT bands, InterPro and Swiss-Prot hits in the residue figures on the same page.
-LIT, DARK = "#2D7A8F", "#222222"
+# Lit is a pale sand, so lit reads as light against the near-black dark tiles. It is far
+# paler than the AlphaFold DB yellow; orange, blue, sky blue, yellow, green and purple
+# already mean pLDDT bands, InterPro and Swiss-Prot hits in the residue figures.
+LIT, DARK = "#EFE1B5", "#222222"
 SPECIES = {"human": "Human (Homo sapiens)", "oyster": "Pacific oyster (Crassostrea gigas)"}
 LABEL_SETS = {
     "proteome_map_human_oyster_any_label_uniprot_2026_03": (
