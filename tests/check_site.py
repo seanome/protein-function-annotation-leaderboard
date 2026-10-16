@@ -96,25 +96,35 @@ SNAP_ALPHABETS = """() => {
     classes: [...tr.querySelectorAll('td.classes .cls')].map((c) => ({
       letters: [...c.querySelectorAll('.sq')].map((s) => s.textContent).join(''),
       hp: ['h', 'p', 'c'].find((k) => c.classList.contains('hp-' + k)) || null})),
-    ev: [...tr.querySelectorAll('td.ev')].map((td) => ({...D(td), text: td.querySelector('.v').textContent,
-                                                        grey: td.classList.contains('grey')})),
+    nClasses: tr.querySelector('th .key').textContent,
+    ev: [...tr.querySelectorAll('td.ev')].map((td) => {
+      const L = [...td.querySelectorAll('line')], c = td.querySelector('circle');
+      return {...D(td), text: td.querySelector('.v').textContent, grey: td.classList.contains('grey'), title: td.title,
+              one: +L[0].getAttribute('x1'), ciLo: +L[1].getAttribute('x1'), ciHi: +L[1].getAttribute('x2'), dot: +c.getAttribute('cx')};
+    }),
     kp: [...tr.querySelectorAll('td.kp')].map((td) => ({...D(td), text: td.textContent.trim(),
-                                                        grey: td.classList.contains('grey')})),
-    uk: [...tr.querySelectorAll('td.uk .kb')].map((s) => ({...D(s), text: s.querySelector('.v').textContent,
-                                                           hidden: s.hidden})),
+                                                        grey: td.classList.contains('grey'), title: td.title})),
+    uk: [...tr.querySelectorAll('td.uk .kb')].map((s) => {
+      const L = [...s.querySelectorAll('line')], R = [...s.querySelectorAll('rect')];
+      return {...D(s), text: s.querySelector('.v').textContent, hidden: s.hidden, title: s.title,
+              rangeLo: +L[0].getAttribute('x1'), rangeHi: +L[0].getAttribute('x2'),
+              bars: R.map((r) => [+r.getAttribute('x'), +r.getAttribute('x') + +r.getAttribute('width')])};
+    }),
   }));
+  const fullHeads = [...document.querySelectorAll('table.full tbody tr')].map((tr) => tr.querySelector('th').textContent);
+  const hpText = document.querySelector('#hp + p').textContent.replace(/\\s+/g, ' ');
   const evHead = [...document.querySelectorAll('th.evh')].map((th) => ({...D(th), text: th.querySelector('.key').textContent}));
   const kpHead = [...document.querySelectorAll('th.kph')].map((th) => ({...D(th), text: th.querySelector('.key').textContent}));
   const hp = [...document.querySelectorAll('table.hp116 td.sq116')].map((td) => ({...D(td), text: td.textContent}));
   const hpN = [...document.querySelectorAll('table.hp116 tbody tr')].map((tr) => ({
     alphabet: tr.querySelector('th').textContent, n: tr.querySelector('td.num').textContent}));
   const full = [...document.querySelectorAll('table.full td.full')].map((td) => ({...D(td), text: td.textContent}));
-  return {rows, evHead, kpHead, hp, hpN, full, lead: document.getElementById('al-lead').textContent.replace(/\\s+/g, ' '),
+  return {rows, evHead, kpHead, hp, hpN, full, fullHeads, hpText, lead: document.getElementById('al-lead').textContent.replace(/\\s+/g, ' '),
           kbinN: document.getElementById('kbin-n').textContent};
 }"""
 
 
-def check_alphabets(page, base: str, data: Path, failures: list, stats: dict) -> None:
+def check_alphabets(page, base: str, data: Path, site: Path, failures: list, stats: dict) -> None:
     """alphabets.html against data/alphabets/*.parquet and PR 116's CSV, read here directly."""
     import csv
     d = data / "alphabets"
@@ -221,12 +231,116 @@ def check_alphabets(page, base: str, data: Path, failures: list, stats: dict) ->
         n["numbers"] += 1
     if len(snap["full"]) != ev.height:
         failures.append(f"alphabets.html: full table has {len(snap['full'])} cells, parquet {ev.height} rows")
-    # the chips switch the usable-k bin
+    check_alphabets_words(snap, ev, kp, uk, reach, cl, hp116, failures, n)
+    # the chips switch the usable-k bin, and the n in the column header follows
     page.click('.kbins .chip[data-kbin="40-60%"]')
     vis = page.evaluate("[...document.querySelectorAll('td.uk .kb')].filter(s => !s.hidden).map(s => s.dataset.bin)")
     if set(vis) != {"40-60%"} or len(vis) != 19:
         failures.append(f"alphabets.html: after the 40-60% chip, visible bins {set(vis)} ({len(vis)})")
+    want_n = f"n = {uk.filter(pl.col('identity_bin') == '40-60%')['n_pairs'][0]:,} pairs"
+    if page.evaluate("document.getElementById('kbin-n').textContent") != want_n:
+        failures.append(f"alphabets.html: usable k header after the 40-60% chip is not {want_n!r}")
+    # the JSON twin's data equal the parquet files
+    doc = json.loads((site / "alphabets.html.json").read_text())["data"]
+    for name, df in (("evidence", ev), ("kappa", kp), ("usable_k", uk)):
+        cols = list(doc[name][0])
+        key = lambda r: json.dumps(r, sort_keys=True)  # noqa: E731
+        if len(doc[name]) != df.height or not set(cols) <= set(df.columns) \
+                or sorted(map(key, doc[name])) != sorted(map(key, df.select(cols).to_dicts())):
+            failures.append(f"alphabets.html.json: {name} differs from data/alphabets/{name}.parquet")
+        n["numbers"] += df.height
+    if doc["hp_classes_pr116"] != [{k: r[k] for k in ("alphabet", "residue", "class")} for r in hp116]:
+        failures.append("alphabets.html.json: hp_classes_pr116 differs from PR 116's CSV")
     stats["alphabets_numbers_checked"] = n["numbers"]
+
+
+def check_alphabets_words(snap, ev, kp, uk, reach, cl, hp116, failures, n) -> None:
+    """The sentences, tooltips, labels and drawn positions of alphabets.html, rebuilt here."""
+    fair = ev.filter(pl.col("mode") == "low_half")
+    pf = fair.filter(pl.col("group") == "Pfam seed")
+    above = pf.filter((pl.col("lo") > 1) & (pl.col("alphabet") != "protein20")).sort("rank")
+    two = pf.filter(pl.col("classes") == 2).sort("rank")
+    sd = pf.filter(pl.col("alphabet") == "sdm12").row(0, named=True)
+    words = {0: "no alphabet keeps", 1: "one alphabet keeps", 2: "two alphabets keep", 3: "three alphabets keep",
+             4: "four alphabets keep"}.get(above.height, f"{above.height} alphabets keep")
+    below = ("Every two-class alphabet keeps less, with its interval below 1; the best of them"
+             if (two["hi"] < 1).all() else "The best two-class alphabet")
+    want = (f"In the fair test on Pfam seed pairs at 20% identity or less, {words} more evidence per aligned "
+            f"position than the 20 amino acids, with the 95% interval above 1 ({', '.join(above['alphabet'])}). "
+            f"sdm12 keeps {sd['ratio_to_20aa']:.3f} times as much (95% interval {sd['lo']:.3f}–{sd['hi']:.3f}). "
+            f"{below}, {two['alphabet'][0]}, keeps {two['ratio_to_20aa'][0]:.2f} times as much. "
+            f"n = {sd['n_items']:,} pair-halves from {sd['n_clusters']:,} Pfam families.")
+    if snap["lead"].strip() != want:
+        failures.append(f"alphabets.html lead sentence:\n    page {snap['lead'].strip()!r}\n    want {want!r}")
+    n["numbers"] += 8
+    # H/P sentence, from PR 116's CSV
+    by_res = {}
+    for r in hp116:
+        by_res.setdefault(r["residue"], set()).add(r["class"])
+    differ = [r for r in "AFILMVCGPWYDEHKNQRST" if len(by_res[r]) > 1]
+    if f"agree on {20 - len(differ)} residues and differ only on {', '.join(differ[:-1])} and {differ[-1]}." not in snap["hpText"]:
+        failures.append(f"alphabets.html H/P sentence {snap['hpText']!r}, differing residues {differ}")
+    for row in snap["rows"]:
+        a = row["alphabet"]
+        nc = cl.filter(pl.col("alphabet") == a)["class_members"].n_unique()
+        if row["nClasses"] != f"{nc} classes":
+            failures.append(f"alphabets.html {a}: label {row['nClasses']!r}, {nc} classes in the table")
+        for e in row["ev"]:
+            r = fair.filter((pl.col("group") == e["group"]) & (pl.col("alphabet") == a)).row(0, named=True)
+            kind = "Pfam families" if e["group"] == "Pfam seed" else "SCOPe folds"
+            tip = (f"{a}: {r['ratio_to_20aa']:.3f} ({r['lo']:.3f}–{r['hi']:.3f}) times the evidence per aligned position "
+                   f"of the 20 amino acids, 95% interval in brackets. Rank {r['rank']} of 19. "
+                   f"n = {r['n_items']:,} pair-halves from {r['n_clusters']:,} {kind}.")
+            if e["title"] != tip:
+                failures.append(f"alphabets.html {a} {e['group']} tooltip {e['title']!r} != {tip!r}")
+            # drawn: the dot inside its interval, and on the side of the dashed line its value is on
+            ok = e["ciLo"] <= e["dot"] <= e["ciHi"] and (e["dot"] > e["one"]) == (r["ratio_to_20aa"] > 1) \
+                and (e["ciLo"] > e["one"]) == (r["lo"] > 1) and (e["ciHi"] > e["one"]) == (r["hi"] > 1)
+            if a != "protein20" and not ok:
+                failures.append(f"alphabets.html {a} {e['group']}: drawn interval {e} does not match {r['lo']}-{r['hi']}")
+            n["numbers"] += 2
+        for k in row["kp"]:
+            r = kp.filter((pl.col("alphabet") == a) & (pl.col("identity_bin") == k["bin"])).row(0, named=True)
+            words_b = {"<20%": "20% or less", "20-30%": "20–30%", "30-40%": "30–40%", "40-60%": "40–60%", ">=60%": "over 60%"}
+            tip = (f"{a}, Pfam seed pairs at {words_b[k['bin']]} identity: kappa {r['kappa']:.2f}. Same class at "
+                   f"{100 * r['agreement']:.0f}% of aligned positions, {100 * r['chance']:.0f}% expected by chance. "
+                   f"n = {r['n_pairs']:,} pairs.")
+            if k["title"] != tip:
+                failures.append(f"alphabets.html {a} kappa tooltip {k['title']!r} != {tip!r}")
+            n["numbers"] += 3
+        for s in row["uk"]:
+            r = uk.filter((pl.col("alphabet") == a) & (pl.col("identity_bin") == s["bin"])).row(0, named=True)
+            rr = reach.filter((pl.col("alphabet") == a) & (pl.col("identity_bin") == s["bin"]))
+            share = lambda k: rr.filter(pl.col("k") == k)["share_reached"][0]  # noqa: E731
+            lo, hi = r["k_use_lo"], r["k_use_hi"]
+            rng = str(lo) if lo == hi else f"{lo}–{hi}"
+            tip = (f"{a}, Pfam seed pairs at {s['bin'].replace('-', '–')} identity (n = {r['n_pairs']:,}): usable k {rng}. "
+                   f"{100 * share(r['k_min']):.0f}% of pairs share a same-class run of k = {r['k_min']} or longer, "
+                   f"{100 * share(hi):.0f}% one of k = {hi}. Chance-match range from notebook 274: k {r['k_min']}–{r['k_max']}.")
+            if s["title"] != tip:
+                failures.append(f"alphabets.html {a} usable k tooltip {s['title']!r} != {tip!r}")
+            # drawn: the range line spans k_min-0.5 to k_max+0.5, so one k is (hi - lo) / (k_max - k_min + 1)
+            unit = (s["rangeHi"] - s["rangeLo"]) / (r["k_max"] - r["k_min"] + 1)
+            at = lambda k: s["rangeLo"] + (k - r["k_min"] + 0.5) * unit  # noqa: E731
+            want_bars = [[at(lo - 0.5), at(hi + 0.5)]] + ([[at(lo - 0.5), at(r["k_most_hi"] + 0.5)]] if r["k_most_hi"] is not None else [])
+            if len(s["bars"]) != len(want_bars) or any(abs(g - w) > 0.15 for gb, wb in zip(s["bars"], want_bars) for g, w in zip(gb, wb)):
+                failures.append(f"alphabets.html {a} usable k {s['bin']}: bars {s['bars']} != {want_bars}")
+            n["numbers"] += 4
+    # row headers of the full table: group, homologs or not, pair selection, counts
+    modes = {"low_half": "fair test: 20% identity or less, grouped on one half, measured on the other",
+             "all": "all identities, whole pairs",
+             "low_same": "20% identity or less, grouped and measured on the same positions (biased)"}
+    want_heads = []
+    for g in ev["group"].unique(maintain_order=True).to_list():
+        for m in ("low_half", "all", "low_same"):
+            e = ev.filter((pl.col("group") == g) & (pl.col("mode") == m))
+            hom = "homologs" if e["homologs_by_truth"][0] else "not homologs by SCOPe"
+            want_heads.append(f"{g} ({hom}){modes[m]}; {e['n_items'][0]:,} "
+                              f"{'pair-halves' if m == 'low_half' else 'pairs'}, {e['n_clusters'][0]:,} clusters")
+    if snap["fullHeads"] != want_heads:
+        bad = [(g, w) for g, w in zip(snap["fullHeads"], want_heads) if g != w][:2]
+        failures.append(f"alphabets.html full table row headers differ: {bad}")
+    n["numbers"] += 2 * len(want_heads)
 
 
 def main() -> int:
@@ -500,7 +614,7 @@ def main() -> int:
 
         # ---- 2d. the alphabet page ----
         if (a.site / "alphabets.html").exists():
-            check_alphabets(page, base, a.data, failures, stats)
+            check_alphabets(page, base, a.data, a.site, failures, stats)
 
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "explainers.html", "tools/index.html"] + \

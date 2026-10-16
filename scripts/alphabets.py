@@ -225,6 +225,13 @@ def build(t: dict, src: dict) -> tuple[str, dict]:
     fair = ev.filter(pl.col("mode") == FAIR)
     kmin, kmax = t["kappa"]["kappa"].min(), t["kappa"]["kappa"].max()
     n_kappa = {r["identity_bin"]: r["n_pairs"] for r in t["kappa"].filter(pl.col("alphabet") == "protein20").iter_rows(named=True)}
+    # H/P residues the seven alphabets put in different classes, counted from PR 116's CSV
+    hp_by_res = {}
+    for r in t["hp116"]:
+        hp_by_res.setdefault(r["residue"], set()).add(r["class"])
+    differ = sorted((r for r, c in hp_by_res.items() if len(c) > 1), key=RES_ORDER.index)
+    n_hp = {7: "seven"}.get(len({r["alphabet"] for r in t["hp116"]}), str(len({r["alphabet"] for r in t["hp116"]})))
+    n_low_same = ev.filter((pl.col("group") == "Pfam seed") & (pl.col("mode") == "low_same"))["n_items"][0]
     ev_n, ev_dom, ev_head = {}, {}, []
     for g, words in EV_GROUPS:
         e = fair.filter(pl.col("group") == g)
@@ -322,7 +329,8 @@ cannot tell them apart. In the seven hydrophobic/polar (H/P) alphabets, a box is
 blue for polar, grey for a cysteine class of its own. The classes are kmerseek's, copied into the analysis
 repository; the H/P letters are {PR[116]}'s.</p>
 <p><b>Evidence per aligned position</b> ({NB[291]}, {PR[99]}). For one aligned pair, an aligned position
-is a column where neither protein has a gap. Each residue is replaced by its class. Agreement <i>a</i> is
+is a column where both proteins have one of the 20 standard amino acids (a gap, X, B, Z, U or O does not
+count). Each residue is replaced by its class. Agreement <i>a</i> is
 the share of positions where the two classes are the same; chance <i>c</i> is the share expected from
 the two proteins' class make-up alone. The evidence in bits is
 <i>a</i>·log₂(<i>a</i>/<i>c</i>) + (1−<i>a</i>)·log₂((1−<i>a</i>)/(1−<i>c</i>)): 0 when the pair agrees
@@ -335,7 +343,10 @@ swapped. Picking pairs by the same positions that are measured favours every alp
 letters (the biased view is in the full table below).</p>
 <p><b>Kappa</b> ({NB[230]}, {PR[100]}). Agreement corrected for chance: (<i>a</i> − <i>c</i>) / (1 − <i>c</i>),
 the mean over Pfam seed pairs in each identity bin. 0 means no better than a shuffled partner, 1 means
-every aligned position agrees. Identity is the 20 amino acid identity over aligned positions. A higher
+every aligned position agrees. Identity is the pair's identity over aligned columns as stored with
+the alignment, so the 20% or less bin here ({n_kappa["<20%"]:,} pairs) can differ slightly from the
+same bin by the 20 amino acid agreement over standard residues used for the evidence groups
+({n_low_same:,} pairs). A higher
 kappa for a smaller alphabet does not mean it finds more homologs: merging letters also counts the
 common swaps between homologs (I and V, D and E) as matches.</p>
 <p><b>Usable k</b> ({NB[230]}, ranges from {NB[274]}, {PR[101]}). An exact seed of length k can find a
@@ -357,7 +368,7 @@ narrow screen the table scrolls sideways; the alphabet names stay in view.</p>
 
 <h2 id="hp">The seven H/P alphabets, residue by residue</h2>
 <p class="prose">From {PR[116]}: one row per H/P alphabet, one square per amino acid, as kmerseek v0.4.0
-classes it. The seven agree on 15 residues and differ only on C, G, P, W and Y.</p>
+classes it. The {n_hp} agree on {20 - len(differ)} residues and differ only on {", ".join(differ[:-1])} and {differ[-1]}.</p>
 <div class="legend" aria-label="Key to the H/P table">
 <span class="item"><span class="cls hp-h"><span class="sq">h</span></span> hydrophobic</span>
 <span class="item"><span class="cls hp-p"><span class="sq">p</span></span> polar</span>
@@ -378,10 +389,12 @@ which may come from the structural superposition putting buried positions on bur
 <a href="{ANALYSIS}/tree/{src["commit"]}/results/leaderboard/alphabets">seanome/2024-kmerseek-analysis at
 commit <span class="mono">{src["commit"][:8]}</span></a>, written by <span class="mono">make leaderboard-alphabets</span>.
 Evidence values are {NB[291]}'s stored table; the build adds the pair counts and checks that its own mean
-evidence equals the notebook's. Kappa and usable k are computed with {NB[230]}'s code from its per-pair
-table, because the notebook prints them but does not store them. Data: Pfam-A 38.2 seed alignments
-(pairs with at least 50 aligned positions) and SCOPe 2.08 domains at 40% identity aligned by structure
-with USalign (TM-score at least 0.5).</p>
+evidence equals the notebook's. Kappa is computed with {NB[230]}'s code from its per-pair table, because
+the notebook prints it but does not store it. Usable k uses the same rule as the notebook, counting pairs
+per longest run instead of joining every pair with every k; the shares are the same. Data: pairs sampled
+from Pfam-A 38.2 seed alignments, and pairs of SCOPe 2.08 domains at 40% identity aligned by structure
+with USalign, kept when the larger of the two TM-scores is at least 0.5. Every pair has at least 50
+aligned positions.</p>
 """
     data = {
         "note": "Values as stored in data/alphabets/*.parquet. evidence: ratio_to_20aa with its 95% interval "

@@ -60,7 +60,8 @@ cannot tell them apart. In the seven hydrophobic/polar (H/P) alphabets, a box is
 blue for polar, grey for a cysteine class of its own. The classes are kmerseek's, copied into the analysis
 repository; the H/P letters are <a href="https://github.com/seanome/2024-kmerseek-analysis/pull/116">PR 116</a>'s.</p>
 <p><b>Evidence per aligned position</b> (<a href="https://github.com/seanome/2024-kmerseek-analysis/blob/main/notebooks/291_evidence_per_position_19_alphabets_pfam_seed_scope40.ipynb">notebook 291</a>, <a href="https://github.com/seanome/2024-kmerseek-analysis/pull/99">PR 99</a>). For one aligned pair, an aligned position
-is a column where neither protein has a gap. Each residue is replaced by its class. Agreement <i>a</i> is
+is a column where both proteins have one of the 20 standard amino acids (a gap, X, B, Z, U or O does not
+count). Each residue is replaced by its class. Agreement <i>a</i> is
 the share of positions where the two classes are the same; chance <i>c</i> is the share expected from
 the two proteins' class make-up alone. The evidence in bits is
 <i>a</i>·log₂(<i>a</i>/<i>c</i>) + (1−<i>a</i>)·log₂((1−<i>a</i>)/(1−<i>c</i>)): 0 when the pair agrees
@@ -73,7 +74,10 @@ swapped. Picking pairs by the same positions that are measured favours every alp
 letters (the biased view is in the full table below).</p>
 <p><b>Kappa</b> (<a href="https://github.com/seanome/2024-kmerseek-analysis/blob/main/notebooks/230_hp_class_conservation_in_aligned_homologs.ipynb">notebook 230</a>, <a href="https://github.com/seanome/2024-kmerseek-analysis/pull/100">PR 100</a>). Agreement corrected for chance: (<i>a</i> − <i>c</i>) / (1 − <i>c</i>),
 the mean over Pfam seed pairs in each identity bin. 0 means no better than a shuffled partner, 1 means
-every aligned position agrees. Identity is the 20 amino acid identity over aligned positions. A higher
+every aligned position agrees. Identity is the pair's identity over aligned columns as stored with
+the alignment, so the 20% or less bin here (16,407 pairs) can differ slightly from the
+same bin by the 20 amino acid agreement over standard residues used for the evidence groups
+(16,406 pairs). A higher
 kappa for a smaller alphabet does not mean it finds more homologs: merging letters also counts the
 common swaps between homologs (I and V, D and E) as matches.</p>
 <p><b>Usable k</b> (<a href="https://github.com/seanome/2024-kmerseek-analysis/blob/main/notebooks/230_hp_class_conservation_in_aligned_homologs.ipynb">notebook 230</a>, ranges from notebook 274, <a href="https://github.com/seanome/2024-kmerseek-analysis/pull/101">PR 101</a>). An exact seed of length k can find a
@@ -116,10 +120,12 @@ which may come from the structural superposition putting buried positions on bur
 <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/98e9bccb9a4e2c7fda2583065730e3a51291ee22/results/leaderboard/alphabets">seanome/2024-kmerseek-analysis at
 commit <span class="mono">98e9bccb</span></a>, written by <span class="mono">make leaderboard-alphabets</span>.
 Evidence values are <a href="https://github.com/seanome/2024-kmerseek-analysis/blob/main/notebooks/291_evidence_per_position_19_alphabets_pfam_seed_scope40.ipynb">notebook 291</a>'s stored table; the build adds the pair counts and checks that its own mean
-evidence equals the notebook's. Kappa and usable k are computed with <a href="https://github.com/seanome/2024-kmerseek-analysis/blob/main/notebooks/230_hp_class_conservation_in_aligned_homologs.ipynb">notebook 230</a>'s code from its per-pair
-table, because the notebook prints them but does not store them. Data: Pfam-A 38.2 seed alignments
-(pairs with at least 50 aligned positions) and SCOPe 2.08 domains at 40% identity aligned by structure
-with USalign (TM-score at least 0.5).</p>
+evidence equals the notebook's. Kappa is computed with <a href="https://github.com/seanome/2024-kmerseek-analysis/blob/main/notebooks/230_hp_class_conservation_in_aligned_homologs.ipynb">notebook 230</a>'s code from its per-pair table, because
+the notebook prints it but does not store it. Usable k uses the same rule as the notebook, counting pairs
+per longest run instead of joining every pair with every k; the shares are the same. Data: pairs sampled
+from Pfam-A 38.2 seed alignments, and pairs of SCOPe 2.08 domains at 40% identity aligned by structure
+with USalign, kept when the larger of the two TM-scores is at least 0.5. Every pair has at least 50
+aligned positions.</p>
 
 </main>
 <footer class="site"><div class="wrap">
