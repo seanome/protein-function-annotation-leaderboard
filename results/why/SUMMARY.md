@@ -138,9 +138,9 @@ Every number below was computed from a file downloaded on 2026-10-15 or made fro
 | oyster: share of proteins with a Swiss-Prot hit above 30% identity other than the protein itself | 60.66 | % of proteins | [`mmseqs_vs_sprot.tsv.gz`](Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch) | UniProt 2026_03 | HOLDS |
 | oyster: share of proteins with a Swiss-Prot hit above 30% identity (MMseqs2, self-hits count) | 60.68 | % of proteins | [`mmseqs_vs_sprot.tsv.gz`](Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch) | UniProt 2026_03 | HOLDS |
 
-![Proteome maps, function labels](maps/proteome_map_function_labels.png)
+![Proteome maps, function labels](maps/proteome_map_human_oyster_interpro_or_swissprot_uniprot_2026_03.png)
 
-![Proteome maps, all three labels](maps/proteome_map.png)
+![Proteome maps, all three labels](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)
 
 Each tile is one protein; both maps use 150 tiles per row and the same tile size. A tile is lit when the protein has the labels named in the legend. The counts printed above each map come from `results/why/proteome_labels.parquet`, the same table as the numbers above.
 
@@ -150,7 +150,7 @@ Each figure shows the protein's residues, 100 per line, with a bar under the res
 
 ### Q25460 Mussel foot protein 1 (Mytilus edulis), 875 residues
 
-![Q25460](maps/four_Q25460.png)
+![Q25460](maps/residues_Q25460_mussel_foot_protein_1_interpro_swissprot_alphafold.png)
 
 - AlphaFold DB: mean pLDDT 41.5.
 - InterPro labels it: 2 entries or signatures, covering 38 of 875 residues (IPR002964 Adhesive plaque protein (interpro) at 48-65, 71-90; PR01216 ADHESIVEI (prints) at 48-65, 71-90).
@@ -158,7 +158,7 @@ Each figure shows the protein's residues, 100 per line, with a bar under the res
 
 ### P24856 Antifreeze glycoprotein polyprotein (Notothenia neglecta), 790 residues
 
-![P24856](maps/four_P24856.png)
+![P24856](maps/residues_P24856_antifreeze_glycoprotein_interpro_swissprot_alphafold.png)
 
 - AlphaFold DB: mean pLDDT 52.7.
 - InterPro: no match anywhere on the protein.
@@ -166,7 +166,7 @@ Each figure shows the protein's residues, 100 per line, with a bar under the res
 
 ### P05484 Omega-conotoxin MVIIA (Conus magus), 71 residues
 
-![P05484](maps/four_P05484.png)
+![P05484](maps/residues_P05484_omega_conotoxin_mviia_interpro_swissprot_alphafold.png)
 
 - AlphaFold DB: mean pLDDT 71.0.
 - InterPro labels it: 6 entries or signatures, covering 70 of 71 residues (IPR004214 Conotoxin (interpro) at 1-70; IPR012321 Conotoxin, omega-type, conserved site (interpro) at 46-70; PF02950 Conotoxin (pfam) at 1-70; PS51257 Prokaryotic membrane lipoprotein lipid attachment site profile (profile) at 1-17; PS60004 Omega-conotoxin family signature (prosite) at 46-70; SSF57059 omega toxin-like (ssf) at 46-70).
@@ -174,7 +174,7 @@ Each figure shows the protein's residues, 100 per line, with a bar under the res
 
 ### P42212 Green fluorescent protein (Aequorea victoria), 238 residues
 
-![P42212](maps/four_P42212.png)
+![P42212](maps/residues_P42212_gfp_interpro_swissprot_alphafold.png)
 
 - AlphaFold DB: mean pLDDT 96.6.
 - InterPro labels it: 7 entries or signatures, covering 238 of 238 residues (G3DSA:2.40.155.10 Green fluorescent protein (cathgene3d) at 1-145, 146-238; IPR000786 Green fluorescent protein, GFP (interpro) at 3-27, 28-48, 49-69, 70-85, 86-108, 109-129, 130-149, 150-171, 173-192, 193-211, 214-237; IPR009017 Green fluorescent protein (interpro) at 1-238; IPR011584 Green fluorescent protein-related (interpro) at 14-227; PF01353 Green fluorescent protein (pfam) at 14-227; PR01229 GFLUORESCENT (prints) at 3-27, 28-48, 49-69, 70-85, 86-108, 109-129, 130-149, 150-171, 173-192, 193-211, 214-237; SSF54511 GFP-like (ssf) at 2-228).

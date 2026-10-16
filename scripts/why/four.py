@@ -29,9 +29,16 @@ FOUR = {
     "P05484": "Omega-conotoxin MVIIA, Conus magus",
     "P42212": "Green fluorescent protein, Aequorea victoria",
 }
+# File names say what is drawn and from which data.
+FILE = {
+    "Q25460": "residues_Q25460_mussel_foot_protein_1_interpro_swissprot_alphafold",
+    "P24856": "residues_P24856_antifreeze_glycoprotein_interpro_swissprot_alphafold",
+    "P05484": "residues_P05484_omega_conotoxin_mviia_interpro_swissprot_alphafold",
+    "P42212": "residues_P42212_gfp_interpro_swissprot_alphafold",
+}
 PER_LINE = 100
-# AlphaFold DB's own pLDDT bands and colours.
-BANDS = [(90, 101, "#0053D6", "pLDDT > 90"), (70, 90, "#65CBF3", "70-90"), (50, 70, "#FFDB13", "50-70"), (0, 50, "#FF7D45", "< 50")]
+# AlphaFold DB's own pLDDT bands and colours: very high > 90, confident (70, 90], low (50, 70], very low <= 50.
+BANDS = [(90, 100, "#0053D6", "pLDDT > 90"), (70, 90, "#65CBF3", "pLDDT 70-90"), (50, 70, "#FFDB13", "pLDDT 50-70"), (-1, 50, "#FF7D45", "pLDDT 50 or less")]
 IPR, HIT = "#009E73", "#CC79A7"  # Okabe-Ito green: InterPro match; reddish purple: Swiss-Prot hit
 
 
@@ -134,7 +141,7 @@ def draw(acc, seq, calls, plddt, out):
         if plddt:
             for j in range(len(chunk)):
                 v = plddt[start + j]
-                col = next(c for lo, hi, c, _ in BANDS if lo <= v < hi)
+                col = next(c for lo, hi, c, _ in BANDS if lo < v <= hi)
                 ax.add_patch(Rectangle((x0 + j * char_mm, ty - row_mm * 0.35), char_mm, row_mm * 0.7, facecolor=col, linewidth=0))
         for name, color, sp in rows:
             ty += row_mm
@@ -165,7 +172,7 @@ def main():
             raise ValueError(f"{acc}: {len(plddt)} pLDDT values for {len(seq)} residues")
         if plddt:
             calls.append({"accession": acc, "tool": "AlphaFold DB", "label": f"mean pLDDT {sum(plddt) / len(plddt):.1f}", "start": 1, "end": len(seq), "score": sum(plddt) / len(plddt)})
-        draw(acc, seq, calls, plddt, pathlib.Path("results/why/maps") / f"four_{acc}")
+        draw(acc, seq, calls, plddt, pathlib.Path("results/why/maps") / FILE[acc])
         all_calls += calls
     pl.DataFrame(all_calls, infer_schema_length=None).write_parquet("results/why/four_proteins_calls.parquet")
     print(pl.DataFrame(all_calls, infer_schema_length=None).select("accession", "tool", "label", "start", "end").to_pandas().to_string())

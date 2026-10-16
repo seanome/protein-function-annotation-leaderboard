@@ -20,20 +20,27 @@ import pubfig as pf  # noqa: E402
 
 OUT = pathlib.Path("results/why/maps")
 COLS = 150  # tiles per row, both species
-LIT, DARK = "#E69F00", "#222222"  # Okabe-Ito orange; near-black
+# Deep teal for lit: orange, blue, sky blue, yellow, green and purple already mean
+# AlphaFold DB pLDDT bands, InterPro and Swiss-Prot hits in the residue figures on the same page.
+LIT, DARK = "#2D7A8F", "#222222"
 SPECIES = {"human": "Human (Homo sapiens)", "oyster": "Pacific oyster (Crassostrea gigas)"}
 LABEL_SETS = {
-    "proteome_map": (
+    "proteome_map_human_oyster_any_label_uniprot_2026_03": (
         ["af_model", "interpro_match", "sprot_hit"],
         "an AlphaFold DB model for that accession, an InterPro match, or a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
     ),
-    "proteome_map_function_labels": (
+    "proteome_map_human_oyster_interpro_or_swissprot_uniprot_2026_03": (
         ["interpro_match", "sprot_hit"],
         "an InterPro match or a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
     ),
 }
 
 
+SOURCES = {
+    "interpro_match": "InterPro: the matches UniProt lists from InterPro 110.0",
+    "sprot_hit": "Swiss-Prot hit: MMseqs2 18.8cc5c against Swiss-Prot 2026_03, identity > 30%",
+    "af_model": "AlphaFold DB: model AF-<accession>-F1 (v6)",
+}
 PX = 10  # pixels per tile in the image, the last one white so single tiles stay visible
 
 
@@ -64,14 +71,21 @@ def draw(table, name, cols, what):
         stats[sp] = (int(lit.sum()), len(lit))
     max_rows = max(g.shape[0] for g in grids.values())
     tile_mm = 85 / COLS  # same tile size in both maps
-    top_mm = 15  # legend, then two lines of text per map, then the tiles
+    top_mm = 20.5 + 2.3 * len(cols)  # finding, tools, legend, then two lines of text per map, then the tiles
     fig_w_mm, fig_h_mm = pf.TWO_COLUMN_MM, top_mm + max_rows * tile_mm + 2
     fig = plt.figure(figsize=(fig_w_mm / 25.4, fig_h_mm / 25.4))
     cmap = ListedColormap([DARK, LIT])
     cmap.set_bad("white")
+    # The one fact the figure rests on, first; then where each label comes from.
+    dark = {sp: 100 * (n - k) / n for sp, (k, n) in stats.items()}
+    fig.text(2 / fig_w_mm, 1 - 2.5 / fig_h_mm,
+             f"{dark['oyster']:.1f}% of Pacific oyster proteins are dark (no label), against {dark['human']:.1f}% of human proteins.",
+             fontsize=7, weight="bold", va="center", ha="left")
+    tools = ["Proteins: UniProt 2026_03 one-protein-per-gene sets. Dark: none of these labels the protein."] + [SOURCES[c] for c in cols]
+    fig.text(2 / fig_w_mm, 1 - 4.6 / fig_h_mm, "\n".join(tools), fontsize=6, va="top", ha="left", linespacing=1.25)
     fig.legend(
         handles=[Patch(facecolor=LIT, label=f"lit: the protein has {what}"), Patch(facecolor=DARK, label="dark: none of these")],
-        loc="upper left", bbox_to_anchor=(2 / fig_w_mm, 1 - 1 / fig_h_mm), frameon=False, ncol=1, borderaxespad=0,
+        loc="upper left", bbox_to_anchor=(2 / fig_w_mm, 1 - (7 + 2.3 * len(cols)) / fig_h_mm), frameon=False, ncol=1, borderaxespad=0,
         title=f"One tile = one protein; {COLS} tiles per row and the same tile size in both maps; lit tiles first, then dark",
         title_fontsize=6, alignment="left",
     )

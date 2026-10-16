@@ -13,6 +13,10 @@ import re
 
 import polars as pl
 
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+from four import FILE  # noqa: E402
+
 OUT = pathlib.Path("results/why")
 STEPS = {
     1: "Swiss-Prot by organism",
@@ -100,8 +104,8 @@ def main():
             )
         md.append("")
         if step == 4:
-            md.append("![Proteome maps, function labels](maps/proteome_map_function_labels.png)\n")
-            md.append("![Proteome maps, all three labels](maps/proteome_map.png)\n")
+            md.append("![Proteome maps, function labels](maps/proteome_map_human_oyster_interpro_or_swissprot_uniprot_2026_03.png)\n")
+            md.append("![Proteome maps, all three labels](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)\n")
             md.append(
                 "Each tile is one protein; both maps use 150 tiles per row and the same tile size. A tile is lit when the "
                 "protein has the labels named in the legend. The counts printed above each map come from "
@@ -126,7 +130,7 @@ def main():
         selfh = c.filter(pl.col("tool").str.starts_with("MMseqs2"), pl.col("self_hit"))
         seq_len = json.loads((args.raw / f"uniprot_{acc}.json").read_text())["sequence"]["length"]
         md.append(f"### {acc} {name}, {seq_len} residues\n")
-        md.append(f"![{acc}](maps/four_{acc}.png)\n")
+        md.append(f"![{acc}](maps/{FILE[acc]}.png)\n")
         lines = []
         lines.append("AlphaFold DB: " + (af["label"][0] if af.height else "no model") + ".")
         if ipr.height:
