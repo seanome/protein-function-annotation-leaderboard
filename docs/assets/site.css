@@ -13,16 +13,16 @@
   --accent:#145A63;--chip:#EEF1EF;--null:#8E9290;--strip-a:#8C6D46;--strip-b:#DCCBAB;
   --k-letters:#0072B2;--k-profiles:#E69F00;--k-shapes:#009E73;--k-kmers:#CC3311;--k-models:#6B4C9A;
   --measured:#1C211F;--reported:#8A5A00;--warn:#9A6200;--warn-bg:#FCEBC4;--nr:#8E9290;
-  --lit:#E3B505;--unlit:#2B3440;
+  --lit:#F0D96A;--unlit:#2B3440;
   --shadow:0 14px 34px -26px rgba(0,40,50,.75)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141716;--surface:#1B1F1E;--ink:#E6EAE8;
   --muted:#A3ABA7;--hair:#2E3432;--accent:#7FD1D9;--chip:#232826;--null:#555B59;--strip-a:#A88A5F;--strip-b:#5E4C33;
   --k-letters:#56B4E9;--k-profiles:#F0B640;--k-shapes:#3CC79A;--k-kmers:#FF6E54;--k-models:#B39DDB;
-  --measured:#E6EAE8;--reported:#F2C46B;--warn:#F2C46B;--warn-bg:#3A2E12;--nr:#7C8380;--lit:#FFD23F;--unlit:#5B6B80;--shadow:0 18px 44px -28px rgba(0,0,0,.85);color-scheme:dark}}
+  --measured:#E6EAE8;--reported:#F2C46B;--warn:#F2C46B;--warn-bg:#3A2E12;--nr:#7C8380;--lit:#FFEB99;--unlit:#5B6B80;--shadow:0 18px 44px -28px rgba(0,0,0,.85);color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#141716;--surface:#1B1F1E;--ink:#E6EAE8;
   --muted:#A3ABA7;--hair:#2E3432;--accent:#7FD1D9;--chip:#232826;--null:#555B59;--strip-a:#A88A5F;--strip-b:#5E4C33;
   --k-letters:#56B4E9;--k-profiles:#F0B640;--k-shapes:#3CC79A;--k-kmers:#FF6E54;--k-models:#B39DDB;
-  --measured:#E6EAE8;--reported:#F2C46B;--warn:#F2C46B;--warn-bg:#3A2E12;--nr:#7C8380;--lit:#FFD23F;--unlit:#5B6B80;--shadow:0 18px 44px -28px rgba(0,0,0,.85);color-scheme:dark}
+  --measured:#E6EAE8;--reported:#F2C46B;--warn:#F2C46B;--warn-bg:#3A2E12;--nr:#7C8380;--lit:#FFEB99;--unlit:#5B6B80;--shadow:0 18px 44px -28px rgba(0,0,0,.85);color-scheme:dark}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -485,7 +485,7 @@ figcaption{font-size:.88rem;color:var(--muted);max-width:90ch;margin-top:6px}
 .maps .map{min-width:0}
 .maps h3{margin:4px 0 0;font-size:1rem}.maps h3 small{font-family:"Source Sans 3",sans-serif;font-weight:400;color:var(--muted)}
 .maps .frac{margin:0 0 4px;font-size:.92rem}
-.maps canvas{display:block;width:100%;cursor:crosshair}
+.maps canvas{display:block;width:100%;cursor:crosshair;outline:1px solid var(--hair);outline-offset:1px}
 .tile{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px}
 .tile.lit{background:var(--lit)}.tile.unlit{background:var(--unlit)}
 .placeholder{border:1px dashed var(--hair);border-radius:8px;padding:18px;color:var(--muted)}

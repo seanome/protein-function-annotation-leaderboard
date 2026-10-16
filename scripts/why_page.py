@@ -149,21 +149,27 @@ def map_data(w: Why) -> dict | None:
         return None
     out = {"cols": COLS, "species": {}}
     for sp in ("human", "oyster"):
+        # A protein's hit to its own Swiss-Prot entry does not count: most human proteins are
+        # Swiss-Prot entries and would light themselves (numbers.parquet's
+        # *_no_interpro_no_sprot_pct counts self-hits; it is checked below, then not shown).
         t = (w.labels.filter(pl.col("species") == sp)
-             .with_columns(lit=pl.col("interpro_match") | pl.col("sprot_hit"))
+             .with_columns(lit=pl.col("interpro_match") | pl.col("sprot_hit_nonself"),
+                           lit_self=pl.col("interpro_match") | pl.col("sprot_hit"))
              .sort(["lit", "accession"], descending=[True, False]))
         n, k = t.height, int(t["lit"].sum())
         stored_n = w.v(f"{sp}_proteins")
-        stored_dark = w.v(f"{sp}_no_interpro_no_sprot_pct")
+        stored_dark_self = w.v(f"{sp}_no_interpro_no_sprot_pct")
+        k_self = int(t["lit_self"].sum())
         if stored_n is not None and int(stored_n) != n:
             raise SystemExit(f"{sp}: {n} proteins in proteome_labels, numbers.parquet says {stored_n}")
-        if stored_dark is not None and abs(round(100 * (n - k) / n, 2) - stored_dark) > 1e-9:
-            raise SystemExit(f"{sp}: {100 * (n - k) / n:.2f}% dark, numbers.parquet says {stored_dark}%")
+        if stored_dark_self is not None and abs(round(100 * (n - k_self) / n, 2) - stored_dark_self) > 1e-9:
+            raise SystemExit(f"{sp}: {100 * (n - k_self) / n:.2f}% dark with self-hits, numbers.parquet says {stored_dark_self}%")
         prot = [[r["accession"], r["gene"] or "", (r["protein_name"] or "")[:70],
-                 int(bool(r["interpro_match"])), int(bool(r["sprot_hit"]))]
-                for r in t.select("accession", "gene", "protein_name", "interpro_match", "sprot_hit").iter_rows(named=True)]
-        out["species"][sp] = {"n": n, "lit": k, "dark": n - k, "dark_pct": stored_dark,
-                              "lit_pct": None if stored_dark is None else round(100 - stored_dark, 2),
+                 int(bool(r["interpro_match"])), int(bool(r["sprot_hit_nonself"]))]
+                for r in t.select("accession", "gene", "protein_name", "interpro_match", "sprot_hit_nonself").iter_rows(named=True)]
+        dark_pct = round(100 * (n - k) / n, 2)
+        out["species"][sp] = {"n": n, "lit": k, "dark": n - k, "dark_pct": dark_pct, "lit_pct": round(100 - dark_pct, 2),
+                              "dark_counting_self_hits": n - k_self, "dark_pct_counting_self_hits": stored_dark_self,
                               "proteins": prot}
     return out
 
@@ -190,7 +196,7 @@ def strata(res: pl.DataFrame, tools: dict) -> list[dict]:
                      "tool_key": r["tool"], "setting": r["setting"], "n": int(r["n_truth_instances"]),
                      "axis": ax, "stratum": b})
     rows.append({"label": "Features where AlphaFold's confidence is below 50 (often disordered)", "value": None,
-                 "why": "the leaderboard has no stratum below 50"})
+                 "why": "the leaderboard does not yet group features with confidence below 50"})
     return rows
 
 
@@ -302,9 +308,12 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
     mp = map_data(w)
     st = strata(res, tools)
     total = w.v("sp_entries")
-    oy_dark = w.v("oyster_no_interpro_no_sprot_pct")
-    oy_n = w.v("oyster_proteins")
-    hu_dark = w.v("human_no_interpro_no_sprot_pct")
+    # The oyster and human shares come from the per-protein table with self-hits left out
+    # (map_data), so the headline, the card and Figure 1 are one number.
+    oy_dark = mp["species"]["oyster"]["dark_pct"] if mp else None
+    oy_n = mp["species"]["oyster"]["n"] if mp else w.v("oyster_proteins")
+    hu_dark = mp["species"]["human"]["dark_pct"] if mp else None
+    animal = w.v("sp_metazoa_entries")
 
     def src_line(key, extra=""):
         r = w.n.get(key)
@@ -312,8 +321,8 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
             return f'<p class="src">Source: {NYM}</p>'
         s = w.sources.get(r["source"], {})
         url = s.get("url")
-        name = {"swissprot_dat": "Swiss-Prot", "worms_matches": "WoRMS habitat flags on Swiss-Prot species",
-                "sherlock_mmseqs": "InterPro and MMseqs2 against Swiss-Prot"}.get(r["source"], r["source"])
+        name = {"swissprot_dat": "Swiss-Prot", "worms_matches": "World Register of Marine Species habitat flags",
+                "sherlock_mmseqs": "MMseqs2 against Swiss-Prot"}.get(r["source"], r["source"])
         link = f'<a href="{esc(url)}">{esc(name)}</a>' if url and url.startswith("http") else esc(name)
         return f'<p class="src">{link}, {esc(r["release"])}{extra}</p>'
 
@@ -321,35 +330,36 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
     n1 = fint(total) if total is not None else DASH
     n2 = f"{oc['share_pct']:.2f}%" if oc and oc["share_pct"] is not None else DASH
     n3 = f"{oy_dark:.1f}%" if oy_dark is not None else DASH
-    head3 = (f"the two standard checks name no function for <b>{n3}</b> of a Pacific oyster's proteins"
+    head3 = (f"<b>{n3}</b> of a Pacific oyster's proteins match no known protein family and no described protein"
              if oy_dark is not None else
-             "the share of a Pacific oyster's proteins with no function from the standard checks is not yet measured")
-    headline = (f'Experts have described <b>{n1}</b> proteins by hand, only <b>{n2}</b> of them '
+             "the share of a Pacific oyster's proteins that match nothing known is not yet measured")
+    headline = (f'Curators have reviewed <b>{n1}</b> proteins by hand, only <b>{n2}</b> of them '
                 f'from ocean animals, and {head3}.')
 
     oy_count = None
     if mp:
         oy_count = mp["species"]["oyster"]["dark"]
-    card3_sub = (f"{oy_count:,} of {fint(oy_n)} oyster proteins have no InterPro match and no Swiss-Prot "
-                 f"protein at least 30% identical" if oy_count is not None and oy_n is not None else
-                 "no InterPro match and no Swiss-Prot protein at least 30% identical")
+    card3_sub = (f"{oy_count:,} of {fint(oy_n)} oyster proteins have no family in InterPro (the catalogue of known "
+                 f"protein families), and no other Swiss-Prot protein shares 30% or more of their amino acids"
+                 if oy_count is not None and oy_n is not None else
+                 "no InterPro family match and no described protein at least 30% identical")
     cards = f"""<div class="cards">
 <div class="card"><div class="big">{n1 if total is not None else nym()}</div>
-<p>proteins whose function experts have written down by hand (Swiss-Prot, the reviewed part of UniProt)</p>
+<p>proteins whose entry a curator has reviewed by hand (Swiss-Prot, the reviewed part of UniProt)</p>
 {src_line("sp_entries")}</div>
 <div class="card"><div class="big">{n2 if oc else nym()}</div>
-<p>come from ocean animals: {oc['entries']:,} proteins from {oc['species']:,} species the World Register of Marine Species lists as marine, not freshwater or land</p>
+<p>come from ocean animals: {oc['entries']:,} proteins from {oc['species']:,} species the World Register of Marine Species lists as marine, not freshwater or land ({100 * oc['entries'] / animal:.1f}% of the {fint(animal)} reviewed animal proteins)</p>
 {src_line("sp_marine_only_animal_share")}</div>
 <div class="card"><div class="big">{n3 if oy_dark is not None else nym()}</div>
-<p>of a Pacific oyster's proteins get no function from the two standard checks: {card3_sub}</p>
-{src_line("oyster_no_interpro_no_sprot_pct", ", oyster reference proteome UP000005408")}</div>
+<p>of a Pacific oyster's proteins get no label: {card3_sub}</p>
+<p class="src">InterPro matches as UniProt 2026_03 lists them; MMseqs2 against Swiss-Prot 2026_03 (E-value 0.001 or less); oyster reference proteome UP000005408</p></div>
 </div>"""
 
     if mp:
         hu, oy = mp["species"]["human"], mp["species"]["oyster"]
         maps = f"""<figure class="maps" id="figure-1">
 <div class="legend" aria-label="Key to Figure 1">
-<span class="item"><span class="tile lit" aria-hidden="true"></span>lit: the protein has an InterPro match or a Swiss-Prot protein at least 30% identical</span>
+<span class="item"><span class="tile lit" aria-hidden="true"></span>lit: the protein has an InterPro family, or another Swiss-Prot protein at least 30% identical</span>
 <span class="item"><span class="tile unlit" aria-hidden="true"></span>dark: neither</span>
 <span class="item muted">one tile = one protein, {COLS} tiles per row in both maps</span></div>
 <div class="mapgrid">
@@ -362,7 +372,8 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
 </div>
 <div class="tip" id="maptip" hidden></div>
 <figcaption><b>Figure 1.</b> Every protein of two animals, one tile each. Like Earth seen from space at night,
-lit tiles show where knowledge reaches; ocean animals are the dark continents. Hover or tap a tile to see the protein.
+lit tiles show where knowledge reaches, and ocean animals are the dark continents: the oyster has {oy['dark'] / hu['dark']:.0f} times
+as many dark proteins as human ({oy['dark']:,} against {hu['dark']:,}). A protein's match to its own Swiss-Prot entry does not count. Hover or tap a tile to see the protein.
 UniProt 2026_03 reference proteomes, one protein per gene: human UP000005640, oyster UP000005408.</figcaption>
 </figure>"""
     else:
@@ -374,9 +385,9 @@ results/why/proteome_labels.parquet (Prompt E, step 4) is not in this build.</di
 <h1 class="headline">{headline}</h1>
 {cards}
 {maps}
-<p class="does">This site measures, for every tool and every kind of organism, which proteins get a label and what
-the run costs, and tells each lab which tool to run. The first organism page will be the Pacific oyster's;
-it is not built yet, so there is no link to it.</p>
+<p class="does">This site measures, for every software tool and every kind of organism, which proteins get a label
+and what the run costs, and tells each lab which tool to run. Today it scores {n_tools} tools on human proteins.
+The first organism page will be the Pacific oyster's; it is not built yet, so there is no link to it.</p>
 </section>"""
 
     # Screen 2
@@ -386,9 +397,10 @@ it is not built yet, so there is no link to it.</p>
 {fig_concentration(oc)}
 <figcaption><b>Figure 2.</b> The five best-studied species hold {oc['top5']:,} reviewed proteins
 ({oc['top5_share']:.1f}% of all), about {oc['top5'] / 5:,.0f} each. The {oc['species']:,} ocean animal species
-hold {oc['entries']:,} together, {oc['entries'] / oc['species']:.1f} each.
+hold {oc['entries']:,} together, {oc['entries'] / oc['species']:.1f} each on average.
 The other {oc['rest_species']:,} species hold {oc['rest_entries']:,}. {oc['no_species']:,} entries have no species
-and are left out. Source: Swiss-Prot, {esc(w.release('sp_entries'))}; World Register of Marine Species habitat flags.</figcaption>
+and are left out. Human has {dict(oc['top']).get('Homo sapiens', 0):,} reviewed entries here; Figure 1 counts the {fint(w.v('human_proteins')) if w.v('human_proteins') else DASH} proteins of the
+human reference proteome, one per gene, reviewed or not. Source: Swiss-Prot, {esc(w.release('sp_entries'))}; World Register of Marine Species habitat flags.</figcaption>
 </figure>"""
     else:
         conc = f'<figure id="figure-2"><div class="placeholder">{DASH} {NYM}</div><figcaption><b>Figure 2.</b> Reviewed proteins by species.</figcaption></figure>'
@@ -433,7 +445,7 @@ and are left out. Source: Swiss-Prot, {esc(w.release('sp_entries'))}; World Regi
 <span class="item"><span class="swatch nomark" aria-hidden="true"></span>none found</span></div>
 <div class="prots">{''.join(blocks)}</div>
 <figcaption><b>Figure 3.</b> Four ocean proteins that changed medicine and biology, and what the tools find on
-them today. Residues and features: UniProt 2026_03. Matches: InterPro API and MMseqs2 against Swiss-Prot (Prompt E, step 6).</figcaption>
+them today. Residues and features: UniProt 2026_03. Matches: the InterPro web service, and MMseqs2 against Swiss-Prot 2026_03.</figcaption>
 </figure>"""
 
     vmax = 1.0
@@ -452,8 +464,9 @@ them today. Residues and features: UniProt 2026_03. Matches: InterPro API and MM
     s_rep = next((r for r in st if r.get("stratum") == "REPEAT"), None)
     if s_all and s_short and s_rep and s_all["value"] is not None:
         tie = (f"The proteins that gave us underwater glue, antifreeze, a painkiller and the green light of cell biology "
-               f"were all found at the bench, by people, not by a tool. Three of the four are built from repeats or short "
-               f"peptides. On the leaderboard, the best tool finds {100 * s_short['value']:.0f} in 100 "
+               f"were all found at the bench, by people, not by a tool. The three that tools label today are found by "
+               f"their likeness to proteins people described first; the antifreeze protein still gets no label. "
+               f"Three of the four are built from repeats or short peptides. On the leaderboard, the best tool finds {100 * s_short['value']:.0f} in 100 "
                f"known features 2 to 15 residues long, against {100 * s_all['value']:.0f} in 100 features of any length. "
                f"Repeats are found about as often as other features ({100 * s_rep['value']:.0f} in 100), and stretches with no "
                f"fixed shape are {NYM}.")
@@ -465,8 +478,8 @@ them today. Residues and features: UniProt 2026_03. Matches: InterPro API and MM
 <div class="tablewrap"><table class="strata"><thead><tr><th>Known Swiss-Prot features on human proteins (how many)</th><th>Found, out of 100</th><th>Best tool</th></tr></thead>
 <tbody>{''.join(srows)}</tbody></table></div>
 <figcaption><b>Figure 4.</b> For each group of known features (Swiss-Prot annotations on human proteins), the
-share found by the tool that does best on that group, each at its own best score cut-off. Each tool searched
-zebrafish proteins, the relative in the leaderboard's <a href="{up}index.html">default view</a>. Source: the leaderboard tables (footer).</figcaption>
+share found by the tool that does best on that group, with the score cut-off that suits that tool best. Picking the best tool for each row raises every row. Each tool
+labelled human proteins by searching the proteins of zebrafish (a freshwater fish), the relative in the leaderboard's <a href="{up}index.html">default view</a>. Source: the leaderboard tables (footer).</figcaption>
 </figure>"""
 
     screen2 = f"""<section class="screen" id="dark">
@@ -486,8 +499,8 @@ zebrafish proteins, the relative in the leaderboard's <a href="{up}index.html">d
         ("Tools scored on each page", nym(),
          f"the leaderboard scores {n_tools} tools today, on human proteins only"),
         ("Copy command button on each page", nym(),
-         "one click copies the command for the best tool for that organism, so a lab can run it the same day; not built yet"),
-        ("Wet-lab truth rows contributed by labs", nym(), "counted through a contribution path that is not built yet"),
+         "one click copies the command that runs the best tool on that organism's proteins, so a lab can run it the same day; not built yet"),
+        ("Lab results sent in: a protein and what an experiment showed it does", nym(), "counted through a way to send results in that is not built yet"),
         ("Labs that used a page", nym(), "counted by clicks on the Copy command button, with no record of who clicked"),
     ]
     trows = "".join(f'<tr><th scope="row">{esc(a)}</th><td class="num">{b}</td><td>{esc(c)}</td></tr>' for a, b, c in units)
@@ -514,13 +527,16 @@ Biotechnology 2025, co-authored by Olga Botvinnik) does the same for single-cell
 </section>"""
 
     used = sorted({k for k in w.n})
-    srcs = sorted({w.n[k]["source"] for k in used if w.n[k]["source"] in w.sources})
+    page_src = ("swissprot_dat", "worms_matches", "human_canonical_fasta", "oyster_canonical_fasta",
+                "human_interpro_xrefs", "oyster_interpro_xrefs", "sherlock_mmseqs", "afdb_predictions")
+    srcs = sorted({k for k in w.sources if k in page_src or k.startswith(("uniprot_", "interpro_matches_", "afdb_confidence_"))}
+                  - {"uniprot_relnotes"})
     src_items = "".join(
-        f'<li><span class="mono">{esc(k)}</span>: <a href="{esc(w.sources[k]["url"])}">{esc(w.sources[k].get("file", k))}</a>, '
+        f'<li><a href="{esc(w.sources[k]["url"])}">{esc(w.sources[k].get("file", k))}</a>, '
         f'{esc(w.sources[k].get("release", ""))}, fetched {esc(str(w.sources[k].get("fetched_utc", ""))[:10])}</li>'
         for k in srcs if str(w.sources[k].get("url", "")).startswith("http"))
     sources = f"""<section class="screen" id="sources"><details><summary>The files behind these numbers</summary>
-<p class="prose">Counts: <span class="mono">results/why/numbers.parquet</span>, built by <span class="mono">scripts/why/</span>; each row names its source below.
+<p class="prose">Counts: <span class="mono">results/why/numbers.parquet</span> and <span class="mono">results/why/proteome_labels.parquet</span>, built by <span class="mono">scripts/why/</span> from the files below.
 Missing parts: {esc(", ".join(sorted(set(w.missing))) or "none")}.</p><ul class="srclist">{src_items}</ul></details></section>"""
 
     body = screen1 + screen2 + screen3 + screen4 + sources

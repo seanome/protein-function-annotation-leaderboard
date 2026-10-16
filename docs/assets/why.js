@@ -49,7 +49,7 @@
     if (!data) return;
     const p = at(c, ev);
     if (!p) { tip.hidden = true; return; }
-    const labels = [p[3] ? "InterPro match" : null, p[4] ? "Swiss-Prot hit" : null].filter(Boolean);
+    const labels = [p[3] ? "an InterPro family" : null, p[4] ? "another Swiss-Prot protein at least 30% identical" : null].filter(Boolean);
     tip.textContent = "";
     const b = document.createElement("b");
     b.textContent = p[1] ? `${p[1]} (${p[0]})` : p[0];
@@ -57,7 +57,7 @@
     name.textContent = p[2] || "no name in UniProt";
     const lab = document.createElement("div");
     lab.className = "muted";
-    lab.textContent = labels.length ? "lit: " + labels.join(", ") : "dark: no InterPro match, no Swiss-Prot hit";
+    lab.textContent = labels.length ? "lit: " + labels.join(", ") : "dark: no InterPro family, no other Swiss-Prot protein at least 30% identical";
     tip.append(b, name, lab);
     tip.hidden = false;
     const fig = c.closest("figure").getBoundingClientRect();
