@@ -13,7 +13,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = {
     "1_leaderboard": "index.html",
-    "2_score_against_cost": "cost.html",
+    "2_compare_two_columns": "cost.html",
     "6_region_pileup": "pileup.html",
     "3_tool_card_kmerseek": "tools/kmerseek.html",
     "3b_tool_cards_index": "tools/index.html",
@@ -21,6 +21,12 @@ PAGES = {
     "4_coverage": "coverage.html",
     "5_methods": "methods.html",
 }
+EXTRA = {
+    "2b_compare_cost_usd_auprc": "cost.html#x=cost&y=auprc",
+    "2c_compare_fmax_auprc": "cost.html#x=fmax&y=auprc",
+    "2d_compare_ram_iou": "cost.html#x=ram&y=iou",
+}
+PHONE = {"2e_compare_two_columns_400px": "cost.html"}
 
 
 class Quiet(http.server.SimpleHTTPRequestHandler):
@@ -44,6 +50,20 @@ def main() -> None:
             if path == "pileup.html":
                 page.wait_for_function("window.__pileup && window.__pileup.ready", timeout=60000)
             page.screenshot(path=str(out / f"{name}.png"), full_page=True)
+            print(out / f"{name}.png")
+        # Figure 1 of cost.html with other axis pairs, and at phone width.
+        for name, path in EXTRA.items():
+            page.goto(base + path)
+            page.wait_for_load_state("networkidle")
+            page.wait_for_timeout(800)
+            page.screenshot(path=str(out / f"{name}.png"), full_page=True)
+            print(out / f"{name}.png")
+        phone = b.new_page(viewport={"width": 400, "height": 900}, color_scheme="light")
+        for name, path in PHONE.items():
+            phone.goto(base + path)
+            phone.wait_for_load_state("networkidle")
+            phone.wait_for_timeout(800)
+            phone.screenshot(path=str(out / f"{name}.png"), full_page=True)
             print(out / f"{name}.png")
         b.close()
     httpd.shutdown()

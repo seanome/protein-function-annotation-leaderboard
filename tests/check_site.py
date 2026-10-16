@@ -5,8 +5,13 @@
    For each tool and setting row, the page must show the parquet's numbers when the
    parquet has a row, and "—" with "not run" when it has none. Every "—" on the page
    must be a cell marked missing, and every missing cell must be a missing row.
-2. Score against cost: render every combination for each of the three scores. The plotted
-   markers must be exactly the rows with both a score and a measured cost.
+2. Compare two columns (Figure 1 on cost.html): render every combination for each of the
+   three scores against core-hours, and every combination with no stratum chosen for five
+   more axis pairs (cost against AUPRC, peak RAM against median IoU, Fmax against AUPRC,
+   wall-clock time against Fmax, database build against Fmax). The plotted markers must be
+   exactly the rows with a value on both axes, each marker's x and y must equal the value
+   computed here from the parquet files, every other row must be listed as not plotted, and
+   the line through the best trade-offs must be drawn only for a cost against a score.
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
    at phone width (375 px).
 
@@ -69,7 +74,10 @@ SNAP_TABLE = """(batch) => batch.map((s) => {
 SNAP_PLOT = """(batch) => batch.map((s) => {
   window.__lb.set(s);
   const marks = [...document.querySelectorAll('#plot [data-tool]')].map((m) => m.dataset.tool + '|' + m.dataset.setting);
-  return {s, marks, notplotted: document.getElementById('notplotted').textContent};
+  const notplotted = [...document.querySelectorAll('#notplotted .np')].map((m) => m.dataset.tool + '|' + m.dataset.setting);
+  const st = window.__lb.state();
+  return {s, marks, notplotted, plotted: window.__lb.plotted(), state: {x: st.x, y: st.y},
+          frontier: !!document.querySelector('#plot polyline.frontier')};
 })"""
 
 
@@ -98,10 +106,20 @@ def main() -> int:
     # tool and setting's search step, shown for every relative that tool and setting searched.
     comp = pl.read_parquet(a.data / "compute.parquet").filter(pl.col("experiment") == "qfo_region_midi_plus")
     search = comp.filter((pl.col("setting") != "database build") & ~pl.col("step").str.contains("Index|Db|DB"))
+    build = comp.filter((pl.col("setting") == "database build") | pl.col("step").str.contains("Index|Db|DB"))
+
+    def db_per_db(tool, setting):
+        # Build rows of this tool and setting, or of the tool family's shared build
+        # ("mmseqs2" for both MMseqs2 searches): mean core-hours per database built.
+        b = build.filter(pl.col("tool").is_in([tool, tool.split("_")[0]])
+                         & pl.col("setting").is_in([setting, "database build"]))
+        return b["cpu_h"].sum() / b["n_target_dbs"].sum() if b.height else None
     per_ts = {(r["tool"], r["setting"]): {
         "cpu_h_per_1000_queries": r["cpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
         "peak_rss_gb": r["peak_ram_gb"], "gpu_h_per_1000_queries": 0.0 if r["gpu_h"] is None else r["gpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
-        "cpu_h_reported": None, "n_completed_runs": 1} for r in search.iter_rows(named=True)}
+        "cpu_h_reported": None, "n_completed_runs": 1,
+        "wall_h_per_1000_queries": r["wall_s"] / 3600 / r["n_target_dbs"] * 1000 / r["n_queries"],
+        "db_cpu_h_per_db": db_per_db(r["tool"], r["setting"])} for r in search.iter_rows(named=True)}
     cexp = {(k[5], k[6], k[2]): per_ts[(k[5], k[6])] for k in expect if (k[5], k[6]) in per_ts}
 
     failures: list[str] = []
@@ -191,24 +209,73 @@ def main() -> int:
                 if snap["dashes"] != n_missing_cells:
                     failures.append(f"{s}: {snap['dashes']} dashes on the page but {n_missing_cells} missing cells")
 
-        # ---- 2. score against cost ----
+        # ---- 2. compare two columns ----
         page.goto(base + "cost.html")
-        plot_combos = [dict(c, metric=m["id"]) for c in all_combos for m in meta["metrics"]]
-        field = {"fmax": "fmax", "auprc": "auprc", "iou": "median_iou_tp"}
+        if page.evaluate("document.querySelector('#choices').open"):
+            failures.append("cost.html: the filters panel starts open; the figure should come first")
+        if page.evaluate("document.querySelector('#choices').compareDocumentPosition(document.querySelector('#plot')) & 4") == 0:
+            failures.append("cost.html: the figure is not after the filters panel")
+        score_field = {"fmax": "fmax", "auprc": "auprc", "iou": "median_iou_tp"}
+
+        def axis_value(ax, k, cw):
+            """Value of one row on one axis, straight from the parquet files, or None."""
+            if ax in score_field:
+                v = expect.get(k, {}).get(score_field[ax])
+                return None if v is None or (ax == "iou" and v == 0) else v
+            if k not in expect or cw is None:
+                return None
+            return {"cpu": cw["cpu_h_per_1000_queries"],
+                    "cost": cw["cpu_h_per_1000_queries"] * 0.044625 + cw["gpu_h_per_1000_queries"] * 1.006,
+                    "wall": cw["wall_h_per_1000_queries"], "ram": cw["peak_rss_gb"],
+                    "db": cw["db_cpu_h_per_db"]}[ax]
+
+        axis_ids = {a["id"] for a in meta["axes"]}
+        no_stratum = [c for c in all_combos if c["axis"] == "all"]
+        pairs = [(c, "cpu", y) for y in ("fmax", "auprc", "iou") for c in all_combos] + \
+            [(c, x, y) for x, y in (("cost", "auprc"), ("ram", "iou"), ("fmax", "auprc"), ("wall", "fmax"), ("db", "fmax"))
+             for c in no_stratum]
+        for x, y in {(x, y) for _, x, y in pairs}:
+            if x not in axis_ids or y not in axis_ids:
+                failures.append(f"axis {x} or {y} not offered on cost.html")
+        plot_combos = [dict(c, x=x, y=y) for c, x, y in pairs]
+        stats["axis_pairs"] = sorted({f"{x}~{y}" for _, x, y in pairs})
         for i in range(0, len(plot_combos), a.batch):
             for snap in page.evaluate(SNAP_PLOT, plot_combos[i:i + a.batch]):
                 stats["plot_renders"] += 1
                 s = snap["s"]
-                want = set()
+                if (snap["state"]["x"], snap["state"]["y"]) != (s["x"], s["y"]):
+                    failures.append(f"plot {s}: page drew {snap['state']['x']} against {snap['state']['y']}")
+                want = {}
                 for r in meta["rows"]:
                     k = (s["truth"], s["calls"], s["species"], s["axis"], s["stratum"], r["tool"], r["setting"])
-                    if k in expect and (r["tool"], r["setting"], s["species"]) in cexp \
-                            and expect[k].get(field[s["metric"]]) not in (None, 0.0 if s["metric"] == "iou" else None):
-                        want.add(r["tool"] + "|" + r["setting"])
-                got = set(snap["marks"])
+                    cw = cexp.get((r["tool"], r["setting"], s["species"]))
+                    vx, vy = axis_value(s["x"], k, cw), axis_value(s["y"], k, cw)
+                    if vx is not None and vy is not None:
+                        want[r["tool"] + "|" + r["setting"]] = (vx, vy)
+                got = {m["tool"] + "|" + m["setting"]: (m["x"], m["y"]) for m in snap["plotted"]}
+                dom = set(snap["marks"])
+                if set(got) != set(want) or len(snap["plotted"]) != len(got) or dom != set(got):
+                    failures.append(f"plot {s}: markers {sorted(set(got) ^ set(want))} differ from the rows with both values")
+                for key in set(got) & set(want):
+                    for gv, wv, name in zip(got[key], want[key], ("x", "y")):
+                        if abs(gv - wv) > 1e-9 * max(1.0, abs(wv)):
+                            failures.append(f"plot {s} {key}: {name} {gv} != parquet {wv}")
+                    stats["marker_values_checked"] = stats.get("marker_values_checked", 0) + 2
+                listed = set(snap["notplotted"])
+                rows_all = {r["tool"] + "|" + r["setting"] for r in meta["rows"]}
+                if listed | set(got) != rows_all or listed & set(got):
+                    failures.append(f"plot {s}: not-plotted list {sorted(listed)} does not complete the markers")
+                # The line: rows no other row beats on both (lower or equal x and higher or
+                # equal y, one strictly), only when x is a cost and y a score.
+                cost_x = s["x"] not in score_field
+                front = {k for k, (x0, y0) in want.items()
+                         if not any(k2 != k and x2 <= x0 and y2 >= y0 and (x2 < x0 or y2 > y0)
+                                    for k2, (x2, y2) in want.items())} if cost_x else set()
+                got_front = {m["tool"] + "|" + m["setting"] for m in snap["plotted"] if m["frontier"]}
+                if got_front != front or snap["frontier"] != (len(front) > 1):
+                    failures.append(f"plot {s}: line through {sorted(got_front)}, expected {sorted(front)}")
+                stats["lines_drawn"] = stats.get("lines_drawn", 0) + int(snap["frontier"])
                 stats["markers_checked"] += len(got)
-                if got != want or len(snap["marks"]) != len(got):
-                    failures.append(f"plot {s}: markers {sorted(got ^ want)} differ from the rows with score and cost")
 
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "tools/index.html"] + \
