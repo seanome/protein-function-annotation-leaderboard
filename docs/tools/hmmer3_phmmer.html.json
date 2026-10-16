@@ -94,6 +94,34 @@
   },
   {
    "tag": "h2",
+   "text": "phmmer (HMMER 3)"
+  },
+  {
+   "tag": "p",
+   "text": "each row: the claim, the result that would disprove it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "h3",
+   "text": "⊘ Disproved (1)"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict."
+  },
+  {
+   "tag": "p",
+   "text": "Source: seanome/2024-kmerseek-analysis@4a4b1171 results.parquet"
+  },
+  {
+   "tag": "li",
+   "text": "⊘phmmer finds distant homologs at least as well as a fast sequence searchThe authors' words: “HMMER is designed to detect remote homologs as sensitively as possible” (hmmer.org, fetched 16 Oct 2026)Disproved if: phmmer's Fmax is more than 0.05 below MMseqs2's on Pfam domains at 20 to 30% identity, on any relative with at least 30 such domainsdisproved · −0.137 to +0.057 across 10 of 15 (5 with fewer than 30 truth regions left out: btaurus, mdomestica, mouse, ptroglodytes, rnorvegicus); furthest: ecoli −0.137 · leaderboard"
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {

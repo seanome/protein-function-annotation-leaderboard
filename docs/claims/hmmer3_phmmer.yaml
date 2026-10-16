@@ -1,0 +1,39 @@
+# Claims by HMMER's authors, each with the test on this site that would retire it.
+# The quote is the authors' own words, written by scripts/fetch_quote.py; the status comes
+# from the test (scripts/claims.py), never from this file. Schema: claims/schema.json.
+
+tool: hmmer3_phmmer
+title: phmmer (HMMER 3)
+updated: "2026-10-16"
+
+claims:
+  - id: remote-homologs
+    claim: phmmer finds distant homologs at least as well as a fast sequence search
+    author_claim:
+      quote: HMMER is designed to detect remote homologs as sensitively as possible
+      url: https://hmmer.org/
+      text_url: http://hmmer.org/
+      fetched: '2026-10-16'
+      sha256: 0a111c0bce09f94c9c9013efeefe78d73a1b753d433e16f6f00a9fef89327f56
+    kill: >-
+      phmmer's Fmax is more than 0.05 below MMseqs2's on Pfam domains at 20 to 30% identity,
+      on any relative with at least 30 such domains
+    scope: >-
+      Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30%
+      identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains
+      in this bin is left out and named in the verdict.
+    test:
+      kind: table
+      experiment: qfo_region_midi_plus
+      truth_source: Pfam-A domain instances
+      dedup_or_raw: raw
+      stratum_axis: identity
+      stratum_bin: 20-30%
+      metric: fmax
+      tool: hmmer3_phmmer
+      setting: default
+      against: {tool: mmseqs2_seqseq, setting: s7}
+      targets: [QfO arabidopsis, QfO btaurus, QfO chicken, QfO ciona, QfO clupus, QfO ecoli, QfO fly, QfO mdomestica, QfO mouse, QfO ptroglodytes, QfO rnorvegicus, QfO worm, QfO xtropicalis, QfO yeast, QfO zebrafish]
+      min_instances: 30
+      kill_if: {below_by_more_than: 0.05}
+    evidence: {label: leaderboard, href: index.html}

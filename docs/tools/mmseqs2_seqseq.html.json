@@ -94,6 +94,34 @@
   },
   {
    "tag": "h2",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "p",
+   "text": "each row: the claim, the result that would disprove it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "h3",
+   "text": "● Holds (1)"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "\"its\" in the quote is BLAST. This site does not run BLAST, so phmmer, a full sequence-to-sequence search, stands in for it. Pfam-A domain instances, raw calls, 998 human queries, MMseqs2 at sensitivity 7 (setting s7). Speed is not part of this test."
+  },
+  {
+   "tag": "p",
+   "text": "Source: seanome/2024-kmerseek-analysis@4a4b1171 results.parquet"
+  },
+  {
+   "tag": "li",
+   "text": "●MMseqs2 is almost as sensitive as a full sequence searchThe authors' words: “At 100 times its speed it achieves almost the same sensitivity.” (github.com/soedinglab/MMseqs2, fetched 16 Oct 2026)Disproved if: MMseqs2's Fmax on Pfam domains is more than 0.05 below phmmer's on any of the 15 relativesholds · −0.037 to +0.008 across 15 of 15 · leaderboard"
+  },
+  {
+   "tag": "h2",
    "text": "What it compares"
   },
   {

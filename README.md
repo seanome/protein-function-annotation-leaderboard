@@ -60,3 +60,19 @@ tests are recomputed from `data/results.parquet`, record tests must quote the ex
 inventory (`data/experiments.json`, from seanome/2024-kmerseek-analysis PR 97) exactly. The
 `claims` GitHub Action runs `python scripts/claims.py --check` on every push; the build writes
 `docs/badges/claims-<tool>.svg`.
+A claim about another group's tool quotes its authors (`author_claim`), written by
+`scripts/fetch_quote.py`; the check fails when a quote no longer matches the sha256 recorded
+when the page was fetched. Claims files exist for kmerseek, Foldseek, MMseqs2, phmmer and
+DIAMOND.
+
+## Submitting a tool, and frozen releases
+
+`SUBMIT.md`: how a tool author sends a container and a Nextflow module, which the host runs on
+Sherlock with a trace, and how a disputed row is rerun.
+
+`schema/results_row.json` defines one row of a release's `results.parquet` (section 6 of the
+research doc, seanome/2024-kmerseek-analysis PR 147). `make rows` builds it from `data/` and
+checks it with `scripts/validate_rows.py`; CI does the same. `make release VERSION=v1 DRY_RUN=1`
+builds a release and prints every upload; `ZENODO_TOKEN=... HF_TOKEN=... make release VERSION=v1`
+publishes the Zenodo record (DOI) and mirrors it to the Hugging Face dataset
+`seanome/protein-function-annotation-leaderboard`, then writes `releases/v1.json` to commit.
