@@ -18,6 +18,8 @@ https://seanome.github.io/protein-function-annotation-leaderboard/
 | `compute.parquet` | CPU-hours and peak memory of each search, from the run's Nextflow task records |
 | `coverage.md` | tool by stratum: measured or not run |
 | `provenance.json` | sha256 of every input and output |
+| `no_search_baselines.parquet` | the no-search baseline rows (Kyte-Doolittle, IUPred, metapredict, SEG, Pfam family frequency); `applicable` False marks a cell shown as "not applicable". Copied from its own commit and folder (`NOSEARCH_COMMIT`, `NOSEARCH_PATH` in the Makefile) |
+| `no_search_compute.parquet` | the baselines' run time per 1,000 queries, once the Sherlock run has a trace |
 
 `data/SOURCE.json` records the commit, and every page prints it. The site never fills a gap:
 where the table has no row, the page shows "—" and "not run".

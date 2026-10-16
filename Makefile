@@ -3,12 +3,16 @@
 SOURCE_REPO ?= seanome/2024-kmerseek-analysis
 SOURCE_COMMIT ?= 4a4b1171
 PILEUP_COMMIT ?= 39d81ec9
+# No-search baseline rows: the laptop check on olgabot/no-search-baselines (PR 158 of the
+# source repo) until the Sherlock run's table replaces it.
+NOSEARCH_COMMIT ?= 05ca5528
+NOSEARCH_PATH ?= tables/no_search_baselines_laptop_check
 PY ?= .venv/bin/python
 
 .PHONY: tables site check serve
 
 tables:
-	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --out data
+	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --nosearch-commit $(NOSEARCH_COMMIT) --nosearch-path $(NOSEARCH_PATH) --out data
 
 site:
 	$(PY) scripts/build_site.py --data data --out docs

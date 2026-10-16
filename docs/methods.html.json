@@ -6,7 +6,7 @@
   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
   "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:44:05Z",
+  "copied_at": "2026-10-16T17:43:58Z",
   "sha256": {
    "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -15,9 +15,12 @@
    "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
-   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+   "no_search_baselines.parquet": "e4d97b75d70a13473c23e98adbf5223d662a83a1e8560c18e8be77fa80441952"
   },
-  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "nosearch_commit": "05ca5528683575b8d33d605785c2547d8ee824bf",
+  "nosearch_path": "tables/no_search_baselines_laptop_check"
  },
  "text": [
   {
@@ -59,6 +62,10 @@
   {
    "tag": "li",
    "text": "Subsets of the proteins"
+  },
+  {
+   "tag": "li",
+   "text": "No-search baselines"
   },
   {
    "tag": "li",
@@ -439,6 +446,46 @@
   {
    "tag": "p",
    "text": "The run computed each subset on its own, so two subsets cannot be combined; a combination with no row shows × and \"not run\"."
+  },
+  {
+   "tag": "h2",
+   "text": "No-search baselines"
+  },
+  {
+   "tag": "p",
+   "text": "A baseline row reads only the query sequence: it searches no relative and copies nothing. It answers what score a reader gets with no database at all. Gillis and Pavlidis (2013) asked every function benchmark for such a row, after a method that gave every protein the same annotation scored well in the first CAFA. Each baseline is scored by the same code and against the same truth tables as the search tools."
+  },
+  {
+   "tag": "li",
+   "text": "Kyte-Doolittle scan: Hydropathy (Kyte and Doolittle 1982) averaged over 19-residue windows; windows above 1.6 are called membrane-spanning. The scan of notebook 231. Can address: Swiss-Prot TRANSMEM and INTRAMEM features. Swiss-Prot features, INTRAMEM: Fmax 0.333 (n = 9, fewer than 30: too few to read); Swiss-Prot features, TRANSMEM: Fmax 0.778 (n = 1,124)."
+  },
+  {
+   "tag": "li",
+   "text": "IUPred long: IUPred 1.0, long mode; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet."
+  },
+  {
+   "tag": "li",
+   "text": "metapredict: metapredict 3.0.1; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet."
+  },
+  {
+   "tag": "li",
+   "text": "SEG: segmasker from BLAST+ 2.16.0 at its default settings (window 12, locut 2.2, hicut 2.5); each masked stretch is a call. Can address: Swiss-Prot COMPBIAS and REPEAT features. Not in this build's table yet."
+  },
+  {
+   "tag": "li",
+   "text": "Pfam family frequency: Every query gets, over its whole length, the Pfam family held by the most human proteins of its length, the queries themselves left out. Can address: Pfam and Pfam-N. Pfam, all proteins: Fmax 0.035 (n = 2,435)."
+  },
+  {
+   "tag": "p",
+   "text": "Each baseline can address only some cells: a hydropathy scan can call a membrane-spanning segment but not a Pfam family. Every other cell shows not applicable, never 0. In Table 1 the baselines sit under the search tools, whatever the sort."
+  },
+  {
+   "tag": "p",
+   "text": "Reading a tool below a baseline. Where a search tool's Fmax is below a baseline's on the same truth set and subset, the search has found nothing there that the query sequence alone does not give. On Swiss-Prot TRANSMEM, for example, a tool below the Kyte-Doolittle scan calls membrane-spanning segments less well than a hydropathy average does, so its score there says nothing about whether it found related proteins. On Pfam, a tool below the Pfam family frequency row does no better than giving every protein the most common family of its length."
+  },
+  {
+   "tag": "p",
+   "text": "A baseline row is the same under every relative and under raw and dedup, since it searches no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000 queries, from the run's task records; where the table holds none, the cost reads not measured. Source of these rows: laptop check: tables/no_search_baselines_laptop_check (committed code, midi-plus truth tables copied from Sherlock)."
   },
   {
    "tag": "h2",

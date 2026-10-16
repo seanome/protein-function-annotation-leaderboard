@@ -20,7 +20,9 @@ import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 ROOT_DIR = Path(__file__).resolve().parents[1]
-from tools import KINDS, SPECIES, TOOLS  # noqa: E402
+from tools import BASELINES, KINDS, SPECIES, TOOLS  # noqa: E402
+# Search tools and no-search baselines, for anything that only needs a name, kind or shape.
+ALL_TOOLS = {**TOOLS, **BASELINES}
 import figures  # noqa: E402
 import pileup_figures  # noqa: E402
 
@@ -114,6 +116,15 @@ SETTING_LABEL = {
     ("hmmscan", "direct"): "Pfam models",
 }
 KMER_SETTING = re.compile(r"(.+)_k(\d+)_lc(False|True)")
+# No-search baseline settings: what each one is called against.
+BASELINE_SETTING = {
+    "w19_t1.6_transmem": "window 19, above 1.6, called TRANSMEM",
+    "w19_t1.6_intramem": "window 19, above 1.6, called INTRAMEM",
+    "long_t0.5_min20_region": "above 0.5 for 20+ residues, called REGION",
+    "v3_t0.5_min20_region": "above 0.5 for 20+ residues, called REGION",
+    "segmasker_default_repeat": "default settings, called REPEAT",
+    "length_bin": "most common family of the length bin",
+}
 
 
 def setting_label(tool: str, setting: str) -> str:
@@ -437,7 +448,7 @@ def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
 def legend_kinds(tools_used: set[str]) -> str:
     items = []
     for kind, k in KINDS.items():
-        names = [TOOLS[t]["name"] for t in TOOLS if TOOLS[t]["kind"] == kind and t in tools_used]
+        names = [ALL_TOOLS[t]["name"] for t in ALL_TOOLS if ALL_TOOLS[t]["kind"] == kind and t in tools_used]
         if names:
             items.append(f'<span class="item"><span class="kind k-{kind}" aria-hidden="true"></span>'
                          f'{esc(k["label"])}: {esc(", ".join(names))}</span>')
@@ -537,6 +548,56 @@ def load(data: Path):
     return res, comp, src, prov, cov
 
 
+NO_SEARCH = "no_search_baselines.parquet"
+NO_SEARCH_COMPUTE = "no_search_compute.parquet"
+
+
+def load_baselines(data: Path, res: pl.DataFrame) -> tuple[pl.DataFrame | None, list[dict]]:
+    """The no-search baseline rows, in the shape of `res`, plus their cost rows.
+
+    data/no_search_baselines.parquet (seanome/2024-kmerseek-analysis,
+    scripts/build_no_search_baseline_table.py) holds one row per baseline, setting, truth
+    set, stratum and metric. `applicable` False marks a cell the baseline cannot address;
+    its value is null and the page shows "not applicable". A baseline searches no relative
+    and makes no transfers to merge, so its row is the same under every relative and under
+    raw and dedup; it is copied to each so that it sits in every view of Table 1. Truth sets
+    the site does not offer (the two Swiss-Prot disorder tables) are left out here.
+    """
+    p = data / NO_SEARCH
+    if not p.exists():
+        return None, []
+    b = pl.read_parquet(p).filter((pl.col("experiment") == EXPERIMENT)
+                                  & pl.col("truth_source").is_in(list(TRUTH_FROM_LONG)))
+    unknown = set(b["tool"].unique()) - set(BASELINES)
+    if unknown:
+        raise SystemExit(f"{NO_SEARCH}: baselines with no entry in tools.BASELINES: {unknown}")
+    if b.filter(~pl.col("applicable") & pl.col("value").is_not_null()).height:
+        raise SystemExit(f"{NO_SEARCH}: a not-applicable row carries a value")
+    b = (b.filter(pl.col("metric").is_in(["fmax", "fmax_precision", "fmax_recall", "auprc", "median_iou_tp"]))
+         .with_columns(pl.col("truth_source").replace_strict(TRUTH_FROM_LONG).alias("truth_set"),
+                       pl.col("stratum_bin").alias("stratum"),
+                       pl.col("n_instances").alias("n_truth_instances"))
+         .pivot(on="metric", index=["truth_set", "tool", "setting", "stratum_axis", "stratum",
+                                    "n_truth_instances", "applicable"], values="value"))
+    rel = res.select("species", "species_mya").unique()
+    calls = pl.DataFrame({"calls": ["raw", "dedup"]})
+    base = (b.join(rel, how="cross").join(calls, how="cross")
+            .with_columns((pl.col("calls") == "dedup").alias("dedup"))
+            .sort("truth_set", "calls", "species", "stratum_axis", "stratum", "tool", "setting"))
+    comp_rows = []
+    pc = data / NO_SEARCH_COMPUTE
+    if pc.exists():
+        c = pl.read_parquet(pc)
+        for r in c.iter_rows(named=True):
+            for st in base.filter(pl.col("tool") == r["tool"])["setting"].unique().sort().to_list():
+                for sp in rel["species"].sort().to_list():
+                    comp_rows.append({"tool": r["tool"], "setting": st, "species": sp,
+                                      "cpu_h_per_1000": r["cpu_h"] * 1000 / r["n_queries"],
+                                      "wall_h_per_1000": r["wall_s"] / 3600 * 1000 / r["n_queries"],
+                                      "peak_rss_gb": r["peak_ram_gb"]})
+    return base, comp_rows
+
+
 def row_order(res: pl.DataFrame) -> list[dict]:
     kinds = list(KINDS)
     pairs = res.select("tool", "setting").unique().to_dicts()
@@ -551,19 +612,34 @@ def row_order(res: pl.DataFrame) -> list[dict]:
     return out
 
 
-def results_json(res: pl.DataFrame) -> dict:
+def results_json(res: pl.DataFrame, base: pl.DataFrame | None = None) -> dict:
     out: dict[str, dict] = {}
-    for r in res.iter_rows(named=True):
-        key = "|".join([r["truth_set"], r["calls"], r["species"], r["stratum_axis"], r["stratum"]])
-        k2 = f'{r["tool"]}|{r["setting"]}'
-        if k2 in out.setdefault(key, {}):
-            raise SystemExit(f"two rows for {key} {k2}")
-        out[key][k2] = [r["fmax"], r["auprc"], r["median_iou_tp"], r["n_truth_instances"]]
+    frames = [res] if base is None else [res, base]
+    for f in frames:
+        for r in f.iter_rows(named=True):
+            key = "|".join([r["truth_set"], r["calls"], r["species"], r["stratum_axis"], r["stratum"]])
+            k2 = f'{r["tool"]}|{r["setting"]}'
+            if k2 in out.setdefault(key, {}):
+                raise SystemExit(f"two rows for {key} {k2}")
+            if r.get("applicable", True):
+                out[key][k2] = [r["fmax"], r["auprc"], r["median_iou_tp"], r["n_truth_instances"]]
+            else:
+                # Not applicable: the baseline cannot address this cell. No score, ever.
+                out[key][k2] = [None, None, None, r["n_truth_instances"], "na"]
     return out
 
 
-def compute_json(comp: pl.DataFrame) -> dict:
+def compute_json(comp: pl.DataFrame, base_comp: list[dict] | None = None) -> dict:
     out = {}
+    for r in base_comp or []:
+        # A baseline's own seconds, from its run's task records; no relative is searched
+        # and no database is built, so there is no per-relative split and no build cost.
+        out[f'{r["tool"]}|{r["setting"]}|{r["species"]}'] = {
+            "cpu_h_per_1000": r["cpu_h_per_1000"], "cpu_h_reported_per_1000": None,
+            "peak_rss_gb": r["peak_rss_gb"], "gpu": "none", "gpu_h_per_1000": 0.0,
+            "hardware": HARDWARE, "n_relatives": 0, "cores": None,
+            "wall_h_per_1000": r["wall_h_per_1000"], "db_cpu_h_per_db": None, "db_n": None,
+        }
     for r in comp.iter_rows(named=True):
         rep = r["cpu_h_reported"]
         out[f'{r["tool"]}|{r["setting"]}|{r["species"]}'] = {
@@ -589,7 +665,7 @@ def compute_json(comp: pl.DataFrame) -> dict:
 def key_line(tools_used: set[str]) -> str:
     """One line above Table 1: the kind colours and the marks inside the table."""
     kinds = "".join(f'<span class="item"><span class="kind k-{k}" aria-hidden="true"></span>{esc(SHORT_KIND[k])}</span>'
-                    for k in KINDS if any(TOOLS[t]["kind"] == k for t in tools_used))
+                    for k in KINDS if any(ALL_TOOLS[t]["kind"] == k for t in tools_used))
     return (f'<div class="legend keyline" aria-label="Key to Table 1">{kinds}'
             '<span class="item"><span class="nr" aria-hidden="true">×</span> not run</span>'
             '<span class="item"><span class="tag warn">graded on its own models</span></span></div>')
@@ -1439,7 +1515,7 @@ def page_card(tool: str, md: tuple[str, str], src: dict, fig: str, cl: dict | No
 # Licence categories a tool card can be filtered by; each tool's is set in scripts/tools.py.
 LICENCE_TAGS = ("permissive licence", "GPL-3.0")
 SHORT_KIND = {"letters": "aligns letters", "profiles": "family profiles", "shapes": "3-D shape letters",
-              "kmers": "reduced-alphabet k-mers", "models": "Pfam models"}
+              "kmers": "reduced-alphabet k-mers", "models": "Pfam models", "nosearch": "no search (baseline)"}
 
 
 def tool_filters(t: str) -> dict:
@@ -1709,7 +1785,51 @@ experiment's output came from, and which outputs were left out and why:
                   description="Which tool, subset and experiment combinations have been measured and which have not been run.")
 
 
-def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict, gallery: str = "") -> str:
+def no_search_section(base: pl.DataFrame | None) -> str:
+    """Methods: the no-search baselines, from data/no_search_baselines.parquet."""
+    if base is None:
+        return ('<h2 id="no-search">No-search baselines</h2>\n<p>Not in this build: '
+                f'<span class="mono">data/{NO_SEARCH}</span> was not copied.</p>')
+    one = base.filter((pl.col("calls") == "raw") & (pl.col("species") == base["species"].min()))
+    items = []
+    for t, b in BASELINES.items():
+        rows = one.filter((pl.col("tool") == t) & pl.col("applicable"))
+        if rows.height == 0:
+            items.append(f"<li><b>{esc(b['name'])}</b>: {esc(b['what'])} Can address: {esc(b['addresses'])}. "
+                         "Not in this build's table yet.</li>")
+            continue
+        cells = rows.filter(pl.col("stratum_axis").is_in(["all", "feature_type"])).sort("truth_set", "stratum")
+        shown = "; ".join(f"{TRUTH[r['truth_set']]}, {('all proteins' if r['stratum'] == 'all' else r['stratum'])}: "
+                          f"Fmax {r['fmax']:.3f} (n = {r['n_truth_instances']:,}"
+                          + (f", fewer than {MIN_N}: too few to read)" if r["n_truth_instances"] < MIN_N else ")")
+                          for r in cells.iter_rows(named=True))
+        items.append(f"<li><b>{esc(b['name'])}</b>: {esc(b['what'])} Can address: {esc(b['addresses'])}. "
+                     f"{esc(shown)}.</li>")
+    src_paths = sorted(set(pl.read_parquet(Path(DATA_DIR) / NO_SEARCH)["source_path"].to_list()))
+    return f"""<h2 id="no-search">No-search baselines</h2>
+<p>A baseline row reads only the query sequence: it searches no relative and copies nothing.
+It answers what score a reader gets with no database at all. Gillis and Pavlidis (2013) asked
+every function benchmark for such a row, after a method that gave every protein the same
+annotation scored well in the first CAFA. Each baseline is scored by the same code and
+against the same truth tables as the search tools.</p>
+<ul>{"".join(items)}</ul>
+<p>Each baseline can address only some cells: a hydropathy scan can call a membrane-spanning
+segment but not a Pfam family. Every other cell shows <i>not applicable</i>, never 0. In Table 1
+the baselines sit under the search tools, whatever the sort.</p>
+<p><b>Reading a tool below a baseline.</b> Where a search tool's Fmax is below a baseline's on
+the same truth set and subset, the search has found nothing there that the query sequence
+alone does not give. On Swiss-Prot TRANSMEM, for example, a tool below the Kyte-Doolittle scan
+calls membrane-spanning segments less well than a hydropathy average does, so its score there
+says nothing about whether it found related proteins. On Pfam, a tool below the Pfam family
+frequency row does no better than giving every protein the most common family of its length.</p>
+<p>A baseline row is the same under every relative and under raw and dedup, since it searches
+no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000
+queries, from the run's task records; where the table holds none, the cost reads
+<i>not measured</i>. Source of these rows: {"; ".join(esc(x) for x in src_paths)}.</p>"""
+
+
+def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict, gallery: str = "",
+                 base: pl.DataFrame | None = None) -> str:
     ex = best_by(res, tool="hmmer3_phmmer", setting="default", truth_set="pfam", calls="raw",
                  species="zebrafish", stratum_axis="all", stratum="all").row(0, named=True)
     P, R = ex["fmax_precision"], ex["fmax_recall"]
@@ -1744,7 +1864,8 @@ how the truth sets were built.</p>
 <li><a href="#scores">The scores</a>: <a href="#fmax">Fmax</a>, <a href="#auprc">AUPRC</a>, <a href="#iou">median IoU</a>,
 <a href="#n">true instances</a>, <a href="#cpu">core-hours</a>, <a href="#cost">estimated cost</a></li>
 <li><a href="#truth">Truth sets</a></li><li><a href="#dedup">Dedup against raw</a></li>
-<li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#checks">Checks on this site</a></li>
+<li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#no-search">No-search baselines</a></li>
+<li><a href="#checks">Checks on this site</a></li>
 <li><a href="#experiments">Experiments in the tables</a></li></ol></nav>
 <div class="prose">
 <h2 id="data">The benchmark run</h2>
@@ -1920,6 +2041,7 @@ marks regions without a fixed shape.</li>
 <p>The run computed each subset on its own, so two subsets cannot be combined; a combination with
 no row shows × and "not run".</p>
 
+{no_search_section(base)}
 <h2 id="checks">Checks on this site</h2>
 <p>A headless browser renders every filter combination and confirms that each × on the
 leaderboard is a missing row in results.parquet, and that every number matches the tables. The
@@ -2609,9 +2731,18 @@ def main() -> None:
                    res.select("species", "species_mya").unique().iter_rows(named=True)
                    if r["species_mya"] is not None and not math.isnan(r["species_mya"])}
     tools_used = set(res["tool"].unique())
+    base, base_comp = load_baselines(a.data, res)
     rows = row_order(res)
+    base_used = set() if base is None else set(base["tool"].unique())
+    if base is not None:
+        # Pinned under the search tools: their order continues after the last search row.
+        for p in sorted(base.select("tool", "setting").unique().iter_rows(named=True),
+                        key=lambda q: (list(BASELINES).index(q["tool"]), q["setting"])):
+            rows.append(dict(p, order=len(rows), label=BASELINE_SETTING.get(p["setting"], p["setting"]),
+                             words=BASELINE_SETTING.get(p["setting"], p["setting"]), shape="circle"))
     searched = sorted({f'{r["tool"]}|{r["setting"]}|{r["species"]}'
-                       for r in res.select("tool", "setting", "species").unique().iter_rows(named=True)})
+                       for f in ([res] if base is None else [res, base.filter(pl.col("applicable"))])
+                       for r in f.select("tool", "setting", "species").unique().iter_rows(named=True)})
     meta = {
         "defaults": DEFAULTS,
         "chiprows": mark_empty(chiprows(species_mya), res),
@@ -2619,7 +2750,9 @@ def main() -> None:
         "tools": {t: {"name": TOOLS[t]["name"], "kind": TOOLS[t]["kind"], "shape": TOOLS[t]["shape"],
                       "tags": [w for k, w in (("3D structure prediction", "needs 3D structure prediction"), ("GPU", "needs GPU"))
                                if TOOLS[t]["needs"][k]]}
-                  for t in sorted(tools_used)},
+                  for t in sorted(tools_used)}
+        | {t: {"name": BASELINES[t]["name"], "kind": "nosearch", "shape": "circle", "tags": []}
+           for t in sorted(base_used)},
         "kinds": KINDS,
         "species": {s: {"name": SPECIES[s], "mya": int(species_mya[s]) if s in species_mya else None}
                     for s in SPECIES},
@@ -2633,7 +2766,8 @@ def main() -> None:
         "terms": {"th": {t: term_btn(t, "th") for t in TERMS}, "short": {t: PLAIN[t][0] for t in PLAIN}, "filters": {"calls": term_btn("calls", "filters")},
                   "axes": {a["id"]: term_btn(a["id"], "ax") for a in AXES if a["id"] in TERMS}},
     }
-    payload = json.dumps({"meta": meta, "results": results_json(res), "compute": compute_json(comp)},
+    payload = json.dumps({"meta": meta, "results": results_json(res, base),
+                          "compute": compute_json(comp, base_comp)},
                          separators=(",", ":"), allow_nan=False)
     payload = payload.replace("</", "<\\/")
     n_q = prov["n_queries"]
@@ -2647,7 +2781,7 @@ def main() -> None:
     dd = {f"{k}_{m}": phm.filter(pl.col("calls") == k)[m][0] for k in ("raw", "dedup") for m in ("fmax", "auprc")}
     has_pileup = (a.data / "pileup/regions.parquet").exists()
     pf = pileup_figures_html(a.data) if has_pileup else {}
-    (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used, dd,
+    (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used | base_used, dd,
                                                      leaderboard_figures(res, pf.get("upset", ""))))
     if pf:
         (out / "data" / "upset.json").write_text(json.dumps(pf["upset_json"], separators=(",", ":")))
@@ -2655,9 +2789,9 @@ def main() -> None:
     else:
         for stale in ("proteins.html", "proteins.html.json", "data/upset.json"):
             (out / stale).unlink(missing_ok=True)
-    (out / "cost.html").write_text(page_cost(payload, src, n_q, tools_used))
+    (out / "cost.html").write_text(page_cost(payload, src, n_q, tools_used | base_used))
     (out / "coverage.html").write_text(page_coverage(cov, src, species_mya))
-    (out / "methods.html").write_text(page_methods(res, comp, src, prov, pf.get("gallery", "")))
+    (out / "methods.html").write_text(page_methods(res, comp, src, prov, pf.get("gallery", ""), base))
     (out / "explainers.html").write_text(page_explainers(src, comp))
     import claims as claims_mod
     schema = json.loads((ROOT_DIR / "claims/schema.json").read_text())

@@ -179,11 +179,18 @@
     { id: "ram", label: "Peak RAM, GB", key: "peak_rss_gb", term: "ram", cls: "c-more" },
   ];
   const LOWER_FIRST = new Set(["tool", "cpu", "ram", "cost"]);
+  // A no-search baseline (kind "nosearch") reads the query alone. It is pinned under the
+  // search tools whatever the sort, and is left out of the sentence's "highest" picks.
+  const isBase = (row) => M.tools[row.tool].kind === "nosearch";
   function rowValues(s, row) {
-    const r = lookup(s, row);
+    const raw = lookup(s, row);
+    // A baseline cell it cannot address is stored as [null, null, null, n, "na"]: shown
+    // as "not applicable", never as a score.
+    const na = !!(raw && raw[4] === "na");
+    const r = na ? null : raw;
     const c = computeRow(s, row);
     return {
-      row, r, c,
+      row, r, c, na,
       // A stored median IoU of 0 means no correct call on a region longer than one residue
       // (any such call has IoU >= 0.5), so it is shown as words and sorts with the missing.
       fmax: r ? r[0] : null, auprc: r ? r[1] : null, iou: r && r[2] ? r[2] : null, n: r ? r[3] : null,
@@ -202,6 +209,7 @@
   function sortRows(vals) {
     const k = state.sort, dir = state.dir === "asc" ? 1 : -1;
     return vals.sort((a, b) => {
+      if (isBase(a.row) !== isBase(b.row)) return isBase(a.row) ? 1 : -1;
       let x = k === "tool" ? M.tools[a.row.tool].name : a[k];
       let y = k === "tool" ? M.tools[b.row.tool].name : b[k];
       // Missing values always sort last, whichever way the column is sorted.
@@ -251,7 +259,8 @@
     const tags = (t.tags || []).map((x) => '<span class="tag">' + x + "</span>");
     if (v.c && v.c.gpu_h_per_1000) tags.push('<span class="tag">GPU in search</span>');
     if (v.row.tool === "hmmscan" && state.truth === "pfam") tags.push('<span class="tag warn">graded on its own models</span>');
-    td.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="tools/' + v.row.tool + '.html">' + t.name + "</a>" +
+    const href = isBase(v.row) ? "methods.html#no-search" : "tools/" + v.row.tool + ".html";
+    td.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="' + href + '">' + t.name + "</a>" +
       '<span class="set" title="' + v.row.setting + ": " + v.row.words + '">' + v.row.label + "</span>" +
       (tags.length ? '<span class="tags">' + tags.join(" ") + "</span>" : "");
     if (nOthers) {
@@ -277,6 +286,7 @@
     const why = v.r ? null : "not run";
     const cwhy = v.r && !v.c ? (M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species) ? "not measured" : "not run") : why;
     for (const col of COLS.slice(1)) {
+      if (v.na) { tr.appendChild(missingCell(col, "na", "not applicable")); continue; }
       if (["fmax", "auprc", "iou", "n"].includes(col.id)) {
         if (!v.r) { tr.appendChild(missingCell(col, "results", "not run")); continue; }
         if (col.id === "iou" && v.iou == null) {
@@ -299,6 +309,11 @@
       }
     }
     return tr;
+  }
+  // A rule above the first baseline row, so the pinned rows read as apart from the ranking.
+  function markFirstBase(tbody) {
+    const first = [...tbody.querySelectorAll("tr")].find((tr) => !tr.hidden && isBase({ tool: tr.dataset.tool }));
+    if (first) first.classList.add("base-first");
   }
   const expanded = new Set();
   let allCols = false;
@@ -350,12 +365,15 @@
         }
       }
     }
+    markFirstBase(tbody);
     const rank = document.getElementById("rankline");
     if (rank) rank.textContent = sortWords() + (state.view === "all" ? ", every setting" : ", best setting of each tool") + ".";
-    const nRun = vals.filter((v) => v.r).length;
-    const nTools = [...byTool.values()].filter((l) => l.some((v) => v.r)).length;
+    const sv = vals.filter((v) => !isBase(v.row));
+    const nRun = sv.filter((v) => v.r).length;
+    const searchTools = [...byTool.entries()].filter(([t]) => !isBase({ tool: t }));
+    const nTools = searchTools.filter(([, l]) => l.some((v) => v.r)).length;
     document.getElementById("count").textContent = nRun
-      ? `${nTools} of ${byTool.size} tools (${nRun} of ${vals.length} settings) have results for these filters.`
+      ? `${nTools} of ${searchTools.length} search tools (${nRun} of ${sv.length} settings) have results for these filters.`
       : "No tool has results for these filters: either this subset holds no regions for this relative, or it was not scored.";
     const vb = document.getElementById("viewbtn");
     if (vb) vb.textContent = state.view === "all" ? "One row per tool" : "Show every setting";
@@ -369,11 +387,13 @@
     const box = document.getElementById("verdict");
     if (!box) return;
     const byOrder = (a, b) => a.row.order - b.row.order;
+    const bases = vals.filter((v) => isBase(v.row) && v.fmax != null);
+    vals = vals.filter((v) => !isBase(v.row));
     const top = (k) => vals.filter((v) => v[k] != null).sort((a, b) => b[k] - a[k] || byOrder(a, b))[0];
     const best = top("fmax");
     const name = (v) => `<b>${M.tools[v.row.tool].name}</b> (${v.row.label})`;
     box.dataset.best = best ? best.row.tool + "|" + best.row.setting : "";
-    box.dataset.cheap = ""; box.dataset.auprc = "";
+    box.dataset.cheap = ""; box.dataset.auprc = ""; box.dataset.floor = "";
     if (!best) { box.innerHTML = "No tool has results for these filters."; return; }
     let t = `Highest Fmax: ${name(best)}, ${fmt3(best.fmax)}.`;
     const near = vals.filter((v) => v.fmax != null && v.fmax >= best.fmax - 0.01 && v.cost != null)
@@ -398,6 +418,13 @@
         : " AUPRC puts the same tool first.";
     }
     if (best.row.tool === "hmmscan" && state.truth === "pfam") t += " hmmscan is graded on its own models here, so read its row as an upper limit.";
+    // A baseline at or above the best search tool: the search found nothing here that the
+    // query sequence alone does not give.
+    const floor = bases.sort((a, b) => b.fmax - a.fmax || byOrder(a, b))[0];
+    if (floor && floor.fmax >= best.fmax) {
+      box.dataset.floor = floor.row.tool + "|" + floor.row.setting;
+      t += ` ${name(floor)}, which searches nothing, scores ${fmt3(floor.fmax)}: no search tool beats it here.`;
+    }
     box.innerHTML = t;
   }
 
@@ -556,7 +583,7 @@
       const v = rowValues(state, row);
       const py = axisValue(ya, v), px = axisValue(xa, v);
       // A row with no result has no score and no cost to speak of: one reason, "not run".
-      const why = !v.r ? "not run" : py.why || px.why;
+      const why = !v.r ? (v.na ? "not applicable" : "not run") : py.why || px.why;
       if (why) { notPlotted.push([row, why]); continue; }
       pts.push({ x: px.val, y: py.val, v, row });
     }
