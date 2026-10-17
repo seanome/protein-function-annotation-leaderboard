@@ -178,6 +178,8 @@ def page(data_dir: Path, r_cpu: float, r_gpu: float) -> tuple[str, dict]:
     ch = {lvl: by[("kmerseek_shuffled", lvl)] for lvl in LEVELS} if "kmerseek_shuffled" in best else None
     n_km = len({r["setting"] for r in summ["overall"] if r["tool"] == "kmerseek"})
     n_q, n_dom = summ["n_queries"], summ["n_domains"]
+    fs_file = next(x for x in tb["rocx"] if x["file"] == "foldseek.rocx")
+    fs_pub, n_fs_file = fs_file["levels"], fs_file["n_queries"]
     miss = summ["missing"]["foldseek"]
     n_miss = len(miss)
     cls_n = {c: r["n_queries"] for r in summ["by_class"] if r["tool"] == "foldseek" and r["level"] == "family"
@@ -223,8 +225,10 @@ a different family, and at the fold level the same fold but a different superfam
 of a different fold. Any other hit is <b>not counted</b>. Sort the hits by the tool's own score,
 best first, after dropping the query's hit to itself, and stop at the first FP. The
 <b>sensitivity up to the first false positive</b> is the TPs above that cut divided by the TPs the
-query has in the set. Foldseek's scoring script, which this page follows, adds 1 to that count at
-the superfamily and fold levels (the query itself stays in it); Figure {R.FIG} shows both.</p>
+query has in the set: the domains it could find there. That is the denominator of LoL-align's
+copy of Foldseek's scoring script (Reifenrath et al. 2026). Foldseek's original script adds 1 at
+the superfamily and fold levels, because it leaves the query itself in those counts; Figure
+{R.FIG} shows both.</p>
 </div>
 
 <figure class="ex-fig" id="fig-scope40-labels">
@@ -234,7 +238,7 @@ holds {R.EX_N['family']} other domains in the query's family, {R.EX_N['superfami
 superfamily but outside the family, and {R.EX_N['fold']} in its fold but outside the superfamily.
 Hits 1, 5 and 7 are three different domains of the query's family; the query's hit to itself was
 dropped before hit 1. The small grey line under the superfamily and fold rows divides by one more,
-as Foldseek's script does. The bottom row is the rule this site first planned, which also counts
+as Foldseek's original script does; this page does not. The bottom row is the rule this site first planned, which also counts
 the family at the superfamily level; it is not used.</figcaption>
 {R.legend_html()}
 <div class="ex-box">{R.figure_svg(rows)}</div>
@@ -242,7 +246,7 @@ the family at the superfamily level; it is not used.</figcaption>
 a different fold, so the walk stops there at every level. Family: hits 1 and 5,
 {fam['above']} of {fam['n_possible']} = {fam['sens']:.2f}. Superfamily: hits 2 and 4,
 {sf['above']} of {sf['n_possible']} = {sf['sens']:.2f} ({sf['above']} of {sf['n_script']} =
-{sf['above'] / sf['n_script']:.2f} in Foldseek's script). Fold: hit 3, {fold['above']} of
+{sf['above'] / sf['n_script']:.2f} in Foldseek's original script). Fold: hit 3, {fold['above']} of
 {fold['n_possible']} = {fold['sens']:.2f} ({fold['above']} of {fold['n_script']} =
 {fold['above'] / fold['n_script']:.2f}). Hit 7 is below the cut and adds nothing.</p>
 </figure>
@@ -324,10 +328,15 @@ value="{r_gpu:g}"></label>.</p>
 <th class="txt" scope="col">Status</th></tr></thead>
 <tbody>{table_rows(summ)}</tbody></table></div>
 <p class="prose">Queries missing from both published files, scored 0: {", ".join(f'<span class="mono">{esc(x)}</span>' for x in miss)}.
-With the denominator over only the domains that can be found (no extra 1), the superfamily AUC
-would be {fs['superfamily']['auc_possible']:.3f} for Foldseek and {mm['superfamily']['auc_possible']:.3f}
-for MMseqs2; both are kept in <span class="mono">data/scope40_long.parquet</span>
-(<span class="mono">sensitivity_possible</span>).</p>
+The published Foldseek and MMseqs2 files are on the scale of Foldseek's original script, one
+more in the superfamily and fold denominators: the Foldseek file's mean superfamily sensitivity is
+{fs_pub['SFAM']['mean_as_published']:.3f} as published and {fs_pub['SFAM']['mean_over_possible_true_positives']:.3f}
+on this page's scale, over its {n_fs_file:,} queries. Each row is rescaled by turning its value back
+into a count of TPs (value times that row's original denominator, a whole number on every row) and
+dividing by the domains it could find. On the original scale this page's superfamily AUC would be
+{fs['superfamily']['auc_foldseek_script']:.3f} for Foldseek and {mm['superfamily']['auc_foldseek_script']:.3f}
+for MMseqs2; both scales are in <span class="mono">data/scope40_long.parquet</span>
+(<span class="mono">sensitivity</span>, <span class="mono">sensitivity_foldseek_script</span>).</p>
 <p class="refs">Cheng, H., B.-H. Kim, and N. V. Grishin. "MALISAM: A Database of Structurally
 Analogous Motifs in Proteins." <i>Nucleic Acids Research</i> 36, Database issue (2008): D211–17.
 <a href="https://doi.org/10.1093/nar/gkm698">https://doi.org/10.1093/nar/gkm698</a>. Other

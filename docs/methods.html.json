@@ -517,6 +517,10 @@
   },
   {
    "tag": "p",
+   "text": "LoL-align (Reifenrath et al. 2026), from the same two groups, reuses this benchmark. Its paper defines the score as \"the fraction of true positives (TPs) found before the first FP in the list of ranked matches\", with \"TPs ... from the same family, superfamily or fold and FPs ... from different folds\", over SCOPe entries \"with at least one additional family-, superfamily- or fold-level member\": 3,566 queries on SCOPe 2.01, the count in the domain-set table below. Its copy of the script (soedinglab/LoLalign-analysis, scope_benchmark/bench.noselfhit.awk) is Foldseek's line for line, except for the superfamily and fold denominators, lines 26 and 27."
+  },
+  {
+   "tag": "p",
    "text": "For one query, a true positive (TP) is a hit at the level being scored. A false positive (FP) is a hit in a different fold. Any other hit is not counted: neither TP nor FP. Sort the hits by the tool's own score, best first, after dropping the query's hit to itself. Walk down the list and stop at the first FP. The sensitivity up to the first false positive is the number of TPs above that cut divided by the number of possible TPs for that query in the whole set. The walk uses every hit the tool reports at the settings it was run with."
   },
   {
@@ -549,7 +553,7 @@
   },
   {
    "tag": "th",
-   "text": "Foldseek's script"
+   "text": "Foldseek's original script"
   },
   {
    "tag": "th",
@@ -613,7 +617,7 @@
   },
   {
    "tag": "td",
-   "text": "one more than that"
+   "text": "one more than that (LoL-align's copy: not)"
   },
   {
    "tag": "td",
@@ -629,7 +633,7 @@
   },
   {
    "tag": "td",
-   "text": "one more than that"
+   "text": "one more than that (LoL-align's copy: not)"
   },
   {
    "tag": "td",
@@ -673,11 +677,11 @@
   },
   {
    "tag": "p",
-   "text": "Where the extra 1 comes from: the script counts the possible family TPs as the family size minus 1, which removes the query itself. For the superfamily it takes the superfamily size minus (the family size minus 1), and for the fold the fold size minus (the superfamily size minus 1). Those two leave the query in, so each is one more than the number of domains that could be found. In the script: lines 7, 10 and 13 count every domain, the query included, into its family, superfamily and fold; line 17 drops the self-hit from the hit list; line 25 takes 1 off the family count, but lines 26 and 27 subtract only the other family members (or the other superfamily members), so the query stays in. It can never be found at those levels: its hit to itself is dropped, and would count at the family level anyway. So no query can reach a superfamily or fold sensitivity of 1."
+   "text": "Where the extra 1 comes from: Foldseek's original script counts the possible family TPs as the family size minus 1, which removes the query itself. For the superfamily it takes the superfamily size minus (the family size minus 1), and for the fold the fold size minus (the superfamily size minus 1). Those two leave the query in, so each is one more than the number of domains that could be found. In the script: lines 7, 10 and 13 count every domain, the query included, into its family, superfamily and fold; line 17 drops the self-hit from the hit list; line 25 takes 1 off the family count, but lines 26 and 27 subtract only the other family members (or the other superfamily members), so the query stays in. It can never be found at those levels: its hit to itself is dropped, and would count at the family level anyway. So no query can reach a superfamily or fold sensitivity of 1 there. LoL-align's copy subtracts the whole family size and the whole superfamily size instead, so its denominators are the domains that can be found. This site uses LoL-align's denominators (Olga, 2026-10-17)."
   },
   {
    "tag": "p",
-   "text": "The extra 1 is in the per-query files of Foldseek and MMseqs2 on SCOPe 2.08 that other authors published, as copied into seanome/2024-kmerseek-analysis (data/tea_scope40_rocx_files). Query d6jc0b_ (d.41.5.0) has 6 domains in its superfamily and 5 in its family, itself included in both, so 1 possible superfamily TP. Foldseek found it and the file says 0.5: 1 of 2. Over the 5,713 queries of the Foldseek file, the mean superfamily sensitivity is 0.574 as published and 0.641 over the possible TPs; at the fold level 0.102 and 0.111. For MMseqs2: superfamily 0.172 and 0.205, fold 0.001 and 0.001. The family level has no extra 1 (0.817 for Foldseek either way). A comparison with these files, or with the paper's own numbers, has to use the script's denominators, or rescore Foldseek."
+   "text": "The extra 1 is in the per-query files of Foldseek and MMseqs2 on SCOPe 2.08 that other authors published, as copied into seanome/2024-kmerseek-analysis (data/tea_scope40_rocx_files). Query d6jc0b_ (d.41.5.0) has 6 domains in its superfamily and 5 in its family, itself included in both, so 1 possible superfamily TP. Foldseek found it and the file says 0.5: 1 of 2. Over the 5,713 queries of the Foldseek file, the mean superfamily sensitivity is 0.574 as published and 0.641 over the possible TPs; at the fold level 0.102 and 0.111. For MMseqs2: superfamily 0.172 and 0.205, fold 0.001 and 0.001. The family level has no extra 1 (0.817 for Foldseek either way). This site rescales those files to LoL-align's denominators: each row's value times its original denominator is a whole number of TPs, which is divided by the domains that row could find. The Foldseek paper's own numbers are on the original scale. The kmerseek SCOPe40 scorer of PR 107 already divides by the domains that can be found, so its database-scale numbers are on the LoL-align scale too."
   },
   {
    "tag": "p",
@@ -789,7 +793,7 @@
   },
   {
    "tag": "li",
-   "text": "The denominator: the script's, one more than the domains that can be found at the superfamily and fold levels, so the numbers match the published files. The other is kept beside it in the long table (sensitivity_possible)."
+   "text": "The denominator: LoL-align's, the domains that can be found at each level. Foldseek's original, one more at the superfamily and fold levels, is kept beside it in the long table (sensitivity_foldseek_script), and the published Foldseek and MMseqs2 files are rescaled from it."
   },
   {
    "tag": "li",
@@ -813,7 +817,7 @@
   },
   {
    "tag": "p",
-   "text": "van Kempen, M., S. S. Kim, C. Tumescheit, M. Mirdita, J. Lee, C. L. M. Gilchrist, J. Söding, and M. Steinegger. \"Fast and Accurate Protein Structure Search with Foldseek.\" Nature Biotechnology 42, no. 2 (2024): 243–46. https://doi.org/10.1038/s41587-023-01773-0. Chandonia, J.-M., L. Guan, S. Lin, C. Yu, N. K. Fox, and S. E. Brenner. \"SCOPe: Improvements to the Structural Classification of Proteins – Extended Database to Facilitate Variant Interpretation and Machine Learning.\" Nucleic Acids Research 50, no. D1 (2022): D553–59. https://doi.org/10.1093/nar/gkab1054. Cheng, H., B.-H. Kim, and N. V. Grishin. \"MALISAM: A Database of Structurally Analogous Motifs in Proteins.\" Nucleic Acids Research 36, Database issue (2008): D211–17. https://doi.org/10.1093/nar/gkm698."
+   "text": "van Kempen, M., S. S. Kim, C. Tumescheit, M. Mirdita, J. Lee, C. L. M. Gilchrist, J. Söding, and M. Steinegger. \"Fast and Accurate Protein Structure Search with Foldseek.\" Nature Biotechnology 42, no. 2 (2024): 243–46. https://doi.org/10.1038/s41587-023-01773-0. Chandonia, J.-M., L. Guan, S. Lin, C. Yu, N. K. Fox, and S. E. Brenner. \"SCOPe: Improvements to the Structural Classification of Proteins – Extended Database to Facilitate Variant Interpretation and Machine Learning.\" Nucleic Acids Research 50, no. D1 (2022): D553–59. https://doi.org/10.1093/nar/gkab1054. Reifenrath, L., M. van Kempen, G. Kim, S. H. Kim, M. Radnezhad, C. L. M. Gilchrist, M. Mirdita, M. Steinegger, and J. Söding. \"LoL-align: Sensitive and Fast Probabilistic Protein Structure Alignment.\" Nature Methods (2026). https://doi.org/10.1038/s41592-026-03249-w. Cheng, H., B.-H. Kim, and N. V. Grishin. \"MALISAM: A Database of Structurally Analogous Motifs in Proteins.\" Nucleic Acids Research 36, Database issue (2008): D211–17. https://doi.org/10.1093/nar/gkm698."
   },
   {
    "tag": "h2",

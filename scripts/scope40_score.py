@@ -11,9 +11,15 @@ Rules (Foldseek paper Methods and its script, bench.noselfhit.awk):
   fold         TP = same fold, different superfamily (same superfamily: not counted)
   FP at every level = a different fold, or a target not in the domain list
 Queries: SCOPe 2.08 ASTRAL 40% domains with another member at all three levels (5,737).
-Sensitivity uses the script's denominators (superfamily and fold one larger than the number
-of domains that can be found, because the query itself stays in those two counts). The
-denominator over the domains that can be found is stored too (sensitivity_possible).
+Denominators, as in LoL-align's copy of the script (soedinglab/LoLalign-analysis,
+scope_benchmark/bench.noselfhit.awk, Reifenrath et al. 2026): the domains that can be found,
+family size - 1, superfamily size - family size, fold size - superfamily size (column
+`sensitivity`, `n_tp_total`). Foldseek's original script (steineggerlab/foldseek-analysis)
+divides the superfamily and fold counts by one more, because it leaves the query itself in
+them; that scale is kept as `sensitivity_foldseek_script` and `n_tp_total_foldseek_script`.
+The published Foldseek and MMseqs2 files are on Foldseek's original scale: each row's true
+positives are its value times that file's denominator (a whole number on every row), divided
+again by the LoL-align denominator from the same row's family, superfamily and fold sizes.
 
 A query missing from a tool's file scores 0 with has_hits false and is listed. The script
 walks each query's hits in score order and stops counting at the first FP, so every hit
@@ -80,7 +86,7 @@ def queries(dom: dict) -> pl.DataFrame:
 
 
 def denominators(f, s, o):
-    """(script, possible) per level from family, superfamily and fold sizes, query included."""
+    """(Foldseek's original script, LoL-align) per level, from sizes that include the query."""
     return {"family": (f - 1, f - 1), "superfamily": (s - (f - 1), s - f), "fold": (o - (s - 1), o - s)}
 
 
@@ -102,13 +108,14 @@ def score_file(path: Path, q: pl.DataFrame, tool: str, setting: str) -> pl.DataF
         has_hits = (n_above + n_fp) > 0
         first_fp = n_above + 1 if n_fp > 0 else None
         for lvl in LEVELS:
-            d_script, d_possible = den[lvl]
+            d_script, d_lol = den[lvl]
             rows.append(dict(
                 tool=tool, setting=setting, level=lvl, query=x["query"], scope_sccs=x["scope_sccs"],
                 scope_class=x["scope_class"], fold=x["fold"], superfamily=x["superfamily"], family=x["family"],
-                query_length=x["query_length"], n_tp_total=d_script, n_tp_possible=d_possible,
-                n_tp_above_cut=tp[lvl], sensitivity=tp[lvl] / d_script,
-                sensitivity_possible=tp[lvl] / d_possible, sensitivity_published=float(r[LEVELS[lvl]]) if r else None,
+                query_length=x["query_length"], n_tp_total=d_lol, n_tp_total_foldseek_script=d_script,
+                n_tp_above_cut=tp[lvl], sensitivity=tp[lvl] / d_lol,
+                sensitivity_foldseek_script=tp[lvl] / d_script,
+                sensitivity_published=float(r[LEVELS[lvl]]) if r else None,
                 has_hits=has_hits, first_fp_index=first_fp, in_published_file=r is not None,
                 counts_match_208=(r is None) or (f, s, o) == (x["famcnt"], x["sfamcnt"], x["foldcnt"]),
                 source_file=path.name))
@@ -120,7 +127,15 @@ def read_scored(paths: list[Path], q: pl.DataFrame) -> pl.DataFrame:
     nextflow-runs/scope40-hitlists) from a tool's own hit list, in this table's columns."""
     if not paths:
         return None
-    t = pl.concat([pl.read_parquet(p).with_columns(pl.lit(p.name).alias("source_file")) for p in paths])
+    def norm(df):
+        # score_hitlist.py before 2026-10-17 called the LoL-align scale sensitivity_possible
+        # and the Foldseek-script scale sensitivity; later versions name both.
+        if "sensitivity_possible" in df.columns:
+            df = df.rename({"sensitivity": "sensitivity_foldseek_script", "n_tp_total": "n_tp_total_foldseek_script",
+                            "sensitivity_possible": "sensitivity", "n_tp_possible": "n_tp_total"})
+        return df
+    t = pl.concat([norm(pl.read_parquet(p)).with_columns(pl.lit(p.name).alias("source_file")) for p in paths],
+                  how="diagonal")
     t = t.join(q.select("query", "query_length", pl.col("famcnt"), pl.col("sfamcnt"), pl.col("foldcnt")),
                on="query", how="inner")
     n = q.height
@@ -129,8 +144,8 @@ def read_scored(paths: list[Path], q: pl.DataFrame) -> pl.DataFrame:
         raise SystemExit(f"scored files do not cover the {n} queries: {bad}")
     return t.select(
         "tool", "setting", "level", "query", "scope_sccs", "scope_class", "fold", "superfamily", "family",
-        "query_length", pl.col("n_tp_total").cast(pl.Int64), pl.col("n_tp_possible").cast(pl.Int64),
-        pl.col("n_tp_above_cut").cast(pl.Int64), "sensitivity", "sensitivity_possible",
+        "query_length", pl.col("n_tp_total").cast(pl.Int64), pl.col("n_tp_total_foldseek_script").cast(pl.Int64),
+        pl.col("n_tp_above_cut").cast(pl.Int64), "sensitivity", "sensitivity_foldseek_script",
         pl.lit(None, dtype=pl.Float64).alias("sensitivity_published"), "has_hits",
         pl.col("first_fp_index").cast(pl.Int64), pl.lit(True).alias("in_published_file"),
         pl.lit(True).alias("counts_match_208"), "source_file")
@@ -163,7 +178,7 @@ def summarise(long: pl.DataFrame) -> dict:
         out["overall"].append(dict(
             tool=tool, setting=setting, level=level, n_queries=n, auc=float(v.mean()), lo=lo, hi=hi,
             coverage=float(h.mean()), n_with_hits=int(h.sum()), auc_hits_only=float(v[h].mean()),
-            auc_possible=float(g["sensitivity_possible"].to_numpy().mean()),
+            auc_foldseek_script=float(g["sensitivity_foldseek_script"].to_numpy().mean()),
             n_missing_from_file=int((~g["in_published_file"]).sum())))
         for c in classes:
             gc = g.filter(pl.col("scope_class") == c)
@@ -185,7 +200,7 @@ def main() -> None:
     dom = read_fasta(a.astral208)
     q = queries(dom)
     long = pl.concat([score_file(a.rocx_dir / f, q, *ts) for f, ts in FILES.items()])
-    long = long.with_columns(pl.col("n_tp_total").cast(pl.Int64), pl.col("n_tp_possible").cast(pl.Int64),
+    long = long.with_columns(pl.col("n_tp_total").cast(pl.Int64), pl.col("n_tp_total_foldseek_script").cast(pl.Int64),
                              pl.col("n_tp_above_cut").cast(pl.Int64), pl.col("first_fp_index").cast(pl.Int64))
     extra = read_scored(sorted(a.scored), q)
     if extra is not None:
@@ -204,7 +219,7 @@ def main() -> None:
     print(f"{long.height:,} rows; {q.height:,} queries")
     for r in s["overall"]:
         print(f"{r['tool']:16} {r['level']:12} AUC {r['auc']:.3f} [{r['lo']:.3f}, {r['hi']:.3f}] "
-              f"coverage {r['coverage']:.3f} hits-only {r['auc_hits_only']:.3f} possible {r['auc_possible']:.3f}")
+              f"coverage {r['coverage']:.3f} hits-only {r['auc_hits_only']:.3f} Foldseek script {r['auc_foldseek_script']:.3f}")
 
 
 if __name__ == "__main__":

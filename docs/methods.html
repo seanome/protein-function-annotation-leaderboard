@@ -268,6 +268,14 @@ cumulative curve and says "Sensitivity is the area under the ROC (AUROC) curve u
 A ROC curve for one query plots TPs found against FPs found. Cut at the first FP, its area is the
 share of TPs found above the cut, which is the sensitivity defined below. The paper's numbers come
 from a scoring script in Foldseek's analysis repository, <span class="mono">bench.noselfhit.awk</span>.</p>
+<p>LoL-align (Reifenrath et al. 2026), from the same two groups, reuses this benchmark. Its paper
+defines the score as "the fraction of true positives (TPs) found before the first FP in the list of
+ranked matches", with "TPs ... from the same family, superfamily or fold and FPs ... from different
+folds", over SCOPe entries "with at least one additional family-, superfamily- or fold-level
+member": 3,566 queries on SCOPe 2.01, the count in the domain-set table below. Its copy of the
+script (<span class="mono">soedinglab/LoLalign-analysis</span>,
+<span class="mono">scope_benchmark/bench.noselfhit.awk</span>) is Foldseek's line for line, except
+for the superfamily and fold denominators, lines 26 and 27.</p>
 <p>For one query, a <b>true positive</b> (TP) is a hit at the level being scored. A <b>false
 positive</b> (FP) is a hit in a different fold. Any other hit is <b>not counted</b>: neither TP
 nor FP. Sort the hits by the tool's own score, best first, after dropping the query's hit to
@@ -297,7 +305,7 @@ its mean over the 228 queries both tools scored.</p>
 <p>The two rules differ in the rows below. Olga chose the paper's rule as its Methods and its
 script state it (2026-10-17), so the SCOPe40 page follows the third column.</p>
 <div class="tablebox"><table class="lb"><thead><tr><th class="txt" scope="col">Point</th>
-<th class="txt" scope="col">Foldseek paper (Methods)</th><th class="txt" scope="col">Foldseek's script</th>
+<th class="txt" scope="col">Foldseek paper (Methods)</th><th class="txt" scope="col">Foldseek's original script</th>
 <th class="txt" scope="col">This site's planned rule</th></tr></thead><tbody>
 <tr><td class="txt">Superfamily TP</td><td class="txt">same superfamily, different family</td>
 <td class="txt">same</td><td class="txt">same superfamily, family included</td></tr>
@@ -306,9 +314,9 @@ script state it (2026-10-17), so the SCOPe40 page follows the third column.</p>
 <tr><td class="txt">Fold TP</td><td class="txt">same fold, different superfamily</td><td class="txt">same</td>
 <td class="txt">no fold level given</td></tr>
 <tr><td class="txt">Superfamily denominator</td><td class="txt">all possible TPs: superfamily members outside the family</td>
-<td class="txt">one more than that</td><td class="txt">every other superfamily member</td></tr>
+<td class="txt">one more than that (LoL-align's copy: not)</td><td class="txt">every other superfamily member</td></tr>
 <tr><td class="txt">Fold denominator</td><td class="txt">all possible TPs: fold members outside the superfamily</td>
-<td class="txt">one more than that</td><td class="txt">no fold level given</td></tr>
+<td class="txt">one more than that (LoL-align's copy: not)</td><td class="txt">no fold level given</td></tr>
 <tr><td class="txt">Queries scored</td><td class="txt">domains with another member at all three levels</td>
 <td class="txt">same</td><td class="txt">every query with a possible TP at the level</td></tr>
 <tr><td class="txt">Hit to a domain not in the SCOPe40 set</td><td class="txt">not stated</td><td class="txt">FP</td>
@@ -318,7 +326,7 @@ script state it (2026-10-17), so the SCOPe40 page follows the third column.</p>
 nested rule; its Methods, quoted above, and its script leave the family out. A third rule, in the
 Methods subsection that fits Foldseek's probability of a true match, ignores "hits to the same
 family or to another superfamily".</p>
-<p>Where the extra 1 comes from: the script counts the possible family TPs as the family size minus
+<p>Where the extra 1 comes from: Foldseek's original script counts the possible family TPs as the family size minus
 1, which removes the query itself. For the superfamily it takes the superfamily size minus (the
 family size minus 1), and for the fold the fold size minus (the superfamily size minus 1). Those
 two leave the query in, so each is one more than the number of domains that could be found.
@@ -327,7 +335,9 @@ superfamily and fold; line 17 drops the self-hit from the hit list; line 25 take
 count, but lines 26 and 27 subtract only the other family members (or the other superfamily
 members), so the query stays in. It can never be found at those levels: its hit to itself is
 dropped, and would count at the family level anyway. So no query can reach a superfamily or fold
-sensitivity of 1.</p>
+sensitivity of 1 there. LoL-align's copy subtracts the whole family size and the whole superfamily
+size instead, so its denominators are the domains that can be found. This site uses LoL-align's
+denominators (Olga, 2026-10-17).</p>
 <p>The extra 1 is in the per-query files of Foldseek and MMseqs2 on SCOPe 2.08 that other authors
 published, as copied into seanome/2024-kmerseek-analysis
 (<span class="mono">data/tea_scope40_rocx_files</span>). Query <span class="mono">d6jc0b_</span>
@@ -341,8 +351,11 @@ superfamily sensitivity is 0.574 as published and
 For MMseqs2: superfamily 0.172 and
 0.205, fold 0.001
 and 0.001. The family level has no extra 1
-(0.817 for Foldseek either way). A comparison with these files, or
-with the paper's own numbers, has to use the script's denominators, or rescore Foldseek.</p>
+(0.817 for Foldseek either way). This site rescales those files to
+LoL-align's denominators: each row's value times its original denominator is a whole number of TPs,
+which is divided by the domains that row could find. The Foldseek paper's own numbers are on the
+original scale. The kmerseek SCOPe40 scorer of PR 107 already divides by the domains that can be
+found, so its database-scale numbers are on the LoL-align scale too.</p>
 <p>At the fold level, a TP is not always a relative: two domains can share a fold with no shared
 ancestor (Cheng et al. 2008). So a fold-level TP means "same shape", not "homolog".</p>
 
@@ -373,9 +386,10 @@ on the same footing as them.</p>
 <h3 id="scope40-choices">Choices made (Olga, 2026-10-17)</h3>
 <ol>
 <li>The rule: the paper's Methods and script. Its Figure 2a legend reads differently (above).</li>
-<li>The denominator: the script's, one more than the domains that can be found at the
-superfamily and fold levels, so the numbers match the published files. The other is kept beside it
-in the long table (<span class="mono">sensitivity_possible</span>).</li>
+<li>The denominator: LoL-align's, the domains that can be found at each level. Foldseek's
+original, one more at the superfamily and fold levels, is kept beside it in the long table
+(<span class="mono">sensitivity_foldseek_script</span>), and the published Foldseek and MMseqs2
+files are rescaled from it.</li>
 <li>The queries: Foldseek's set, domains with another member at all three levels, computed on
 SCOPe 2.08: 5,737.</li>
 <li>The set: SCOPe 2.08 at 40% identity, 15,177 domains, searched all against all.</li>
@@ -395,6 +409,10 @@ Chandonia, J.-M., L. Guan, S. Lin, C. Yu, N. K. Fox, and S. E. Brenner. "SCOPe: 
 Structural Classification of Proteins – Extended Database to Facilitate Variant Interpretation and
 Machine Learning." <i>Nucleic Acids Research</i> 50, no. D1 (2022): D553–59.
 <a href="https://doi.org/10.1093/nar/gkab1054">https://doi.org/10.1093/nar/gkab1054</a>.<br>
+Reifenrath, L., M. van Kempen, G. Kim, S. H. Kim, M. Radnezhad, C. L. M. Gilchrist, M. Mirdita,
+M. Steinegger, and J. Söding. "LoL-align: Sensitive and Fast Probabilistic Protein Structure
+Alignment." <i>Nature Methods</i> (2026).
+<a href="https://doi.org/10.1038/s41592-026-03249-w">https://doi.org/10.1038/s41592-026-03249-w</a>.<br>
 Cheng, H., B.-H. Kim, and N. V. Grishin. "MALISAM: A Database of Structurally Analogous Motifs in
 Proteins." <i>Nucleic Acids Research</i> 36, Database issue (2008): D211–17.
 <a href="https://doi.org/10.1093/nar/gkm698">https://doi.org/10.1093/nar/gkm698</a>.</p>

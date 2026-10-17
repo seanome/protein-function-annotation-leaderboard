@@ -41,11 +41,11 @@
   },
   {
    "tag": "p",
-   "text": "For one query, a true positive (TP) is a hit to another domain at the level being scored. At the family level that is the same family. At the superfamily level it is the same superfamily but a different family, and at the fold level the same fold but a different superfamily. A false positive (FP) is a hit to a domain of a different fold. Any other hit is not counted. Sort the hits by the tool's own score, best first, after dropping the query's hit to itself, and stop at the first FP. The sensitivity up to the first false positive is the TPs above that cut divided by the TPs the query has in the set. Foldseek's scoring script, which this page follows, adds 1 to that count at the superfamily and fold levels (the query itself stays in it); Figure 18 shows both."
+   "text": "For one query, a true positive (TP) is a hit to another domain at the level being scored. At the family level that is the same family. At the superfamily level it is the same superfamily but a different family, and at the fold level the same fold but a different superfamily. A false positive (FP) is a hit to a domain of a different fold. Any other hit is not counted. Sort the hits by the tool's own score, best first, after dropping the query's hit to itself, and stop at the first FP. The sensitivity up to the first false positive is the TPs above that cut divided by the TPs the query has in the set: the domains it could find there. That is the denominator of LoL-align's copy of Foldseek's scoring script (Reifenrath et al. 2026). Foldseek's original script adds 1 at the superfamily and fold levels, because it leaves the query itself in those counts; Figure 18 shows both."
   },
   {
    "tag": "figcaption",
-   "text": "made-up exampleFigure 18. One query, b.1.1.1, and its eight hits, labelled at each level. The made-up set holds 4 other domains in the query's family, 5 in its superfamily but outside the family, and 3 in its fold but outside the superfamily. Hits 1, 5 and 7 are three different domains of the query's family; the query's hit to itself was dropped before hit 1. The small grey line under the superfamily and fold rows divides by one more, as Foldseek's script does. The bottom row is the rule this site first planned, which also counts the family at the superfamily level; it is not used."
+   "text": "made-up exampleFigure 18. One query, b.1.1.1, and its eight hits, labelled at each level. The made-up set holds 4 other domains in the query's family, 5 in its superfamily but outside the family, and 3 in its fold but outside the superfamily. Hits 1, 5 and 7 are three different domains of the query's family; the query's hit to itself was dropped before hit 1. The small grey line under the superfamily and fold rows divides by one more, as Foldseek's original script does; this page does not. The bottom row is the rule this site first planned, which also counts the family at the superfamily level; it is not used."
   },
   {
    "tag": "p",
@@ -53,7 +53,7 @@
   },
   {
    "tag": "p",
-   "text": "Hit 6, a.4.5.28, is in a different fold, so the walk stops there at every level. Family: hits 1 and 5, 2 of 4 = 0.50. Superfamily: hits 2 and 4, 2 of 5 = 0.40 (2 of 6 = 0.33 in Foldseek's script). Fold: hit 3, 1 of 3 = 0.33 (1 of 4 = 0.25). Hit 7 is below the cut and adds nothing."
+   "text": "Hit 6, a.4.5.28, is in a different fold, so the walk stops there at every level. Family: hits 1 and 5, 2 of 4 = 0.50. Superfamily: hits 2 and 4, 2 of 5 = 0.40 (2 of 6 = 0.33 in Foldseek's original script). Fold: hit 3, 1 of 3 = 0.33 (1 of 4 = 0.25). Hit 7 is below the cut and adds nothing."
   },
   {
    "tag": "p",
@@ -73,7 +73,7 @@
   },
   {
    "tag": "p",
-   "text": "Foldseek, comparing shapes, finds family members for most queries (AUC 0.814) and keeps much of its lead at the superfamily level (0.572 against MMseqs2's 0.171). At the fold level both are near the floor (0.101 and 0.001). A fold-level TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008). Dropping the no-hit queries moves a drawn AUC by at most 0.004 here, because every search tool drawn returns hits for at least 99.5% of queries."
+   "text": "Foldseek, comparing shapes, finds family members for most queries (AUC 0.814) and keeps much of its lead at the superfamily level (0.638 against MMseqs2's 0.204). At the fold level both are near the floor (0.111 and 0.001). A fold-level TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008). Dropping the no-hit queries moves a drawn AUC by at most 0.004 here, because every search tool drawn returns hits for at least 99.5% of queries."
   },
   {
    "tag": "figcaption",
@@ -265,7 +265,7 @@
   },
   {
    "tag": "td",
-   "text": "0.1710.166–0.177"
+   "text": "0.2040.197–0.211"
   },
   {
    "tag": "td",
@@ -385,11 +385,11 @@
   },
   {
    "tag": "td",
-   "text": "0.5720.564–0.580"
+   "text": "0.6380.630–0.647"
   },
   {
    "tag": "td",
-   "text": "0.1010.097–0.106"
+   "text": "0.1110.106–0.116"
   },
   {
    "tag": "td",
@@ -533,7 +533,7 @@
   },
   {
    "tag": "p",
-   "text": "Queries missing from both published files, scored 0: d2bbva_, d3bvxa1, d3bvxa2, d3bvxa3, d3cu7a6, d3ljqa_, d6a1ia1, g1apy.1, g1b35.1, g1f8v.1, g1gk9.1, g1k2x.1, g1ku8.1, g1o7d.1, g1o7d.2, g1o7d.3, g1or0.1, g1pvc.1, g1q7l.1, g1qqp.1, g1r8o.1, g1tme.1, g2a73.1, g2dbx.1. With the denominator over only the domains that can be found (no extra 1), the superfamily AUC would be 0.638 for Foldseek and 0.204 for MMseqs2; both are kept in data/scope40_long.parquet (sensitivity_possible)."
+   "text": "Queries missing from both published files, scored 0: d2bbva_, d3bvxa1, d3bvxa2, d3bvxa3, d3cu7a6, d3ljqa_, d6a1ia1, g1apy.1, g1b35.1, g1f8v.1, g1gk9.1, g1k2x.1, g1ku8.1, g1o7d.1, g1o7d.2, g1o7d.3, g1or0.1, g1pvc.1, g1q7l.1, g1qqp.1, g1r8o.1, g1tme.1, g2a73.1, g2dbx.1. The published Foldseek and MMseqs2 files are on the scale of Foldseek's original script, one more in the superfamily and fold denominators: the Foldseek file's mean superfamily sensitivity is 0.574 as published and 0.641 on this page's scale, over its 5,713 queries. Each row is rescaled by turning its value back into a count of TPs (value times that row's original denominator, a whole number on every row) and dividing by the domains it could find. On the original scale this page's superfamily AUC would be 0.572 for Foldseek and 0.171 for MMseqs2; both scales are in data/scope40_long.parquet (sensitivity, sensitivity_foldseek_script)."
   },
   {
    "tag": "p",
@@ -555,7 +555,7 @@
     "coverage": 0.9952937075126372,
     "n_with_hits": 5710,
     "auc_hits_only": 0.8174363100558196,
-    "auc_possible": 0.8135892156909064,
+    "auc_foldseek_script": 0.8135892156909064,
     "n_missing_from_file": 24
    },
    {
@@ -563,13 +563,13 @@
     "setting": "published run",
     "level": "superfamily",
     "n_queries": 5737,
-    "auc": 0.5720300916333882,
-    "lo": 0.5644529932184749,
-    "hi": 0.5799749124186956,
+    "auc": 0.6380548051038565,
+    "lo": 0.6302182120498645,
+    "hi": 0.647075093615756,
     "coverage": 0.9952937075126372,
     "n_with_hits": 5710,
-    "auc_hits_only": 0.5747349624694832,
-    "auc_possible": 0.6380548051038565,
+    "auc_hits_only": 0.6410718768617907,
+    "auc_foldseek_script": 0.5720300916333882,
     "n_missing_from_file": 24
    },
    {
@@ -577,13 +577,13 @@
     "setting": "published run",
     "level": "fold",
     "n_queries": 5737,
-    "auc": 0.10131303419654766,
-    "lo": 0.09708160271194523,
-    "hi": 0.10557730322627504,
+    "auc": 0.11087206314959444,
+    "lo": 0.10569503456561759,
+    "hi": 0.11568452137375398,
     "coverage": 0.9952937075126372,
     "n_with_hits": 5710,
-    "auc_hits_only": 0.10179209758066445,
-    "auc_possible": 0.11087206314959444,
+    "auc_hits_only": 0.11139632684574839,
+    "auc_foldseek_script": 0.10131303419654766,
     "n_missing_from_file": 24
    },
    {
@@ -597,7 +597,7 @@
     "coverage": 0.995816628900122,
     "n_with_hits": 5713,
     "auc_hits_only": 0.4032919703877513,
-    "auc_possible": 0.4016048504140182,
+    "auc_foldseek_script": 0.4016048504140182,
     "n_missing_from_file": 24
    },
    {
@@ -605,13 +605,13 @@
     "setting": "published run",
     "level": "superfamily",
     "n_queries": 5737,
-    "auc": 0.1714671869545707,
-    "lo": 0.16586604604702232,
-    "hi": 0.17739915468528233,
+    "auc": 0.20383325823011633,
+    "lo": 0.19675654947102134,
+    "hi": 0.2112874118296533,
     "coverage": 0.995816628900122,
     "n_with_hits": 5713,
-    "auc_hits_only": 0.17218751121273798,
-    "auc_possible": 0.20383325823011633,
+    "auc_hits_only": 0.20468955058046165,
+    "auc_foldseek_script": 0.1714671869545707,
     "n_missing_from_file": 24
    },
    {
@@ -619,13 +619,13 @@
     "setting": "published run",
     "level": "fold",
     "n_queries": 5737,
-    "auc": 0.0008331073699413378,
-    "lo": 0.0005674036518097191,
-    "hi": 0.0011260156852573142,
+    "auc": 0.0009257483315626154,
+    "lo": 0.0006154476636823155,
+    "hi": 0.0012713952478858922,
     "coverage": 0.995816628900122,
     "n_with_hits": 5713,
-    "auc_hits_only": 0.0008366072083587355,
-    "auc_possible": 0.0009257483315626154,
+    "auc_hits_only": 0.0009296373495842331,
+    "auc_foldseek_script": 0.0008331073699413378,
     "n_missing_from_file": 24
    }
   ],
@@ -696,9 +696,9 @@
     "level": "superfamily",
     "scope_class": "a",
     "n_queries": 1018,
-    "mean": 0.4418488331188803,
-    "lo": 0.4265912630667381,
-    "hi": 0.4589914798313434
+    "mean": 0.5081064487504651,
+    "lo": 0.48928165099443177,
+    "hi": 0.5283663890459508
    },
    {
     "tool": "foldseek",
@@ -706,9 +706,9 @@
     "level": "superfamily",
     "scope_class": "b",
     "n_queries": 1748,
-    "mean": 0.5902719348102142,
-    "lo": 0.5757247745319768,
-    "hi": 0.60477648571968
+    "mean": 0.6572844326719592,
+    "lo": 0.6416236693210657,
+    "hi": 0.6734280781743337
    },
    {
     "tool": "foldseek",
@@ -716,9 +716,9 @@
     "level": "superfamily",
     "scope_class": "c",
     "n_queries": 1635,
-    "mean": 0.6132176730085418,
-    "lo": 0.5992296544927683,
-    "hi": 0.6253445707701292
+    "mean": 0.6664762437198921,
+    "lo": 0.65094545005631,
+    "hi": 0.6809915431287383
    },
    {
     "tool": "foldseek",
@@ -726,9 +726,9 @@
     "level": "superfamily",
     "scope_class": "d",
     "n_queries": 1109,
-    "mean": 0.6573924375693445,
-    "lo": 0.6411157789108507,
-    "hi": 0.6729331688274633
+    "mean": 0.7405760988448279,
+    "lo": 0.7226628511431595,
+    "hi": 0.7582042659263545
    },
    {
     "tool": "foldseek",
@@ -736,9 +736,9 @@
     "level": "superfamily",
     "scope_class": "f",
     "n_queries": 69,
-    "mean": 0.573998294970162,
-    "lo": 0.5029834216295213,
-    "hi": 0.6480698064249855
+    "mean": 0.7129433569650961,
+    "lo": 0.6245659885605538,
+    "hi": 0.7930769914465567
    },
    {
     "tool": "foldseek",
@@ -746,9 +746,9 @@
     "level": "superfamily",
     "scope_class": "g",
     "n_queries": 158,
-    "mean": 0.18274804146306478,
-    "lo": 0.15657141436132524,
-    "hi": 0.20845328098914248
+    "mean": 0.21616594943504466,
+    "lo": 0.1827852428823371,
+    "hi": 0.25289217715955414
    },
    {
     "tool": "foldseek",
@@ -756,9 +756,9 @@
     "level": "fold",
     "scope_class": "a",
     "n_queries": 1018,
-    "mean": 0.05278893177287745,
-    "lo": 0.04509853016636516,
-    "hi": 0.06138257663300988
+    "mean": 0.05740549923095206,
+    "lo": 0.04865427628816591,
+    "hi": 0.06709783811642073
    },
    {
     "tool": "foldseek",
@@ -766,9 +766,9 @@
     "level": "fold",
     "scope_class": "b",
     "n_queries": 1748,
-    "mean": 0.12497957976231032,
-    "lo": 0.1166332283082069,
-    "hi": 0.13416837064356338
+    "mean": 0.13210646090902414,
+    "lo": 0.12327374208318269,
+    "hi": 0.14199503632470256
    },
    {
     "tool": "foldseek",
@@ -776,9 +776,9 @@
     "level": "fold",
     "scope_class": "c",
     "n_queries": 1635,
-    "mean": 0.11379328689996016,
-    "lo": 0.10473532232526407,
-    "hi": 0.12206238456288761
+    "mean": 0.12615966876291798,
+    "lo": 0.11537712553645837,
+    "hi": 0.13717908634855308
    },
    {
     "tool": "foldseek",
@@ -786,9 +786,9 @@
     "level": "fold",
     "scope_class": "d",
     "n_queries": 1109,
-    "mean": 0.09629209645588424,
-    "lo": 0.08751322901281043,
-    "hi": 0.10558725941429356
+    "mean": 0.11139502247728524,
+    "lo": 0.1004849333900771,
+    "hi": 0.1235877943089565
    },
    {
     "tool": "foldseek",
@@ -796,9 +796,9 @@
     "level": "fold",
     "scope_class": "f",
     "n_queries": 69,
-    "mean": 0.21220813204508857,
-    "lo": 0.1435102153784219,
-    "hi": 0.27816651570048306
+    "mean": 0.22226673165963706,
+    "lo": 0.15024650503695522,
+    "hi": 0.29159353101462854
    },
    {
     "tool": "foldseek",
@@ -806,9 +806,9 @@
     "level": "fold",
     "scope_class": "g",
     "n_queries": 158,
-    "mean": 0.0097918927478779,
-    "lo": 0.0070310756798563955,
-    "hi": 0.012667595355989296
+    "mean": 0.00992146559458708,
+    "lo": 0.007137644758644586,
+    "hi": 0.012826437388566743
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -876,9 +876,9 @@
     "level": "superfamily",
     "scope_class": "a",
     "n_queries": 1018,
-    "mean": 0.15133753832681063,
-    "lo": 0.1390090832932089,
-    "hi": 0.16407789325876024
+    "mean": 0.19166621126496294,
+    "lo": 0.1733364508831023,
+    "hi": 0.20972772173532161
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -886,9 +886,9 @@
     "level": "superfamily",
     "scope_class": "b",
     "n_queries": 1748,
-    "mean": 0.15806321505101778,
-    "lo": 0.14747933822391146,
-    "hi": 0.16866860413698942
+    "mean": 0.18882506788551134,
+    "lo": 0.17493957619372233,
+    "hi": 0.20244671964862157
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -896,9 +896,9 @@
     "level": "superfamily",
     "scope_class": "c",
     "n_queries": 1635,
-    "mean": 0.1850282481927261,
-    "lo": 0.17404844573444747,
-    "hi": 0.1962401391821139
+    "mean": 0.21079867301548563,
+    "lo": 0.1975102149974554,
+    "hi": 0.22502238926551235
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -906,9 +906,9 @@
     "level": "superfamily",
     "scope_class": "d",
     "n_queries": 1109,
-    "mean": 0.19627097063995533,
-    "lo": 0.18263719488805588,
-    "hi": 0.21066176204668638
+    "mean": 0.23272678741852731,
+    "lo": 0.21612547162835036,
+    "hi": 0.25034024500734087
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -916,9 +916,9 @@
     "level": "superfamily",
     "scope_class": "f",
     "n_queries": 69,
-    "mean": 0.2755923625488843,
-    "lo": 0.21862635150678628,
-    "hi": 0.3363792558086036
+    "mean": 0.3576395424221511,
+    "lo": 0.27623295585252106,
+    "hi": 0.4416593470941298
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -926,9 +926,9 @@
     "level": "superfamily",
     "scope_class": "g",
     "n_queries": 158,
-    "mean": 0.08955425558107102,
-    "lo": 0.06924562971958458,
-    "hi": 0.1093267889833721
+    "mean": 0.1062152827846653,
+    "lo": 0.08023836309399061,
+    "hi": 0.13412840083515531
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -936,9 +936,9 @@
     "level": "fold",
     "scope_class": "a",
     "n_queries": 1018,
-    "mean": 0.00034384183785764123,
-    "lo": 0.00017376461900985585,
-    "hi": 0.0005562782939303792
+    "mean": 0.00035395247545877466,
+    "lo": 0.00017573821310538186,
+    "hi": 0.0005788300238700772
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -946,9 +946,9 @@
     "level": "fold",
     "scope_class": "b",
     "n_queries": 1748,
-    "mean": 0.0004264973274361399,
-    "lo": 0.0002591612701787099,
-    "hi": 0.0006022484853260677
+    "mean": 0.0004384392816213205,
+    "lo": 0.0002655508475503705,
+    "hi": 0.0006205369691149556
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -956,9 +956,9 @@
     "level": "fold",
     "scope_class": "c",
     "n_queries": 1635,
-    "mean": 0.001798432950500359,
-    "lo": 0.0009433874540037464,
-    "hi": 0.00272764948777836
+    "mean": 0.0020479742957443922,
+    "lo": 0.0010606534075886958,
+    "hi": 0.0031367865746581586
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -966,9 +966,9 @@
     "level": "fold",
     "scope_class": "d",
     "n_queries": 1109,
-    "mean": 0.00023687208442446704,
-    "lo": 4.6011053612803435e-06,
-    "hi": 0.0006966411489453307
+    "mean": 0.00031204444689504537,
+    "lo": 4.613126630464573e-06,
+    "hi": 0.0009221214137948464
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -976,9 +976,9 @@
     "level": "fold",
     "scope_class": "f",
     "n_queries": 69,
-    "mean": 0.001177536231884058,
+    "mean": 0.0012302846878767745,
     "lo": 0.0,
-    "hi": 0.0030797101449275364
+    "hi": 0.0032233458822371495
    },
    {
     "tool": "mmseqs2_seqseq",
@@ -986,9 +986,9 @@
     "level": "fold",
     "scope_class": "g",
     "n_queries": 158,
-    "mean": 0.0025291749769695113,
-    "lo": 0.001536240984207777,
-    "hi": 0.0035912702689161057
+    "mean": 0.0025627707928572107,
+    "lo": 0.0015593203110497948,
+    "hi": 0.0036408111224954945
    }
   ],
   "n_domains": 15177,
