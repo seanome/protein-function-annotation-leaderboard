@@ -487,3 +487,16 @@ form.tf .tf-pair>span{flex:1 1 10rem}
 .tf-go:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tf-problems{border:1px solid var(--warn);background:var(--warn-bg);border-radius:8px;padding:8px 12px}
 .tf-preview pre{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Known cases: the aligned-residue blocks, the tool-by-case matrix and the cards. */
+pre.aln{font-size:.82rem;line-height:1.35;white-space:pre;overflow-x:auto}
+p.alnnote{font-size:.88rem;color:var(--muted);margin:4px 0 0;max-width:90ch}
+p.takeaway{max-width:80ch;margin:12px 0 0}
+section.card.kc{margin:22px 0;max-width:1100px}
+section.card.kc h2{border-bottom:none;margin-top:14px}
+ol.boxes{max-width:80ch}
+ol.boxes li,ol.refs li,ol.elm li{margin-bottom:7px}
+ol.refs{font-size:.92rem;max-width:90ch}
+ol.elm{font-size:.92rem;max-width:90ch}
+.kcmatrix .mk{cursor:pointer}
+.kcmatrix .mk:focus-visible{outline:2px solid var(--accent)}

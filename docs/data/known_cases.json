@@ -1,0 +1,3488 @@
+{
+ "built_by": "scripts/known_cases.py",
+ "target_db": "UniProtKB/Swiss-Prot release 2026_03",
+ "direction": "each case's query protein is searched against Swiss-Prot. Table 1 searches the other way: human proteins against one relative's proteome.",
+ "shuffle_seed": 1,
+ "boxes": {
+  "1": {
+   "title": "Shared ancestor, same job",
+   "right": "the target's family and its function",
+   "words": "The two proteins descend from one ancestral protein and still do the same job. A call is right when it names the target's family and transfers its function."
+  },
+  "2": {
+   "title": "Shared ancestor, new job",
+   "right": "the family only; transferring the function is a wrong label",
+   "words": "The two proteins descend from one ancestral protein, but the query protein has taken on a different job. A call is right when it names the family, and wrong when it carries the target's function across."
+  },
+  "3": {
+   "title": "No shared ancestor, whole protein",
+   "right": "the function only; a family call is wrong by ancestry and right by function",
+   "words": "The two proteins reached the same job from different ancestors, so there is no family truth. A call that names the target's family is wrong by ancestry and right by function, and the card shows both marks."
+  },
+  "4": {
+   "title": "No shared ancestor, short motif",
+   "right": "a call covering the right few residues",
+   "words": "A short stretch of the query protein copies a short stretch of a human protein. A call is right when it lands on those residues."
+  }
+ },
+ "result_words": {
+  "found": "a call on the right target, overlapping the truth region with an IoU of 0.5 or more",
+  "wrong place": "a call on the right target, overlapping the truth region with an IoU below 0.5",
+  "wrong label": "the call carries the human protein's function to a protein that does not have it",
+  "missed": "no call on the target above the tool's own cutoff",
+  "not run": "the search has not been run yet; the card says why"
+ },
+ "eco": {
+  "ECO:0000012": "functional complementation evidence",
+  "ECO:0005670": "x-ray crystallography evidence used in manual assertion",
+  "ECO:0000314": "direct assay evidence used in manual assertion",
+  "ECO:0000315": "mutant phenotype evidence used in manual assertion",
+  "ECO:0000353": "physical interaction evidence used in manual assertion",
+  "ECO:0005801": "enzymatic activity assay evidence used in manual assertion",
+  "ECO:0000269": "experimental evidence used in manual assertion"
+ },
+ "references": [
+  {
+   "n": 1,
+   "text": "Hengartner, M. O., and H. R. Horvitz. \"C. elegans Cell Survival Gene ced-9 Encodes a Functional Homolog of the Mammalian Proto-oncogene bcl-2.\" <i>Cell</i> 76, no. 4 (1994): 665–76.",
+   "doi": "10.1016/0092-8674(94)90506-1"
+  },
+  {
+   "n": 2,
+   "text": "Vaux, D. L., I. L. Weissman, and S. K. Kim. \"Prevention of Programmed Cell Death in Caenorhabditis elegans by Human bcl-2.\" <i>Science</i> 258, no. 5090 (1992): 1955–57.",
+   "doi": "10.1126/science.1470921"
+  },
+  {
+   "n": 3,
+   "text": "Kvansakul, M., M. F. van Delft, E. F. Lee, J. M. Gulbis, W. D. Fairlie, D. C. S. Huang, and P. M. Colman. \"A Structural Viral Mimic of Prosurvival Bcl-2: A Pivotal Role for Sequestering Proapoptotic Bax and Bak.\" <i>Molecular Cell</i> 25, no. 6 (2007): 933–42.",
+   "doi": "10.1016/j.molcel.2007.02.004"
+  },
+  {
+   "n": 4,
+   "text": "Graham, S. C., M. W. Bahar, S. Cooray, R. A.-J. Chen, D. M. Whalen, N. G. A. Abrescia, D. Alderton, et al. \"Vaccinia Virus Proteins A52 and B14 Share a Bcl-2-like Fold but Have Evolved to Inhibit NF-κB Rather Than Apoptosis.\" <i>PLoS Pathogens</i> 4, no. 8 (2008): e1000128.",
+   "doi": "10.1371/journal.ppat.1000128"
+  },
+  {
+   "n": 5,
+   "text": "Löwe, J., and L. A. Amos. \"Crystal Structure of the Bacterial Cell-Division Protein FtsZ.\" <i>Nature</i> 391, no. 6663 (1998): 203–6.",
+   "doi": "10.1038/34472"
+  },
+  {
+   "n": 6,
+   "text": "van den Ent, F., L. A. Amos, and J. Löwe. \"Prokaryotic Origin of the Actin Cytoskeleton.\" <i>Nature</i> 413, no. 6851 (2001): 39–44.",
+   "doi": "10.1038/35092500"
+  },
+  {
+   "n": 7,
+   "text": "Bork, P., C. Sander, and A. Valencia. \"An ATPase Domain Common to Prokaryotic Cell Cycle Proteins, Sugar Kinases, Actin, and hsp70 Heat Shock Proteins.\" <i>Proceedings of the National Academy of Sciences of the United States of America</i> 89, no. 16 (1992): 7290–94.",
+   "doi": "10.1073/pnas.89.16.7290"
+  },
+  {
+   "n": 8,
+   "text": "Schumacher, M. A., R. F. Pearson, T. Møller, P. Valentin-Hansen, and R. G. Brennan. \"Structures of the Pleiotropic Translational Regulator Hfq and an Hfq–RNA Complex: A Bacterial Sm-like Protein.\" <i>The EMBO Journal</i> 21, no. 13 (2002): 3546–56.",
+   "doi": "10.1093/emboj/cdf322"
+  },
+  {
+   "n": 9,
+   "text": "Essuman, K., D. W. Summers, Y. Sasaki, X. Mao, A. K. Y. Yim, A. DiAntonio, and J. Milbrandt. \"TIR Domain Proteins Are an Ancient Family of NAD-Consuming Enzymes.\" <i>Current Biology</i> 28, no. 3 (2018): 421–430.e4.",
+   "doi": "10.1016/j.cub.2017.12.024"
+  },
+  {
+   "n": 10,
+   "text": "Buchwald, G., A. Friebel, J. E. Galán, W.-D. Hardt, A. Wittinghofer, and K. Scheffzek. \"Structural Basis for the Reversible Activation of a Rho Protein by the Bacterial Toxin SopE.\" <i>The EMBO Journal</i> 21, no. 13 (2002): 3286–95.",
+   "doi": "10.1093/emboj/cdf329"
+  },
+  {
+   "n": 11,
+   "text": "Stebbins, C. E., and J. E. Galán. \"Modulation of Host Signaling by a Bacterial Mimic: Structure of the Salmonella Effector SptP Bound to Rac1.\" <i>Molecular Cell</i> 6, no. 6 (2000): 1449–60.",
+   "doi": "10.1016/s1097-2765(00)00141-6"
+  },
+  {
+   "n": 12,
+   "text": "Cameron, C. M., J. W. Barrett, M. Mann, A. Lucas, and G. McFadden. \"Myxoma Virus M128L Is Expressed as a Cell Surface CD47-like Virulence Factor That Contributes to the Downregulation of Macrophage Activation in Vivo.\" <i>Virology</i> 337, no. 1 (2005): 55–67.",
+   "doi": "10.1016/j.virol.2005.03.037"
+  },
+  {
+   "n": 13,
+   "text": "Tal, M. C., P. S. Hansen, H. A. Ogasawara, Q. Feng, R. F. Volk, B. Lee, S. E. Casebeer, et al. \"P66 Is a Bacterial Mimic of CD47 That Binds the Anti-phagocytic Receptor SIRPα and Facilitates Macrophage Evasion by Borrelia burgdorferi.\" bioRxiv preprint, April 30, 2024.",
+   "doi": "10.1101/2024.04.29.591704",
+   "note": "Preprint, not peer reviewed."
+  },
+  {
+   "n": 14,
+   "text": "Marazzi, I., J. S. Y. Ho, J. Kim, B. Manicassamy, S. Dewell, R. A. Albrecht, C. W. Seibert, et al. \"Suppression of the Antiviral Response by an Influenza Histone Mimic.\" <i>Nature</i> 483, no. 7390 (2012): 428–33.",
+   "doi": "10.1038/nature10892"
+  },
+  {
+   "n": 15,
+   "text": "Chen, L., A. L. DeVries, and C. H. Cheng. \"Convergent Evolution of Antifreeze Glycoproteins in Antarctic Notothenioid Fish and Arctic Cod.\" <i>Proceedings of the National Academy of Sciences of the United States of America</i> 94, no. 8 (1997): 3817–22.",
+   "doi": "10.1073/pnas.94.8.3817"
+  },
+  {
+   "n": 16,
+   "text": "Kumar, M., S. Michael, J. Alvarado-Valverde, B. Mészáros, H. Sámano-Sánchez, A. Zeke, L. Dobson, et al. \"The Eukaryotic Linear Motif Resource: 2022 Release.\" <i>Nucleic Acids Research</i> 50, no. D1 (2022): D497–D508.",
+   "doi": "10.1093/nar/gkab975"
+  },
+  {
+   "n": 17,
+   "text": "Cheng, H., B.-H. Kim, and N. V. Grishin. \"MALISAM: A Database of Structurally Analogous Motifs in Proteins.\" <i>Nucleic Acids Research</i> 36, Database issue (2008): D211–17.",
+   "doi": "10.1093/nar/gkm698"
+  },
+  {
+   "n": 18,
+   "text": "Davey, N. E., G. Travé, and T. J. Gibson. \"How Viruses Hijack Cell Regulation.\" <i>Trends in Biochemical Sciences</i> 36, no. 3 (2011): 159–69.",
+   "doi": "10.1016/j.tibs.2010.10.002"
+  }
+ ],
+ "tool_settings": {
+  "kmerseek": "gbmr4_k21_lcFalse",
+  "hmmer3_phmmer": "default",
+  "hmmer3_jackhmmer": "n3",
+  "mmseqs2_seqseq": "s7",
+  "mmseqs2_iterative": "s7",
+  "hhblits": "single_seq",
+  "foldseek": "3di_aa",
+  "prostt5": "3di_from_seq",
+  "hmmscan": "direct"
+ },
+ "cases": [
+  {
+   "id": 1,
+   "box": 1,
+   "name": "CED-9 against BCL-2",
+   "query": {
+    "acc": "P41958",
+    "label": "CED-9",
+    "species": "Caenorhabditis elegans"
+   },
+   "target": {
+    "acc": "P10415",
+    "label": "BCL-2",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF00452",
+    "name": "Bcl-2"
+   },
+   "experiment": "Human bcl-2 put into C. elegans stopped the programmed cell death that loss of ced-9 causes, and ced-9 itself carries the same activity.",
+   "takeaway": "Two proteins that do the same job can sit near the edge of what a sequence search reports. A weak hit to a protein of the right family is worth reading, not throwing away.",
+   "earlier_runs": "An earlier search of CED-9 against the human GENCODE v49 canonical proteome is stored in seanome/2024-kmerseek-analysis, branch olgabot/case-gallery-reference-pairs, commit 3e3767c1, files tables/case_gallery/other_tools/*.tsv. phmmer puts CED-9 residues 111 to 232 on BCL-2 residues 68 to 235, E = 7.9e-05. jackhmmer puts 100 to 229 on 73 to 208, E = 7.7e-41. MMseqs2 with three rounds puts 101 to 236 on 82 to 211, E = 8.1e-20, and with one round reports no BCL-2 row at all. Those runs had no decoy and searched a different database, so they are not in the table above.",
+   "eco": "ECO:0000012",
+   "refs": [
+    1,
+    2
+   ],
+   "structure": null,
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 93,
+    "target_start": 68,
+    "query": "RQNGMEWFGAPGLPCG-----VQP-EHEMMRVMGTIFEKKHAENFETFCEQLLAVPRISFSLYQDVVRTVGNAQTDQCPMSYGRLIGLISFGGFVAAKMMESVELQGQVRNLFVYTSLFIKTRIRNNWKEHNRSWDDFMTL-GKQMKEDYERAEAEKVGRRKQNRRWSMIGAGVTAGA",
+    "target": "RTSPLQTPAAPGAAAGPALSPVPPVVHLTLRQAGDDFSRRYRRDFAEMSSQLHLTP---FTARGRFATVV-E-ELFRDGVNWGRIVAFFEFGGVMCVESVNR-EMSPLVDNIALWMTEYLNRHL-HTWIQDNGGWDAFVELYGPSMRPLF---DFSWLS-LKTLLSLALVGACITLGA",
+    "match": "|        |||   |     | |  |   |  |  |       |     ||   |   |         |            ||      |||          |    | |                |   |  || |  | |  |               |        ||  | ||",
+    "identical": 39,
+    "columns": 178,
+    "score": 98
+   },
+   "queries": [
+    {
+     "acc": "P41958",
+     "label": "CED-9",
+     "species": "Caenorhabditis elegans",
+     "length": 280,
+     "protein_name": "Apoptosis regulator ced-9 (Cell death protein 9)",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MSMGIGRIVDVVVRNDLDWKQVTSLIKKIELFSINRSDNWSPSRRIKEEMFGLGTDFESLPCGKQNNPAQTHRMMTINFTRNSFLPRVGRTNRQGEPRRRLLISVRMKGADIRLKHETASLQMKEHAVQNLYEGEKMEFVGLFEDFVYGAEWEQAESLGKTAEHNGFISTEPMIRRWDAATRIGNSYFSIGIFGIGFVVGVVMENAIDGAYTGMMSWFGGVAPERTDDQDYQCPGRRKVPSFMMRAGTLTFCTVEKEMTMAGQPTRQDYRCGVCEAQLAK"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-P41958-F1-model_v6.cif",
+      "version": 6
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P41958, version 6",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-P41958-F1-model_v6.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "P10415",
+     "label": "BCL-2",
+     "species": "human",
+     "length": 239,
+     "protein_name": "Apoptosis regulator Bcl-2"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 2,
+   "box": 1,
+   "name": "Myxoma virus M11L against BCL-2",
+   "query": {
+    "acc": "Q85295",
+    "label": "M11L",
+    "species": "myxoma virus"
+   },
+   "target": {
+    "acc": "P10415",
+    "label": "BCL-2",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF00452",
+    "name": "Bcl-2"
+   },
+   "experiment": "The crystal structure of M11L bound to a Bak BH3 peptide shows the Bcl-2 fold and the same groove that BCL-2 uses to hold Bax and Bak.",
+   "takeaway": "A virus protein can hold a human fold with almost no sequence left in common. A tool that reads only letters may report nothing here, even though the label is right.",
+   "eco": "ECO:0005670",
+   "refs": [
+    3
+   ],
+   "structure": {
+    "pdb": "2JBX",
+    "chain": "A",
+    "what": "M11L, 1.7 Å crystal structure"
+   },
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 48,
+    "target_start": 201,
+    "query": "LYDIMERDILSYNIVNIKNTLTFAL",
+    "target": "LYGPSMRPLFDFSWLSLKTLLSLAL",
+    "match": "||    |          |  |  ||",
+    "identical": 7,
+    "columns": 25,
+    "score": 32
+   },
+   "queries": [
+    {
+     "acc": "Q85295",
+     "label": "M11L",
+     "species": "myxoma virus",
+     "length": 166,
+     "protein_name": "Apoptosis regulator M11L (M11L protein)",
+     "reviewed": false,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MMDTTFAEQVIDVYAKINVAATLNTLKKCKIKWYLNYNIGIMSNILTDFIVDIKNECDLSVNKYGISGGTAVIQLLASRDILRGCCQQKKLLYLKNCKTERLCTYRDYNDIQHTYDAVYDGFVGFIVRSPSETLSYYDAMEMFSVVAALTLTEEVKLAYNTASVIT"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 2JBX chain A: M11L, 1.7 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "P10415",
+     "label": "BCL-2",
+     "species": "human",
+     "length": 239,
+     "protein_name": "Apoptosis regulator Bcl-2"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 3,
+   "box": 1,
+   "name": "Myxoma virus M128L against CD47",
+   "query": {
+    "acc": "Q9Q8H3",
+    "label": "M128L",
+    "species": "myxoma virus"
+   },
+   "target": {
+    "acc": "Q08722",
+    "label": "CD47",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF07686",
+    "name": "V-set immunoglobulin domain"
+   },
+   "experiment": "M128L sits on the surface of infected cells as a CD47-like protein, and rabbits infected with virus lacking it had milder disease and more activated macrophages.",
+   "takeaway": "When a virus carries a copy of a host surface protein, the right label is the host protein's own family. A tool that misses it leaves a virulence factor unlabelled.",
+   "eco": "ECO:0000315",
+   "refs": [
+    12
+   ],
+   "structure": null,
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 17,
+    "target_start": 23,
+    "query": "NEVTVTPYTVCNKTVTLECNLDALIYKDINSVHVKW--------LF---------DTMYDTISNK-T----NGSSITFDFAN--NLTGNYTCEAYSEFNSVKHVIALTF-VHQWFSREEIQFILSLLTIYIILLWG--NVCTITFKINNV-SKLIHVYSIALWMTLIMFVGQYMIGIDTDMLYVKVNGIILIQLSIFSSIFLQRILHKKLI--PSYLLNIVLGLKAVSYTGSTVVIALSFIGCYNKAYGYTYMYKLLFADILELISLI",
+    "target": "NKTKSVEFTFCNDTVVIPCFVTNMEAQNTTEVYVKWKFKGRDIYTFDGALNKSTVPTDFSSAKIEVSQLLKGDASLKMDKSDAVSHTGNYTCEVTELTREGETIIELKYRVVSWFSPNENILIVIFPIFAILLFWGQFGIKTLKYRSGGMDEKTIALLVAGLVITVIVIVGAILF-VPGEYSLKNATGLGLIVTSTGILILLHYYVFSTAIGLTSFVIAILV-IQVIAYILAVVGLSLCIAACI-PMHGPLLISGLSILALAQLLGLV",
+    "match": "|       | || ||   |            | |||         |          |                 |   |       |||||||           | |   |  |||  |   |       | | ||     |          | |      |  | |  ||                |  ||  |    | |        |   |    |        |    |   |    |     |      |       |  | ",
+    "identical": 59,
+    "columns": 268,
+    "score": 142
+   },
+   "queries": [
+    {
+     "acc": "Q9Q8H3",
+     "label": "M128L",
+     "species": "myxoma virus",
+     "length": 281,
+     "protein_name": "Leukocyte surface antigen CD47 (Integrin-associated protein) (Protein OPG166)",
+     "reviewed": false,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MYLGCTDEIANNNINLPSSILWLIGNKAAYLTFLSILLLTNSVKTIQYMYKLISLYSFIINYMFTLQSEALIQWFSSNVGSKTGQATIGTLILAYGNVHVYTVTYTYTFDIHVKKITFSIALEFALNGILIAELGSYIIAVLSLKLFVVCYSRENECNSTMTCETPYDIDALQFDTGYKHVIYVKWMLFLIYNGITLSIFADMIPLLIVSDFIGLFFNLDTFVPLYTVSYTQRISVNKALLYVVTVCNKDTIMILTFVHQLHKVTVYKKLWGLEEVIFKLL"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365764421-model_v1.cif",
+      "version": 1
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of Q9Q8H3, version 1",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365764421-model_v1.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "Q08722",
+     "label": "CD47",
+     "species": "human",
+     "length": 323,
+     "protein_name": "Leukocyte surface antigen CD47 (Antigenic surface determinant protein OA3) (Integrin-associated protein) (IAP) (Protein MER6) (CD antigen CD47)"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 4,
+   "box": 1,
+   "name": "FtsZ against alpha- and beta-tubulin",
+   "query": {
+    "acc": "Q57816",
+    "label": "FtsZ",
+    "species": "Methanocaldococcus jannaschii"
+   },
+   "target": {
+    "acc": "P07437",
+    "label": "beta-tubulin",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF00091",
+    "name": "Tubulin/FtsZ GTPase domain"
+   },
+   "experiment": "The crystal structure of FtsZ has the tubulin fold and the same GTP-binding site. A bacterial cell-division protein and a human cytoskeleton protein are one family.",
+   "takeaway": "One ancient family can keep its fold and its binding site while the sequence drifts far apart. Check how much of the call sits on the real domain, not only whether the family is named.",
+   "eco": "ECO:0005670",
+   "refs": [
+    5
+   ],
+   "structure": {
+    "pdb": "1FSZ",
+    "chain": "A",
+    "what": "FtsZ, 2.8 Å crystal structure"
+   },
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 127,
+    "target_start": 135,
+    "query": "ITCGLGGGTGTGSAP-VVAEISKKI--G-ALTVAVVTLPFVMEGKVRMKNAMEGLERLKQHTDTLVVIPNEKLFEIVPNMPLKLAFKV-ADEV-LINA-VKGLVELITKDGLINVD",
+    "target": "LTHSLGGGTGSGMGTLLISKIREEYPDRIMNTFSVVPSPKVSDTVVEPYNATLSVHQLVENTDETYCIDNEALYDIC-FRTLKLTTPTYGDLNHLVSATMSGVTTCLRFPGQLNAD",
+    "match": " |  |||||| |        |          |  ||  | |    |   ||      |   ||    | || |  |     |||      |   |  |   |        |  | |",
+    "identical": 35,
+    "columns": 116,
+    "score": 86
+   },
+   "queries": [
+    {
+     "acc": "Q57816",
+     "label": "FtsZ",
+     "species": "Methanocaldococcus jannaschii",
+     "length": 364,
+     "protein_name": "Cell division protein FtsZ 1",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MKITGGAMNTCGLNTVAIGIRLVGLKKIDLKKKVKLITKRLENTGKIGNEIHVVFTIGSDAADGATDIPEFNSMVRIGVAVKINNNAKARKAIKNAGSDKEGTVSPLEEIDTKAEFLLEKENVITDMEDFKFVVQHTLIVAVLILESPNGGLEEVVITVMEVSKKLKIINLSALQDEINEADVAGLEEGALTRGGKAFEAAVVEGNATDSSKDVREERMKGGGPKLELTKLGCGLKVDTGLTLLADGIEATGAVLFIWGISEGTLIQSRVMEEDKQQQTGELKNMAMPFAKMIGAPNPKLPLVVMGLITGELGAKEGAELDSRTIPNVLVTRAKRLESATVPVAQLLDEKTVDPELTIEYLALI"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 1FSZ chain A: FtsZ, 2.8 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "P07437",
+     "label": "beta-tubulin",
+     "species": "human",
+     "length": 444,
+     "protein_name": "Tubulin beta chain (Tubulin beta-5 chain)"
+    },
+    {
+     "acc": "Q71U36",
+     "label": "alpha-tubulin",
+     "species": "human",
+     "length": 451,
+     "protein_name": "Tubulin alpha-1A chain (EC 3.6.5.-) (Alpha-tubulin 3) (Tubulin B-alpha-1) (Tubulin alpha-3 chain) [Cleaved into: Detyrosinated tubulin alpha-1A chain]"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 5,
+   "box": 1,
+   "name": "MreB against actin",
+   "query": {
+    "acc": "Q9WZ57",
+    "label": "MreB",
+    "species": "Thermotoga maritima"
+   },
+   "target": {
+    "acc": "P60709",
+    "label": "beta-actin",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF06723",
+    "name": "MreB/Mbl, the actin-like ATPase fold"
+   },
+   "experiment": "The crystal structure of MreB has the actin fold, and MreB forms protein filaments with the same subunit spacing as an actin filament.",
+   "takeaway": "The same fold carries actin's job in a bacterium, so a family call here is both correct and far from obvious from the sequence alone.",
+   "eco": "ECO:0005670",
+   "refs": [
+    6,
+    7
+   ],
+   "structure": {
+    "pdb": "1JCE",
+    "chain": "A",
+    "what": "MreB, 1.9 Å crystal structure"
+   },
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 150,
+    "target_start": 151,
+    "query": "MVVDIGGGTTEVAVISLGSIVTWESIR--IAGDEMDEAIVQYVRET-YR-VAIGERTAER-VKIEIGNVFPSKENDELETTV-SGIDLSTGLP--RKLTLKGG-----EV--REA-LRSVVVAIVESVRTTLEKTPPELVSDIIERGIFLTGGGSLLRGLDTLLQKE",
+    "target": "IVMDSGDGVTHTVPIYEGYALPHAILRLDLAGRDLTDYLMKILTERGYSFTTTAEREIVRDIKEKLCYVALDFEQEMATAASSSSLEKSYELPDGQVITIGNERFRCPEALFQPSFLGMESCGIHETTFNSIMKCDVDIRKDLYANTV-LSGGTTMYPGIADRMQKE",
+    "match": " | | | | |    |  |        |   ||            |  |      ||   |  |     |    |         |    |  ||     |         |       |      | |       |       |       | ||     |     |||",
+    "identical": 36,
+    "columns": 167,
+    "score": 44
+   },
+   "queries": [
+    {
+     "acc": "Q9WZ57",
+     "label": "MreB",
+     "species": "Thermotoga maritima",
+     "length": 336,
+     "protein_name": "Cell shape-determining protein MreB",
+     "reviewed": false,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MDELTYVGGGSIGGGMAIDLRTLKERGIGLDYFLVEEPMVSVFIDSIGENMVVDLEAIGAGGATLTTGKILEEIFKLKAKGIVSKVRAIKERGTWERKGVVLPSVKLQKTGEPRKTVIRPSLLNDIGIDAKVMRGKPPIRVEAAGGTEKNVTDEMNLVERDETTAGIEPRYRSVVIAGNTGLFPEVAEAVAIVQYTALRIVAGLRRESVAILIGDISKDVVRSGETTGIEVNMILSNLDKGIAANEEPLRVINVPSGLTPALDISLESTAIASELGMLLKKVAKAITTVRVIIGAVNIEADTLETLVVFLQGVFLRTIVIREIGNKGSDGSTPMLG"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 1JCE chain A: MreB, 1.9 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "P60709",
+     "label": "beta-actin",
+     "species": "human",
+     "length": 375,
+     "protein_name": "Actin, cytoplasmic 1 (EC 3.6.4.-) (Beta-actin) [Cleaved into: Actin, cytoplasmic 1, N-terminally processed]"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 6,
+   "box": 1,
+   "name": "Hfq against the Sm proteins",
+   "query": {
+    "acc": "A0A0H3JV59",
+    "label": "Hfq",
+    "species": "Staphylococcus aureus"
+   },
+   "target": {
+    "acc": "P62314",
+    "label": "Sm D1",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF01423",
+    "name": "LSM domain"
+   },
+   "experiment": "The crystal structures of Hfq alone and bound to RNA show the Sm fold. Its subunits form a ring that holds single-stranded RNA, as the human Sm proteins do.",
+   "takeaway": "Both proteins here are 77 residues long, which leaves a search little to work with. A miss says more about the length than about the pair.",
+   "eco": "ECO:0005670",
+   "refs": [
+    8
+   ],
+   "structure": {
+    "pdb": "1KQ1",
+    "chain": "A",
+    "what": "Hfq, 1.55 Å crystal structure"
+   },
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 16,
+    "target_start": 9,
+    "query": "KANQTEVTVFFLNGFQMKGVIEEYDKYVVSLNSQGK",
+    "target": "KLSHETVTIELKNGTQVHGTITGVD---VSMNTHLK",
+    "match": "|     ||    || |  | |   |   || |   |",
+    "identical": 13,
+    "columns": 36,
+    "score": 42
+   },
+   "queries": [
+    {
+     "acc": "A0A0H3JV59",
+     "label": "Hfq",
+     "species": "Staphylococcus aureus",
+     "length": 77,
+     "protein_name": "RNA-binding protein Hfq",
+     "reviewed": false,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MKASTENFFQGKQTENISTYTEYVIQANQMIAIYDKANEGQDKYKHLNSQHALNGFLESEEEVFKGVTVSLIETVVE"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 1KQ1 chain A: Hfq, 1.55 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "P62314",
+     "label": "Sm D1",
+     "species": "human",
+     "length": 119,
+     "protein_name": "Small nuclear ribonucleoprotein Sm D1 (Sm-D1) (Sm-D autoantigen) (snRNP core protein D1)"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 7,
+   "box": 2,
+   "name": "Vaccinia virus A52 and B14 against BCL-2",
+   "query": {
+    "acc": "Q01220",
+    "label": "A52",
+    "species": "vaccinia virus"
+   },
+   "target": {
+    "acc": "P10415",
+    "label": "BCL-2",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF00452",
+    "name": "Bcl-2"
+   },
+   "experiment": "The crystal structures of A52 and B14 have the Bcl-2 fold but no groove for a BH3 peptide. Neither protein changes programmed cell death; both block NF-κB signalling.",
+   "takeaway": "A52 and B14 have the Bcl-2 fold and none of the apoptosis job. Reading the family off the fold is safe here; reading the job off the family is not.",
+   "eco": "ECO:0005670",
+   "refs": [
+    4
+   ],
+   "structure": {
+    "pdb": "2VVW",
+    "chain": "A",
+    "what": "A52, 1.9 Å crystal structure"
+   },
+   "wrong_label": "stops programmed cell death (the job of BCL-2)",
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 3,
+    "target_start": 93,
+    "query": "IKIDISISGDKFTVTTRRENEERKKYLPL",
+    "target": "VHLTLRQAGDDFSRRYRRDFAEMSSQLHL",
+    "match": "        || |    ||   |    | |",
+    "identical": 8,
+    "columns": 29,
+    "score": 31
+   },
+   "queries": [
+    {
+     "acc": "Q01220",
+     "label": "A52",
+     "species": "vaccinia virus",
+     "length": 190,
+     "protein_name": "Protein A52",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MDVWKKQFTIGDNENSREEGAEEEEEMFNDILLGLFSGTVVEYGLFGRISEKQKYLDYFTTINEYRKYLPDCVDDYDIKVKLFIEISIKFMILEQKLRRLRACLDRLQDLKLRDVQNFIVTRWRLVYIDELEMLQKPLTTDNRNERGLLNDADKYVYDISMYCAIKSIKFDKLCIKIKKIKEKTVIDHMS"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 2VVW chain A: A52, 1.9 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P24772",
+     "label": "B14",
+     "species": "vaccinia virus",
+     "structure": {
+      "pdb": "2VVY",
+      "chain": "A",
+      "what": "B14, 2.7 Å crystal structure"
+     },
+     "length": 149,
+     "protein_name": "Protein OPG200",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MNMLELLCAEYIGGQCDVFRMLNFSPQCGLFREQLTSSFVDEDVFIIDAIRQKNSTELNYAEMPDYAATHVKDHCALVKTSTANIIRQHPTYWGCYRRCLYVMTLVRDDIDDCAYSAGEIISYNAYIYWDDRNREIPWSIRLSLTIFSN"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 2VVY chain A: B14, 2.7 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "P10415",
+     "label": "BCL-2",
+     "species": "human",
+     "length": 239,
+     "protein_name": "Apoptosis regulator Bcl-2"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 8,
+   "box": 2,
+   "name": "A bacterial TIR-domain protein against a human TIR domain",
+   "query": {
+    "acc": "P0DTS9",
+    "label": "TirS",
+    "species": "Staphylococcus aureus"
+   },
+   "target": {
+    "acc": "Q6SZW1",
+    "label": "SARM1",
+    "species": "human"
+   },
+   "family": {
+    "id": "PF01582",
+    "name": "TIR domain"
+   },
+   "experiment": "Purified TirS cleaves NAD, and the full-length protein lowers NAD in human cells, which the catalytically dead E216A protein does not. The human TIR domains of the Toll-like receptors hold protein complexes together instead.",
+   "takeaway": "A domain shared between a bacterium and a human can carry a different job in each. The safe transfer is the domain name, not the human protein's role.",
+   "eco": "ECO:0005801",
+   "refs": [
+    9
+   ],
+   "structure": null,
+   "wrong_label": "holds a Toll-like receptor signalling complex together",
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 144,
+    "target_start": 563,
+    "query": "DVFLSHSSLDKEDYVSKISEKLIEKGLKVFEDVKVFEIGKSQTETMNMGILNSRFVVVFLSPNFIESGWSRYEFLSFLNREI------NEEHVIILPI--WHKVSV--EDVRAYNPYLVDKYALNTSDFSIEEIV",
+    "target": "DVFISYRRNSGSQLASLLKVHLQLHGFSVFIDVEKLEAGKFE-DKLIQSVMGARNFVLVLSPGALDKCMQDHDCKDWVHKEIVTALSCGKNIVPIIDGFEWPEPQVLPEDMQAVLTFNGIKWSHEYQEATIEKII",
+    "match": "||| |          |     |   |  || ||   | ||             |  |  |||                  ||          | |     |    |  ||  |       |         || | ",
+    "identical": 32,
+    "columns": 135,
+    "score": 80
+   },
+   "queries": [
+    {
+     "acc": "P0DTS9",
+     "label": "TirS",
+     "species": "Staphylococcus aureus",
+     "length": 280,
+     "protein_name": "NAD(+) hydrolase TirS (EC 3.2.2.6) (NADP(+) hydrolase TirS) (EC 3.2.2.-) (TIR domain-containing protein in S.aureus)",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MGNKVEYEYLKKINQVNSPNEDLIIKYDESHSRDVNQKNEIEIMSEEKPYVDRAVTMNMLAYQTKQKINLSRNKEQLQISDKRFVFLVFLEKLLPTKSGKREKSSKAKNKLETKIVVFEIYNSVSKLNTKLPILQMSSLDYTKISQKQSVRKKSIGWHKSDFLSFEININTETSALNEDVEEKEEHVVLKIEIEKGLTNMERILVFSQQIEKEFIWSKGIETSSRKVKKLDQVSNPDKIVIARYADVEDKLNFLSNEINRLRIIEIRNSNQKKVIDLSMN"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-P0DTS9-F1-model_v6.cif",
+      "version": 6
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P0DTS9, version 6",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-P0DTS9-F1-model_v6.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "Q6SZW1",
+     "label": "SARM1",
+     "species": "human",
+     "length": 724,
+     "protein_name": "NAD(+) hydrolase SARM1 (NADase SARM1) (hSARM1) (EC 3.2.2.6) (NADP(+) hydrolase SARM1) (EC 3.2.2.-) (Sterile alpha and Armadillo repeat protein) (Sterile alpha and TIR motif-containing protein 1) (Sterile alpha motif domain-containing protein 2) (MyD88-5) (SAM domain-containing protein 2) (Tir-1 homolog) (HsTIR)"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 9,
+   "box": 3,
+   "name": "P66 against CD47",
+   "query": {
+    "acc": "H7C7N8",
+    "label": "P66",
+    "species": "Borrelia burgdorferi"
+   },
+   "target": {
+    "acc": "Q08722",
+    "label": "CD47",
+    "species": "human"
+   },
+   "family": null,
+   "experiment": "P66 binds the human receptor SIRPα, the receptor CD47 binds, and Borrelia lacking P66 is taken up by macrophages more readily.",
+   "takeaway": "Two proteins can do the same job with no shared ancestry, so a search that finds nothing here is not wrong about the family. It says nothing about the job.",
+   "earlier_runs": "An earlier search of P66 against the human GENCODE v49 canonical proteome, same branch and commit, returns no CD47 row from phmmer, jackhmmer or MMseqs2. Foldseek on the two AlphaFold models gives one hit, E = 3.047, bit score 3, over 22 aligned residues (seanome/2024-kmerseek-analysis notebook 276, commit 7043bd98). Those runs had no decoy and searched a different database.",
+   "eco": "ECO:0000353",
+   "refs": [
+    13
+   ],
+   "structure": null,
+   "preprint": true,
+   "wrong_label": null,
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 185,
+    "target_start": 99,
+    "query": "KLDLTFAIGGTGTGNRNQENDKDTPYNKTYQGILYGIQATWKPIKNLL",
+    "target": "KMDKSDAV--SHTGNYTCEVTELTREGETIIELKYRVVSWFSPNENIL",
+    "match": "| |   |     |||   |    |    |     |       |  | |",
+    "identical": 13,
+    "columns": 48,
+    "score": 37
+   },
+   "queries": [
+    {
+     "acc": "H7C7N8",
+     "label": "P66",
+     "species": "Borrelia burgdorferi",
+     "length": 618,
+     "protein_name": "Integral outer membrane protein P66",
+     "reviewed": false,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MPIEGQDKKRQFSLGTNKGDAIGKTENFSIQAILLILNKNSILKETKESKALSSTPFEDLDYSYGLDLYLFKDDIKDMKSNDSNRNLLSHIFEKTKNAFSINFEQETGFDKIDLFGNVVGGKKTSLYYDNLVVELEKILSSKKSVEKSAARFPWDAAYKGIGSSEDSAQGDRGLNNKISTGLINIAINNAPSGFGFGPEILAYKNLGFKLKYGASTSGEIITGLDPSLKEALAELGYIDTINGHIGALSTYGSKIAIGWALASSKLGITTSFGTIGASIKLYDTLQSLRAMKESSAFLGENMTFKNDQSIGTANENTFFRSTWNAIRLDFAIFIIKALGWISLTIAYSNDFEQTDTMTYLQLYITDTGTYRLYQFQNQITTKTPNNKKGISTRGFKDPFATSANDIQNPGLSNNISVAASENKDIFGTYNELTFKDVPMDKVPTTGTPSFSDQKATTGNKSTKSYSDFDAENGSGLADPFNKLIKSDFAKIFGILKPISKNFELGAVISWKLTPTIYAFAANQMYLGVEAWMGNTEDPKLNSYKKPNPYIISPFTTEFLKIFSVGNKILTEKLKLAELPYGIPTTFNTSTENTIAYPNYETISDEDKDFAYVRLGIKS"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-H7C7N8-F1-model_v6.cif",
+      "version": 6
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of H7C7N8, version 6",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-H7C7N8-F1-model_v6.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "Q08722",
+     "label": "CD47",
+     "species": "human",
+     "length": 323,
+     "protein_name": "Leukocyte surface antigen CD47 (Antigenic surface determinant protein OA3) (Integrin-associated protein) (IAP) (Protein MER6) (CD antigen CD47)"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 10,
+   "box": 3,
+   "name": "SopE against a Dbl-family exchange factor",
+   "query": {
+    "acc": "O52623",
+    "label": "SopE",
+    "species": "Salmonella typhimurium"
+   },
+   "target": {
+    "acc": "Q13009",
+    "label": "TIAM1",
+    "species": "human"
+   },
+   "family": null,
+   "experiment": "The crystal structure of SopE bound to Cdc42 shows SopE swapping the nucleotide of a Rho protein. That is the job of the human Dbl-family exchange factors, done from a fold unlike theirs.",
+   "takeaway": "A bacterial toxin can take over a human enzyme's job with an unrelated fold. No search here is expected to find it, and no hit is not evidence that the protein is harmless.",
+   "eco": "ECO:0005670",
+   "refs": [
+    10
+   ],
+   "structure": {
+    "pdb": "1GZS",
+    "chain": "B",
+    "what": "SopE with Cdc42, 2.3 Å crystal structure"
+   },
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 111,
+    "target_start": 742,
+    "query": "REAILSAVYSKNKDQCCNLLISKGINIAPFLQEIGEAAKNAGLPGTTKND",
+    "target": "KEVVLPNVHQHNPD--CDIWVHEYFTPSWFCLPNNQPALTVVRPGDTARD",
+    "match": " |  |  |   | |  |            |       |     || |  |",
+    "identical": 12,
+    "columns": 50,
+    "score": 38
+   },
+   "queries": [
+    {
+     "acc": "O52623",
+     "label": "SopE",
+     "species": "Salmonella typhimurium",
+     "length": 240,
+     "protein_name": "Guanine nucleotide exchange factor SopE (Effector protein SopE) (Toxin SopE)",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MPFISTPGSAILIDIAVKNEGRMLNDPRGENIQANHFINTLASLSEITKVFNKILIEKYPQNSASFRERIGIYAASKQQTTECCNKNSAKIIANASESKISKGAEAPTEKNDFISQNQFQLQKDVLINTLSIRFIQCANKNITLLSAGAVYSHQELAVAMTKYILLKLEAYAGTTHRAPLTRGSKNFHFLFKNLPQETPSAKSSPLRSSGLQQTEVVKDQHKSKEKDIMTPATNPFMFTP"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 1GZS chain B: SopE with Cdc42, 2.3 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "Q13009",
+     "label": "TIAM1",
+     "species": "human",
+     "length": 1591,
+     "protein_name": "Rho guanine nucleotide exchange factor TIAM1 (T-lymphoma invasion and metastasis-inducing protein 1) (TIAM-1)"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 11,
+   "box": 3,
+   "name": "SptP against a RhoGAP",
+   "query": {
+    "acc": "P74873",
+    "label": "SptP",
+    "species": "Salmonella typhimurium"
+   },
+   "target": {
+    "acc": "Q07960",
+    "label": "p50-RhoGAP",
+    "species": "human"
+   },
+   "family": null,
+   "experiment": "The crystal structure of SptP bound to Rac1 shows SptP switching a Rho protein off with an arginine finger. That is the job of the human RhoGAP proteins, done from a fold unlike theirs.",
+   "takeaway": "The same job with a different fold again. A tool that names a human RhoGAP family here is right about what the protein does and wrong about where it came from.",
+   "eco": "ECO:0005670",
+   "refs": [
+    11
+   ],
+   "structure": {
+    "pdb": "1G4U",
+    "chain": "S",
+    "what": "SptP with Rac1, 2.3 Å crystal structure"
+   },
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 288,
+    "target_start": 221,
+    "query": "EKIEAGAPMPQTMSGPTLGLARFAVSSIPINQQTQVKLSDGMPVPV",
+    "target": "QKSPATAPKPMP-PRPPLPNQQFGV-S--L-QHLQEKNPEQEPIPI",
+    "match": " |  | || |     | |    | | |    |  | |     | | ",
+    "identical": 15,
+    "columns": 46,
+    "score": 37
+   },
+   "queries": [
+    {
+     "acc": "P74873",
+     "label": "SptP",
+     "species": "Salmonella typhimurium",
+     "length": 543,
+     "protein_name": "Secreted effector protein SptP [Includes: GTPase-activating protein (GAP); Tyrosine-protein phosphatase (EC 3.1.3.48)]",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MQDTHTDERSLTLTNQKQRMILGLTADINQVGESKFVKVLSSTAIPPLTTPLPIHVTLLMPLLSSCGPHQPDNTSTEVHLDHCGKYNAVKDAAPQMLEVGVPGDSDRNTAGASQKVNTWVLNMQLLTNPMTQVASSSKINKVNSLKPVVRWPYEEAASQLTTFRGENMAKMTIPLQTDNLIAELLRLQLETKECLARAPEKLKNDQGMLGSRITLERVIEMLEAGGKVALAHASKQTCVGTNKQAYLVKINNGALVQAAMADAAKARKPKGGRFIALMSNVIQVADKKHSCSNNDGSDGTLASGVVSQNSNRTMQIPVQYVALTELHELPTEALGNDQKALFSYIKEKLHMPVQMNLNWLEDQTLRDYGVGVQAVDKRLAEKNIAREQQEGALKGNGEDFKAPMKIRNTQLEAVLKRTGRSEKHVSAVRYFQLYTFDQPQLKEYVTQFLMSRFAENFSSSYPENNIHTEKMPDAQLNLEVSFGECLPLTMDKIDGFRVLVKNLKNDVKSQWGGPSKYTFSIKAKDAKNVEQNLSGLPVGEKNS"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 1G4U chain S: SptP with Rac1, 2.3 Å crystal structure"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "Q07960",
+     "label": "p50-RhoGAP",
+     "species": "human",
+     "length": 439,
+     "protein_name": "Rho GTPase-activating protein 1 (CDC42 GTPase-activating protein) (GTPase-activating protein rhoGAP) (Rho-related small GTPase protein activator) (Rho-type GTPase-activating protein 1) (p50-RhoGAP)"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 12,
+   "box": 3,
+   "name": "Antifreeze glycoprotein, Antarctic notothenioid against Arctic cod",
+   "query": {
+    "acc": "P24856",
+    "label": "antifreeze glycoprotein polyprotein",
+    "species": "Notothenia neglecta (Antarctic)"
+   },
+   "target": {
+    "acc": "A0A481T0N3",
+    "label": "antifreeze glycoprotein polypeptide 9",
+    "species": "Boreogadus saida (Arctic cod)"
+   },
+   "family": null,
+   "experiment": "Both fish make the same ice-binding glycoprotein from a repeat of the same three residues. The notothenioid gene came from a trypsinogen and the cod gene did not, and the two genes differ in their introns, spacers and codon use.",
+   "takeaway": "Two fish lineages arrived at the same repeated glycoprotein from different genes, so a strong sequence match is not by itself evidence of common ancestry.",
+   "eco": "ECO:0000269",
+   "refs": [
+    15
+   ],
+   "structure": null,
+   "target_rule": "Of the Boreogadus saida antifreeze glycoprotein polypeptides in UniProt, the longest, so that its length is closest to the notothenioid polyprotein's.",
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 4,
+    "target_start": 47,
+    "query": "APAATAATAATPATAALNFAATAATPATPATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAAAAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATPAFHFAATAATPATAATPALIFAATAATAATPATPAFHFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATAATPATAACNFAATAATPATAATPALIFAATAATAATPATAACNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATAATPATPAFNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALHFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAAFNFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAA--LNFAATAATPATAATPALIFAATAATAATPATPAFHFAATAATPATAATPALIFAATAATAATPATAALNFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAAFNFAATAATAATPATAATPALIFAATAATAATPATPATPALIF",
+    "target": "ARPARAARAATPAT-----AATPATAPTPATPAT--AATAATAATAATAA-T-AATAATAATAATP-----ARAARAATP--------ATAATPATAATP--------ATAATAAT-----AATAATVATAATAAT--AATAATAATAATPA-R-AARAATPATAATP--------ATAATPAT-----PAT-A--ATAATAAT--AATAATAATAATAAT--AATAATAATAATPA-R-AARAATPATAATP-----------ATPAT-----VATAATAATAATAAT--AATAATAATAATPA-R-AARAATPATAATP--------ATAPAAATAAT--AATAATAATAATAAT--AATAATAATAATAA-T-AATAATAATAATAAT--AATAATAATAATPAR--AATPATAATPAT-----AATPATPATAAT-AAT-AATAATAATAATAAT--PARAARAATPATAATP--AT-A--ATPATPAT--AATAATAATAATVAT--AATAATAATAATAA-T-AATAATPARAA--R---AATPATAATPATAATPAT-AATAATAATAATAAT--AATAATAATAATPA--RAARAATPATAATPA-T-PATAATAATAATAA-T-AATAATAATAATAA-T-AATAATPARAA--R---AAIPATAATPAT------A-PAAT-TAATAAT--AATAATAATAATAAT--AATAATAATPARAATP--------ATAATPATAATPAAVF",
+    "match": "|  | || ||||||     ||| ||  ||||||   ||||||||| ||||   |||||| ||||||     | || ||||        ||||||||||||        ||||| ||     |||||| ||||| |   ||||||||| ||||   || ||||||||||        ||||||||      || |  ||||| |   ||||||||| ||||   ||||||||| || |   || ||||||||||           |||||      ||||| ||||| |   ||||||||| || |   || ||||||||||        |||   ||||   |||||| ||||| |   ||||||||| ||||   ||||||||| || |   |||||| |||||||   ||| ||||||||     ||| |||||||| |   ||||||||| ||||    | || ||||||||    || |  || ||||   ||||||||| || |   ||||||||| ||||   |||||||| ||      ||| ||||||||||     |||||| ||||| |   ||||||||| ||||   || |||||||||||    |||||||| ||||   ||||||||| ||||   |||||||| ||      ||  ||||||||      |  |   |||| |   ||||||||| ||||   ||||||||||| ||||        |||||||| ||||  |",
+    "identical": 495,
+    "columns": 758,
+    "score": 1634
+   },
+   "queries": [
+    {
+     "acc": "P24856",
+     "label": "antifreeze glycoprotein polyprotein",
+     "species": "Notothenia neglecta (Antarctic)",
+     "length": 790,
+     "protein_name": "Ice-structuring glycoprotein (ISGP) (Antifreeze glycopeptide polyprotein) (AFGP polyprotein) [Cleaved into: AFGP7-1 (AFGP 7); AFGP7-2 (AFGP 7); AFGP8-1 (AFGP 8); AFGP8-2 (AFGP 8); AFGP8-3 (AFGP 8); AFGP8-4 (AFGP 8); AFGP8-5 (AFGP 8); AFGP8-like]",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "VTAAPAATAATAATPATAALNFAATAATPATPATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAAAAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATPAFHFAATAATPATAATPALIFAATAATAATPATPAFHFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATAATPATAACNFAATAATPATAATPALIFAATAATAATPATAACNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATAATPATPAFNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALHFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAAFNFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATPAFHFAATAATPATAATPALIFAATAATAATPATAALNFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAALNFAATAATPATAATPALIFAATAATAATPATAAFNFAATAATAATPATAATPALIFAATAATAATPATPATPALIFAATAATAATPATPALNFAATAATAATTAARG"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-P24856-F1-model_v6.cif",
+      "version": 6
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P24856, version 6",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-P24856-F1-model_v6.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "A0A481T0N3",
+     "label": "antifreeze glycoprotein polypeptide 9",
+     "species": "Boreogadus saida (Arctic cod)",
+     "length": 644,
+     "protein_name": "Antifreeze glycoprotein polypeptide 9"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 13,
+   "box": 4,
+   "name": "Influenza A NS1 against the histone H3 tail",
+   "query": {
+    "acc": "P03495",
+    "label": "NS1",
+    "species": "influenza A H3N2, A/Udorn/307/1972"
+   },
+   "query_region": [
+    226,
+    229
+   ],
+   "target": {
+    "acc": "P68431",
+    "label": "histone H3.1",
+    "species": "human"
+   },
+   "target_region": [
+    2,
+    5
+   ],
+   "family": null,
+   "experiment": "The last residues of NS1 copy the start of the histone H3 tail. NS1 binds the human PAF1 transcription complex through them, and changing them ends the binding.",
+   "takeaway": "Four residues are shorter than the shortest word any of these tools indexes. Every search here is expected to be silent, and a motif scanner is the right tool.",
+   "eco": "ECO:0000315",
+   "refs": [
+    14
+   ],
+   "structure": {
+    "pdb": "4O42",
+    "chain": "B",
+    "what": "the NS1 C-terminal tail, 15 residues, bound to the CHD1 chromodomains"
+   },
+   "structure_note": "The only experimental structure of this stretch holds 15 residues of NS1, not the whole protein, and it is the tail of a different H3N2 strain (UniProt Q38SQ2).",
+   "motif_note": "UniProt numbers the histone from its initial methionine, so the ARTK of the H3 tail is residues 2 to 5 there and residues 1 to 4 in the chromatin literature.",
+   "alignment": {
+    "source": "the motif and six residues on each side, set side by side",
+    "query_start": 225,
+    "target_start": 1,
+    "query": "TARSKVRRDKM",
+    "target": "MARTKQTARKS",
+    "match": " || |    | ",
+    "identical": 4,
+    "columns": 11,
+    "motif_query": [
+     226,
+     229
+    ],
+    "motif_target": [
+     2,
+     5
+    ],
+    "motif_columns": [
+     2,
+     5
+    ],
+    "identical_in_motif": 3
+   },
+   "queries": [
+    {
+     "acc": "P03495",
+     "label": "NS1",
+     "species": "influenza A H3N2, A/Udorn/307/1972",
+     "length": 237,
+     "protein_name": "Non-structural protein 1 (NS1) (NS1A)",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MARSDRKQVKMDRDNFTDKRLGELNTPLEDWNELKVSKQKSTVRFMLRGASNIMAFLQADCIEKNAAWFSRRTLKANDQEGLSSVEEALWGPARASLDVIGGVVGHTIVDSKVDMTISFDQRGLILRRIEAPGSTVSRDEWHVRKMPKQKEESFQVGSPLIGRVLLCFPSSNTPFAITAIRLRYILTHVEEIFLPLKQKNIDKIMDAIETENGRPPKTMLMTLGKMATLEGDQIVRD"
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "experimental structure",
+       "what": "PDB 4O42 chain B: the NS1 C-terminal tail, 15 residues, bound to the CHD1 chromodomains"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "P68431",
+     "label": "histone H3.1",
+     "species": "human",
+     "length": 136,
+     "protein_name": "Histone H3.1 (Histone H3/a) (Histone H3/b) (Histone H3/c) (Histone H3/d) (Histone H3/f) (Histone H3/h) (Histone H3/i) (Histone H3/j) (Histone H3/k) (Histone H3/l)"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  },
+  {
+   "id": 14,
+   "box": 4,
+   "name": "Ten pathogen motifs from ELM against their human partners",
+   "query": null,
+   "target": null,
+   "family": null,
+   "experiment": "Each instance is a short motif in a virus or bacterial protein. The Eukaryotic Linear Motif resource records the experiments that showed it binds a human protein.",
+   "takeaway": "Short pathogen motifs are the part of annotation these nine tools are least suited to. That is why the leaderboard reports region length as its own axis.",
+   "eco": "ECO:0000353",
+   "refs": [
+    16,
+    18
+   ],
+   "structure": null,
+   "elm": true,
+   "pick_rule": "The ten ELM instances whose protein is from a virus or a bacterium (UniProt lineage), whose recorded partner is a human protein, with the lowest ELM instance identifiers. Chosen before any search was run.",
+   "alignment": {
+    "source": "best local alignment of the two sequences, BLOSUM62, gap open 11, gap extend 1, computed by scripts/known_cases.py",
+    "query_start": 61,
+    "target_start": 396,
+    "query": "AVSQIFPDSVMLAVQEGIDLLTF-P--PAPGSPEPPHLSR",
+    "target": "AVEGIVPSAMSLS--HGLPPVAHPPHAPSPGQTVKPEADR",
+    "match": "||  | |    |    |       |  | ||    |   |",
+    "identical": 12,
+    "columns": 40,
+    "score": 36
+   },
+   "queries": [
+    {
+     "acc": "P03254",
+     "label": "E1A_ADE02",
+     "species": "Human adenovirus 2",
+     "elm_instance": "ELMI000263",
+     "elm_class": "LIG_CtBP_PxDLS_1",
+     "region": [
+      279,
+      283
+     ],
+     "partner": {
+      "acc": "Q13363",
+      "pfam": "PF00389",
+      "pmid": "7479821"
+     },
+     "length": 289,
+     "protein_name": "Early E1A protein (Early E1A 32 kDa protein)",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MCSPEPVSCHPDECKRVRPVGIDSTLPVEEPPPGCYVIMRNSRRPVSVYSLTPPELRAVPPEDQPPPEPEQRRTDSRPARQPIFVPHLYMAGGQAPEAVLTGESPNLLAAVPTRSPEFPEPPSDLDVVQEPADLDEHFPKLILNEDLHEGMPDNLDLVSCHGFEPEVSSEEEMLLDLALCNTAPSNEQLGVMFPSHRPEIEPASMRRREGSGPNTCPLVAICHYDIHGGHPECGPTEPVTSLCDSGDPRHIEEEDDYHEVEAVLLSQIIDPTFVIKPLSCITCRPGRQP"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-0000000211982092-model_v1.cif",
+      "version": 1
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P03254, version 1",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-0000000211982092-model_v1.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P69732",
+     "label": "GAG_EIAVY",
+     "species": "Equine infectious anemia virus (ISOLATE WYOMING)",
+     "elm_instance": "ELMI001464",
+     "elm_class": "LIG_LYPXL_S_1",
+     "region": [
+      457,
+      461
+     ],
+     "partner": {
+      "acc": "Q8WUM4",
+      "pfam": "PF13949",
+      "pmid": "14505569,17350572,17158451,18066081,14519844"
+     },
+     "length": 486,
+     "protein_name": "Gag polyprotein [Cleaved into: Matrix protein p15 (MA); Capsid protein p26 (CA); p1; Nucleocapsid protein p11 (NC); p9]",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MLTCNLLAINNAFSGKSLSLNVPGYNCGHLRAPQNWISKVTQSEKTNRQTYPLVDQKVDGAMIKQKIGKMNVPLSKQEEKMGHDCRNKEYNLWSVQKDVTDTKQISQEKFQKDVKSVVMMTLLSEFPMEALTWEKAPSQVDALRAGDTTPRPKMRDIQQEPQGAQTAGSEPLLQTILFVDRSERPLDQHNREMYAFRGKSQTQGHLLLGQPLTVCTGAPFLFKEDTWQTLYEKYRQGGQGGIDKKLERERTWDLLTILSQTGIPPGLTTTFRPIMGKKQIQNLVVKNGLQTNALNTPYPKQCFKQNEYPDPKASEAFLETLSKQNCRDVVPLKKKPNAMIAIQFIGQAKECKANIKPQWADGVAGPQGNGPIRGPAKCYTAKEEPGLDWWALSQMSSASEDLKARQIEGAQLKVNFVIPRLAANKGTSFHPEAQCRQKLRFDWVEDLDSVQLEEIIRHFEIDDNACRNFGLPIKAVKGRHPEEGNE"
+     },
+     "alphafold": {},
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "no structure",
+       "what": "no experimental structure in the papers cited here, and the AlphaFold Database has no model of P69732"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "Q83383",
+     "label": "Q83383_9GAMR",
+     "species": "Murine leukemia virus",
+     "elm_instance": "ELMI001465",
+     "elm_class": "LIG_LYPXL_S_1",
+     "region": [
+      128,
+      132
+     ],
+     "partner": {
+      "acc": "Q8WUM4",
+      "pfam": "PF13949",
+      "pmid": "15908698"
+     },
+     "length": 537,
+     "protein_name": "Gag protein",
+     "reviewed": false,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MSKNGPIETFSVKSSKRERLYIIEMSTTHLKKEDRATTQFGRYCSDLEEDNEEETPSAALEAIPNWVFIAPRGGTVKTNEIKRGWPAYTTLAKPTATFSSDVLRNQVTWGPWDDKEKREAFNAVLIKPTTPMVSAERVVRRERGPPRIFPLYNNKQEKKGSEQPSVTSDQVKEDGHPYWAPSFNHWQKLLEQREIWVSFLTGITPQGDCKLLEDDLYGESSPGRQLSPPQLTPERPSRPPFSNKGREERQSAEHWPEKPLLETLALPYEASMGQLVQNPDERWQPKLSLDRKERSIGTFCPYPTSPAFVLIVGGKEESSPQDVTEKARLTLLTLTAPPSRPTNVKVLEDILSNLRQRLGKVPSLTSPRPPSGDGEAYRRERAAGDPRIAFPLLRRKPDPDDPQRPLQGQCAEARLPPRRRRGPGQQLLLGPPEWKLTVDWERRSLSKRDPTGDGVSPKNLDGGDLLGQDLKDCQYTQGPGEEAVSALQVTPSTLVRGHQTQTEPAGNNGLQLAYDQSTWDPHGRDRDYRRQRIDILD"
+     },
+     "alphafold": {},
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "no structure",
+       "what": "no experimental structure in the papers cited here, and the AlphaFold Database has no model of Q83383"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P03322",
+     "label": "GAG_RSVP",
+     "species": "Rous sarcoma virus - Prague C",
+     "elm_instance": "ELMI001468",
+     "elm_class": "LIG_LYPXL_S_1",
+     "region": [
+      180,
+      184
+     ],
+     "partner": {
+      "acc": "Q8WUM4",
+      "pfam": "PF13949",
+      "pmid": "20392845"
+     },
+     "length": 701,
+     "protein_name": "Gag polyprotein [Cleaved into: Matrix protein p19; p2A; p2B; p10; Capsid protein p27, alternate cleaved 1; Capsid protein p27, alternate cleaved 2; Spacer peptide (SP) (p3); Nucleocapsid protein p12 (NCp12); Protease p15 (EC 3.4.23.-)]",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MLANASEQGEGQGGRGPGERTATARPVGQQIKGELDWTGQAKDSLECGPIDVQPGSGPSPVITTMIHNTAIKRQTWGERDARPGSSGPAEVEPQRLLPKKSAMEEIPALALYVSPLVTVLLAMARLMEDWLITIEGDLRKTPVYTCGHCQRDQCYVRAPPPVVNGMRLQGTAQAPGPSVITNLCKTSGLLYHPSDFAPQAADIISPYCREHPWDMIIMVRVILQLTNGEGPHKQRKTLADWAVIGILTAAPGEERLMQTAMVGNPALIQRIGVVIITSLMTNRTNRDRDIEKLGPWPSTDCNCILGGLITPLPPRESRQQGKAVQCNRHDCGAAAMRVGPAAVIRSTYPLGLKYQAEPSEREQAGAPPELDISGKGAELLKKGINRAANLWMSGVRDGCYALTRGGSLKRVVALSSDAIAAPLGKARRSIKSAKPGSSSASHATGQKEQLQVRAKETDGLAWPDGLAPEVAMPGGRADPPMDRCLLLSCPALFWAWGQGHGTGLLTTMSPGLGGQKMATPEEALVGGIKSRGSRLGHYIALSEQGMSGVDGSPKFVASPAVIDTKTAGLGPTVEAVGRDLQKTEVAIQSWPLNPSQGSQGNQLCAERPVLVILGLRDPAGLIMEITPKQPPPLTDKTVMGEEPIGNSATSPGRELETRTEPPGSKVTVSFRKSADTAAFRPYSLRVKGACFPAMAREEANL"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365763033-model_v1.cif",
+      "version": 1
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P03322, version 1",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365763033-model_v1.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P03347",
+     "label": "GAG_HV1B1",
+     "species": "Human immunodeficiency virus type 1 BH10",
+     "elm_instance": "ELMI001475",
+     "elm_class": "LIG_LYPXL_L_2",
+     "region": [
+      495,
+      504
+     ],
+     "partner": {
+      "acc": "Q8WUM4",
+      "pfam": "PF13949",
+      "pmid": "14505569,18066081,17277784,17350572,14519844"
+     },
+     "length": 512,
+     "protein_name": "Gag polyprotein (Pr55Gag) [Cleaved into: Matrix protein p17 (MA); Capsid protein p24 (CA); Spacer peptide 1 (SP1) (p2); Nucleocapsid protein p7 (NC); Spacer peptide 2 (SP2) (p1); p6-gag]",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MGETIANQNTLTEEQGSEPGRPRMQETSEKCRGCVKTGTSSKGKCFLLEQMMQKEEADRFSQNKIRQDCQGNPDCRWAWVHPMLDIVIDTIMSLGCGQPPGPVQMRAGVEMMFNWPPQRQALQMLYNTNDPTIWKYPFLKDRIGPSLNPQLKAASQVTATSPSQGPIRNTNCGGQTAPAAMTSGAAPFRNKKGHQAILDRPRKSFYKAERKASPGASRQATTGKINAFREPEEWDTKALKEQNTLQSDYSPSTLATVGHQIEPVSISLSLQEELNIYCTTLLGHILRFLGEAAPPIIPLNPRPEELEIEVGSEVHTEAGKKDKETPEETAELQNEEIPPGNFRATPGGHSSARDLVNYPEGVWMVVREGPTAMTLNNFSGWILFACWMTMYKLQRSVQMVGHQAVLGLRGNFGGQIVEKRSRTAQVKNAARVKKMKKKEPTTLRPKELRLEGGKIKVARWESRVHKERSQEGLYKIQQSYKHAPIALYVDILSQRANCKTVLDKQAEPIVHQ"
+     },
+     "alphafold": {},
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "no structure",
+       "what": "no experimental structure in the papers cited here, and the AlphaFold Database has no model of P03347"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P03255",
+     "label": "E1A_ADE05",
+     "species": "Human adenovirus 5",
+     "elm_instance": "ELMI001514",
+     "elm_class": "LIG_RB_pABgroove_1",
+     "region": [
+      41,
+      49
+     ],
+     "partner": {
+      "acc": "P06400",
+      "pfam": "PF01858",
+      "pmid": "1534854,17974914"
+     },
+     "length": 289,
+     "protein_name": "Early E1A protein (Early E1A 32 kDa protein)",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MFVPSEVAVTRASQEPVSCYHLLDDIIHGPEDEDLSCNLYMPPVQAPECKREQPAAVVMCHRPSSNLVRHFVEEPAPEEQPDSVPTCHGRQITEHPGDQPVSMAVSLDLGCRPEEPVEEIMRRRRNEPLRRPEMALLDPIKPDYSPRTDLPPEFEPPGILHEPEPPEEDLCIDVLLNTGGPVIFPGMLAIECDLDPEGGSRQLCHPTPPKMRSPEARVYVGELTFPTSRPNTADSCSTCPPNSPHYDEGFPAGVLAVIEAPSGHIDSHEVSLSDNEPEPPLTLICGQRP"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-0000000211982139-model_v1.cif",
+      "version": 1
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P03255, version 1",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-0000000211982139-model_v1.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P03077",
+     "label": "MT_POVMA",
+     "species": "Murine polyomavirus strain A2",
+     "elm_instance": "ELMI001538",
+     "elm_class": "LIG_PTB_Phospho_1",
+     "region": [
+      244,
+      250
+     ],
+     "partner": {
+      "acc": "P29353",
+      "pfam": "PF00640",
+      "pmid": "7543098"
+     },
+     "length": 421,
+     "protein_name": "Middle T antigen (MT) (MT-AG)",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MQDILQRLGILEVHATYKDRMPALLYYATRKGSMQEGDVHFGTGECSLSPRADLLLLNLVKDWNPRLRLWLYLFILRLRQQLMQRRRFCLDGTELHSPGNPLYMTFGRRAALELTMPMRRAMDRHPWGWFQQWGTFDECIKRVRAGGEQVNGHPTPTHRATFIIAHRVMQLSCLLLKLPTSEPPDALLKCLADQLRDVYPPIPSTLPLQRMRRMEEEEDLLLGMPPHSLPRTADAAARSSVLILSYPMLVYTTKYNLLRSQGGLGTPELEILIHAYPIPELSMTRYQHYMNVLLLVLNSGFCLHIDKQSVTVPQISSLDTSAYSCRASRSTGRAHSRDKTCFLRCYNLGDFKRMEREYSQQVLICDQASEEEDLEEASHSNLELWESDPPKEESRLRTPILSHFGLVLCLMILDKQRHLDF"
+     },
+     "alphafold": {},
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "no structure",
+       "what": "no experimental structure in the papers cited here, and the AlphaFold Database has no model of P03077"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P06463",
+     "label": "VE6_HPV18",
+     "species": "Human papillomavirus type 18",
+     "elm_instance": "ELMI001580",
+     "elm_class": "LIG_PDZ_Class_1",
+     "region": [
+      153,
+      158
+     ],
+     "partner": {
+      "acc": "Q12959",
+      "pfam": "PF00595",
+      "pmid": "17713926,17267502"
+     },
+     "length": 158,
+     "protein_name": "Protein E6",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MAAFACNPAGHKLNTEKDPHNLIRFELTLRLCIPLNRHYRFVYCQELTEKLEDIRCHARDLRRCKTCHYKPTNIARRPYNTSDSRGDSCTGLEFYREKLQKRQVVFKCLRRREIEVLFHLPDFELLYSLNERAETRIDLQDTQRHSVYGQCCVYSITV"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365832307-model_v1.cif",
+      "version": 1
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P06463, version 1",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365832307-model_v1.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P03383",
+     "label": "ENV_HTLV2",
+     "species": "Human T-lymphotropic virus 2",
+     "elm_instance": "ELMI001709",
+     "elm_class": "CLV_PCSK_FUR_1",
+     "region": [
+      305,
+      309
+     ],
+     "partner": {
+      "acc": "P09958",
+      "pfam": "PF00082",
+      "pmid": "12487813"
+     },
+     "length": 486,
+     "protein_name": "Envelope glycoprotein gp63 (Env polyprotein) [Cleaved into: Surface protein (SU) (Glycoprotein 46) (gp46); Transmembrane protein (TM) (Glycoprotein 21) (gp21)]",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MLEQPRGFPCMVLQGNFGPVWETYTPLFTQQTHQEKRQQSISVSLQRRVFLAPTPHVNWTLCGGLGIQALNRQGIVSSYSNTQCIPPPCKSQISTSLYSTHPPTGTITLDNLQPPNLFITQTTRLQPITMGSGGLLLLYQVCSLTNCCQCPEQRRLGSDLGLLWTHWLASQAQYHVSQPQNSMTGCVLAILSLTTQAVTLLLQERAVPLVDRLLVDKDQWGPYSDSWDIQNNREVKNYAGLSLLNIISLFILTISPPSRHDPPNHFSWFHFLFWNPAQYLLPPLTDPCTSPSLIATKPFPSEAIAPLFFHLAYTGYDALILSLHKTYSAALDLRLVPVILVITSLKIKCFPGINRSLEHSKFSSLRVDLNVAWKFPSPWTWIGLHVCPFSPNSSSPPVSSCTSAPPSHSLPCYYSSSSYNDLRPTGYLTILTTSIQLAITGWALEPAQEVSWHNILQALPQSKKAAGVHCSRCNQNILARRRTDVL"
+     },
+     "alphafold": {
+      "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365761473-model_v1.cif",
+      "version": 1
+     },
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "AlphaFold Database model",
+       "what": "the AlphaFold Database model of P03383, version 1",
+       "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365761473-model_v1.cif"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    },
+    {
+     "acc": "P03375",
+     "label": "ENV_HV1B1",
+     "species": "Human immunodeficiency virus type 1 BH10",
+     "elm_instance": "ELMI001710",
+     "elm_class": "CLV_PCSK_FUR_1",
+     "region": [
+      508,
+      512
+     ],
+     "partner": {
+      "acc": "P09958",
+      "pfam": "PF00082",
+      "pmid": "11063880"
+     },
+     "length": 856,
+     "protein_name": "Envelope glycoprotein gp160 (Env polyprotein) [Cleaved into: Surface protein gp120 (SU) (Glycoprotein 120) (gp120); Transmembrane protein gp41 (TM) (Glycoprotein 41) (gp41)]",
+     "reviewed": true,
+     "decoy": {
+      "method": "dipeptide-preserving shuffle (Altschul and Erickson 1985)",
+      "seed": 1,
+      "sequence": "MTRPVIHCNISDLFAKTAYCLTHAIVVEIGIRDNAKIWSYRCNWWFYYARQIIERANFYIRESLRQFNEEISTSAEAKCSFQEKSGVVQLIDDTTVSLKQLGIFNGCSVVVVGFLMTMEKEATFERSGKCSTQSTHYTSTNYDRISEGDALTEEVGNMWNTRIRQMVNAGEIVQLIPNNPRRMLLPIFNCNLWGSLCTWASNNSLEGVIIGELRLQGGAVGNKLLKQEWSTEPCVRREITLSSWNNMEPGAYKAVILTTIVHLLLINDIPIIKVSLFTLTRDRITICNTEGRDRRSLVNTDRENICTVEEKRPCRSNDMYATHSMIDIEIKRIKNLKLLDTTWYWGLLKYWKAPWKQEQLLQKYKNCVVTSSELQARAQCTKEVLRWDGAKNCVSRIRVQAIVNMRVQQAFNAVTLEVGKLGSFSGFRIINDPKYHLNQNSFFCSIQQYTDNNMLLAIWQQLGSTIVASGGQTDPQALGIKGGYCAAHGWLLAELRKLFFNIGPEEQNNNVVPTQGGLNNKITTPEDNRDTKNSNNNSIMIRGIVSTESAMHLSGGGEVEFKLRDLNNVKWNKPTSCGTQSLLWRGILLLIEAPPIVKSTNSPDLGRLLKTGTWVASSYGKVLSKEQLWFVQIIRGWRHEKACTITNFGGDQSNGNVTSLGKGRGSFAIRVPGTGPLKTVWSLFIWAVKLTRPATACTLPINWGSLIAVTHNTNGMIERWNSDMRIPCAPILYQGPLLALKVYSQIPNQHSLDKQRAVWMRYKNWDRSSAAFNEYLKWGLVPRQEQIRVWRASVTVEEKDSVSISQQLELVQELCPVFNIMGATDTMWNTLWDQQHRAGIHIEGLLFLWEVQRPLL"
+     },
+     "alphafold": {},
+     "input_per_tool": {
+      "kmerseek": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_phmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hmmer3_jackhmmer": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_seqseq": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "mmseqs2_iterative": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "hhblits": {
+       "kind": "sequence",
+       "what": "the sequence"
+      },
+      "foldseek": {
+       "kind": "no structure",
+       "what": "no experimental structure in the papers cited here, and the AlphaFold Database has no model of P03375"
+      },
+      "prostt5": {
+       "kind": "sequence",
+       "what": "the sequence; ProstT5 predicts the 3-D shape letters from it"
+      },
+      "hmmscan": {
+       "kind": "sequence",
+       "what": "the sequence"
+      }
+     }
+    }
+   ],
+   "targets": [
+    {
+     "acc": "Q13363",
+     "species": "human",
+     "length": 440,
+     "protein_name": "C-terminal-binding protein 1 (CtBP1) (EC 1.1.1.-)",
+     "label": "CTBP1"
+    },
+    {
+     "acc": "Q8WUM4",
+     "species": "human",
+     "length": 868,
+     "protein_name": "Programmed cell death 6-interacting protein (PDCD6-interacting protein) (ALG-2-interacting protein 1) (ALG-2-interacting protein X) (Hp95)",
+     "label": "PDC6I"
+    },
+    {
+     "acc": "Q8WUM4",
+     "species": "human",
+     "length": 868,
+     "protein_name": "Programmed cell death 6-interacting protein (PDCD6-interacting protein) (ALG-2-interacting protein 1) (ALG-2-interacting protein X) (Hp95)",
+     "label": "PDC6I"
+    },
+    {
+     "acc": "Q8WUM4",
+     "species": "human",
+     "length": 868,
+     "protein_name": "Programmed cell death 6-interacting protein (PDCD6-interacting protein) (ALG-2-interacting protein 1) (ALG-2-interacting protein X) (Hp95)",
+     "label": "PDC6I"
+    },
+    {
+     "acc": "Q8WUM4",
+     "species": "human",
+     "length": 868,
+     "protein_name": "Programmed cell death 6-interacting protein (PDCD6-interacting protein) (ALG-2-interacting protein 1) (ALG-2-interacting protein X) (Hp95)",
+     "label": "PDC6I"
+    },
+    {
+     "acc": "P06400",
+     "species": "human",
+     "length": 928,
+     "protein_name": "Retinoblastoma-associated protein (p105-Rb) (p110-RB1) (pRb) (Rb) (pp110)",
+     "label": "RB"
+    },
+    {
+     "acc": "P29353",
+     "species": "human",
+     "length": 583,
+     "protein_name": "SHC-transforming protein 1 (SHC-transforming protein 3) (SHC-transforming protein A) (Src homology 2 domain-containing-transforming protein C1) (SH2 domain protein C1)",
+     "label": "SHC1"
+    },
+    {
+     "acc": "Q12959",
+     "species": "human",
+     "length": 904,
+     "protein_name": "Disks large homolog 1 (Synapse-associated protein 97) (SAP-97) (SAP97) (hDlg)",
+     "label": "DLG1"
+    },
+    {
+     "acc": "P09958",
+     "species": "human",
+     "length": 794,
+     "protein_name": "Furin (EC 3.4.21.75) (Dibasic-processing enzyme) (Paired basic amino acid residue-cleaving enzyme) (PACE)",
+     "label": "FURIN"
+    },
+    {
+     "acc": "P09958",
+     "species": "human",
+     "length": 794,
+     "protein_name": "Furin (EC 3.4.21.75) (Dibasic-processing enzyme) (Paired basic amino acid residue-cleaving enzyme) (PACE)",
+     "label": "FURIN"
+    }
+   ],
+   "tools": {
+    "kmerseek": {
+     "setting": "gbmr4_k21_lcFalse",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_phmmer": {
+     "setting": "default",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmer3_jackhmmer": {
+     "setting": "n3",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_seqseq": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "mmseqs2_iterative": {
+     "setting": "s7",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hhblits": {
+     "setting": "single_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "foldseek": {
+     "setting": "3di_aa",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet; and 5 of 10 query proteins have neither an experimental structure in the papers cited here nor an AlphaFold Database model (P69732, Q83383, P03347, P03077, P03375), so Foldseek cannot search them at all",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "prostt5": {
+     "setting": "3di_from_seq",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    },
+    "hmmscan": {
+     "setting": "direct",
+     "result": "not run",
+     "reason": "the search of this query against UniProtKB/Swiss-Prot release 2026_03 has not been run yet",
+     "score": null,
+     "decoy_score": null,
+     "call": null,
+     "iou": null
+    }
+   }
+  }
+ ]
+}
