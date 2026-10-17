@@ -140,9 +140,52 @@ Every number below was computed from a file downloaded on 2026-10-15 or made fro
 
 ![Proteome maps, function labels](maps/proteome_map_human_oyster_interpro_or_swissprot_uniprot_2026_03.png)
 
-![Proteome maps, all three labels](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)
-
 Each tile is one protein; both maps use 150 tiles per row and the same tile size. A tile is lit when the protein has the labels named in the legend. The counts printed above each map come from `results/why/proteome_labels.parquet`, the same table as the numbers above.
+
+Dark proteins are shorter and less confidently folded. In the oyster their median length is 192 aa against 411 aa for lit proteins, and 36.55% have mean pLDDT 50 or less against 3.92%. In human, 81.77% of the 181 dark proteins are under 100 aa. Step 5 has the numbers.
+
+## 5. What the dark proteins are
+
+| Number | Value | Unit | Source file | Release | Check |
+|---|---|---|---|---|---|
+| human, dark proteins: share BUSCO metazoa_odb12 calls Fragmented | 0.00 | % of proteins | [`full_table.tsv`](Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch) | BUSCO 6.1.0, metazoa_odb12 | HOLDS |
+| human, dark proteins: median length | 22 | aa | [`UP000005640_9606.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) | UniProt 2026_03 | HOLDS |
+| human, dark proteins: count (dark: no InterPro match and no Swiss-Prot hit above 30% identity (a hit to its own entry counts)) | 181 | proteins | [`mmseqs_vs_sprot.tsv.gz`](Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch) | UniProt 2026_03 | HOLDS |
+| human, dark proteins: share with no AlphaFold DB model for the accession (AF-accession-F1) | 45.30 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| human, dark proteins: share whose AlphaFold DB model has mean pLDDT 50 or less (denominator is every protein in the group; proteins with no model are not in the numerator) | 14.36 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| human, dark proteins: share shorter than 100 aa | 81.77 | % of proteins | [`UP000005640_9606.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) | UniProt 2026_03 | HOLDS |
+| human, lit proteins: share BUSCO metazoa_odb12 calls Fragmented | 0.00 | % of proteins | [`full_table.tsv`](Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch) | BUSCO 6.1.0, metazoa_odb12 | HOLDS |
+| human, lit proteins: median length | 414 | aa | [`UP000005640_9606.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) | UniProt 2026_03 | HOLDS |
+| human, lit proteins: count (dark: no InterPro match and no Swiss-Prot hit above 30% identity (a hit to its own entry counts)) | 20,471 | proteins | [`mmseqs_vs_sprot.tsv.gz`](Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch) | UniProt 2026_03 | HOLDS |
+| human, lit proteins: share with no AlphaFold DB model for the accession (AF-accession-F1) | 1.30 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| human, lit proteins: share whose AlphaFold DB model has mean pLDDT 50 or less (denominator is every protein in the group; proteins with no model are not in the numerator) | 4.87 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| human, lit proteins: share shorter than 100 aa | 3.65 | % of proteins | [`UP000005640_9606.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) | UniProt 2026_03 | HOLDS |
+| oyster, dark proteins: share BUSCO metazoa_odb12 calls Fragmented | 0.00 | % of proteins | [`full_table.tsv`](Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch) | BUSCO 6.1.0, metazoa_odb12 | HOLDS |
+| oyster, dark proteins: median length | 192 | aa | [`UP000005408_29159.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005408/UP000005408_29159.fasta.gz) | UniProt 2026_03 | HOLDS |
+| oyster, dark proteins: count (dark: no InterPro match and no Swiss-Prot hit above 30% identity (a hit to its own entry counts)) | 5,877 | proteins | [`mmseqs_vs_sprot.tsv.gz`](Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch) | UniProt 2026_03 | HOLDS |
+| oyster, dark proteins: share with no AlphaFold DB model for the accession (AF-accession-F1) | 0.82 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| oyster, dark proteins: share whose AlphaFold DB model has mean pLDDT 50 or less (denominator is every protein in the group; proteins with no model are not in the numerator) | 36.55 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| oyster, dark proteins: share shorter than 100 aa | 12.71 | % of proteins | [`UP000005408_29159.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005408/UP000005408_29159.fasta.gz) | UniProt 2026_03 | HOLDS |
+| oyster, lit proteins: share BUSCO metazoa_odb12 calls Fragmented | 0.07 | % of proteins | [`full_table.tsv`](Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch) | BUSCO 6.1.0, metazoa_odb12 | HOLDS |
+| oyster, lit proteins: median length | 411 | aa | [`UP000005408_29159.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005408/UP000005408_29159.fasta.gz) | UniProt 2026_03 | HOLDS |
+| oyster, lit proteins: count (dark: no InterPro match and no Swiss-Prot hit above 30% identity (a hit to its own entry counts)) | 24,395 | proteins | [`mmseqs_vs_sprot.tsv.gz`](Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch) | UniProt 2026_03 | HOLDS |
+| oyster, lit proteins: share with no AlphaFold DB model for the accession (AF-accession-F1) | 6.20 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| oyster, lit proteins: share whose AlphaFold DB model has mean pLDDT 50 or less (denominator is every protein in the group; proteins with no model are not in the numerator) | 3.92 | % of proteins | [`afdb_predictions.jsonl.gz`](https://alphafold.ebi.ac.uk/api/prediction/{accession}) | AlphaFold DB API | HOLDS |
+| oyster, lit proteins: share shorter than 100 aa | 1.94 | % of proteins | [`UP000005408_29159.fasta.gz`](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005408/UP000005408_29159.fasta.gz) | UniProt 2026_03 | HOLDS |
+
+Dark here is the rule of the first map above: no InterPro match and no Swiss-Prot hit above 30% identity. Lit is every other protein of the same species. Length bins and pLDDT bands are the ones the leaderboard uses.
+
+The share of residues SEG masks as low-complexity is not in the table yet: `scripts/why/seg.sh` needs BLAST+ 2.16.0 and the two proteome FASTA files, then `labels.py --seg` and `dark.py`.
+
+![Dark proteins by AlphaFold DB pLDDT](maps/proteome_map_dark_by_plddt.png)
+
+Only the dark proteins are drawn, one tile each, longest first; colour is the mean pLDDT band of the protein's AlphaFold DB model, and black is no model. Made by `scripts/why/dark.py` from `results/why/proteome_labels.parquet`.
+
+### A model is not a label
+
+![Proteome maps, AlphaFold DB model counted as a label](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)
+
+94.85% of oyster proteins have an AlphaFold DB model; 19.41% have no function label. Counting the model as a label leaves 0.16% dark, but a model does not say what the protein does. Made by `scripts/why/maps.py` from `results/why/proteome_labels.parquet`.
 
 ## 6. Four proteins, the same three labels
 
