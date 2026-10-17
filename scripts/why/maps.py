@@ -27,7 +27,7 @@ SPECIES = {"human": "Human (Homo sapiens)", "oyster": "Pacific oyster (Crassostr
 LABEL_SETS = {
     "proteome_map_human_oyster_any_label_uniprot_2026_03": (
         ["af_model", "interpro_match", "sprot_hit"],
-        "an AlphaFold DB model for that accession, an InterPro match, or a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+        "any of three: an AlphaFold DB model (which names no function), an InterPro match, or a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
     ),
     "proteome_map_human_oyster_interpro_or_swissprot_uniprot_2026_03": (
         ["interpro_match", "sprot_hit"],
@@ -78,6 +78,7 @@ def draw(table, name, cols, what):
     cmap.set_bad("white")
     # The one fact the figure rests on, first; then where each label comes from.
     dark = {sp: 100 * (n - k) / n for sp, (k, n) in stats.items()}
+    what_dark = "dark: none of these"
     finding = f"{dark['oyster']:.1f}% of Pacific oyster proteins are dark (no label), against {dark['human']:.1f}% of human proteins."
     if "af_model" in cols:
         # With a model counted as a label almost nothing is dark, which reads as if
@@ -86,11 +87,12 @@ def draw(table, name, cols, what):
         no_function = 100 * o.filter(~pl.col("interpro_match") & ~pl.col("sprot_hit")).height / o.height
         finding = (f"A model is not a label: {100 * o['af_model'].mean():.2f}% of oyster proteins have an AlphaFold DB model; "
                    f"{no_function:.2f}% have no function label.")
+        what_dark = "dark: none of the three, not even a model (the first map counts only the two function labels)"
     fig.text(2 / fig_w_mm, 1 - 2.5 / fig_h_mm, finding, fontsize=7, weight="bold", va="center", ha="left")
     tools = ["Proteins: UniProt 2026_03 one-protein-per-gene sets. Dark: none of these labels the protein."] + [SOURCES[c] for c in cols]
     fig.text(2 / fig_w_mm, 1 - 4.6 / fig_h_mm, "\n".join(tools), fontsize=6, va="top", ha="left", linespacing=1.25)
     fig.legend(
-        handles=[Patch(facecolor=LIT, label=f"lit: the protein has {what}"), Patch(facecolor=DARK, label="dark: none of these")],
+        handles=[Patch(facecolor=LIT, label=f"lit: the protein has {what}"), Patch(facecolor=DARK, label=what_dark)],
         loc="upper left", bbox_to_anchor=(2 / fig_w_mm, 1 - (7 + 2.3 * len(cols)) / fig_h_mm), frameon=False, ncol=1, borderaxespad=0,
         title=f"One tile = one protein; {COLS} tiles per row and the same tile size in both maps; lit tiles first, then dark",
         title_fontsize=6, alignment="left",
