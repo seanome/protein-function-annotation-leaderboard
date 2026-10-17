@@ -25,6 +25,7 @@ from tools import BASELINES, KINDS, SPECIES, TOOLS  # noqa: E402
 ALL_TOOLS = {**TOOLS, **BASELINES}
 import figures  # noqa: E402
 import pileup_figures  # noqa: E402
+import scope40_rules  # noqa: E402
 
 SITE = "Protein annotation leaderboard"
 REPO = "seanome/protein-function-annotation-leaderboard"
@@ -1865,6 +1866,7 @@ how the truth sets were built.</p>
 <a href="#n">true instances</a>, <a href="#cpu">core-hours</a>, <a href="#cost">estimated cost</a></li>
 <li><a href="#truth">Truth sets</a></li><li><a href="#dedup">Dedup against raw</a></li>
 <li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#no-search">No-search baselines</a></li>
+<li><a href="#scope40">SCOPe40: ranking a domain's relatives</a> (not scored yet)</li>
 <li><a href="#checks">Checks on this site</a></li>
 <li><a href="#experiments">Experiments in the tables</a></li></ol></nav>
 <div class="prose">
@@ -2042,6 +2044,7 @@ marks regions without a fixed shape.</li>
 no row shows × and "not run".</p>
 
 {no_search_section(base)}
+{scope40_rules.section(Path(DATA_DIR))}
 <h2 id="checks">Checks on this site</h2>
 <p>A headless browser renders every filter combination and confirms that each × on the
 leaderboard is a missing row in results.parquet, and that every number matches the tables. The
