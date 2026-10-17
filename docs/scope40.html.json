@@ -61,7 +61,7 @@
   },
   {
    "tag": "p",
-   "text": "Every query counts. A query with no hits scores 0 and stays in every mean, every curve and every area. An earlier kmerseek claim, that it \"outperforms Foldseek on SCOPe\", computed the area over only the queries kmerseek returned hits for, 3.3% of them. That number is retired."
+   "text": "Every query counts. A query with no hits scores 0 and stays in every mean, every curve and every area. An earlier kmerseek claim, that it \"outperforms Foldseek on SCOPe\", was computed over only part of the queries: in its source, kmerseek found a family member for 3.3% of them, and the mean was taken over the queries both kmerseek and Foldseek returned hits for (Methods). That claim and its number are retired."
   },
   {
    "tag": "p",
@@ -73,7 +73,7 @@
   },
   {
    "tag": "p",
-   "text": "Foldseek, comparing shapes, finds family members for most queries (AUC 0.814) and keeps much of its lead at the superfamily level (0.638 against MMseqs2's 0.204). At the fold level Foldseek reaches 0.111 and MMseqs2 0.001, and kmerseek below 0.001 at every setting. A fold-level TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008). kmerseek's best setting, hsdm17.k4.c_max, reaches 0.152 at the family level and 0.066 at the superfamily level; the same setting on shuffled queries reaches 0.0002 and 0.0001, the chance level. Dropping the no-hit queries moves a drawn AUC by at most 0.004 here, because every search tool drawn returns hits for at least 99.5% of queries."
+   "text": "Foldseek, comparing shapes, finds family members for most queries (AUC 0.814) and keeps much of its lead at the superfamily level (0.638 against MMseqs2's 0.204). At the fold level Foldseek reaches 0.111 and MMseqs2 0.001, and kmerseek below 0.001 at every setting. A fold-level TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008). kmerseek's best setting, hsdm17.k4.c_max, reaches 0.152 at the family level and 0.066 at the superfamily level; the same setting on shuffled queries reaches <0.0001 and <0.0001, the chance level. Dropping the no-hit queries moves an AUC by at most 0.004 here, because every tool and setting returns hits for at least 98.7% of queries."
   },
   {
    "tag": "figcaption",

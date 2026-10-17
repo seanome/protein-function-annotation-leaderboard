@@ -179,6 +179,9 @@ def page(data_dir: Path, r_cpu: float, r_gpu: float) -> tuple[str, dict]:
     tb = json.loads((data_dir / "scope40_testbed.json").read_text())
     scored_tools = sorted({r["tool"] for r in summ["overall"]})
     best = {t: best_setting(summ, t) for t in scored_tools}
+    # The chance level is the shuffled run of kmerseek's own best setting, not the best shuffled run.
+    if "kmerseek" in best and "kmerseek_shuffled" in best:
+        best["kmerseek_shuffled"] = best["kmerseek"]
     by = {(r["tool"], r["level"]): r for r in summ["overall"] if r["setting"] == best[r["tool"]]}
     fs, mm = {lvl: by[("foldseek", lvl)] for lvl in LEVELS}, {lvl: by[("mmseqs2_seqseq", lvl)] for lvl in LEVELS}
     km = {lvl: by[("kmerseek", lvl)] for lvl in LEVELS} if "kmerseek" in best else None
@@ -194,9 +197,8 @@ def page(data_dir: Path, r_cpu: float, r_gpu: float) -> tuple[str, dict]:
     absent = [c for c in CLASS_NAMES if c not in cls_n]
     rows = R.worked_example()
     fam, sf, fold, nest = rows
-    prim = [r for r in summ["overall"] if r["setting"] == best[r["tool"]]]
-    max_delta = max(abs(r["auc_hits_only"] - r["auc"]) for r in prim)
-    min_cov = min(r["coverage"] for r in prim if not r["tool"].endswith("_shuffled"))
+    max_delta = max(abs(r["auc_hits_only"] - r["auc"]) for r in summ["overall"])
+    min_cov = min(r["coverage"] for r in summ["overall"])
     cv = tb["rocx_counts_vs_208"]
     kind_legend = "".join(
         f'<span class="item"><span class="kind k-{k}" aria-hidden="true"></span>{esc(KINDS[k]["label"])}</span>'
@@ -218,7 +220,7 @@ def page(data_dir: Path, r_cpu: float, r_gpu: float) -> tuple[str, dict]:
     km_sentence = "" if km is None else (
         f" kmerseek's best setting, {best['kmerseek']}, reaches {km['family']['auc']:.3f} at the family "
         f"level and {km['superfamily']['auc']:.3f} at the superfamily level; the same setting on shuffled "
-        f"queries reaches {ch['family']['auc']:.4f} and {ch['superfamily']['auc']:.4f}, the chance level."
+        f"queries reaches {fa(ch['family']['auc'])} and {fa(ch['superfamily']['auc'])}, the chance level."
         if ch else "")
 
     body = f"""<h1>SCOPe40: does a tool rank a domain's relatives first?</h1>
@@ -280,8 +282,10 @@ whether the hits are right: kmerseek on shuffled queries has coverage near 100% 
 published files it is read from each row's counts: a query's first hit is either a TP at some level
 or an FP, so a row with no TP and no FP had no hits.</p>
 <p><b>Every query counts.</b> A query with no hits scores 0 and stays in every mean, every curve and
-every area. An earlier kmerseek claim, that it "outperforms Foldseek on SCOPe", computed the area
-over only the queries kmerseek returned hits for, 3.3% of them. That number is retired.</p>
+every area. An earlier kmerseek claim, that it "outperforms Foldseek on SCOPe", was computed over
+only part of the queries: in its source, kmerseek found a family member for 3.3% of them, and the
+mean was taken over the queries both kmerseek and Foldseek returned hits for
+(<a href="methods.html#scope40">Methods</a>). That claim and its number are retired.</p>
 <p><b>Inputs.</b> In this site's pipeline, Foldseek runs on the SCOPe domain structures
 themselves (experimental coordinates from the PDB, not predicted); ProstT5 + Foldseek (ProstT5 is
 a protein language model that predicts Foldseek's 3Di shape letters from the sequence) and every
@@ -319,8 +323,8 @@ identity.</figcaption>
 ({fs['superfamily']['auc']:.3f} against MMseqs2's {mm['superfamily']['auc']:.3f}). At the fold
 level Foldseek reaches {fs['fold']['auc']:.3f} and MMseqs2 {mm['fold']['auc']:.3f}{km_fold}. A fold-level
 TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008).{km_sentence}
-Dropping the no-hit queries moves a drawn AUC by at most {max_delta:.3f} here, because every
-search tool drawn returns hits for at least {pct(min_cov)} of queries.</p>
+Dropping the no-hit queries moves an AUC by at most {max_delta:.3f} here, because every tool and
+setting returns hits for at least {pct(min_cov)} of queries.</p>
 </figure>
 
 <figure class="fgfig" id="fig-scope40-classes">

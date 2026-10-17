@@ -240,9 +240,8 @@ share of queries with at least one hit at the settings the tool was run with; it
 AUC. Coverage says nothing about whether the hits are right: the shuffled-query control has
 coverage near 100% too.</p>
 <p><b>Every query counts.</b> A query that gets no hits scores 0 and stays in every mean and every
-area. An earlier kmerseek claim, that it "outperforms Foldseek on SCOPe", computed the area under
-the curve over only the queries kmerseek returned hits for, 3.3% of them. That claim and its number
-are retired. Its source, <a href="{nb76_url}">notebook 076</a>, ran one hydrophobic-polar alphabet
+area. An earlier kmerseek claim, that it "outperforms Foldseek on SCOPe", was computed over only
+part of the queries. That claim and its number are retired. Its source, <a href="{nb76_url}">notebook 076</a>, ran one hydrophobic-polar alphabet
 at k = 26 with a strict cutoff ({esc(nb76["dataset"])}), so kmerseek reported hits for few queries:
 it found a family member for {n_det} of the {n_fs:,} queries of Foldseek's file
 ({100 * n_det / n_fs:.1f}%), and its mean was taken over the {n_mean} queries that both tools
