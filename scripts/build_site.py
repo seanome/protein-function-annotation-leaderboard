@@ -25,6 +25,7 @@ from tools import BASELINES, KINDS, SPECIES, TOOLS  # noqa: E402
 ALL_TOOLS = {**TOOLS, **BASELINES}
 import figures  # noqa: E402
 import pileup_figures  # noqa: E402
+import scope40_page  # noqa: E402
 import scope40_rules  # noqa: E402
 
 SITE = "Protein annotation leaderboard"
@@ -382,7 +383,7 @@ NAV = [("index.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool 
        ("cost.html", "Compare two columns", "cost"), ("explainers.html", "How the scores work", "explainers"),
        ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods")]
 NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage"),
-            ("proteins.html", "Protein map", "proteins")]
+            ("proteins.html", "Protein map", "proteins"), ("scope40.html", "SCOPe40 ranking", "scope40")]
 
 
 def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
@@ -2796,6 +2797,13 @@ def main() -> None:
     (out / "coverage.html").write_text(page_coverage(cov, src, species_mya))
     (out / "methods.html").write_text(page_methods(res, comp, src, prov, pf.get("gallery", ""), base))
     (out / "explainers.html").write_text(page_explainers(src, comp))
+    s40 = None
+    if (a.data / "scope40_summary.json").exists():
+        body40, s40 = scope40_page.page(a.data, R_CPU, R_GPU)
+        (out / "scope40.html").write_text(layout(
+            "SCOPe40 ranking", "scope40", body40, src,
+            description="Does each tool rank a SCOPe domain's relatives above the first unrelated hit?"))
+        (out / "data" / "scope40.json").write_text(json.dumps(s40, separators=(",", ":"), allow_nan=False))
     import claims as claims_mod
     schema = json.loads((ROOT_DIR / "claims/schema.json").read_text())
     resolver = claims_mod.Resolver(a.data)
@@ -2886,6 +2894,8 @@ def main() -> None:
     else:
         (out / "data" / "inventory.md").unlink(missing_ok=True)
     page_json(out, "methods.html", src, None)
+    if s40 is not None:
+        page_json(out, "scope40.html", src, s40["summary"])
     if pf:
         page_json(out, "proteins.html", src, {"note": "Figure 17 is drawn from data/pileup/ (regions.parquet, "
                                                    "calls.parquet); data/upset.json lists the regions behind each "

@@ -168,13 +168,12 @@ def section(data_dir: Path) -> str:
         return f"{x:.3f}"
 
     return f"""<h2 id="scope40">SCOPe40: ranking a domain's relatives</h2>
-<p><b>Not scored yet for any tool on this site.</b> This section sets the rules a SCOPe40 ranking
-will be scored by. The question it will answer: given one known domain, does the tool rank the
-domain's known relatives above the first unrelated hit? Here a relative is a domain of the same
+<p><b>Scored for two tools so far</b>, on the <a href="scope40.html">SCOPe40 page</a>. This
+section gives the rules. The question: given one known domain, does the tool rank the domain's
+known relatives above the first unrelated hit? Here a relative is a domain of the same
 family, superfamily or fold, one level at a time; an unrelated hit is a domain of a different
-fold. The means for Foldseek (a structure search tool) and MMseqs2 (a sequence search tool)
-further down are read from per-query files that other
-authors published. They are here only to show what the rules change.</p>
+fold. The Foldseek (a structure search tool) and MMseqs2 (a sequence search tool) numbers are read
+from per-query files that other authors published.</p>
 <p>SCOPe (Structural Classification of Proteins, extended) sorts protein domains into four nested
 levels. An id such as <span class="mono">b.1.1.1</span> reads class.fold.superfamily.family:
 class b (all beta), fold 1, superfamily 1, family 1. Domains in one superfamily are taken to share
@@ -211,30 +210,10 @@ nor FP. Sort the hits by the tool's own score, best first, after dropping the qu
 itself. Walk down the list and stop at the first FP. The <b>sensitivity up to the first false
 positive</b> is the number of TPs above that cut divided by the number of possible TPs for that
 query in the whole set. The walk uses every hit the tool reports at the settings it was run with.</p>
-<p>This site planned a <b>nested rule</b> instead. A hit is a superfamily TP when query and target
+<p>This site first planned a <b>nested rule</b>. A hit is a superfamily TP when query and target
 share the first three fields of the SCOPe id (class letter, fold, superfamily), family included.
-It is an FP when their folds differ, and not counted when they share the fold only. Figure {FIG} labels one
-made-up hit list both ways.</p>
-
-<figure class="ex-fig" id="fig-scope40-labels">
-<figcaption><span class="ex-made-up">made-up example</span><b>Figure {FIG}.</b> One query, the
-immunoglobulin-like domain <span class="mono">{EX_QUERY}</span>, and its eight hits, labelled at
-each level. The made-up set holds {EX_N['family']} other domains in the query's family,
-{EX_N['superfamily']} in its superfamily but outside the family, and {EX_N['fold']} in its fold but
-outside the superfamily. Hits 1, 5 and 7 are three different domains of the query's family; the
-query's hit to itself was dropped before hit 1. The small grey line under the paper's
-superfamily and fold rows divides by one more than the possible TPs, as Foldseek's script does.</figcaption>
-{legend_html()}
-<div class="ex-box">{figure_svg(rows)}</div>
-<p class="ex-read">Hit {fam['cut'] + 1}, <span class="mono">{EX_HITS[fam['cut']]}</span>, is in a
-different fold, so it is the first FP at every level and the walk stops there. At the family level
-hits 1 and 5 are TPs: {fam['above']} of {fam['n_possible']} = {f2(fam['sens'])}. At the
-superfamily level the paper does not count the same-family hits; hits 2 and 4 are TPs:
-{sf['above']} of {sf['n_possible']} = {f2(sf['sens'])}. At the fold level only hit 3 is a TP:
-{fold['above']} of {fold['n_possible']} = {f2(fold['sens'])}. Hit 7 is in the family but sits
-below the cut, so it adds nothing. The nested rule (bottom row) counts the family hits at the
-superfamily level too: {nest['above']} of {nest['n_possible']} = {f2(nest['sens'])}.</p>
-</figure>
+It is an FP when their folds differ, and not counted when they share the fold only. <a href="scope40.html#fig-scope40-labels">Figure {FIG}</a>, on the
+SCOPe40 page, labels one made-up hit list both ways.</p>
 
 <p>Over many queries, the <b>area under the curve</b> (AUC) sorts the queries by sensitivity,
 highest first, and plots sensitivity against the fraction of queries. Its area is the mean
@@ -251,8 +230,8 @@ detected {n_det} of the {n_fs:,} queries of Foldseek's SCOPe 2.08 file ({100 * n
 its mean over the {n_mean} queries both tools scored.</p>
 
 <h3 id="scope40-differences">The paper's rule against the planned rule</h3>
-<p>The two rules differ in the rows below, so nothing is scored until one is chosen. The third
-column is what Foldseek's script does.</p>
+<p>The two rules differ in the rows below. Olga chose the paper's rule as its Methods and its
+script state it (2026-10-17), so the SCOPe40 page follows the third column.</p>
 <div class="tablebox"><table class="lb"><thead><tr><th class="txt" scope="col">Point</th>
 <th class="txt" scope="col">Foldseek paper (Methods)</th><th class="txt" scope="col">Foldseek's script</th>
 <th class="txt" scope="col">This site's planned rule</th></tr></thead><tbody>
@@ -278,7 +257,13 @@ family or to another superfamily".</p>
 <p>Where the extra 1 comes from: the script counts the possible family TPs as the family size minus
 1, which removes the query itself. For the superfamily it takes the superfamily size minus (the
 family size minus 1), and for the fold the fold size minus (the superfamily size minus 1). Those
-two leave the query in, so each is one more than the number of domains that could be found.</p>
+two leave the query in, so each is one more than the number of domains that could be found.
+In the script: lines 7, 10 and 13 count every domain, the query included, into its family,
+superfamily and fold; line 17 drops the self-hit from the hit list; line 25 takes 1 off the family
+count, but lines 26 and 27 subtract only the other family members (or the other superfamily
+members), so the query stays in. It can never be found at those levels: its hit to itself is
+dropped, and would count at the family level anyway. So no query can reach a superfamily or fold
+sensitivity of 1.</p>
 <p>The extra 1 is in the per-query files of Foldseek and MMseqs2 on SCOPe 2.08 that other authors
 published, as copied into seanome/2024-kmerseek-analysis
 (<span class="mono">data/tea_scope40_rocx_files</span>). Query <span class="mono">{esc(ex['name'])}</span>
@@ -321,18 +306,23 @@ the {cv['n_rows']:,} rows (fold size on {cv['FOLDCNT']:,}, superfamily on {cv['S
 searched a domain list with some 2.08 domains missing, and a tool scored on the full 2.08 set is not
 on the same footing as them.</p>
 
-<h3 id="scope40-wait">What scoring waits on</h3>
+<h3 id="scope40-choices">Choices made (Olga, 2026-10-17)</h3>
 <ol>
-<li>The superfamily rule: the paper's (family left out) or the nested one.</li>
-<li>The denominator: possible TPs, as the paper's text says, or one more, as Foldseek's script and
-its published numbers do.</li>
-<li>The queries: Foldseek's narrower set (a possible TP at all three levels), for comparison with
-its numbers, or every query with a possible TP at the level being scored.</li>
-<li>The set: SCOPe 2.08 (the set of the existing kmerseek runs) or Foldseek's SCOPe 2.01.</li>
-<li>Hit lists. No tool has a per-query hit list on SCOPe40 from the runs in
-seanome/2024-kmerseek-analysis. Its kmerseek SCOPe40 runs kept one area under the curve per
-kmerseek setting, not the hits.</li>
+<li>The rule: the paper's Methods and script. Its Figure 2a legend reads differently (above).</li>
+<li>The denominator: the script's, one more than the domains that can be found at the
+superfamily and fold levels, so the numbers match the published files. The other is kept beside it
+in the long table (<span class="mono">sensitivity_possible</span>).</li>
+<li>The queries: Foldseek's set, domains with another member at all three levels, computed on
+SCOPe 2.08: {q8['all_three']:,}.</li>
+<li>The set: SCOPe 2.08 at 40% identity, {n8['n_domains']:,} domains, searched all against all.</li>
+<li>Hit lists: still missing for every tool. The two scored rows come from per-query files with no
+hit lists; the pipeline that keeps them for every tool is written, not launched.</li>
 </ol>
+<h3 id="scope40-scores">The score each tool is ranked by</h3>
+<p>Each tool's hits are sorted by its own score, best first, ties broken by target id. In the
+pipeline: Foldseek, ProstT5 + Foldseek, MMseqs2 (both modes), phmmer, jackhmmer and HH-suite by
+bit score, higher first; kmerseek by region E-value, smaller first. The two published files do not
+record the order their runs used.</p>
 <p class="refs">van Kempen, M., S. S. Kim, C. Tumescheit, M. Mirdita, J. Lee, C. L. M. Gilchrist,
 J. Söding, and M. Steinegger. "Fast and Accurate Protein Structure Search with Foldseek."
 <i>Nature Biotechnology</i> 42, no. 2 (2024): 243–46.

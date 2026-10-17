@@ -1,0 +1,1056 @@
+{
+ "page": "scope40.html",
+ "title": "SCOPe40 ranking",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit_date": "2026-10-15T13:12:56Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-16T17:43:58Z",
+  "sha256": {
+   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
+   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+   "no_search_baselines.parquet": "e4d97b75d70a13473c23e98adbf5223d662a83a1e8560c18e8be77fa80441952"
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "nosearch_commit": "05ca5528683575b8d33d605785c2547d8ee824bf",
+  "nosearch_path": "tables/no_search_baselines_laptop_check"
+ },
+ "text": [
+  {
+   "tag": "h1",
+   "text": "SCOPe40: does a tool rank a domain's relatives first?"
+  },
+  {
+   "tag": "p",
+   "text": "Given one known domain, does the tool rank the domain's known relatives above the first unrelated hit?"
+  },
+  {
+   "tag": "p",
+   "text": "Data from 15 Oct 2026, commit 4a4b1171 (source)"
+  },
+  {
+   "tag": "p",
+   "text": "Table 1 places annotations on human proteins by searching one relative's proteome, and scores where the ends of each call land. This page does something else: it ranks pairs of single structural domains from SCOPe, and never scores boundaries. SCOPe sorts domains into class.fold.superfamily.family; an id such as b.1.1.1 is class b (all beta), fold 1, superfamily 1, family 1. Domains in one superfamily are taken to share an ancestor; domains in one fold share a shape, with or without one. The set searched is SCOPe 2.08 at 40% identity, 15,177 domains. Every domain is searched against all of them. The queries are the 5,737 domains that have another member in the set at all three levels, as in Foldseek's benchmark (Methods). Foldseek's own set was SCOPe 2.01, 11,211 domains, so these numbers are not the paper's."
+  },
+  {
+   "tag": "p",
+   "text": "For one query, a true positive (TP) is a hit to another domain at the level being scored. At the family level that is the same family. At the superfamily level it is the same superfamily but a different family, and at the fold level the same fold but a different superfamily. A false positive (FP) is a hit to a domain of a different fold. Any other hit is not counted. Sort the hits by the tool's own score, best first, after dropping the query's hit to itself, and stop at the first FP. The sensitivity up to the first false positive is the TPs above that cut divided by the TPs the query has in the set. Foldseek's scoring script, which this page follows, adds 1 to that count at the superfamily and fold levels (the query itself stays in it); Figure 18 shows both."
+  },
+  {
+   "tag": "figcaption",
+   "text": "made-up exampleFigure 18. One query, b.1.1.1, and its eight hits, labelled at each level. The made-up set holds 4 other domains in the query's family, 5 in its superfamily but outside the family, and 3 in its fold but outside the superfamily. Hits 1, 5 and 7 are three different domains of the query's family; the query's hit to itself was dropped before hit 1. The small grey line under the superfamily and fold rows divides by one more, as Foldseek's script does. The bottom row is the rule this site first planned, which also counts the family at the superfamily level; it is not used."
+  },
+  {
+   "tag": "p",
+   "text": "true positive false positive (a different fold) not counted first false positive: the list is cut here any mark drawn pale is below the cut, so it adds nothing"
+  },
+  {
+   "tag": "p",
+   "text": "Hit 6, a.4.5.28, is in a different fold, so the walk stops there at every level. Family: hits 1 and 5, 2 of 4 = 0.50. Superfamily: hits 2 and 4, 2 of 5 = 0.40 (2 of 6 = 0.33 in Foldseek's script). Fold: hit 3, 1 of 3 = 0.33 (1 of 4 = 0.25). Hit 7 is below the cut and adds nothing."
+  },
+  {
+   "tag": "p",
+   "text": "Over many queries, sort the queries by sensitivity, highest first, and plot sensitivity against the fraction of queries. The area under the curve (AUC) is the mean sensitivity over all queries: the AUC and the mean are the same number. Coverage is the share of queries with at least one hit at the settings the tool was run with."
+  },
+  {
+   "tag": "p",
+   "text": "Every query counts. A query with no hits scores 0 and stays in every mean, every curve and every area. An earlier kmerseek claim, that it \"outperforms Foldseek on SCOPe\", computed the area over only the queries kmerseek returned hits for, 3.3% of them. That number is retired."
+  },
+  {
+   "tag": "p",
+   "text": "Inputs. Foldseek runs on the SCOPe domain structures themselves: experimental coordinates from the PDB, not predicted. ProstT5 + Foldseek and every other tool run on the domain sequences. Foldseek and MMseqs2 are read from per-query files that other authors published on SCOPe 2.08 (folder data/tea_scope40_rocx_files of seanome/2024-kmerseek-analysis); those files do not record which structures or settings the runs used. Their own scoring script dropped each self-hit. 24 of the 5,737 queries are missing from both files; they score 0 and are listed under Table 3. Not scored yet: kmerseek, phmmer, jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch), ProstT5 + Foldseek; their pipeline keeps per-query hit lists and is written but not launched (pipeline PR)."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 19. Sensitivity up to the first false positive, one line per tool, queries sorted from highest to lowest; a, family; b, superfamily; c, fold. The area under each line is its AUC. n = 5,737 queries, SCOPe 2.08 at 40% identity."
+  },
+  {
+   "tag": "p",
+   "text": "Foldseek, comparing shapes, finds family members for most queries (AUC 0.814) and keeps much of its lead at the superfamily level (0.572 against MMseqs2's 0.171). At the fold level both are near the floor (0.101 and 0.001). A fold-level TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008). Dropping the no-hit queries moves a drawn AUC by at most 0.004 here, because every search tool drawn returns hits for at least 99.5% of queries."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 20. Mean sensitivity up to the first false positive by SCOPe class, with the 95% bootstrap interval as a bar (1,000 resamples of the queries, seed 20261017); a, family; b, superfamily; c, fold. Classes: a, all alpha (n = 1,018); b, all beta (n = 1,748); c, alpha/beta (n = 1,635); d, alpha+beta (n = 1,109); f, membrane and cell surface (n = 69); g, small proteins (n = 158). Class e (multi-domain proteins) has no query with another member at all three levels, so it has no column. Click a class to list its queries under the figure."
+  },
+  {
+   "tag": "p",
+   "text": "Classes f (membrane and cell surface) and g (small proteins): composition and cysteine spacing can match without homology there, so read those two columns with the composition-scan row beside them. That row is not run yet."
+  },
+  {
+   "tag": "h2",
+   "text": "Table 3. Tool by level"
+  },
+  {
+   "tag": "p",
+   "text": "AUC with its 95% bootstrap interval under it, coverage, and cost. Click a heading to sort; rows with no value sort last; the two no-search rows stay at the bottom. Core-hours and GPU-hours come from a run's task records; the published files have none, so cost reads not measured. Prices, as on Table 1: rcpu $ per CPU-hour rgpu $ per GPU-hour ."
+  },
+  {
+   "tag": "th",
+   "text": "Tool"
+  },
+  {
+   "tag": "th",
+   "text": "Setting"
+  },
+  {
+   "tag": "th",
+   "text": "Family AUC"
+  },
+  {
+   "tag": "th",
+   "text": "Superfamily AUC"
+  },
+  {
+   "tag": "th",
+   "text": "Fold AUC"
+  },
+  {
+   "tag": "th",
+   "text": "Coverage"
+  },
+  {
+   "tag": "th",
+   "text": "Core-hours"
+  },
+  {
+   "tag": "th",
+   "text": "GPU-hours"
+  },
+  {
+   "tag": "th",
+   "text": "Cost per 1,000 queries"
+  },
+  {
+   "tag": "th",
+   "text": "Status"
+  },
+  {
+   "tag": "td",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not run: no per-query hit list on SCOPe40 yet; pipeline written, not launched; the PR 107 runs kept one area per setting, not the hits"
+  },
+  {
+   "tag": "td",
+   "text": "phmmer"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not run: no per-query hit list on SCOPe40 yet; pipeline written, not launched"
+  },
+  {
+   "tag": "td",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not run: no per-query hit list on SCOPe40 yet; pipeline written, not launched"
+  },
+  {
+   "tag": "td",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "td",
+   "text": "published run"
+  },
+  {
+   "tag": "td",
+   "text": "0.4020.392–0.411"
+  },
+  {
+   "tag": "td",
+   "text": "0.1710.166–0.177"
+  },
+  {
+   "tag": "td",
+   "text": "0.0010.001–0.001"
+  },
+  {
+   "tag": "td",
+   "text": "99.6%"
+  },
+  {
+   "tag": "td",
+   "text": "not measured"
+  },
+  {
+   "tag": "td",
+   "text": "not measured"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "scored: from the per-query file other authors published; our own run is in the pipeline"
+  },
+  {
+   "tag": "td",
+   "text": "MMseqs2, three rounds"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not run: no per-query hit list on SCOPe40 yet; pipeline written, not launched"
+  },
+  {
+   "tag": "td",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not run: no per-query hit list on SCOPe40 yet; pipeline written, not launched"
+  },
+  {
+   "tag": "td",
+   "text": "Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "published run"
+  },
+  {
+   "tag": "td",
+   "text": "0.8140.807–0.821"
+  },
+  {
+   "tag": "td",
+   "text": "0.5720.564–0.580"
+  },
+  {
+   "tag": "td",
+   "text": "0.1010.097–0.106"
+  },
+  {
+   "tag": "td",
+   "text": "99.5%"
+  },
+  {
+   "tag": "td",
+   "text": "not measured"
+  },
+  {
+   "tag": "td",
+   "text": "not measured"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "scored: from the per-query file other authors published; our own run is in the pipeline"
+  },
+  {
+   "tag": "td",
+   "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not run: no per-query hit list on SCOPe40 yet; pipeline written, not launched"
+  },
+  {
+   "tag": "td",
+   "text": "hmmscan with Pfam"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not applicable: it scores a sequence against Pfam family models, not one domain against another"
+  },
+  {
+   "tag": "td",
+   "text": "Kyte-Doolittle composition scan (notebook 231)"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "—"
+  },
+  {
+   "tag": "td",
+   "text": "not run: not yet run on SCOPe40; it would rank targets by its own score"
+  },
+  {
+   "tag": "p",
+   "text": "Queries missing from both published files, scored 0: d2bbva_, d3bvxa1, d3bvxa2, d3bvxa3, d3cu7a6, d3ljqa_, d6a1ia1, g1apy.1, g1b35.1, g1f8v.1, g1gk9.1, g1k2x.1, g1ku8.1, g1o7d.1, g1o7d.2, g1o7d.3, g1or0.1, g1pvc.1, g1q7l.1, g1qqp.1, g1r8o.1, g1tme.1, g2a73.1, g2dbx.1. With the denominator over only the domains that can be found (no extra 1), the superfamily AUC would be 0.638 for Foldseek and 0.204 for MMseqs2; both are kept in data/scope40_long.parquet (sensitivity_possible)."
+  },
+  {
+   "tag": "p",
+   "text": "Cheng, H., B.-H. Kim, and N. V. Grishin. \"MALISAM: A Database of Structurally Analogous Motifs in Proteins.\" Nucleic Acids Research 36, Database issue (2008): D211–17. https://doi.org/10.1093/nar/gkm698. Other references: Methods."
+  }
+ ],
+ "data": {
+  "seed": 20261017,
+  "n_boot": 1000,
+  "overall": [
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "family",
+    "n_queries": 5737,
+    "auc": 0.8135892156909064,
+    "lo": 0.8065467999176709,
+    "hi": 0.8206268604586902,
+    "coverage": 0.9952937075126372,
+    "n_with_hits": 5710,
+    "auc_hits_only": 0.8174363100558196,
+    "auc_possible": 0.8135892156909064,
+    "n_missing_from_file": 24
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "superfamily",
+    "n_queries": 5737,
+    "auc": 0.5720300916333882,
+    "lo": 0.5644529932184749,
+    "hi": 0.5799749124186956,
+    "coverage": 0.9952937075126372,
+    "n_with_hits": 5710,
+    "auc_hits_only": 0.5747349624694832,
+    "auc_possible": 0.6380548051038565,
+    "n_missing_from_file": 24
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "fold",
+    "n_queries": 5737,
+    "auc": 0.10131303419654766,
+    "lo": 0.09708160271194523,
+    "hi": 0.10557730322627504,
+    "coverage": 0.9952937075126372,
+    "n_with_hits": 5710,
+    "auc_hits_only": 0.10179209758066445,
+    "auc_possible": 0.11087206314959444,
+    "n_missing_from_file": 24
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "family",
+    "n_queries": 5737,
+    "auc": 0.4016048504140182,
+    "lo": 0.3919599385493266,
+    "hi": 0.4112990979972916,
+    "coverage": 0.995816628900122,
+    "n_with_hits": 5713,
+    "auc_hits_only": 0.4032919703877513,
+    "auc_possible": 0.4016048504140182,
+    "n_missing_from_file": 24
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "superfamily",
+    "n_queries": 5737,
+    "auc": 0.1714671869545707,
+    "lo": 0.16586604604702232,
+    "hi": 0.17739915468528233,
+    "coverage": 0.995816628900122,
+    "n_with_hits": 5713,
+    "auc_hits_only": 0.17218751121273798,
+    "auc_possible": 0.20383325823011633,
+    "n_missing_from_file": 24
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "fold",
+    "n_queries": 5737,
+    "auc": 0.0008331073699413378,
+    "lo": 0.0005674036518097191,
+    "hi": 0.0011260156852573142,
+    "coverage": 0.995816628900122,
+    "n_with_hits": 5713,
+    "auc_hits_only": 0.0008366072083587355,
+    "auc_possible": 0.0009257483315626154,
+    "n_missing_from_file": 24
+   }
+  ],
+  "by_class": [
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "a",
+    "n_queries": 1018,
+    "mean": 0.7433588382125529,
+    "lo": 0.7237904905416533,
+    "hi": 0.7619758923207479
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "b",
+    "n_queries": 1748,
+    "mean": 0.8203315258378292,
+    "lo": 0.8084603229594722,
+    "hi": 0.8334087102379776
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "c",
+    "n_queries": 1635,
+    "mean": 0.8442038047366345,
+    "lo": 0.8321517467739766,
+    "hi": 0.8565148129698049
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "d",
+    "n_queries": 1109,
+    "mean": 0.8815984116706601,
+    "lo": 0.8671983267729042,
+    "hi": 0.8954823868069609
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "f",
+    "n_queries": 69,
+    "mean": 0.8096618357487922,
+    "lo": 0.7313647342995168,
+    "hi": 0.8903381642512077
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "g",
+    "n_queries": 158,
+    "mean": 0.39905063291139237,
+    "lo": 0.3457799314345991,
+    "hi": 0.45520239978902954
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "a",
+    "n_queries": 1018,
+    "mean": 0.4418488331188803,
+    "lo": 0.4265912630667381,
+    "hi": 0.4589914798313434
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "b",
+    "n_queries": 1748,
+    "mean": 0.5902719348102142,
+    "lo": 0.5757247745319768,
+    "hi": 0.60477648571968
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "c",
+    "n_queries": 1635,
+    "mean": 0.6132176730085418,
+    "lo": 0.5992296544927683,
+    "hi": 0.6253445707701292
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "d",
+    "n_queries": 1109,
+    "mean": 0.6573924375693445,
+    "lo": 0.6411157789108507,
+    "hi": 0.6729331688274633
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "f",
+    "n_queries": 69,
+    "mean": 0.573998294970162,
+    "lo": 0.5029834216295213,
+    "hi": 0.6480698064249855
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "g",
+    "n_queries": 158,
+    "mean": 0.18274804146306478,
+    "lo": 0.15657141436132524,
+    "hi": 0.20845328098914248
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "a",
+    "n_queries": 1018,
+    "mean": 0.05278893177287745,
+    "lo": 0.04509853016636516,
+    "hi": 0.06138257663300988
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "b",
+    "n_queries": 1748,
+    "mean": 0.12497957976231032,
+    "lo": 0.1166332283082069,
+    "hi": 0.13416837064356338
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "c",
+    "n_queries": 1635,
+    "mean": 0.11379328689996016,
+    "lo": 0.10473532232526407,
+    "hi": 0.12206238456288761
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "d",
+    "n_queries": 1109,
+    "mean": 0.09629209645588424,
+    "lo": 0.08751322901281043,
+    "hi": 0.10558725941429356
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "f",
+    "n_queries": 69,
+    "mean": 0.21220813204508857,
+    "lo": 0.1435102153784219,
+    "hi": 0.27816651570048306
+   },
+   {
+    "tool": "foldseek",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "g",
+    "n_queries": 158,
+    "mean": 0.0097918927478779,
+    "lo": 0.0070310756798563955,
+    "hi": 0.012667595355989296
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "a",
+    "n_queries": 1018,
+    "mean": 0.39793954777477986,
+    "lo": 0.37454361541316844,
+    "hi": 0.4205618507710984
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "b",
+    "n_queries": 1748,
+    "mean": 0.37593226779907013,
+    "lo": 0.35907354494436766,
+    "hi": 0.3936976102202385
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "c",
+    "n_queries": 1635,
+    "mean": 0.4150407010257703,
+    "lo": 0.3986845134516433,
+    "hi": 0.431653476230934
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "d",
+    "n_queries": 1109,
+    "mean": 0.42270571607106394,
+    "lo": 0.4003124781252235,
+    "hi": 0.44588131060825603
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "f",
+    "n_queries": 69,
+    "mean": 0.6072463768115942,
+    "lo": 0.5096618357487923,
+    "hi": 0.7038647342995169
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "family",
+    "scope_class": "g",
+    "n_queries": 158,
+    "mean": 0.3322960618846695,
+    "lo": 0.28232067510548525,
+    "hi": 0.3889137218706047
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "a",
+    "n_queries": 1018,
+    "mean": 0.15133753832681063,
+    "lo": 0.1390090832932089,
+    "hi": 0.16407789325876024
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "b",
+    "n_queries": 1748,
+    "mean": 0.15806321505101778,
+    "lo": 0.14747933822391146,
+    "hi": 0.16866860413698942
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "c",
+    "n_queries": 1635,
+    "mean": 0.1850282481927261,
+    "lo": 0.17404844573444747,
+    "hi": 0.1962401391821139
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "d",
+    "n_queries": 1109,
+    "mean": 0.19627097063995533,
+    "lo": 0.18263719488805588,
+    "hi": 0.21066176204668638
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "f",
+    "n_queries": 69,
+    "mean": 0.2755923625488843,
+    "lo": 0.21862635150678628,
+    "hi": 0.3363792558086036
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "superfamily",
+    "scope_class": "g",
+    "n_queries": 158,
+    "mean": 0.08955425558107102,
+    "lo": 0.06924562971958458,
+    "hi": 0.1093267889833721
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "a",
+    "n_queries": 1018,
+    "mean": 0.00034384183785764123,
+    "lo": 0.00017376461900985585,
+    "hi": 0.0005562782939303792
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "b",
+    "n_queries": 1748,
+    "mean": 0.0004264973274361399,
+    "lo": 0.0002591612701787099,
+    "hi": 0.0006022484853260677
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "c",
+    "n_queries": 1635,
+    "mean": 0.001798432950500359,
+    "lo": 0.0009433874540037464,
+    "hi": 0.00272764948777836
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "d",
+    "n_queries": 1109,
+    "mean": 0.00023687208442446704,
+    "lo": 4.6011053612803435e-06,
+    "hi": 0.0006966411489453307
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "f",
+    "n_queries": 69,
+    "mean": 0.001177536231884058,
+    "lo": 0.0,
+    "hi": 0.0030797101449275364
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "setting": "published run",
+    "level": "fold",
+    "scope_class": "g",
+    "n_queries": 158,
+    "mean": 0.0025291749769695113,
+    "lo": 0.001536240984207777,
+    "hi": 0.0035912702689161057
+   }
+  ],
+  "n_domains": 15177,
+  "n_queries": 5737,
+  "missing": {
+   "foldseek": [
+    "d2bbva_",
+    "d3bvxa1",
+    "d3bvxa2",
+    "d3bvxa3",
+    "d3cu7a6",
+    "d3ljqa_",
+    "d6a1ia1",
+    "g1apy.1",
+    "g1b35.1",
+    "g1f8v.1",
+    "g1gk9.1",
+    "g1k2x.1",
+    "g1ku8.1",
+    "g1o7d.1",
+    "g1o7d.2",
+    "g1o7d.3",
+    "g1or0.1",
+    "g1pvc.1",
+    "g1q7l.1",
+    "g1qqp.1",
+    "g1r8o.1",
+    "g1tme.1",
+    "g2a73.1",
+    "g2dbx.1"
+   ],
+   "mmseqs2_seqseq": [
+    "d2bbva_",
+    "d3bvxa1",
+    "d3bvxa2",
+    "d3bvxa3",
+    "d3cu7a6",
+    "d3ljqa_",
+    "d6a1ia1",
+    "g1apy.1",
+    "g1b35.1",
+    "g1f8v.1",
+    "g1gk9.1",
+    "g1k2x.1",
+    "g1ku8.1",
+    "g1o7d.1",
+    "g1o7d.2",
+    "g1o7d.3",
+    "g1or0.1",
+    "g1pvc.1",
+    "g1q7l.1",
+    "g1qqp.1",
+    "g1r8o.1",
+    "g1tme.1",
+    "g2a73.1",
+    "g2dbx.1"
+   ]
+  },
+  "inputs": {
+   "astral208_sha256": "e6d3213b38225f617966686809fa5531f0de6a7d00d01692477476a1493ab037",
+   "foldseek.rocx": "b47e64c15d3ad21875795adbe04a8ddc41166242df5cf5cbd71fa1529b8c1a16",
+   "mmseqs.rocx": "50e454721a727ad57d1e131237810a3b6e3fba46fbfd72fd2959e8c82bc4225d"
+  }
+ }
+}

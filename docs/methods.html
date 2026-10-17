@@ -18,9 +18,9 @@
 <header class="site"><div class="wrap">
 <a class="brand" href="index.html">Protein annotation leaderboard</a>
 <nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html" aria-current="page">Methods</a><details class="navmore"><summary>More</summary>
-<div class="navpop"><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a><a href="proteins.html">Protein map</a></div></details></nav>
+<div class="navpop"><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a><a href="proteins.html">Protein map</a><a href="scope40.html">SCOPe40 ranking</a></div></details></nav>
 <details class="navmenu"><summary aria-label="Pages: Methods">Methods</summary>
-<div class="navpop"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html" aria-current="page">Methods</a><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a><a href="proteins.html">Protein map</a></div></details>
+<div class="navpop"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html" aria-current="page">Methods</a><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a><a href="proteins.html">Protein map</a><a href="scope40.html">SCOPe40 ranking</a></div></details>
 </div></header>
 <main class="wrap" data-page="methods">
 <h1>Methods</h1>
@@ -232,13 +232,12 @@ no relative and makes no copies to merge. Its cost is the run time of its own ta
 queries, from the run's task records; where the table holds none, the cost reads
 <i>not measured</i>. Source of these rows: laptop check: tables/no_search_baselines_laptop_check (committed code, midi-plus truth tables copied from Sherlock).</p>
 <h2 id="scope40">SCOPe40: ranking a domain's relatives</h2>
-<p><b>Not scored yet for any tool on this site.</b> This section sets the rules a SCOPe40 ranking
-will be scored by. The question it will answer: given one known domain, does the tool rank the
-domain's known relatives above the first unrelated hit? Here a relative is a domain of the same
+<p><b>Scored for two tools so far</b>, on the <a href="scope40.html">SCOPe40 page</a>. This
+section gives the rules. The question: given one known domain, does the tool rank the domain's
+known relatives above the first unrelated hit? Here a relative is a domain of the same
 family, superfamily or fold, one level at a time; an unrelated hit is a domain of a different
-fold. The means for Foldseek (a structure search tool) and MMseqs2 (a sequence search tool)
-further down are read from per-query files that other
-authors published. They are here only to show what the rules change.</p>
+fold. The Foldseek (a structure search tool) and MMseqs2 (a sequence search tool) numbers are read
+from per-query files that other authors published.</p>
 <p>SCOPe (Structural Classification of Proteins, extended) sorts protein domains into four nested
 levels. An id such as <span class="mono">b.1.1.1</span> reads class.fold.superfamily.family:
 class b (all beta), fold 1, superfamily 1, family 1. Domains in one superfamily are taken to share
@@ -275,30 +274,10 @@ nor FP. Sort the hits by the tool's own score, best first, after dropping the qu
 itself. Walk down the list and stop at the first FP. The <b>sensitivity up to the first false
 positive</b> is the number of TPs above that cut divided by the number of possible TPs for that
 query in the whole set. The walk uses every hit the tool reports at the settings it was run with.</p>
-<p>This site planned a <b>nested rule</b> instead. A hit is a superfamily TP when query and target
+<p>This site first planned a <b>nested rule</b>. A hit is a superfamily TP when query and target
 share the first three fields of the SCOPe id (class letter, fold, superfamily), family included.
-It is an FP when their folds differ, and not counted when they share the fold only. Figure 18 labels one
-made-up hit list both ways.</p>
-
-<figure class="ex-fig" id="fig-scope40-labels">
-<figcaption><span class="ex-made-up">made-up example</span><b>Figure 18.</b> One query, the
-immunoglobulin-like domain <span class="mono">b.1.1.1</span>, and its eight hits, labelled at
-each level. The made-up set holds 4 other domains in the query's family,
-5 in its superfamily but outside the family, and 3 in its fold but
-outside the superfamily. Hits 1, 5 and 7 are three different domains of the query's family; the
-query's hit to itself was dropped before hit 1. The small grey line under the paper's
-superfamily and fold rows divides by one more than the possible TPs, as Foldseek's script does.</figcaption>
-<p class="ex-read" style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center"><span><svg width="30" height="18" viewBox="0 0 30 18" aria-hidden="true"><rect class="ex-kept" x="1" y="1" width="28" height="16" rx="3"/><text class="ex-glyph" x="15" y="14" text-anchor="middle" style="fill:var(--bg);font-size:12px">✓</text></svg> true positive</span><span><svg width="30" height="18" viewBox="0 0 30 18" aria-hidden="true"><rect x="2" y="2" width="26" height="14" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="15" y="14" text-anchor="middle" style="font-size:12px">✗</text></svg> false positive (a different fold)</span><span><svg width="30" height="18" viewBox="0 0 30 18" aria-hidden="true"><rect class="ex-drop" x="2" y="2" width="26" height="14" rx="3"/></svg> not counted</span><span><svg width="30" height="18" viewBox="0 0 30 18" aria-hidden="true"><line class="ex-cut" x1="15" x2="15" y1="0" y2="18"/></svg> first false positive: the list is cut here</span><span><svg width="30" height="18" viewBox="0 0 30 18" aria-hidden="true"><g opacity="0.4"><rect class="ex-kept" x="1" y="1" width="28" height="16" rx="3"/><text class="ex-glyph" x="15" y="14" text-anchor="middle" style="fill:var(--bg);font-size:12px">✓</text></g></svg> any mark drawn pale is below the cut, so it adds nothing</span></p>
-<div class="ex-box"><svg viewBox="0 0 825 224" width="825" role="img" aria-label="Eight made-up hits labelled under each rule, with the cut at the first false positive"><text class="ex-lab" x="0" y="18">Hit, best score first</text><text class="ex-lab" x="0" y="40">SCOPe id of the hit</text><text class="ex-tk" x="176.0" y="18" text-anchor="middle">1</text><text class="ex-tk" x="176.0" y="40" text-anchor="middle">b.1.1.1</text><text class="ex-tk" x="233.0" y="18" text-anchor="middle">2</text><text class="ex-tk" x="233.0" y="40" text-anchor="middle">b.1.1.4</text><text class="ex-tk" x="290.0" y="18" text-anchor="middle">3</text><text class="ex-tk" x="290.0" y="40" text-anchor="middle">b.1.2.1</text><text class="ex-tk" x="347.0" y="18" text-anchor="middle">4</text><text class="ex-tk" x="347.0" y="40" text-anchor="middle">b.1.1.2</text><text class="ex-tk" x="404.0" y="18" text-anchor="middle">5</text><text class="ex-tk" x="404.0" y="40" text-anchor="middle">b.1.1.1</text><text class="ex-tk" x="461.0" y="18" text-anchor="middle">6</text><text class="ex-tk" x="461.0" y="40" text-anchor="middle">a.4.5.28</text><text class="ex-tk" x="518.0" y="18" text-anchor="middle">7</text><text class="ex-tk" x="518.0" y="40" text-anchor="middle">b.1.1.1</text><text class="ex-tk" x="575.0" y="18" text-anchor="middle">8</text><text class="ex-tk" x="575.0" y="40" text-anchor="middle">b.2.2.2</text><text class="ex-lab" x="620" y="40">sensitivity</text><text class="ex-lab" x="0" y="76.0">Family (paper)</text><g data-label="tp"><rect class="ex-kept" x="150" y="58" width="52" height="26" rx="3"/><text class="ex-glyph" x="176.0" y="76" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="skip"><rect class="ex-drop" x="208" y="59" width="50" height="24" rx="3"/></g><g data-label="skip"><rect class="ex-drop" x="265" y="59" width="50" height="24" rx="3"/></g><g data-label="skip"><rect class="ex-drop" x="322" y="59" width="50" height="24" rx="3"/></g><g data-label="tp"><rect class="ex-kept" x="378" y="58" width="52" height="26" rx="3"/><text class="ex-glyph" x="404.0" y="76" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="fp"><rect x="436" y="59" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="461.0" y="76" text-anchor="middle">✗</text></g><g data-label="tp" opacity="0.4"><rect class="ex-kept" x="492" y="58" width="52" height="26" rx="3"/><text class="ex-glyph" x="518.0" y="76" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="fp" opacity="0.4"><rect x="550" y="59" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="575.0" y="76" text-anchor="middle">✗</text></g><text class="ex-lab mono" x="620" y="70">2 of 4 = 0.50</text><text class="ex-lab" x="0" y="116.0">Superfamily (paper)</text><g data-label="skip"><rect class="ex-drop" x="151" y="99" width="50" height="24" rx="3"/></g><g data-label="tp"><rect class="ex-kept" x="207" y="98" width="52" height="26" rx="3"/><text class="ex-glyph" x="233.0" y="116" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="skip"><rect class="ex-drop" x="265" y="99" width="50" height="24" rx="3"/></g><g data-label="tp"><rect class="ex-kept" x="321" y="98" width="52" height="26" rx="3"/><text class="ex-glyph" x="347.0" y="116" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="skip"><rect class="ex-drop" x="379" y="99" width="50" height="24" rx="3"/></g><g data-label="fp"><rect x="436" y="99" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="461.0" y="116" text-anchor="middle">✗</text></g><g data-label="skip" opacity="0.4"><rect class="ex-drop" x="493" y="99" width="50" height="24" rx="3"/></g><g data-label="fp" opacity="0.4"><rect x="550" y="99" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="575.0" y="116" text-anchor="middle">✗</text></g><text class="ex-lab mono" x="620" y="110">2 of 5 = 0.40</text><text class="ex-note" x="620" y="126">Foldseek's script: 2 of 6 = 0.33</text><text class="ex-lab" x="0" y="156.0">Fold (paper)</text><g data-label="skip"><rect class="ex-drop" x="151" y="139" width="50" height="24" rx="3"/></g><g data-label="skip"><rect class="ex-drop" x="208" y="139" width="50" height="24" rx="3"/></g><g data-label="tp"><rect class="ex-kept" x="264" y="138" width="52" height="26" rx="3"/><text class="ex-glyph" x="290.0" y="156" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="skip"><rect class="ex-drop" x="322" y="139" width="50" height="24" rx="3"/></g><g data-label="skip"><rect class="ex-drop" x="379" y="139" width="50" height="24" rx="3"/></g><g data-label="fp"><rect x="436" y="139" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="461.0" y="156" text-anchor="middle">✗</text></g><g data-label="skip" opacity="0.4"><rect class="ex-drop" x="493" y="139" width="50" height="24" rx="3"/></g><g data-label="fp" opacity="0.4"><rect x="550" y="139" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="575.0" y="156" text-anchor="middle">✗</text></g><text class="ex-lab mono" x="620" y="150">1 of 3 = 0.33</text><text class="ex-note" x="620" y="166">Foldseek's script: 1 of 4 = 0.25</text><text class="ex-lab" x="0" y="196.0">Superfamily (nested)</text><g data-label="tp"><rect class="ex-kept" x="150" y="178" width="52" height="26" rx="3"/><text class="ex-glyph" x="176.0" y="196" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="tp"><rect class="ex-kept" x="207" y="178" width="52" height="26" rx="3"/><text class="ex-glyph" x="233.0" y="196" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="skip"><rect class="ex-drop" x="265" y="179" width="50" height="24" rx="3"/></g><g data-label="tp"><rect class="ex-kept" x="321" y="178" width="52" height="26" rx="3"/><text class="ex-glyph" x="347.0" y="196" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="tp"><rect class="ex-kept" x="378" y="178" width="52" height="26" rx="3"/><text class="ex-glyph" x="404.0" y="196" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="fp"><rect x="436" y="179" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="461.0" y="196" text-anchor="middle">✗</text></g><g data-label="tp" opacity="0.4"><rect class="ex-kept" x="492" y="178" width="52" height="26" rx="3"/><text class="ex-glyph" x="518.0" y="196" text-anchor="middle" style="fill:var(--bg)">✓</text></g><g data-label="fp" opacity="0.4"><rect x="550" y="179" width="50" height="24" rx="3" style="fill:var(--surface);stroke:var(--ink);stroke-width:2"/><text class="ex-glyph" x="575.0" y="196" text-anchor="middle">✗</text></g><text class="ex-lab mono" x="620" y="190">4 of 9 = 0.44</text><line class="ex-cut" x1="432.5" x2="432.5" y1="50" y2="222"/></svg></div>
-<p class="ex-read">Hit 6, <span class="mono">a.4.5.28</span>, is in a
-different fold, so it is the first FP at every level and the walk stops there. At the family level
-hits 1 and 5 are TPs: 2 of 4 = 0.50. At the
-superfamily level the paper does not count the same-family hits; hits 2 and 4 are TPs:
-2 of 5 = 0.40. At the fold level only hit 3 is a TP:
-1 of 3 = 0.33. Hit 7 is in the family but sits
-below the cut, so it adds nothing. The nested rule (bottom row) counts the family hits at the
-superfamily level too: 4 of 9 = 0.44.</p>
-</figure>
+It is an FP when their folds differ, and not counted when they share the fold only. <a href="scope40.html#fig-scope40-labels">Figure 18</a>, on the
+SCOPe40 page, labels one made-up hit list both ways.</p>
 
 <p>Over many queries, the <b>area under the curve</b> (AUC) sorts the queries by sensitivity,
 highest first, and plots sensitivity against the fraction of queries. Its area is the mean
@@ -315,8 +294,8 @@ detected 188 of the 5,713 queries of Foldseek's SCOPe 2.08 file (3.3%) and took
 its mean over the 228 queries both tools scored.</p>
 
 <h3 id="scope40-differences">The paper's rule against the planned rule</h3>
-<p>The two rules differ in the rows below, so nothing is scored until one is chosen. The third
-column is what Foldseek's script does.</p>
+<p>The two rules differ in the rows below. Olga chose the paper's rule as its Methods and its
+script state it (2026-10-17), so the SCOPe40 page follows the third column.</p>
 <div class="tablebox"><table class="lb"><thead><tr><th class="txt" scope="col">Point</th>
 <th class="txt" scope="col">Foldseek paper (Methods)</th><th class="txt" scope="col">Foldseek's script</th>
 <th class="txt" scope="col">This site's planned rule</th></tr></thead><tbody>
@@ -342,7 +321,13 @@ family or to another superfamily".</p>
 <p>Where the extra 1 comes from: the script counts the possible family TPs as the family size minus
 1, which removes the query itself. For the superfamily it takes the superfamily size minus (the
 family size minus 1), and for the fold the fold size minus (the superfamily size minus 1). Those
-two leave the query in, so each is one more than the number of domains that could be found.</p>
+two leave the query in, so each is one more than the number of domains that could be found.
+In the script: lines 7, 10 and 13 count every domain, the query included, into its family,
+superfamily and fold; line 17 drops the self-hit from the hit list; line 25 takes 1 off the family
+count, but lines 26 and 27 subtract only the other family members (or the other superfamily
+members), so the query stays in. It can never be found at those levels: its hit to itself is
+dropped, and would count at the family level anyway. So no query can reach a superfamily or fold
+sensitivity of 1.</p>
 <p>The extra 1 is in the per-query files of Foldseek and MMseqs2 on SCOPe 2.08 that other authors
 published, as copied into seanome/2024-kmerseek-analysis
 (<span class="mono">data/tea_scope40_rocx_files</span>). Query <span class="mono">d6jc0b_</span>
@@ -385,18 +370,23 @@ the 5,713 rows (fold size on 1,131, superfamily on 252, family on
 searched a domain list with some 2.08 domains missing, and a tool scored on the full 2.08 set is not
 on the same footing as them.</p>
 
-<h3 id="scope40-wait">What scoring waits on</h3>
+<h3 id="scope40-choices">Choices made (Olga, 2026-10-17)</h3>
 <ol>
-<li>The superfamily rule: the paper's (family left out) or the nested one.</li>
-<li>The denominator: possible TPs, as the paper's text says, or one more, as Foldseek's script and
-its published numbers do.</li>
-<li>The queries: Foldseek's narrower set (a possible TP at all three levels), for comparison with
-its numbers, or every query with a possible TP at the level being scored.</li>
-<li>The set: SCOPe 2.08 (the set of the existing kmerseek runs) or Foldseek's SCOPe 2.01.</li>
-<li>Hit lists. No tool has a per-query hit list on SCOPe40 from the runs in
-seanome/2024-kmerseek-analysis. Its kmerseek SCOPe40 runs kept one area under the curve per
-kmerseek setting, not the hits.</li>
+<li>The rule: the paper's Methods and script. Its Figure 2a legend reads differently (above).</li>
+<li>The denominator: the script's, one more than the domains that can be found at the
+superfamily and fold levels, so the numbers match the published files. The other is kept beside it
+in the long table (<span class="mono">sensitivity_possible</span>).</li>
+<li>The queries: Foldseek's set, domains with another member at all three levels, computed on
+SCOPe 2.08: 5,737.</li>
+<li>The set: SCOPe 2.08 at 40% identity, 15,177 domains, searched all against all.</li>
+<li>Hit lists: still missing for every tool. The two scored rows come from per-query files with no
+hit lists; the pipeline that keeps them for every tool is written, not launched.</li>
 </ol>
+<h3 id="scope40-scores">The score each tool is ranked by</h3>
+<p>Each tool's hits are sorted by its own score, best first, ties broken by target id. In the
+pipeline: Foldseek, ProstT5 + Foldseek, MMseqs2 (both modes), phmmer, jackhmmer and HH-suite by
+bit score, higher first; kmerseek by region E-value, smaller first. The two published files do not
+record the order their runs used.</p>
 <p class="refs">van Kempen, M., S. S. Kim, C. Tumescheit, M. Mirdita, J. Lee, C. L. M. Gilchrist,
 J. Söding, and M. Steinegger. "Fast and Accurate Protein Structure Search with Foldseek."
 <i>Nature Biotechnology</i> 42, no. 2 (2024): 243–46.
