@@ -57,6 +57,15 @@ def interpro_calls(path, acc):
     return rows
 
 
+def evalue_text(evalue, bits):
+    """MMseqs2 writes E = 0 when the E-value is smaller than a double can hold (about
+    1e-308); "E = 0.0e+00" would read as a measured zero, so say what it means and give the
+    bit score, which does not underflow."""
+    if evalue == 0:
+        return f"E below 1e-300, {bits:,.0f} bits"
+    return f"E = {evalue:.1e}, {bits:,.0f} bits"
+
+
 def mmseqs_calls(path, acc):
     cols = ["query", "target", "fident", "alnlen", "qstart", "qend", "tstart", "tend", "evalue", "bits", "qlen", "tlen"]
     hits = pl.read_csv(path, separator="\t", has_header=False, new_columns=cols).with_columns(
@@ -66,8 +75,8 @@ def mmseqs_calls(path, acc):
     for h in hits.sort("bits", descending=True).iter_rows(named=True):
         rows.append({
             "accession": acc, "tool": "MMseqs2 vs Swiss-Prot",
-            "label": f"{h['target']} {100 * h['fident']:.1f}% identity, E = {h['evalue']:.1e}" + (" (itself)" if h["target_acc"] == acc else ""),
-            "start": h["qstart"], "end": h["qend"], "score": h["fident"], "self_hit": h["target_acc"] == acc,
+            "label": f"{h['target']} {100 * h['fident']:.1f}% identity, {evalue_text(h['evalue'], h['bits'])}" + (" (itself)" if h["target_acc"] == acc else ""),
+            "start": h["qstart"], "end": h["qend"], "score": h["fident"], "bits": h["bits"], "self_hit": h["target_acc"] == acc,
             "above_30pct": h["fident"] > MIN_FIDENT,
         })
     return rows
