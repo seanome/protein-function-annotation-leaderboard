@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from matplotlib.colors import ListedColormap
+from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
@@ -31,6 +32,7 @@ STEP = 5
 # black, and it is never folded into "pLDDT 50 or less".
 NO_MODEL = "#000000"
 REL = "UniProt 2026_03"
+TICK = "#555555"
 DARK_RULE = "dark: no InterPro match and no Swiss-Prot hit above 30% identity (a hit to its own entry counts)"
 
 
@@ -47,6 +49,14 @@ def band_index(plddt):
     for i, (lo, hi, _, _) in enumerate(BANDS):
         out[(plddt > lo) & (plddt <= hi)] = i
     return out
+
+
+def leading_no_model(grid):
+    """How many of the longest proteins in a row have no model before the first one that has one."""
+    flat = grid.ravel()
+    flat = flat[~np.isnan(flat)]
+    has = np.flatnonzero(flat != len(BANDS))
+    return int(has[0]) if has.size else len(flat)
 
 
 def numbers(t):
@@ -101,18 +111,21 @@ def draw(t):
     fig_h_mm = top_mm + sum(heights) + gap_mm * len(panels) + 2
     fig = plt.figure(figsize=(fig_w_mm / 25.4, fig_h_mm / 25.4))
     fig.text(2 / fig_w_mm, 1 - 2.5 / fig_h_mm,
-             f"{low_dark:.1f}% of dark Pacific oyster proteins have an AlphaFold DB model with mean pLDDT 50 or less, against {low_lit:.1f}% of lit ones.",
+             f"{low_dark:.1f}% of dark Pacific oyster proteins have an AlphaFold DB model with mean pLDDT 50 or less, "
+             f"against {low_lit:.1f}% of lit ones (proteins with no model count in both totals).",
              fontsize=7, weight="bold", va="center", ha="left")
     fig.text(2 / fig_w_mm, 1 - 4.6 / fig_h_mm, "\n".join([
         "Proteins: UniProt 2026_03 one-protein-per-gene sets; only the dark ones are drawn. "
         "Dark: no InterPro match and no Swiss-Prot hit above 30% identity (MMseqs2 18.8cc5c).",
-        "Colour: mean pLDDT of the AlphaFold DB model AF-<accession>-F1 (v6), in AlphaFold DB's own bands and colours.",
+        "Colour: mean pLDDT of the AlphaFold DB model AF-<accession>-F1 (v6), in AlphaFold DB's colours; bands as in the four-protein "
+        "figures: above 90, above 70 up to 90, above 50 up to 70, 50 or less.",
     ]), fontsize=6, va="top", ha="left", linespacing=1.25)
     fig.legend(
-        handles=[Patch(facecolor=c, label=lab) for (_, _, c, lab) in BANDS] + [Patch(facecolor=NO_MODEL, label="no AlphaFold DB model")],
-        loc="upper left", bbox_to_anchor=(2 / fig_w_mm, 1 - 9.5 / fig_h_mm), frameon=False, ncol=5, borderaxespad=0,
-        title=f"One tile = one dark protein; {COLS} tiles per row, the same tile size as the maps above; longest protein first, "
-              "read row by row. A grey triangle at the right points at the row holding every 1,000th tile, with that protein's length.",
+        handles=[Patch(facecolor=c, label=lab) for (_, _, c, lab) in BANDS] + [Patch(facecolor=NO_MODEL, label="no AlphaFold DB model"),
+                 Line2D([], [], marker="<", markersize=3, color=TICK, linestyle="none", label="row holding every 1,000th tile")],
+        loc="upper left", bbox_to_anchor=(2 / fig_w_mm, 1 - 9.5 / fig_h_mm), frameon=False, ncol=6, borderaxespad=0,
+        title=f"One tile = one dark protein; {COLS} tiles per row, the same tile size as the two proteome maps on this page; "
+              "longest protein first, read row by row.",
         title_fontsize=6, alignment="left",
     )
     y_mm = top_mm
@@ -120,7 +133,8 @@ def draw(t):
         n = len(lengths)
         fig.text(3 / fig_w_mm, 1 - (y_mm - 0.8) / fig_h_mm,
                  f"{SPECIES[sp]}: {n:,} dark proteins, {lengths[0]:,} to {lengths[-1]:,} aa. "
-                 + ", ".join(f"{lab} {c:,}" for (_, _, _, lab), c in zip(BANDS, counts)) + f", no model {counts[-1]:,}",
+                 + ", ".join(f"{lab} {c:,}" for (_, _, _, lab), c in zip(BANDS, counts)) + f", no model {counts[-1]:,}"
+                 + (f" (the {lead:,} longest, {lengths[lead - 1]:,} aa and up, all have no model)" if (lead := leading_no_model(grid)) > 1 else ""),
                  fontsize=6, va="bottom", ha="left")
         h_mm = grid.shape[0] * tile_mm
         ax = fig.add_axes([3 / fig_w_mm, 1 - (y_mm + h_mm) / fig_h_mm, COLS * tile_mm / fig_w_mm, h_mm / fig_h_mm])
@@ -133,9 +147,9 @@ def draw(t):
             r, c = divmod(k - 1, COLS)
             # A triangle in the right margin points at the row holding the tile; inside the
             # grid a tick would be a sixth mark on top of five colours.
-            ax.plot([COLS * PX + 6], [r * PX + PX / 2], marker="<", markersize=3, color="#555555", clip_on=False)
+            ax.plot([COLS * PX + 6], [r * PX + PX / 2], marker="<", markersize=3, color=TICK, clip_on=False)
             fig.text((3 + COLS * tile_mm + 2.5) / fig_w_mm, 1 - (y_mm + (r + 0.5) * tile_mm) / fig_h_mm,
-                     f"tile {k:,} (column {c + 1}): {lengths[k - 1]:,} aa", fontsize=5, va="center", ha="left")
+                     f"tile {k:,} (column {c + 1} of {COLS}): {lengths[k - 1]:,} aa", fontsize=5, va="center", ha="left")
         y_mm += h_mm + gap_mm
     assert 3 + COLS * tile_mm + 1.5 + label_mm < fig_w_mm
     OUT.mkdir(parents=True, exist_ok=True)
