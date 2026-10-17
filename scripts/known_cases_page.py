@@ -63,6 +63,18 @@ def legend() -> str:
     return f'<div class="legend" aria-label="What each mark means">{items}</div>'
 
 
+def kind_legend(tools: dict, kinds: dict) -> str:
+    """The site's colour key for what a tool compares, the same colours as Table 1."""
+    items = []
+    for kind, k in kinds.items():
+        names = [tools[t]["name"] for t in tools if tools[t]["kind"] == kind]
+        if names:
+            items.append(f'<span class="item"><span class="kind k-{kind}" aria-hidden="true">'
+                         f'</span>{esc(k["label"])}: {esc(", ".join(names))}</span>')
+    return ('<div class="legend" aria-label="Colour key for the tools">' + "".join(items)
+            + "</div>")
+
+
 def case_title(c: dict) -> str:
     return f'Case {c["id"]}. {c["name"]}'
 
@@ -86,12 +98,22 @@ def alignment_block(c: dict) -> str:
     cut = len(q) > cap
     if cut:
         q, t, m = q[:cap], t[:cap], m[:cap]
+    # The proven region, marked under the rows it covers, so the reader can see what IoU is
+    # measured against.
+    mc = a.get("motif_columns")
+    mark = [" "] * len(q)
+    if mc:
+        for i in range(mc[0] - 1, min(mc[1], len(mark))):
+            mark[i] = "^"
+    marks = "".join(mark)
     for i in range(0, len(q), step):
         qi = qs + len(q[:i].replace("-", ""))
         ti = ts + len(t[:i].replace("-", ""))
         rows.append(f'{qlab:<{width}} {qi:>6} {q[i:i + step]}')
         rows.append(f'{"":<{width}} {"":>6} {m[i:i + step]}')
         rows.append(f'{tlab:<{width}} {ti:>6} {t[i:i + step]}')
+        if mc and marks[i:i + step].strip():
+            rows.append(f'{"proven":<{width}} {"":>6} {marks[i:i + step]}')
         rows.append("")
     block = "\n".join(rows).rstrip()
     count = (f'{a["identical"]} of {a["columns"]} identical')
@@ -107,11 +129,12 @@ def alignment_block(c: dict) -> str:
             f'Whole block: {esc(qlab)} {qs}–{qe}, {esc(tlab)} {ts}–{te}.</p>')
 
 
-def tool_table(c: dict, tools: dict, kinds: dict, cost: dict) -> str:
+def tool_table(c: dict, tools: dict, kinds: dict, cost: dict, setting_words) -> str:
     rows = []
     for tid, r in c["tools"].items():
         t = tools[tid]
         k = t["kind"]
+        words = setting_words(tid, r["setting"])
         cc = cost.get(tid, {})
         score = "not run" if r["score"] is None else esc(r["score"])
         decoy = "not run" if r["decoy_score"] is None else esc(r["decoy_score"])
@@ -120,7 +143,8 @@ def tool_table(c: dict, tools: dict, kinds: dict, cost: dict) -> str:
         inp = c["queries"][0]["input_per_tool"][tid]
         rows.append(
             f'<tr><td class="txt"><span class="kind k-{k}" aria-hidden="true"></span>'
-            f'{esc(t["name"])} <span class="mono runs">{esc(r["setting"])}</span></td>'
+            f'{esc(t["name"])} <span class="mono runs" title="{esc(words)}">'
+            f'{esc(r["setting"])}</span><small class="setw">{esc(words)}</small></td>'
             f'<td class="txt" title="{esc(r.get("reason", ""))}">{mark_svg(r["result"], 14)} '
             f'{esc(r["result"])}</td>'
             f'<td class="txt">{esc(inp["kind"])}</td>'
@@ -134,9 +158,13 @@ def tool_table(c: dict, tools: dict, kinds: dict, cost: dict) -> str:
     return (
         '<div class="tablebox"><table class="lb"><thead><tr>'
         '<th class="txt">Tool and setting</th><th class="txt">Result</th>'
-        '<th class="txt">Given</th><th>Its own score</th><th>Decoy score</th>'
-        '<th>Call on the query</th><th>IoU</th>'
-        '<th>Cost per 1,000 queries</th></tr></thead><tbody>'
+        '<th class="txt">Given</th><th>Its own score<span class="key">E-value, '
+        'smaller is better</span></th>'
+        '<th>Decoy score<span class="key">the shuffled query, same units</span></th>'
+        '<th>Call on the query<span class="key">first and last residue</span></th>'
+        '<th>IoU<span class="key">1 is a perfect fit</span></th>'
+        '<th>Cost per 1,000 queries<span class="key">not this search: see below</span></th>'
+        '</tr></thead><tbody>'
         + "".join(rows) + "</tbody></table></div>" + why)
 
 
@@ -192,7 +220,7 @@ def matrix_svg(doc: dict, tools: dict) -> str:
     return '<div class="plotbox kcmatrix">' + "".join(out) + "</div>"
 
 
-def card(c: dict, doc: dict, tools: dict, kinds: dict, cost: dict) -> str:
+def card(c: dict, doc: dict, tools: dict, kinds: dict, cost: dict, setting_words) -> str:
     box = doc["boxes"][str(c["box"])]
     eco = doc["eco"][c["eco"]]
     q = c["queries"][0]
@@ -223,23 +251,51 @@ def card(c: dict, doc: dict, tools: dict, kinds: dict, cost: dict) -> str:
     if c.get("earlier_runs"):
         notes.append(c["earlier_runs"])
     note_html = "".join(f"<p class=\"muted\">{esc(n)}</p>" for n in notes)
+    if c.get("earlier_runs"):
+        note_html = (f'<p class="muted"><span class="tag">not this run</span> '
+                     f'{esc(c["earlier_runs"])}</p>'
+                     + "".join(f'<p class="muted">{esc(n)}</p>'
+                               for n in notes if n != c["earlier_runs"]))
     elm_list = ""
     if c.get("elm"):
         items = "".join(
-            f'<li><span class="mono">{esc(x["elm_instance"])}</span> '
-            f'{esc(x["elm_class"])} in {esc(x["label"])} '
-            f'(<span class="mono">{esc(x["acc"])}</span>, {esc(x["species"])}), residues '
-            f'{x["region"][0]}–{x["region"][1]}, partner '
-            f'<span class="mono">{esc(x["partner"]["acc"])}</span></li>'
+            f'<tr><td class="txt"><span class="mono">{esc(x["elm_instance"])}</span></td>'
+            f'<td class="txt">{esc(x["elm_class"])}</td>'
+            f'<td class="txt">{esc(x["label"])} '
+            f'(<span class="mono">{esc(x["acc"])}</span>, {esc(x["species"])})</td>'
+            f'<td class="num">{x["region"][0]}–{x["region"][1]}</td>'
+            f'<td class="txt">{esc(x["partner"].get("label", x["partner"]["acc"]))} '
+            f'(<span class="mono">{esc(x["partner"]["acc"])}</span>)</td></tr>'
             for x in c["queries"])
-        elm_list = f'<ol class="elm">{items}</ol>'
+        elm_list = ('<div class="tablebox"><table class="lb"><thead><tr>'
+                    '<th class="txt">ELM instance</th><th class="txt">Motif class</th>'
+                    '<th class="txt">Pathogen protein searched</th>'
+                    '<th>Residues</th><th class="txt">Human partner</th></tr></thead><tbody>'
+                    + items + "</tbody></table></div>"
+                    + '<p class="alnnote">The residues and the tool table below are for the '
+                      'first instance in this list; the other nine are searched in the same '
+                      'run.</p>')
+    # What the reader should hold in mind while looking at the table.
+    if c.get("elm"):
+        question = ("Each pathogen protein is searched against the whole of Swiss-Prot. The "
+                    "question is whether its human partner comes back, with the call on the "
+                    "motif.")
+    else:
+        truth = c.get("query_region")
+        where = (f'residues {truth[0]} to {truth[1]} of {esc(q["label"])}' if truth
+                 else f'anywhere on {esc(q["label"])}, since the experiment is about the whole '
+                      f'protein')
+        question = (f'{esc(q["label"])} is searched against the whole of {esc(doc["target_db"])}. '
+                    f'The question is whether {esc(t["label"])} comes back, and whether the call '
+                    f'lands on {where}.')
     return f"""
 <section class="card kc" id="case-{c["id"]}">
 <h2>{esc(case_title(c))}</h2>
 <dl class="facts">
 <dt>Searched</dt><dd>{names}</dd>
 <dt>Label at stake</dt><dd>{tnames}</dd>
-<dt>Box {c["box"]}</dt><dd>{esc(box["title"])}. A right call names {esc(box["right"])}.</dd>
+<dt>Box {c["box"]}</dt><dd>{esc(box["title"])}. A right call is {esc(box["right"])}.</dd>
+<dt>The question</dt><dd>{question}</dd>
 <dt>The experiment</dt><dd>{esc(c["experiment"])} ({refs_line(c)}, evidence code
 <span class="mono">{esc(c["eco"])}</span>, {esc(eco)}).</dd>
 <dt>Given to Foldseek</dt><dd>{given}.</dd>
@@ -248,14 +304,14 @@ def card(c: dict, doc: dict, tools: dict, kinds: dict, cost: dict) -> str:
 <h3>The residues</h3>
 {alignment_block(c)}
 <h3>What each tool does with it</h3>
-{tool_table(c, tools, kinds, cost)}
+{tool_table(c, tools, kinds, cost, setting_words)}
 {note_html}
 <p class="takeaway"><b>For an annotator:</b> {esc(c["takeaway"])}</p>
 </section>"""
 
 
 def page(layout, src: dict, data_dir: Path, tools: dict, kinds: dict, cost: dict,
-         out_dir: Path) -> None:
+         setting_words, out_dir: Path) -> None:
     doc = json.loads((data_dir / "known_cases" / "cases.json").read_text())
     n_cases = len(doc["cases"])
     n_queries = sum(len(c["queries"]) for c in doc["cases"])
@@ -268,7 +324,15 @@ def page(layout, src: dict, data_dir: Path, tools: dict, kinds: dict, cost: dict
         f'<a href="https://doi.org/{r["doi"]}">https://doi.org/{esc(r["doi"])}</a>.'
         + (f' <b>{esc(r["note"])}</b>' if r.get("note") else "") + "</li>"
         for r in doc["references"])
-    cards = "".join(card(c, doc, tools, kinds, cost) for c in doc["cases"])
+    cards = "".join(card(c, doc, tools, kinds, cost, setting_words) for c in doc["cases"])
+    pr = cost.get("prostt5", {})
+    if pr.get("db_gpu_h_per_db") and pr.get("db_n"):
+        per_1k = pr["db_gpu_h_per_db"] / 998 * 1000
+        gpu_note = (f'{pr["db_gpu_h_per_db"]:.3f} GPU-hours for one database of 998 proteins, '
+                    f'about {per_1k:.2f} GPU-hours per 1,000 proteins, '
+                    f'${per_1k * cost["r_gpu"]:.2f} at the price above')
+    else:
+        gpu_note = "the tables hold no GPU-hours for that step"
     n_pairs = sum(len(c["queries"]) * len(doc["tool_settings"]) for c in doc["cases"])
     if n_run:
         run_line = f"Results are in for {n_run} of the {n_pairs} searches."
@@ -279,21 +343,26 @@ def page(layout, src: dict, data_dir: Path, tools: dict, kinds: dict, cost: dict
     body = f"""<h1>Known cases</h1>
 <p class="lede">Fourteen pairs of proteins whose shared job was proven in a laboratory, and what
 each of the nine tools on this board does with them. This page shows illustrations, not rates.
-The rates stay in Table 1.</p>
-<p class="prose">Each case is one query protein searched against {esc(doc["target_db"])}. That is
-the opposite direction from Table 1, which searches human proteins against one relative's
+The rates stay in <a href="index.html">Table 1, the leaderboard</a>.</p>
+<p class="prose">In each case one protein is searched against the whole of
+{esc(doc["target_db"])}, and the question is whether the protein it shares a job with comes
+back, in the right place. Case 1, for example, searches the worm protein CED-9 against
+Swiss-Prot and asks whether human BCL-2 is among the hits. That is the opposite direction from
+<a href="index.html">Table 1</a>, which searches human proteins against one relative's
 proteome.</p>
-<p class="prose">Three words this page uses throughout. <b>IoU</b> (intersection over union) is
-the number of residues a call and the true region share, divided by the number either one
-covers. The site counts a call as correct at an IoU of 0.5 or more. An <b>E-value</b> is how
-many hits as good as this one a search of a database this size would be expected to turn up by
-chance, so smaller is better. A <b>decoy</b> is the same query with its residues reshuffled so
-that every pair of neighbouring residues still occurs as often as before. A hit counts only
-when the real query beats its decoy. Every query here has one decoy, shuffled with seed
-{doc["shuffle_seed"]}.</p>
-<p class="prose">{n_queries} query proteins over {n_cases} cases, each searched by
-{len(doc["tool_settings"])} tools at the setting Table 1 calls that tool's best.
-{run_line}</p>
+<p class="prose">Four words this page uses throughout. A <b>call</b> is one hit a tool reports,
+with the first and last residue of the query it covers. <b>IoU</b> (intersection over union) is
+the number of residues a call and the proven region share, divided by the number either one
+covers; the proven region is marked under the residues on every card. The site counts a call as
+correct at an IoU of 0.5 or more. An <b>E-value</b> is how many hits as good as this one a
+search of a database this size would be expected to turn up by chance, so smaller is better. A
+<b>decoy</b> is the same query with its residues reshuffled so that every pair of neighbouring
+residues still occurs as often as before. A hit counts only when the real query beats its
+decoy. Every query here has one decoy, shuffled with the random seed {doc["shuffle_seed"]}, so
+the same shuffle comes back on every rebuild.</p>
+<p class="prose">{n_cases} cases, {n_queries} query proteins (two cases search more than one
+protein), each searched by {len(doc["tool_settings"])} tools at the setting
+<a href="index.html">Table 1</a> calls that tool's best. {run_line}</p>
 
 <h2 id="boxes">The four boxes</h2>
 <p class="prose">Each case sits in one of four boxes, and the box decides what counts as a right
@@ -302,6 +371,7 @@ call.</p>
 
 <h2 id="matrix">Which tool finds which case</h2>
 {legend()}
+{kind_legend(tools, kinds)}
 <figure>
 <figcaption><b>Figure {FIG_MATRIX}.</b> One mark per tool and case, grouped by box. Hovering a
 mark shows the score, the decoy's score and the coordinates of the call; clicking it opens that
@@ -315,9 +385,16 @@ case below. Numbers along the top are the case numbers of the cards below.</figc
 <label>Price of a GPU-hour, US dollars
 <input id="kc-rgpu" type="number" min="0" step="0.01" value="{cost["r_gpu"]:.3f}"></label></div>
 <p class="prose">The cost on every card is core-hours × the price of a core-hour, plus GPU-hours ×
-the price of a GPU-hour, the same arithmetic the cost page uses. Until a case has been run, the
-core-hours are the ones the Table 1 run measured for that tool against one relative's proteome.
-Swiss-Prot is larger than any one proteome, so those numbers are a floor.</p>
+the price of a GPU-hour, the same arithmetic <a href="cost.html">Compare two columns</a> uses.
+Typing a different price in either box changes the cost on every card at once. Until a case has
+been run, the core-hours are the ones the <a href="index.html">Table 1</a> run measured for that
+tool against one relative's proteome, so the cost column is the only column on a card that is
+not from this page's own run. Swiss-Prot is larger than any one proteome, so those numbers are
+a floor.</p>
+<p class="prose">One cost is left out. ProstT5 has to predict the 3-D shape letters of every
+query on a GPU before Foldseek can search with them, and the Table 1 run records that as a
+separate step: {gpu_note}. The cost column counts only the search, as the rest of the site
+does, so ProstT5's row is lower than the cost of annotating a new query with it.</p>
 
 {cards}
 

@@ -2301,11 +2301,21 @@ def main() -> None:
     import contribute_pages
     contribute_pages.write(out, src, layout)
     import known_cases_page
-    kc_cost = {t: compute_json(comp).get(f"{t}|{card_numbers(t, res, comp)['best_setting']}|"
-                                         f"{'all' if t == 'hmmscan' else 'zebrafish'}", {})
-               for t in sorted(tools_used)}
+    kc_comp = compute_json(comp)
+    kc_cost = {}
+    for t in sorted(tools_used):
+        best = card_numbers(t, res, comp)["best_setting"]
+        sp = "all" if t == "hmmscan" else "zebrafish"
+        kc_cost[t] = dict(kc_comp.get(f"{t}|{best}|{sp}", {}))
+        # compute_json carries no GPU hours for a database build. The known cases page names
+        # ProstT5's, because every query there needs its shape letters predicted on a GPU.
+        row = comp.filter((pl.col("tool") == t) & (pl.col("setting") == best)
+                          & (pl.col("species") == sp))
+        if row.height and row["db_gpu_h"][0] and row["db_n"][0]:
+            kc_cost[t]["db_gpu_h_per_db"] = row["db_gpu_h"][0] / row["db_n"][0]
+            kc_cost[t]["db_n"] = row["db_n"][0]
     kc_cost["r_cpu"], kc_cost["r_gpu"] = R_CPU, R_GPU
-    known_cases_page.page(layout, src, a.data, TOOLS, KINDS, kc_cost, out)
+    known_cases_page.page(layout, src, a.data, TOOLS, KINDS, kc_cost, setting_words, out)
     for t in sorted(tools_used):
         nums = card_numbers(t, res, comp)
         md = card_markdown(t, nums, src)

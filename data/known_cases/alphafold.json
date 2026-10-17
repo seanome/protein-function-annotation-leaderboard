@@ -43,5 +43,9 @@
   "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365761473-model_v1.cif",
   "version": 1
  },
- "P03375": {}
+ "P03375": {},
+ "P33379": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P33379-F1-model_v6.cif",
+  "version": 6
+ }
 }

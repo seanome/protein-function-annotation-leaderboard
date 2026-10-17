@@ -44,27 +44,29 @@ ECO = {
 BOXES = {
     1: {
         "title": "Shared ancestor, same job",
-        "right": "the target's family and its function",
+        "right": "a call that names the other protein's family and carries its job across",
         "words": "The two proteins descend from one ancestral protein and still do the same job. "
                  "A call is right when it names the target's family and transfers its function.",
     },
     2: {
         "title": "Shared ancestor, new job",
-        "right": "the family only; transferring the function is a wrong label",
+        "right": "a call that names the family only; carrying the job across is a wrong label",
         "words": "The two proteins descend from one ancestral protein, but the query protein has "
                  "taken on a different job. A call is right when it names the family, and wrong "
                  "when it carries the target's function across.",
     },
     3: {
         "title": "No shared ancestor, whole protein",
-        "right": "the function only; a family call is wrong by ancestry and right by function",
+        "right": "a call that points at a protein doing the same job; naming a shared family "
+                 "is wrong, because the two have no common ancestor",
         "words": "The two proteins reached the same job from different ancestors, so there is no "
-                 "family truth. A call that names the target's family is wrong by ancestry and "
-                 "right by function, and the card shows both marks.",
+                 "family truth. A call that names a family shared with the other protein is "
+                 "wrong, even though it points at a protein that does the same job; the card "
+                 "marks it wrong label and says what the call did get right.",
     },
     4: {
         "title": "No shared ancestor, short motif",
-        "right": "a call covering the right few residues",
+        "right": "a call that covers the right few residues",
         "words": "A short stretch of the query protein copies a short stretch of a human protein. "
                  "A call is right when it lands on those residues.",
     },
@@ -187,13 +189,14 @@ CASES = [
         "query": {"acc": "Q85295", "label": "M11L", "species": "myxoma virus"},
         "target": {"acc": "P10415", "label": "BCL-2", "species": "human"},
         "family": {"id": "PF00452", "name": "Bcl-2"},
-        "experiment": "The crystal structure of M11L bound to a Bak BH3 peptide shows the Bcl-2 "
-                      "fold and the same groove that BCL-2 uses to hold Bax and Bak.",
+        "experiment": "The crystal structures of M11L alone (PDB 2JBX) and bound to a Bak BH3 "
+                      "peptide (PDB 2JBY) show the Bcl-2 fold and the same groove that BCL-2 "
+                      "uses to hold Bax and Bak.",
         "takeaway": "A virus protein can hold a human fold with almost no sequence left in "
                     "common. A tool that reads only letters may report nothing here, even though "
                     "the label is right.",
         "eco": "ECO:0005670", "refs": [3],
-        "structure": {"pdb": "2JBX", "chain": "A", "what": "M11L, 1.7 Å crystal structure"},
+        "structure": {"pdb": "2JBX", "chain": "A", "what": "M11L alone, 2.73 Å crystal structure"},
     },
     {
         "id": 3, "box": 1,
@@ -237,7 +240,7 @@ CASES = [
         "takeaway": "The same fold carries actin's job in a bacterium, so a family call here is "
                     "both correct and far from obvious from the sequence alone.",
         "eco": "ECO:0005670", "refs": [6, 7],
-        "structure": {"pdb": "1JCE", "chain": "A", "what": "MreB, 1.9 Å crystal structure"},
+        "structure": {"pdb": "1JCE", "chain": "A", "what": "MreB, 2.1 Å crystal structure"},
     },
     {
         "id": 6, "box": 1,
@@ -259,7 +262,7 @@ CASES = [
         "query": {"acc": "Q01220", "label": "A52", "species": "vaccinia virus"},
         "extra_queries": [{"acc": "P24772", "label": "B14", "species": "vaccinia virus",
                            "structure": {"pdb": "2VVY", "chain": "A",
-                                         "what": "B14, 2.7 Å crystal structure"}}],
+                                         "what": "B14, 2.69 Å crystal structure"}}],
         "target": {"acc": "P10415", "label": "BCL-2", "species": "human"},
         "family": {"id": "PF00452", "name": "Bcl-2"},
         "experiment": "The crystal structures of A52 and B14 have the Bcl-2 fold but no groove "
@@ -273,14 +276,15 @@ CASES = [
     },
     {
         "id": 8, "box": 2,
-        "name": "A bacterial TIR-domain protein against a human TIR domain",
+        "name": "A bacterial TIR-domain protein against the TIR domain of TLR4",
         "query": {"acc": "P0DTS9", "label": "TirS", "species": "Staphylococcus aureus"},
-        "target": {"acc": "Q6SZW1", "label": "SARM1", "species": "human"},
+        "target": {"acc": "O00206", "label": "TLR4", "species": "human"},
         "family": {"id": "PF01582", "name": "TIR domain"},
         "experiment": "Purified TirS cleaves NAD, and the full-length protein lowers NAD in human "
-                      "cells, which the catalytically dead E216A protein does not. The human TIR "
-                      "domains of the Toll-like receptors hold protein complexes together "
-                      "instead.",
+                      "cells, which the catalytically dead E216A protein does not. The TIR domain "
+                      "of TLR4 holds a signalling complex together and does no such chemistry, "
+                      "which is what puts this pair in box 2. The one human TIR domain that does "
+                      "cleave NAD, SARM1, would put the same bacterial protein in box 1.",
         "takeaway": "A domain shared between a bacterium and a human can carry a different job in "
                     "each. The safe transfer is the domain name, not the human protein's role.",
         "eco": "ECO:0005801", "refs": [9],
@@ -356,9 +360,11 @@ CASES = [
                     "ancestry.",
         "eco": "ECO:0000269", "refs": [15],
         "structure": None,
-        "target_rule": "Of the Boreogadus saida antifreeze glycoprotein polypeptides in UniProt, "
-                       "the longest, so that its length is closest to the notothenioid "
-                       "polyprotein's.",
+        "target_rule": "The Arctic cod protein is the longest of the Boreogadus saida antifreeze "
+                       "glycoprotein polypeptides in UniProt, so that its length is closest to "
+                       "the notothenioid polyprotein's. The two match closely because both are "
+                       "a repeat of the same three residues, which is what the paper calls "
+                       "convergent, not inherited.",
     },
     {
         "id": 13, "box": 4,
@@ -377,7 +383,9 @@ CASES = [
         "eco": "ECO:0000315", "refs": [14],
         "structure": {"pdb": "4O42", "chain": "B",
                       "what": "the NS1 C-terminal tail, 15 residues, bound to the CHD1 "
-                              "chromodomains"},
+                              "chromodomains, 1.87 Å. That structure is reported by a later "
+                              "paper, Qin et al., Nature Communications 5 (2014): 3952, "
+                              "https://doi.org/10.1038/ncomms4952, not by reference 14"},
         "structure_note": "The only experimental structure of this stretch holds 15 residues of "
                           "NS1, not the whole protein, and it is the tail of a different H3N2 "
                           "strain (UniProt Q38SQ2).",
@@ -400,9 +408,12 @@ CASES = [
         "eco": "ECO:0000353", "refs": [16, 18],
         "structure": None,
         "elm": True,
-        "pick_rule": "The ten ELM instances whose protein is from a virus or a bacterium "
-                     "(UniProt lineage), whose recorded partner is a human protein, with the "
-                     "lowest ELM instance identifiers. Chosen before any search was run.",
+        "pick_rule": "The ten ELM instances with the lowest ELM instance identifiers that meet "
+                     "all of: the protein is from a virus or a bacterium by its UniProt "
+                     "lineage; ELM records the instance as experimentally shown (its \"true "
+                     "positive\" status); and ELM records a binding partner that is a human "
+                     "protein, at the same motif coordinates. The rule was fixed before any "
+                     "search was run; scripts/known_cases_elm.py applies it.",
     },
 ]
 
@@ -464,25 +475,29 @@ def dipeptide_shuffle(seq: str, rng: random.Random) -> str:
         edges.setdefault(x, []).append(y)
     last = seq[-1]
 
-    def reaches_last(nxt: dict[str, str]) -> bool:
-        """Following the chosen last edge from every residue must end at the final residue."""
-        for v in nxt:
-            seen, u = {v}, v
-            while u != last:
-                u = nxt.get(u)
-                if u is None or u in seen:
-                    return False
-                seen.add(u)
-        return True
-
-    for _ in range(500):
-        # One outgoing edge per residue, kept for the end of that residue's edge list; the walk
-        # can then never leave a residue it still has edges to reach (Altschul and Erickson 1985).
-        nxt = {v: rng.choice(e) for v, e in edges.items() if v != last}
-        if reaches_last(nxt):
-            break
-    else:
-        return seq
+    # One outgoing edge per residue is held back for the end of that residue's list, and these
+    # held-back edges must lead to the final residue (Altschul and Erickson 1985); the walk can
+    # then never strand itself. They are chosen outwards from the final residue: a residue is
+    # settled once it can hand over to one already settled. Drawing all of them at random and
+    # retrying is hopeless on a repeat-rich sequence (1 draw in 200 for the antifreeze
+    # glycoprotein), which is why they are built this way instead.
+    nxt: dict[str, str] = {}
+    settled = {last}
+    todo = [v for v in edges if v != last]
+    rng.shuffle(todo)
+    while todo:
+        left = []
+        for v in todo:
+            choices = [u for u in edges[v] if u in settled]
+            if choices:
+                nxt[v] = rng.choice(choices)
+                settled.add(v)
+            else:
+                left.append(v)
+        if len(left) == len(todo):
+            raise ValueError("no dipeptide-preserving shuffle exists for this sequence: no "
+                             f"residue of {sorted(left)} can reach the last residue {last!r}")
+        todo = left
 
     pool = {v: list(e) for v, e in edges.items()}
     for v, u in nxt.items():
@@ -500,8 +515,9 @@ def dipeptide_shuffle(seq: str, rng: random.Random) -> str:
         u = pool[v].pop(0)
         out.append(u)
         v = u
-    if len(out) != len(seq):  # the walk did not use every dipeptide; keep the real order
-        return seq
+    if len(out) != len(seq):
+        raise ValueError(f"the shuffle used {len(out)} of {len(seq)} residues; it would not be "
+                         "a dipeptide-preserving copy of the query")
     return "".join(out)
 
 
@@ -693,7 +709,8 @@ def main() -> None:
             asub = qs[qlo - 1:qa - 1 + n_motif + rf]
             bsub = ts[tlo - 1:ta - 1 + n_motif + rf]
             line, ident = match_line(asub, bsub)
-            aln = {"source": "the motif and six residues on each side, set side by side",
+            aln = {"source": f"the motif with {lf} residue{'' if lf == 1 else 's'} before it and "
+                             f"{rf} after, as many as both proteins have, set side by side",
                    "query_start": qlo, "target_start": tlo, "query": asub, "target": bsub,
                    "match": line, "identical": ident, "columns": len(asub),
                    "motif_query": [qa, qb], "motif_target": [ta, tb],

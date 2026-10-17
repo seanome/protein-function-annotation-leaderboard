@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 EXPECTED = [
     (1, 1, "P41958", "P10415"), (2, 1, "Q85295", "P10415"), (3, 1, "Q9Q8H3", "Q08722"),
     (4, 1, "Q57816", "P07437"), (5, 1, "Q9WZ57", "P60709"), (6, 1, "A0A0H3JV59", "P62314"),
-    (7, 2, "Q01220", "P10415"), (8, 2, "P0DTS9", "Q6SZW1"), (9, 3, "H7C7N8", "Q08722"),
+    (7, 2, "Q01220", "P10415"), (8, 2, "P0DTS9", "O00206"), (9, 3, "H7C7N8", "Q08722"),
     (10, 3, "O52623", "Q13009"), (11, 3, "P74873", "Q07960"), (12, 3, "P24856", "A0A481T0N3"),
     (13, 4, "P03495", "P68431"), (14, 4, "P03254", "Q13363"),
 ]
@@ -86,6 +86,8 @@ def main() -> int:
         for q in c["queries"]:
             s = seqs[q["acc"]]["sequence"]
             d = q["decoy"]["sequence"]
+            if d == s:
+                bad.append(f'case {c["id"]} {q["acc"]}: the decoy is the query itself')
             if Counter(s) != Counter(d):
                 bad.append(f'case {c["id"]} {q["acc"]}: the decoy has different residue counts')
             if (Counter(x + y for x, y in zip(s, s[1:]))
