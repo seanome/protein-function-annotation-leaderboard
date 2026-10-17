@@ -151,6 +151,15 @@ def main():
             lines.append("MMseqs2 finds no other Swiss-Prot entry above 30% identity, only the protein's own entry.")
         else:
             lines.append("MMseqs2 finds no hit at all, not even the protein's own Swiss-Prot entry.")
+        if acc == "Q25460" and ipr.height and hits.height:
+            # The two labels on one protein: InterPro's few residues against the homolog's span.
+            top = hits.row(0, named=True)
+            span = set(range(top["start"], top["end"] + 1))
+            lines.append(
+                f"InterPro labels {len(covered)} of {seq_len} residues; the hit to {top['label'].split(' ')[0]} covers residues "
+                f"{top['start']} to {top['end']}. The two labels disagree on {len(span - covered)} residues of one protein, "
+                "which is why the leaderboard scores regions, not proteins."
+            )
         md.append("\n".join(f"- {x}" for x in lines) + "\n")
 
     md.append("## Notes on the sources\n")
