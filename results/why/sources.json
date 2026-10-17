@@ -220,6 +220,15 @@
   "sha256": "ed19c9625aef9fc618526a9bfdba51be9188b0663b450f5a8d2eae10216d5eb7",
   "url": "Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch"
  },
+ "sherlock_kmerseek": {
+  "bytes": 3104,
+  "computed": true,
+  "fetched_utc": "2026-10-17T12:49:07Z",
+  "file": "kmerseek_hits_manifest.tsv",
+  "release": "computed",
+  "sha256": "694fdc0f9f33b2fa4f1b90e35b439fa1e1b013aac37730d2e3dcb2a6a0048174",
+  "url": "Sherlock kmerseek jobs submitted 2026-10-17 by scripts/why/kmerseek_submit.sh; finished searches' hits files (sha256 per file in this manifest), copied 2026-10-17"
+ },
  "sherlock_mmseqs": {
   "bytes": 117883518,
   "computed": true,
