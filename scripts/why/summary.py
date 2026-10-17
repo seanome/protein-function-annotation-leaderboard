@@ -23,6 +23,7 @@ STEPS = {
     2: "Proteins with an experimental structure (PDB)",
     3: "Described species, and species with a Swiss-Prot entry",
     4: "Human and Pacific oyster, one row per protein",
+    5: "What the dark proteins are",
 }
 FOUR = {
     "Q25460": "Mussel foot protein 1 (Mytilus edulis)",
@@ -105,12 +106,40 @@ def main():
         md.append("")
         if step == 4:
             md.append("![Proteome maps, function labels](maps/proteome_map_human_oyster_interpro_or_swissprot_uniprot_2026_03.png)\n")
-            md.append("![Proteome maps, all three labels](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)\n")
             md.append(
                 "Each tile is one protein; both maps use 150 tiles per row and the same tile size. A tile is lit when the "
                 "protein has the labels named in the legend. The counts printed above each map come from "
                 "`results/why/proteome_labels.parquet`, the same table as the numbers above.\n"
             )
+            md.append(t(
+                "Dark proteins are shorter and less confidently folded. In the oyster their median length is "
+                "{oyster_dark_length_median} aa against {oyster_lit_length_median} aa for lit proteins, and "
+                "{oyster_dark_plddt_50_or_less_pct}% have mean pLDDT 50 or less against {oyster_lit_plddt_50_or_less_pct}%. "
+                "In human, {human_dark_under_100aa_pct}% of the {human_dark_n} dark proteins are under 100 aa. Step 5 has the numbers.\n"
+            ))
+        if step == 5:
+            md.append(
+                "Dark here is the rule of the first map above: no InterPro match and no Swiss-Prot hit above 30% identity. "
+                "Lit is every other protein of the same species. Length bins and pLDDT bands are the ones the leaderboard uses.\n"
+            )
+            if "oyster_dark_seg_over_20pct_pct" not in V:
+                md.append(
+                    "The share of residues SEG masks as low-complexity is not in the table yet: `scripts/why/seg.sh` "
+                    "needs BLAST+ 2.16.0 and the two proteome FASTA files, then `labels.py --seg` and `dark.py`.\n"
+                )
+            md.append("![Dark proteins by AlphaFold DB pLDDT](maps/proteome_map_dark_by_plddt.png)\n")
+            md.append(t(
+                "Only the dark proteins are drawn, one tile each, longest first; colour is the mean pLDDT band of the "
+                "protein's AlphaFold DB model, and black is no model. Made by `scripts/why/dark.py` from "
+                "`results/why/proteome_labels.parquet`.\n"
+            ))
+            md.append("### A model is not a label\n")
+            md.append("![Proteome maps, AlphaFold DB model counted as a label](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)\n")
+            md.append(t(
+                "{oyster_af_model_pct}% of oyster proteins have an AlphaFold DB model; {oyster_no_interpro_no_sprot_pct}% have "
+                "no function label. Counting the model as a label leaves {oyster_no_label_pct}% dark, but a model does not "
+                "say what the protein does. Made by `scripts/why/maps.py` from `results/why/proteome_labels.parquet`.\n"
+            ))
 
     # Step 6
     calls = pl.read_parquet(OUT / "four_proteins_calls.parquet")
