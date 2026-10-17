@@ -69,6 +69,10 @@
   },
   {
    "tag": "li",
+   "text": "SCOPe40: ranking a domain's relatives (not scored yet)"
+  },
+  {
+   "tag": "li",
    "text": "Checks on this site"
   },
   {
@@ -486,6 +490,334 @@
   {
    "tag": "p",
    "text": "A baseline row is the same under every relative and under raw and dedup, since it searches no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000 queries, from the run's task records; where the table holds none, the cost reads not measured. Source of these rows: laptop check: tables/no_search_baselines_laptop_check (committed code, midi-plus truth tables copied from Sherlock)."
+  },
+  {
+   "tag": "h2",
+   "text": "SCOPe40: ranking a domain's relatives"
+  },
+  {
+   "tag": "p",
+   "text": "Scored so far: Foldseek, MMseqs2 and kmerseek, on the SCOPe40 page. This section gives the rules. The question: given one known domain, does the tool rank the domain's known relatives above the first unrelated hit? Here a relative is a domain of the same family, superfamily or fold, one level at a time; an unrelated hit is a domain of a different fold. The Foldseek (a structure search tool) and MMseqs2 (a sequence search tool) numbers are read from per-query files that other authors published; kmerseek (the k-mer search tool whose settings fill most rows of this site) is scored from its own hit lists."
+  },
+  {
+   "tag": "p",
+   "text": "SCOPe (Structural Classification of Proteins, extended) sorts protein domains into four nested levels. An id such as b.1.1.1 reads class.fold.superfamily.family: class b (all beta), fold 1, superfamily 1, family 1. Domains in one superfamily are taken to share an ancestor. Domains in one fold share a shape, with or without an ancestor. A family numbered 0 holds SCOPe's automated matches: domains placed in the superfamily but in no curated family; two domains in the same family 0 count as the same family, as in the scripts below. Each domain has its own id, such as d6jc0b_: d, the PDB entry (6jc0), the chain (b) and a domain number (_ for the whole chain). SCOPe40 is the set of SCOPe domains with no two above 40% sequence identity, as distributed by ASTRAL, SCOPe's companion set of domain sequences and structures (Chandonia et al. 2022)."
+  },
+  {
+   "tag": "h3",
+   "text": "What Foldseek's paper counts"
+  },
+  {
+   "tag": "p",
+   "text": "The paper that set this benchmark, van Kempen et al. (2024), defines the labels in its Methods (quoted under its CC BY 4.0 licence):"
+  },
+  {
+   "tag": "p",
+   "text": "Its main text gives the denominator: \"the fraction of TPs out of all possible correct matches until the first FP, a match to a different fold\". Its Figure 2a draws the per-query values as a cumulative curve and says \"Sensitivity is the area under the ROC (AUROC) curve up to the first FP\". The paper means each query's own value: the share of that query's TPs ranked above its first FP, the sensitivity defined below. The AUC on this site is a second area, under those values sorted across queries (defined below). The paper's numbers come from a scoring script in Foldseek's analysis repository, bench.noselfhit.awk."
+  },
+  {
+   "tag": "p",
+   "text": "LoL-align (Reifenrath et al. 2026), a structure aligner from the same two groups (Johannes Söding's and Martin Steinegger's), reuses this benchmark. Its paper defines the score as \"the fraction of true positives (TPs) found before the first FP in the list of ranked matches\", with \"TPs ... from the same family, superfamily or fold and FPs ... from different folds\", over SCOPe entries \"with at least one additional family-, superfamily- or fold-level member\": 3,566 queries on SCOPe 2.01. The sentence says \"or\", but 3,566 is the count of domains with members at all three levels (the domain-set table below), which is what the script keeps (line 24). Its copy of the script (soedinglab/LoLalign-analysis, scope_benchmark/bench.noselfhit.awk) is Foldseek's line for line, except for the superfamily and fold denominators, lines 26 and 27."
+  },
+  {
+   "tag": "p",
+   "text": "For one query, a true positive (TP) is a hit at the level being scored. A false positive (FP) is a hit in a different fold. Any other hit is not counted: neither TP nor FP. Sort the hits by the tool's own score, best first, after dropping the query's hit to itself. Walk down the list and stop at the first FP. The sensitivity up to the first false positive is the number of TPs above that cut divided by the number of possible TPs for that query in the whole set. The walk uses every hit the tool reports at the settings it was run with. Every query on this site has at least one possible TP at each level, so no sensitivity is 0 of 0."
+  },
+  {
+   "tag": "p",
+   "text": "This site first planned a nested rule. A hit is a superfamily TP when query and target share the first three fields of the SCOPe id (class letter, fold, superfamily), family included. It is an FP when their folds differ, and not counted when they share the fold only. Figure 19, on the SCOPe40 page, labels one made-up hit list both ways."
+  },
+  {
+   "tag": "p",
+   "text": "Over many queries, the area under the curve (AUC) sorts the queries by sensitivity, highest first, and plots sensitivity against the fraction of queries. Its area is the mean sensitivity over all queries, so the AUC and the mean are the same number. Coverage is the share of queries with at least one hit at the settings the tool was run with; it goes next to every AUC. Coverage says nothing about whether the hits are right: the shuffled-query control has coverage near 100% too."
+  },
+  {
+   "tag": "p",
+   "text": "Every query counts. A query that gets no hits scores 0 and stays in every mean and every area. An earlier kmerseek claim, that it \"outperforms Foldseek on SCOPe\", was computed over only part of the queries. That claim and its number are retired. Its source, notebook 076, ran one hydrophobic-polar alphabet at k = 26 with a strict cutoff (SCOPe40 single-domain set, 14,873 domains, hp_thomas_dill k=26, Bonferroni<0.05; FoldSeek benchmark 5,713 queries), so kmerseek reported hits for few queries: it found a family member for 188 of the 5,713 queries of Foldseek's file (3.3%), and its mean was taken over the 228 queries that both tools returned any hit for (a hit need not be a family member, so 228 is more than 188). The kmerseek settings on the SCOPe40 page are different ones and report hits for nearly every query."
+  },
+  {
+   "tag": "h3",
+   "text": "The paper's rule against the planned rule"
+  },
+  {
+   "tag": "p",
+   "text": "The two rules differ in the rows below. On 2026-10-17 Olga Botvinnik, who runs this benchmark, chose the paper's rule as its Methods and its script state it (\"Foldseek paper\" and \"Foldseek's original script\" columns), with LoL-align's denominators (below). The planned rule is not used."
+  },
+  {
+   "tag": "th",
+   "text": "Point"
+  },
+  {
+   "tag": "th",
+   "text": "Foldseek paper (Methods)"
+  },
+  {
+   "tag": "th",
+   "text": "Foldseek's original script"
+  },
+  {
+   "tag": "th",
+   "text": "This site's planned rule"
+  },
+  {
+   "tag": "td",
+   "text": "Superfamily TP"
+  },
+  {
+   "tag": "td",
+   "text": "same superfamily, different family"
+  },
+  {
+   "tag": "td",
+   "text": "same"
+  },
+  {
+   "tag": "td",
+   "text": "same superfamily, family included"
+  },
+  {
+   "tag": "td",
+   "text": "Same-family hit, superfamily level"
+  },
+  {
+   "tag": "td",
+   "text": "not counted"
+  },
+  {
+   "tag": "td",
+   "text": "not counted"
+  },
+  {
+   "tag": "td",
+   "text": "TP"
+  },
+  {
+   "tag": "td",
+   "text": "Fold TP"
+  },
+  {
+   "tag": "td",
+   "text": "same fold, different superfamily"
+  },
+  {
+   "tag": "td",
+   "text": "same"
+  },
+  {
+   "tag": "td",
+   "text": "no fold level given"
+  },
+  {
+   "tag": "td",
+   "text": "Superfamily denominator"
+  },
+  {
+   "tag": "td",
+   "text": "all possible TPs: superfamily members outside the family"
+  },
+  {
+   "tag": "td",
+   "text": "one more than that (LoL-align's copy: not)"
+  },
+  {
+   "tag": "td",
+   "text": "every other superfamily member"
+  },
+  {
+   "tag": "td",
+   "text": "Fold denominator"
+  },
+  {
+   "tag": "td",
+   "text": "all possible TPs: fold members outside the superfamily"
+  },
+  {
+   "tag": "td",
+   "text": "one more than that (LoL-align's copy: not)"
+  },
+  {
+   "tag": "td",
+   "text": "no fold level given"
+  },
+  {
+   "tag": "td",
+   "text": "Queries scored"
+  },
+  {
+   "tag": "td",
+   "text": "domains with another member at all three levels"
+  },
+  {
+   "tag": "td",
+   "text": "same"
+  },
+  {
+   "tag": "td",
+   "text": "every query with a possible TP at the level"
+  },
+  {
+   "tag": "td",
+   "text": "Hit to a domain missing from the script's domain list (it happens when the list used for scoring is shorter than the set searched)"
+  },
+  {
+   "tag": "td",
+   "text": "not stated"
+  },
+  {
+   "tag": "td",
+   "text": "FP"
+  },
+  {
+   "tag": "td",
+   "text": "not stated"
+  },
+  {
+   "tag": "p",
+   "text": "The paper's Figure 2a legend reads \"TPs are matches within the same superfamily\", which is the nested rule; its Methods, quoted above, and its script leave the family out. A third rule, in the Methods subsection that fits Foldseek's probability of a true match, ignores \"hits to the same family or to another superfamily\". That rule only sets Foldseek's reported probability; it changes no score here."
+  },
+  {
+   "tag": "p",
+   "text": "Where the extra 1 comes from: Foldseek's original script counts the possible family TPs as the family size minus 1, which removes the query itself. For the superfamily it takes the superfamily size minus (the family size minus 1), and for the fold the fold size minus (the superfamily size minus 1). Those two leave the query in, so each is one more than the number of domains that could be found. In the script: lines 7, 10 and 13 count every domain, the query included, into its family, superfamily and fold; line 17 drops the self-hit from the hit list; line 25 takes 1 off the family count, but lines 26 and 27 subtract only the other family members (or the other superfamily members), so the query stays in. It can never be found at those levels: its hit to itself is dropped, and would count at the family level anyway. So no query can reach a superfamily or fold sensitivity of 1 there. LoL-align's copy subtracts the whole family size and the whole superfamily size instead, so its denominators are the domains that can be found. This site uses LoL-align's denominators (chosen by Olga Botvinnik, 2026-10-17)."
+  },
+  {
+   "tag": "p",
+   "text": "The extra 1 is in the per-query files of Foldseek and MMseqs2 on SCOPe 2.08 that other authors published, as copied into seanome/2024-kmerseek-analysis (data/tea_scope40_rocx_files). Query d6jc0b_ (d.41.5.0) has 6 domains in its superfamily and 5 in its family, itself included in both, so 1 possible superfamily TP. Foldseek found it and the file says 0.5: 1 of 2. Over the 5,713 queries of the Foldseek file, the mean superfamily sensitivity is 0.574 as published and 0.641 over the possible TPs; at the fold level 0.102 and 0.111. For MMseqs2: superfamily 0.172 and 0.205, fold 0.001 and 0.001. The family level has no extra 1 (0.817 for Foldseek either way). This site rescales those files to LoL-align's denominators: each row's value times its original denominator is a whole number of TPs, which is divided by the domains that row could find. These means are over the file's 5,713 rows; the SCOPe40 page's AUCs are over all 5,737 queries, with the 24 the files lack scored 0, so they are a little lower. The Foldseek paper's own numbers are on the original scale. The kmerseek SCOPe40 scorer of PR 107 already divides by the domains that can be found, so its numbers that divide by every true pair in the set (column auc_ref_db) are on the LoL-align scale too."
+  },
+  {
+   "tag": "p",
+   "text": "At the fold level, a TP is not always a relative: two domains can share a fold with no shared ancestor (Cheng et al. 2008). So a fold-level TP means \"same shape\", not \"homolog\"."
+  },
+  {
+   "tag": "h3",
+   "text": "The domain set"
+  },
+  {
+   "tag": "p",
+   "text": "Foldseek's set is SCOPe 2.01 at 40% identity, 11,211 domains (Foldseek's list scop_lookup.fix.tsv, as copied into seanome/2024-kmerseek-analysis). The set every kmerseek SCOPe40 run in seanome/2024-kmerseek-analysis searched is a different release: ASTRAL SCOPe 2.08 at 40% identity, 15,177 domains (astral-scopedom-seqres-gd-sel-gs-bib-40-2.08.fa, sha256 e6d3213b3822…). Numbers from the two are not comparable without saying so."
+  },
+  {
+   "tag": "th",
+   "text": "Domains with a possible TP"
+  },
+  {
+   "tag": "th",
+   "text": "SCOPe 2.08, ASTRAL 40%"
+  },
+  {
+   "tag": "th",
+   "text": "SCOPe 2.01, Foldseek"
+  },
+  {
+   "tag": "td",
+   "text": "All domains"
+  },
+  {
+   "tag": "td",
+   "text": "15,177"
+  },
+  {
+   "tag": "td",
+   "text": "11,211"
+  },
+  {
+   "tag": "td",
+   "text": "Family level"
+  },
+  {
+   "tag": "td",
+   "text": "12,723"
+  },
+  {
+   "tag": "td",
+   "text": "8,975"
+  },
+  {
+   "tag": "td",
+   "text": "Superfamily level, paper"
+  },
+  {
+   "tag": "td",
+   "text": "13,275"
+  },
+  {
+   "tag": "td",
+   "text": "8,636"
+  },
+  {
+   "tag": "td",
+   "text": "Superfamily level, nested"
+  },
+  {
+   "tag": "td",
+   "text": "14,362"
+  },
+  {
+   "tag": "td",
+   "text": "10,373"
+  },
+  {
+   "tag": "td",
+   "text": "Fold level, paper"
+  },
+  {
+   "tag": "td",
+   "text": "7,409"
+  },
+  {
+   "tag": "td",
+   "text": "5,488"
+  },
+  {
+   "tag": "td",
+   "text": "All three levels (the paper's queries)"
+  },
+  {
+   "tag": "td",
+   "text": "5,737"
+  },
+  {
+   "tag": "td",
+   "text": "3,566"
+  },
+  {
+   "tag": "p",
+   "text": "The published Foldseek and MMseqs2 per-query files on SCOPe 2.08 hold 5,713 of the 5,737 all-three-level domains; 24 are missing. Their family, superfamily and fold sizes do not match SCOPe 2.08 on 1,131 of the 5,713 rows (fold size on 1,131, superfamily on 252, family on 38), always smaller. So the runs behind those files searched a domain list with some 2.08 domains missing, and a tool scored on the full 2.08 set is not on the same footing as them."
+  },
+  {
+   "tag": "h3",
+   "text": "Choices made (Olga Botvinnik, 2026-10-17)"
+  },
+  {
+   "tag": "li",
+   "text": "The rule: the paper's Methods and script. Its Figure 2a legend reads differently (above)."
+  },
+  {
+   "tag": "li",
+   "text": "The denominator: LoL-align's, the domains that can be found at each level. Foldseek's original, one more at the superfamily and fold levels, is kept beside it in the long table (sensitivity_foldseek_script), and the published Foldseek and MMseqs2 files are rescaled from it."
+  },
+  {
+   "tag": "li",
+   "text": "The queries: Foldseek's set, domains with another member at all three levels, computed on SCOPe 2.08: 5,737."
+  },
+  {
+   "tag": "li",
+   "text": "The set: SCOPe 2.08 at 40% identity, 15,177 domains, searched all against all."
+  },
+  {
+   "tag": "li",
+   "text": "Hit lists: kmerseek is scored from its own hit lists (one row per protein pair, kept by the runs of analysis PR 107). Foldseek and MMseqs2 come from per-query files with no hit lists. The pipeline that keeps hit lists for every other tool is written, not launched (analysis PR 166)."
+  },
+  {
+   "tag": "h3",
+   "text": "The score each tool is ranked by"
+  },
+  {
+   "tag": "p",
+   "text": "Each tool's hits are sorted by its own score, best first, ties broken by target id. In the pipeline: Foldseek, ProstT5 + Foldseek, MMseqs2 (both modes), phmmer, jackhmmer and HH-suite by bit score, higher first; kmerseek by region E-value, smaller first. The two published files do not record the order their runs used. kmerseek's region E-value is the E-value of the best-matching region of the pair: about how many regions that good one search would find by chance."
+  },
+  {
+   "tag": "p",
+   "text": "van Kempen, M., S. S. Kim, C. Tumescheit, M. Mirdita, J. Lee, C. L. M. Gilchrist, J. Söding, and M. Steinegger. \"Fast and Accurate Protein Structure Search with Foldseek.\" Nature Biotechnology 42, no. 2 (2024): 243–46. https://doi.org/10.1038/s41587-023-01773-0. Chandonia, J.-M., L. Guan, S. Lin, C. Yu, N. K. Fox, and S. E. Brenner. \"SCOPe: Improvements to the Structural Classification of Proteins – Extended Database to Facilitate Variant Interpretation and Machine Learning.\" Nucleic Acids Research 50, no. D1 (2022): D553–59. https://doi.org/10.1093/nar/gkab1054. Reifenrath, L., M. van Kempen, G. Kim, S. H. Kim, M. Radnezhad, C. L. M. Gilchrist, M. Mirdita, M. Steinegger, and J. Söding. \"LoL-align: Sensitive and Fast Probabilistic Protein Structure Alignment.\" Nature Methods (2026). https://doi.org/10.1038/s41592-026-03249-w. Cheng, H., B.-H. Kim, and N. V. Grishin. \"MALISAM: A Database of Structurally Analogous Motifs in Proteins.\" Nucleic Acids Research 36, Database issue (2008): D211–17. https://doi.org/10.1093/nar/gkm698."
   },
   {
    "tag": "h2",

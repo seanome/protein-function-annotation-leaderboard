@@ -25,6 +25,7 @@ check:
 	$(PY) tests/check_pileup.py --site docs --data data
 	$(PY) tests/check_explainers.py --site docs
 	$(PY) tests/check_figures.py --site docs --data data
+	$(PY) tests/check_scope40.py --site docs --data data
 	$(PY) tests/check_prose_all.py --site docs
 
 serve:

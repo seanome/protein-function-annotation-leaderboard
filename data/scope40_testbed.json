@@ -1,0 +1,177 @@
+{
+ "inputs": {
+  "astral208": {
+   "path": "~/data/scope/astral-scopedom-seqres-gd-sel-gs-bib-40-2.08.fa",
+   "sherlock_path": "$SCRATCH/scope/astral-scopedom-seqres-gd-sel-gs-bib-40-2.08.fa",
+   "sha256": "e6d3213b38225f617966686809fa5531f0de6a7d00d01692477476a1493ab037"
+  },
+  "lookup201": {
+   "path": "seanome/2024-kmerseek-analysis data/foldseek-analysis/scop_lookup.fix.tsv",
+   "sha256": "35a09c180af6c224287330e474b02469da58d03cf3efb771f49327f250aa6453"
+  },
+  "rocx_dir": {
+   "path": "seanome/2024-kmerseek-analysis data/tea_scope40_rocx_files",
+   "sha256": {
+    "3Di_exact.rocx": "3cc507621ea0d3966260d97ecc9cedcb0e538385d7e52abb0920915c099eb3cd",
+    "3Di_sensitive.rocx": "af9fbd74bcd231afd4e6356e880fbb8b38daf52587a11fb4834cd28a6d1e0f97",
+    "eba.rocx": "cfdc358a7c1d088db27539e36cf79e4355b901d8186b253637537de430a8b3aa",
+    "foldseek.rocx": "b47e64c15d3ad21875795adbe04a8ddc41166242df5cf5cbd71fa1529b8c1a16",
+    "mmseqs.rocx": "50e454721a727ad57d1e131237810a3b6e3fba46fbfd72fd2959e8c82bc4225d",
+    "tea_all.rocx": "00610e7fe21c6c3cb4b72c491c40735e0fd7d3cb53b6ee0ada3bab516daac73b",
+    "tea_fold_1.rocx": "756bb99ff02413e190f23ad229af7ee53abdbf31581908b92e0cd69ad5d63563",
+    "tea_fold_2.rocx": "99bc324d7b0512ed2807d771f5f6bce0cbe96a98122c667a262e7306e81646d3",
+    "tea_fold_3.rocx": "29c248d1827532ecbd5a254b4ab3e4805fc5bb3c89351ca4ce0f34a7fab34960",
+    "tea_fold_4.rocx": "c6454bd9eb0bd19fd5d30ebe557e5bee61f58d1f5d574c4b21d456ffc3b84654"
+   }
+  },
+  "bench_awk": {
+   "path": "github.com/steineggerlab/foldseek-analysis scopbenchmark/scripts/bench.noselfhit.awk",
+   "sha256": "cd6352c80e9da590cf684827766adbe9957d63582f4f0894f5f0958c13ce2648"
+  }
+ },
+ "scope208_astral40": {
+  "n_domains": 15177,
+  "n_by_class": {
+   "a": 2644,
+   "b": 3059,
+   "c": 4463,
+   "d": 3653,
+   "e": 304,
+   "f": 332,
+   "g": 722
+  },
+  "n_families": 4703,
+  "n_superfamilies": 2065,
+  "n_folds": 1257,
+  "n_queries_with_a_true_positive": {
+   "family": 12723,
+   "superfamily": 13275,
+   "superfamily_nested": 14362,
+   "fold": 7409,
+   "all_three": 5737
+  }
+ },
+ "scope201_foldseek": {
+  "n_domains": 11211,
+  "n_by_class": {
+   "a": 2079,
+   "b": 2327,
+   "c": 2965,
+   "d": 2811,
+   "e": 199,
+   "f": 198,
+   "g": 632
+  },
+  "n_families": 4161,
+  "n_superfamilies": 1960,
+  "n_folds": 1194,
+  "n_queries_with_a_true_positive": {
+   "family": 8975,
+   "superfamily": 8636,
+   "superfamily_nested": 10373,
+   "fold": 5488,
+   "all_three": 3566
+  }
+ },
+ "tea_query_set": {
+  "n_eba": 5737,
+  "eba_equals_all_three": true,
+  "n_foldseek_rocx": 5713,
+  "foldseek_rocx_subset_of_all_three": true,
+  "missing_from_foldseek_rocx": [
+   "d2bbva_",
+   "d3bvxa1",
+   "d3bvxa2",
+   "d3bvxa3",
+   "d3cu7a6",
+   "d3ljqa_",
+   "d6a1ia1",
+   "g1apy.1",
+   "g1b35.1",
+   "g1f8v.1",
+   "g1gk9.1",
+   "g1k2x.1",
+   "g1ku8.1",
+   "g1o7d.1",
+   "g1o7d.2",
+   "g1o7d.3",
+   "g1or0.1",
+   "g1pvc.1",
+   "g1q7l.1",
+   "g1qqp.1",
+   "g1r8o.1",
+   "g1tme.1",
+   "g2a73.1",
+   "g2dbx.1"
+  ]
+ },
+ "rocx": [
+  {
+   "file": "foldseek.rocx",
+   "n_queries": 5713,
+   "levels": {
+    "FAM": {
+     "mean_as_published": 0.8170070560476125,
+     "mean_over_possible_true_positives": 0.8170070594116485,
+     "rows_whole_with_script_denominator": 5713,
+     "rows_whole_with_possible_denominator": 5713
+    },
+    "SFAM": {
+     "mean_as_published": 0.5744331670138274,
+     "mean_over_possible_true_positives": 0.6407352383827808,
+     "rows_whole_with_script_denominator": 5713,
+     "rows_whole_with_possible_denominator": 292
+    },
+    "FOLD": {
+     "mean_as_published": 0.10173864115350956,
+     "mean_over_possible_true_positives": 0.11133783061250181,
+     "rows_whole_with_script_denominator": 5713,
+     "rows_whole_with_possible_denominator": 2267
+    }
+   }
+  },
+  {
+   "file": "mmseqs.rocx",
+   "n_queries": 5713,
+   "levels": {
+    "FAM": {
+     "mean_as_published": 0.4032919567407671,
+     "mean_over_possible_true_positives": 0.40329197038775033,
+     "rows_whole_with_script_denominator": 5713,
+     "rows_whole_with_possible_denominator": 5713
+    },
+    "SFAM": {
+     "mean_as_published": 0.17218749948188475,
+     "mean_over_possible_true_positives": 0.20468955058046062,
+     "rows_whole_with_script_denominator": 5713,
+     "rows_whole_with_possible_denominator": 1588
+    },
+    "FOLD": {
+     "mean_as_published": 0.0008366066725013138,
+     "mean_over_possible_true_positives": 0.0009296373495842331,
+     "rows_whole_with_script_denominator": 5713,
+     "rows_whole_with_possible_denominator": 5489
+    }
+   }
+  }
+ ],
+ "rocx_counts_vs_208": {
+  "n_rows": 5713,
+  "FAMCNT": 38,
+  "SFAMCNT": 252,
+  "FOLDCNT": 1131,
+  "any": 1131,
+  "smaller_only": true
+ },
+ "example": {
+  "file": "foldseek.rocx",
+  "name": "d6jc0b_",
+  "scop": "d.41.5.0",
+  "SFAM": 0.5,
+  "FAMCNT": 5,
+  "SFAMCNT": 6,
+  "sfam_denominator_script": 2,
+  "sfam_possible": 1,
+  "sfam_tp": 1
+ }
+}
