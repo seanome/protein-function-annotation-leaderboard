@@ -6,7 +6,7 @@
   const NS = "http://www.w3.org/2000/svg";
   const LEVELS = ["family", "superfamily", "fold"];
   const LETTER = { family: "a", superfamily: "b", fold: "c" };
-  const f3 = (x) => x.toFixed(3);
+  const f3 = (x) => (x > 0 && x < 0.0001 ? "<0.0001" : x > 0 && x < 0.001 ? x.toFixed(4) : x.toFixed(3));
   const pct = (x) => (100 * x).toFixed(1) + "%";
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const el = (tag, attrs, parent) => {
@@ -190,7 +190,13 @@
       const c = typeof x === "string" ? x.localeCompare(y) : x - y;
       return dir === "ascending" ? c : -c;
     });
-    for (const r of rest.concat(toggles, pinned)) body.appendChild(r);
+    // Each "+N more settings" row stays right under its tool's own row.
+    const out = [];
+    for (const r of rest) {
+      out.push(r);
+      if (!r.classList.contains("more")) toggles.filter((t) => t.getAttribute("data-tool") === r.getAttribute("data-tool")).forEach((t) => out.push(t));
+    }
+    for (const r of out.concat(pinned)) body.appendChild(r);
   }
 
   function costs() {

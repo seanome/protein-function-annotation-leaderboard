@@ -37,19 +37,19 @@
   },
   {
    "tag": "p",
-   "text": "Table 1 places annotations on human proteins by searching one relative's proteome, and scores where the ends of each call land. This page does something else: it ranks pairs of single structural domains from SCOPe, and never scores boundaries. SCOPe sorts domains into class.fold.superfamily.family; an id such as b.1.1.1 is class b (all beta), fold 1, superfamily 1, family 1. Domains in one superfamily are taken to share an ancestor; domains in one fold share a shape, with or without one. The set searched is SCOPe 2.08 at 40% identity, 15,177 domains. Every domain is searched against all of them. The queries are the 5,737 domains that have another member in the set at all three levels, as in Foldseek's benchmark (Methods). Foldseek's own set was SCOPe 2.01, 11,211 domains, so these numbers are not the paper's."
+   "text": "Table 1, on the leaderboard page, places annotations on human proteins by searching one relative's proteome, and scores where the ends of each call land. (Figures and tables are numbered across the whole site.) This page does something else: it ranks pairs of single structural domains from SCOPe, and never scores boundaries. SCOPe sorts domains into class.fold.superfamily.family; an id such as b.1.1.1 is class b (all beta), fold 1, superfamily 1, family 1. Domains in one superfamily are taken to share an ancestor; domains in one fold share a shape, with or without one. A family numbered 0 holds automated matches, domains placed in a superfamily but in no curated family; two domains in the same family 0 count as the same family. The set searched is SCOPe 2.08 at 40% identity, 15,177 domains. Every domain is searched against all of them. The queries are the 5,737 domains that have another member in the set at all three levels, as in Foldseek's benchmark (Methods). Foldseek's own set was SCOPe 2.01, 11,211 domains, so these numbers are not the paper's."
   },
   {
    "tag": "p",
-   "text": "For one query, a true positive (TP) is a hit to another domain at the level being scored. At the family level that is the same family. At the superfamily level it is the same superfamily but a different family, and at the fold level the same fold but a different superfamily. A false positive (FP) is a hit to a domain of a different fold. Any other hit is not counted. Sort the hits by the tool's own score, best first, after dropping the query's hit to itself, and stop at the first FP. The sensitivity up to the first false positive is the TPs above that cut divided by the TPs the query has in the set: the domains it could find there. That is the denominator of LoL-align's copy of Foldseek's scoring script (Reifenrath et al. 2026). Foldseek's original script adds 1 at the superfamily and fold levels, because it leaves the query itself in those counts; Figure 18 shows both."
+   "text": "For one query, a true positive (TP) is a hit to another domain at the level being scored. At the family level that is the same family. At the superfamily level it is the same superfamily but a different family, and at the fold level the same fold but a different superfamily. A false positive (FP) is a hit to a domain of a different fold. Any other hit is not counted. Sort the hits by the tool's own score, best first, after dropping the query's hit to itself, and stop at the first FP. The sensitivity up to the first false positive is the TPs above that cut divided by the TPs the query has in the set: the domains it could find there. LoL-align, a structure aligner from the same groups as Foldseek, reuses Foldseek's benchmark with this denominator (Reifenrath et al. 2026). Foldseek's original script adds 1 to the bottom of the fraction at the superfamily and fold levels, because it leaves the query itself in those counts; Figure 19 shows both."
   },
   {
    "tag": "figcaption",
-   "text": "made-up exampleFigure 18. One query, b.1.1.1, and its eight hits, labelled at each level. The made-up set holds 4 other domains in the query's family, 5 in its superfamily but outside the family, and 3 in its fold but outside the superfamily. Hits 1, 5 and 7 are three different domains of the query's family; the query's hit to itself was dropped before hit 1. The small grey line under the superfamily and fold rows divides by one more, as Foldseek's original script does; this page does not. The bottom row is the rule this site first planned, which also counts the family at the superfamily level; it is not used."
+   "text": "made-up exampleFigure 19. One query, b.1.1.1, and its eight hits, labelled at each level. The made-up set holds 4 other domains in the query's family, 5 in its superfamily but outside the family, and 3 in its fold but outside the superfamily. Hits 1, 5 and 7 are three different domains of the query's family; the query's hit to itself was dropped before hit 1. The small grey text under the superfamily and fold values divides by one more, as Foldseek's original script does; this page does not. The bottom row is the rule this site first planned, which also counts the family at the superfamily level; it is not used."
   },
   {
    "tag": "p",
-   "text": "true positive false positive (a different fold) not counted first false positive: the list is cut here any mark drawn pale is below the cut, so it adds nothing"
+   "text": "true positive false positive (a different fold) not counted first false positive: the list is cut here any mark drawn pale (TP, FP or not counted) is below the cut, so it adds nothing"
   },
   {
    "tag": "p",
@@ -57,7 +57,7 @@
   },
   {
    "tag": "p",
-   "text": "Over many queries, sort the queries by sensitivity, highest first, and plot sensitivity against the fraction of queries. The area under the curve (AUC) is the mean sensitivity over all queries: the AUC and the mean are the same number. Coverage is the share of queries with at least one hit at the settings the tool was run with."
+   "text": "Over many queries, sort the queries by sensitivity, highest first, and plot sensitivity against the fraction of queries. The area under the curve (AUC) is the mean sensitivity over all queries: the AUC and the mean are the same number. (Foldseek's paper also says \"area\", for one query's own value; on this page AUC always means this area across queries.) Coverage is the share of queries with at least one hit at the settings the tool was run with. It says nothing about whether the hits are right: kmerseek on shuffled queries has coverage near 100% too. For the published files it is read from each row's counts: a query's first hit is either a TP at some level or an FP, so a row with no TP and no FP had no hits."
   },
   {
    "tag": "p",
@@ -65,23 +65,23 @@
   },
   {
    "tag": "p",
-   "text": "Inputs. Foldseek runs on the SCOPe domain structures themselves: experimental coordinates from the PDB, not predicted. ProstT5 + Foldseek and every other tool run on the domain sequences. Foldseek and MMseqs2 are read from per-query files that other authors published on SCOPe 2.08 (folder data/tea_scope40_rocx_files of seanome/2024-kmerseek-analysis); those files do not record which structures or settings the runs used. Their own scoring script dropped each self-hit. 24 of the 5,737 queries are missing from both files; they score 0 and are listed under Table 3. kmerseek is scored from its own hit lists: the one-row-per-pair tables that its SCOPe 2.08 runs kept on Sherlock (PR 107), 16 kmerseek settings, ranked by region E-value and scored here with Foldseek's rules. The chance level is the same kmerseek settings run on every query shuffled with its dipeptide counts kept. Not scored yet: phmmer, jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch), ProstT5 + Foldseek; their pipeline keeps per-query hit lists and is written but not launched (pipeline PR)."
+   "text": "Inputs. In this site's pipeline, Foldseek runs on the SCOPe domain structures themselves (experimental coordinates from the PDB, not predicted); ProstT5 + Foldseek (ProstT5 is a protein language model that predicts Foldseek's 3Di shape letters from the sequence) and every other tool run on the domain sequences. The Foldseek and MMseqs2 rows shown here are not from that pipeline: they are read from per-query files that other authors published on SCOPe 2.08, kept in seanome/2024-kmerseek-analysis (folder data/tea_scope40_rocx_files; the files do not name their run, its structures or its settings). Their scoring script dropped each self-hit. Their runs also searched a domain list with some 2.08 domains missing (family, superfamily or fold sizes smaller on 1,131 of their 5,713 rows), while kmerseek searched all 15,177, so kmerseek's rows and theirs are not on quite the same footing. 24 of the 5,737 queries are missing from both files; they score 0 and are listed under Table 3. kmerseek is scored from its own hit lists: the one-row-per-pair tables that its SCOPe 2.08 runs kept on Stanford's Sherlock cluster (seanome/2024-kmerseek-analysis PR 107), 16 kmerseek settings, scored here with the same rules. Its hits are ranked by region E-value, the E-value of the best-matching region of a pair (smaller is better). A setting such as hsdm17.k4.c_max names the reduced alphabet (hsdm17, 17 letters), the k-mer length (k = 4) and the mismatch penalty used when a match is extended (c_max, the alphabet's largest log-odds penalty; c2, a penalty of 2). The chance level is the same kmerseek settings run on every query shuffled so that it keeps its count of every two-residue pair (dipeptide), seed 1. Not scored yet: phmmer; jackhmmer; MMseqs2, three rounds; HH-suite (hhsearch); ProstT5 + Foldseek. Their pipeline keeps per-query hit lists and is written but not launched (seanome/2024-kmerseek-analysis PR 166)."
   },
   {
    "tag": "figcaption",
-   "text": "Figure 19. Sensitivity up to the first false positive, one line per tool, queries sorted from highest to lowest; a, family; b, superfamily; c, fold. The area under each line is its AUC. n = 5,737 queries, SCOPe 2.08 at 40% identity."
+   "text": "Figure 20. Sensitivity up to the first false positive, one line per tool and setting, queries sorted from highest to lowest; a, family; b, superfamily; c, fold. The area under each line is its AUC. Colour is the kind of tool; kmerseek on shuffled queries is kmerseek's colour, dashed. The other kmerseek settings, behind \"+ more settings\", are drawn thin and pale in kmerseek's colour; hover a line for its name. At the fold level the MMseqs2, kmerseek and shuffled-query lines all lie along 0. n = 5,737 queries, SCOPe 2.08 at 40% identity."
   },
   {
    "tag": "p",
-   "text": "Foldseek, comparing shapes, finds family members for most queries (AUC 0.814) and keeps much of its lead at the superfamily level (0.638 against MMseqs2's 0.204). At the fold level both are near the floor (0.111 and 0.001). A fold-level TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008). kmerseek's best setting, hsdm17.k4.c_max, reaches 0.152 at the family level and 0.066 at the superfamily level; the same setting on shuffled queries reaches 0.0002 and 0.0001, the chance level. Dropping the no-hit queries moves a drawn AUC by at most 0.004 here, because every search tool drawn returns hits for at least 99.5% of queries."
+   "text": "Foldseek, comparing shapes, finds family members for most queries (AUC 0.814) and keeps much of its lead at the superfamily level (0.638 against MMseqs2's 0.204). At the fold level Foldseek reaches 0.111 and MMseqs2 0.001, and kmerseek below 0.001 at every setting. A fold-level TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008). kmerseek's best setting, hsdm17.k4.c_max, reaches 0.152 at the family level and 0.066 at the superfamily level; the same setting on shuffled queries reaches 0.0002 and 0.0001, the chance level. Dropping the no-hit queries moves a drawn AUC by at most 0.004 here, because every search tool drawn returns hits for at least 99.5% of queries."
   },
   {
    "tag": "figcaption",
-   "text": "Figure 20. Mean sensitivity up to the first false positive by SCOPe class, with the 95% bootstrap interval as a bar (1,000 resamples of the queries, seed 20261017); a, family; b, superfamily; c, fold. Classes: a, all alpha (n = 1,018); b, all beta (n = 1,748); c, alpha/beta (n = 1,635); d, alpha+beta (n = 1,109); f, membrane and cell surface (n = 69); g, small proteins (n = 158). Class e (multi-domain proteins) has no query with another member at all three levels, so it has no column. Click a class to list its queries under the figure."
+   "text": "Figure 21. Mean sensitivity up to the first false positive by SCOPe class, with the 95% bootstrap interval as a bar (1,000 resamples of the queries, seed 20261017; a bar shorter than its dot is hidden behind it); a, family; b, superfamily; c, fold. Classes: a, all alpha (n = 1,018); b, all beta (n = 1,748); c, alpha/beta (n = 1,635); d, alpha+beta (n = 1,109); f, membrane and cell surface (n = 69); g, small proteins (n = 158). Class e (multi-domain proteins) has no query with another member at all three levels, so it has no column. Click a class to list its queries under the figure."
   },
   {
    "tag": "p",
-   "text": "Classes f (membrane and cell surface) and g (small proteins): composition and cysteine spacing can match without homology there, so read those two columns with the composition-scan row beside them. That row is not run yet."
+   "text": "Classes f (membrane and cell surface) and g (small proteins): composition and cysteine spacing can match without homology there, so read those two columns against the shuffled-query control, and against the composition scan once it is run (not run yet)."
   },
   {
    "tag": "h2",
@@ -89,7 +89,7 @@
   },
   {
    "tag": "p",
-   "text": "AUC with its 95% bootstrap interval under it, coverage, and cost. Click a heading to sort; rows with no value sort last; the two no-search rows stay at the bottom. Core-hours and GPU-hours come from a run's task records; the published files have none, so cost reads not measured. Prices, as on Table 1: rcpu $ per CPU-hour rgpu $ per GPU-hour ."
+   "text": "AUC with its 95% bootstrap interval under it, coverage, and cost. Click a heading to sort; rows with no value sort last; the controls (the composition scan and kmerseek on shuffled queries) stay at the bottom. An AUC below 0.001 is printed to four decimals. Core-hours and GPU-hours come from a run's task records; none of the scored rows has them (the published files are someone else's runs, and the kmerseek searches were not timed for this), so cost reads not measured and the price boxes change nothing until the pipeline runs. Prices, as on Table 1: rcpu $ per CPU-hour rgpu $ per GPU-hour ."
   },
   {
    "tag": "th",
@@ -149,7 +149,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
@@ -169,7 +169,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -193,7 +193,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0003"
   },
   {
    "tag": "td",
@@ -213,7 +213,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -233,7 +233,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0004"
   },
   {
    "tag": "td",
@@ -253,7 +253,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -273,7 +273,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
@@ -293,7 +293,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -313,7 +313,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
@@ -333,7 +333,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -353,7 +353,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0003"
   },
   {
    "tag": "td",
@@ -373,7 +373,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -393,7 +393,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0004"
   },
   {
    "tag": "td",
@@ -413,7 +413,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -433,7 +433,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
@@ -453,7 +453,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -473,7 +473,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
@@ -493,7 +493,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -513,7 +513,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
@@ -533,7 +533,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -553,7 +553,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0003"
   },
   {
    "tag": "td",
@@ -573,7 +573,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -593,7 +593,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
@@ -613,7 +613,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -633,7 +633,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
@@ -653,7 +653,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -673,7 +673,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0003"
   },
   {
    "tag": "td",
@@ -693,7 +693,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -713,7 +713,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
@@ -733,7 +733,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -753,7 +753,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
@@ -773,7 +773,7 @@
   },
   {
    "tag": "td",
-   "text": "scored: from the pair tables the PR 107 combination runs kept on Sherlock, ranked by region E-value; scored with Foldseek's rules"
+   "text": "scored: from kmerseek's own hit lists (analysis PR 107 runs), ranked by region E-value"
   },
   {
    "tag": "td",
@@ -873,7 +873,7 @@
   },
   {
    "tag": "td",
-   "text": "0.0010.001–0.001"
+   "text": "0.00090.0006–0.001"
   },
   {
    "tag": "td",
@@ -1137,7 +1137,7 @@
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1145,15 +1145,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0003"
   },
   {
    "tag": "td",
@@ -1173,11 +1173,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1185,15 +1185,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1213,11 +1213,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1225,15 +1225,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1253,11 +1253,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1265,15 +1265,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1293,11 +1293,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1305,15 +1305,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1333,11 +1333,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1345,15 +1345,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0003"
   },
   {
    "tag": "td",
@@ -1373,11 +1373,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1385,15 +1385,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.001"
+   "text": "0.0002<0.0001–0.0006"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.001"
+   "text": "0.0002<0.0001–0.0007"
   },
   {
    "tag": "td",
@@ -1413,11 +1413,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1425,15 +1425,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1453,11 +1453,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1465,15 +1465,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0004"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1493,11 +1493,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1505,15 +1505,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1533,11 +1533,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1545,15 +1545,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1573,11 +1573,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1585,15 +1585,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.001"
+   "text": "0.0003<0.0001–0.0007"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1613,11 +1613,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1625,15 +1625,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1653,11 +1653,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1665,15 +1665,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
@@ -1693,11 +1693,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1705,15 +1705,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0001<0.0001–0.0002"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "0.0002<0.0001–0.0004"
   },
   {
    "tag": "td",
@@ -1733,11 +1733,11 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",
-   "text": "kmerseek, queries shuffled"
+   "text": "kmerseek, queries shuffled (chance level)"
   },
   {
    "tag": "td",
@@ -1745,15 +1745,15 @@
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–0.0001"
   },
   {
    "tag": "td",
-   "text": "0.0000.000–0.000"
+   "text": "<0.0001<0.0001–<0.0001"
   },
   {
    "tag": "td",
@@ -1773,7 +1773,7 @@
   },
   {
    "tag": "td",
-   "text": "chance level: each query shuffled with its dipeptide counts kept (k = 2, seed 1), same setting; other tools: not run yet"
+   "text": "chance level: each query shuffled keeping its count of every two-residue pair, seed 1; same setting; other tools: not run yet"
   },
   {
    "tag": "td",

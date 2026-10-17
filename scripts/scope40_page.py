@@ -14,7 +14,7 @@ import polars as pl
 import scope40_rules as R
 from tools import KINDS, TOOLS
 
-FIG_CURVES, FIG_CLASSES, TABLE = 19, 20, 3
+FIG_CURVES, FIG_CLASSES, TABLE = 20, 21, 3
 LEVELS = ["family", "superfamily", "fold"]
 CLASS_NAMES = {"a": "all alpha", "b": "all beta", "c": "alpha/beta", "d": "alpha+beta",
                "e": "multi-domain proteins", "f": "membrane and cell surface", "g": "small proteins"}
@@ -23,8 +23,8 @@ PIPELINE_PR = "https://github.com/seanome/2024-kmerseek-analysis/pull/166"
 
 SCORED_NOTE = "from the per-query file other authors published; our own run is in the pipeline"
 NOT_RUN = "no per-query hit list on SCOPe40 yet; pipeline written, not launched"
-SCORED_NOTES = {"kmerseek": "from the pair tables the PR 107 combination runs kept on Sherlock, ranked by "
-                            "region E-value; scored with Foldseek's rules"}
+SCORED_NOTES = {"kmerseek": "from kmerseek's own hit lists (analysis PR 107 runs), ranked by region "
+                            "E-value"}
 # Rows of Table 3 in the order of Table 1, then the two no-search rows.
 ROWS = [
     ("kmerseek", NOT_RUN + "; the PR 107 runs kept one area per setting, not the hits"),
@@ -63,8 +63,8 @@ def row_info(tool: str, setting: str, summ: dict) -> dict:
     """Name, colour and marks for one (tool, setting) row on the page."""
     if tool.endswith("_shuffled"):
         base = tool[: -len("_shuffled")]
-        return {"name": f"{TOOLS[base]['name']} {setting}, queries shuffled (chance level)", "kind": "nosearch",
-                "shape": "circle", "color": "var(--k-nosearch)", "dash": "5 3",
+        return {"name": f"{TOOLS[base]['name']} {setting}, queries shuffled (chance level)", "kind": TOOLS[base]["kind"],
+                "shape": "circle", "color": f"var(--k-{TOOLS[base]['kind']})", "dash": "5 3",
                 "primary": setting == best_setting(summ, base), "chance": True}
     best = best_setting(summ, tool)
     name = TOOLS[tool]["name"] + (f" {setting}" if tool == "kmerseek" else "")
@@ -95,14 +95,21 @@ def data_json(data_dir: Path) -> dict:
     return out
 
 
+def fa(x: float) -> str:
+    """An AUC to three decimals, or four below 0.001 so a chance level does not print as 0.000."""
+    if 0 < x < 0.0001:
+        return "<0.0001"
+    return f"{x:.4f}" if 0 < x < 0.001 else f"{x:.3f}"
+
+
 def auc_cells(by: dict, tool: str, setting: str) -> tuple[list[str], float | None]:
     cells, cov = [], None
     for lvl in LEVELS:
         r = by.get((tool, setting, lvl))
         if r:
             cov = r["coverage"]
-            cells.append(f'<td class="num" data-v="{r["auc"]:.6f}">{r["auc"]:.3f}'
-                         f'<span class="key" style="display:block">{r["lo"]:.3f}–{r["hi"]:.3f}</span></td>')
+            cells.append(f'<td class="num" data-v="{r["auc"]:.6f}">{fa(r["auc"])}'
+                         f'<span class="key" style="display:block">{fa(r["lo"])}–{fa(r["hi"])}</span></td>')
         else:
             cells.append('<td class="num" data-v="">—</td>')
     return cells, cov
@@ -149,8 +156,8 @@ def table_rows(summ: dict) -> str:
                 base = tool[: -len("_shuffled")]
                 best = best_setting(summ, base)
                 for s in sorted(settings[tool], key=lambda s: (s != best, s)):
-                    out.append(row(tool, f"{TOOLS[base]['name']}, queries shuffled", "nosearch", s,
-                                   "each query shuffled with its dipeptide counts kept (k = 2, seed 1), same "
+                    out.append(row(tool, f"{TOOLS[base]['name']}, queries shuffled (chance level)", TOOLS[base]["kind"], s,
+                                   "each query shuffled keeping its count of every two-residue pair, seed 1; same "
                                    "setting; other tools: not run yet", "chance level",
                                    cls="pinned" + ("" if s == best else f" more more-{tool}")))
                 others = len(settings[tool]) - 1
@@ -190,15 +197,24 @@ def page(data_dir: Path, r_cpu: float, r_gpu: float) -> tuple[str, dict]:
     prim = [r for r in summ["overall"] if r["setting"] == best[r["tool"]]]
     max_delta = max(abs(r["auc_hits_only"] - r["auc"]) for r in prim)
     min_cov = min(r["coverage"] for r in prim if not r["tool"].endswith("_shuffled"))
+    cv = tb["rocx_counts_vs_208"]
     kind_legend = "".join(
         f'<span class="item"><span class="kind k-{k}" aria-hidden="true"></span>{esc(KINDS[k]["label"])}</span>'
-        for k in ("kmers", "letters", "profiles", "shapes", "models", "nosearch"))
+        for k in ("kmers", "letters", "shapes"))
     not_scored = [TOOLS[t]["name"] for t, _ in ROWS if t not in best and t != "hmmscan"]
     km_text = "" if km is None else (
         f" kmerseek is scored from its own hit lists: the one-row-per-pair tables that its SCOPe 2.08 runs "
-        f"kept on Sherlock (PR 107), {n_km} kmerseek settings, ranked by region E-value and scored here "
-        f"with Foldseek's rules. The chance level is the same kmerseek settings run on every query "
-        f"shuffled with its dipeptide counts kept.")
+        f"kept on Stanford's Sherlock cluster (seanome/2024-kmerseek-analysis PR 107), {n_km} kmerseek "
+        f"settings, scored here with the same rules. Its hits are ranked by region E-value, the E-value of "
+        f"the best-matching region of a pair (smaller is better). A setting such as hsdm17.k4.c_max names "
+        f"the reduced alphabet (hsdm17, 17 letters), the k-mer length (k = 4) and the mismatch penalty "
+        f"used when a match is extended (c_max, the alphabet's largest log-odds penalty; c2, a penalty of "
+        f"2). The chance level is the same kmerseek settings run on every query shuffled so that it keeps "
+        f"its count of every two-residue pair (dipeptide), seed 1.")
+    km_fold = "" if km is None else (
+        ", and kmerseek " + ("below 0.001 at every setting" if max(r["auc"] for r in summ["overall"]
+                                                                  if r["tool"] == "kmerseek" and r["level"] == "fold") < 0.001
+                             else f"{km['fold']['auc']:.3f} at its best setting"))
     km_sentence = "" if km is None else (
         f" kmerseek's best setting, {best['kmerseek']}, reaches {km['family']['auc']:.3f} at the family "
         f"level and {km['superfamily']['auc']:.3f} at the superfamily level; the same setting on shuffled "
@@ -209,12 +225,15 @@ def page(data_dir: Path, r_cpu: float, r_gpu: float) -> tuple[str, dict]:
 <p class="lede">Given one known domain, does the tool rank the domain's known relatives above the
 first unrelated hit?</p>
 <div class="prose">
-<p>Table 1 places annotations on human proteins by searching one relative's proteome, and scores
-where the ends of each call land. This page does something else: it ranks pairs of single
+<p>Table 1, on the <a href="index.html">leaderboard page</a>, places annotations on human proteins
+by searching one relative's proteome, and scores where the ends of each call land. (Figures and
+tables are numbered across the whole site.) This page does something else: it ranks pairs of single
 structural domains from SCOPe, and never scores boundaries. SCOPe sorts domains into
 class.fold.superfamily.family; an id such as <span class="mono">b.1.1.1</span> is class b (all
 beta), fold 1, superfamily 1, family 1. Domains in one superfamily are taken to share an ancestor;
-domains in one fold share a shape, with or without one. The set searched is SCOPe 2.08 at 40%
+domains in one fold share a shape, with or without one. A family numbered 0 holds automated
+matches, domains placed in a superfamily but in no curated family; two domains in the same family 0
+count as the same family. The set searched is SCOPe 2.08 at 40%
 identity, {n_dom:,} domains. Every domain is searched against all of them. The queries are the
 {n_q:,} domains that have another member in the set at all three levels, as in Foldseek's
 benchmark (<a href="methods.html#scope40">Methods</a>). Foldseek's own set was SCOPe 2.01, 11,211
@@ -225,10 +244,10 @@ a different family, and at the fold level the same fold but a different superfam
 of a different fold. Any other hit is <b>not counted</b>. Sort the hits by the tool's own score,
 best first, after dropping the query's hit to itself, and stop at the first FP. The
 <b>sensitivity up to the first false positive</b> is the TPs above that cut divided by the TPs the
-query has in the set: the domains it could find there. That is the denominator of LoL-align's
-copy of Foldseek's scoring script (Reifenrath et al. 2026). Foldseek's original script adds 1 at
-the superfamily and fold levels, because it leaves the query itself in those counts; Figure
-{R.FIG} shows both.</p>
+query has in the set: the domains it could find there. LoL-align, a structure aligner from the
+same groups as Foldseek, reuses Foldseek's benchmark with this denominator (Reifenrath et al. 2026).
+Foldseek's original script adds 1 to the bottom of the fraction at the superfamily and fold levels,
+because it leaves the query itself in those counts; Figure {R.FIG} shows both.</p>
 </div>
 
 <figure class="ex-fig" id="fig-scope40-labels">
@@ -237,7 +256,7 @@ the superfamily and fold levels, because it leaves the query itself in those cou
 holds {R.EX_N['family']} other domains in the query's family, {R.EX_N['superfamily']} in its
 superfamily but outside the family, and {R.EX_N['fold']} in its fold but outside the superfamily.
 Hits 1, 5 and 7 are three different domains of the query's family; the query's hit to itself was
-dropped before hit 1. The small grey line under the superfamily and fold rows divides by one more,
+dropped before hit 1. The small grey text under the superfamily and fold values divides by one more,
 as Foldseek's original script does; this page does not. The bottom row is the rule this site first planned, which also counts
 the family at the superfamily level; it is not used.</figcaption>
 {R.legend_html()}
@@ -254,26 +273,38 @@ a different fold, so the walk stops there at every level. Family: hits 1 and 5,
 <div class="prose">
 <p>Over many queries, sort the queries by sensitivity, highest first, and plot sensitivity against
 the fraction of queries. The <b>area under the curve</b> (AUC) is the mean sensitivity over all
-queries: the AUC and the mean are the same number. <b>Coverage</b> is the share of queries with at
-least one hit at the settings the tool was run with.</p>
+queries: the AUC and the mean are the same number. (Foldseek's paper also says "area", for one
+query's own value; on this page AUC always means this area across queries.) <b>Coverage</b> is the
+share of queries with at least one hit at the settings the tool was run with. It says nothing about
+whether the hits are right: kmerseek on shuffled queries has coverage near 100% too. For the
+published files it is read from each row's counts: a query's first hit is either a TP at some level
+or an FP, so a row with no TP and no FP had no hits.</p>
 <p><b>Every query counts.</b> A query with no hits scores 0 and stays in every mean, every curve and
 every area. An earlier kmerseek claim, that it "outperforms Foldseek on SCOPe", computed the area
 over only the queries kmerseek returned hits for, 3.3% of them. That number is retired.</p>
-<p><b>Inputs.</b> Foldseek runs on the SCOPe domain structures themselves: experimental
-coordinates from the PDB, not predicted. ProstT5 + Foldseek and every other tool run on the domain
-sequences. Foldseek and MMseqs2 are read from per-query files that other
-authors published on SCOPe 2.08 (folder
-<span class="mono">data/tea_scope40_rocx_files</span> of seanome/2024-kmerseek-analysis); those
-files do not record which structures or settings the runs used. Their own scoring script dropped
-each self-hit. {n_miss} of the {n_q:,} queries are missing from both files; they score 0 and are
-listed under Table {TABLE}.{km_text} Not scored yet: {esc(", ".join(not_scored))}; their pipeline keeps
-per-query hit lists and is written but not launched (<a href="{PIPELINE_PR}">pipeline PR</a>).</p>
+<p><b>Inputs.</b> In this site's pipeline, Foldseek runs on the SCOPe domain structures
+themselves (experimental coordinates from the PDB, not predicted); ProstT5 + Foldseek (ProstT5 is
+a protein language model that predicts Foldseek's 3Di shape letters from the sequence) and every
+other tool run on the domain sequences. The Foldseek and MMseqs2 rows shown here are not from that
+pipeline: they are read from per-query files that other authors published on SCOPe 2.08, kept in
+seanome/2024-kmerseek-analysis (folder <span class="mono">data/tea_scope40_rocx_files</span>; the
+files do not name their run, its structures or its settings). Their scoring script dropped each
+self-hit. Their runs also searched a domain list with some 2.08 domains missing (family, superfamily
+or fold sizes smaller on {cv['any']:,} of their {cv['n_rows']:,} rows), while kmerseek searched all
+{n_dom:,}, so kmerseek's rows and theirs are not on quite the same footing. {n_miss} of the {n_q:,} queries are missing from both files; they score 0 and are
+listed under Table {TABLE}.{km_text} Not scored yet: {esc("; ".join(not_scored))}. Their pipeline keeps
+per-query hit lists and is written but not launched
+(<a href="{PIPELINE_PR}">seanome/2024-kmerseek-analysis PR 166</a>).</p>
 </div>
 
 <figure class="fgfig" id="fig-scope40-curves">
 <figcaption><b>Figure {FIG_CURVES}.</b> Sensitivity up to the first false positive, one line per
-tool, queries sorted from highest to lowest; a, family; b, superfamily; c, fold. The area under
-each line is its AUC. n = {n_q:,} queries, SCOPe 2.08 at 40% identity.</figcaption>
+tool and setting, queries sorted from highest to lowest; a, family; b, superfamily; c, fold. The
+area under each line is its AUC. Colour is the kind of tool; kmerseek on shuffled queries is
+kmerseek's colour, dashed. The other kmerseek settings, behind "+ more settings", are drawn thin
+and pale in kmerseek's colour; hover a line for its name. At the fold level the MMseqs2, kmerseek
+and shuffled-query lines all lie along 0. n = {n_q:,} queries, SCOPe 2.08 at 40%
+identity.</figcaption>
 <div class="legend" aria-label="Colour key">{kind_legend}</div>
 <div class="s40-controls" id="s40-curve-controls">
 <fieldset><legend>Tools</legend><span id="s40-tool-boxes"></span></fieldset>
@@ -286,7 +317,7 @@ each line is its AUC. n = {n_q:,} queries, SCOPe 2.08 at 40% identity.</figcapti
 <p class="fg-sentence">Foldseek, comparing shapes, finds family members for most queries
 (AUC {fs['family']['auc']:.3f}) and keeps much of its lead at the superfamily level
 ({fs['superfamily']['auc']:.3f} against MMseqs2's {mm['superfamily']['auc']:.3f}). At the fold
-level both are near the floor ({fs['fold']['auc']:.3f} and {mm['fold']['auc']:.3f}). A fold-level
+level Foldseek reaches {fs['fold']['auc']:.3f} and MMseqs2 {mm['fold']['auc']:.3f}{km_fold}. A fold-level
 TP is a domain of the same shape, which need not share an ancestor (Cheng et al. 2008).{km_sentence}
 Dropping the no-hit queries moves a drawn AUC by at most {max_delta:.3f} here, because every
 search tool drawn returns hits for at least {pct(min_cov)} of queries.</p>
@@ -295,23 +326,27 @@ search tool drawn returns hits for at least {pct(min_cov)} of queries.</p>
 <figure class="fgfig" id="fig-scope40-classes">
 <figcaption><b>Figure {FIG_CLASSES}.</b> Mean sensitivity up to the first false positive by SCOPe
 class, with the 95% bootstrap interval as a bar (1,000 resamples of the queries, seed
-{summ['seed']}); a, family; b, superfamily; c, fold. Classes:
+{summ['seed']}; a bar shorter than its dot is hidden behind it); a, family; b, superfamily; c, fold.
+Classes:
 {"; ".join(f"{c}, {CLASS_NAMES[c]} (n = {cls_n[c]:,})" for c in CLASS_NAMES if c in cls_n)}.
 {"".join(f"Class {c} ({CLASS_NAMES[c]}) has no query with another member at all three levels, so it has no column. " for c in absent)}Click
 a class to list its queries under the figure.</figcaption>
 <div class="legend" aria-label="Marks" id="s40-class-legend"></div>
 <div id="s40-classes"></div>
 <p class="fg-sentence">Classes f (membrane and cell surface) and g (small proteins): composition
-and cysteine spacing can match without homology there, so read those two columns with the
-composition-scan row beside them. That row is not run yet.</p>
+and cysteine spacing can match without homology there, so read those two columns against the
+shuffled-query control, and against the composition scan once it is run (not run yet).</p>
 <div class="fg-list" id="s40-class-list"></div>
 </figure>
 
 <h2 id="s40-table">Table {TABLE}. Tool by level</h2>
 <p class="prose">AUC with its 95% bootstrap interval under it, coverage, and cost. Click a heading
-to sort; rows with no value sort last; the two no-search rows stay at the bottom. Core-hours and
-GPU-hours come from a run's task records; the published files have none, so cost reads
-<i>not measured</i>. Prices, as on Table 1: <label>r<sub>cpu</sub> $ per CPU-hour
+to sort; rows with no value sort last; the controls (the composition scan and kmerseek on
+shuffled queries) stay at the bottom. An AUC below 0.001 is printed to four decimals. Core-hours
+and GPU-hours come from a run's task records; none of the scored rows has them (the published
+files are someone else's runs, and the kmerseek searches were not timed for this), so cost reads
+<i>not measured</i> and the price boxes change nothing until the pipeline runs. Prices, as on
+Table 1: <label>r<sub>cpu</sub> $ per CPU-hour
 <input type="number" id="s40-rcpu" step="0.001" min="0" value="{r_cpu:g}"></label>
 <label>r<sub>gpu</sub> $ per GPU-hour <input type="number" id="s40-rgpu" step="0.01" min="0"
 value="{r_gpu:g}"></label>.</p>

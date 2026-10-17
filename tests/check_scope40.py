@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Check the SCOPe40 page (scope40.html) and the SCOPe40 section of the Methods page.
 
-1. Figure 18's worked example: label() against labels written out by hand from the SCOPe ids.
+1. Figure 19's worked example: label() against labels written out by hand from the SCOPe ids.
 2. Numbers: the Methods section against data/scope40_testbed.json; the page's AUCs, coverage,
    n and class counts against data/scope40_summary.json; the summary against a recomputation
    from data/scope40_long.parquet (AUC = mean sensitivity over ALL queries, coverage = share
    with has_hits, hits-only AUC over has_hits queries).
-3. Headless Chrome, light and dark, 1280 and 400 px: no page errors; in Figures 18, 19 and 20
+3. Headless Chrome, light and dark, 1280 and 400 px: no page errors; in Figures 19, 20 and 21
    no two SVG text elements overlap and none leaves its SVG; no sideways scroll; every
    "Figure N" names a caption on the site. Controls: each tool box removes its lines; the
    no-hit toggle prints, per tool and level, a change equal to the summary's hits-only AUC
@@ -83,7 +83,8 @@ def check_numbers(site: Path, data: Path, errors: list) -> dict:
             errors.append(f"{r['tool']} {r['level']}: AUC outside its interval")
     page = (site / "scope40.html").read_text()
     for r in summ["overall"]:
-        if f"{r['auc']:.3f}" not in page:
+        a = r["auc"]
+        if ("<0.0001" if 0 < a < 0.0001 else f"{a:.4f}" if 0 < a < 0.001 else f"{a:.3f}") not in page:
             errors.append(f"scope40.html: AUC {r['auc']:.3f} ({r['tool']} {r['level']}) not in Table 3")
     if f"n = {n_q:,} queries" not in page:
         errors.append("scope40.html: caption n is not the number of queries")
@@ -142,13 +143,15 @@ def check_render(site: Path, out: Path, summ: dict, errors: list) -> None:
                 if page.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth + 1"):
                     errors.append(f"{tag}: page scrolls sideways")
                 if page.locator("#fig-scope40-labels [data-label]").count() != 32:
-                    errors.append(f"{tag}: Figure 18 does not have 32 hit boxes")
+                    errors.append(f"{tag}: Figure 19 does not have 32 hit boxes")
+                if width == 1280:
+                    # The sticky site header would sit over the element screenshots.
+                    page.add_style_tag(content="header.site{position:static !important}")
+                    for sel, name in (("#fig-scope40-labels", "fig19"), ("#fig-scope40-curves", "fig20"),
+                                      ("#fig-scope40-classes", "fig21"), ("#s40-tab", "table3")):
+                        page.locator(sel).screenshot(path=str(out / f"scope40_{name}_{scheme}.png"))
                 if width == 1280 and scheme == "light":
                     check_controls(page, summ, errors)
-                if width == 1280:
-                    for sel, name in (("#fig-scope40-labels", "fig18"), ("#fig-scope40-curves", "fig19"),
-                                      ("#fig-scope40-classes", "fig20"), ("#s40-tab", "table3")):
-                        page.locator(sel).screenshot(path=str(out / f"scope40_{name}_{scheme}.png"))
                 if errs:
                     errors.append(f"{tag}: page errors {errs}")
                 page.close()
@@ -172,36 +175,37 @@ def check_controls(page, summ: dict, errors: list) -> None:
     tools = page.locator("#s40-tool-boxes input").count()
     on = page.locator("#s40-tool-boxes input:checked").count()
     if n_lines != 3 * on:
-        errors.append(f"Figure 19: {n_lines} lines for {on} ticked tools")
+        errors.append(f"Figure 20: {n_lines} lines for {on} ticked tools")
     page.locator("#s40-tool-boxes input").first.uncheck()
     if page.locator("#s40-curves path[data-tool]").count() != 3 * (on - 1):
-        errors.append("Figure 19: unticking a tool does not remove its lines")
+        errors.append("Figure 20: unticking a tool does not remove its lines")
     page.locator("#s40-tool-boxes input").first.check()
     before = page.locator("#s40-curves path[data-tool]").first.get_attribute("d")
     page.locator('input[name="s40-nohit"][value="drop"]').check()
     after = page.locator("#s40-curves path[data-tool]").first.get_attribute("d")
     if before == after:
-        errors.append("Figure 19: the no-hit toggle does not redraw the lines")
+        errors.append("Figure 20: the no-hit toggle does not redraw the lines")
     deltas = page.evaluate("""() => [...document.querySelectorAll('#s40-curve-legend td[data-delta]')]
         .map(td => [td.closest('tr').getAttribute('data-key'), td.cellIndex, parseFloat(td.getAttribute('data-delta')),
                     td.textContent])""")
     levels = ["family", "superfamily", "fold"]
     if len(deltas) != 3 * on:
-        errors.append(f"Figure 19: {len(deltas)} printed changes, expected {3 * on}")
+        errors.append(f"Figure 20: {len(deltas)} printed changes, expected {3 * on}")
     for key, col, d, shown in deltas:
         tool, setting = key.split("|")
         s = next(r for r in summ["overall"] if r["tool"] == tool and r["setting"] == setting and r["level"] == levels[col - 1])
         want = s["auc_hits_only"] - s["auc"]
         if abs(d - want) > 1e-9:
-            errors.append(f"Figure 19 toggle {tool} {levels[col - 1]}: printed change {d}, recomputed {want}")
-        if f"{abs(want):.3f}" not in shown:
-            errors.append(f"Figure 19 toggle {tool} {levels[col - 1]}: text '{shown}' lacks {abs(want):.3f}")
+            errors.append(f"Figure 20 toggle {tool} {levels[col - 1]}: printed change {d}, recomputed {want}")
+        w = abs(want)
+        if ("<0.0001" if 0 < w < 0.0001 else f"{w:.4f}" if 0 < w < 0.001 else f"{w:.3f}") not in shown:
+            errors.append(f"Figure 20 toggle {tool} {levels[col - 1]}: text '{shown}' lacks {abs(want):.3f}")
     page.locator('input[name="s40-nohit"][value="zero"]').check()
     g = page.locator('#s40-classes g.fg-col[data-cls="f"][data-level="family"]')
     g.locator("rect").first.click(force=True)
     n_f = next(r["n_queries"] for r in summ["by_class"] if r["scope_class"] == "f" and r["level"] == "family")
     if page.locator("#s40-class-table tbody tr").count() != n_f:
-        errors.append("Figure 20: clicking class f does not list its queries")
+        errors.append("Figure 21: clicking class f does not list its queries")
     page.locator('#s40-tab thead button[data-col="2"]').click()
     first = page.locator("#s40-tab tbody tr").first.get_attribute("data-tool")
     page.locator('#s40-tab thead button[data-col="2"]').click()
