@@ -118,7 +118,7 @@
     const box = document.getElementById("s40-classes");
     box.innerHTML = "";
     const cls = Object.keys(D.classNames);
-    const W = 820, H = 230, L = 54, R = 10, T = 12, B = 46;
+    const W = 820, H = 240, L = 54, R = 10, T = 12, B = 54;
     const slot = (W - L - R) / cls.length;
     const Y = (y) => T + (1 - y) * (H - T - B);
     for (const lvl of LEVELS) {
@@ -145,8 +145,8 @@
           marker(g, t.shape, x, Y(r.mean), t.color,
             `${t.name}, class ${c} (${D.classNames[c]}), ${lvl}: mean ${f3(r.mean)}, 95% interval ${f3(r.lo)}–${f3(r.hi)}, n = ${r.n_queries.toLocaleString("en-US")}. Click to list the queries.`, t.chance);
         });
-        text(g, cx, H - B + 16, `class ${c}`, { class: "fg-lab", "text-anchor": "middle" });
-        text(g, cx, H - B + 31, `n = ${rows[0].n_queries.toLocaleString("en-US")}`, { class: "fg-tick", "text-anchor": "middle" });
+        text(g, cx, H - B + 24, `class ${c}`, { class: "fg-lab", "text-anchor": "middle" });
+        text(g, cx, H - B + 39, `n = ${rows[0].n_queries.toLocaleString("en-US")}`, { class: "fg-tick", "text-anchor": "middle" });
       });
     }
   }
@@ -197,6 +197,7 @@
     // Cost per 1,000 queries = core-hours x r_cpu + GPU-hours x r_gpu, where both are measured.
     const rc = parseFloat(document.getElementById("s40-rcpu").value), rg = parseFloat(document.getElementById("s40-rgpu").value);
     document.querySelectorAll("#s40-tab tbody tr").forEach((tr) => {
+      if (tr.cells.length < 9) return;
       const ch = tr.cells[6].getAttribute("data-v"), gh = tr.cells[7].getAttribute("data-v");
       const td = tr.cells[8];
       if (ch === "" || ch === null) { td.textContent = "—"; td.setAttribute("data-v", ""); return; }

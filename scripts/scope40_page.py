@@ -202,7 +202,7 @@ def page(data_dir: Path, r_cpu: float, r_gpu: float) -> tuple[str, dict]:
     km_sentence = "" if km is None else (
         f" kmerseek's best setting, {best['kmerseek']}, reaches {km['family']['auc']:.3f} at the family "
         f"level and {km['superfamily']['auc']:.3f} at the superfamily level; the same setting on shuffled "
-        f"queries reaches {ch['family']['auc']:.3f} and {ch['superfamily']['auc']:.3f}, the chance level."
+        f"queries reaches {ch['family']['auc']:.4f} and {ch['superfamily']['auc']:.4f}, the chance level."
         if ch else "")
 
     body = f"""<h1>SCOPe40: does a tool rank a domain's relatives first?</h1>
