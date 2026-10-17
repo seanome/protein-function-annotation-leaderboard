@@ -1,0 +1,323 @@
+{
+ "afdb_confidence_P05484": {
+  "bytes": 970,
+  "fetched_utc": "2026-10-15T14:18:22Z",
+  "file": "afdb_confidence_P05484.json",
+  "http_status": 200,
+  "release": "AlphaFold DB v6",
+  "sha256": "441965f6cd102e233d9138aac9a793ee18bae5c76e5fa3a35af6824157efdf25",
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P05484-F1-confidence_v6.json"
+ },
+ "afdb_confidence_P24856": {
+  "bytes": 10973,
+  "fetched_utc": "2026-10-15T14:18:22Z",
+  "file": "afdb_confidence_P24856.json",
+  "http_status": 200,
+  "release": "AlphaFold DB v6",
+  "sha256": "cfa107c5a316a483089ea216634dfa440ecf37ee2fac3ba2b39f8cdf55ca7d61",
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P24856-F1-confidence_v6.json"
+ },
+ "afdb_confidence_P42212": {
+  "bytes": 3268,
+  "fetched_utc": "2026-10-15T14:18:22Z",
+  "file": "afdb_confidence_P42212.json",
+  "http_status": 200,
+  "release": "AlphaFold DB v6",
+  "sha256": "422dc5bc499109afdbedcb608245331e9660dfea1f944347bf0bcb1016146828",
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P42212-F1-confidence_v6.json"
+ },
+ "afdb_confidence_Q25460": {
+  "bytes": 12153,
+  "fetched_utc": "2026-10-15T14:18:21Z",
+  "file": "afdb_confidence_Q25460.json",
+  "http_status": 200,
+  "release": "AlphaFold DB v6",
+  "sha256": "2342c9088d4151ed159624f87c20f6061ebc3c3b049dd157c996ce678d7efbca",
+  "url": "https://alphafold.ebi.ac.uk/files/AF-Q25460-F1-confidence_v6.json"
+ },
+ "afdb_predictions": {
+  "bytes": 18306445,
+  "fetched_utc": "2026-10-15T14:18:21Z",
+  "file": "afdb_predictions.jsonl.gz",
+  "release": "AlphaFold DB API (version per model in latestVersion)",
+  "rows": 50928,
+  "sha256": "34b11ddb597439598be5481ab169134d199da16a34473e0559edb79a38165a24",
+  "started_utc": "2026-10-15T14:06:58Z",
+  "url": "https://alphafold.ebi.ac.uk/api/prediction/{accession}"
+ },
+ "col_accepted_species": {
+  "bytes": 145862,
+  "fetched_utc": "2026-10-15T13:19:49Z",
+  "file": "col_accepted_species.json",
+  "release": "Catalogue of Life COL26.9 (version 2026-09-11, doi 10.48580/dgz5n, dataset key 316321)",
+  "sha256": "31037e4c1d84d2c44cf7bf9b527ca5ec97e7156143b62323fa86a1a63dc4a425",
+  "url": "https://api.checklistbank.org/dataset/316321"
+ },
+ "darkset_midi_trace": {
+  "bytes": 2836492,
+  "computed": true,
+  "fetched_utc": "2026-10-16T17:46:39Z",
+  "file": "trace.ladder-0.4-midi.txt",
+  "release": "computed",
+  "sha256": "aba305259fe1c39e1ce868947dd525fad1e479421ac5acd866890447963e25be",
+  "url": "sherlock:/scratch/users/olgabot/2024-kmerseek-invertebrate-dark-set-0.4/nextflow-runs/invertebrate-dark-set/runs/ladder-0.4-midi/trace.ladder-0.4-midi.txt"
+ },
+ "deck_parquet": {
+  "bytes": 29430048,
+  "computed": true,
+  "fetched_utc": "2026-10-15T14:33:32Z",
+  "file": "wealth_inequality_uniprot_combined_sprot_trembl_taxonomy_summary.parquet",
+  "release": "computed",
+  "sha256": "67b6c77cc8f24124a760201c19936f12441b1eb313fca5279f676556f2a08621",
+  "url": "https://github.com/seanome/2025-biodata-wealth-inequality/blob/d6b68a0f31c8d26014360b556113f7571fc86a31/data/uniprot_combined_sprot_trembl_taxonomy_summary.parquet"
+ },
+ "human_canonical_fasta": {
+  "bytes": 7728297,
+  "fetched_utc": "2026-10-15T14:06:34Z",
+  "file": "UP000005640_9606.fasta.gz",
+  "release": "Last-Modified Tue, 15 Sep 2026 09:21:31 GMT",
+  "sha256": "64299d01e8f41fb6ef03cdf7ec051d3d4e5f041003b6b0fa75b09d439af79dce",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz"
+ },
+ "human_interpro_xrefs": {
+  "bytes": 5213982,
+  "fetched_utc": "2026-10-15T14:12:39Z",
+  "file": "human_interpro_xrefs.tsv.gz",
+  "release": "UniProt 2026_03 (02-September-2026)",
+  "rows": 147520,
+  "sha256": "e35fbf37573b782bb4a0d3a7e39345ada40c93d5ba404c1d585db5a2f38f3772",
+  "url": "https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP000005640&fields=accession%2Cxref_interpro%2Cxref_pfam%2Cxref_panther%2Cxref_cdd%2Cxref_gene3d%2Cxref_supfam%2Cxref_smart%2Cxref_prosite%2Cxref_prints%2Cxref_pirsf%2Cxref_hamap%2Cxref_sfld%2Cxref_ncbifam&format=tsv&size=500"
+ },
+ "human_proteome_fields": {
+  "bytes": 5787178,
+  "fetched_utc": "2026-10-15T13:57:16Z",
+  "file": "human_proteome_fields.tsv.gz",
+  "release": "UniProt 2026_03 (02-September-2026)",
+  "rows": 147520,
+  "sha256": "1935dc7eb08de6a66ce069594c5855c626850b699dd4c4b7125698ea5fc9afb8",
+  "url": "https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP000005640&fields=accession%2Creviewed%2Clength%2Cgene_primary%2Cprotein_name%2Cxref_interpro%2Cxref_alphafolddb%2Cxref_pdb&format=tsv&size=500"
+ },
+ "interpro_matches_P05484": {
+  "bytes": 3293,
+  "fetched_utc": "2026-10-15T14:35:46Z",
+  "file": "interpro_matches_P05484.json",
+  "http_status": 200,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "1be3d61e056c379583884a2e0c32ea451c174e510a3e36370a1ae4a695b67606",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P05484/?page_size=200"
+ },
+ "interpro_matches_P24856": {
+  "bytes": 27,
+  "fetched_utc": "2026-10-15T14:35:45Z",
+  "file": "interpro_matches_P24856.json",
+  "http_status": 204,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "b3d9099952278972fe6dcccaa4876ff859687876b4119738f4f23a9746f7d1d0",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P24856/?page_size=200"
+ },
+ "interpro_matches_P42212": {
+  "bytes": 6056,
+  "fetched_utc": "2026-10-15T14:35:47Z",
+  "file": "interpro_matches_P42212.json",
+  "http_status": 200,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "8313e27e1a551a4cdf44605e0eb969fbaede0c80fed29c6bf14b8574b751fb25",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/P42212/?page_size=200"
+ },
+ "interpro_matches_Q25460": {
+  "bytes": 1290,
+  "fetched_utc": "2026-10-15T14:35:44Z",
+  "file": "interpro_matches_Q25460.json",
+  "http_status": 200,
+  "release": "InterPro 110.0 (2026-09-03)",
+  "sha256": "393271d1543b4e226298d0bc88eab941950e0b22738b5de1acf006d8f4d46b68",
+  "url": "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/Q25460/?page_size=200"
+ },
+ "kappa_by_alphabet": {
+  "bytes": 1726,
+  "computed": true,
+  "fetched_utc": "2026-10-16T17:46:39Z",
+  "file": "kappa_by_alphabet.tsv",
+  "release": "computed",
+  "sha256": "3900d33e684a264050024ca6375f9f1940abc4a282e0d0555050bf9ee2a5f24b",
+  "url": "https://github.com/seanome/2024-kmerseek-analysis/blob/ec91da53b26d88474679989205045de45e38a162/nextflow-runs/invertebrate-dark-set/assets/kappa_by_alphabet.tsv"
+ },
+ "larsen2017_notebook": {
+  "bytes": 30274,
+  "computed": true,
+  "fetched_utc": "2026-10-15T14:32:52Z",
+  "file": "wealth_inequality_03_make_predicted_n_proteins.ipynb",
+  "release": "computed",
+  "sha256": "66ba1d1b4f4215e8c9187332346a79d96a55b092970e65b9a0e667690aeb13c9",
+  "url": "https://github.com/seanome/2025-biodata-wealth-inequality/blob/d6b68a0f31c8d26014360b556113f7571fc86a31/notebooks/03_make_predicted_n_proteins.ipynb"
+ },
+ "nb291_dark_fmax_metrics": {
+  "bytes": 3174903,
+  "computed": true,
+  "fetched_utc": "2026-10-16T17:46:39Z",
+  "file": "dark_fmax_metrics_2026-10-14.csv",
+  "release": "computed",
+  "sha256": "613416fb127b87230353238b01d926b6fe14f2c07cef47c9708b830d76d31beb",
+  "url": "sherlock:/scratch/users/olgabot/invertebrate-dark-set/results-0.4/dark-fmax-2026-10-14/dark_fmax_metrics.csv (analysis notebook 291, PR 133 branch)"
+ },
+ "ncbi_taxdump": {
+  "bytes": 79828323,
+  "fetched_utc": "2026-10-15T13:32:27Z",
+  "file": "taxdump.tar.gz",
+  "release": "Last-Modified Thu, 15 Oct 2026 13:29:24 GMT",
+  "sha256": "b47e04631a96ebc9b7490d3a4a2c85357be11f33d5d4cfd047ff91fee7a40d49",
+  "url": "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"
+ },
+ "oyster_canonical_fasta": {
+  "bytes": 9818453,
+  "fetched_utc": "2026-10-15T14:06:37Z",
+  "file": "UP000005408_29159.fasta.gz",
+  "release": "Last-Modified Thu, 03 Sep 2026 18:00:00 GMT",
+  "sha256": "9dab4d1e11d5cd2193f82ca071a3ff00fce72730b910dc6dd110dc3289252830",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005408/UP000005408_29159.fasta.gz"
+ },
+ "oyster_interpro_xrefs": {
+  "bytes": 1456159,
+  "fetched_utc": "2026-10-15T14:18:25Z",
+  "file": "oyster_interpro_xrefs.tsv.gz",
+  "release": "UniProt 2026_03 (02-September-2026)",
+  "rows": 57874,
+  "sha256": "8af0c7876ef5bf0b61b711219b4b2eb03cef29a5955c20ffe340ad4c6c508ca4",
+  "url": "https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP000005408&fields=accession%2Cxref_interpro%2Cxref_pfam%2Cxref_panther%2Cxref_cdd%2Cxref_gene3d%2Cxref_supfam%2Cxref_smart%2Cxref_prosite%2Cxref_prints%2Cxref_pirsf%2Cxref_hamap%2Cxref_sfld%2Cxref_ncbifam&format=tsv&size=500"
+ },
+ "oyster_proteome_fields": {
+  "bytes": 1322493,
+  "fetched_utc": "2026-10-15T14:05:15Z",
+  "file": "oyster_proteome_fields.tsv.gz",
+  "release": "UniProt 2026_03 (02-September-2026)",
+  "rows": 57874,
+  "sha256": "7fe2f037dfaff041d3e0a7b3455df10030994896f1d1e39742a328fe820d83c3",
+  "url": "https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP000005408&fields=accession%2Creviewed%2Clength%2Cgene_primary%2Cprotein_name%2Cxref_interpro%2Cxref_alphafolddb%2Cxref_pdb&format=tsv&size=500"
+ },
+ "reference_proteomes_readme": {
+  "bytes": 2736451,
+  "fetched_utc": "2026-10-15T14:05:33Z",
+  "file": "README",
+  "release": "Last-Modified Thu, 03 Sep 2026 18:00:00 GMT",
+  "sha256": "6addba1761cc9d6e251140972cf079377736145632f465e5e0033f8e5dc6e88c",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/README"
+ },
+ "sherlock_busco_human": {
+  "bytes": 93241,
+  "computed": true,
+  "fetched_utc": "2026-10-16T16:49:58Z",
+  "file": "full_table.tsv",
+  "release": "computed",
+  "sha256": "14bd1daf8ad12953074bb272fc9b574c33dbf14e2709dc81c6f26173909818c7",
+  "url": "Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch"
+ },
+ "sherlock_busco_oyster": {
+  "bytes": 98573,
+  "computed": true,
+  "fetched_utc": "2026-10-16T16:49:58Z",
+  "file": "full_table.tsv",
+  "release": "computed",
+  "sha256": "ed19c9625aef9fc618526a9bfdba51be9188b0663b450f5a8d2eae10216d5eb7",
+  "url": "Sherlock job 47961379: BUSCO 6.1.0 -m proteins, metazoa_odb12 (2026-05-22, 672 BUSCOs), scripts/why/sherlock_labels.sbatch"
+ },
+ "sherlock_kmerseek": {
+  "bytes": 8372,
+  "computed": true,
+  "fetched_utc": "2026-10-17T13:29:26Z",
+  "file": "kmerseek_hits_manifest.tsv",
+  "release": "computed",
+  "sha256": "aac0da1b356f11507391343c4b8960e663a13544fd1eb204c13998f93dc4f5b4",
+  "url": "Sherlock kmerseek jobs submitted 2026-10-17 by scripts/why/kmerseek_submit.sh; finished searches' hits files (sha256 per file in this manifest)"
+ },
+ "sherlock_mmseqs": {
+  "bytes": 117883518,
+  "computed": true,
+  "fetched_utc": "2026-10-16T16:49:58Z",
+  "file": "mmseqs_vs_sprot.tsv.gz",
+  "release": "computed",
+  "sha256": "71467410052402aee148636e67babbeff251e2bf49afc80422e203ef599ff3a7",
+  "url": "Sherlock job 47961379 task 0: MMseqs2 18.8cc5c easy-search -s 7.5 -e 1e-3 --max-seqs 1000, scripts/why/sherlock_labels.sbatch"
+ },
+ "sifts_uniprot_pdb": {
+  "bytes": 1424469,
+  "fetched_utc": "2026-10-15T13:33:14Z",
+  "file": "sifts_uniprot_pdb.tsv.gz",
+  "release": "Last-Modified Sun, 11 Oct 2026 18:53:06 GMT",
+  "sha256": "668bf92793bc085cc0757e897f9b7c808c461f6f42c85e7fee0eddb759e8c897",
+  "url": "https://ftp.ebi.ac.uk/pub/databases/msd/sifts/flatfiles/tsv/uniprot_pdb.tsv.gz"
+ },
+ "swissprot_dat": {
+  "bytes": 700301138,
+  "fetched_utc": "2026-10-15T14:06:30Z",
+  "file": "uniprot_sprot.dat.gz",
+  "release": "Last-Modified Thu, 03 Sep 2026 18:00:00 GMT",
+  "sha256": "c87208822a56e8ae0d6bf5072c287b35e42a8b9f25e8bd771389abc5b7a29c38",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz"
+ },
+ "swissprot_fasta": {
+  "bytes": 93801562,
+  "fetched_utc": "2026-10-15T14:06:04Z",
+  "file": "uniprot_sprot.fasta.gz",
+  "release": "Last-Modified Thu, 03 Sep 2026 18:00:00 GMT",
+  "sha256": "a9c3496aa727e61d25d9e1291c9ba28d2c2ad19c0e26569dc083d53ec4169536",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz"
+ },
+ "uniprot_P05484": {
+  "bytes": 29208,
+  "fetched_utc": "2026-10-15T13:33:17Z",
+  "file": "uniprot_P05484.json",
+  "release": "UniProt 2026_03",
+  "sha256": "6dbc6af26b1a9fd7639f13c3354903fc31ed6836fd0b903afd0b22f55e3f8dac",
+  "url": "https://rest.uniprot.org/uniprotkb/P05484.json"
+ },
+ "uniprot_P24856": {
+  "bytes": 13793,
+  "fetched_utc": "2026-10-15T13:33:17Z",
+  "file": "uniprot_P24856.json",
+  "release": "UniProt 2026_03",
+  "sha256": "d60dc37e0702be099979f19eeee97b551c841057ca75e472e1649a8bb071bbdb",
+  "url": "https://rest.uniprot.org/uniprotkb/P24856.json"
+ },
+ "uniprot_P42212": {
+  "bytes": 244843,
+  "fetched_utc": "2026-10-15T13:33:19Z",
+  "file": "uniprot_P42212.json",
+  "release": "UniProt 2026_03",
+  "sha256": "9808303592b6644d614d7e048230f7279051ab5db171e3a1d9c5977a9e7bf383",
+  "url": "https://rest.uniprot.org/uniprotkb/P42212.json"
+ },
+ "uniprot_Q25460": {
+  "bytes": 106017,
+  "fetched_utc": "2026-10-15T13:33:16Z",
+  "file": "uniprot_Q25460.json",
+  "release": "UniProt 2026_03",
+  "sha256": "a27d83f1ca01578f5103cbd44fe9efb15f5bc6e427023698ecc4579930a4254f",
+  "url": "https://rest.uniprot.org/uniprotkb/Q25460.json"
+ },
+ "uniprot_relnotes": {
+  "bytes": 1146,
+  "fetched_utc": "2026-10-15T14:06:33Z",
+  "file": "relnotes.txt",
+  "release": "Last-Modified Thu, 03 Sep 2026 18:00:00 GMT",
+  "sha256": "48cc0ef635a5c7c3e3f26628fecd3d2a88f6c9c40a23bda522e41938f96d0422",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/relnotes.txt"
+ },
+ "uniprotkb_with_pdb": {
+  "bytes": 2126197,
+  "fetched_utc": "2026-10-15T13:41:01Z",
+  "file": "uniprotkb_with_pdb.tsv.gz",
+  "release": "UniProt 2026_03 (02-September-2026)",
+  "rows": 72313,
+  "sha256": "480a879aee7a27c92bfc0378228de195f70dcb2fca0a26208dec6ca9501917ce",
+  "url": "https://rest.uniprot.org/uniprotkb/search?query=database%3Apdb&fields=accession%2Creviewed%2Corganism_id%2Corganism_name%2Cxref_pdb&format=tsv&size=500"
+ },
+ "worms_matches": {
+  "bytes": 225742,
+  "fetched_utc": "2026-10-15T14:30:48Z",
+  "file": "worms_matches.jsonl.gz",
+  "release": "World Register of Marine Species REST API, queried 2026-10-15T14:11:27Z",
+  "rows": 4855,
+  "sha256": "20e7a6383cd20d1d6bdb6ad77a27fc7e263864498bb1e7b4c6c82b77e104b13d",
+  "url": "https://www.marinespecies.org/rest/AphiaRecordsByMatchNames?scientificnames[]=...&marine_only=false"
+ }
+}
