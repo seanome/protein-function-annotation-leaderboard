@@ -226,14 +226,30 @@ def main() -> int:
 
     # ---- 4. every page has its JSON twin, naming the same source commit ----
     commit = json.loads((a.site / "data/SOURCE.json").read_text())["commit"]
-    for pg in pages:
+    on_disk = sorted(str(q.relative_to(a.site)) for q in a.site.rglob("*.html"))
+    if sorted(pages) != on_disk:
+        failures.append(f"pages checked {sorted(set(pages) ^ set(on_disk))} differ from the .html files in the site")
+    for pg in on_disk:
         jp = a.site / (pg + ".json")
         if not jp.exists():
             failures.append(f"{pg}: no {pg}.json")
             continue
-        doc = json.loads(jp.read_text())
+        doc = json.loads(jp.read_text(encoding="utf-8"))
         if doc["source"]["commit"] != commit or not doc["text"]:
             failures.append(f"{pg}.json: wrong commit or no text")
+        if doc["page"] != pg or not doc["title"]:
+            failures.append(f"{pg}.json: page or title field wrong")
+        if doc["data"] is None and pg != "methods.html":
+            failures.append(f"{pg}.json: no data")
+        name = pg.split("/")[-1]
+        if f'href="{name}.json"' not in (a.site / pg).read_text(encoding="utf-8"):
+            failures.append(f"{pg}: no link to {name}.json in the HTML")
+    idx = json.loads((a.site / "index.html.json").read_text(encoding="utf-8"))["data"]
+    if not idx.get("results") or not idx.get("compute"):
+        failures.append("index.html.json: no results or compute")
+    cost = json.loads((a.site / "cost.html.json").read_text(encoding="utf-8"))["data"]
+    if cost["results"] != idx["results"] or cost["compute"] != idx["compute"]:
+        failures.append("cost.html.json: rows differ from index.html.json")
     cov = json.loads((a.site / "coverage.html.json").read_text(encoding="utf-8"))
     if not any(t["tag"] in ("td", "th") for t in cov["text"]):
         failures.append("coverage.html.json: table cells missing from text")
