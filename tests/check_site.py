@@ -234,6 +234,9 @@ def main() -> int:
         doc = json.loads(jp.read_text())
         if doc["source"]["commit"] != commit or not doc["text"]:
             failures.append(f"{pg}.json: wrong commit or no text")
+    cov = json.loads((a.site / "coverage.html.json").read_text(encoding="utf-8"))
+    if not any(t["tag"] in ("td", "th") for t in cov["text"]):
+        failures.append("coverage.html.json: table cells missing from text")
     stats["json_pages"] = len(pages)
     failures += [f"console: {e}" for e in console_errors]
 
