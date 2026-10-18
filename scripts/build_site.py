@@ -1004,7 +1004,7 @@ class _Text(HTMLParser):
 def page_json(out: Path, rel: str, src: dict, data, compact: bool = False) -> None:
     """Write <page>.json beside <page>: the page's text in reading order plus its data, so an
     agent gets what a person gets."""
-    html_text = (out / rel).read_text()
+    html_text = (out / rel).read_text(encoding="utf-8")
     parser = _Text()
     parser.feed(html_text)
     title = re.search(r"<title>(.*?)</title>", html_text).group(1)
@@ -1014,7 +1014,7 @@ def page_json(out: Path, rel: str, src: dict, data, compact: bool = False) -> No
         json.dumps(doc, ensure_ascii=False, allow_nan=False, **dump) + "\n", encoding="utf-8")
     name = rel.split("/")[-1]
     link = f'<p>This page as JSON, for scripts and agents: <a class="mono" href="{name}.json">{name}.json</a></p>\n'
-    (out / rel).write_text(html_text.replace("</div></footer>", link + "</div></footer>", 1))
+    (out / rel).write_text(html_text.replace("</div></footer>", link + "</div></footer>", 1), encoding="utf-8")
 
 
 def main() -> None:
