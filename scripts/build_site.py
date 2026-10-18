@@ -1001,7 +1001,7 @@ class _Text(HTMLParser):
             self.stack[-1][1] += data
 
 
-def page_json(out: Path, rel: str, src: dict, data) -> None:
+def page_json(out: Path, rel: str, src: dict, data, compact: bool = False) -> None:
     """Write <page>.json beside <page>: the page's text in reading order plus its data, so an
     agent gets what a person gets."""
     html_text = (out / rel).read_text()
@@ -1009,7 +1009,9 @@ def page_json(out: Path, rel: str, src: dict, data) -> None:
     parser.feed(html_text)
     title = re.search(r"<title>(.*?)</title>", html_text).group(1)
     doc = {"page": rel, "title": html.unescape(title), "source": src, "text": parser.out, "data": data}
-    (out / (rel + ".json")).write_text(json.dumps(doc, indent=1, ensure_ascii=False, allow_nan=False) + "\n")
+    dump = ({"separators": (",", ":")} if compact else {"indent": 1})
+    (out / (rel + ".json")).write_text(
+        json.dumps(doc, ensure_ascii=False, allow_nan=False, **dump) + "\n", encoding="utf-8")
     name = rel.split("/")[-1]
     link = f'<p>This page as JSON, for scripts and agents: <a class="mono" href="{name}.json">{name}.json</a></p>\n'
     (out / rel).write_text(html_text.replace("</div></footer>", link + "</div></footer>", 1))
@@ -1039,7 +1041,7 @@ def main() -> None:
         "tools": {t: {"name": TOOLS[t]["name"], "kind": TOOLS[t]["kind"], "shape": TOOLS[t]["shape"],
                       "tags": [w for k, w in (("AlphaFold model", "needs AlphaFold model"), ("GPU", "needs GPU"))
                                if TOOLS[t]["needs"][k]]}
-                  for t in tools_used},
+                  for t in sorted(tools_used)},
         "kinds": KINDS,
         "species": {s: {"name": SPECIES[s], "mya": int(species_mya[s]) if s in species_mya else None}
                     for s in SPECIES},
@@ -1048,8 +1050,8 @@ def main() -> None:
         "searched": searched,
         "source": src,
     }
-    payload = json.dumps({"meta": meta, "results": results_json(res), "compute": compute_json(comp)},
-                         separators=(",", ":"), allow_nan=False)
+    full = {"meta": meta, "results": results_json(res), "compute": compute_json(comp)}
+    payload = json.dumps(full, separators=(",", ":"), allow_nan=False)
     payload = payload.replace("</", "<\\/")
     n_q = prov["n_queries"]
 
@@ -1093,14 +1095,13 @@ def main() -> None:
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
 
     # Every page also as JSON at its path plus .json.
-    full = json.loads(payload.replace("<\\/", "</"))
     page_json(out, "index.html", src, {"note": "The table is drawn from these rows: results keyed "
               "truth|calls|species|stratum_axis|stratum, then tool|setting -> [fmax, auprc, median_iou_tp, "
               "n_truth_instances, n_tp_calls]; compute keyed tool|setting|species.", **full,
-              "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_PAGE, "price_file": PRICE_FILE}})
+              "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_PAGE, "price_file": PRICE_FILE}}, compact=True)
     page_json(out, "cost.html", src, {"note": "Same rows as index.html.json; the plot is score against "
               "cpu_h_per_1000 for every tool and setting that has both.", "results": full["results"],
-              "compute": full["compute"], "rows": full["meta"]["rows"]})
+              "compute": full["compute"], "rows": full["meta"]["rows"]}, compact=True)
     cov_tools, cov_rows = parse_coverage(cov)
     page_json(out, "coverage.html", src, {"tools": cov_tools, "rows": [
         {"axis": r[0], "value": r[1], "measured": {t: c == "■" for t, c in zip(cov_tools, r[2:])}} for r in cov_rows]})
