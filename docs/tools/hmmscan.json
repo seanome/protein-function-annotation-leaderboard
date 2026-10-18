@@ -1,0 +1,42 @@
+{
+ "tool": "hmmscan",
+ "name": "hmmscan with Pfam",
+ "kind": "scans curated Pfam family models",
+ "compares": "Each query protein against the curated profile models of every Pfam family, without searching any relative.",
+ "needs": {
+  "sequence only": true,
+  "AlphaFold model": false,
+  "GPU": false
+ },
+ "reference": "Pfam-A 38.2 family models (30,134 models).",
+ "score": "Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).",
+ "failure_modes": [
+  "Pfam domains are defined by these same models, so scoring hmmscan against the Pfam truth set grades the models against their own output. Read its Pfam row as the best a search could do, not as a competitor.",
+  "It was scored against the Pfam truth set only. Swiss-Prot features and Pfam-N: not run."
+ ],
+ "version": "HMMER 3.4",
+ "licence": "BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes)",
+ "commercial_use": "Yes.",
+ "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",
+ "container": "quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)",
+ "command": "hmmscan \\\n    --domtblout /dev/stdout \\\n    -o /dev/null \\\n    --noali \\\n    -E 10.0 --domE 10.0 \\\n    --cpu 4 \\\n    Pfam-A.hmm UP000005640_9606.fasta",
+ "numbers_from": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "filters": "pfam, raw, all"
+ },
+ "best_setting": "direct",
+ "strong": [],
+ "weak": [],
+ "cost_per_1000_queries": {
+  "cpu_h_measured": 0.19777443776441772,
+  "peak_rss_gb": 0.46298828125,
+  "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+ },
+ "questions": [
+  "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model.",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.785 (n = 963), 121\u2013250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16\u201330 aa 0.580 (n = 271), 31\u201360 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)",
+  "Can you spend about 0.198 CPU-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
+ ],
+ "markdown": "hmmscan.md"
+}
