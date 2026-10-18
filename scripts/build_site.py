@@ -1007,14 +1007,19 @@ def page_json(out: Path, rel: str, src: dict, data, compact: bool = False) -> No
     html_text = (out / rel).read_text(encoding="utf-8")
     parser = _Text()
     parser.feed(html_text)
-    title = re.search(r"<title>(.*?)</title>", html_text).group(1)
-    doc = {"page": rel, "title": html.unescape(title), "source": src, "text": parser.out, "data": data}
+    m = re.search(r"<title>(.*?)</title>", html_text)
+    if not m:
+        raise SystemExit(f"{rel}: no <title> found; page_json needs one")
+    doc = {"page": rel, "title": html.unescape(m.group(1)), "source": src, "text": parser.out, "data": data}
     dump = ({"separators": (",", ":")} if compact else {"indent": 1})
     (out / (rel + ".json")).write_text(
         json.dumps(doc, ensure_ascii=False, allow_nan=False, **dump) + "\n", encoding="utf-8")
     name = rel.split("/")[-1]
     link = f'<p>This page as JSON, for scripts and agents: <a class="mono" href="{name}.json">{name}.json</a></p>\n'
-    (out / rel).write_text(html_text.replace("</div></footer>", link + "</div></footer>", 1), encoding="utf-8")
+    marker = "</div></footer>"
+    if marker not in html_text:
+        raise SystemExit(f"{rel}: footer marker {marker!r} not found; the JSON link was not added")
+    (out / rel).write_text(html_text.replace(marker, link + marker, 1), encoding="utf-8")
 
 
 def main() -> None:
