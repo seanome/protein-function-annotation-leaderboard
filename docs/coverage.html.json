@@ -32,6 +32,278 @@
    "text": "Figure 2. Tool by stratum. A square is filled when the results table has at least one row for that tool with that value (under any other filters), and empty when it has none: not run. 390 squares are filled and 69 are empty."
   },
   {
+   "tag": "th",
+   "text": "Value"
+  },
+  {
+   "tag": "th",
+   "text": "phmmer"
+  },
+  {
+   "tag": "th",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "th",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "th",
+   "text": "MMseqs2, three rounds"
+  },
+  {
+   "tag": "th",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "th",
+   "text": "Foldseek"
+  },
+  {
+   "tag": "th",
+   "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "th",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "th",
+   "text": "hmmscan with Pfam"
+  },
+  {
+   "tag": "td",
+   "text": "Truth set"
+  },
+  {
+   "tag": "td",
+   "text": "Swiss-Prot features"
+  },
+  {
+   "tag": "td",
+   "text": "Pfam"
+  },
+  {
+   "tag": "td",
+   "text": "Pfam-N"
+  },
+  {
+   "tag": "td",
+   "text": "Dedup or raw"
+  },
+  {
+   "tag": "td",
+   "text": "raw"
+  },
+  {
+   "tag": "td",
+   "text": "dedup"
+  },
+  {
+   "tag": "td",
+   "text": "Relative searched"
+  },
+  {
+   "tag": "td",
+   "text": "chimpanzee (6 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "rat (90 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "cow (95 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "dog (95 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "mouse (100 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "opossum (160 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "chicken (300 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "western clawed frog (350 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "zebrafish (430 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "sea squirt (Ciona) (550 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "fruit fly (600 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "nematode (C. elegans) (650 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "baker's yeast (900 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "thale cress (Arabidopsis) (1500 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "E. coli (2000 Mya)"
+  },
+  {
+   "tag": "td",
+   "text": "none: Pfam models (hmmscan only)"
+  },
+  {
+   "tag": "td",
+   "text": "Nearest reviewed relative (% identity)"
+  },
+  {
+   "tag": "td",
+   "text": "0–20%"
+  },
+  {
+   "tag": "td",
+   "text": "20–30%"
+  },
+  {
+   "tag": "td",
+   "text": "30–40%"
+  },
+  {
+   "tag": "td",
+   "text": "40–60%"
+  },
+  {
+   "tag": "td",
+   "text": "60–100%"
+  },
+  {
+   "tag": "td",
+   "text": "no same-family domain"
+  },
+  {
+   "tag": "td",
+   "text": "Disorder (mean pLDDT)"
+  },
+  {
+   "tag": "td",
+   "text": "0–50"
+  },
+  {
+   "tag": "td",
+   "text": "50–70"
+  },
+  {
+   "tag": "td",
+   "text": "70–90"
+  },
+  {
+   "tag": "td",
+   "text": "90–100"
+  },
+  {
+   "tag": "td",
+   "text": "Region type and length"
+  },
+  {
+   "tag": "td",
+   "text": "1 aa"
+  },
+  {
+   "tag": "td",
+   "text": "2–15 aa"
+  },
+  {
+   "tag": "td",
+   "text": "16–30 aa"
+  },
+  {
+   "tag": "td",
+   "text": "31–60 aa"
+  },
+  {
+   "tag": "td",
+   "text": "61–120 aa"
+  },
+  {
+   "tag": "td",
+   "text": "121–250 aa"
+  },
+  {
+   "tag": "td",
+   "text": "251 aa or more"
+  },
+  {
+   "tag": "td",
+   "text": "whole protein"
+  },
+  {
+   "tag": "td",
+   "text": "Feature type (Swiss-Prot key)"
+  },
+  {
+   "tag": "td",
+   "text": "ACT_SITE (active site residue)"
+  },
+  {
+   "tag": "td",
+   "text": "BINDING (binding site residue)"
+  },
+  {
+   "tag": "td",
+   "text": "COILED (coiled coil)"
+  },
+  {
+   "tag": "td",
+   "text": "DNA_BIND (DNA-binding region)"
+  },
+  {
+   "tag": "td",
+   "text": "DOMAIN (domain)"
+  },
+  {
+   "tag": "td",
+   "text": "INTRAMEM (region inside the membrane that does not cross it)"
+  },
+  {
+   "tag": "td",
+   "text": "MOTIF (short motif)"
+  },
+  {
+   "tag": "td",
+   "text": "REGION (region of interest)"
+  },
+  {
+   "tag": "td",
+   "text": "REPEAT (repeat)"
+  },
+  {
+   "tag": "td",
+   "text": "SITE (other single-residue site)"
+  },
+  {
+   "tag": "td",
+   "text": "TRANSMEM (membrane-spanning segment)"
+  },
+  {
+   "tag": "td",
+   "text": "ZN_FING (zinc finger)"
+  },
+  {
    "tag": "h2",
    "text": "What to run next"
   },

@@ -971,7 +971,7 @@ from html.parser import HTMLParser
 
 class _Text(HTMLParser):
     """Headings, paragraphs, captions, list items and table cells of <main>, in order."""
-    KEEP = {"h1", "h2", "h3", "p", "figcaption", "li", "dt", "dd", "summary", "pre"}
+    KEEP = {"h1", "h2", "h3", "p", "figcaption", "li", "dt", "dd", "summary", "pre", "td", "th"}
 
     def __init__(self):
         super().__init__()
