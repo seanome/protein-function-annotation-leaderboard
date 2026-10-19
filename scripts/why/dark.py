@@ -105,7 +105,7 @@ def draw(t):
     low_lit = 100 * (o.filter(~pl.col("dark"))["af_mean_plddt"] <= 50).sum() / o.filter(~pl.col("dark")).height
 
     gap_mm, label_mm = 6, 32
-    top_mm = 19
+    top_mm = 21.5
     heights = [panels[sp][0].shape[0] * tile_mm for sp in panels]
     fig_w_mm = pf.TWO_COLUMN_MM
     fig_h_mm = top_mm + sum(heights) + gap_mm * len(panels) + 2
@@ -124,8 +124,8 @@ def draw(t):
         handles=[Patch(facecolor=c, label=lab) for (_, _, c, lab) in BANDS] + [Patch(facecolor=NO_MODEL, label="no AlphaFold DB model"),
                  Line2D([], [], marker="<", markersize=3, color=TICK, linestyle="none", label="row holding every 1,000th tile")],
         loc="upper left", bbox_to_anchor=(2 / fig_w_mm, 1 - 9.5 / fig_h_mm), frameon=False, ncol=6, borderaxespad=0,
-        title=f"One tile = one dark protein; {COLS} tiles per row, the same tile size as the two proteome maps on this page; "
-              "longest protein first, read row by row.",
+        title=f"One tile = one dark protein; {COLS} tiles per row, the same tile size as the two proteome maps on this page.\n"
+              "Longest protein first, read row by row.",
         title_fontsize=6, alignment="left",
     )
     y_mm = top_mm

@@ -185,7 +185,7 @@ Only the dark proteins are drawn, one tile each, longest first; colour is the me
 
 ![Proteome maps, AlphaFold DB model counted as a label](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)
 
-94.85% of oyster proteins have an AlphaFold DB model; 19.41% have no function label. Counting the model as a label leaves 0.16% dark, but a model does not say what the protein does. Made by `scripts/why/maps.py` from `results/why/proteome_labels.parquet`.
+94.85% of oyster proteins have an AlphaFold DB model; 19.41% have no function label. Only 0.82% of the dark oyster proteins lack a model, so the model does not light them: it is a predicted structure and names no function. The tiles are those of the first map, with the dark ones split by model. Made by `scripts/why/maps.py` from `results/why/proteome_labels.parquet`.
 
 ## 6. Four proteins, the same three labels
 

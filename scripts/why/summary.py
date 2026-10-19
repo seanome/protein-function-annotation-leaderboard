@@ -137,8 +137,9 @@ def main():
             md.append("![Proteome maps, AlphaFold DB model counted as a label](maps/proteome_map_human_oyster_any_label_uniprot_2026_03.png)\n")
             md.append(t(
                 "{oyster_af_model_pct}% of oyster proteins have an AlphaFold DB model; {oyster_no_interpro_no_sprot_pct}% have "
-                "no function label. Counting the model as a label leaves {oyster_no_label_pct}% dark, but a model does not "
-                "say what the protein does. Made by `scripts/why/maps.py` from `results/why/proteome_labels.parquet`.\n"
+                "no function label. Only {oyster_dark_no_model_pct}% of the dark oyster proteins lack a model, so the model "
+                "does not light them: it is a predicted structure and names no function. The tiles are those of the first map, "
+                "with the dark ones split by model. Made by `scripts/why/maps.py` from `results/why/proteome_labels.parquet`.\n"
             ))
 
     # Step 6
