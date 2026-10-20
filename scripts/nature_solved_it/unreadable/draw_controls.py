@@ -61,6 +61,7 @@ def main():
     ap.add_argument("--out-dir", required=True, type=pathlib.Path)
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--readme", type=pathlib.Path, help="saved README (.gz); default <out-dir>/reference_proteomes_README.txt.gz")
+    ap.add_argument("--exclude-species", type=pathlib.Path, help="file of binomials, one a line, also left out of the pool (every species named in the atlas)")
     args = ap.parse_args()
     out = args.out_dir
     out.mkdir(parents=True, exist_ok=True)
@@ -85,6 +86,8 @@ def main():
     need_start = dict(need)
 
     excluded = {r["species"].lower() for r in atlas} | {r["species"].lower() for r in models}
+    if args.exclude_species:
+        excluded |= {line.strip().lower() for line in args.exclude_species.read_text().splitlines() if line.strip()}
     pool = [
         r for r in candidates_all
         if r["SUPERREGNUM"] == "eukaryota" and today.binomial_of(r["Species Name"]).lower() not in excluded
@@ -131,6 +134,7 @@ def main():
         "bin_width_my": BIN_MY,
         "readme": str(readme_path.name),
         "readme_release_line": next((l for l in gzip.open(readme_path, "rt").read().splitlines() if l.startswith("Release ")), ""),
+        "excluded_binomials": sorted(excluded),
         "candidates_eukaryota_after_exclusion": len(pool),
         "candidates_read": read,
         "skipped_no_timetree_time": no_time,
