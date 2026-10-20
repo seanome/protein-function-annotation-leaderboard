@@ -36,8 +36,9 @@ aligns part of a human protein to part of a relative's protein, the scorer copie
 annotation of that part of the relative's protein (its Pfam domains, its Swiss-Prot features)
 onto the human region. The call is right when the copied family or feature is there on
 the human protein, in the right place. `relatives.tsv` lists 15 relatives, from chimpanzee
-(6 million years ago, Mya, since its line split from the human line) to *E. coli* (2,000 Mya),
-all from the Quest for Orthologs (QfO) reference proteomes, release 2020_04. Get the proteome file the table names
+(6 million years ago, Mya, since its line split from the human line) to *Arabidopsis* (1,516 Mya),
+and *E. coli*, for which TimeTree 5 gives no age (`mya_to_human` is empty). The ages are TimeTree 5's
+pairwise divergence times from human. All are from the Quest for Orthologs (QfO) reference proteomes, release 2020_04. Get the proteome file the table names
 and check its sha256; the answers were made for that file and no other:
 
 ```bash

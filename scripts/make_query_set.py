@@ -89,7 +89,8 @@ def main() -> None:
         )
     if len(rows) != len(mya):
         raise SystemExit(f"relatives in results.parquet without a QfO row: {set(mya) - {r['relative'] for r in rows}}")
-    rel = pl.DataFrame(rows).sort("mya_to_human", "relative")
+    # E. coli has no TimeTree age (null): it sorts last.
+    rel = pl.DataFrame(rows).sort("mya_to_human", "relative", nulls_last=True)
     rel.write_csv(out / "relatives.tsv", separator="\t")
 
     copies = {
