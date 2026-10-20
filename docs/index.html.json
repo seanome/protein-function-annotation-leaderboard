@@ -82,7 +82,7 @@
   },
   {
    "tag": "p",
-   "text": "Every tool drawn in full scores lower at E. coli (2,000 Mya) than at chimpanzee (6 Mya) (Foldseek has no chimpanzee search). At chimpanzee the best is kmerseek (protein20, k = 6) at Fmax 0.443; at E. coli it is HH-suite (hhsearch) at 0.123. kmerseek at the setting on its tool card (gbmr4, k = 21) goes from 0.428 to 0.000."
+   "text": "Every tool drawn in full scores lower at E. coli (2,000 Mya) than at chimpanzee (6 Mya) (Foldseek has no chimpanzee search). At chimpanzee the best is kmerseek (gbmr4, k = 21) at Fmax 0.428; at E. coli it is HH-suite (hhsearch) at 0.123. kmerseek at the setting on its tool card (gbmr4, k = 21) goes from 0.428 to 0.000."
   },
   {
    "tag": "figcaption",
