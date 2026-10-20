@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Drive the widgets on explainers.html and the "?" definitions on index.html.
+"""Drive the widgets on explainers.html and the "?" definitions on leaderboard.html.
 
 The made-up example is read from the page itself (#toy-data). Every expected number is
 computed here in Python, separately from docs/assets/explainers.js:
@@ -269,12 +269,12 @@ def main() -> int:
 
         # ---- 6. keyboard and tap on the definitions ----
         page.set_viewport_size({"width": 1280, "height": 900})
-        page.goto(base + "index.html")
+        page.goto(base + "leaderboard.html")
         page.wait_for_load_state("networkidle")
         heads = page.eval_on_selector_all("#lb thead button.term", "es => es.map(e => e.dataset.term)")
         for t in ("fmax", "auprc", "iou", "n", "cpu", "ram", "cost"):
             if t not in heads:
-                fails.append(f"index.html: no definition button for {t} in Table 1")
+                fails.append(f"leaderboard.html: no definition button for {t} in Table 1")
         page.focus("#lb thead th:nth-child(1) button")  # the Tool column's sort button
         for _ in range(4):  # Tab onto the Fmax "?" (sort Fmax, then its "?")
             page.keyboard.press("Tab")
@@ -312,7 +312,7 @@ def main() -> int:
             fails.append("clicking the ? of the cost column sorted the table")
         # Every definition link on every page with definitions points at an explainer anchor.
         anchors = None
-        for pg in ("index.html", "cost.html"):
+        for pg in ("leaderboard.html", "cost.html"):
             page.goto(base + pg)
             page.wait_for_load_state("networkidle")
             links = page.eval_on_selector_all(".term-tip a", "es => es.map(e => e.getAttribute('href'))")

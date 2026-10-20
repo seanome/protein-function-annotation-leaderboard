@@ -1,0 +1,72 @@
+{
+ "alphafold_counts": {
+  "band_width": 5,
+  "bytes": 1077074,
+  "fetched_utc": "2026-10-16T17:41:51Z",
+  "file": "alphafold_counts.jsonl",
+  "release": "AlphaFold DB search API (models version 6) and UniProt 2026_03",
+  "sha256": "e68e316a77764abddab0e5c9b248baa35bc133c24349d4ac7d7604590ee6f039",
+  "species": 1952,
+  "url": "https://alphafold.ebi.ac.uk/api/search?q=taxId:<taxon> AND isUniProtReferenceProteome:true AND globalMetricValue:[lo TO hi} (and UniProt proteome:<UP> AND database:alphafolddb)"
+ },
+ "goat_ebp_list": {
+  "bytes": 2729233,
+  "fetched_utc": "2026-10-16T17:14:10Z",
+  "file": "goat_ebp_species.json",
+  "goat_total": 160083,
+  "release": "GoaT index taxon--ncbi--goat--2026.10.14",
+  "sha256": "88e38b582c928a9ab2da85bc816edc38ef5915c1e9030eba01a1c3bae9a8a707",
+  "species": 137337,
+  "species_without_ncbi_id": 22729,
+  "url": "https://goat.genomehubs.org/api/v2/search?query=tax_tree(<clade>) AND long_list AND tax_rank(species)"
+ },
+ "ncbi_taxdump": {
+  "bytes": 79843175,
+  "fetched_utc": "2026-10-16T17:01:37Z",
+  "file": "taxdump.tar.gz",
+  "release": "NCBI Taxonomy taxdump, Last-Modified Fri, 16 Oct 2026 16:29:52 GMT",
+  "rows": 3022069,
+  "sha256": "f75ee3ecfc32d198ff525a5eac76cb85096885dc8bbbcafdb7b3875e06a75994",
+  "url": "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"
+ },
+ "swissprot_per_taxon": {
+  "bytes": 299865,
+  "entries": 575748,
+  "entries_without_species": 59,
+  "fetched_utc": "2026-10-16T17:10:27Z",
+  "file": "swissprot_organism_id.tsv.gz",
+  "release": "UniProt 2026_03 (02-September-2026)",
+  "sha256": "2550a33a6efcae1652cc9f243fb7eeec2d233ed989fc770c0710d04240dc46c9",
+  "species": 11770,
+  "url": "https://rest.uniprot.org/uniprotkb/stream?query=reviewed:true&fields=organism_id&format=tsv&compressed=true"
+ },
+ "timetree_mrca": {
+  "bytes": 36667,
+  "fetched_utc": "2026-10-16T17:28:14Z",
+  "file": "timetree_mrca.json",
+  "nodes": 1675,
+  "nodes_with_age": 965,
+  "release": "TimeTree 5, database version 20260820",
+  "sha256": "cc65c6ab9c6a0e9e3ed7b7f6e1f66f3bb852a82ea221d480c7e32d6680b0d2a5",
+  "url": "https://timetree.org/api/mrca/id/<NCBI taxon id>"
+ },
+ "timetree_pairs": {
+  "bytes": 87923,
+  "fetched_utc": "2026-10-16T17:25:04Z",
+  "file": "timetree_pairs.jsonl",
+  "pairs": 1952,
+  "pairs_with_age": 1813,
+  "release": "TimeTree 5, database version 20260820",
+  "sha256": "7091e3ccf370ef1e542afe1a54eef5afe7d9e505937c80274713f024828bef2e",
+  "url": "https://timetree.org/api/pairwise/<species>/<relative>"
+ },
+ "uniprot_reference_proteomes": {
+  "bytes": 2987015,
+  "fetched_utc": "2026-10-16T17:01:42Z",
+  "file": "reference_proteomes.tsv",
+  "release": "UniProt 2026_03 (02-September-2026)",
+  "rows": 37190,
+  "sha256": "ba41998c46dc670452940961bfec845fb8a021302d6cdef608a7e23e1e603773",
+  "url": "https://rest.uniprot.org/proteomes/stream?query=reference:true&fields=upid,organism_id,organism,protein_count,busco&format=tsv"
+ }
+}
