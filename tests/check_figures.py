@@ -106,7 +106,7 @@ def main() -> None:
         r = look(tool, setting, "Pfam-A domain instances", "QfO " + ORG2SP[m[3]], "all", "all", "fmax")
         n_checked += 1
         if f"{r['value']:.3f}" != m[5] or r["n_instances"] != int(m[6].replace(",", "")) \
-                or int(r["target_mya_to_human"]) != int(m[4].replace(",", "")):
+                or round(r["target_mya_to_human"]) != int(m[4].replace(",", "")):
             errors.append(f"Figure 11: {s} but table has {r['value']:.3f}, n {r['n_instances']}")
     for fid in ("fig-distance", "fig-identity"):
         drawn = {split_name(s)[1].split(":")[0] for s in t.get(fid, []) if s.startswith("kmerseek, ")}
@@ -115,7 +115,9 @@ def main() -> None:
             errors.append(f"{fid}: kmerseek drawn in full at {drawn}, not the card's setting {want_label}")
     full = long.filter((pl.col("truth_source") == "Pfam-A domain instances") & (pl.col("dedup_or_raw") == "raw")
                        & (pl.col("stratum_axis") == "all") & (pl.col("metric") == "fmax")
-                       & pl.col("target_db").str.starts_with("QfO ") & (pl.col("tool") != "kmerseek"))
+                       & pl.col("target_db").str.starts_with("QfO ") & (pl.col("tool") != "kmerseek")
+                       # a relative with no divergence time (E. coli) has no place on the time axis
+                       & pl.col("target_mya_to_human").is_not_null())
     n_marks_other = sum(1 for s in t.get("fig-distance", []) if not s.startswith("kmerseek"))
     if n_marks_other != full.height:
         errors.append(f"Figure 11: {n_marks_other} marks for the other tools, table has {full.height} rows")

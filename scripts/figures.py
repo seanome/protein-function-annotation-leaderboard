@@ -142,7 +142,7 @@ def draw_distance(t: pl.DataFrame) -> tuple[str, str]:
     ends = []
     for hl in (False, True):
         for (tool, setting), g in t.filter(pl.col("highlight") == hl).group_by(["tool", "setting"], maintain_order=True):
-            # relatives at the same Mya (dog and cow, 95) are joined lowest Fmax first
+            # relatives at the same Mya (cow and dog, 89) are joined lowest Fmax first
             g = g.sort("mya", "fmax")
             r0 = g.row(0, named=True)
             col = f"var(--k-{r0['kind']})"
