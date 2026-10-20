@@ -395,7 +395,8 @@ def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
 NAV = [("index.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool cards", "tools"),
        ("cost.html", "Compare two columns", "cost"), ("explainers.html", "How the scores work", "explainers"),
        ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods")]
-NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage")]
+NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage"),
+            ("alphabets.html", "Reduced alphabets", "alphabets")]
 
 
 def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
@@ -2377,6 +2378,25 @@ def main() -> None:
         for stale in ("pileup.html", "pileup.html.json", "data/pileup.json", "data/pileup_check.json"):
             (out / stale).unlink(missing_ok=True)
 
+    if (a.data / "alphabets/classes.parquet").exists():
+        # The alphabet page's tables come from their own commit (data/SOURCE.json alphabets_commit).
+        if not src.get("alphabets_commit"):
+            raise SystemExit("data/alphabets/ exists but data/SOURCE.json has no alphabets_commit; "
+                             "run `make alphabet-tables`")
+        import alphabets
+        al_src = {"repo": src["repo"], "commit": src["alphabets_commit"], "commit_date": src["alphabets_commit_date"],
+                  "path": "results/leaderboard/alphabets",
+                  "copied_at": src.get("alphabets_copied_at") or src["copied_at"]}
+        al_body, al_data = alphabets.build(alphabets.load(a.data), al_src)
+        (out / "alphabets.html").write_text(layout(
+            "Reduced alphabets", "alphabets", al_body, al_src,
+            head='<script defer src="assets/alphabets.js"></script>',
+            description="Evidence per aligned position, kappa and usable seed lengths for the 19 kmerseek alphabets."))
+    else:
+        al_src = al_data = None
+        for stale in ("alphabets.html", "alphabets.html.json"):
+            (out / stale).unlink(missing_ok=True)
+
     # Every page also as JSON at its path plus .json.
     full = json.loads(payload.replace("<\\/", "</"))
     page_json(out, "index.html", src, {"note": "The table is drawn from these rows: results keyed "
@@ -2411,6 +2431,8 @@ def main() -> None:
             "matrix": "data/pileup.json", "per_residue_recall_check": check, **pileup.readouts(data)})
     for t in sorted(tools_used):
         page_json(out, f"tools/{t}.html", src, json.loads((out / "tools" / f"{t}.json").read_text()))
+    if al_src:
+        page_json(out, "alphabets.html", al_src, al_data)
     print(f"built {out}: {len(rows)} tool-setting rows, {len(tools_used)} cards, payload {len(payload) / 1e6:.2f} MB")
 
 
