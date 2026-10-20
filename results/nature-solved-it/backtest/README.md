@@ -194,7 +194,7 @@ entries from the mechanism text alone, before opening anything else:
 | Individual points that agree | 52 of 60 |
 | By point | T1 10/10, T2 10/10, T3 9/10, T4 8/10, T5 7/10, T6 8/10 |
 
-Most of the disagreement is T5, size: four of the eight differing points. The first scorer
+Most of the disagreement is T5, size: three of the eight differing points. The first scorer
 gave 0 whenever the description states no residue or domain count; the second read "one
 chain" as a single domain and gave the point. The rule as written does not say which is
 right. T4 and T6 account for the rest: T4 mixes two different tests, how conserved the
