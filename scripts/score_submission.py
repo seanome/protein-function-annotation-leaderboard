@@ -312,7 +312,9 @@ def run_scorer(work: Path, qs_dir: Path, preds: pl.DataFrame, card: dict,
                 (out_dir / "manifest.tsv").write_text("\n".join(manifest) + "\n")
                 cmd = base + ["--manifest", "manifest.tsv", "--domain-map", str(dmap.resolve()),
                               "--identity", str((qsd / f"identity/{relative}.parquet").resolve()),
-                              "--species-mya", str(mya), "--dedup-transfer-modes", "off,on"]
+                              "--dedup-transfer-modes", "off,on"]
+                # E. coli has no TimeTree age: leave the option out rather than pass "None".
+                cmd += ["--species-mya", str(mya)] if mya is not None else []
                 subprocess.run(cmd, cwd=out_dir, check=True, stdout=subprocess.DEVNULL)
             metrics += sorted(out_dir.glob("*.metrics.parquet"))
     return metrics
@@ -423,7 +425,7 @@ def comment(rows: pl.DataFrame, comp: pl.DataFrame, card: dict, site: pl.DataFra
         key = (r["target_db"], r["truth_source"])
         s = same.get((r["target_db"], r["truth_source"], r["setting"]))
         b = best.get(key)
-        mya = "" if r["target_mya_to_human"] is None else f" ({int(r['target_mya_to_human'])})"
+        mya = "" if r["target_mya_to_human"] is None else f" ({round(r['target_mya_to_human'])})"
         L.append(
             f"| {r['target_db']}{mya} | {r['truth_source']} | `{r['setting']}` | {r['n_instances']:,} "
             f"| {fmt(r.get('raw_fmax'))} | {fmt(r.get('dedup_fmax'))} | {fmt(r.get('raw_auprc'))} "
