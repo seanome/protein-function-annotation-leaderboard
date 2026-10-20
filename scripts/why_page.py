@@ -357,12 +357,16 @@ def page(w: Why, res: pl.DataFrame, tools: dict, n_tools: int, up: str = "") -> 
                  f"families) and no other Swiss-Prot protein at least 30% identical"
                  if oy_count is not None and oy_n is not None else
                  "no InterPro family match and no described protein at least 30% identical")
+    card2_text = (f"come from ocean animals: {oc['entries']:,} proteins from species the World Register of "
+                  f"Marine Species (WoRMS) lists as marine only, up to {oc['broad_entries']:,} counting "
+                  f"species that also live in fresh water or on land" if oc else
+                  "the share of Swiss-Prot proteins from ocean animals is not yet measured")
     cards = f"""<div class="cards">
 <div class="card"><div class="big">{n1 if total is not None else nym()}</div>
 <p>proteins whose entry a curator has reviewed by hand (Swiss-Prot, the reviewed part of UniProt)</p>
 {src_line("sp_entries")}</div>
 <div class="card"><div class="big">{n2 if oc else nym()}</div>
-<p>come from ocean animals: {oc['entries']:,} proteins from species the World Register of Marine Species (WoRMS) lists as marine only, up to {oc['broad_entries']:,} counting species that also live in fresh water or on land</p>
+<p>{card2_text}</p>
 {src_line("sp_marine_only_animal_share")}</div>
 <div class="card"><div class="big">{n3 if oy_dark is not None else nym()}</div>
 <p>of a Pacific oyster's proteins get no label: {card3_sub}</p>
