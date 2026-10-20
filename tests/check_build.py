@@ -102,12 +102,13 @@ def main() -> int:
     import re as _re
     rel = ["a", "b", "c"]
     build_site.SPECIES.update({"a": "A", "b": "B", "c": "C"})
+    build_site.SPECIES_MYA.update({"a": 1, "b": 2, "c": 3})
     svg = build_site.fmax_strip("hmmer3_phmmer", {"hmmer3_phmmer": {"a": 0.24, "b": 0.48, "c": 0.9}},
-                                rel, {"a": 1, "b": 2, "c": 3}, 1.0)
+                                rel, 1.0)
     hs = [float(h) for h in _re.findall(r'<rect [^>]*height="([0-9.]+)"', svg)]
     check(len(hs) == 3 and abs(hs[1] / hs[0] - 2) < 0.02 and abs(hs[2] / hs[1] - 0.9 / 0.48) < 0.02,
           f"bar heights proportional to Fmax: {hs}")
-    svg = build_site.fmax_strip("hmmer3_phmmer", {"hmmer3_phmmer": {"a": 0.3}}, rel, {"a": 1, "b": 2, "c": 3}, 1.0)
+    svg = build_site.fmax_strip("hmmer3_phmmer", {"hmmer3_phmmer": {"a": 0.3}}, rel, 1.0)
     check(svg.count('class="st-nr"') == 2, "a relative with no row gets the grey x, not a bar")
 
     # 5. Deterministic builds.

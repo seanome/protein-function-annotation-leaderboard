@@ -27,12 +27,12 @@
 <p>Predicted 3-D shapes.</p>
 <h2>Will it work for you?</h2>
 <ol>
-<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.164 (n = 563), 60–100% 0.241 (n = 1,289). If no, 20–30% 0.268 (n = 93), 30–40% 0.167 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting shape letters + amino acids; subsets with at least 30 true instances.)</li>
+<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.164 (n = 563), 60–100% 0.241 (n = 1,289). If no, 20–30% 0.268 (n = 93), 30–40% 0.167 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting shape letters + amino acids; subsets with at least 30 true instances.)</li>
 <li><strong>Do you have a 3D structure prediction for every protein you want to annotate?</strong> If not, Foldseek cannot search the proteins without one.</li>
 <li><strong>Can you spend about 0.129 core-hours per 1,000 proteins for each relative you search?</strong> That is the measured mean per relative; see "Cost per 1,000 queries" below.</li>
 </ol>
 <h2>Best Fmax and cost</h2>
-<p>Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is shape letters + amino acids (<code>3di_aa</code>): Fmax 0.250 over 2,435 true instances. Searching costs about $0.00574 per 1,000 queries (0.129 core-hours), for each relative searched.</p>
+<p>Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is shape letters + amino acids (<code>3di_aa</code>): Fmax 0.250 over 2,435 true instances. Searching costs about $0.00574 per 1,000 queries (0.129 core-hours), for each relative searched.</p>
 <h2>Where it is strong and weak</h2>
 <p>Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.</p>
 <p>Where it is closest to, or furthest ahead of, the best other tool:</p>
@@ -98,11 +98,11 @@ This covers the 2 database builds the task records hold; the search used 10 rela
     --max-seqs 1000
 </code></pre>
 <p>Followed by foldseek convertalis to write the table of hits.</p>
-<p>Tool id <code>foldseek</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>4a4b1171</code>.</p></div>
+<p>Tool id <code>foldseek</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>7eca428b</code>.</p></div>
 <p><a href="index.html">All tool cards</a> · <a href="foldseek.md">this card as Markdown</a> · <a href="foldseek.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-16.</p>
+<p id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="foldseek.html.json">foldseek.html.json</a></p>
 </div></footer>

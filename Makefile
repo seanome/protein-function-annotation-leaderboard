@@ -1,7 +1,7 @@
 # Source of the tables: a commit of seanome/2024-kmerseek-analysis that holds
 # results/leaderboard/, written there by `make leaderboard-tables`.
 SOURCE_REPO ?= seanome/2024-kmerseek-analysis
-SOURCE_COMMIT ?= 4a4b1171
+SOURCE_COMMIT ?= 7eca428b
 PILEUP_COMMIT ?= 39d81ec9
 # results/leaderboard/weak_hits/ (dark-set weak-hit accuracy), 2024-kmerseek-analysis PR 163
 WEAK_HITS_COMMIT ?= cc33016e

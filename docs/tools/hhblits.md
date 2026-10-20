@@ -4,13 +4,13 @@ Two profiles against each other.
 
 ## Will it work for you?
 
-1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.248 (n = 563), 60–100% 0.283 (n = 1,289). If no, 20–30% 0.321 (n = 93), 30–40% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting single-protein profiles; subsets with at least 30 true instances.)
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.230 (n = 963), 121–250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16–30 aa 0.066 (n = 271), 31–60 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting single-protein profiles.)
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.248 (n = 563), 60–100% 0.283 (n = 1,289). If no, 20–30% 0.321 (n = 93), 30–40% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting single-protein profiles; subsets with at least 30 true instances.)
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.230 (n = 963), 121–250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16–30 aa 0.066 (n = 271), 31–60 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting single-protein profiles.)
 3. **Can you spend about 24.8 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" below.
 
 ## Best Fmax and cost
 
-Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is single-protein profiles (`single_seq`): Fmax 0.313 over 2,435 true instances. Searching costs about $1.11 per 1,000 queries (24.8 core-hours), for each relative searched.
+Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is single-protein profiles (`single_seq`): Fmax 0.313 over 2,435 true instances. Searching costs about $1.11 per 1,000 queries (24.8 core-hours), for each relative searched.
 
 ## Where it is strong and weak
 
@@ -86,5 +86,5 @@ ffindex_apply \
 
 One hhsearch per query protein, run through ffindex_apply.
 
-Tool id `hhblits`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Tool id `hhblits`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
 

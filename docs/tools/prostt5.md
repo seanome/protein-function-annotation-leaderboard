@@ -4,13 +4,13 @@ Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protei
 
 ## Will it work for you?
 
-1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting shape letters from sequence; subsets with at least 30 true instances.)
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting shape letters from sequence; subsets with at least 30 true instances.)
 2. **Do you have a GPU to predict the 3Di letters for your proteins?** The run used one GPU for that step; its cost is not counted here.
 3. **Can you spend about 0.109 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" below.
 
 ## Best Fmax and cost
 
-Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is shape letters from sequence (`3di_from_seq`): Fmax 0.223 over 2,435 true instances. Searching costs about $0.00486 per 1,000 queries (0.109 core-hours), for each relative searched.
+Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is shape letters from sequence (`3di_from_seq`): Fmax 0.223 over 2,435 true instances. Searching costs about $0.00486 per 1,000 queries (0.109 core-hours), for each relative searched.
 
 ## Where it is strong and weak
 
@@ -91,5 +91,5 @@ foldseek search \
 
 The first command (one per proteome, on a GPU) predicts the 3Di letters. The second is the search the cost columns measure.
 
-Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
 
