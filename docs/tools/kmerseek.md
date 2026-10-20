@@ -49,6 +49,14 @@ Building its databases took 0.147 core-hours over 6 databases. A database is bui
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
+## Hardware
+
+Hardware of the search (setting `gbmr4_k21_lcFalse`, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 12 nodes. CPU: AMD 8224P (10 tasks); not recorded, as scontrol no longer finds the node (4 tasks); AMD 7543 (1 task). GPU: none allocated.
+
+Hardware of the database build: Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 6 tasks on 5 nodes. CPU: AMD 8224P (6 tasks). GPU: none allocated.
+
+Sources, read 2026-10-16: the partition is the `queue` column of the run's Nextflow traces. The traces have no `hostname` column, so the node is the one SLURM's job record (`sacct`) gives for the trace's job id. CPU and GPU are that node's features in SLURM (`scontrol show node`: CPU_MNF, CPU_SKU, GPU_SKU), named as on Sherlock's [node features page](https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/). Partition hns is owned by a research group, and Sherlock's [tech specs page](https://www.sherlock.stanford.edu/docs/tech/) lists no CPU models for such partitions. Script: `scripts/read_hardware.py`.
+
 ## Licence
 
 - Licence: MIT ([source](https://github.com/seanome/kmerseek))

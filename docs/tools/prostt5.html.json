@@ -126,11 +126,27 @@
   },
   {
    "tag": "p",
-   "text": "Setting 3di_from_seq, searching one relative (mean over the 15 relatives it searched): 0.109 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.5 GB. That is about $0.00486 at $0.044625 per CPU-hour. Building its databases took 5.31 core-hours over 3 databases, plus 0.664 GPU-hours (1 GPU via --gres=gpu:1 (model not recorded)). A database is built once and reused, so this is not in the per-query cost."
+   "text": "Setting 3di_from_seq, searching one relative (mean over the 15 relatives it searched): 0.109 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.5 GB. That is about $0.00486 at $0.044625 per CPU-hour. Building its databases took 5.31 core-hours over 3 databases, plus 0.664 GPU-hours (1 GPU per task: H100_SXM5, L40S). A database is built once and reused, so this is not in the per-query cost."
   },
   {
    "tag": "p",
    "text": "The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean."
+  },
+  {
+   "tag": "h2",
+   "text": "Hardware"
+  },
+  {
+   "tag": "p",
+   "text": "Hardware of the search (setting 3di_from_seq, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 9 nodes. CPU: AMD 7543 (4 tasks); not recorded, as scontrol no longer finds the node (4 tasks); AMD 9754 (3 tasks); AMD 7742 (2 tasks); AMD 7763 (2 tasks). GPU: none allocated."
+  },
+  {
+   "tag": "p",
+   "text": "Hardware of the database build: Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 3 tasks on 2 nodes. CPU: INTEL 8462Y+ (2 tasks); INTEL 6426Y (1 task). GPU: 3 tasks had one: H100_SXM5 (2); L40S (1)."
+  },
+  {
+   "tag": "p",
+   "text": "Sources, read 2026-10-16: the partition is the queue column of the run's Nextflow traces. The traces have no hostname column, so the node is the one SLURM's job record (sacct) gives for the trace's job id. CPU and GPU are that node's features in SLURM (scontrol show node: CPU_MNF, CPU_SKU, GPU_SKU), named as on Sherlock's node features page. Partition hns is owned by a research group, and Sherlock's tech specs page lists no CPU models for such partitions. Script: scripts/read_hardware.py."
   },
   {
    "tag": "h2",
@@ -272,6 +288,93 @@
    "database_build_gpu_h": 0.6641666666666667,
    "peak_rss_gb": 1.5,
    "hardware": "Stanford Sherlock, SLURM partition hns"
+  },
+  "hardware": {
+   "search": {
+    "recorded": true,
+    "n_tasks": 15,
+    "partitions": [
+     {
+      "value": "hns",
+      "n_tasks": 15
+     }
+    ],
+    "hostname_in_trace": false,
+    "n_nodes": 9,
+    "n_tasks_without_node": 0,
+    "cpu_models": [
+     {
+      "value": "AMD 7543",
+      "n_tasks": 4
+     },
+     {
+      "value": null,
+      "n_tasks": 4
+     },
+     {
+      "value": "AMD 9754",
+      "n_tasks": 3
+     },
+     {
+      "value": "AMD 7742",
+      "n_tasks": 2
+     },
+     {
+      "value": "AMD 7763",
+      "n_tasks": 2
+     }
+    ],
+    "gpu_models": [],
+    "n_tasks_with_gpu": 0
+   },
+   "database_build": {
+    "recorded": true,
+    "n_tasks": 3,
+    "partitions": [
+     {
+      "value": "hns",
+      "n_tasks": 3
+     }
+    ],
+    "hostname_in_trace": false,
+    "n_nodes": 2,
+    "n_tasks_without_node": 0,
+    "cpu_models": [
+     {
+      "value": "INTEL 8462Y+",
+      "n_tasks": 2
+     },
+     {
+      "value": "INTEL 6426Y",
+      "n_tasks": 1
+     }
+    ],
+    "gpu_models": [
+     {
+      "value": "H100_SXM5",
+      "n_tasks": 2
+     },
+     {
+      "value": "L40S",
+      "n_tasks": 1
+     }
+    ],
+    "n_tasks_with_gpu": 3
+   },
+   "source": {
+    "read_on": "2026-10-16",
+    "experiment": "qfo_region_midi_plus",
+    "traces": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/{run-midi-plus,run-midi-plus-all-qfo}/*trace*.txt",
+    "trace_files_with_hostname_column": [],
+    "n_trace_files": 11,
+    "node_from": "sacct -u olgabot -X -n -P -S 2026-08-31 -E 2026-09-14 --format=JobID,NodeList,Partition,AllocTRES, matched on the trace's native_id",
+    "hardware_from": "scontrol -o show node <node>: AvailableFeatures CPU_MNF, CPU_SKU, GPU_SKU",
+    "feature_names_documented_at": "https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/",
+    "partition_specs": "https://www.sherlock.stanford.edu/docs/tech/",
+    "n_tasks": 6260,
+    "n_tasks_with_node": 6260,
+    "n_nodes": 131
+   }
   },
   "questions": [
    "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `3di_from_seq`; strata with at least 30 true instances.)",

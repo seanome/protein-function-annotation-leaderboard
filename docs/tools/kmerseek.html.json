@@ -278,6 +278,22 @@
   },
   {
    "tag": "h2",
+   "text": "Hardware"
+  },
+  {
+   "tag": "p",
+   "text": "Hardware of the search (setting gbmr4_k21_lcFalse, every task): Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 15 tasks on 12 nodes. CPU: AMD 8224P (10 tasks); not recorded, as scontrol no longer finds the node (4 tasks); AMD 7543 (1 task). GPU: none allocated."
+  },
+  {
+   "tag": "p",
+   "text": "Hardware of the database build: Sherlock partition hns, from the trace. Host name: not recorded in the trace, so the node is the one SLURM's job record (sacct) gives. 6 tasks on 5 nodes. CPU: AMD 8224P (6 tasks). GPU: none allocated."
+  },
+  {
+   "tag": "p",
+   "text": "Sources, read 2026-10-16: the partition is the queue column of the run's Nextflow traces. The traces have no hostname column, so the node is the one SLURM's job record (sacct) gives for the trace's job id. CPU and GPU are that node's features in SLURM (scontrol show node: CPU_MNF, CPU_SKU, GPU_SKU), named as on Sherlock's node features page. Partition hns is owned by a research group, and Sherlock's tech specs page lists no CPU models for such partitions. Script: scripts/read_hardware.py."
+  },
+  {
+   "tag": "h2",
    "text": "Licence"
   },
   {
@@ -473,6 +489,72 @@
    "database_build_gpu_h": null,
    "peak_rss_gb": 5.2,
    "hardware": "Stanford Sherlock, SLURM partition hns"
+  },
+  "hardware": {
+   "search": {
+    "recorded": true,
+    "n_tasks": 15,
+    "partitions": [
+     {
+      "value": "hns",
+      "n_tasks": 15
+     }
+    ],
+    "hostname_in_trace": false,
+    "n_nodes": 12,
+    "n_tasks_without_node": 0,
+    "cpu_models": [
+     {
+      "value": "AMD 8224P",
+      "n_tasks": 10
+     },
+     {
+      "value": null,
+      "n_tasks": 4
+     },
+     {
+      "value": "AMD 7543",
+      "n_tasks": 1
+     }
+    ],
+    "gpu_models": [],
+    "n_tasks_with_gpu": 0
+   },
+   "database_build": {
+    "recorded": true,
+    "n_tasks": 6,
+    "partitions": [
+     {
+      "value": "hns",
+      "n_tasks": 6
+     }
+    ],
+    "hostname_in_trace": false,
+    "n_nodes": 5,
+    "n_tasks_without_node": 0,
+    "cpu_models": [
+     {
+      "value": "AMD 8224P",
+      "n_tasks": 6
+     }
+    ],
+    "gpu_models": [],
+    "n_tasks_with_gpu": 0
+   },
+   "source": {
+    "read_on": "2026-10-16",
+    "experiment": "qfo_region_midi_plus",
+    "traces": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/{run-midi-plus,run-midi-plus-all-qfo}/*trace*.txt",
+    "trace_files_with_hostname_column": [],
+    "n_trace_files": 11,
+    "node_from": "sacct -u olgabot -X -n -P -S 2026-08-31 -E 2026-09-14 --format=JobID,NodeList,Partition,AllocTRES, matched on the trace's native_id",
+    "hardware_from": "scontrol -o show node <node>: AvailableFeatures CPU_MNF, CPU_SKU, GPU_SKU",
+    "feature_names_documented_at": "https://www.sherlock.stanford.edu/docs/advanced-topics/node-features/",
+    "partition_specs": "https://www.sherlock.stanford.edu/docs/tech/",
+    "n_tasks": 6260,
+    "n_tasks_with_node": 6260,
+    "n_nodes": 131
+   }
   },
   "questions": [
    "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.005 (n = 563), 60–100% 0.297 (n = 1,289). If no, 20–30% 0.000 (n = 93), 30–40% 0.000 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `gbmr4_k21_lcFalse`; strata with at least 30 true instances.)",
