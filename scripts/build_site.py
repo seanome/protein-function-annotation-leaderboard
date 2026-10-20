@@ -21,6 +21,7 @@ import polars as pl
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 ROOT_DIR = Path(__file__).resolve().parents[1]
 from tools import BASELINES, KINDS, SPECIES, TOOLS  # noqa: E402
+import best_hit  # noqa: E402
 # Search tools and no-search baselines, for anything that only needs a name, kind or shape.
 ALL_TOOLS = {**TOOLS, **BASELINES}
 import figures  # noqa: E402
@@ -677,7 +678,7 @@ def key_line(tools_used: set[str]) -> str:
 
 
 def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[str], dd: dict,
-                     figs: str = "") -> str:
+                     figs: str = "", besthit: str = "") -> str:
     body = f"""
 <h1>{SITE}</h1>
 <p class="lede">Which tool puts the known domains and features of human proteins in the right
@@ -726,7 +727,7 @@ set: Pfam's domains are defined by the models hmmscan runs, so read its row as a
 <span class="item">Cost and core-hours are measured on Stanford's Sherlock cluster, from the run's own task records {term_btn("measured", "key")}</span>
 </div>
 </details>
-<p class="prose oneline">In plain words: <b>Fmax</b> asks whether a tool finds the real domains
+{besthit}<p class="prose oneline">In plain words: <b>Fmax</b> asks whether a tool finds the real domains
 without adding wrong ones. <b>AUPRC</b> asks whether its correct calls stay at the top of its list.
 <b>Median IoU</b> asks how well the ends of its right calls line up with the real domain. All run
 0 to 1, and higher is better. Hover or tap a <b>?</b> for more, or see
@@ -2786,8 +2787,12 @@ def main() -> None:
     dd = {f"{k}_{m}": phm.filter(pl.col("calls") == k)[m][0] for k in ("raw", "dedup") for m in ("fmax", "auprc")}
     has_pileup = (a.data / "pileup/regions.parquet").exists()
     pf = pileup_figures_html(a.data) if has_pileup else {}
+    bh = best_hit.values(a.data)
+    if bh is not None:
+        best_hit.copy_figures(a.data, out)
     (out / "index.html").write_text(page_leaderboard(payload, src, n_q, tools_used | base_used, dd,
-                                                     leaderboard_figures(res, pf.get("upset", ""))))
+                                                     leaderboard_figures(res, pf.get("upset", "")),
+                                                     best_hit.section(bh, src)))
     if pf:
         (out / "data" / "upset.json").write_text(json.dumps(pf["upset_json"], separators=(",", ":")))
         (out / "proteins.html").write_text(page_proteins(src, pf["map"]))

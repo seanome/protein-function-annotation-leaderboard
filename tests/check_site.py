@@ -18,6 +18,11 @@
    combination, below every search row; a cell it can address shows the parquet's numbers,
    any other shows "not applicable" and no number; the sentence's picks leave baselines out
    and name a baseline only when it is at or above the best search tool's Fmax.
+   Best-hit transfer (Table 2, data/best_hit/): every number in the table is recomputed here
+   from rows.parquet, call_rules.parquet, compute.parquet and the cards, with this file's own
+   code; the table has exactly the three settings in their run order, sits after Table 1 and
+   outside it, and stays shown with its three rows under every relative and subset chosen
+   above Table 1 (no time since the split from human hides or moves it).
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
    at phone width (375 px).
 
@@ -90,6 +95,52 @@ SNAP_PLOT = """(batch) => batch.map((s) => {
 
 def fmt3(x):
     return f"{x:.3f}"
+
+
+def best_hit_expect(data: Path) -> dict | None:
+    """Table 2's numbers, recomputed from data/best_hit/ without scripts/best_hit.py."""
+    d = data / "best_hit"
+    if not (d / "rows.parquet").exists():
+        return None
+    rows = pl.read_parquet(d / "rows.parquet")
+    rules = pl.read_parquet(d / "call_rules.parquet")
+    comp = pl.read_parquet(d / "compute.parquet")
+    out = {}
+    for tool, setting in (("diamond_besthit", "sensitive"), ("diamond_besthit", "ultra-sensitive"),
+                          ("mmseqs2_besthit", "s7.5")):
+        r = rows.filter((pl.col("tool") == tool) & (pl.col("setting") == setting)
+                        & (pl.col("stratum_axis") == "all") & (pl.col("dedup_or_raw") == "raw"))
+
+        def metric(m):
+            return r.filter(pl.col("metric") == m)["value"].item()
+
+        rr = rules.filter((pl.col("tool") == tool) & (pl.col("setting") == setting))
+        placed = rr.filter(pl.col("call_rule") == "placed").row(0, named=True)
+        whole = rr.filter(pl.col("call_rule") == "whole_region").row(0, named=True)
+        card = json.loads((d / "cards" / f"{tool}.{setting}.json").read_text())
+        step = {"diamond_besthit": "diamondBestHitSearch", "mmseqs2_besthit": "mmseqsBestHitSearch"}[tool]
+        sr = comp.filter((pl.col("tool") == tool) & (pl.col("setting") == setting)
+                         & (pl.col("step") == step)).row(0, named=True)
+        n_truth = r["n_instances"].unique().item()
+        q = card["queries"]
+        cpu = sr["cpu_h"] / sr["n_queries"] * 1000
+        out[f"{tool}|{setting}"] = {
+            "fmax_placed": (metric("fmax"), f"{metric('fmax'):.3f}"),
+            "fmax_whole": (whole["fmax"], f"{whole['fmax']:.3f}"),
+            "precision": (metric("fmax_precision"), f"{metric('fmax_precision'):.3f}"),
+            "recall": (metric("fmax_recall"), f"{metric('fmax_recall'):.3f}"),
+            "iou_placed": (metric("median_iou_tp"), f"{metric('median_iou_tp'):.3f} ({placed['n_tp_calls']:,})"),
+            "iou_whole": (whole["median_iou_tp"], f"{whole['median_iou_tp']:.3f} ({whole['n_tp_calls']:,})"),
+            "n_truth": (n_truth, f"{n_truth:,}"),
+            "queries_with_call": (q["n_queries_with_call"], f"{q['n_queries_with_call']:,} of {q['n_queries']:,}"),
+            "cpu_h_per_1000": (cpu, f"{cpu:.3f}"),
+            "peak_ram_gb": (sr["peak_ram_gb"], f"{sr['peak_ram_gb']:.1f}"),
+            "version": (r["tool_version"].unique().item(), r["tool_version"].unique().item()),
+        }
+        if abs(placed["fmax"] - metric("fmax")) > 1e-12:
+            raise SystemExit(f"{tool} {setting}: call_rules placed Fmax != rows Fmax")
+    shared = comp.filter(pl.col("tool") == "annotator_shared")["cpu_h"].sum()
+    return {"rows": out, "shared": float(shared)}
 
 
 def main() -> int:
@@ -293,6 +344,45 @@ def main() -> int:
             check_snap(snap, "all")
         stats["every_setting_views"] = len(every)
         page.evaluate("window.__lb.set({view: 'best'})")
+
+        # ---- 1b. best-hit transfer, Table 2 ----
+        bh = best_hit_expect(a.data)
+        if bh is not None:
+            got = page.evaluate("""() => [...document.querySelectorAll('#besthit-table tbody tr')].map(tr => ({
+              key: tr.dataset.tool + '|' + tr.dataset.setting,
+              cells: Object.fromEntries([...tr.querySelectorAll('td')].map(td => [td.dataset.k, {v: td.dataset.v, text: td.textContent}]))}))""")
+            if [g["key"] for g in got] != list(bh["rows"]):
+                failures.append(f"Table 2 rows {[g['key'] for g in got]} != {list(bh['rows'])}")
+            for g in got:
+                want = bh["rows"].get(g["key"], {})
+                for k, (wv, wtext) in want.items():
+                    c = g["cells"].get(k)
+                    if c is None:
+                        failures.append(f"Table 2 {g['key']}: no cell {k}")
+                        continue
+                    num = isinstance(wv, float)
+                    same = abs(float(c["v"]) - wv) < 1e-9 if num else c["v"] == str(wv)
+                    if not same or c["text"] != wtext:
+                        failures.append(f"Table 2 {g['key']} {k}: page {c} != {wv!r} / {wtext!r}")
+                    stats["besthit_numbers_checked"] = stats.get("besthit_numbers_checked", 0) + 1
+            shared = float(page.evaluate("document.getElementById('besthit-shared').dataset.v"))
+            if abs(shared - bh["shared"]) > 1e-9:
+                failures.append(f"Table 2 shared core-hours {shared} != {bh['shared']}")
+            order = page.evaluate("document.getElementById('lb').compareDocumentPosition(document.getElementById('besthit-table'))")
+            if not order & 4 or page.evaluate("!!document.querySelector('#lb #besthit-table, #besthit-table #lb')"):
+                failures.append("Table 2 is not after Table 1, or one is inside the other")
+            # No relative or subset may hide or move it.
+            for c in all_combos:
+                if c["axis"] != "all" and c["species"] != "zebrafish":
+                    continue
+                shown = page.evaluate("""(s) => { window.__lb.set(s);
+                  const t = document.getElementById('besthit-table');
+                  return [t.offsetParent !== null, t.querySelectorAll('tbody tr').length,
+                          document.getElementById('best-hit').closest('#lb') === null]; }""", c)
+                if shown != [True, 3, True]:
+                    failures.append(f"Table 2 under {c}: shown, rows, outside Table 1 = {shown}")
+                stats["besthit_states_checked"] = stats.get("besthit_states_checked", 0) + 1
+            page.evaluate("window.__lb.set({view: 'best'})")
 
         # ---- 2. compare two columns ----
         page.goto(base + "cost.html")
