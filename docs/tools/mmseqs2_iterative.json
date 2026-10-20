@@ -22,7 +22,7 @@
  "command": "mmseqs search \\\n    human-38fdd87d_mmdb/db zebrafish_mmdb/db result mmseqs_tmp \\\n    --threads 16 \\\n    -s 7 \\\n    --num-iterations 3 \\\n    --max-seqs 1000 \\\n    -e 10.0",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "s7",
@@ -79,8 +79,8 @@
   "hardware": "Stanford Sherlock, SLURM partition hns"
  },
  "questions": [
-  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.241 (n = 563), 60\u2013100% 0.300 (n = 1,289). If no, 20\u201330% 0.337 (n = 93), 30\u201340% 0.209 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting sensitivity 7, 3 rounds; subsets with at least 30 true instances.)",
-  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.245 (n = 963), 121\u2013250 aa 0.319 (n = 504), 251 aa or more 0.462 (n = 277). If no, 16\u201330 aa 0.028 (n = 271), 31\u201360 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting sensitivity 7, 3 rounds.)",
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.241 (n = 563), 60\u2013100% 0.300 (n = 1,289). If no, 20\u201330% 0.337 (n = 93), 30\u201340% 0.209 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting sensitivity 7, 3 rounds; subsets with at least 30 true instances.)",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.245 (n = 963), 121\u2013250 aa 0.319 (n = 504), 251 aa or more 0.462 (n = 277). If no, 16\u201330 aa 0.028 (n = 271), 31\u201360 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting sensitivity 7, 3 rounds.)",
   "Can you spend about 0.0787 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" below."
  ],
  "markdown": "mmseqs2_iterative.md"

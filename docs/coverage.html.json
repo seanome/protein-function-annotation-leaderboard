@@ -3,15 +3,15 @@
  "title": "Coverage",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
-  "commit_date": "2026-10-16T19:47:35Z",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+  "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-16T19:47:54Z",
+  "copied_at": "2026-10-20T13:48:23Z",
   "sha256": {
-   "results.parquet": "50a9ea98f3110eb3fffc4e9bbca2de714278118cc2d89c2dd59ac985b323e752",
+   "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
-   "coverage.md": "cc1b2273680bd4c39806525bcade5c816506ce70ca1b0a7b5dbad137836d77e2",
-   "provenance.json": "40dae057f103b483428e57b14d59bf903362b6b965523676bd9947ff98d7a71f",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "928a70476164c3fa5f5da18160695a1fe80594d5f614e332509c1d0a341b636d",
    "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
@@ -23,7 +23,8 @@
    "query_strata/RULES.md": "da15ff78a41ca8a43a64a5cf0cf738569776f274b938be776218923490a44bae",
    "query_strata/provenance.json": "136f4e6d55028117591cd069e83b63ae543687f0f758630f846e3d703aa4cb0b"
   },
-  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "query_strata_commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e"
  },
  "text": [
   {
@@ -36,7 +37,7 @@
   },
   {
    "tag": "p",
-   "text": "Data from 16 Oct 2026, commit 26a778cb (source)"
+   "text": "Data from 20 Oct 2026, commit 7eca428b (source)"
   },
   {
    "tag": "figcaption",
@@ -67,38 +68,6 @@
    "text": "region length"
   },
   {
-   "tag": "th",
-   "text": "nearest_identity"
-  },
-  {
-   "tag": "th",
-   "text": "membrane"
-  },
-  {
-   "tag": "th",
-   "text": "low_complexity"
-  },
-  {
-   "tag": "th",
-   "text": "protein_length"
-  },
-  {
-   "tag": "th",
-   "text": "region_length"
-  },
-  {
-   "tag": "th",
-   "text": "family_superkingdoms"
-  },
-  {
-   "tag": "th",
-   "text": "family_phyla"
-  },
-  {
-   "tag": "th",
-   "text": "busco"
-  },
-  {
    "tag": "td",
    "text": "phmmer"
   },
@@ -121,38 +90,6 @@
   {
    "tag": "td",
    "text": "1,133,694"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
   },
   {
    "tag": "td",
@@ -180,38 +117,6 @@
   },
   {
    "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
    "text": "jackhmmer"
   },
   {
@@ -233,38 +138,6 @@
   {
    "tag": "td",
    "text": "1,133,694"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
   },
   {
    "tag": "td",
@@ -292,38 +165,6 @@
   },
   {
    "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
    "text": "HH-suite (hhsearch)"
   },
   {
@@ -345,38 +186,6 @@
   {
    "tag": "td",
    "text": "1,133,694"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
   },
   {
    "tag": "td",
@@ -404,38 +213,6 @@
   },
   {
    "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
    "text": "ProstT5 + Foldseek"
   },
   {
@@ -457,38 +234,6 @@
   {
    "tag": "td",
    "text": "1,133,694"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
   },
   {
    "tag": "td",
@@ -516,38 +261,6 @@
   },
   {
    "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
    "text": "hmmscan with Pfam"
   },
   {
@@ -569,38 +282,6 @@
   {
    "tag": "td",
    "text": "8,793"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
   },
   {
    "tag": "td",
@@ -628,75 +309,11 @@
   },
   {
    "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
    "text": "MMseqs2, search mode not recorded (no card)"
   },
   {
    "tag": "td",
    "text": "171,383"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
   },
   {
    "tag": "td",
@@ -737,38 +354,6 @@
   {
    "tag": "td",
    "text": "590,559"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
-  },
-  {
-   "tag": "td",
-   "text": "×"
   },
   {
    "tag": "figcaption",
@@ -1452,7 +1037,7 @@
   },
   {
    "tag": "p",
-   "text": "111 squares are filled, 177 are not run and 12 do not apply. Where each experiment's output came from, and which outputs were left out and why: inventory.md (copied with the tables)."
+   "text": "111 squares are filled, 81 are not run and 12 do not apply. Where each experiment's output came from, and which outputs were left out and why: inventory.md (copied with the tables)."
   },
   {
    "tag": "h2",
@@ -1515,15 +1100,7 @@
      "identity",
      "plddt",
      "feature_type",
-     "feature_length_bin",
-     "nearest_identity",
-     "membrane",
-     "low_complexity",
-     "protein_length",
-     "region_length",
-     "family_superkingdoms",
-     "family_phyla",
-     "busco"
+     "feature_length_bin"
     ],
     "rows": [
      {
@@ -1533,15 +1110,7 @@
        "identity": 516687,
        "plddt": 121049,
        "feature_type": 73872,
-       "feature_length_bin": 590559,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 590559
       }
      },
      {
@@ -1551,15 +1120,7 @@
        "identity": 939872,
        "plddt": 231206,
        "feature_type": 145722,
-       "feature_length_bin": 1085594,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1085594
       }
      },
      {
@@ -1569,15 +1130,7 @@
        "identity": 952047,
        "plddt": 276686,
        "feature_type": 181647,
-       "feature_length_bin": 1133694,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1133694
       }
      },
      {
@@ -1587,15 +1140,7 @@
        "identity": 952047,
        "plddt": 276686,
        "feature_type": 181647,
-       "feature_length_bin": 1133694,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1133694
       }
      },
      {
@@ -1605,15 +1150,7 @@
        "identity": 952047,
        "plddt": 276686,
        "feature_type": 181647,
-       "feature_length_bin": 1133694,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1133694
       }
      },
      {
@@ -1623,15 +1160,7 @@
        "identity": null,
        "plddt": 8234,
        "feature_type": null,
-       "feature_length_bin": 8793,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 8793
       }
      },
      {
@@ -1641,15 +1170,7 @@
        "identity": 1105115,
        "plddt": 276686,
        "feature_type": 181647,
-       "feature_length_bin": 1133694,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1133694
       }
      },
      {
@@ -1659,15 +1180,7 @@
        "identity": null,
        "plddt": null,
        "feature_type": null,
-       "feature_length_bin": null,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": null
       }
      },
      {
@@ -1677,15 +1190,7 @@
        "identity": 952047,
        "plddt": 276686,
        "feature_type": 181647,
-       "feature_length_bin": 1133694,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1133694
       }
      },
      {
@@ -1695,15 +1200,7 @@
        "identity": 952047,
        "plddt": 276686,
        "feature_type": 181647,
-       "feature_length_bin": 1133694,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1133694
       }
      },
      {
@@ -1713,15 +1210,7 @@
        "identity": 952047,
        "plddt": 276686,
        "feature_type": 181647,
-       "feature_length_bin": 1133694,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 1133694
       }
      },
      {
@@ -1731,15 +1220,7 @@
        "identity": 516687,
        "plddt": 121049,
        "feature_type": 73872,
-       "feature_length_bin": 590559,
-       "nearest_identity": null,
-       "membrane": null,
-       "low_complexity": null,
-       "protein_length": null,
-       "region_length": null,
-       "family_superkingdoms": null,
-       "family_phyla": null,
-       "busco": null
+       "feature_length_bin": 590559
       }
      }
     ]

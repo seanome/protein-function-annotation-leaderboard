@@ -48,6 +48,8 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=Path("data"))
     ap.add_argument("--pileup-commit", default=None,
                     help="commit holding results/leaderboard/pileup/, when it is not --commit")
+    ap.add_argument("--query-strata-commit", default=None,
+                    help="commit holding results/leaderboard/query_strata/, when it is not --commit")
     a = ap.parse_args()
 
     commit = json.loads(gh(f"repos/{a.repo}/commits/{a.commit}"))
@@ -87,9 +89,11 @@ def main() -> None:
         want = json.loads((a.out / "pileup/provenance.json").read_text())["outputs"]
         check_listed(want, checksums, "pileup/provenance.json", prefix="pileup/")
 
+    qs_sha = (json.loads(gh(f"repos/{a.repo}/commits/{a.query_strata_commit}"))["sha"]
+              if a.query_strata_commit else sha)
     for name in QUERY_STRATA:
         try:
-            body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={sha}", raw=True)
+            body = gh(f"repos/{a.repo}/contents/results/leaderboard/{name}?ref={qs_sha}", raw=True)
         except subprocess.CalledProcessError:
             (a.out / name).unlink(missing_ok=True)
             continue
@@ -98,7 +102,7 @@ def main() -> None:
         checksums[name] = hashlib.sha256(body).hexdigest()
     got_qs = [n for n in QUERY_STRATA if n in checksums]
     if got_qs and len(got_qs) != len(QUERY_STRATA):
-        raise SystemExit(f"{sha[:8]} has only some of the query-strata files ({got_qs})")
+        raise SystemExit(f"{qs_sha[:8]} has only some of the query-strata files ({got_qs})")
     if "query_strata/provenance.json" in checksums:
         want = json.loads((a.out / "query_strata/provenance.json").read_text())["outputs"]
         check_listed({k: v for k, v in want.items() if "query_strata/" + k in QUERY_STRATA},
@@ -116,6 +120,7 @@ def main() -> None:
         "copied_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sha256": checksums,
         "pileup_commit": pileup_sha if "pileup/regions.parquet" in checksums else None,
+        "query_strata_commit": qs_sha if got_qs else None,
     }
     (a.out / "SOURCE.json").write_text(json.dumps(source, indent=1) + "\n")
     print(f"copied {len(FILES)} files from {a.repo}@{sha[:8]}")

@@ -3,15 +3,15 @@
  "title": "ProstT5 + Foldseek card",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
-  "commit_date": "2026-10-16T19:47:35Z",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+  "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-16T19:47:54Z",
+  "copied_at": "2026-10-20T13:48:23Z",
   "sha256": {
-   "results.parquet": "50a9ea98f3110eb3fffc4e9bbca2de714278118cc2d89c2dd59ac985b323e752",
+   "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
-   "coverage.md": "cc1b2273680bd4c39806525bcade5c816506ce70ca1b0a7b5dbad137836d77e2",
-   "provenance.json": "40dae057f103b483428e57b14d59bf903362b6b965523676bd9947ff98d7a71f",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "928a70476164c3fa5f5da18160695a1fe80594d5f614e332509c1d0a341b636d",
    "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
@@ -23,7 +23,8 @@
    "query_strata/RULES.md": "da15ff78a41ca8a43a64a5cf0cf738569776f274b938be776218923490a44bae",
    "query_strata/provenance.json": "136f4e6d55028117591cd069e83b63ae543687f0f758630f846e3d703aa4cb0b"
   },
-  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "query_strata_commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e"
  },
  "text": [
   {
@@ -40,7 +41,7 @@
   },
   {
    "tag": "li",
-   "text": "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting shape letters from sequence; subsets with at least 30 true instances.)"
+   "text": "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting shape letters from sequence; subsets with at least 30 true instances.)"
   },
   {
    "tag": "li",
@@ -56,7 +57,7 @@
   },
   {
    "tag": "p",
-   "text": "Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is shape letters from sequence (3di_from_seq): Fmax 0.223 over 2,435 true instances. Searching costs about $0.00486 per 1,000 queries (0.109 core-hours), for each relative searched."
+   "text": "Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is shape letters from sequence (3di_from_seq): Fmax 0.223 over 2,435 true instances. Searching costs about $0.00486 per 1,000 queries (0.109 core-hours), for each relative searched."
   },
   {
    "tag": "h2",
@@ -204,7 +205,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool id prostt5. Numbers from seanome/2024-kmerseek-analysis commit 26a778cb."
+   "text": "Tool id prostt5. Numbers from seanome/2024-kmerseek-analysis commit 7eca428b."
   },
   {
    "tag": "p",
@@ -235,7 +236,7 @@
   "command": "foldseek createdb filtered.fasta zebrafish_prostt5/db \\\n    --prostt5-model weights --gpu 1 --threads 8\n\nfoldseek search \\\n    human-38fdd87d_prostt5/db zebrafish_prostt5/db result tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
   "numbers_from": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e",
+   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
    "filters": "pfam, raw, zebrafish"
   },
   "best_setting": "3di_from_seq",
@@ -292,7 +293,7 @@
    "hardware": "Stanford Sherlock, SLURM partition hns"
   },
   "questions": [
-   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting shape letters from sequence; subsets with at least 30 true instances.)",
+   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting shape letters from sequence; subsets with at least 30 true instances.)",
    "Do you have a GPU to predict the 3Di letters for your proteins? The run used one GPU for that step; its cost is not counted here.",
    "Can you spend about 0.109 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" below."
   ],
