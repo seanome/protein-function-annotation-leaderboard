@@ -1,0 +1,58 @@
+{
+ "10090": {
+  "adjusted_age": 83.51396,
+  "name_b": "Mus musculus",
+  "precomputed_age": 83.51395605058,
+  "read_utc": "2026-10-20T00:04:37Z",
+  "studies": 75,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/10090"
+ },
+ "3702": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Arabidopsis thaliana",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:04:45Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3702"
+ },
+ "559292": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Saccharomyces cerevisiae S288C",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:04:43Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/559292"
+ },
+ "6239": {
+  "adjusted_age": 692.17015,
+  "name_b": "Caenorhabditis elegans",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:04:42Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6239"
+ },
+ "7227": {
+  "adjusted_age": 692.17015,
+  "name_b": "Drosophila melanogaster",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:04:40Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7227"
+ },
+ "7955": {
+  "adjusted_age": 435.12563,
+  "name_b": "Danio rerio",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:04:39Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7955"
+ },
+ "9606": {
+  "adjusted_age": 0.0,
+  "name_b": "Homo sapiens",
+  "note": "human itself, set to 0",
+  "precomputed_age": 0.0,
+  "read_utc": "2026-10-20T00:04:37Z",
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9606"
+ }
+}
