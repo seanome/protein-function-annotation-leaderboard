@@ -20,6 +20,10 @@ No other tool was scored on the same subsets, so no comparison: not run.
 
 Swiss-Prot feature types: not run.
 
+## Can its weak hits be trusted? {#weak-hits}
+
+<span class="few">Not run on the dark set.</span> The weak-hit test so far covers phmmer, jackhmmer, MMseqs2 (3 rounds) and kmerseek ([how it was measured](../methods.html#weak-hits)).
+
 
 ## What it compares
 

@@ -6,7 +6,7 @@
   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
   "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-20T13:27:30Z",
+  "copied_at": "2026-10-20T13:47:19Z",
   "sha256": {
    "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -15,9 +15,12 @@
    "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
-   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+   "weak_hits/weak_hits.parquet": "cec1343e6d18f9dc35eb732e606828462899193ccf10249e2fd15a38b8c7a548",
+   "weak_hits/provenance.json": "2a6293b56b27819a7e934bd62d35b17f9efe97bfe9f073f361996db2fdd6c699"
   },
-  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "weak_hits_commit": "cc33016e578f4cf2440f249b10992670347978cb"
  },
  "text": [
   {
@@ -87,6 +90,226 @@
   {
    "tag": "p",
    "text": "Swiss-Prot features, raw calls, zebrafish, setting wwmj5, k = 11: best feature type membrane-spanning, Fmax 0.362 (n = 1,124); worst coiled coil, Fmax 0.000 (n = 145)."
+  },
+  {
+   "tag": "h2",
+   "text": "Can its weak hits be trusted?"
+  },
+  {
+   "tag": "p",
+   "text": "When this tool's best hit on a protein is weak, is it right? It was measured on the dark set of four species, each searched against Swiss-Prot without its own clade. Dark proteins have no phmmer, jackhmmer or MMseqs2 hit at E ≤ 1; placed proteins are the rest. A best hit is right when the target shares a Pfam family with the query and the hit covers a Pfam domain of that family on the query. n counts the best hits whose target has any Pfam family. Test half of the proteins only. Grey: fewer than 30 judged hits (how it was measured)."
+  },
+  {
+   "tag": "p",
+   "text": "Dark proteins, best hit right:"
+  },
+  {
+   "tag": "th",
+   "text": "species"
+  },
+  {
+   "tag": "th",
+   "text": "E ≤ 0.001"
+  },
+  {
+   "tag": "th",
+   "text": "0.001 < E ≤ 1"
+  },
+  {
+   "tag": "th",
+   "text": "1 < E ≤ 10"
+  },
+  {
+   "tag": "td",
+   "text": "human"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 6; 95% CI 0.0–39.0%)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 75; 95% CI 0.0–4.9%)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 292; 95% CI 0.0–1.3%)"
+  },
+  {
+   "tag": "td",
+   "text": "C. elegans"
+  },
+  {
+   "tag": "td",
+   "text": "no judged hits (n = 0)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 33; 95% CI 0.0–10.4%)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 38; 95% CI 0.0–9.2%)"
+  },
+  {
+   "tag": "td",
+   "text": "S. cerevisiae"
+  },
+  {
+   "tag": "td",
+   "text": "no judged hits (n = 0)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 15; 95% CI 0.0–20.4%)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 106; 95% CI 0.0–3.5%)"
+  },
+  {
+   "tag": "td",
+   "text": "B. burgdorferi"
+  },
+  {
+   "tag": "td",
+   "text": "no judged hits (n = 0)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 3; 95% CI 0.0–56.1%)"
+  },
+  {
+   "tag": "td",
+   "text": "0.0% (0 of 51; 95% CI 0.0–7.0%)"
+  },
+  {
+   "tag": "p",
+   "text": "Placed proteins, best hit right:"
+  },
+  {
+   "tag": "th",
+   "text": "species"
+  },
+  {
+   "tag": "th",
+   "text": "E ≤ 0.001"
+  },
+  {
+   "tag": "th",
+   "text": "0.001 < E ≤ 1"
+  },
+  {
+   "tag": "th",
+   "text": "1 < E ≤ 10"
+  },
+  {
+   "tag": "td",
+   "text": "human"
+  },
+  {
+   "tag": "td",
+   "text": "94.3% (6,010 of 6,374; 95% CI 93.7–94.8%)"
+  },
+  {
+   "tag": "td",
+   "text": "57.5% (541 of 941; 95% CI 54.3–60.6%)"
+  },
+  {
+   "tag": "td",
+   "text": "9.5% (106 of 1,120; 95% CI 7.9–11.3%)"
+  },
+  {
+   "tag": "td",
+   "text": "C. elegans"
+  },
+  {
+   "tag": "td",
+   "text": "85.7% (6 of 7; 95% CI 48.7–97.4%)"
+  },
+  {
+   "tag": "td",
+   "text": "15.9% (31 of 195; 95% CI 11.4–21.7%)"
+  },
+  {
+   "tag": "td",
+   "text": "2.0% (7 of 349; 95% CI 1.0–4.1%)"
+  },
+  {
+   "tag": "td",
+   "text": "S. cerevisiae"
+  },
+  {
+   "tag": "td",
+   "text": "95.3% (832 of 873; 95% CI 93.7–96.5%)"
+  },
+  {
+   "tag": "td",
+   "text": "49.6% (236 of 476; 95% CI 45.1–54.1%)"
+  },
+  {
+   "tag": "td",
+   "text": "9.5% (78 of 823; 95% CI 7.7–11.7%)"
+  },
+  {
+   "tag": "td",
+   "text": "B. burgdorferi"
+  },
+  {
+   "tag": "td",
+   "text": "95.3% (203 of 213; 95% CI 91.6–97.4%)"
+  },
+  {
+   "tag": "td",
+   "text": "50.7% (34 of 67; 95% CI 39.1–62.3%)"
+  },
+  {
+   "tag": "td",
+   "text": "9.9% (13 of 131; 95% CI 5.9–16.2%)"
+  },
+  {
+   "tag": "p",
+   "text": "The kmerseek setting for each species was picked on the other half of the proteins, as the one with the highest share right at E 1–10 on dark proteins:"
+  },
+  {
+   "tag": "li",
+   "text": "human: alphabet wass14, k = 6, scaled 1"
+  },
+  {
+   "tag": "li",
+   "text": "C. elegans: alphabet hp_lehninger_hpc3, k = 25, scaled 10"
+  },
+  {
+   "tag": "li",
+   "text": "S. cerevisiae: alphabet hp_pbotc_1st_ed2, k = 23, scaled 1"
+  },
+  {
+   "tag": "li",
+   "text": "B. burgdorferi: alphabet uniprot18, k = 5, scaled 1"
+  },
+  {
+   "tag": "p",
+   "text": "The pick is close to arbitrary: on the tune half no setting was ahead by more than two right hits, and in two species every setting had none, so the setting with the most judged hits was taken (rule and numbers)."
+  },
+  {
+   "tag": "p",
+   "text": "PR 133's looser test counts a shared Pfam family or clan anywhere on the two proteins. By that test, on dark proteins at E 1–10:"
+  },
+  {
+   "tag": "li",
+   "text": "human 0.7% (2 of 292)"
+  },
+  {
+   "tag": "li",
+   "text": "C. elegans 0.0% (0 of 38)"
+  },
+  {
+   "tag": "li",
+   "text": "S. cerevisiae 0.9% (1 of 106)"
+  },
+  {
+   "tag": "li",
+   "text": "B. burgdorferi 0.0% (0 of 51)"
   },
   {
    "tag": "figcaption",

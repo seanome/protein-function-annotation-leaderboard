@@ -6,7 +6,7 @@
   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
   "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-20T13:27:30Z",
+  "copied_at": "2026-10-20T13:47:19Z",
   "sha256": {
    "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -15,9 +15,12 @@
    "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
-   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
+   "weak_hits/weak_hits.parquet": "cec1343e6d18f9dc35eb732e606828462899193ccf10249e2fd15a38b8c7a548",
+   "weak_hits/provenance.json": "2a6293b56b27819a7e934bd62d35b17f9efe97bfe9f073f361996db2fdd6c699"
   },
-  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "weak_hits_commit": "cc33016e578f4cf2440f249b10992670347978cb"
  },
  "text": [
   {
@@ -259,6 +262,14 @@
   {
    "tag": "p",
    "text": "The run computed each subset on its own, so two subsets cannot be combined; a combination with no row shows × and \"not run\"."
+  },
+  {
+   "tag": "h2",
+   "text": "Can a tool's weak hits be trusted?"
+  },
+  {
+   "tag": "p",
+   "text": "A separate test from the benchmark above, on the dark set of the kmerseek analysis (PR 133, PR 163). Each protein of four species (human, C. elegans, S. cerevisiae, B. burgdorferi) was searched against Swiss-Prot with the species' own clade removed. A protein is dark when no phmmer, jackhmmer or MMseqs2 hit has E ≤ 1, placed otherwise; only proteins with a known Pfam family count. A tool's best hit on a protein (smallest E-value) is right when the target's Swiss-Prot entry lists a Pfam family the query has, and the stretch of the query the hit covers overlaps a Pfam domain of that family on the query by at least one residue. n counts the best hits whose target has any Pfam family. The share right is given with a 95% Wilson interval, and grey under 30 judged hits. For the sequence tools the stretch of the query comes from aligning the query to its best target again with phmmer, because their hit files keep only the target's positions. kmerseek ran many settings (alphabet, k and scaled). The one shown for each species was picked on one half of the proteins, split by the accession. It is scored here on the other half, and so are the other tools. Botryllus is left out: it has no Pfam annotation. hhblits, one-round MMseqs2, hmmscan, Foldseek and ProstT5 have no dark-set run yet."
   },
   {
    "tag": "h2",

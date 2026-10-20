@@ -28,6 +28,10 @@ Where it is furthest behind the best other tool:
 
 Swiss-Prot features, raw calls, zebrafish, setting single-protein profiles: best feature type domain, Fmax 0.294 (n = 1,107); worst short motif, Fmax 0.003 (n = 190).
 
+## Can its weak hits be trusted? {#weak-hits}
+
+<span class="few">Not run on the dark set.</span> The weak-hit test so far covers phmmer, jackhmmer, MMseqs2 (3 rounds) and kmerseek ([how it was measured](../methods.html#weak-hits)).
+
 
 ## What it compares
 

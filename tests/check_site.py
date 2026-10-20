@@ -17,7 +17,11 @@
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
    at phone width (375 px). Every number written before "Mya" or "million years" must be a
    relative's divergence time from human in the parquet's target_mya_to_human, rounded.
-4. Divergence times: each relative's chip label and the page's species table show the
+4. Weak hits right (four columns of Table 1, one per dark-set species, and the block on every
+   tool card): recomputed here from data/weak_hits/weak_hits.parquet (dark proteins, test
+   half, best hit at E 1-10, strict call). A tool with no row shows "× not run" in grey; a
+   value from fewer than 30 judged hits is grey; the columns do not change with the filters.
+5. Divergence times: each relative's chip label and the page's species table show the
    parquet's target_mya_to_human rounded to whole million years, and no number where it is
    null (E. coli).
 
@@ -71,7 +75,8 @@ SNAP_TABLE = """(batch) => batch.map((s) => {
   const rows = [...document.querySelectorAll('#lb tbody tr')].map((tr) => {
     const cells = {};
     for (const td of tr.querySelectorAll('td[data-col]')) {
-      cells[td.dataset.col] = {text: td.textContent.trim(), missing: td.dataset.missing || null, none: td.dataset.none || null};
+      cells[td.dataset.col] = {text: td.textContent.trim(), missing: td.dataset.missing || null, none: td.dataset.none || null,
+                               few: td.classList.contains('few')};
     }
     return {tool: tr.dataset.tool, setting: tr.dataset.setting, hidden: tr.hidden, cells};
   });
@@ -130,6 +135,17 @@ def main() -> int:
         "db_cpu_h_per_db": db_per_db(r["tool"], r["setting"])} for r in search.iter_rows(named=True)}
     cexp = {(k[5], k[6], k[2]): per_ts[(k[5], k[6])] for k in expect if (k[5], k[6]) in per_ts}
 
+    # Weak hits right, from the weak-hit table directly: tool -> species -> (right, judged).
+    wexp: dict = {}
+    wpath = a.data / "weak_hits" / "weak_hits.parquet"
+    if wpath.exists():
+        w = pl.read_parquet(wpath).filter((pl.col("query_set") == "dark") & (pl.col("split") == "test")
+                                          & (pl.col("band") == "1_10"))
+        for r in w.iter_rows(named=True):
+            if (r["tool"], r["species"]) in {(t, s) for t, d in wexp.items() for s in d}:
+                raise SystemExit(f"two weak-hit rows for {r['tool']} {r['species']}")
+            wexp.setdefault(r["tool"], {})[r["species"]] = (r["right_strict"], r["n_judged"])
+
     # Divergence time from human per relative, from the long table itself.
     mya_rows = long.select("target_db", "target_mya_to_human").unique()
     mya_want = {}
@@ -176,6 +192,25 @@ def main() -> int:
                 failures.append(f"{s}: table rows {sorted(set(got_rows) ^ set(order))} differ from the tool-setting rows")
             vals = {}
             for row in snap["rows"]:
+                for sp in ("human", "worm", "yeast", "borrelia"):
+                    c = row["cells"].get("wh_" + sp)
+                    kn = wexp.get(row["tool"], {}).get(sp)
+                    if c is None:
+                        failures.append(f"{s} {row['tool']}: no weak-hit cell for {sp}")
+                    elif kn is None:
+                        if c["missing"] != "weak" or c["text"] != "× not run" or not c["few"]:
+                            failures.append(f"{row['tool']} {sp}: no weak-hit row but cell {c}")
+                    elif kn[1] == 0:
+                        if c["text"] != "no judged hits" or not c["few"]:
+                            failures.append(f"{row['tool']} {sp}: 0 judged but cell {c}")
+                    else:
+                        want = f"({kn[0]:,}/{kn[1]:,})"
+                        pct = float(c["text"].split("%")[0])
+                        if (abs(pct - 100 * kn[0] / kn[1]) > 0.05 + 1e-9 or not c["text"].endswith(want)
+                                or c["few"] != (kn[1] < 30)):
+                            failures.append(f"{row['tool']} {sp}: weak-hit cell {c} != {kn}")
+                    stats["weak_cells_checked"] = stats.get("weak_cells_checked", 0) + 1
+                row["cells"] = {k: v for k, v in row["cells"].items() if not k.startswith("wh_")}
                 stats["rows_checked"] += 1
                 key = (s["truth"], s["calls"], s["species"], s["axis"], s["stratum"], row["tool"], row["setting"])
                 want = expect.get(key)

@@ -10,6 +10,8 @@
 5. Two builds from the same data/, under different Python hash seeds, are byte-identical.
 6. copy_tables.py deletes an optional file the new commit lacks, and names a file that
    provenance lists but that was not copied.
+7. Every tool card's "Can its weak hits be trusted?" block shows the weak-hit table's numbers,
+   recomputed here, or says the tool was not run on the dark set.
 """
 
 import argparse
@@ -171,6 +173,64 @@ def main() -> int:
         p = subprocess.run([sys.executable, str(ROOT / "scripts/build_site.py"), "--data", str(tmp / "data"),
                             "--out", str(tmp / "out")], capture_output=True, text=True, cwd=ROOT)
         check(p.returncode != 0 and "pileup_commit" in p.stderr, "pile-up page refused without pileup_commit")
+
+    # 7. "Can its weak hits be trusted?" on every card, recomputed from the weak-hit table here.
+    wpath = a.data / "weak_hits" / "weak_hits.parquet"
+    if wpath.exists():
+        import math as _m
+        w = pl.read_parquet(wpath).filter(pl.col("split") == "test")
+        names = {"human": "human", "worm": "C. elegans", "yeast": "S. cerevisiae",
+                 "borrelia": "B. burgdorferi"}
+        bands = ["le_0.001", "0.001_1", "1_10"]
+
+        def ci(k, n, z=1.959964):
+            p = k / n
+            c = (p + z * z / (2 * n)) / (1 + z * z / n)
+            h = z * _m.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+            return max(0.0, c - h), min(1.0, c + h)
+
+        def want_cell(r):
+            if r is None:
+                return '<span class="few">not run</span>'
+            k, n = r["right_strict"], r["n_judged"]
+            if n == 0:
+                return '<span class="few">no judged hits (n = 0)</span>'
+            lo, hi = ci(k, n)
+            t = f"{100 * k / n:.1f}% ({k:,} of {n:,}; 95% CI {100 * lo:.1f}–{100 * hi:.1f}%)"
+            return f'<span class="few">{t}</span>' if n < 30 else t
+
+        with tempfile.TemporaryDirectory() as tmp:
+            subprocess.run([sys.executable, str(ROOT / "scripts/build_site.py"), "--data", str(a.data),
+                            "--out", tmp], check=True, capture_output=True, cwd=ROOT)
+            n_cells = 0
+            for t in TOOLS:
+                md_path = Path(tmp) / "tools" / f"{t}.md"
+                if not md_path.exists():
+                    continue
+                md = md_path.read_text()
+                sec = md.split("## Can its weak hits be trusted?", 1)
+                check(len(sec) == 2, f"{t}: card has the weak-hit block")
+                if len(sec) != 2:
+                    continue
+                body = sec[1].split("\n## ", 1)[0]
+                wt = w.filter(pl.col("tool") == t)
+                if wt.height == 0:
+                    check("Not run on the dark set." in body, f"{t}: card says not run on the dark set")
+                    continue
+                for qset, head in (("dark", "**Dark proteins**"), ("placed", "**Placed proteins**")):
+                    part = body.split(head, 1)[1]
+                    for sp, name in names.items():
+                        line = next((l for l in part.splitlines() if l.startswith(f"| {name} |")), None)
+                        cells = [c.strip() for c in line.strip("|").split(" | ")[1:]] if line else []
+                        want = []
+                        for b in bands:
+                            r = wt.filter((pl.col("species") == sp) & (pl.col("query_set") == qset)
+                                          & (pl.col("band") == b))
+                            want.append(want_cell(r.row(0, named=True) if r.height else None))
+                        n_cells += len(want)
+                        if cells != want:
+                            check(False, f"{t} {qset} {sp}: card {cells} != {want}")
+            check(True, f"weak-hit block: {n_cells} card cells recomputed from weak_hits.parquet")
 
     if failures:
         print(f"{len(failures)} FAILURES")
