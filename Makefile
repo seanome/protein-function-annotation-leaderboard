@@ -16,6 +16,7 @@ site:
 check:
 	$(PY) scripts/claims.py --data data --check
 	$(PY) tests/check_site.py --site docs
+	$(PY) tests/check_explainers.py --site docs
 	$(PY) tests/check_prose_all.py --site docs
 
 serve:
