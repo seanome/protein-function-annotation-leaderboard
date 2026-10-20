@@ -9,7 +9,7 @@ Predicted 3-D shapes. Each residue of an AlphaFold model gets one of 20 shape le
 ## What it needs
 
 - sequence only: no
-- AlphaFold model: yes
+- 3D structure prediction: yes
 - GPU: no
 
 ## Reference searched
@@ -75,5 +75,5 @@ Followed by foldseek convertalis to write the table of hits.
 ## Will it work for you?
 
 1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.164 (n = 563), 60–100% 0.241 (n = 1,289). If no, 20–30% 0.268 (n = 93), 30–40% 0.167 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `3di_aa`; strata with at least 30 true instances.)
-2. **Do you have an AlphaFold model for every protein you want to annotate?** If not, Foldseek cannot search the proteins without one.
+2. **Do you have a 3D structure prediction for every protein you want to annotate?** If not, Foldseek cannot search the proteins without one.
 3. **Can you spend about 0.129 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" above.

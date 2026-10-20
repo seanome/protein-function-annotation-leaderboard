@@ -9,7 +9,7 @@ Each query protein against the curated profile models of every Pfam family, with
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: no
 
 ## Reference searched

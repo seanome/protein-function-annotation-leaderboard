@@ -9,7 +9,7 @@ Two profiles against each other. Here each profile was built from a single prote
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: no
 
 ## Reference searched

@@ -382,20 +382,11 @@ def compute_json(comp: pl.DataFrame) -> dict:
 def page_leaderboard(meta_json: str, src: dict, n_queries: int, tools_used: set[str], dd: dict) -> str:
     body = f"""
 <h1>{SITE}</h1>
-<p class="lede">Which tool finds the known domains and features of a protein, and what does it
-cost? Each row is one tool at one setting. It searched {n_queries:,} human proteins against the
-proteome of one relative and copied the relative's annotations onto them. The scores say how many
-of the human proteins' known annotations it put in the right place. The queries are human proteins,
-964 of them from chromosome 6; how the ranking holds for queries from other species is not
-measured.</p>
-<details class="prose"><summary>How to choose between Fmax and AUPRC, and raw against dedup</summary>
-<p>Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it
-when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting
-each call: use it when you will rank calls and read down the list. The two can rank tools in
-opposite orders, because AUPRC pools every call of every protein while Fmax averages protein by
-protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from
-{dd['raw_fmax']:.3f} to {dd['dedup_fmax']:.3f} and AUPRC from {dd['raw_auprc']:.3f} to
-{dd['dedup_auprc']:.3f}. Definitions: <a href="methods.html">Methods</a>.</p></details>
+<p class="lede">Which tool puts the known domains and features of human proteins in the right
+place, and what does it cost? Each row is one tool at one setting, ranked best first.</p>
+<details class="choices" id="choices">
+<summary><span class="choices-label">Change what is ranked</span>
+<span class="choices-now" id="filtersummary"></span></summary>
 <form class="filters" id="filters-form" onsubmit="return false" aria-label="Filters">
 <div id="filters"></div>
 <p class="axisnote">The benchmark split the proteins along one of the last four rows at a time,
@@ -409,15 +400,11 @@ so picking a value in one of them sets the other three back to "any".</p>
 price file</a>). CPU: a c7i.large costs $0.08925 per hour for 2 vCPU, so $0.044625 per CPU-hour.
 GPU: a g5.xlarge with one NVIDIA A10G costs $1.006 per hour.</span>
 </div>
+</details>
 <figure>
-<figcaption><b>Table 1.</b> Tools ranked under the filters above: <span id="filterline"></span>
-Fmax is the best balance of precision and recall at any one score cutoff; AUPRC is precision
-summed over all cutoffs. Both run from 0 to 1, and higher is better. Median IoU is how well a
-correct call's ends match the true region: the overlap divided by the combined span, 1 for a
-perfect match. Click a column name to sort; rows with no value always sort last.
-<span id="count"></span> On a narrow screen, scroll the table sideways; the tool name stays in
-place.</figcaption>
-<div class="legend" aria-label="Key to the marks in Table 1">
+<figcaption><b>Table 1.</b> Tools ranked by Fmax, best first: <span id="filterline"></span> <span id="count"></span> Click a column name to sort; rows with no value always sort last. On a narrow screen, scroll the table sideways; the tool name stays in place.</figcaption>
+<details class="key"><summary>Key to the marks in Table 1</summary>
+<div class="legend">
 <span class="item"><span class="prov measured">measured</span> measured on Stanford's Sherlock
 cluster, from the run's own task records</span>
 <span class="item"><span class="prov reported">reported</span> reported by the tool's submitter, on the
@@ -426,14 +413,31 @@ hardware they name (none yet)</span>
 <span class="item">— not measured: the search ran, but no task record holds its cost</span>
 <span class="item"><i>no correct calls</i>: a median IoU needs at least one correct call on a region
 longer than one residue</span>
-<span class="item"><span class="tag">needs AlphaFold model</span> <span class="tag">needs GPU</span>
+<span class="item"><span class="tag">needs 3D structure prediction</span> <span class="tag">needs GPU</span>
 what the tool needs besides the sequence</span>
 <span class="item"><span class="tag warn">graded on its own models</span> hmmscan under the Pfam truth
 set: Pfam's domains are defined by the models hmmscan runs, so read its row as an upper limit</span>
 </div>
+</details>
 {legend_kinds(tools_used)}
 <div class="tablebox"><table class="lb" id="lb"><thead><tr></tr></thead><tbody></tbody></table></div>
 </figure>
+<p class="prose">Fmax is the best balance of precision and recall at any one score cutoff; AUPRC is precision
+summed over all cutoffs. Both run from 0 to 1, and higher is better. Median IoU is how well a
+correct call's ends match the true region: the overlap divided by the combined span, 1 for a
+perfect match.</p>
+<p class="prose">Each tool searched {n_queries:,} human proteins against the proteome of one
+relative and copied the relative's annotations onto them. The scores say how many of the human
+proteins' known annotations it put in the right place. The queries are human proteins, 964 of them
+from chromosome 6; how the ranking holds for queries from other species is not measured.</p>
+<details class="prose"><summary>How to choose between Fmax and AUPRC, and raw against dedup</summary>
+<p>Fmax is the score at the single best cutoff on the tool's own score, protein by protein: use it
+when you will keep every call above one cutoff. AUPRC sums precision over every cutoff, counting
+each call: use it when you will rank calls and read down the list. The two can rank tools in
+opposite orders, because AUPRC pools every call of every protein while Fmax averages protein by
+protein. A domain reported many times counts against both. Dedup merges those copies; for phmmer against zebrafish (Pfam) it moves Fmax from
+{dd['raw_fmax']:.3f} to {dd['dedup_fmax']:.3f} and AUPRC from {dd['raw_auprc']:.3f} to
+{dd['dedup_auprc']:.3f}. Definitions: <a href="methods.html">Methods</a>.</p></details>
 <p class="prose muted">cost_usd_est = core-hours × r_cpu + GPU-hours × r_gpu, per 1,000 queries,
 pricing a reserved core-hour as one CPU-hour. Core-hours are cores reserved × wall time, for the
 search alone, as the mean over the relatives each tool searched; the run recorded them per tool,
@@ -749,7 +753,7 @@ def tool_tags(t: str, cl: dict | None) -> list[str]:
     info = TOOLS[t]
     tags = [SHORT_KIND[info["kind"]]]
     needs = info["needs"]
-    tags.append("needs AlphaFold model" if needs["AlphaFold model"] else "sequence only")
+    tags.append("needs 3D structure prediction" if needs["3D structure prediction"] else "sequence only")
     if needs["GPU"]:
         tags.append("needs GPU")
     tags.append("GPL-3.0" if "GPL" in info["licence"] else "permissive licence")
@@ -818,7 +822,7 @@ def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, claims_
 <h2 class="tc-name"><span class="kind k-{kind}" aria-hidden="true"></span><a href="{t}.html">{esc(info["name"])}</a></h2>
 <p class="tc-desc">{esc(first)}</p>
 <div class="tc-foot">{" · ".join(stats)}</div></li>""")
-    group = ([SHORT_KIND[k] for k in KINDS] + ["sequence only", "needs AlphaFold model", "needs GPU",
+    group = ([SHORT_KIND[k] for k in KINDS] + ["sequence only", "needs 3D structure prediction", "needs GPU",
                                               "permissive licence", "GPL-3.0", "reference", "has claims"])
     all_tags = [x for x in group if x in all_tags] + [x for x in all_tags if x not in group]
     chips = '<button type="button" class="chip" data-tag="" aria-pressed="true">All</button>' + "".join(
@@ -1473,7 +1477,7 @@ def main() -> None:
         "chiprows": mark_empty(chiprows(species_mya), res),
         "rows": rows,
         "tools": {t: {"name": TOOLS[t]["name"], "kind": TOOLS[t]["kind"], "shape": TOOLS[t]["shape"],
-                      "tags": [w for k, w in (("AlphaFold model", "needs AlphaFold model"), ("GPU", "needs GPU"))
+                      "tags": [w for k, w in (("3D structure prediction", "needs 3D structure prediction"), ("GPU", "needs GPU"))
                                if TOOLS[t]["needs"][k]]}
                   for t in tools_used},
         "kinds": KINDS,

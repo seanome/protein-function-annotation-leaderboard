@@ -9,7 +9,7 @@ Amino-acid letters, one query protein against each protein of the relative, scor
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: no
 
 ## Reference searched

@@ -9,7 +9,7 @@ A profile of a protein family: it searches with one protein, builds a profile fr
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: no
 
 ## Reference searched

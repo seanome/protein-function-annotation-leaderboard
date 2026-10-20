@@ -5,7 +5,7 @@
  "compares": "Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protein language model, then searched with Foldseek, so no AlphaFold model is needed.",
  "needs": {
   "sequence only": true,
-  "AlphaFold model": false,
+  "3D structure prediction": false,
   "GPU": true
  },
  "reference": "3Di letters predicted by ProstT5 for the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a Foldseek database.",

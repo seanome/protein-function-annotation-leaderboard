@@ -50,7 +50,7 @@
   },
   {
    "tag": "li",
-   "text": "AlphaFold model: no"
+   "text": "3D structure prediction: no"
   },
   {
    "tag": "li",
@@ -200,7 +200,7 @@
   "compares": "A profile of a protein family, built by MMseqs2 from its own hits over three rounds of search, as jackhmmer does.",
   "needs": {
    "sequence only": true,
-   "AlphaFold model": false,
+   "3D structure prediction": false,
    "GPU": false
   },
   "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an MMseqs2 database.",

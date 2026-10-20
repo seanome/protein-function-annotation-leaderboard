@@ -190,7 +190,7 @@
   },
   {
    "tag": "li",
-   "text": "AlphaFold model: no"
+   "text": "3D structure prediction: no"
   },
   {
    "tag": "li",
@@ -400,7 +400,7 @@
   "compares": "Short words of k letters (k-mers) shared between two proteins. First, each amino acid is replaced by a letter from a smaller alphabet, for example H for hydrophobic and P for polar. Two proteins can then match where their residues differ but their pattern of residue types is the same.",
   "needs": {
    "sequence only": true,
-   "AlphaFold model": false,
+   "3D structure prediction": false,
    "GPU": false
   },
   "reference": "An index of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), built once per alphabet and k-mer length.",

@@ -50,7 +50,7 @@
   },
   {
    "tag": "li",
-   "text": "AlphaFold model: no"
+   "text": "3D structure prediction: no"
   },
   {
    "tag": "li",
@@ -180,7 +180,7 @@
   "compares": "Each query protein against the curated profile models of every Pfam family, without searching any relative.",
   "needs": {
    "sequence only": true,
-   "AlphaFold model": false,
+   "3D structure prediction": false,
    "GPU": false
   },
   "reference": "Pfam-A 38.2 family models (30,134 models).",

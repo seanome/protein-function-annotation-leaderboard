@@ -9,7 +9,7 @@ Short words of k letters (k-mers) shared between two proteins. First, each amino
 ## What it needs
 
 - sequence only: yes
-- AlphaFold model: no
+- 3D structure prediction: no
 - GPU: no
 
 ## Reference searched

@@ -5,7 +5,7 @@
  "compares": "A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all.",
  "needs": {
   "sequence only": true,
-  "AlphaFold model": false,
+  "3D structure prediction": false,
   "GPU": false
  },
  "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a FASTA file.",
