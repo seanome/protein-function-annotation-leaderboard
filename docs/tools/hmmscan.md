@@ -81,5 +81,5 @@ hmmscan \
 
 Query: the same 998 human proteins.
 
-Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
 
