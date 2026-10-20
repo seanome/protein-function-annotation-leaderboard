@@ -4,8 +4,9 @@ Prompt 3 of the "nature already solved it" tests. It asks whether species that t
 human insult (the tolerance atlas of Prompt 1) have a larger share of proteins with no
 function label than model organisms, and than random species at the same distance from human.
 
-**State on 2026-10-19: set up only. No proteome has been downloaded, searched or scored.** The
-atlas species list comes from Prompt 1, which is still running. Nothing has been submitted to
+**State on 2026-10-19: the run list is fixed; nothing has been measured.** The atlas came in
+(PR 33), the decisions in PLAN.md "Atlas list decisions" were committed, and the controls were
+drawn. No proteome has been downloaded, searched or scored, and nothing has been submitted to
 Sherlock.
 
 ## Why this repository
@@ -47,8 +48,45 @@ says 100.0% and 95.7%).
 | `sacct_47961379.txt` | Slurm's record of the leaderboard job, read 2026-10-19 |
 | `resources.md`, `resources_model_organisms.tsv` | CPU-hours, wall clock and memory, predicted per proteome from that record |
 
-Added once the atlas list exists (by `after_atlas.sh`): `atlas_proteomes.csv`, `controls.csv`,
-`draw_record.json`, `proteomes.tsv`, `resources_run.tsv`.
+Made by `after_atlas.sh` from the atlas on 2026-10-19:
+
+| File | What it holds |
+|---|---|
+| `atlas_species_list.csv` | Every name in the atlas's species column, its binomial, and why it is in or out of the atlas group |
+| `atlas_species_input.csv` | The 30 atlas-group binomials |
+| `atlas_named_species.txt` | Every binomial named in the atlas; all are out of the control pool |
+| `atlas_proteomes.csv` | The 30 atlas species and their reference proteome, where one exists (17) |
+| `controls.csv`, `draw_record.json` | The 17 random controls and the record of the draw (seed, bins, skips) |
+| `proteomes.tsv` | The run list: 42 proteomes |
+| `resources_run.tsv` | Predicted CPU-hours and wall clock per proteome |
+
+## The atlas group and the controls
+
+34 binomials in the atlas have a measured number. Four are left out by PLAN.md decisions 1
+and 2: *Deinococcus radiodurans* and *Flavobacterium frigoris* (bacteria), and *Danio rerio*
+and *Drosophila melanogaster* (model organisms only). *Onychomys torridus* has no row with a
+number and *Acomys* spp. is a genus. That leaves 30 atlas species.
+
+17 of the 30 have a UniProt 2026_03 reference proteome. The 13 without one are *Acomys
+cahirinus*, *Ambystoma mexicanum*, *Anser anser*, *Anser indicus*, *Desmodus rotundus*,
+*Didelphis aurita*, *Lama glama*, *Mirounga angustirostris*, *Neotoma albigula*,
+*Periophthalmodon schlosseri*, *Rana sylvatica* (UniProt: *Lithobates sylvaticus*),
+*Squalus acanthias* and *Ursus arctos*. Their absence was checked against the 2026_03 reference
+proteomes README as well as the UniProt search. Two species resolved to a subspecies
+proteome, as decision 4 allows: *Chrysemys picta* to *C. picta bellii* and *Danaus plexippus*
+to *D. plexippus plexippus*.
+
+| 100-My bin (time from human) | Atlas species | Controls drawn |
+|---|---|---|
+| 0 (0 to 99 My) | 5 | 5 |
+| 3 (300 to 399 My) | 5 | 5 |
+| 4 (400 to 499 My) | 1 | 1 |
+| 6 (600 to 699 My) | 6 | 6 |
+
+No bin was short. The draw read 236 of the 3,501 candidates in shuffled order (seed
+20261019); one had no TimeTree time. One control, *Pagothenia borchgrevinki* (bald rockcod),
+may be a species with a tolerance the atlas did not list. Under the rule it is a control,
+because the atlas does not name it; whether the atlas should have is a question for Prompt 1.
 
 ## Model organisms
 
@@ -91,8 +129,7 @@ no group median.
 
 ## Not done yet
 
-- The atlas species list, the control draw, the Sherlock run, the figure, `verdict.json`, the
-  notebook and the claims-ledger row.
+- The Sherlock run, the figure, `verdict.json`, the notebook and the claims-ledger row.
 - The second agent's recompute.
 - The control draw was tested on a stand-in list of six species, labelled as such and kept
   out of the repository. Drawing twice with the same seed and TimeTree answers gave the same

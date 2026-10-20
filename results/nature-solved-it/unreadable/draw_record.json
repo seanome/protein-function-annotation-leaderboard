@@ -1,0 +1,150 @@
+{
+ "seed": 20261019,
+ "bin_width_my": 100,
+ "readme": "reference_proteomes_README.txt.gz",
+ "readme_release_line": "Release 2026_03, 02-Sep-2026",
+ "excluded_binomials": [
+  "acomys cahirinus",
+  "acomys spp.",
+  "alligator mississippiensis",
+  "ambystoma mexicanum",
+  "anser anser",
+  "anser indicus",
+  "arabidopsis thaliana",
+  "artemia franciscana",
+  "caenorhabditis elegans",
+  "calypte anna",
+  "chrysemys picta",
+  "columba livia",
+  "culex quinquefasciatus",
+  "danaus plexippus",
+  "danio rerio",
+  "deinococcus radiodurans",
+  "desmodus rotundus",
+  "didelphis aurita",
+  "drosophila melanogaster",
+  "flavobacterium frigoris",
+  "gallus gallus",
+  "heterocephalus glaber",
+  "homo sapiens",
+  "ictidomys tridecemlineatus",
+  "lama glama",
+  "loxodonta africana",
+  "mirounga angustirostris",
+  "mus musculus",
+  "mya arenaria",
+  "neotoma albigula",
+  "onychomys torridus",
+  "periophthalmodon schlosseri",
+  "poecilia mexicana",
+  "ramazzottius varieornatus",
+  "rana sylvatica",
+  "saccharomyces cerevisiae",
+  "squalus acanthias",
+  "tenebrio molitor",
+  "urocitellus parryii",
+  "ursus americanus",
+  "ursus arctos"
+ ],
+ "candidates_eukaryota_after_exclusion": 3501,
+ "candidates_read": 236,
+ "skipped_no_timetree_time": 1,
+ "skipped_same_binomial_already_drawn": 0,
+ "skipped_bin_already_full": 218,
+ "atlas_species_with_proteome": 17,
+ "atlas_species_without_timetree_time": [],
+ "needed_per_bin": {
+  "0": 5,
+  "3": 5,
+  "4": 1,
+  "6": 6
+ },
+ "short_per_bin": {},
+ "drawn": [
+  {
+   "species": "Eurystomus gularis",
+   "upid": "UP000541249",
+   "bin": 3
+  },
+  {
+   "species": "Melipona quadrifasciata",
+   "upid": "UP000053105",
+   "bin": 6
+  },
+  {
+   "species": "Pagothenia borchgrevinki",
+   "upid": "UP001619887",
+   "bin": 4
+  },
+  {
+   "species": "Calonectris borealis",
+   "upid": "UP000535403",
+   "bin": 3
+  },
+  {
+   "species": "Ceutorhynchus assimilis",
+   "upid": "UP001152799",
+   "bin": 6
+  },
+  {
+   "species": "Phaetusa simplex",
+   "upid": "UP000556165",
+   "bin": 3
+  },
+  {
+   "species": "Cettia cetti",
+   "upid": "UP000524451",
+   "bin": 3
+  },
+  {
+   "species": "Trichogramma brassicae",
+   "upid": "UP000479190",
+   "bin": 6
+  },
+  {
+   "species": "Pristionchus fissidentatus",
+   "upid": "UP001432322",
+   "bin": 6
+  },
+  {
+   "species": "Chloropsis cyanopogon",
+   "upid": "UP000614263",
+   "bin": 3
+  },
+  {
+   "species": "Paragonimus skrjabini",
+   "upid": "UP000822476",
+   "bin": 6
+  },
+  {
+   "species": "Octodon degus",
+   "upid": "UP000515203",
+   "bin": 0
+  },
+  {
+   "species": "Oikopleura dioica",
+   "upid": "UP001158576",
+   "bin": 6
+  },
+  {
+   "species": "Rhinopithecus bieti",
+   "upid": "UP000233180",
+   "bin": 0
+  },
+  {
+   "species": "Pygathrix nigripes",
+   "upid": "UP001710656",
+   "bin": 0
+  },
+  {
+   "species": "Sciurus carolinensis",
+   "upid": "UP001166674",
+   "bin": 0
+  },
+  {
+   "species": "Pteropus alecto",
+   "upid": "UP000010552",
+   "bin": 0
+  }
+ ]
+}

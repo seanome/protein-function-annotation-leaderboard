@@ -1,4 +1,12 @@
 {
+ "1003232": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Edhazardia aedis USNM 41457",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1003232"
+ },
  "10090": {
   "adjusted_age": 83.51396,
   "name_b": "Mus musculus",
@@ -6,6 +14,1078 @@
   "read_utc": "2026-10-20T00:04:37Z",
   "studies": 75,
   "url": "https://timetree.temple.edu/api/pairwise/9606/10090"
+ },
+ "101097": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Entomortierella chlamydospora",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/101097"
+ },
+ "10160": {
+  "adjusted_age": 83.51396,
+  "name_b": "Octodon degus",
+  "precomputed_age": 83.51395605058,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 75,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/10160"
+ },
+ "10181": {
+  "adjusted_age": 83.51396,
+  "name_b": "Heterocephalus glaber",
+  "precomputed_age": 83.51395605058,
+  "read_utc": "2026-10-20T00:29:40Z",
+  "studies": 75,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/10181"
+ },
+ "1033252": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Mycena metata",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1033252"
+ },
+ "1036612": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Aspergillus sydowii CBS 593.65",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1036612"
+ },
+ "1036808": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Scleroderma citrinum Foug A",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1036808"
+ },
+ "104408": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Naganishia liquefaciens",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/104408"
+ },
+ "1052879": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Coemansia pectinata",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1052879"
+ },
+ "106582": {
+  "adjusted_age": 435.12563,
+  "name_b": "Maylandia zebra",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/106582"
+ },
+ "1071381": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Tetrapisispora phaffii CBS 4417",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1071381"
+ },
+ "1073089": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Aspergillus wentii DTO 134E9",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1073089"
+ },
+ "1076256": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Armillaria solidipes",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1076256"
+ },
+ "1095629": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Laccaria amethystina LaAM-08-1",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1095629"
+ },
+ "110450": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Oryza meyeriana var. granulata",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/110450"
+ },
+ "1111077": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Claviceps purpurea 20.1",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:24Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1111077"
+ },
+ "1133968": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Babesia microti strain RI",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1133968"
+ },
+ "113544": {
+  "adjusted_age": 435.12563,
+  "name_b": "Arapaima gigas",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/113544"
+ },
+ "1160509": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Ascobolus immersus RN42",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1160509"
+ },
+ "1163406": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Tolypocladium ophioglossoides CBS 100239",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1163406"
+ },
+ "1168544": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Cucurbitaria berberidis CBS 394.84",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1168544"
+ },
+ "117069": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Sphagnurus paluster",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/117069"
+ },
+ "1213859": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Colletotrichum fructicola Nara gc5",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1213859"
+ },
+ "1218682": {
+  "adjusted_age": 318.82488,
+  "name_b": "Chloropsis cyanopogon",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1218682"
+ },
+ "1230383": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Malassezia sympodialis ATCC 42132",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1230383"
+ },
+ "1237068": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Fusarium albosuccineum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1237068"
+ },
+ "1245528": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Candida maltosa Xu316",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1245528"
+ },
+ "1246581": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Paramicrosporidium saccamoebae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1246581"
+ },
+ "1260050": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Sporothrix curviconia",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1260050"
+ },
+ "1263415": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Endocarpon pusillum Z07020",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1263415"
+ },
+ "1265417": {
+  "adjusted_age": 692.17015,
+  "name_b": "Aromia moschata",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1265417"
+ },
+ "126957": {
+  "adjusted_age": 692.17015,
+  "name_b": "Strigamia maritima",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/126957"
+ },
+ "1280837": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Meira miltonrushii",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1280837"
+ },
+ "1314800": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Rhizopogon vinicolor AM-OR11-026",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1314800"
+ },
+ "1314801": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Pleomassaria siparia CBS 279.74",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1314801"
+ },
+ "1316785": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Lachnellula arida",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1316785"
+ },
+ "1323832": {
+  "adjusted_age": 318.82488,
+  "name_b": "Calonectris borealis",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1323832"
+ },
+ "1325733": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Fusarium floridanum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1325733"
+ },
+ "1328300": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Fusarium keratoplasticum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1328300"
+ },
+ "1380566": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Pochonia chlamydosporia 170",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1380566"
+ },
+ "1381693": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Durusdinium trenchii",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1381693"
+ },
+ "139825": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Sparassis crispa",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/139825"
+ },
+ "1408161": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Plenodomus tracheiphilus IPT5",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1408161"
+ },
+ "1408657": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Pneumocystis jirovecii RU7",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1408657"
+ },
+ "1442369": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Rhinocladiella mackenziei CBS 650.93",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1442369"
+ },
+ "1469910": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Ophiobolus disseminans",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1469910"
+ },
+ "1538716": {
+  "adjusted_age": 692.17015,
+  "name_b": "Pristionchus fissidentatus",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1538716"
+ },
+ "156630": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Alternaria arborescens",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/156630"
+ },
+ "1569628": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Jaminaea rosea",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1569628"
+ },
+ "1572043": {
+  "adjusted_age": 435.12563,
+  "name_b": "Triplophysa tibetana",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1572043"
+ },
+ "159581": {
+  "adjusted_age": 318.82488,
+  "name_b": "Catharus fuscescens",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/159581"
+ },
+ "161742": {
+  "adjusted_age": 318.82488,
+  "name_b": "Thinocorus orbignyianus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:24Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/161742"
+ },
+ "166423": {
+  "adjusted_age": 692.17015,
+  "name_b": "Melipona quadrifasciata",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/166423"
+ },
+ "166442": {
+  "adjusted_age": 692.17015,
+  "name_b": "Tetragonisca angustula",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/166442"
+ },
+ "1682393": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Microdochium trichocladiopsis",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1682393"
+ },
+ "168631": {
+  "adjusted_age": 692.17015,
+  "name_b": "Chilo suppressalis",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/168631"
+ },
+ "1690605": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Vermiconidia calcicola",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1690605"
+ },
+ "1769908": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Didymella heteroderae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:24Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1769908"
+ },
+ "180528": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Malassezia nana",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/180528"
+ },
+ "181099": {
+  "adjusted_age": 318.82488,
+  "name_b": "Oriolus oriolus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/181099"
+ },
+ "1851511": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Naganishia onofrii",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1851511"
+ },
+ "1892477": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Sporothrix epigloea",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1892477"
+ },
+ "1912939": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Suillus fuscotomentosus",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1912939"
+ },
+ "192010": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Fusarium mangiferae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/192010"
+ },
+ "192012": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Mikania micrantha",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/192012"
+ },
+ "1928728": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Paulinella micropora",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/1928728"
+ },
+ "194682": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Phlebia brevispora",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/194682"
+ },
+ "199890": {
+  "adjusted_age": 692.17015,
+  "name_b": "Anopheles epiroticus",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/199890"
+ },
+ "200324": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Puccinia coronata f. sp. avenae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/200324"
+ },
+ "201217": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Leucocoprinus leucothites",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/201217"
+ },
+ "201329": {
+  "adjusted_age": 318.82488,
+  "name_b": "Illadopsis cleaveri",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:24Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/201329"
+ },
+ "2026836": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Apatococcus fuscideae",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2026836"
+ },
+ "2077276": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Phytophthora lilii",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2077276"
+ },
+ "2078593": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Colletotrichum shisoi",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2078593"
+ },
+ "208324": {
+  "adjusted_age": 435.12563,
+  "name_b": "Ameca splendens",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/208324"
+ },
+ "2126181": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Mycena indigotica",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2126181"
+ },
+ "2163413": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Metschnikowia aff. pulcherrima",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2163413"
+ },
+ "2231603": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Akanthomyces muscarius",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2231603"
+ },
+ "227184": {
+  "adjusted_age": 318.82488,
+  "name_b": "Rynchops niger",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/227184"
+ },
+ "240209": {
+  "adjusted_age": 318.82488,
+  "name_b": "Rhinoptilus africanus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/240209"
+ },
+ "243888": {
+  "adjusted_age": 318.82488,
+  "name_b": "Larus smithsonianus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/243888"
+ },
+ "245834": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Neohortaea acidophila",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/245834"
+ },
+ "2478898": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Cerrena zonata",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2478898"
+ },
+ "2511006": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Salix koriyanagi",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2511006"
+ },
+ "2585822": {
+  "adjusted_age": 318.82488,
+  "name_b": "Zapornia atra",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2585822"
+ },
+ "2588326": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Parachaetomium inaequale",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2588326"
+ },
+ "2596975": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Metarhizium humberi",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2596975"
+ },
+ "259834": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Discostella pseudostelligera",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/259834"
+ },
+ "2604345": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Fusarium oligoseptatum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2604345"
+ },
+ "262757": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Morella rubra",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/262757"
+ },
+ "2650707": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Coemansia brasiliensis",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2650707"
+ },
+ "2675880": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Fusarium flagelliforme",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2675880"
+ },
+ "2733690": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Mycena venus",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2733690"
+ },
+ "2761395": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Coemansia guatemalensis",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2761395"
+ },
+ "2761396": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Coemansia javaensis",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2761396"
+ },
+ "27687": {
+  "adjusted_age": 435.12563,
+  "name_b": "Erpetoichthys calabaricus",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/27687"
+ },
+ "278856": {
+  "adjusted_age": 692.17015,
+  "name_b": "Danaus plexippus plexippus",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:29:34Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/278856"
+ },
+ "278940": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Botrytis galanthina",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/278940"
+ },
+ "27915": {
+  "adjusted_age": 692.17015,
+  "name_b": "Ridgeia piscesae",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/27915"
+ },
+ "2795749": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Diplocarpon coronariae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2795749"
+ },
+ "280699": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Cyanidioschyzon merolae strain 10D",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/280699"
+ },
+ "2862362": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Favolaschia claudopus",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2862362"
+ },
+ "2874296": {
+  "adjusted_age": 692.17015,
+  "name_b": "Cercopithifilaria johnstoni",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/2874296"
+ },
+ "29159": {
+  "adjusted_age": 692.17015,
+  "name_b": "Magallana gigas",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:35Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/29159"
+ },
+ "29729": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Gossypium arboreum",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/29729"
+ },
+ "29760": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Vitis vinifera",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/29760"
+ },
+ "297813": {
+  "adjusted_age": 318.82488,
+  "name_b": "Phaetusa simplex",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/297813"
+ },
+ "29808": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Taxus chinensis",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/29808"
+ },
+ "29856": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Clonostachys rosea",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/29856"
+ },
+ "303518": {
+  "adjusted_age": 435.12563,
+  "name_b": "Pundamilia nyererei",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/303518"
+ },
+ "30419": {
+  "adjusted_age": 318.82488,
+  "name_b": "Opisthocomus hoazin",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/30419"
+ },
+ "30640": {
+  "adjusted_age": 83.51396,
+  "name_b": "Sciurus carolinensis",
+  "precomputed_age": 83.51395605058,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 75,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/30640"
+ },
+ "307507": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Raphidocelis subcapitata",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/307507"
+ },
+ "31033": {
+  "adjusted_age": 435.12563,
+  "name_b": "Takifugu rubripes",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/31033"
+ },
+ "310352": {
+  "adjusted_age": 28.89794,
+  "name_b": "Pygathrix nigripes",
+  "precomputed_age": 28.897943781257,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 87,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/310352"
+ },
+ "314023": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Apiosordaria backusii",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/314023"
+ },
+ "314043": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Immersiella caudata",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/314043"
+ },
+ "3158075": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Penicillium psychrofluorescens",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3158075"
+ },
+ "3197": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Marchantia polymorpha",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3197"
+ },
+ "322582": {
+  "adjusted_age": 318.82488,
+  "name_b": "Ramphastos sulfuratus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/322582"
+ },
+ "325343": {
+  "adjusted_age": 318.82488,
+  "name_b": "Eurystomus gularis",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/325343"
+ },
+ "331657": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Cryomyces minteri",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/331657"
+ },
+ "33203": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Purpureocillium lilacinum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/33203"
+ },
+ "334819": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Fusarium verticillioides 7600",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/334819"
+ },
+ "336963": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Uncinocarpus reesii 1704",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/336963"
+ },
+ "342381": {
+  "adjusted_age": 318.82488,
+  "name_b": "Halcyon senegalensis",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/342381"
+ },
+ "3435": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Persea americana",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3435"
+ },
+ "343691": {
+  "adjusted_age": 692.17015,
+  "name_b": "Hermetia illucens",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/343691"
+ },
+ "34504": {
+  "adjusted_age": 692.17015,
+  "name_b": "Paragonimus westermani",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/34504"
+ },
+ "34765": {
+  "adjusted_age": 600.96099,
+  "name_b": "Oikopleura dioica",
+  "precomputed_age": 600.96098530339,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 11,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/34765"
+ },
+ "35725": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Macrophomina phaseolina",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/35725"
+ },
+ "358040": {
+  "adjusted_age": 692.17015,
+  "name_b": "Pristionchus entomophagus",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/358040"
+ },
+ "36090": {
+  "adjusted_age": 692.17015,
+  "name_b": "Globodera pallida",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/36090"
+ },
+ "3659": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Cucumis sativus",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3659"
+ },
+ "3696": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Populus deltoides",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3696"
  },
  "3702": {
   "adjusted_age": 1515.8312,
@@ -15,6 +1095,285 @@
   "studies": 10,
   "url": "https://timetree.temple.edu/api/pairwise/9606/3702"
  },
+ "3750": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Malus domestica",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3750"
+ },
+ "3873": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Lupinus luteus",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/3873"
+ },
+ "392030": {
+  "adjusted_age": 692.17015,
+  "name_b": "Rotaria magnacalcarata",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/392030"
+ },
+ "39621": {
+  "adjusted_age": 318.82488,
+  "name_b": "Acrocephalus arundinaceus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/39621"
+ },
+ "40998": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Elsinoe australis",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/40998"
+ },
+ "41045": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Pythium oligandrum",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/41045"
+ },
+ "43179": {
+  "adjusted_age": 83.51396,
+  "name_b": "Ictidomys tridecemlineatus",
+  "precomputed_age": 83.51395605058,
+  "read_utc": "2026-10-20T00:29:41Z",
+  "studies": 75,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/43179"
+ },
+ "43782": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Dipteronia sinensis",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/43782"
+ },
+ "43959": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Saccharomycopsis crataegensis",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/43959"
+ },
+ "45133": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Lasiodiplodia theobromae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/45133"
+ },
+ "4529": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Oryza rufipogon",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/4529"
+ },
+ "4533": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Oryza brachyantha",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/4533"
+ },
+ "45513": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Scheffersomyces spartinae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/45513"
+ },
+ "461836": {
+  "adjusted_age": null,
+  "note": "TimeTree returned no time",
+  "precomputed_age": null,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "url": "https://timetree.temple.edu/api/pairwise/9606/461836"
+ },
+ "46634": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Aureobasidium melanogenum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/46634"
+ },
+ "467358": {
+  "adjusted_age": 692.17015,
+  "name_b": "Ceutorhynchus assimilis",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/467358"
+ },
+ "467808": {
+  "adjusted_age": 1164.29781,
+  "name_b": "[Candida] jaroonii",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/467808"
+ },
+ "47969": {
+  "adjusted_age": 435.12563,
+  "name_b": "Oreochromis aureus",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/47969"
+ },
+ "48254": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Torulaspora globosa",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/48254"
+ },
+ "48416": {
+  "adjusted_age": 435.12563,
+  "name_b": "Zoarces viviparus",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/48416"
+ },
+ "48701": {
+  "adjusted_age": 435.12563,
+  "name_b": "Poecilia mexicana",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:29:51Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/48701"
+ },
+ "490622": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Trichoderma arundinaceum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/490622"
+ },
+ "50390": {
+  "adjusted_age": 692.17015,
+  "name_b": "Diabrotica virgifera virgifera",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/50390"
+ },
+ "5046": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Sarocladium strictum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/5046"
+ },
+ "5067": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Aspergillus parasiticus",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/5067"
+ },
+ "5078": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Penicillium griseofulvum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/5078"
+ },
+ "50990": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Rickenella mellea",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/50990"
+ },
+ "510951": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Neurospora tetrasperma FGSC 2508",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/510951"
+ },
+ "51315": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Eimeria necatrix",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/51315"
+ },
+ "51543": {
+  "adjusted_age": 692.17015,
+  "name_b": "Cotesia congregata",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/51543"
+ },
+ "519963": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Elaphomyces granulatus",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/519963"
+ },
+ "53326": {
+  "adjusted_age": 692.17015,
+  "name_b": "Ancylostoma ceylanicum",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/53326"
+ },
+ "545262": {
+  "adjusted_age": 318.82488,
+  "name_b": "Indicator maculatus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/545262"
+ },
+ "5466": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Colletotrichum trifolii",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/5466"
+ },
+ "55184": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Acorus gramineus",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/55184"
+ },
  "559292": {
   "adjusted_age": 1164.29781,
   "name_b": "Saccharomyces cerevisiae S288C",
@@ -22,6 +1381,126 @@
   "read_utc": "2026-10-20T00:04:43Z",
   "studies": 17,
   "url": "https://timetree.temple.edu/api/pairwise/9606/559292"
+ },
+ "56716": {
+  "adjusted_age": 435.12563,
+  "name_b": "Cottoperca gobio",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/56716"
+ },
+ "573826": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Candida dubliniensis CD36",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/573826"
+ },
+ "5742": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Giardia muris",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/5742"
+ },
+ "576137": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Phialocephala subalpina",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/576137"
+ },
+ "585013": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Marasmius crinis-equi",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/585013"
+ },
+ "586396": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Linum tenue",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/586396"
+ },
+ "5888": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Paramecium tetraurelia",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/5888"
+ },
+ "59628": {
+  "adjusted_age": 692.17015,
+  "name_b": "Paragonimus skrjabini miyazakii",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/59628"
+ },
+ "60175": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Penicillium nalgiovense",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/60175"
+ },
+ "602072": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Aspergillus carbonarius ITEM 5010",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/602072"
+ },
+ "61180": {
+  "adjusted_age": 692.17015,
+  "name_b": "Oesophagostomum dentatum",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/61180"
+ },
+ "61621": {
+  "adjusted_age": 28.89794,
+  "name_b": "Rhinopithecus bieti",
+  "precomputed_age": 28.897943781257,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 87,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/61621"
+ },
+ "619300": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Spathaspora passalidarum NRRL Y-27907",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/619300"
+ },
+ "6211": {
+  "adjusted_age": 692.17015,
+  "name_b": "Echinococcus multilocularis",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6211"
+ },
+ "6238": {
+  "adjusted_age": 692.17015,
+  "name_b": "Caenorhabditis briggsae",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6238"
  },
  "6239": {
   "adjusted_age": 692.17015,
@@ -31,6 +1510,198 @@
   "studies": 21,
   "url": "https://timetree.temple.edu/api/pairwise/9606/6239"
  },
+ "6248": {
+  "adjusted_age": 692.17015,
+  "name_b": "Strongyloides stercoralis",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6248"
+ },
+ "630221": {
+  "adjusted_age": 435.12563,
+  "name_b": "Cyprinus carpio carpio",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/630221"
+ },
+ "630683": {
+  "adjusted_age": 435.12563,
+  "name_b": "Muraenolepis orangiensis",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/630683"
+ },
+ "63821": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Penicillium daleae",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/63821"
+ },
+ "6526": {
+  "adjusted_age": 692.17015,
+  "name_b": "Biomphalaria glabrata",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6526"
+ },
+ "653667": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Schizosaccharomyces cryophilus OY26",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/653667"
+ },
+ "655844": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Metarhizium robertsii ARSEF 23",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/655844"
+ },
+ "6604": {
+  "adjusted_age": 692.17015,
+  "name_b": "Mya arenaria",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:29:47Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6604"
+ },
+ "663331": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Trichophyton benhamiae CBS 112371",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/663331"
+ },
+ "6661": {
+  "adjusted_age": 692.17015,
+  "name_b": "Artemia franciscana",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:29:26Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6661"
+ },
+ "6669": {
+  "adjusted_age": 692.17015,
+  "name_b": "Daphnia pulex",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/6669"
+ },
+ "669874": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Pachysolen tannophilus NRRL Y-2460",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/669874"
+ },
+ "671064": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Sporothrix bragantina",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/671064"
+ },
+ "67801": {
+  "adjusted_age": 692.17015,
+  "name_b": "Glossina palpalis gambiensis",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/67801"
+ },
+ "683960": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Wickerhamomyces anomalus NRRL Y-366-8",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/683960"
+ },
+ "68486": {
+  "adjusted_age": 318.82488,
+  "name_b": "Cettia cetti",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/68486"
+ },
+ "69820": {
+  "adjusted_age": 692.17015,
+  "name_b": "Spodoptera litura",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/69820"
+ },
+ "7029": {
+  "adjusted_age": 692.17015,
+  "name_b": "Acyrthosiphon pisum",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7029"
+ },
+ "7067": {
+  "adjusted_age": 692.17015,
+  "name_b": "Tenebrio molitor",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:29:58Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7067"
+ },
+ "708192": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Colletotrichum liriopes",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/708192"
+ },
+ "7111": {
+  "adjusted_age": 692.17015,
+  "name_b": "Trichoplusia ni",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7111"
+ },
+ "71139": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Eucalyptus grandis",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/71139"
+ },
+ "7167": {
+  "adjusted_age": 692.17015,
+  "name_b": "Anopheles albimanus",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7167"
+ },
+ "7176": {
+  "adjusted_age": 692.17015,
+  "name_b": "Culex quinquefasciatus",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:29:32Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7176"
+ },
  "7227": {
   "adjusted_age": 692.17015,
   "name_b": "Drosophila melanogaster",
@@ -38,6 +1709,110 @@
   "read_utc": "2026-10-20T00:04:40Z",
   "studies": 21,
   "url": "https://timetree.temple.edu/api/pairwise/9606/7227"
+ },
+ "7398": {
+  "adjusted_age": 692.17015,
+  "name_b": "Glossina pallidipes",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7398"
+ },
+ "741705": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Coniophora puteana RWD-64-598 SS2",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/741705"
+ },
+ "7425": {
+  "adjusted_age": 692.17015,
+  "name_b": "Nasonia vitripennis",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7425"
+ },
+ "74830": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Penicillium discolor",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/74830"
+ },
+ "74926": {
+  "adjusted_age": 318.82488,
+  "name_b": "Mauremys mutica",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:17Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/74926"
+ },
+ "75947": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Lactuca virosa",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/75947"
+ },
+ "75948": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Lactuca saligna",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:15Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/75948"
+ },
+ "763407": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Phycomyces blakesleeanus NRRL 1555(-)",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/763407"
+ },
+ "76774": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Malassezia obtusa",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/76774"
+ },
+ "7741": {
+  "adjusted_age": 610.36865,
+  "name_b": "Branchiostoma belcheri",
+  "precomputed_age": 610.36864755158,
+  "read_utc": "2026-10-20T00:30:10Z",
+  "studies": 11,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7741"
+ },
+ "7757": {
+  "adjusted_age": 562.83963,
+  "name_b": "Petromyzon marinus",
+  "precomputed_age": 562.83963451849,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 13,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7757"
+ },
+ "7918": {
+  "adjusted_age": 435.12563,
+  "name_b": "Lepisosteus oculatus",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7918"
+ },
+ "7936": {
+  "adjusted_age": 435.12563,
+  "name_b": "Anguilla anguilla",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/7936"
  },
  "7955": {
   "adjusted_age": 435.12563,
@@ -47,6 +1822,230 @@
   "studies": 37,
   "url": "https://timetree.temple.edu/api/pairwise/9606/7955"
  },
+ "8049": {
+  "adjusted_age": 435.12563,
+  "name_b": "Gadus morhua",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:07Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/8049"
+ },
+ "81985": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Capsella rubella",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:03Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/81985"
+ },
+ "8213": {
+  "adjusted_age": 435.12563,
+  "name_b": "Pagothenia borchgrevinki",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/8213"
+ },
+ "84607": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Agrocybe pediades",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:11Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/84607"
+ },
+ "8478": {
+  "adjusted_age": 318.82488,
+  "name_b": "Chrysemys picta bellii",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:29:29Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/8478"
+ },
+ "8496": {
+  "adjusted_age": 318.82488,
+  "name_b": "Alligator mississippiensis",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:29:20Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/8496"
+ },
+ "861557": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Pyrenophora teres f. teres 0-1",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:06Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/861557"
+ },
+ "8663": {
+  "adjusted_age": 318.82488,
+  "name_b": "Notechis scutatus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/8663"
+ },
+ "86838": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Rhodotorula paludigena",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/86838"
+ },
+ "869390": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Lasiodiplodia hormozganensis",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/869390"
+ },
+ "86971": {
+  "adjusted_age": 692.17015,
+  "name_b": "Trichogramma brassicae",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:05Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/86971"
+ },
+ "870730": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Ogataea angusta",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:04Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/870730"
+ },
+ "879819": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Cutaneotrichosporon oleaginosum",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:13Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/879819"
+ },
+ "88201": {
+  "adjusted_age": 435.12563,
+  "name_b": "Mugilogobius chulae",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/88201"
+ },
+ "8845": {
+  "adjusted_age": 318.82488,
+  "name_b": "Anser cygnoides",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:14Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/8845"
+ },
+ "886794": {
+  "adjusted_age": 318.82488,
+  "name_b": "Odontophorus gujanensis",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/886794"
+ },
+ "8932": {
+  "adjusted_age": 318.82488,
+  "name_b": "Columba livia",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:29:31Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/8932"
+ },
+ "9031": {
+  "adjusted_age": 318.82488,
+  "name_b": "Gallus gallus",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:29:38Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9031"
+ },
+ "904363": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Apatococcus lobatus",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:22Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/904363"
+ },
+ "90978": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Curvularia kusanoi",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:21Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/90978"
+ },
+ "9218": {
+  "adjusted_age": 318.82488,
+  "name_b": "Phoenicopterus ruber ruber",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:30:18Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9218"
+ },
+ "9244": {
+  "adjusted_age": 318.82488,
+  "name_b": "Calypte anna",
+  "precomputed_age": 318.82487763205,
+  "read_utc": "2026-10-20T00:29:27Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9244"
+ },
+ "92902": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Lasiosphaeria ovina",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/92902"
+ },
+ "93625": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Psilocybe cyanescens",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:20Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/93625"
+ },
+ "9402": {
+  "adjusted_age": 89.48067,
+  "name_b": "Pteropus alecto",
+  "precomputed_age": 89.480669664156,
+  "read_utc": "2026-10-20T00:30:23Z",
+  "studies": 64,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9402"
+ },
+ "94029": {
+  "adjusted_age": 692.17015,
+  "name_b": "Argiope bruennichi",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:09Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/94029"
+ },
+ "944289": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Collybiopsis luxurians FD-317 M1",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:19Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/944289"
+ },
+ "947166": {
+  "adjusted_age": 692.17015,
+  "name_b": "Ramazzottius varieornatus",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:29:53Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/947166"
+ },
  "9606": {
   "adjusted_age": 0.0,
   "name_b": "Homo sapiens",
@@ -54,5 +2053,69 @@
   "precomputed_age": 0.0,
   "read_utc": "2026-10-20T00:04:37Z",
   "url": "https://timetree.temple.edu/api/pairwise/9606/9606"
+ },
+ "9643": {
+  "adjusted_age": 89.48067,
+  "name_b": "Ursus americanus",
+  "precomputed_age": 89.480669664156,
+  "read_utc": "2026-10-20T00:30:01Z",
+  "studies": 64,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9643"
+ },
+ "97028": {
+  "adjusted_age": 1515.8312,
+  "name_b": "Trifolium medium",
+  "precomputed_age": 1455.2614625,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 10,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/97028"
+ },
+ "9785": {
+  "adjusted_age": 96.97232,
+  "name_b": "Loxodonta africana",
+  "precomputed_age": 96.972322924686,
+  "read_utc": "2026-10-20T00:29:44Z",
+  "studies": 24,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9785"
+ },
+ "979145": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Neonectria punicea",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/979145"
+ },
+ "983964": {
+  "adjusted_age": 1164.29781,
+  "name_b": "Trichoderma harzianum CBS 226.95",
+  "precomputed_age": 1217.8553761111,
+  "read_utc": "2026-10-20T00:30:16Z",
+  "studies": 17,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/983964"
+ },
+ "990121": {
+  "adjusted_age": 692.17015,
+  "name_b": "Trichinella patagoniensis",
+  "precomputed_age": 721.45304263256,
+  "read_utc": "2026-10-20T00:30:12Z",
+  "studies": 21,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/990121"
+ },
+ "992332": {
+  "adjusted_age": 435.12563,
+  "name_b": "Triplophysa rosa",
+  "precomputed_age": 435.12562641043,
+  "read_utc": "2026-10-20T00:30:08Z",
+  "studies": 37,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/992332"
+ },
+ "9999": {
+  "adjusted_age": 83.51396,
+  "name_b": "Urocitellus parryii",
+  "precomputed_age": 83.51395605058,
+  "read_utc": "2026-10-20T00:29:59Z",
+  "studies": 75,
+  "url": "https://timetree.temple.edu/api/pairwise/9606/9999"
  }
 }
