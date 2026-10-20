@@ -7,7 +7,8 @@ the tables do not have is left out, and the page shows a dash and "not run" for 
 Strata. A species is placed by two numbers from its cards:
   distance  the TimeTree age to its nearest reviewed relative, matched to the measured
             relative whose age (to human) is closest. The leaderboard searched human proteins
-            against 15 relatives, 6 to 2,000 million years (Mya) away.
+            against 15 relatives, 6 to 1,516 million years (Mya) away by TimeTree 5's
+            pairwise ages; E. coli has no TimeTree age and is never matched.
   pLDDT     the mean AlphaFold pLDDT of its proteome, matched to the pLDDT band the tables
             use for the domains (0-50, 50-70, 70-90, 90-100).
 """

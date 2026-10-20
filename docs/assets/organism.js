@@ -58,6 +58,16 @@
     return null;
   }
 
+  // Divergence time from human of a measured relative, as the page shows it (whole Mya).
+  const relMya = (S, id) => { const r = S.relatives.find((x) => x.id === id); return r ? num(r.mya) : "—"; };
+  // Two measured relatives with the same age, for the Figure 3 caption: "cow and dog, 89 Mya".
+  function sharedAge(S) {
+    const by = {};
+    for (const r of S.relatives) if (r.mya !== null) (by[r.mya] = by[r.mya] || []).push(r.name);
+    const m = Object.keys(by).map(Number).sort((a, b) => a - b).find((k) => by[k].length > 1);
+    return m === undefined ? null : `${by[m].slice(0, 2).join(" and ")}, ${num(m)} Mya`;
+  }
+
   function measuredRelative(mya, S) {
     if (mya === null || mya === undefined) return null;
     let best = null;
@@ -206,7 +216,7 @@
       }
       A.expected_label_fraction_est = { value: w ? s / w : null, share_of_models_covered: w, tool: v0.tool,
         setting: v0.setting, relative: rel.id, parts,
-        rests_on: `human proteins (Pfam 38.2 domains) searched against ${rel.name} (${rel.scientific}), ${rel.mya} Mya` };
+        rests_on: `human proteins (Pfam 38.2 domains) searched against ${rel.name} (${rel.scientific}), ${num(rel.mya)} Mya` };
     }
     A.command = command(A, S);
     return A;
@@ -284,14 +294,14 @@
 
   // Pile-up thumbnail: share of domains covered by a call at each of 300 columns (100
   // residues before, the domain scaled to 100 columns, 100 residues after).
-  function thumb(v, idx) {
+  function thumb(v, idx, S) {
     if (!v.pileup) return `<p class="muted small">Pile-up: not run for ${esc(v.name)} at this setting.</p>`;
     const W = 307, H = 70, P = 4;  // one column per x unit
     const pts = v.pileup.curve.map((y, j) => (y === null ? null : [P + j, H - 14 - y * (H - 22)]));
     let d = "", pen = false;
     for (const p of pts) { if (!p) { pen = false; continue; } d += (pen ? "L" : "M") + p[0] + "," + p[1].toFixed(1); pen = true; }
     const x0 = P + 100, x1 = P + 199;
-    return `<figure class="thumb"><figcaption><b>Figure 1${"abc"[idx]}.</b> ${esc(v.name)}: at each residue, the share of ${num(v.pileup.n_domains)} Pfam domains${v.pileup.band === "all" ? "" : ` whose own stretch of the protein has pLDDT ${esc(v.pileup.band)} (grouped by the domain, not the whole protein, so the count differs from the one above)`} that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width.</figcaption>
+    return `<figure class="thumb"><figcaption><b>Figure 1${"abc"[idx]}.</b> ${esc(v.name)}: at each residue, the share of ${num(v.pileup.n_domains)} Pfam domains${v.pileup.band === "all" ? "" : ` whose own stretch of the protein has pLDDT ${esc(v.pileup.band)} (grouped by the domain, not the whole protein, so the count differs from the one above)`} that a call covers. Human proteins searched against zebrafish (${relMya(S, "zebrafish")} Mya); the grey band is the domain, every domain stretched to one width.</figcaption>
 <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Pile-up of ${esc(v.name)}" class="thumbsvg">
 <rect x="${x0}" y="4" width="${x1 - x0}" height="${H - 18}" fill="var(--chip)"/>
 <line x1="${P}" y1="${H - 14}" x2="${W - P}" y2="${H - 14}" stroke="var(--hair)"/>
@@ -305,7 +315,7 @@
   function upsetSvg(A, S) {
     const U = A.upset;
     if (!U) return "";
-    const head = `<figure><figcaption><b>Figure 2.</b> Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against ${esc(U.species)} (430 Mya)${U.band === "all" ? "" : `; domains whose own stretch of the protein has pLDDT ${esc(U.band)}`}. Per-domain calls were kept only for zebrafish, so this figure is at 430 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other.</figcaption>`;
+    const head = `<figure><figcaption><b>Figure 2.</b> Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against ${esc(U.species)} (${relMya(S, "zebrafish")} Mya)${U.band === "all" ? "" : `; domains whose own stretch of the protein has pLDDT ${esc(U.band)}`}. Per-domain calls were kept only for zebrafish, so this figure is at ${relMya(S, "zebrafish")} Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other.</figcaption>`;
     if (U.missing) return head + `<p class="muted">Not run: the pile-up tables hold no calls for ${esc(U.missing.join(", "))} at the setting chosen here, so the overlap cannot be counted.</p></figure>`;
     const order = Object.entries(U.combos).filter(([k]) => k !== "000").sort((a, b) => b[1] - a[1]);
     const none = U.combos["000"] || 0;
@@ -362,7 +372,7 @@
     A.curve.forEach((c, i) => {
       const v = A.verdict[i];
       const pts = c.points.filter((p) => p.fmax !== null && p.mya).sort((a, b) => a.mya - b.mya);
-      // Two relatives at the same age (dog and cow, 95 Mya) are drawn as two marks; the
+      // Two relatives at the same age (cow and dog, 89 Mya) are drawn as two marks; the
       // line goes through their mean.
       const byMya = {};
       for (const p of pts) (byMya[p.mya] = byMya[p.mya] || []).push(p.fmax);
@@ -374,7 +384,7 @@
     });
     s += "</svg>";
     const legend = `<div class="legend">${A.verdict.map((v) => `<span class="item">${legendMark(v)}${esc(v.name)} (${esc(v.setting_label)})</span>`).join("")}<span class="item"><svg width="22" height="12" aria-hidden="true"><line x1="0" y1="6" x2="22" y2="6" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="5 4"/></svg>this species' distance to its nearest reviewed relative</span></div>`;
-    return `<figure><figcaption><b>Figure 3.</b> How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (dog and cow, 95 Mya) the line goes through their mean. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000.</figcaption>${legend}${s}</figure>`;
+    return `<figure><figcaption><b>Figure 3.</b> How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains${sharedAge(S) ? `; where two relatives share an age (${sharedAge(S)}) the line goes through their mean` : ""}. Divergence times are TimeTree 5's${S.relatives.some((r) => r.mya === null) ? `; ${S.relatives.filter((r) => r.mya === null).map((r) => r.name).join(" and ")}, with no TimeTree age, is not drawn` : ""}. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000.</figcaption>${legend}${s}</figure>`;
   }
 
   function card(title, value, sub, source) {
@@ -434,16 +444,16 @@ ${card("Earth BioGenome Project target", !c.ebp ? "—" : c.ebp.on_list ? "on th
         h += `<p class="notice">Only ${num(st.models_counted)} AlphaFold models counted for this species, fewer than ${MIN_MODELS}, so the ranking uses all domains at this distance.</p>`;
       }
       const gap = v.length > 1 ? v[0].fmax - v[v.length - 1].fmax : null;
-      h += `<p class="small">How this was measured: ${num(S.n_queries)} human proteins were searched against the proteome of ${esc(st.relative.name)} (<i>${esc(st.relative.scientific)}</i>), whose lineage split from human ${num(st.relative.mya)} Mya. Of the 15 relatives measured, its split age is the closest to this species' ${mya} Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: ${num(st.n)} Pfam domains in human proteins ${st.band === "all" ? "of any AlphaFold confidence" : `whose mean AlphaFold confidence (pLDDT, 0–100; AlphaFold DB calls 70 to 90 confident and above 90 very high) is ${esc(st.band)}`}. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect${gap !== null ? `; the three differ by ${num(gap, 3)} in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them` : ""}.</p><ol class="verdict">`;
+      h += `<p class="small">How this was measured: ${num(S.n_queries)} human proteins were searched against the proteome of ${esc(st.relative.name)} (<i>${esc(st.relative.scientific)}</i>), whose lineage split from human ${num(st.relative.mya)} Mya. Of the ${S.relatives.filter((r) => r.mya !== null).length} relatives measured that have a TimeTree age, its split age is the closest to this species' ${mya} Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: ${num(st.n)} Pfam domains in human proteins ${st.band === "all" ? "of any AlphaFold confidence" : `whose mean AlphaFold confidence (pLDDT, 0–100; AlphaFold DB calls 70 to 90 confident and above 90 very high) is ${esc(st.band)}`}. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect${gap !== null ? `; the three differ by ${num(gap, 3)} in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them` : ""}.</p><ol class="verdict">`;
       v.forEach((x, i) => {
-        const place = x.pileup && x.pileup.median_start_offset_aa !== null ? `; starts a found domain a median ${num(x.pileup.median_start_offset_aa)} residues from where the domain starts (measured at zebrafish, 430 Mya)` : "; placement: not run";
+        const place = x.pileup && x.pileup.median_start_offset_aa !== null ? `; starts a found domain a median ${num(x.pileup.median_start_offset_aa)} residues from where the domain starts (measured at zebrafish, ${relMya(S, "zebrafish")} Mya)` : "; placement: not run";
         const sh = x.short_recall !== null ? `; finds ${pct(x.short_recall)} of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (${pct(x.short_precision)} of those calls right)` : "; short features: not run";
         const sameName = x.name.toLowerCase().includes(x.setting_label.split(",")[0].toLowerCase());
         h += `<li class="vtool"><h3>${legendMark(x)} ${i + 1}. ${esc(x.name)}${sameName ? "" : ` <span class="muted small">${esc(x.setting_label)}</span>`}</h3>
 <p>Finds ${pct(x.recall)} of Pfam domains at this distance, and ${pct(x.precision)} of the domains it reports (its calls) are right${place}${sh}.</p>
 <p class="small">Counted at the score cut-off that gives this tool its best Fmax: ${num(x.fmax, 3)} on ${num(x.n)} domains${x.short_n ? `; short features from ${num(x.short_n)} Swiss-Prot features` : ""}. A found domain and its call overlap over a median ${pct(x.overlap_median)} of the span they cover together.</p>
 <p class="small cost">Computer time per 1,000 proteins searched against one relative's proteome: ${x.cpu_h_per_1000 === null ? "— processor-hours (not run)" : num(x.cpu_h_per_1000, 2) + " processor-hours (CPU-h)"}${x.gpu_h_per_1000 ? ", " + num(x.gpu_h_per_1000, 2) + " GPU-hours" : ""}; cloud price ${x.cost_usd_est === null ? "—" : "$" + num(x.cost_usd_est, 3)} <span class="est">estimate</span> (cost_usd_est). Search step only; ${x.db_cpu_h_per_db === null ? "no database-building step was recorded for it" : "building the relative's database took " + num(x.db_cpu_h_per_db, 2) + " CPU-h more, once per relative"}.</p>
-${thumb(x, i)}
+${thumb(x, i, S)}
 <button type="button" class="copy" data-copy="cmd-${i}">Copy command</button><pre class="cmd" id="cmd-${i}"><code>${esc(commandFor(A, S, i))}</code></pre></li>`;
       });
       h += "</ol>";

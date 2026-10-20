@@ -3,16 +3,16 @@
  "title": "American mink (Neogale vison): which tools to run",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
-  "commit_date": "2026-10-15T13:12:56Z",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+  "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:44:05Z",
+  "copied_at": "2026-10-20T13:27:30Z",
   "sha256": {
-   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
    "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
-   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
-   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "provenance.json": "928a70476164c3fa5f5da18160695a1fe80594d5f614e332509c1d0a341b636d",
+   "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
@@ -42,7 +42,7 @@
   },
   {
    "tag": "p",
-   "text": "How this was measured: 998 human proteins were searched against the proteome of chimpanzee (Pan troglodytes), whose lineage split from human 6 Mya. Of the 15 relatives measured, its split age is the closest to this species' 45 Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: 1,399 Pfam domains in human proteins whose mean AlphaFold confidence (pLDDT, 0–100; AlphaFold DB calls 70 to 90 confident and above 90 very high) is 70-90. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect; the three differ by 0.122 in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them."
+   "text": "How this was measured: 998 human proteins were searched against the proteome of chimpanzee (Pan troglodytes), whose lineage split from human 6 Mya. Of the 14 relatives measured that have a TimeTree age, its split age is the closest to this species' 45 Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: 1,399 Pfam domains in human proteins whose mean AlphaFold confidence (pLDDT, 0–100; AlphaFold DB calls 70 to 90 confident and above 90 very high) is 70-90. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect; the three differ by 0.122 in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them."
   },
   {
    "tag": "h3",
@@ -50,7 +50,7 @@
   },
   {
    "tag": "p",
-   "text": "Finds 37% of Pfam domains at this distance, and 55% of the domains it reports (its calls) are right; starts a found domain a median 23 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 1% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (5% of those calls right)."
+   "text": "Finds 37% of Pfam domains at this distance, and 55% of the domains it reports (its calls) are right; starts a found domain a median 23 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 1% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (5% of those calls right)."
   },
   {
    "tag": "p",
@@ -62,7 +62,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1a. kmerseek: at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1a. kmerseek: at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -78,7 +78,7 @@
   },
   {
    "tag": "p",
-   "text": "Finds 42% of Pfam domains at this distance, and 27% of the domains it reports (its calls) are right; starts a found domain a median 26 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 6% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (1% of those calls right)."
+   "text": "Finds 42% of Pfam domains at this distance, and 27% of the domains it reports (its calls) are right; starts a found domain a median 26 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 6% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (1% of those calls right)."
   },
   {
    "tag": "p",
@@ -90,7 +90,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1b. HH-suite (hhsearch): at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1b. HH-suite (hhsearch): at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -106,7 +106,7 @@
   },
   {
    "tag": "p",
-   "text": "Finds 41% of Pfam domains at this distance, and 27% of the domains it reports (its calls) are right; starts a found domain a median 18 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+   "text": "Finds 41% of Pfam domains at this distance, and 27% of the domains it reports (its calls) are right; starts a found domain a median 18 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
   },
   {
    "tag": "p",
@@ -118,7 +118,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1c. MMseqs2, three rounds: at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1c. MMseqs2, three rounds: at each residue, the share of 1,023 Pfam domains whose own stretch of the protein has pLDDT 70-90 (grouped by the domain, not the whole protein, so the count differs from the one above) that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -274,7 +274,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 2. Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against zebrafish (430 Mya); domains whose own stretch of the protein has pLDDT 70-90. Per-domain calls were kept only for zebrafish, so this figure is at 430 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other."
+   "text": "Figure 2. Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against zebrafish (435 Mya); domains whose own stretch of the protein has pLDDT 70-90. Per-domain calls were kept only for zebrafish, so this figure is at 435 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other."
   },
   {
    "tag": "p",
@@ -282,7 +282,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 3. How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (dog and cow, 95 Mya) the line goes through their mean. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000."
+   "text": "Figure 3. How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (mouse and rat, 84 Mya) the line goes through their mean. Divergence times are TimeTree 5's; E. coli, with no TimeTree age, is not drawn. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000."
   },
   {
    "tag": "h2",
@@ -290,7 +290,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit 4a4b1171, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:"
+   "text": "Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit 7eca428b, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:"
   },
   {
    "tag": "th",
@@ -729,7 +729,7 @@
      "name": "chimpanzee",
      "scientific": "Pan troglodytes",
      "taxid": 9598,
-     "mya": 6
+     "mya": 6.45
     },
     "band_asked": "70-90",
     "mean_plddt_est": 73.48531028280203,
@@ -1757,78 +1757,78 @@
      "setting": "protein20_k6_lcFalse",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
+       "mya": 6.45,
        "fmax": 0.44321639696329435
       },
       {
+       "relative": "mouse",
+       "mya": 83.51,
+       "fmax": 0.3049039643618391
+      },
+      {
        "relative": "rnorvegicus",
-       "mya": 90,
+       "mya": 83.51,
        "fmax": 0.2703345507671435
       },
       {
        "relative": "btaurus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.2903450834198843
       },
       {
        "relative": "clupus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.054633008453046326
       },
       {
-       "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.3049039643618391
-      },
-      {
        "relative": "mdomestica",
-       "mya": 160,
+       "mya": 159.16,
        "fmax": 0.24990329873910852
       },
       {
        "relative": "chicken",
-       "mya": 300,
+       "mya": 318.82,
        "fmax": 0.11553982247800378
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
+       "mya": 352.08,
        "fmax": 0.06698888802909093
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
+       "mya": 435.13,
        "fmax": 0.09072341090819058
       },
       {
        "relative": "ciona",
-       "mya": 550,
+       "mya": 600.96,
        "fmax": 0.008957452102513063
       },
       {
        "relative": "fly",
-       "mya": 600,
+       "mya": 692.17,
        "fmax": 0.023111130657473857
       },
       {
        "relative": "worm",
-       "mya": 650,
+       "mya": 692.17,
        "fmax": 0.013651274008460257
       },
       {
        "relative": "yeast",
-       "mya": 900,
+       "mya": 1164.3,
        "fmax": 0
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
-       "fmax": 0
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
+       "mya": 1515.83,
        "fmax": 0
       }
      ]
@@ -1838,79 +1838,79 @@
      "setting": "single_seq",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0.12346302108033828
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
+       "mya": 6.45,
        "fmax": 0.311328253651204
       },
       {
+       "relative": "mouse",
+       "mya": 83.51,
+       "fmax": 0.31380473289141964
+      },
+      {
        "relative": "rnorvegicus",
-       "mya": 90,
+       "mya": 83.51,
        "fmax": 0.31255993333394255
       },
       {
        "relative": "btaurus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.29680715867472923
       },
       {
        "relative": "clupus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.2690609580498647
       },
       {
-       "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.31380473289141964
-      },
-      {
        "relative": "mdomestica",
-       "mya": 160,
+       "mya": 159.16,
        "fmax": 0.3115964207063659
       },
       {
        "relative": "chicken",
-       "mya": 300,
+       "mya": 318.82,
        "fmax": 0.3162182759156151
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
+       "mya": 352.08,
        "fmax": 0.3391834268902635
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
+       "mya": 435.13,
        "fmax": 0.31303012408094416
       },
       {
        "relative": "ciona",
-       "mya": 550,
+       "mya": 600.96,
        "fmax": 0.3205404896480434
       },
       {
        "relative": "fly",
-       "mya": 600,
+       "mya": 692.17,
        "fmax": 0.3265168384661322
       },
       {
        "relative": "worm",
-       "mya": 650,
+       "mya": 692.17,
        "fmax": 0.3019010142586021
       },
       {
        "relative": "yeast",
-       "mya": 900,
+       "mya": 1164.3,
        "fmax": 0.2696538610876024
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
+       "mya": 1515.83,
        "fmax": 0.2350288684161828
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0.12346302108033828
       }
      ]
     },
@@ -1919,79 +1919,79 @@
      "setting": "s7",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0.10396023441745252
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
+       "mya": 6.45,
        "fmax": 0.30105637481300707
       },
       {
+       "relative": "mouse",
+       "mya": 83.51,
+       "fmax": 0.3165282069932801
+      },
+      {
        "relative": "rnorvegicus",
-       "mya": 90,
+       "mya": 83.51,
        "fmax": 0.3107565181903354
       },
       {
        "relative": "btaurus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.3033285005763616
       },
       {
        "relative": "clupus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.27871038816135574
       },
       {
-       "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.3165282069932801
-      },
-      {
        "relative": "mdomestica",
-       "mya": 160,
+       "mya": 159.16,
        "fmax": 0.3117102435265398
       },
       {
        "relative": "chicken",
-       "mya": 300,
+       "mya": 318.82,
        "fmax": 0.3300728023034689
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
+       "mya": 352.08,
        "fmax": 0.34670093274403063
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
+       "mya": 435.13,
        "fmax": 0.3242333985424603
       },
       {
        "relative": "ciona",
-       "mya": 550,
+       "mya": 600.96,
        "fmax": 0.32101163033306485
       },
       {
        "relative": "fly",
-       "mya": 600,
+       "mya": 692.17,
        "fmax": 0.3254091437251392
       },
       {
        "relative": "worm",
-       "mya": 650,
+       "mya": 692.17,
        "fmax": 0.29893693646469743
       },
       {
        "relative": "yeast",
-       "mya": 900,
+       "mya": 1164.3,
        "fmax": 0.25988935842918226
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
+       "mya": 1515.83,
        "fmax": 0.24173722247499785
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0.10396023441745252
       }
      ]
     }

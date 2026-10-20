@@ -3,16 +3,16 @@
  "title": "Xenoophorus captivus: which tools to run",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
-  "commit_date": "2026-10-15T13:12:56Z",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+  "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:44:05Z",
+  "copied_at": "2026-10-20T13:27:30Z",
   "sha256": {
-   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
    "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
-   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
-   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "provenance.json": "928a70476164c3fa5f5da18160695a1fe80594d5f614e332509c1d0a341b636d",
+   "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
@@ -26,7 +26,7 @@
   },
   {
    "tag": "p",
-   "text": "The closest species with at least 100 curator-checked (Swiss-Prot) proteins is torafugu (Takifugu rubripes); the two lineages split 106 million years ago (Mya). In human proteins searched against a species that far away (mouse, 100 Mya), the three tools with the best Fmax (the balance of finding domains and being right) were kmerseek; phmmer; MMseqs2, three rounds, and kmerseek found 35% of the known Pfam domains. In the measured organism closest to this one, human (Homo sapiens), 15% of proteins had no hit from any sequence tool, so expect a share like that to stay without a label."
+   "text": "The closest species with at least 100 curator-checked (Swiss-Prot) proteins is torafugu (Takifugu rubripes); the two lineages split 106 million years ago (Mya). In human proteins searched against a species that far away (cow, 89 Mya), the three tools with the best Fmax (the balance of finding domains and being right) were kmerseek; phmmer; MMseqs2, three rounds, and kmerseek found 32% of the known Pfam domains. In the measured organism closest to this one, human (Homo sapiens), 15% of proteins had no hit from any sequence tool, so expect a share like that to stay without a label."
   },
   {
    "tag": "pre",
@@ -46,27 +46,27 @@
   },
   {
    "tag": "p",
-   "text": "How this was measured: 998 human proteins were searched against the proteome of mouse (Mus musculus), whose lineage split from human 100 Mya. Of the 15 relatives measured, its split age is the closest to this species' 106 Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: 2,435 Pfam domains in human proteins of any AlphaFold confidence. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect; the three differ by 0.118 in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them."
+   "text": "How this was measured: 998 human proteins were searched against the proteome of cow (Bos taurus), whose lineage split from human 89 Mya. Of the 14 relatives measured that have a TimeTree age, its split age is the closest to this species' 106 Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: 2,435 Pfam domains in human proteins of any AlphaFold confidence. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect; the three differ by 0.088 in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them."
   },
   {
    "tag": "h3",
-   "text": "1. kmerseek hp_thomas_dill2, k = 33"
+   "text": "1. kmerseek gbmr4, k = 21"
   },
   {
    "tag": "p",
-   "text": "Finds 35% of Pfam domains at this distance, and 57% of the domains it reports (its calls) are right; starts a found domain a median 26 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+   "text": "Finds 32% of Pfam domains at this distance, and 50% of the domains it reports (its calls) are right; starts a found domain a median 33 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (1% of those calls right)."
   },
   {
    "tag": "p",
-   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.434 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 64% of the span they cover together."
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.391 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 63% of the span they cover together."
   },
   {
    "tag": "p",
-   "text": "Computer time per 1,000 proteins searched against one relative's proteome: — processor-hours (not run); cloud price — estimate (cost_usd_est). Search step only; no database-building step was recorded for it."
+   "text": "Computer time per 1,000 proteins searched against one relative's proteome: 0.06 processor-hours (CPU-h); cloud price $0.002 estimate (cost_usd_est). Search step only; building the relative's database took 0.02 CPU-h more, once per relative."
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1a. kmerseek: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1a. kmerseek: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -82,11 +82,11 @@
   },
   {
    "tag": "p",
-   "text": "Finds 56% of Pfam domains at this distance, and 22% of the domains it reports (its calls) are right; starts a found domain a median 30 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+   "text": "Finds 47% of Pfam domains at this distance, and 23% of the domains it reports (its calls) are right; starts a found domain a median 30 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
   },
   {
    "tag": "p",
-   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.321 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 67% of the span they cover together."
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.310 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 68% of the span they cover together."
   },
   {
    "tag": "p",
@@ -94,7 +94,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1b. phmmer: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1b. phmmer: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -110,11 +110,11 @@
   },
   {
    "tag": "p",
-   "text": "Finds 60% of Pfam domains at this distance, and 21% of the domains it reports (its calls) are right; starts a found domain a median 20 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+   "text": "Finds 60% of Pfam domains at this distance, and 20% of the domains it reports (its calls) are right; starts a found domain a median 20 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
   },
   {
    "tag": "p",
-   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.317 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 71% of the span they cover together."
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.303 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 74% of the span they cover together."
   },
   {
    "tag": "p",
@@ -122,7 +122,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1c. MMseqs2, three rounds: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1c. MMseqs2, three rounds: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -131,6 +131,10 @@
   {
    "tag": "li",
    "text": "Copy command"
+  },
+  {
+   "tag": "p",
+   "text": "Not run at this distance and pLDDT: Foldseek (shown as — in the tables). Pfam's own models (hmmscan) are left out of the ranking, because the answer key is made from those models."
   },
   {
    "tag": "h2",
@@ -190,15 +194,15 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 2. Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against zebrafish (430 Mya). Per-domain calls were kept only for zebrafish, so this figure is at 430 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other."
+   "text": "Figure 2. Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against zebrafish (435 Mya). Per-domain calls were kept only for zebrafish, so this figure is at 435 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other."
   },
   {
    "tag": "p",
-   "text": "2,435 domains in this band; 798 of them found by none of the three. A domain counts as found when any call on it names the right Pfam family and overlaps it, at any score."
+   "text": "2,435 domains in this band; 780 of them found by none of the three. A domain counts as found when any call on it names the right Pfam family and overlaps it, at any score."
   },
   {
    "tag": "figcaption",
-   "text": "Figure 3. How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (dog and cow, 95 Mya) the line goes through their mean. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000."
+   "text": "Figure 3. How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (mouse and rat, 84 Mya) the line goes through their mean. Divergence times are TimeTree 5's; E. coli, with no TimeTree age, is not drawn. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000."
   },
   {
    "tag": "h2",
@@ -206,7 +210,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit 4a4b1171, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:"
+   "text": "Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit 7eca428b, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:"
   },
   {
    "tag": "th",
@@ -650,11 +654,11 @@
    },
    "stratum": {
     "relative": {
-     "id": "mouse",
-     "name": "mouse",
-     "scientific": "Mus musculus",
-     "taxid": 10090,
-     "mya": 100
+     "id": "btaurus",
+     "name": "cow",
+     "scientific": "Bos taurus",
+     "taxid": 9913,
+     "mya": 89.48
     },
     "band_asked": null,
     "mean_plddt_est": null,
@@ -670,329 +674,329 @@
      "name": "kmerseek",
      "kind": "kmers",
      "shape": "circle",
-     "setting": "hp_thomas_dill2_k33_lcFalse",
-     "setting_label": "hp_thomas_dill2, k = 33",
-     "fmax": 0.4340399973161837,
-     "recall": 0.35207807517009476,
-     "precision": 0.5657416822026706,
-     "overlap_median": 0.6366749688667497,
+     "setting": "gbmr4_k21_lcFalse",
+     "setting_label": "gbmr4, k = 21",
+     "fmax": 0.39126913986878004,
+     "recall": 0.3206086335163408,
+     "precision": 0.5018811930852537,
+     "overlap_median": 0.6333333333333333,
      "n": 2435,
-     "short_recall": 0,
-     "short_precision": 0,
+     "short_recall": 0.004562043795620438,
+     "short_precision": 0.005509641873278237,
      "short_n": 546,
      "pileup": {
       "species": "zebrafish",
       "band": "all",
       "n_domains": 2435,
       "curve": [
-       0.029,
-       0.029,
-       0.0289,
-       0.0288,
-       0.0287,
-       0.0293,
-       0.0286,
-       0.0285,
-       0.0303,
-       0.0344,
-       0.0355,
-       0.036,
-       0.0359,
-       0.0357,
-       0.0362,
-       0.0356,
-       0.0356,
-       0.0342,
-       0.0354,
-       0.0365,
-       0.0359,
-       0.0369,
-       0.0368,
-       0.0367,
-       0.0354,
-       0.0377,
-       0.0377,
-       0.0375,
-       0.0381,
-       0.0374,
-       0.0379,
-       0.0383,
-       0.0388,
-       0.0399,
-       0.0398,
-       0.0391,
-       0.0396,
-       0.0407,
-       0.044,
-       0.0444,
-       0.0442,
+       0.0429,
+       0.0428,
+       0.042,
+       0.0432,
+       0.0417,
        0.0436,
-       0.0433,
-       0.0431,
-       0.0426,
-       0.043,
-       0.0435,
-       0.0451,
-       0.0439,
-       0.0455,
-       0.0464,
-       0.0458,
-       0.0439,
-       0.0447,
-       0.0445,
-       0.0449,
-       0.0453,
-       0.0441,
-       0.0445,
-       0.0439,
-       0.0442,
-       0.0454,
-       0.0453,
-       0.0455,
-       0.0464,
-       0.0468,
-       0.0477,
-       0.0468,
        0.0466,
-       0.0465,
-       0.0476,
-       0.0478,
-       0.0472,
+       0.0471,
+       0.0471,
        0.0467,
-       0.0478,
-       0.048,
-       0.0482,
-       0.0498,
+       0.0465,
+       0.0463,
+       0.0468,
+       0.046,
+       0.0465,
+       0.0465,
+       0.0488,
+       0.0492,
+       0.0504,
+       0.0496,
+       0.0508,
+       0.0506,
+       0.0486,
+       0.0485,
        0.0495,
+       0.0501,
+       0.0506,
+       0.0498,
        0.0516,
-       0.0491,
-       0.0507,
-       0.05,
-       0.0519,
-       0.0527,
-       0.0527,
+       0.0514,
+       0.0513,
        0.0534,
-       0.0536,
-       0.0538,
+       0.0509,
+       0.0509,
+       0.0542,
+       0.0546,
+       0.0551,
+       0.0545,
+       0.0549,
+       0.0564,
+       0.0561,
+       0.0566,
+       0.0568,
        0.056,
+       0.0566,
+       0.0559,
+       0.0564,
+       0.0568,
+       0.0562,
+       0.0571,
+       0.0564,
+       0.0574,
+       0.0565,
+       0.0556,
+       0.0559,
+       0.0552,
+       0.0567,
+       0.0559,
+       0.0542,
+       0.0551,
+       0.0532,
        0.058,
-       0.0585,
+       0.06,
+       0.0592,
+       0.0595,
+       0.0608,
+       0.061,
+       0.0611,
        0.0623,
-       0.065,
-       0.0691,
-       0.0717,
-       0.0725,
-       0.0753,
-       0.0767,
-       0.0776,
-       0.0807,
-       0.0815,
-       0.0828,
-       0.0832,
-       0.0832,
-       0.0836,
-       0.0848,
-       0.0853,
-       0.0857,
-       0.0877,
-       0.0886,
-       0.0894,
-       0.0902,
-       0.091,
-       0.0923,
-       0.0927,
-       0.0935,
-       0.0927,
-       0.0943,
-       0.0951,
-       0.0951,
-       0.0968,
-       0.1001,
-       0.1009,
-       0.1021,
-       0.1038,
-       0.1075,
+       0.0621,
+       0.0631,
+       0.0632,
+       0.0634,
+       0.0623,
+       0.0628,
+       0.0619,
+       0.0625,
+       0.0645,
+       0.0645,
+       0.0656,
+       0.0659,
+       0.0674,
+       0.0676,
+       0.0671,
+       0.0679,
+       0.0672,
+       0.067,
+       0.0693,
+       0.0672,
+       0.0756,
+       0.0801,
+       0.08,
+       0.0864,
+       0.0868,
+       0.0891,
+       0.0898,
+       0.0901,
+       0.0961,
+       0.1016,
+       0.1032,
+       0.1062,
+       0.1071,
+       0.1071,
+       0.1071,
+       0.1071,
        0.1075,
        0.1083,
-       0.1108,
+       0.11,
+       0.1104,
+       0.1112,
+       0.1116,
        0.1124,
-       0.1137,
-       0.1149,
+       0.1141,
+       0.1141,
        0.1153,
+       0.1161,
        0.1166,
-       0.1149,
-       0.1174,
-       0.1182,
-       0.1186,
+       0.1178,
+       0.119,
        0.1194,
-       0.1211,
-       0.1227,
+       0.1194,
+       0.1199,
+       0.1223,
+       0.1231,
        0.1236,
-       0.1232,
-       0.1244,
        0.1248,
-       0.1248,
-       0.1248,
-       0.1273,
-       0.1273,
+       0.1277,
+       0.1281,
+       0.1293,
+       0.1301,
+       0.1314,
+       0.1334,
+       0.1347,
+       0.1355,
+       0.1363,
+       0.1359,
+       0.1384,
+       0.1396,
+       0.1417,
+       0.1433,
+       0.1437,
+       0.145,
+       0.1459,
+       0.1463,
+       0.1475,
+       0.1483,
+       0.15,
+       0.1512,
+       0.1516,
+       0.1525,
+       0.1545,
+       0.1541,
+       0.1545,
+       0.1545,
+       0.1545,
+       0.1537,
+       0.1529,
+       0.1504,
+       0.1492,
+       0.1483,
+       0.1479,
+       0.145,
+       0.143,
+       0.1417,
+       0.1401,
+       0.1409,
+       0.1401,
+       0.1376,
+       0.1368,
+       0.1364,
+       0.1319,
+       0.1314,
        0.1294,
+       0.1286,
+       0.1335,
+       0.1331,
+       0.1327,
+       0.1327,
+       0.1335,
+       0.1323,
+       0.1319,
+       0.1314,
+       0.131,
        0.1294,
-       0.1302,
-       0.1298,
        0.129,
        0.1277,
        0.1273,
-       0.1248,
-       0.124,
-       0.124,
-       0.1236,
-       0.1236,
-       0.1211,
-       0.1207,
-       0.1195,
+       0.1261,
+       0.1257,
+       0.1253,
+       0.1249,
        0.1187,
-       0.1187,
-       0.1174,
-       0.1162,
-       0.1158,
-       0.115,
-       0.1145,
-       0.1141,
+       0.1179,
+       0.1167,
+       0.1146,
+       0.1134,
        0.1129,
-       0.1121,
-       0.1121,
-       0.1108,
-       0.1104,
-       0.1104,
-       0.11,
+       0.1125,
+       0.1113,
+       0.1105,
+       0.1074,
        0.1075,
-       0.1063,
-       0.1059,
-       0.1055,
-       0.1042,
-       0.1038,
-       0.1026,
-       0.1034,
-       0.103,
-       0.1022,
-       0.1014,
-       0.0993,
-       0.0981,
-       0.0956,
-       0.0899,
-       0.0903,
-       0.0903,
-       0.0894,
-       0.0886,
-       0.0878,
-       0.085,
-       0.0847,
-       0.0843,
-       0.0816,
-       0.0797,
-       0.0766,
-       0.0765,
+       0.1056,
+       0.1041,
+       0.102,
+       0.0991,
+       0.0979,
+       0.0951,
+       0.0908,
+       0.0863,
+       0.0866,
+       0.084,
+       0.0829,
+       0.0798,
+       0.0813,
+       0.0805,
+       0.0779,
+       0.0788,
+       0.0771,
+       0.0736,
        0.074,
-       0.0718,
-       0.0705,
-       0.0692,
-       0.0675,
+       0.0701,
+       0.0742,
+       0.0759,
+       0.0762,
+       0.0719,
+       0.0708,
+       0.0707,
+       0.0689,
+       0.0678,
+       0.0676,
+       0.0683,
+       0.0676,
        0.0673,
-       0.0642,
-       0.0631,
-       0.0614,
-       0.0587,
+       0.0657,
+       0.0643,
+       0.0629,
+       0.0625,
+       0.064,
+       0.0625,
+       0.0623,
+       0.0598,
+       0.0617,
+       0.0612,
+       0.0597,
+       0.0582,
+       0.0573,
+       0.0553,
+       0.0565,
+       0.0523,
        0.0585,
-       0.0539,
-       0.0541,
-       0.0534,
-       0.0528,
-       0.0529,
-       0.0521,
-       0.0528,
-       0.0493,
-       0.0496,
-       0.0488,
+       0.0608,
+       0.0593,
+       0.0606,
+       0.0597,
+       0.0598,
+       0.0572,
+       0.0564,
+       0.0562,
+       0.0576,
+       0.0565,
+       0.0568,
+       0.0583,
+       0.0573,
+       0.0551,
+       0.0553,
+       0.0561,
+       0.0556,
+       0.0558,
+       0.0558,
+       0.0559,
+       0.0554,
+       0.0538,
+       0.0522,
+       0.0518,
        0.049,
-       0.0493,
-       0.0485,
-       0.0487,
-       0.0478,
-       0.0454,
-       0.0415,
-       0.0406,
-       0.0402,
-       0.0387,
-       0.04,
-       0.0396,
-       0.0387,
-       0.0361,
-       0.0357,
-       0.0358,
-       0.0369,
-       0.0375,
-       0.036,
-       0.0361,
-       0.0362,
-       0.0358,
-       0.0342,
-       0.0332,
-       0.0332,
-       0.0361,
-       0.0368,
-       0.0363,
-       0.0364,
-       0.0372,
-       0.0369,
-       0.0371,
-       0.0377,
-       0.0356,
-       0.0347,
-       0.0318,
-       0.0319,
-       0.032,
-       0.0339,
-       0.034,
-       0.034,
-       0.0323,
-       0.0329,
-       0.033,
-       0.0319,
-       0.0326,
-       0.031,
-       0.0304,
-       0.03,
-       0.0295,
-       0.0295,
-       0.0295,
-       0.029,
-       0.0296,
-       0.0303,
-       0.0298,
-       0.0299,
-       0.0299,
-       0.0305,
-       0.0312,
-       0.0312,
-       0.0301,
-       0.0303,
-       0.0291,
-       0.0272,
-       0.0274,
-       0.0294,
-       0.0288,
-       0.0296,
-       0.0284,
-       0.0284,
-       0.0291
+       0.0504,
+       0.0463,
+       0.0512,
+       0.0512,
+       0.0507,
+       0.0496,
+       0.0491,
+       0.0486,
+       0.0481,
+       0.0476,
+       0.0482,
+       0.0484,
+       0.0472,
+       0.0473,
+       0.0469,
+       0.047,
+       0.0433,
+       0.0442,
+       0.0462,
+       0.0464,
+       0.0466,
+       0.0466,
+       0.0461,
+       0.0449
       ],
-      "median_start_offset_aa": 26,
-      "n_tp_calls": 399
+      "median_start_offset_aa": 33,
+      "n_tp_calls": 681
      },
-     "cpu_h_per_1000": null,
-     "gpu_h_per_1000": null,
-     "cost_usd_est": null,
-     "db_cpu_h_per_db": null
+     "cpu_h_per_1000": 0.0551695984561716,
+     "gpu_h_per_1000": 0,
+     "cost_usd_est": 0.0024619433311066576,
+     "db_cpu_h_per_db": 0.024444444444444446
     },
     {
      "tool": "hmmer3_phmmer",
@@ -1001,13 +1005,13 @@
      "shape": "circle",
      "setting": "default",
      "setting_label": "default options",
-     "fmax": 0.32067312141070353,
-     "recall": 0.5604371331170769,
-     "precision": 0.22458993715982542,
-     "overlap_median": 0.672514619883041,
+     "fmax": 0.3104945685793282,
+     "recall": 0.46552809359422564,
+     "precision": 0.23292440306905446,
+     "overlap_median": 0.6771653543307087,
      "n": 2435,
-     "short_recall": 0.0009124087591240876,
-     "short_precision": 0.00017442874585731728,
+     "short_recall": 0,
+     "short_precision": 0,
      "short_n": 546,
      "pileup": {
       "species": "zebrafish",
@@ -1330,13 +1334,13 @@
      "shape": "square",
      "setting": "s7",
      "setting_label": "sensitivity 7, 3 rounds",
-     "fmax": 0.3165282069932801,
-     "recall": 0.6034958854540458,
-     "precision": 0.21452137773136984,
-     "overlap_median": 0.7129629629629629,
+     "fmax": 0.3033285005763616,
+     "recall": 0.6000101021444743,
+     "precision": 0.20296849392117133,
+     "overlap_median": 0.7381706408345753,
      "n": 2435,
-     "short_recall": 0.0036496350364963502,
-     "short_precision": 4.641555849520759e-06,
+     "short_recall": 0,
+     "short_precision": 0,
      "short_n": 546,
      "pileup": {
       "species": "zebrafish",
@@ -1653,7 +1657,9 @@
      "db_cpu_h_per_db": 0.0012698412698412698
     }
    ],
-   "not_run": [],
+   "not_run": [
+    "foldseek"
+   ],
    "upset": {
     "species": "zebrafish",
     "band": "all",
@@ -1664,95 +1670,95 @@
      "mmseqs2_iterative"
     ],
     "combos": {
-     "100": 69,
-     "101": 6,
-     "110": 85,
-     "111": 183,
-     "000": 798,
-     "011": 972,
-     "001": 122,
-     "010": 200
+     "100": 87,
+     "101": 9,
+     "110": 101,
+     "111": 191,
+     "000": 780,
+     "011": 964,
+     "001": 119,
+     "010": 184
     }
    },
    "curve": [
     {
      "tool": "kmerseek",
-     "setting": "hp_thomas_dill2_k33_lcFalse",
+     "setting": "gbmr4_k21_lcFalse",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
-       "fmax": 0.40114908927250525
-      },
-      {
-       "relative": "rnorvegicus",
-       "mya": 90,
-       "fmax": 0.389910018024893
-      },
-      {
-       "relative": "btaurus",
-       "mya": 95,
-       "fmax": 0.3844639366121437
-      },
-      {
-       "relative": "clupus",
-       "mya": 95,
-       "fmax": 0.07774353623075807
+       "mya": 6.45,
+       "fmax": 0.427648485505391
       },
       {
        "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.4340399973161837
+       "mya": 83.51,
+       "fmax": 0.4106904053215238
+      },
+      {
+       "relative": "rnorvegicus",
+       "mya": 83.51,
+       "fmax": 0.36400152279582315
+      },
+      {
+       "relative": "btaurus",
+       "mya": 89.48,
+       "fmax": 0.39126913986878004
+      },
+      {
+       "relative": "clupus",
+       "mya": 89.48,
+       "fmax": 0.0499674700736884
       },
       {
        "relative": "mdomestica",
-       "mya": 160,
-       "fmax": 0.37533908607891237
+       "mya": 159.16,
+       "fmax": 0.36601753277827725
       },
       {
        "relative": "chicken",
-       "mya": 300,
-       "fmax": 0.18491223788684122
+       "mya": 318.82,
+       "fmax": 0.18243373604878518
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
-       "fmax": 0.1566349515557212
+       "mya": 352.08,
+       "fmax": 0.14088640690641446
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
-       "fmax": 0.18444735032057227
+       "mya": 435.13,
+       "fmax": 0.1916925711349533
       },
       {
        "relative": "ciona",
-       "mya": 550,
-       "fmax": 0.03708004055046179
+       "mya": 600.96,
+       "fmax": 0.04945681281759475
       },
       {
        "relative": "fly",
-       "mya": 600,
-       "fmax": 0.050844773560621274
+       "mya": 692.17,
+       "fmax": 0.0632804831219113
       },
       {
        "relative": "worm",
-       "mya": 650,
-       "fmax": 0.05237105413214039
+       "mya": 692.17,
+       "fmax": 0.05194199995848825
       },
       {
        "relative": "yeast",
-       "mya": 900,
-       "fmax": 0.001990049751243781
+       "mya": 1164.3,
+       "fmax": 0.009516297517398185
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
-       "fmax": 0.004789859855107705
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0
+       "mya": 1515.83,
+       "fmax": 0.018995184787073207
       }
      ]
     },
@@ -1761,79 +1767,79 @@
      "setting": "default",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0.11886732942255351
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
+       "mya": 6.45,
        "fmax": 0.3136661577873329
       },
       {
+       "relative": "mouse",
+       "mya": 83.51,
+       "fmax": 0.32067312141070353
+      },
+      {
        "relative": "rnorvegicus",
-       "mya": 90,
+       "mya": 83.51,
        "fmax": 0.32551539144492686
       },
       {
        "relative": "btaurus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.3104945685793282
       },
       {
        "relative": "clupus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.27315278615416777
       },
       {
-       "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.32067312141070353
-      },
-      {
        "relative": "mdomestica",
-       "mya": 160,
+       "mya": 159.16,
        "fmax": 0.3251116440547209
       },
       {
        "relative": "chicken",
-       "mya": 300,
+       "mya": 318.82,
        "fmax": 0.3335453036153417
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
+       "mya": 352.08,
        "fmax": 0.36873253926867994
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
+       "mya": 435.13,
        "fmax": 0.3330610188863855
       },
       {
        "relative": "ciona",
-       "mya": 550,
+       "mya": 600.96,
        "fmax": 0.3205750942307098
       },
       {
        "relative": "fly",
-       "mya": 600,
+       "mya": 692.17,
        "fmax": 0.3361256797007681
       },
       {
        "relative": "worm",
-       "mya": 650,
+       "mya": 692.17,
        "fmax": 0.3143294605901872
       },
       {
        "relative": "yeast",
-       "mya": 900,
+       "mya": 1164.3,
        "fmax": 0.2675662106448453
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
+       "mya": 1515.83,
        "fmax": 0.23642526145380457
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0.11886732942255351
       }
      ]
     },
@@ -1842,79 +1848,79 @@
      "setting": "s7",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0.10396023441745252
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
+       "mya": 6.45,
        "fmax": 0.30105637481300707
       },
       {
+       "relative": "mouse",
+       "mya": 83.51,
+       "fmax": 0.3165282069932801
+      },
+      {
        "relative": "rnorvegicus",
-       "mya": 90,
+       "mya": 83.51,
        "fmax": 0.3107565181903354
       },
       {
        "relative": "btaurus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.3033285005763616
       },
       {
        "relative": "clupus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.27871038816135574
       },
       {
-       "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.3165282069932801
-      },
-      {
        "relative": "mdomestica",
-       "mya": 160,
+       "mya": 159.16,
        "fmax": 0.3117102435265398
       },
       {
        "relative": "chicken",
-       "mya": 300,
+       "mya": 318.82,
        "fmax": 0.3300728023034689
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
+       "mya": 352.08,
        "fmax": 0.34670093274403063
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
+       "mya": 435.13,
        "fmax": 0.3242333985424603
       },
       {
        "relative": "ciona",
-       "mya": 550,
+       "mya": 600.96,
        "fmax": 0.32101163033306485
       },
       {
        "relative": "fly",
-       "mya": 600,
+       "mya": 692.17,
        "fmax": 0.3254091437251392
       },
       {
        "relative": "worm",
-       "mya": 650,
+       "mya": 692.17,
        "fmax": 0.29893693646469743
       },
       {
        "relative": "yeast",
-       "mya": 900,
+       "mya": 1164.3,
        "fmax": 0.25988935842918226
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
+       "mya": 1515.83,
        "fmax": 0.24173722247499785
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0.10396023441745252
       }
      ]
     }

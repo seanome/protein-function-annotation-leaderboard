@@ -3,16 +3,16 @@
  "title": "Nathusius's pipistrelle (Pipistrellus nathusii): which tools to run",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
-  "commit_date": "2026-10-15T13:12:56Z",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+  "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T13:44:05Z",
+  "copied_at": "2026-10-20T13:27:30Z",
   "sha256": {
-   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
+   "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
    "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
-   "provenance.json": "22e54f206354e42208f8a78c4f4827f980ac1db2ce13153f2b077274552e4141",
-   "inventory.md": "8dc7040a38cf06af126bd08211edf1f6055c69fe9ac2b4088c6ba8f7f90e6c71",
+   "provenance.json": "928a70476164c3fa5f5da18160695a1fe80594d5f614e332509c1d0a341b636d",
+   "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
@@ -26,11 +26,11 @@
   },
   {
    "tag": "p",
-   "text": "The closest species with at least 100 curator-checked (Swiss-Prot) proteins is domestic cattle (Bos taurus); the two lineages split 79 million years ago (Mya). In human proteins searched against a species that far away (rat, 90 Mya), the three tools with the best Fmax (the balance of finding domains and being right) were kmerseek; phmmer; MMseqs2, and kmerseek found 31% of the known Pfam domains. In the measured organism closest to this one, human (Homo sapiens), 15% of proteins had no hit from any sequence tool, so expect a share like that to stay without a label."
+   "text": "The closest species with at least 100 curator-checked (Swiss-Prot) proteins is domestic cattle (Bos taurus); the two lineages split 79 million years ago (Mya). In human proteins searched against a species that far away (mouse, 84 Mya), the three tools with the best Fmax (the balance of finding domains and being right) were kmerseek; phmmer; MMseqs2, three rounds, and kmerseek found 35% of the known Pfam domains. In the measured organism closest to this one, human (Homo sapiens), 15% of proteins had no hit from any sequence tool, so expect a share like that to stay without a label."
   },
   {
    "tag": "pre",
-   "text": "# Nathusius's pipistrelle (Pipistrellus nathusii) # UniProt reference proteome UP001314169, 18,936 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP001314169&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Bos taurus). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run kmerseek; phmmer; MMseqs2; their commands follow. printf 'id,fasta\\npipistrellus_nathusii,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # kmerseek: its database needs build steps this page does not write out. # The command the board ran is on its tool card: tools/kmerseek.html # phmmer (quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)) gunzip -kf proteome.fasta.gz swissprot.fasta.gz phmmer --domtblout phmmer.domtbl --noali -E 10.0 --cpu 8 proteome.fasta swissprot.fasta > /dev/null # MMseqs2, sensitivity 7, one round (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)) mmseqs createdb proteome.fasta.gz q_db mmseqs createdb swissprot.fasta.gz t_db mmseqs search q_db t_db result_s7 tmp_s7 --threads 16 -s 7 --max-seqs 1000 -e 10.0 mmseqs convertalis q_db t_db result_s7 mmseqs2_s7.m8"
+   "text": "# Nathusius's pipistrelle (Pipistrellus nathusii) # UniProt reference proteome UP001314169, 18,936 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP001314169&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Bos taurus). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run kmerseek; phmmer; MMseqs2, three rounds; their commands follow. printf 'id,fasta\\npipistrellus_nathusii,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # kmerseek: its database needs build steps this page does not write out. # The command the board ran is on its tool card: tools/kmerseek.html # phmmer (quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)) gunzip -kf proteome.fasta.gz swissprot.fasta.gz phmmer --domtblout phmmer.domtbl --noali -E 10.0 --cpu 8 proteome.fasta swissprot.fasta > /dev/null # MMseqs2, sensitivity 7, three rounds (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)) mmseqs createdb proteome.fasta.gz q_db mmseqs createdb swissprot.fasta.gz t_db mmseqs search q_db t_db result_s7_n3 tmp_s7_n3 --threads 16 -s 7 --num-iterations 3 --max-seqs 1000 -e 10.0 mmseqs convertalis q_db t_db result_s7_n3 mmseqs2_s7_3rounds.m8"
   },
   {
    "tag": "h2",
@@ -46,7 +46,7 @@
   },
   {
    "tag": "p",
-   "text": "How this was measured: 998 human proteins were searched against the proteome of rat (Rattus norvegicus), whose lineage split from human 90 Mya. Of the 15 relatives measured, its split age is the closest to this species' 79 Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: 2,435 Pfam domains in human proteins of any AlphaFold confidence. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect; the three differ by 0.077 in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them."
+   "text": "How this was measured: 998 human proteins were searched against the proteome of mouse (Mus musculus), whose lineage split from human 84 Mya. Of the 14 relatives measured that have a TimeTree age, its split age is the closest to this species' 79 Mya. Split age is a stand-in for how much proteins have changed; lineages change at different speeds. Counted: 2,435 Pfam domains in human proteins of any AlphaFold confidence. Tools are ranked by Fmax, the best balance of finding domains (recall) and being right (precision), 1 being perfect; the three differ by 0.118 in Fmax, a gap this one set of proteins cannot settle, so if cost matters pick the cheapest of them."
   },
   {
    "tag": "h3",
@@ -54,11 +54,11 @@
   },
   {
    "tag": "p",
-   "text": "Finds 31% of Pfam domains at this distance, and 53% of the domains it reports (its calls) are right; starts a found domain a median 26 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+   "text": "Finds 35% of Pfam domains at this distance, and 57% of the domains it reports (its calls) are right; starts a found domain a median 26 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
   },
   {
    "tag": "p",
-   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.390 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 63% of the span they cover together."
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.434 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 64% of the span they cover together."
   },
   {
    "tag": "p",
@@ -66,7 +66,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1a. kmerseek: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1a. kmerseek: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -82,11 +82,11 @@
   },
   {
    "tag": "p",
-   "text": "Finds 64% of Pfam domains at this distance, and 22% of the domains it reports (its calls) are right; starts a found domain a median 30 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+   "text": "Finds 56% of Pfam domains at this distance, and 22% of the domains it reports (its calls) are right; starts a found domain a median 30 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
   },
   {
    "tag": "p",
-   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.326 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 68% of the span they cover together."
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.321 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 67% of the span they cover together."
   },
   {
    "tag": "p",
@@ -94,7 +94,7 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1b. phmmer: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1b. phmmer: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
@@ -106,27 +106,27 @@
   },
   {
    "tag": "h3",
-   "text": "3. MMseqs2 sensitivity 7"
+   "text": "3. MMseqs2, three rounds sensitivity 7, 3 rounds"
   },
   {
    "tag": "p",
-   "text": "Finds 60% of Pfam domains at this distance, and 21% of the domains it reports (its calls) are right; starts a found domain a median 19 residues from where the domain starts (measured at zebrafish, 430 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
+   "text": "Finds 60% of Pfam domains at this distance, and 21% of the domains it reports (its calls) are right; starts a found domain a median 20 residues from where the domain starts (measured at zebrafish, 435 Mya); finds 0% of short Swiss-Prot features 2–15 residues long, such as motifs and binding sites (0% of those calls right)."
   },
   {
    "tag": "p",
-   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.313 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 71% of the span they cover together."
+   "text": "Counted at the score cut-off that gives this tool its best Fmax: 0.317 on 2,435 domains; short features from 546 Swiss-Prot features. A found domain and its call overlap over a median 71% of the span they cover together."
   },
   {
    "tag": "p",
-   "text": "Computer time per 1,000 proteins searched against one relative's proteome: 0.03 processor-hours (CPU-h); cloud price $0.001 estimate (cost_usd_est). Search step only; building the relative's database took 0.00 CPU-h more, once per relative."
+   "text": "Computer time per 1,000 proteins searched against one relative's proteome: 0.08 processor-hours (CPU-h); cloud price $0.004 estimate (cost_usd_est). Search step only; building the relative's database took 0.00 CPU-h more, once per relative."
   },
   {
    "tag": "figcaption",
-   "text": "Figure 1c. MMseqs2: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (430 Mya); the grey band is the domain, every domain stretched to one width."
+   "text": "Figure 1c. MMseqs2, three rounds: at each residue, the share of 2,435 Pfam domains that a call covers. Human proteins searched against zebrafish (435 Mya); the grey band is the domain, every domain stretched to one width."
   },
   {
    "tag": "pre",
-   "text": "# Nathusius's pipistrelle (Pipistrellus nathusii) # UniProt reference proteome UP001314169, 18,936 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP001314169&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Bos taurus). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run MMseqs2; its command follows. printf 'id,fasta\\npipistrellus_nathusii,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # MMseqs2, sensitivity 7, one round (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)) mmseqs createdb proteome.fasta.gz q_db mmseqs createdb swissprot.fasta.gz t_db mmseqs search q_db t_db result_s7 tmp_s7 --threads 16 -s 7 --max-seqs 1000 -e 10.0 mmseqs convertalis q_db t_db result_s7 mmseqs2_s7.m8"
+   "text": "# Nathusius's pipistrelle (Pipistrellus nathusii) # UniProt reference proteome UP001314169, 18,936 proteins curl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP001314169&format=fasta&compressed=true' # All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Bos taurus). # Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs. curl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz' # nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome. # Version 1.1.0 has no option to run MMseqs2, three rounds; its command follows. printf 'id,fasta\\npipistrellus_nathusii,proteome.fasta.gz\\n' > samplesheet.csv nextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results # -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off # that gives each tool its best Fmax; filter the output before you take labels from it. # MMseqs2, sensitivity 7, three rounds (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef)) mmseqs createdb proteome.fasta.gz q_db mmseqs createdb swissprot.fasta.gz t_db mmseqs search q_db t_db result_s7_n3 tmp_s7_n3 --threads 16 -s 7 --num-iterations 3 --max-seqs 1000 -e 10.0 mmseqs convertalis q_db t_db result_s7_n3 mmseqs2_s7_3rounds.m8"
   },
   {
    "tag": "li",
@@ -190,15 +190,15 @@
   },
   {
    "tag": "figcaption",
-   "text": "Figure 2. Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against zebrafish (430 Mya). Per-domain calls were kept only for zebrafish, so this figure is at 430 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other."
+   "text": "Figure 2. Which domains each of the three tools finds, and which only one of them finds. The tools searched human proteins against zebrafish (435 Mya). Per-domain calls were kept only for zebrafish, so this figure is at 435 Mya whatever this species' distance. A filled dot under a bar means that tool found the domain; the bar is the number of domains found by that set of tools and no other."
   },
   {
    "tag": "p",
-   "text": "2,435 domains in this band; 856 of them found by none of the three. A domain counts as found when any call on it names the right Pfam family and overlaps it, at any score."
+   "text": "2,435 domains in this band; 798 of them found by none of the three. A domain counts as found when any call on it names the right Pfam family and overlaps it, at any score."
   },
   {
    "tag": "figcaption",
-   "text": "Figure 3. How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (dog and cow, 95 Mya) the line goes through their mean. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000."
+   "text": "Figure 3. How Fmax falls with distance, for the three tools above. Fmax is the best balance of finding domains and being right (1 is perfect). Each mark is one relative the human proteins were searched against, all Pfam domains; where two relatives share an age (mouse and rat, 84 Mya) the line goes through their mean. Divergence times are TimeTree 5's; E. coli, with no TimeTree age, is not drawn. The step from 10 to 100 Mya takes as much room as the step from 100 to 1,000."
   },
   {
    "tag": "h2",
@@ -206,7 +206,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit 4a4b1171, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:"
+   "text": "Tool scores and costs: results.parquet and compute.parquet, seanome/2024-kmerseek-analysis commit 7eca428b, experiment qfo_region_midi_plus. cost_usd_est is an estimate: CPU-hours times the AWS on-demand price (c7i.large $0.08925 per hour for 2 vCPU and g5.xlarge $1.006 per GPU-hour, US East, read 2026-10-15), plus GPU-hours times the GPU price. Lookups for the four facts:"
   },
   {
    "tag": "th",
@@ -620,11 +620,11 @@
    },
    "stratum": {
     "relative": {
-     "id": "rnorvegicus",
-     "name": "rat",
-     "scientific": "Rattus norvegicus",
-     "taxid": 10116,
-     "mya": 90
+     "id": "mouse",
+     "name": "mouse",
+     "scientific": "Mus musculus",
+     "taxid": 10090,
+     "mya": 83.51
     },
     "band_asked": null,
     "mean_plddt_est": null,
@@ -642,10 +642,10 @@
      "shape": "circle",
      "setting": "hp_thomas_dill2_k33_lcFalse",
      "setting_label": "hp_thomas_dill2, k = 33",
-     "fmax": 0.389910018024893,
-     "recall": 0.3071301012254631,
-     "precision": 0.533777601347546,
-     "overlap_median": 0.6292448380672886,
+     "fmax": 0.4340399973161837,
+     "recall": 0.35207807517009476,
+     "precision": 0.5657416822026706,
+     "overlap_median": 0.6366749688667497,
      "n": 2435,
      "short_recall": 0,
      "short_precision": 0,
@@ -971,13 +971,13 @@
      "shape": "circle",
      "setting": "default",
      "setting_label": "default options",
-     "fmax": 0.32551539144492686,
-     "recall": 0.6396713635727459,
-     "precision": 0.21830248150369636,
-     "overlap_median": 0.6804123711340206,
+     "fmax": 0.32067312141070353,
+     "recall": 0.5604371331170769,
+     "precision": 0.22458993715982542,
+     "overlap_median": 0.672514619883041,
      "n": 2435,
-     "short_recall": 0,
-     "short_precision": 0,
+     "short_recall": 0.0009124087591240876,
+     "short_precision": 0.00017442874585731728,
      "short_n": 546,
      "pileup": {
       "species": "zebrafish",
@@ -1294,332 +1294,332 @@
      "db_cpu_h_per_db": null
     },
     {
-     "tool": "mmseqs2_seqseq",
-     "name": "MMseqs2",
-     "kind": "letters",
+     "tool": "mmseqs2_iterative",
+     "name": "MMseqs2, three rounds",
+     "kind": "profiles",
      "shape": "square",
      "setting": "s7",
-     "setting_label": "sensitivity 7",
-     "fmax": 0.31330547776885725,
-     "recall": 0.5951686723063748,
-     "precision": 0.2126144012315529,
-     "overlap_median": 0.7142857142857143,
+     "setting_label": "sensitivity 7, 3 rounds",
+     "fmax": 0.3165282069932801,
+     "recall": 0.6034958854540458,
+     "precision": 0.21452137773136984,
+     "overlap_median": 0.7129629629629629,
      "n": 2435,
-     "short_recall": 0,
-     "short_precision": 0,
+     "short_recall": 0.0036496350364963502,
+     "short_precision": 4.641555849520759e-06,
      "short_n": 546,
      "pileup": {
       "species": "zebrafish",
       "band": "all",
       "n_domains": 2435,
       "curve": [
-       0.715,
-       0.716,
-       0.7146,
-       0.7148,
-       0.7146,
+       0.6854,
+       0.6864,
+       0.687,
+       0.6886,
+       0.691,
+       0.6912,
+       0.6915,
+       0.6917,
+       0.6916,
+       0.6945,
+       0.6948,
+       0.6953,
+       0.6967,
+       0.6985,
+       0.6975,
+       0.7013,
+       0.701,
+       0.7017,
+       0.7026,
+       0.7039,
+       0.7063,
+       0.707,
+       0.7084,
+       0.7099,
+       0.7093,
+       0.7108,
+       0.7139,
+       0.714,
+       0.7141,
+       0.712,
+       0.7131,
+       0.7149,
+       0.717,
        0.7179,
-       0.7177,
-       0.7208,
-       0.7214,
-       0.7228,
-       0.7223,
-       0.7215,
+       0.718,
+       0.719,
+       0.7199,
+       0.7196,
+       0.7206,
+       0.7225,
+       0.7205,
+       0.7217,
+       0.7209,
+       0.7221,
        0.7234,
-       0.724,
-       0.7246,
-       0.7278,
+       0.7233,
+       0.726,
+       0.7277,
+       0.7286,
+       0.7267,
+       0.728,
+       0.7289,
        0.7294,
-       0.7287,
-       0.7284,
        0.7285,
-       0.7309,
-       0.7344,
-       0.7344,
-       0.7377,
-       0.7364,
-       0.7373,
-       0.741,
-       0.7392,
-       0.7422,
-       0.7412,
-       0.7405,
-       0.7404,
-       0.7407,
-       0.7422,
-       0.7428,
-       0.7414,
-       0.7434,
-       0.7443,
-       0.7446,
-       0.7447,
-       0.7421,
-       0.7426,
-       0.7451,
-       0.7457,
-       0.7464,
-       0.7468,
-       0.7478,
-       0.7467,
-       0.7481,
-       0.7472,
-       0.7468,
-       0.7488,
-       0.747,
-       0.747,
+       0.7273,
+       0.7277,
+       0.7264,
+       0.7273,
+       0.7264,
+       0.727,
+       0.7254,
+       0.7235,
+       0.7262,
+       0.7267,
+       0.7287,
+       0.7292,
+       0.7221,
+       0.721,
+       0.7205,
+       0.7212,
+       0.7211,
+       0.7234,
+       0.7212,
+       0.7155,
+       0.7159,
+       0.7148,
+       0.7144,
+       0.7161,
+       0.7146,
+       0.715,
+       0.718,
+       0.7219,
+       0.7249,
+       0.7275,
+       0.7331,
+       0.7333,
+       0.737,
+       0.7394,
+       0.7427,
+       0.7442,
        0.7469,
-       0.7466,
-       0.7458,
-       0.7456,
-       0.7452,
-       0.7479,
-       0.7461,
-       0.7435,
-       0.7467,
-       0.7461,
-       0.7486,
-       0.749,
-       0.7421,
-       0.7403,
-       0.7397,
-       0.7399,
-       0.7431,
-       0.7443,
-       0.7409,
-       0.7364,
-       0.7348,
-       0.7336,
-       0.7315,
-       0.7332,
-       0.7339,
-       0.7356,
-       0.7418,
-       0.7423,
-       0.7439,
-       0.7482,
-       0.7529,
-       0.7528,
-       0.7555,
-       0.7561,
-       0.762,
-       0.7629,
-       0.7633,
-       0.7669,
-       0.769,
-       0.7709,
-       0.7737,
-       0.7802,
-       0.7843,
-       0.7899,
-       0.7922,
-       0.7982,
-       0.7987,
-       0.8023,
-       0.8077,
-       0.8101,
-       0.8118,
-       0.8126,
-       0.813,
+       0.748,
+       0.7488,
+       0.7517,
+       0.7546,
+       0.7612,
+       0.7684,
+       0.7733,
+       0.7778,
+       0.7882,
+       0.7892,
+       0.7949,
+       0.7986,
+       0.7994,
+       0.8011,
+       0.806,
+       0.8068,
+       0.8068,
+       0.8085,
+       0.8093,
+       0.811,
        0.8134,
-       0.8155,
+       0.8147,
+       0.8159,
+       0.8163,
        0.8175,
-       0.8188,
        0.8192,
-       0.8192,
-       0.8196,
-       0.8196,
-       0.82,
-       0.8213,
+       0.8204,
+       0.8208,
        0.8217,
-       0.8225,
        0.8229,
-       0.8245,
-       0.8245,
-       0.8245,
-       0.8245,
-       0.825,
-       0.8254,
+       0.8233,
+       0.8237,
+       0.8237,
        0.8241,
        0.8245,
        0.8245,
-       0.8245,
-       0.8245,
-       0.8258,
-       0.8258,
-       0.8258,
-       0.8258,
+       0.8254,
+       0.8254,
        0.8262,
        0.8262,
        0.8262,
-       0.8262,
-       0.8266,
+       0.827,
        0.827,
        0.8278,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8282,
+       0.8287,
+       0.8291,
+       0.8291,
+       0.8291,
+       0.8291,
+       0.8295,
+       0.8311,
+       0.8319,
+       0.8319,
+       0.8315,
+       0.8315,
+       0.8319,
+       0.8323,
+       0.8319,
+       0.8315,
+       0.8315,
+       0.8315,
+       0.8311,
+       0.8311,
+       0.8311,
+       0.8307,
+       0.8307,
+       0.8307,
+       0.8302,
+       0.8298,
+       0.8298,
+       0.8298,
+       0.8298,
+       0.8294,
+       0.8294,
+       0.8298,
+       0.829,
+       0.8286,
        0.8282,
        0.8282,
        0.8282,
        0.8278,
-       0.8282,
-       0.8282,
-       0.8282,
-       0.8278,
-       0.8278,
-       0.8278,
-       0.8278,
-       0.8282,
-       0.8278,
-       0.8274,
-       0.8274,
        0.8269,
        0.8265,
-       0.8261,
-       0.8257,
-       0.8253,
-       0.8257,
-       0.8253,
-       0.8241,
-       0.8237,
+       0.8249,
+       0.8245,
+       0.8245,
        0.8232,
-       0.8228,
+       0.8224,
        0.822,
-       0.822,
+       0.8216,
+       0.8216,
+       0.8216,
        0.8212,
-       0.8208,
+       0.8204,
        0.8199,
        0.8199,
-       0.8195,
-       0.8195,
-       0.8191,
-       0.8175,
-       0.8166,
+       0.8179,
+       0.8171,
        0.8162,
-       0.8153,
-       0.8137,
+       0.8149,
+       0.8133,
        0.8124,
        0.8124,
        0.8112,
-       0.8104,
-       0.8083,
-       0.8054,
-       0.803,
-       0.7976,
-       0.7957,
-       0.7966,
-       0.7957,
+       0.8096,
+       0.8071,
+       0.805,
+       0.8009,
        0.7923,
-       0.788,
-       0.786,
-       0.7827,
-       0.784,
-       0.7836,
-       0.7839,
-       0.7831,
-       0.7815,
-       0.781,
-       0.7804,
-       0.7786,
-       0.7766,
-       0.7739,
-       0.7722,
-       0.7695,
-       0.7661,
-       0.7652,
-       0.7652,
-       0.7641,
-       0.7604,
-       0.7615,
-       0.7586,
-       0.7607,
-       0.7625,
-       0.7626,
-       0.7628,
-       0.7643,
-       0.7624,
-       0.7629,
-       0.7617,
-       0.761,
-       0.7597,
-       0.7567,
-       0.7542,
-       0.7532,
-       0.7525,
+       0.7931,
+       0.7927,
+       0.7897,
+       0.7897,
+       0.7835,
+       0.782,
+       0.7781,
+       0.7776,
+       0.7757,
+       0.776,
+       0.7779,
+       0.7754,
+       0.773,
+       0.7719,
+       0.7714,
+       0.7685,
+       0.7653,
+       0.7645,
+       0.7618,
+       0.7588,
+       0.7574,
+       0.7583,
+       0.7572,
+       0.7555,
        0.7535,
-       0.7516,
-       0.7518,
-       0.7518,
-       0.7492,
-       0.7465,
-       0.7447,
-       0.7407,
-       0.7372,
-       0.736,
-       0.7351,
-       0.7336,
-       0.7335,
-       0.7294,
-       0.7317,
-       0.7291,
-       0.7281,
-       0.7308,
-       0.7323,
-       0.7342,
-       0.7339,
-       0.7313,
-       0.7314,
-       0.7299,
-       0.7281,
-       0.7272,
-       0.7282,
-       0.7283,
-       0.7271,
-       0.7272,
-       0.7271,
-       0.726,
-       0.7262,
-       0.7244,
-       0.725,
-       0.7242,
-       0.726,
-       0.7258,
-       0.7253,
+       0.7525,
+       0.7537,
+       0.7564,
+       0.755,
+       0.7541,
+       0.7566,
+       0.7552,
+       0.753,
+       0.7503,
+       0.7489,
+       0.7482,
+       0.7456,
+       0.7426,
+       0.7409,
+       0.7408,
+       0.7411,
+       0.7387,
+       0.7388,
+       0.7393,
+       0.7378,
+       0.7345,
+       0.7316,
+       0.7276,
+       0.7263,
        0.7239,
-       0.7252,
-       0.726,
-       0.7244,
-       0.7237,
-       0.7233,
-       0.723,
-       0.7212,
-       0.7201,
-       0.72,
-       0.7211,
-       0.7202,
-       0.7197,
-       0.7203,
-       0.7231,
-       0.7239,
-       0.721,
-       0.7223,
-       0.7209,
-       0.7199,
-       0.7203
+       0.7235,
+       0.7225,
+       0.7208,
+       0.7167,
+       0.7178,
+       0.7168,
+       0.7169,
+       0.7173,
+       0.7158,
+       0.7171,
+       0.7156,
+       0.7153,
+       0.7163,
+       0.7149,
+       0.7148,
+       0.715,
+       0.7177,
+       0.7172,
+       0.7171,
+       0.7178,
+       0.7176,
+       0.7154,
+       0.7132,
+       0.7125,
+       0.7137,
+       0.7116,
+       0.7122,
+       0.7114,
+       0.7102,
+       0.7107,
+       0.7095,
+       0.709,
+       0.7081,
+       0.7073,
+       0.7093,
+       0.7071,
+       0.7041,
+       0.7036,
+       0.7034,
+       0.7021,
+       0.7011,
+       0.7011,
+       0.7005,
+       0.7026,
+       0.7033,
+       0.7028,
+       0.7047,
+       0.7026,
+       0.7022,
+       0.7032
       ],
-      "median_start_offset_aa": 19,
-      "n_tp_calls": 1291
+      "median_start_offset_aa": 20,
+      "n_tp_calls": 1568
      },
-     "cpu_h_per_1000": 0.02523565649818155,
+     "cpu_h_per_1000": 0.07867587025903659,
      "gpu_h_per_1000": 0,
-     "cost_usd_est": 0.0011261411712313516,
+     "cost_usd_est": 0.0035109107103095077,
      "db_cpu_h_per_db": 0.0012698412698412698
     }
    ],
@@ -1631,17 +1631,17 @@
     "tools": [
      "kmerseek",
      "hmmer3_phmmer",
-     "mmseqs2_seqseq"
+     "mmseqs2_iterative"
     ],
     "combos": {
-     "100": 71,
-     "101": 4,
-     "110": 124,
-     "111": 144,
-     "000": 856,
-     "011": 883,
-     "010": 289,
-     "001": 64
+     "100": 69,
+     "101": 6,
+     "110": 85,
+     "111": 183,
+     "000": 798,
+     "011": 972,
+     "001": 122,
+     "010": 200
     }
    },
    "curve": [
@@ -1650,79 +1650,79 @@
      "setting": "hp_thomas_dill2_k33_lcFalse",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
+       "mya": 6.45,
        "fmax": 0.40114908927250525
       },
       {
+       "relative": "mouse",
+       "mya": 83.51,
+       "fmax": 0.4340399973161837
+      },
+      {
        "relative": "rnorvegicus",
-       "mya": 90,
+       "mya": 83.51,
        "fmax": 0.389910018024893
       },
       {
        "relative": "btaurus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.3844639366121437
       },
       {
        "relative": "clupus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.07774353623075807
       },
       {
-       "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.4340399973161837
-      },
-      {
        "relative": "mdomestica",
-       "mya": 160,
+       "mya": 159.16,
        "fmax": 0.37533908607891237
       },
       {
        "relative": "chicken",
-       "mya": 300,
+       "mya": 318.82,
        "fmax": 0.18491223788684122
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
+       "mya": 352.08,
        "fmax": 0.1566349515557212
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
+       "mya": 435.13,
        "fmax": 0.18444735032057227
       },
       {
        "relative": "ciona",
-       "mya": 550,
+       "mya": 600.96,
        "fmax": 0.03708004055046179
       },
       {
        "relative": "fly",
-       "mya": 600,
+       "mya": 692.17,
        "fmax": 0.050844773560621274
       },
       {
        "relative": "worm",
-       "mya": 650,
+       "mya": 692.17,
        "fmax": 0.05237105413214039
       },
       {
        "relative": "yeast",
-       "mya": 900,
+       "mya": 1164.3,
        "fmax": 0.001990049751243781
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
+       "mya": 1515.83,
        "fmax": 0.004789859855107705
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0
       }
      ]
     },
@@ -1731,160 +1731,160 @@
      "setting": "default",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0.11886732942255351
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
+       "mya": 6.45,
        "fmax": 0.3136661577873329
       },
       {
+       "relative": "mouse",
+       "mya": 83.51,
+       "fmax": 0.32067312141070353
+      },
+      {
        "relative": "rnorvegicus",
-       "mya": 90,
+       "mya": 83.51,
        "fmax": 0.32551539144492686
       },
       {
        "relative": "btaurus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.3104945685793282
       },
       {
        "relative": "clupus",
-       "mya": 95,
+       "mya": 89.48,
        "fmax": 0.27315278615416777
       },
       {
-       "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.32067312141070353
-      },
-      {
        "relative": "mdomestica",
-       "mya": 160,
+       "mya": 159.16,
        "fmax": 0.3251116440547209
       },
       {
        "relative": "chicken",
-       "mya": 300,
+       "mya": 318.82,
        "fmax": 0.3335453036153417
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
+       "mya": 352.08,
        "fmax": 0.36873253926867994
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
+       "mya": 435.13,
        "fmax": 0.3330610188863855
       },
       {
        "relative": "ciona",
-       "mya": 550,
+       "mya": 600.96,
        "fmax": 0.3205750942307098
       },
       {
        "relative": "fly",
-       "mya": 600,
+       "mya": 692.17,
        "fmax": 0.3361256797007681
       },
       {
        "relative": "worm",
-       "mya": 650,
+       "mya": 692.17,
        "fmax": 0.3143294605901872
       },
       {
        "relative": "yeast",
-       "mya": 900,
+       "mya": 1164.3,
        "fmax": 0.2675662106448453
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
+       "mya": 1515.83,
        "fmax": 0.23642526145380457
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0.11886732942255351
       }
      ]
     },
     {
-     "tool": "mmseqs2_seqseq",
+     "tool": "mmseqs2_iterative",
      "setting": "s7",
      "points": [
       {
+       "relative": "ecoli",
+       "mya": null,
+       "fmax": 0.10396023441745252
+      },
+      {
        "relative": "ptroglodytes",
-       "mya": 6,
-       "fmax": 0.2992904869110699
-      },
-      {
-       "relative": "rnorvegicus",
-       "mya": 90,
-       "fmax": 0.31330547776885725
-      },
-      {
-       "relative": "btaurus",
-       "mya": 95,
-       "fmax": 0.29928940524167186
-      },
-      {
-       "relative": "clupus",
-       "mya": 95,
-       "fmax": 0.25478056592734377
+       "mya": 6.45,
+       "fmax": 0.30105637481300707
       },
       {
        "relative": "mouse",
-       "mya": 100,
-       "fmax": 0.3103583800362423
+       "mya": 83.51,
+       "fmax": 0.3165282069932801
+      },
+      {
+       "relative": "rnorvegicus",
+       "mya": 83.51,
+       "fmax": 0.3107565181903354
+      },
+      {
+       "relative": "btaurus",
+       "mya": 89.48,
+       "fmax": 0.3033285005763616
+      },
+      {
+       "relative": "clupus",
+       "mya": 89.48,
+       "fmax": 0.27871038816135574
       },
       {
        "relative": "mdomestica",
-       "mya": 160,
-       "fmax": 0.31382393277941223
+       "mya": 159.16,
+       "fmax": 0.3117102435265398
       },
       {
        "relative": "chicken",
-       "mya": 300,
-       "fmax": 0.3207324147627103
+       "mya": 318.82,
+       "fmax": 0.3300728023034689
       },
       {
        "relative": "xtropicalis",
-       "mya": 350,
-       "fmax": 0.33192977024542786
+       "mya": 352.08,
+       "fmax": 0.34670093274403063
       },
       {
        "relative": "zebrafish",
-       "mya": 430,
-       "fmax": 0.327218117734176
+       "mya": 435.13,
+       "fmax": 0.3242333985424603
       },
       {
        "relative": "ciona",
-       "mya": 550,
-       "fmax": 0.3223612333405603
+       "mya": 600.96,
+       "fmax": 0.32101163033306485
       },
       {
        "relative": "fly",
-       "mya": 600,
-       "fmax": 0.3320899846222801
+       "mya": 692.17,
+       "fmax": 0.3254091437251392
       },
       {
        "relative": "worm",
-       "mya": 650,
-       "fmax": 0.3086845700690799
+       "mya": 692.17,
+       "fmax": 0.29893693646469743
       },
       {
        "relative": "yeast",
-       "mya": 900,
-       "fmax": 0.2579634985425519
+       "mya": 1164.3,
+       "fmax": 0.25988935842918226
       },
       {
        "relative": "arabidopsis",
-       "mya": 1500,
-       "fmax": 0.24459596710575404
-      },
-      {
-       "relative": "ecoli",
-       "mya": 2000,
-       "fmax": 0.11081753447144564
+       "mya": 1515.83,
+       "fmax": 0.24173722247499785
       }
      ]
     }
@@ -1975,7 +1975,7 @@
     }
    ],
    "expected_label_fraction_est": null,
-   "command": "# Nathusius's pipistrelle (Pipistrellus nathusii)\n# UniProt reference proteome UP001314169, 18,936 proteins\ncurl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP001314169&format=fasta&compressed=true'\n# All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Bos taurus).\n# Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs.\ncurl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz'\n# nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome.\n# Version 1.1.0 has no option to run kmerseek; phmmer; MMseqs2; their commands follow.\nprintf 'id,fasta\\npipistrellus_nathusii,proteome.fasta.gz\\n' > samplesheet.csv\nnextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results\n\n# -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off\n# that gives each tool its best Fmax; filter the output before you take labels from it.\n\n# kmerseek: its database needs build steps this page does not write out.\n# The command the board ran is on its tool card: tools/kmerseek.html\n\n# phmmer (quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c))\ngunzip -kf proteome.fasta.gz swissprot.fasta.gz\nphmmer --domtblout phmmer.domtbl --noali -E 10.0 --cpu 8 proteome.fasta swissprot.fasta > /dev/null\n\n# MMseqs2, sensitivity 7, one round (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef))\nmmseqs createdb proteome.fasta.gz q_db\nmmseqs createdb swissprot.fasta.gz t_db\nmmseqs search q_db t_db result_s7 tmp_s7 --threads 16 -s 7 --max-seqs 1000 -e 10.0\nmmseqs convertalis q_db t_db result_s7 mmseqs2_s7.m8"
+   "command": "# Nathusius's pipistrelle (Pipistrellus nathusii)\n# UniProt reference proteome UP001314169, 18,936 proteins\ncurl -L -o proteome.fasta.gz 'https://rest.uniprot.org/uniprotkb/stream?query=proteome%3AUP001314169&format=fasta&compressed=true'\n# All reviewed Swiss-Prot proteins, the source of the labels (they include those of the nearest reviewed relative, Bos taurus).\n# Swiss-Prot has about 575,000 proteins; the board measured cost against one relative's proteome of about 20,000, so expect longer runs.\ncurl -L -o swissprot.fasta.gz 'https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz'\n# nf-core/proteinannotator 1.1.0: Pfam, FunFam and InterProScan on your proteome.\n# Version 1.1.0 has no option to run kmerseek; phmmer; MMseqs2, three rounds; their commands follow.\nprintf 'id,fasta\\npipistrellus_nathusii,proteome.fasta.gz\\n' > samplesheet.csv\nnextflow run nf-core/proteinannotator -r 1.1.0 -profile docker --input samplesheet.csv --outdir results\n\n# -E 10.0 keeps every hit, as on the board. The board's numbers count calls above the score cut-off\n# that gives each tool its best Fmax; filter the output before you take labels from it.\n\n# kmerseek: its database needs build steps this page does not write out.\n# The command the board ran is on its tool card: tools/kmerseek.html\n\n# phmmer (quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c))\ngunzip -kf proteome.fasta.gz swissprot.fasta.gz\nphmmer --domtblout phmmer.domtbl --noali -E 10.0 --cpu 8 proteome.fasta swissprot.fasta > /dev/null\n\n# MMseqs2, sensitivity 7, three rounds (quay.io/biocontainers/mmseqs2:18.8cc5c--hd6d6fdc_0 (sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef))\nmmseqs createdb proteome.fasta.gz q_db\nmmseqs createdb swissprot.fasta.gz t_db\nmmseqs search q_db t_db result_s7_n3 tmp_s7_n3 --threads 16 -s 7 --num-iterations 3 --max-seqs 1000 -e 10.0\nmmseqs convertalis q_db t_db result_s7_n3 mmseqs2_s7_3rounds.m8"
   }
  }
 }
