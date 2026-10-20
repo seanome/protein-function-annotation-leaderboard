@@ -27,12 +27,12 @@
 <p>Amino-acid letters, one query protein against each protein of the relative, scored with a substitution matrix the way BLAST does but with HMMER's model of insertions and deletions.</p>
 <h2>Will it work for you?</h2>
 <ol>
-<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.252 (n = 563), 60–100% 0.308 (n = 1,289). If no, 20–30% 0.359 (n = 93), 30–40% 0.199 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting default options; subsets with at least 30 true instances.)</li>
-<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.250 (n = 963), 121–250 aa 0.329 (n = 504), 251 aa or more 0.477 (n = 277). If no, 16–30 aa 0.042 (n = 271), 31–60 aa 0.095 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting default options.)</li>
+<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.252 (n = 563), 60–100% 0.308 (n = 1,289). If no, 20–30% 0.359 (n = 93), 30–40% 0.199 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting default options; subsets with at least 30 true instances.)</li>
+<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.250 (n = 963), 121–250 aa 0.329 (n = 504), 251 aa or more 0.477 (n = 277). If no, 16–30 aa 0.042 (n = 271), 31–60 aa 0.095 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting default options.)</li>
 <li><strong>Can you spend about 0.417 core-hours per 1,000 proteins for each relative you search?</strong> That is the measured mean per relative; see "Cost per 1,000 queries" below.</li>
 </ol>
 <h2>Best Fmax and cost</h2>
-<p>Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is default options (<code>default</code>): Fmax 0.333 over 2,435 true instances. Searching costs about $0.0186 per 1,000 queries (0.417 core-hours), for each relative searched.</p>
+<p>Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is default options (<code>default</code>): Fmax 0.333 over 2,435 true instances. Searching costs about $0.0186 per 1,000 queries (0.417 core-hours), for each relative searched.</p>
 <h2>Where it is strong and weak</h2>
 <p>Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.</p>
 <p>Where it is closest to, or furthest ahead of, the best other tool:</p>
@@ -102,11 +102,11 @@ Building its databases for setting <code>default</code>: not measured (no task r
     UP000005640_9606.fasta UP000000437_7955.fasta
 </code></pre>
 <p>Query: 998 human proteins. Target: the zebrafish proteome.</p>
-<p>Tool id <code>hmmer3_phmmer</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>4a4b1171</code>.</p></div>
+<p>Tool id <code>hmmer3_phmmer</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>7eca428b</code>.</p></div>
 <p><a href="index.html">All tool cards</a> · <a href="hmmer3_phmmer.md">this card as Markdown</a> · <a href="hmmer3_phmmer.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="hmmer3_phmmer.html.json">hmmer3_phmmer.html.json</a></p>
 </div></footer>
