@@ -1,0 +1,4 @@
+{
+ "note": "Where Copy-command clicks are counted. null: no counter service is set up, so assets/counts.js sends nothing and the Why page says the copies are not counted. A static GitHub Pages site cannot store a count itself; setting this needs a service outside GitHub (see README.md, 'Usage counts').",
+ "endpoint": null
+}

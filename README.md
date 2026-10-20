@@ -60,3 +60,30 @@ tests are recomputed from `data/results.parquet`, record tests must quote the ex
 inventory (`data/experiments.json`, from seanome/2024-kmerseek-analysis PR 97) exactly. The
 `claims` GitHub Action runs `python scripts/claims.py --check` on every push; the build writes
 `docs/badges/claims-<tool>.svg`.
+
+## Contributions
+
+[CONTRIBUTING.md](CONTRIBUTING.md) has both ways in. In short:
+
+- `data/query_sets/<name>/`: the fixed query sets a tool author runs on, with their answers
+  (`scripts/make_query_set.py` copied them from the region benchmark's midi-plus run).
+- `submissions/<name>/`: one folder per tool submission. `.github/workflows/score-submission.yml`
+  scores a pull request that adds one, with `scripts/score_submission.py`, and posts the rows.
+- `scorer/`: byte-for-byte copies of the leaderboard's scorer; `tests/check_scorer.py` checks
+  their sha256 against `scorer/SOURCE.json`.
+- `/contribute/truth/` (`scripts/contribute_pages.py`, `docs/assets/truth-form.js`): the
+  wet-lab form. It opens a filled-in GitHub issue; `scripts/truth_contributed.py` turns accepted
+  issues into `data/truth_contributed.tsv` ([docs/curation.md](docs/curation.md)).
+- `docs/assets/counts.js`: the contributed-rows count for the organism page, and the Copy
+  command counter for the organism and Why pages.
+
+### Usage counts
+
+The Copy command counter needs somewhere to store a number, and a GitHub Pages site cannot
+store anything: a page can only write to GitHub with a token, and a token in a public page is
+public. So the counter is off. `docs/data/counter.json` has `"endpoint": null`, the button sends
+nothing, and the Why page says copies are not counted. Turning it on needs a small service
+outside GitHub that keeps one number per (organism, tool set) and nothing about the visitor.
+Setting `endpoint` to that service's address turns the counter on; `counts.js` then sends one
+request per click, with no cookies, no referrer and no identifier, and reads the totals back
+from `<endpoint>/counts`.

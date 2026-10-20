@@ -395,7 +395,8 @@ def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
 NAV = [("index.html", "Leaderboard", "leaderboard"), ("tools/index.html", "Tool cards", "tools"),
        ("cost.html", "Compare two columns", "cost"), ("explainers.html", "How the scores work", "explainers"),
        ("pileup.html", "Region pile-up", "pileup"), ("methods.html", "Methods", "methods")]
-NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage")]
+NAV_MORE = [("claims.html", "Claims", "claims"), ("coverage.html", "Coverage", "coverage"),
+            ("contribute/index.html", "Contribute", "contribute")]
 
 
 def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
@@ -2327,6 +2328,8 @@ def main() -> None:
     (out / "claims.html").write_text(page_claims(src, cards))
     (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, comp, claims_by_tool))
     (out / "claims-schema.html").write_text(page_claims_schema(src, cards, resolver.inv_src))
+    import contribute_pages
+    contribute_pages.write(out, src, layout)
     for t in sorted(tools_used):
         nums = card_numbers(t, res, comp)
         md = card_markdown(t, nums, src)

@@ -1,0 +1,219 @@
+{
+ "name": "human_midi_plus",
+ "description": "human proteins from chromosome 6 plus the MHC partners on other chromosomes (B2M, CD1A-E, MR1, KIR and LILR genes), a test subset of the proteome",
+ "n_queries": 998,
+ "experiment_on_the_leaderboard": "qfo_region_midi_plus",
+ "written_by": "seanome/2024-kmerseek-analysis commit a47ea25 (HEAD of the Sherlock clone when the midi-plus run started)",
+ "truth_versions": {
+  "pfam": "Pfam 38.2",
+  "swissprot": "uniprot_sprot.dat (release not recorded)"
+ },
+ "relatives_from": "https://ftp.ebi.ac.uk/pub/databases/reference_proteomes/previous_releases/qfo_release-2020_04_with_updated_UP000008143/QfO_release_2020_04_with_updated_UP000008143.tar.gz",
+ "scoring": {
+  "min_overlap": 0.5,
+  "strict_iou": 0.8,
+  "dedup_transfer_modes": "off,on"
+ },
+ "files": {
+  "queries.fasta": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/qfo/Eukaryota/UP000005640_9606.fasta",
+   "sha256": "04965fb6a2b0f578dbe2c31dc97a5de4f27c5bc990286fd01858eb0ebdb053a7"
+  },
+  "covariates.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/human_query_covariates.parquet",
+   "sha256": "0426136476103ee0e818c81fe4a18f99899044262870717dac8738ffb3cd8ef0"
+  },
+  "truth/pfam/human_truth.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/human_domain_truth.parquet",
+   "sha256": "b963d8865daab9c0a1b527398aef0da9d1e3b32efd1d612c20e95914d7b69e5d"
+  },
+  "truth/swissprot/human_truth.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/human_swissprot_truth.parquet",
+   "sha256": "01ff91976757fe01203db8e0062cdd3f8da5d051d88c51f160570ff2668ecd62"
+  },
+  "query_set_summary.json": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/midi_testset_summary.json",
+   "sha256": "5f2702f88c207a3b9de5b0a52ec7b22f7c7e04cd6af78f78927b3ace875ad079"
+  },
+  "truth/pfam/maps/ptroglodytes.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/ptroglodytes_domain_map.parquet",
+   "sha256": "6a9de2d071bf0727e7cb265172c020f838861ce150149653863254f6f23a567e"
+  },
+  "truth/swissprot/maps/ptroglodytes.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/ptroglodytes_domain_map.parquet",
+   "sha256": "46a47348083dffbb4f37ba3ed4f82d795e7ebdcaa7b710cd4bd471ba971d4ad8"
+  },
+  "identity/ptroglodytes.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/ptroglodytes.domain_identity.parquet",
+   "sha256": "ca63ffc11a91817ab28af2b79bd6ae45ad84c7b204d36037ce547885b1fa3964"
+  },
+  "truth/pfam/maps/rnorvegicus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/rnorvegicus_domain_map.parquet",
+   "sha256": "b89b162f7d3721eae7bf2af888fa52f22d580eb21f9b340f72315f267507c34f"
+  },
+  "truth/swissprot/maps/rnorvegicus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/rnorvegicus_domain_map.parquet",
+   "sha256": "a6f918a8b82c88706e308c49ffa9121f382806262d823f77baa422631e6c881b"
+  },
+  "identity/rnorvegicus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/rnorvegicus.domain_identity.parquet",
+   "sha256": "b96801713b806cb404077f52d9f4ee77adadc66817ce7a925c28847a440b2142"
+  },
+  "truth/pfam/maps/btaurus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/btaurus_domain_map.parquet",
+   "sha256": "7e994e3678387b3f4f640d32a6dac6eee117cdff7d3ee3240eeb52fe1425984d"
+  },
+  "truth/swissprot/maps/btaurus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/btaurus_domain_map.parquet",
+   "sha256": "1eaab9dcd6dc8d03e45fc538d250df55cdacc6a7ef469f46a10d652dd96f93fa"
+  },
+  "identity/btaurus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/btaurus.domain_identity.parquet",
+   "sha256": "71ecdfdca5652e73b3a9464257bedfb6a3648e635f8d9f281c6b1c6e05d1bd88"
+  },
+  "truth/pfam/maps/clupus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/clupus_domain_map.parquet",
+   "sha256": "ddc0ce14a5f120922bd2e055064602f0f842d1e6ae5cee4b1080a13834dd189c"
+  },
+  "truth/swissprot/maps/clupus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/clupus_domain_map.parquet",
+   "sha256": "d1f30690e45374a09df213742cd4c834fe80bbdb4449e8bd6af66cd163bc1b9e"
+  },
+  "identity/clupus.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/clupus.domain_identity.parquet",
+   "sha256": "17e7bd9cf73f877098fa4653947739574956bef91470edb20fed2b7f75846663"
+  },
+  "truth/pfam/maps/mouse.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/mouse_domain_map.parquet",
+   "sha256": "9a258627024d4e161051562a3ccaca28af3e665e745d67fbbc99b6bb6711fab1"
+  },
+  "truth/swissprot/maps/mouse.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/mouse_domain_map.parquet",
+   "sha256": "a5dcb435057fc73cf68a544e1737e89a6f52974066d7cc5451eca26fceb05f2a"
+  },
+  "identity/mouse.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/mouse.domain_identity.parquet",
+   "sha256": "f5336554db6bf68f5048f69a609011dce9326b079ec05c45b7332121c86807de"
+  },
+  "truth/pfam/maps/mdomestica.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/mdomestica_domain_map.parquet",
+   "sha256": "87ccda3d7952b840eb588e37cd955c528d9c123522579cc5eedd0d483b12fdf0"
+  },
+  "truth/swissprot/maps/mdomestica.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/mdomestica_domain_map.parquet",
+   "sha256": "5e017abf93ce90112a7cfda1169010a6ce47c43d8c1cdcdaf8c9ab56116d51f8"
+  },
+  "identity/mdomestica.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/mdomestica.domain_identity.parquet",
+   "sha256": "04149864321b720dcfb166735a4dc89f2561a059d27d26236e6292c099a91893"
+  },
+  "truth/pfam/maps/chicken.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/chicken_domain_map.parquet",
+   "sha256": "a9054268024984ac91b1389dc76ecae9088fff77adcbd369f842b72a765d971b"
+  },
+  "truth/swissprot/maps/chicken.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/chicken_domain_map.parquet",
+   "sha256": "8f3f233da2c03149a24548942fcfc7d627336e79b98351a4679b0373ea753c9d"
+  },
+  "identity/chicken.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/chicken.domain_identity.parquet",
+   "sha256": "0dff6e3233c277d8b24aa0e32d9d982a10d679e015bff20206142d88f00b3ec5"
+  },
+  "truth/pfam/maps/xtropicalis.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/xtropicalis_domain_map.parquet",
+   "sha256": "5ff75d6b2230ed41d05b3db92ad2e0e476d6c35db755dccb729ff6cb131482cb"
+  },
+  "truth/swissprot/maps/xtropicalis.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/xtropicalis_domain_map.parquet",
+   "sha256": "6bded469846305e0844ae75fb93a4aba376936f83f069e10eea9e824831fe08e"
+  },
+  "identity/xtropicalis.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/xtropicalis.domain_identity.parquet",
+   "sha256": "c50674757270ab09e2ff0aff712754822456635b96b011116cf2e1b6e16fe36e"
+  },
+  "truth/pfam/maps/zebrafish.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/zebrafish_domain_map.parquet",
+   "sha256": "e01876098b39c54b1050b24142980e6c569808a670b97b334720297849539810"
+  },
+  "truth/swissprot/maps/zebrafish.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/zebrafish_domain_map.parquet",
+   "sha256": "b19ba7912e09dfee13e2786c60ecd824ee291758a03eb33b17edb565ecbe5b4d"
+  },
+  "identity/zebrafish.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/zebrafish.domain_identity.parquet",
+   "sha256": "347c6bd277b8a082dc4e71a8893c7c19d7c0ae7e76ad5037ed2fb8e0f6dfedb5"
+  },
+  "truth/pfam/maps/ciona.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/ciona_domain_map.parquet",
+   "sha256": "9f0e878848d14d49a4329c89a9a9c1374e5d591dc15e5e43bebf7a828a92733c"
+  },
+  "truth/swissprot/maps/ciona.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/ciona_domain_map.parquet",
+   "sha256": "8b39f0a2f8f9e733a82ff725d7c2729f96e0b3a8d7ce1ee4b4354a02ccfbf137"
+  },
+  "identity/ciona.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/ciona.domain_identity.parquet",
+   "sha256": "be8e41ee138be14fcdca4f88fe8613754a7a6e6d50780d913d259a350a128c7c"
+  },
+  "truth/pfam/maps/fly.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/fly_domain_map.parquet",
+   "sha256": "ef14cff49c02d2c06a54ff637ec06f7150d8a7f250475b4f49c1bdf6f4ce9954"
+  },
+  "truth/swissprot/maps/fly.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/fly_domain_map.parquet",
+   "sha256": "73c62a0a78df04dae6bed5cff2d55ca8875c7b9c4e2e9036e14b3cfef4d71c3d"
+  },
+  "identity/fly.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/fly.domain_identity.parquet",
+   "sha256": "4aa45a27c3639490d332f610b645c761c5592ec650ac013abba29118f3a6e48e"
+  },
+  "truth/pfam/maps/worm.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/worm_domain_map.parquet",
+   "sha256": "4cc6ce4d7d2719e5f6a00595ba07985f5f39966a83aaa52bdff7838e8c3f0f0c"
+  },
+  "truth/swissprot/maps/worm.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/worm_domain_map.parquet",
+   "sha256": "9050676f997d82610de09606ae000308fd70758a890fb81414d2121e0488f4e1"
+  },
+  "identity/worm.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/worm.domain_identity.parquet",
+   "sha256": "4c97fe81c6375762d2373d4cf7fc32228daa8832bd925d4ea0ff0f68f8c34c43"
+  },
+  "truth/pfam/maps/yeast.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/yeast_domain_map.parquet",
+   "sha256": "49220569d08ce40dfde8be39adf1c165224c05743290a74956645b7c9ceb7197"
+  },
+  "truth/swissprot/maps/yeast.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/yeast_domain_map.parquet",
+   "sha256": "a8070138b33ab21e888e9d55d6623a9953fbf7721e57242807cd8ca32004b9e8"
+  },
+  "identity/yeast.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/yeast.domain_identity.parquet",
+   "sha256": "258d1b4c616d6885fb4f97a25d746fe5cac07edc1f5210cb999beff5c1637902"
+  },
+  "truth/pfam/maps/arabidopsis.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/arabidopsis_domain_map.parquet",
+   "sha256": "915a4953e8320d50d5142ce3617cd38e593669c9d2c5549c61a17d33a26fc1a8"
+  },
+  "truth/swissprot/maps/arabidopsis.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/arabidopsis_domain_map.parquet",
+   "sha256": "feff37a4a762579e2f9dd0615cb555567dd111cd21074dbc52b6c4c1bb1acb6c"
+  },
+  "identity/arabidopsis.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/arabidopsis.domain_identity.parquet",
+   "sha256": "7e4dfc7e10079d69eb689f78b95755b2419290cba6a0bb760b7b6b577e18da4f"
+  },
+  "truth/pfam/maps/ecoli.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth/ecoli_domain_map.parquet",
+   "sha256": "e86869070e2fe8656c26a9fa518b097bdea9e679a85733eb0df503f0016206d1"
+  },
+  "truth/swissprot/maps/ecoli.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/truth_swissprot/ecoli_domain_map.parquet",
+   "sha256": "fa83fcd11483a54950d0cb8f7a3834097147915da723f61848f6f27ae3f2a968"
+  },
+  "identity/ecoli.parquet": {
+   "from": "/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/results/identity/ecoli.domain_identity.parquet",
+   "sha256": "114ff9b7c1b5d623883a1e79427ca6e845a384b83a599a9289a95cfb514e57bb"
+  }
+ }
+}
