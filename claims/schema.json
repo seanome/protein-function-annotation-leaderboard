@@ -21,6 +21,16 @@
     "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
     "claim": {"type": "string", "description": "The claim, as a reader would say it."},
     "kill": {"type": "string", "description": "The result that would retire the claim."},
+    "author_claim": {"type": "object", "required": ["quote", "url", "text_url", "fetched", "sha256"],
+     "additionalProperties": false,
+     "description": "The tool authors' own words for this claim, copied from their paper, README or website. Written by scripts/fetch_quote.py, which fetches text_url and refuses a quote that is not on the page; scripts/claims.py fails when the quote no longer matches sha256.",
+     "properties": {
+      "quote": {"type": "string", "description": "Verbatim, under 15 words."},
+      "url": {"type": "string", "pattern": "^https://", "description": "The page a reader opens."},
+      "text_url": {"type": "string", "pattern": "^https?://", "description": "The page as fetched (a raw README, for example)."},
+      "fetched": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+      "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "sha256 of the quote with runs of whitespace collapsed to one space."}
+     }},
     "scope": {"type": "string", "description": "Data, settings and truth set the test runs on."},
     "test": {"$ref": "#/$defs/test"},
     "context": {"type": "array", "items": {"type": "object", "required": ["label", "test"],

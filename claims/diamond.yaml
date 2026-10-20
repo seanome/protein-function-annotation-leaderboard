@@ -1,0 +1,25 @@
+# Claims by DIAMOND's authors, each with the test on this site that would retire it.
+# The quote is the authors' own words, written by scripts/fetch_quote.py; the status comes
+# from the test (scripts/claims.py), never from this file. Schema: claims/schema.json.
+
+tool: diamond
+title: DIAMOND
+updated: "2026-10-16"
+
+claims:
+  - id: blast-speed
+    claim: DIAMOND aligns proteins 100 to 10,000 times faster than BLAST
+    author_claim:
+      quote: Pairwise alignment of proteins and translated DNA at 100x-10,000x speed of BLAST.
+      url: https://github.com/bbuchfink/diamond
+      text_url: https://raw.githubusercontent.com/bbuchfink/diamond/master/README.md
+      fetched: '2026-10-16'
+      sha256: db7675e41a9de99f870e8435ca81169fcfb85ff42c717060e086209e7a3aceb1
+    kill: >-
+      DIAMOND's CPU-hours per 1,000 queries are more than 1/100 of BLASTP's, on the same
+      queries, relatives and machine
+    scope: >-
+      The 998 human queries against the 15 relatives, both tools run by the host on Sherlock
+      with their traces. Needs DIAMOND rows (the DIAMOND module, branch
+      olgabot/annotator-tools) and a BLASTP module, which this site does not have yet.
+    test: {kind: not_run, reason: "DIAMOND and BLASTP have not been run on the QfO relatives"}

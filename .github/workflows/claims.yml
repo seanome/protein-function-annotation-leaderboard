@@ -1,4 +1,5 @@
-# Checks every claims/<tool>.yaml: the schema, each quoted inventory value against
+# Checks every claims/<tool>.yaml: the schema, each author quote against the sha256 recorded
+# when it was fetched, each quoted inventory value against
 # data/experiments.json, and each table test against data/results.parquet.
 # Also rebuilds the site from data/ and fails if docs/ differs from what is committed,
 # so the published pages always match the tables and the code that built them.
@@ -17,6 +18,19 @@ jobs:
       - run: pip install polars==1.44.2 pyarrow==26.0.0 pyyaml==6.0.2 jsonschema==4.23.0
       - run: python scripts/claims.py --data data --check
       - run: python tests/check_claims.py
+  release-table:
+    # The release's results.parquet, built from data/, must pass schema/results_row.json, and
+    # the validator and the release dry run must behave (tests/check_release.py).
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install polars==1.44.2 pyarrow==26.0.0 Markdown==3.11.1 pyyaml==6.0.2 jsonschema==4.23.0 numpy==2.3.5
+      - run: python scripts/release_rows.py --data data --out build/release/results.parquet
+      - run: python scripts/validate_rows.py build/release/results.parquet
+      - run: python tests/check_release.py
   rebuild:
     runs-on: ubuntu-24.04
     steps:

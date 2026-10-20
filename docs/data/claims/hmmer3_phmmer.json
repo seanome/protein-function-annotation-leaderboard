@@ -1,0 +1,42 @@
+{
+ "tool": "hmmer3_phmmer",
+ "title": "phmmer (HMMER 3)",
+ "updated": "2026-10-16",
+ "file": "claims/hmmer3_phmmer.yaml",
+ "claims": [
+  {
+   "id": "remote-homologs",
+   "claim": "phmmer finds distant homologs at least as well as a fast sequence search",
+   "kill": "phmmer's Fmax is more than 0.05 below MMseqs2's on Pfam domains at 20 to 30% identity, on any relative with at least 30 such domains",
+   "scope": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict. The identity bins come from an MMseqs2 search (-s 7.5) between the domains, so a pair MMseqs2 cannot align is in no bin; this favours MMseqs2 in this comparison.",
+   "status": "retired",
+   "verdict": "−0.137 to +0.057 across 10 of 15 (5 with fewer than 30 truth regions left out: btaurus, mdomestica, mouse, ptroglodytes, rnorvegicus); furthest: ecoli −0.137",
+   "date": null,
+   "source": "seanome/2024-kmerseek-analysis@7eca428b results.parquet",
+   "context": [],
+   "evidence": {
+    "label": "leaderboard",
+    "href": "index.html"
+   },
+   "author_claim": {
+    "quote": "HMMER is designed to detect remote homologs as sensitively as possible",
+    "url": "https://hmmer.org/",
+    "fetched": "2026-10-16"
+   }
+  }
+ ],
+ "counts": {
+  "alive": 0,
+  "retired": 1,
+  "untested": 0
+ },
+ "last_kill": null,
+ "source": {
+  "tables": {
+   "repo": "seanome/2024-kmerseek-analysis",
+   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+   "commit_date": "2026-10-20T13:23:48Z"
+  },
+  "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
+ }
+}

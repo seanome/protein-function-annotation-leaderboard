@@ -26,7 +26,7 @@
   },
   {
    "tag": "p",
-   "text": "What each tool's authors claim, the result that would disprove each claim, and where it stands. Only kmerseek has filed claims so far."
+   "text": "What each tool's authors claim, the result that would disprove each claim, and where it stands. 5 tools have claims here. The claims for DIAMOND, Foldseek, phmmer (HMMER 3), MMseqs2 quote the authors' own paper, README or website, with the link; kmerseek's are ours."
   },
   {
    "tag": "p",
@@ -35,6 +35,86 @@
   {
    "tag": "p",
    "text": "The build recomputes every verdict from the tables or checks it against the recorded notebook output, so nothing on a card is typed in by hand."
+  },
+  {
+   "tag": "h2",
+   "text": "DIAMOND"
+  },
+  {
+   "tag": "p",
+   "text": "each row: the claim, the result that would disprove it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "h3",
+   "text": "○ Not yet tested (1)"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "The 998 human queries against the 15 relatives, both tools run by the host on Sherlock with their traces. Needs DIAMOND rows (the DIAMOND module, branch olgabot/annotator-tools) and a BLASTP module, which this site does not have yet."
+  },
+  {
+   "tag": "li",
+   "text": "○DIAMOND aligns proteins 100 to 10,000 times faster than BLASTThe authors' words: “Pairwise alignment of proteins and translated DNA at 100x-10,000x speed of BLAST.” (github.com/bbuchfink/diamond, fetched 16 Oct 2026)Disproved if: DIAMOND's CPU-hours per 1,000 queries are more than 1/100 of BLASTP's, on the same queries, relatives and machinenot yet tested · DIAMOND and BLASTP have not been run on the QfO relatives"
+  },
+  {
+   "tag": "h2",
+   "text": "Foldseek"
+  },
+  {
+   "tag": "p",
+   "text": "each row: the claim, the result that would disprove it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "h3",
+   "text": "⊘ Disproved (1)"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Pfam-A domain instances, raw calls, 998 human queries, the 10 relatives with Foldseek rows (setting 3di_aa against AlphaFold structures). Tests the \"sensitive\" half only; speed is on the Cost page and is not part of this test. Pfam domains are defined from sequence, which favours sequence searches like phmmer; a structure-based truth set would be the fairer test and is not on this site yet."
+  },
+  {
+   "tag": "p",
+   "text": "Source: seanome/2024-kmerseek-analysis@7eca428b results.parquet"
+  },
+  {
+   "tag": "li",
+   "text": "⊘Foldseek is sensitiveThe authors' words: “Foldseek enables fast and sensitive comparisons of large protein structure sets” (github.com/steineggerlab/foldseek, fetched 16 Oct 2026)Disproved if: Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searcheddisproved · −0.100 to +0.000 across 10 of 10; furthest: fly −0.100 · leaderboard"
+  },
+  {
+   "tag": "h2",
+   "text": "phmmer (HMMER 3)"
+  },
+  {
+   "tag": "p",
+   "text": "each row: the claim, the result that would disprove it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "h3",
+   "text": "⊘ Disproved (1)"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict. The identity bins come from an MMseqs2 search (-s 7.5) between the domains, so a pair MMseqs2 cannot align is in no bin; this favours MMseqs2 in this comparison."
+  },
+  {
+   "tag": "p",
+   "text": "Source: seanome/2024-kmerseek-analysis@7eca428b results.parquet"
+  },
+  {
+   "tag": "li",
+   "text": "⊘phmmer finds distant homologs at least as well as a fast sequence searchThe authors' words: “HMMER is designed to detect remote homologs as sensitively as possible” (hmmer.org, fetched 16 Oct 2026)Disproved if: phmmer's Fmax is more than 0.05 below MMseqs2's on Pfam domains at 20 to 30% identity, on any relative with at least 30 such domainsdisproved · −0.137 to +0.057 across 10 of 15 (5 with fewer than 30 truth regions left out: btaurus, mdomestica, mouse, ptroglodytes, rnorvegicus); furthest: ecoli −0.137 · leaderboard"
   },
   {
    "tag": "h2",
@@ -187,10 +267,161 @@
   {
    "tag": "li",
    "text": "⊘Outperforms Foldseek on SCOPeDisproved if: inside FoldSeek's 5,713-query SCOPe40 benchmark, kmerseek detects no query that FoldSeek missesdisproved 30 Aug 2026 · fired on 188 of 5,713 benchmark queries (3.3%); 0 that FoldSeek missed · notebook 076"
+  },
+  {
+   "tag": "h2",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "p",
+   "text": "each row: the claim, the result that would disprove it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "h3",
+   "text": "● Holds (1)"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "\"its\" in the quote is BLAST. This site does not run BLAST, so phmmer, a full sequence-to-sequence search, stands in for it. Pfam-A domain instances, raw calls, 998 human queries, MMseqs2 at sensitivity 7 (setting s7). Speed is not part of this test."
+  },
+  {
+   "tag": "p",
+   "text": "Source: seanome/2024-kmerseek-analysis@7eca428b results.parquet"
+  },
+  {
+   "tag": "li",
+   "text": "●MMseqs2 is almost as sensitive as a full sequence searchThe authors' words: “At 100 times its speed it achieves almost the same sensitivity.” (github.com/soedinglab/MMseqs2, fetched 16 Oct 2026)Disproved if: MMseqs2's Fmax on Pfam domains is more than 0.05 below phmmer's on any of the 15 relativesholds · −0.037 to +0.008 across 15 of 15 · leaderboard"
   }
  ],
  "data": {
   "claims": [
+   {
+    "tool": "diamond",
+    "title": "DIAMOND",
+    "updated": "2026-10-16",
+    "file": "claims/diamond.yaml",
+    "claims": [
+     {
+      "id": "blast-speed",
+      "claim": "DIAMOND aligns proteins 100 to 10,000 times faster than BLAST",
+      "kill": "DIAMOND's CPU-hours per 1,000 queries are more than 1/100 of BLASTP's, on the same queries, relatives and machine",
+      "scope": "The 998 human queries against the 15 relatives, both tools run by the host on Sherlock with their traces. Needs DIAMOND rows (the DIAMOND module, branch olgabot/annotator-tools) and a BLASTP module, which this site does not have yet.",
+      "status": "untested",
+      "verdict": "DIAMOND and BLASTP have not been run on the QfO relatives",
+      "date": null,
+      "source": null,
+      "context": [],
+      "evidence": null,
+      "author_claim": {
+       "quote": "Pairwise alignment of proteins and translated DNA at 100x-10,000x speed of BLAST.",
+       "url": "https://github.com/bbuchfink/diamond",
+       "fetched": "2026-10-16"
+      }
+     }
+    ],
+    "counts": {
+     "alive": 0,
+     "retired": 0,
+     "untested": 1
+    },
+    "last_kill": null,
+    "source": {
+     "tables": {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+      "commit_date": "2026-10-20T13:23:48Z"
+     },
+     "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
+    }
+   },
+   {
+    "tool": "foldseek",
+    "title": "Foldseek",
+    "updated": "2026-10-16",
+    "file": "claims/foldseek.yaml",
+    "claims": [
+     {
+      "id": "fast-and-sensitive",
+      "claim": "Foldseek is sensitive",
+      "kill": "Foldseek's Fmax on Pfam domains is more than 0.05 below phmmer's, a sequence-only search, on any relative Foldseek searched",
+      "scope": "Pfam-A domain instances, raw calls, 998 human queries, the 10 relatives with Foldseek rows (setting 3di_aa against AlphaFold structures). Tests the \"sensitive\" half only; speed is on the Cost page and is not part of this test. Pfam domains are defined from sequence, which favours sequence searches like phmmer; a structure-based truth set would be the fairer test and is not on this site yet.",
+      "status": "retired",
+      "verdict": "−0.100 to +0.000 across 10 of 10; furthest: fly −0.100",
+      "date": null,
+      "source": "seanome/2024-kmerseek-analysis@7eca428b results.parquet",
+      "context": [],
+      "evidence": {
+       "label": "leaderboard",
+       "href": "index.html"
+      },
+      "author_claim": {
+       "quote": "Foldseek enables fast and sensitive comparisons of large protein structure sets",
+       "url": "https://github.com/steineggerlab/foldseek",
+       "fetched": "2026-10-16"
+      }
+     }
+    ],
+    "counts": {
+     "alive": 0,
+     "retired": 1,
+     "untested": 0
+    },
+    "last_kill": null,
+    "source": {
+     "tables": {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+      "commit_date": "2026-10-20T13:23:48Z"
+     },
+     "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
+    }
+   },
+   {
+    "tool": "hmmer3_phmmer",
+    "title": "phmmer (HMMER 3)",
+    "updated": "2026-10-16",
+    "file": "claims/hmmer3_phmmer.yaml",
+    "claims": [
+     {
+      "id": "remote-homologs",
+      "claim": "phmmer finds distant homologs at least as well as a fast sequence search",
+      "kill": "phmmer's Fmax is more than 0.05 below MMseqs2's on Pfam domains at 20 to 30% identity, on any relative with at least 30 such domains",
+      "scope": "Pfam-A domain instances whose closest same-family domain in the relative is 20 to 30% identical, raw calls, 998 human queries; MMseqs2 at sensitivity 7. A relative with fewer than 30 domains in this bin is left out and named in the verdict. The identity bins come from an MMseqs2 search (-s 7.5) between the domains, so a pair MMseqs2 cannot align is in no bin; this favours MMseqs2 in this comparison.",
+      "status": "retired",
+      "verdict": "−0.137 to +0.057 across 10 of 15 (5 with fewer than 30 truth regions left out: btaurus, mdomestica, mouse, ptroglodytes, rnorvegicus); furthest: ecoli −0.137",
+      "date": null,
+      "source": "seanome/2024-kmerseek-analysis@7eca428b results.parquet",
+      "context": [],
+      "evidence": {
+       "label": "leaderboard",
+       "href": "index.html"
+      },
+      "author_claim": {
+       "quote": "HMMER is designed to detect remote homologs as sensitively as possible",
+       "url": "https://hmmer.org/",
+       "fetched": "2026-10-16"
+      }
+     }
+    ],
+    "counts": {
+     "alive": 0,
+     "retired": 1,
+     "untested": 0
+    },
+    "last_kill": null,
+    "source": {
+     "tables": {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+      "commit_date": "2026-10-20T13:23:48Z"
+     },
+     "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
+    }
+   },
    {
     "tool": "kmerseek",
     "title": "kmerseek",
@@ -360,6 +591,48 @@
      "untested": 3
     },
     "last_kill": "2026-09-13",
+    "source": {
+     "tables": {
+      "repo": "seanome/2024-kmerseek-analysis",
+      "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+      "commit_date": "2026-10-20T13:23:48Z"
+     },
+     "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
+    }
+   },
+   {
+    "tool": "mmseqs2_seqseq",
+    "title": "MMseqs2",
+    "updated": "2026-10-16",
+    "file": "claims/mmseqs2_seqseq.yaml",
+    "claims": [
+     {
+      "id": "blast-sensitivity",
+      "claim": "MMseqs2 is almost as sensitive as a full sequence search",
+      "kill": "MMseqs2's Fmax on Pfam domains is more than 0.05 below phmmer's on any of the 15 relatives",
+      "scope": "\"its\" in the quote is BLAST. This site does not run BLAST, so phmmer, a full sequence-to-sequence search, stands in for it. Pfam-A domain instances, raw calls, 998 human queries, MMseqs2 at sensitivity 7 (setting s7). Speed is not part of this test.",
+      "status": "alive",
+      "verdict": "−0.037 to +0.008 across 15 of 15",
+      "date": null,
+      "source": "seanome/2024-kmerseek-analysis@7eca428b results.parquet",
+      "context": [],
+      "evidence": {
+       "label": "leaderboard",
+       "href": "index.html"
+      },
+      "author_claim": {
+       "quote": "At 100 times its speed it achieves almost the same sensitivity.",
+       "url": "https://github.com/soedinglab/MMseqs2",
+       "fetched": "2026-10-16"
+      }
+     }
+    ],
+    "counts": {
+     "alive": 1,
+     "retired": 0,
+     "untested": 0
+    },
+    "last_kill": null,
     "source": {
      "tables": {
       "repo": "seanome/2024-kmerseek-analysis",

@@ -1842,8 +1842,12 @@ def claims_card(cl: dict, up: str = "") -> str:
                     f'<p>{esc(plain_refs(x.get("scope") or ""))}</p><ul>{ctx}</ul>'
                     + (f'<p class="muted">Source: <span class="mono">{esc(x["source"])}</span></p>' if x.get("source") else "")
                     + '</details>')
+            au = x.get("author_claim")
+            words = (f'<div class="cl-kill">The authors\' words: &ldquo;{esc(au["quote"])}&rdquo; '
+                     f'(<a href="{esc(au["url"])}">{esc(au["url"].split("://", 1)[1].rstrip("/"))}</a>, '
+                     f'fetched {fmt_date(au["fetched"])})</div>') if au else ""
             rows.append(f'<li class="cl-row" data-status="{status}"><span class="cl-mark" aria-hidden="true">{MARK[status]}</span>'
-                        f'<div><div class="cl-claim">{esc(plain_refs(x["claim"]))}</div>'
+                        f'<div><div class="cl-claim">{esc(plain_refs(x["claim"]))}</div>{words}'
                         f'<div class="cl-kill">Disproved if: {esc(plain_refs(x["kill"]))}</div>'
                         f'<div class="cl-verdict">{verdict}</div>{more}</div></li>')
         if rows:
@@ -1861,8 +1865,10 @@ def claims_card(cl: dict, up: str = "") -> str:
 
 
 def page_claims(src: dict, cards: list[dict]) -> str:
+    quoted = [c["title"] for c in cards if any("author_claim" in x for x in c["claims"])]
     who = ("Only kmerseek has filed claims so far." if [c["tool"] for c in cards] == ["kmerseek"]
-           else f"{len(cards)} tools have filed claims so far.")
+           else f"{len(cards)} tools have claims here. The claims for {', '.join(quoted)} quote the "
+                f"authors' own paper, README or website, with the link; kmerseek's are ours.")
     body = f"""<h1>Claims</h1>
 <p class="lede">What each tool's authors claim, the result that would disprove each claim, and where
 it stands. {who}</p>
@@ -2230,6 +2236,12 @@ is updated.</li>
 </ul>
 <p>A test may carry a <b>verdict</b>: the wording of its verdict line, with the resolved numbers
 filled in. Without one, the line is the test's own result.</p>
+<p>A claim about another group's tool carries <b>author_claim</b>: the authors' own words, under 15,
+with the link to their paper, README or website. <span class="mono">scripts/fetch_quote.py</span> fetches
+the page, refuses a quote that is not on it, and records the quote's sha256. The build fails when a
+quote no longer matches that sha256, so a quote cannot be edited by hand. A <b>table</b> test may also
+carry <b>min_instances</b> (a relative with fewer truth regions in the stratum is left out and named)
+and a one-sided kill, <b>below_by_more_than</b>, where only a shortfall against the other tool counts.</p>
 <p>A claim retired by a record test is dated with the date of that inventory record. A claim retired
 by a table test has no date, because the tables are recomputed on every build and the build cannot
 tell when the claim was first disproved. The "last disproved" date on a card counts only dated

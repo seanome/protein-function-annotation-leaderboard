@@ -50,7 +50,7 @@
   },
   {
    "tag": "li",
-   "text": "0.333 best Fmax$0.0186 per 1,000 queriesPfam, raw calls, zebrafish; default options permissive licence"
+   "text": "0.333 best Fmax$0.0186 per 1,000 queriesPfam, raw calls, zebrafish; default options permissive licenceclaims: 0 hold, 1 disproved"
   },
   {
    "tag": "h2",
@@ -62,7 +62,7 @@
   },
   {
    "tag": "li",
-   "text": "0.327 best Fmax$0.00113 per 1,000 queriesPfam, raw calls, zebrafish; sensitivity 7 permissive licence"
+   "text": "0.327 best Fmax$0.00113 per 1,000 queriesPfam, raw calls, zebrafish; sensitivity 7 permissive licenceclaims: 1 holds, 0 disproved"
   },
   {
    "tag": "h2",
@@ -110,7 +110,7 @@
   },
   {
    "tag": "li",
-   "text": "0.250 best Fmax$0.00574 per 1,000 queriesPfam, raw calls, zebrafish; shape letters + amino acids needs 3D structure predictionGPL-3.0"
+   "text": "0.250 best Fmax$0.00574 per 1,000 queriesPfam, raw calls, zebrafish; shape letters + amino acids needs 3D structure predictionGPL-3.0claims: 0 hold, 1 disproved"
   },
   {
    "tag": "h2",

@@ -11,6 +11,10 @@ cannot decide it (too few instances). A `record` quote must equal the inventory'
 character for character, so a re-run notebook that changes a number fails the check here
 instead of leaving a stale claim on the site.
 
+A claim about another group's tool quotes the authors (`author_claim`). Its sha256 was written
+by scripts/fetch_quote.py when the quote was found on the authors' page; a quote that no longer
+matches it fails the check, so a quote cannot be reworded by hand.
+
 A claim retired by a record test is dated with that record's date. A claim retired by a
 table test has no date: the tables are recomputed on every build, so the build cannot tell
 when the kill first held. The verdict line is the test's optional `verdict` template,
@@ -39,6 +43,9 @@ def num(text: str) -> float:
 
 
 def signed(x: float, d: int = 3) -> str:
+    # A value that rounds to zero prints as +0.000, not −0.000.
+    if round(x, d) == 0:
+        x = 0.0
     return f"{x:+.{d}f}".replace("-", "−")
 
 
@@ -71,7 +78,7 @@ class Resolver:
             q = q.filter(pl.col("dedup_or_raw") == dedup)
         theirs = q.filter(pl.col("tool") == t["against"]["tool"], pl.col("setting") == t["against"]["setting"])
         ours = q.filter(pl.col("tool") == t["tool"])
-        out, missing = [], []
+        out, missing, small = [], [], []
         for target in t["targets"]:
             th = theirs.filter(pl.col("target_db") == target)
             o = ours.filter(pl.col("target_db") == target)
@@ -80,18 +87,36 @@ class Resolver:
             if th.height != 1 or o.height == 0:
                 missing.append(target)
                 continue
+            # A relative with too few truth regions in this stratum cannot decide: one call
+            # swings Fmax from 0 to 1. It is left out and named, never counted.
+            if "min_instances" in t and min(int(th["n_instances"][0]), int(o["n_instances"].min())) < t["min_instances"]:
+                small.append(target)
+                continue
             out.append((target, float(o["value"].max()) - float(th["value"][0])))
-        return {"diffs": out, "missing": missing}
+        return {"diffs": out, "missing": missing, "small": small}
 
     def table(self, t: dict) -> dict:
         r = self._diffs(t, t["setting"])
+        small = r["small"]
         if r["missing"] or not r["diffs"]:
-            return {"status": "untested", "text": f"no rows for {', '.join(r['missing']) or 'any target'}"}
+            why = f"no rows for {', '.join(r['missing']) or 'any target'}"
+            if small and not r["missing"]:
+                why = (f"every relative has fewer than {t['min_instances']} truth regions in this stratum; "
+                       f"at least {t['min_instances']} are needed to decide")
+            return {"status": "untested", "text": why}
         ds = [d for _, d in r["diffs"]]
-        thr = t["kill_if"]["abs_difference_above"]
-        killed = any(abs(d) > thr for d in ds)
-        worst = max(r["diffs"], key=lambda x: abs(x[1]))
+        k = t["kill_if"]
+        if "abs_difference_above" in k:
+            killed = any(abs(d) > k["abs_difference_above"] for d in ds)
+            worst = max(r["diffs"], key=lambda x: abs(x[1]))
+        else:
+            # One-sided: only a shortfall against the other tool disproves the claim.
+            killed = any(d < -k["below_by_more_than"] for d in ds)
+            worst = min(r["diffs"], key=lambda x: x[1])
         text = f"{signed(min(ds))} to {signed(max(ds))} across {len(ds)} of {len(t['targets'])}"
+        if small:
+            text += (f" ({len(small)} with fewer than {t['min_instances']} truth regions left out: "
+                     + ", ".join(x.removeprefix("QfO ") for x in small) + ")")
         if killed:
             text += f"; furthest: {worst[0].removeprefix('QfO ')} {signed(worst[1])}"
         return {"status": "retired" if killed else "alive", "text": text,
@@ -195,9 +220,36 @@ def verdict_text(t: dict, r: dict) -> str:
         raise ValueError(f"verdict template {t['verdict']!r} cannot be filled from {sorted(r)}: {e}") from e
 
 
+def normalise(text: str) -> str:
+    """Whitespace collapsed to single spaces, so a quote that wraps across lines in the
+    source still matches. Nothing else changes: case, punctuation and words must match."""
+    return " ".join(text.split())
+
+
+def quote_sha256(quote: str) -> str:
+    return hashlib.sha256(normalise(quote).encode()).hexdigest()
+
+
+def check_author_quote(claim: dict) -> None:
+    """The author's words must be the words recorded when their page was fetched.
+    `sha256` is written by scripts/fetch_quote.py from the quote as found on the page, so a
+    quote edited by hand, without fetching the page again, fails here."""
+    a = claim.get("author_claim")
+    if not a:
+        return
+    if quote_sha256(a["quote"]) != a["sha256"]:
+        raise ValueError(f"claim {claim['id']!r}: the quote does not match the sha256 recorded when "
+                         f"{a['text_url']} was fetched on {a['fetched']}; run scripts/fetch_quote.py again")
+    n_words = len(normalise(a["quote"]).split())
+    if n_words >= 15:
+        raise ValueError(f"claim {claim['id']!r}: the quote has {n_words} words; keep it under 15")
+
+
 def resolve_file(path: Path, res: Resolver, schema: dict) -> dict:
     doc = yaml.safe_load(path.read_text())
     jsonschema.validate(doc, schema)
+    for c in doc["claims"]:
+        check_author_quote(c)
     out = {"tool": doc["tool"], "title": doc["title"], "updated": str(doc["updated"]),
            "file": str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path), "claims": []}
     for c in doc["claims"]:
@@ -210,6 +262,8 @@ def resolve_file(path: Path, res: Resolver, schema: dict) -> dict:
             "id": c["id"], "claim": c["claim"], "kill": c["kill"], "scope": c.get("scope"),
             "status": r["status"], "verdict": verdict_text(c["test"], r), "date": r.get("date"),
             "source": r.get("source"), "context": ctx, "evidence": c.get("evidence"),
+            **({"author_claim": {k: c["author_claim"][k] for k in ("quote", "url", "fetched")}}
+               if "author_claim" in c else {}),
         })
     counts = {s: sum(x["status"] == s for x in out["claims"]) for s in ("alive", "retired", "untested")}
     kills = [x["date"] for x in out["claims"] if x["status"] == "retired" and x["date"]]

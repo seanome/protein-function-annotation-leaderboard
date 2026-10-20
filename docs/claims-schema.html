@@ -42,6 +42,12 @@ is updated.</li>
 </ul>
 <p>A test may carry a <b>verdict</b>: the wording of its verdict line, with the resolved numbers
 filled in. Without one, the line is the test's own result.</p>
+<p>A claim about another group's tool carries <b>author_claim</b>: the authors' own words, under 15,
+with the link to their paper, README or website. <span class="mono">scripts/fetch_quote.py</span> fetches
+the page, refuses a quote that is not on it, and records the quote's sha256. The build fails when a
+quote no longer matches that sha256, so a quote cannot be edited by hand. A <b>table</b> test may also
+carry <b>min_instances</b> (a relative with fewer truth regions in the stratum is left out and named)
+and a one-sided kill, <b>below_by_more_than</b>, where only a shortfall against the other tool counts.</p>
 <p>A claim retired by a record test is dated with the date of that inventory record. A claim retired
 by a table test has no date, because the tables are recomputed on every build and the build cannot
 tell when the claim was first disproved. The "last disproved" date on a card counts only dated
@@ -99,7 +105,7 @@ Action (<a class="mono" href="https://github.com/seanome/protein-function-annota
 It fails when a file breaks the schema, a quote no longer matches its record, or a table test cannot
 find its rows. A second job rebuilds the site from <span class="mono">data/</span> and fails if any
 page differs from the committed one. The build also writes a badge per tool from the same verdicts:</p>
-<p><img src="badges/claims-kmerseek.svg" alt="claims for kmerseek: 1 alive, 2 retired, 3 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-kmerseek.svg)</code></pre>
+<p><img src="badges/claims-diamond.svg" alt="claims for diamond: 0 alive, 0 retired, 1 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-diamond.svg)</code></pre><p><img src="badges/claims-foldseek.svg" alt="claims for foldseek: 0 alive, 1 retired, 0 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-foldseek.svg)</code></pre><p><img src="badges/claims-hmmer3_phmmer.svg" alt="claims for hmmer3_phmmer: 0 alive, 1 retired, 0 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-hmmer3_phmmer.svg)</code></pre><p><img src="badges/claims-kmerseek.svg" alt="claims for kmerseek: 1 alive, 2 retired, 3 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-kmerseek.svg)</code></pre><p><img src="badges/claims-mmseqs2_seqseq.svg" alt="claims for mmseqs2_seqseq: 1 alive, 0 retired, 0 untested"></p><pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-mmseqs2_seqseq.svg)</code></pre>
 </div>
 </main>
 <footer class="site"><div class="wrap">
