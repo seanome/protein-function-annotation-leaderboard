@@ -4,10 +4,34 @@ Prompt 3 of the "nature already solved it" tests. It asks whether species that t
 human insult (the tolerance atlas of Prompt 1) have a larger share of proteins with no
 function label than model organisms, and than random species at the same distance from human.
 
-**State on 2026-10-19: the run list is fixed; nothing has been measured.** The atlas came in
-(PR 33), the decisions in PLAN.md "Atlas list decisions" were committed, and the controls were
-drawn. No proteome has been downloaded, searched or scored, and nothing has been submitted to
-Sherlock.
+**Result, 2026-10-20: none of the three sentences in PLAN.md holds.** The atlas species are
+not less readable than random species at the same distance from human; if anything they are
+more readable. Among proteomes with BUSCO of at least 90%, the median unlabelled share is
+1.66% for the atlas species (n = 8), 5.505% for the random controls (n = 4) and 2.57% for the
+model organisms (n = 5). Over all proteomes: 2.02% (n = 17), 6.63% (n = 17) and 2.57% (n = 7).
+Within the atlas and control groups the share rises with divergence time from human (Spearman
+rho 0.82 and 0.59). The oyster came out at 19.41% and human at 0.88%, as on the leaderboard.
+Notebook: `solvers_unreadable_uniprot_2026_03.ipynb`; numbers: `verdict.json`.
+
+![Unlabelled share against divergence time from human, 42 UniProt 2026_03 proteomes](unlabelled_share_vs_divergence_time_uniprot_2026_03.png)
+
+## Run of record
+
+Sherlock, 2026-10-20, commit ce7928d: setup 48677851, download array 48677853, label array
+48677854, collect 48677855 ("42 proteomes, 0 failed"). 38.18 CPU-hours in all (label tasks
+38.14), against 45.7 predicted. Its small outputs (result table, Slurm record, setup marker,
+versions, logs, and per proteome the counts in `summary.json`, input checksums and BUSCO
+summaries) are in `run_2026-10-20/`, copied by `copy_results.sh`. The MMseqs2 tables (2 GB)
+stay in `$SCRATCH/nature-solved-it/unreadable/out/`.
+
+`submit_all.sh` was run twice, 13 s apart. The second chain's setup, 48677882, built the BUSCO
+image again and failed when it tried to move it onto the first chain's finished, read-only
+image; its download, label and collect jobs (48677884, 48677886, 48677888) were cancelled
+and never ran. Its `job_ids.txt` replaced the first chain's; the first chain's ids are in
+`run_2026-10-20/earlier-run-20261020T205757Z/job_ids.txt`. Its unfinished image is still at
+`$SCRATCH/nature-solved-it/unreadable/images/busco-6.1.0--pyhdfd78af_2.sandbox.part`, for
+Olga to remove. Since commit f0d03e2, `submit_all.sh` refuses while any unread-* job is
+pending or running, and writes one job-id file per submission.
 
 ## Why this repository
 
@@ -160,8 +184,4 @@ What changed:
 
 ## Not done yet
 
-- The Sherlock run, the figure, `verdict.json`, the notebook and the claims-ledger row.
-- The second agent's recompute.
-- The control draw was tested on a stand-in list of six species, labelled as such and kept
-  out of the repository. Drawing twice with the same seed and TimeTree answers gave the same
-  five controls.
+- The second agent's recompute (`VERIFY_TODO.md`).

@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 10,
+   "complete_single": 576,
+   "completeness_pct": 87.2,
+   "fragmented": 51,
+   "lineage": "metazoa_odb12",
+   "missing": 35,
+   "short_summary_c_pct": 87.2
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 2,
+   "complete_single": 115,
+   "completeness_pct": 90.7,
+   "fragmented": 8,
+   "lineage": "eukaryota_odb12",
+   "missing": 4,
+   "short_summary_c_pct": 90.7
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "atlas species",
+ "n_interpro_match": 11595,
+ "n_proteins": 15140,
+ "n_sprot_hit": 9906,
+ "n_uncharacterized_name": 4008,
+ "n_unlabelled": 3334,
+ "proteome_taxid": "278856",
+ "species": "Danaus plexippus",
+ "uncharacterized_name_pct": 26.47,
+ "unlabelled_pct": 22.02,
+ "upid": "UP000007151"
+}

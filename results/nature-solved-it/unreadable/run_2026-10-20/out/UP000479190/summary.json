@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 9,
+   "complete_single": 343,
+   "completeness_pct": 52.38,
+   "fragmented": 81,
+   "lineage": "metazoa_odb12",
+   "missing": 239,
+   "short_summary_c_pct": 52.4
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 3,
+   "complete_single": 68,
+   "completeness_pct": 55.04,
+   "fragmented": 14,
+   "lineage": "eukaryota_odb12",
+   "missing": 44,
+   "short_summary_c_pct": 55.0
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "random control",
+ "n_interpro_match": 10404,
+ "n_proteins": 16797,
+ "n_sprot_hit": 8486,
+ "n_uncharacterized_name": 7823,
+ "n_unlabelled": 6211,
+ "proteome_taxid": "86971",
+ "species": "Trichogramma brassicae",
+ "uncharacterized_name_pct": 46.57,
+ "unlabelled_pct": 36.98,
+ "upid": "UP000479190"
+}

@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 1122,
+   "complete_duplicated": 70,
+   "complete_single": 780,
+   "completeness_pct": 75.76,
+   "fragmented": 30,
+   "lineage": "fungi_odb12",
+   "missing": 242,
+   "short_summary_c_pct": 75.8
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 109,
+   "completeness_pct": 85.27,
+   "fragmented": 10,
+   "lineage": "eukaryota_odb12",
+   "missing": 9,
+   "short_summary_c_pct": 85.3
+  }
+ ],
+ "busco_lineage": "fungi_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "1164.29781",
+ "group": "model organism",
+ "n_interpro_match": 5546,
+ "n_proteins": 6066,
+ "n_sprot_hit": 6065,
+ "n_uncharacterized_name": 0,
+ "n_unlabelled": 1,
+ "proteome_taxid": "559292",
+ "species": "Saccharomyces cerevisiae",
+ "uncharacterized_name_pct": 0.0,
+ "unlabelled_pct": 0.02,
+ "upid": "UP000002311"
+}

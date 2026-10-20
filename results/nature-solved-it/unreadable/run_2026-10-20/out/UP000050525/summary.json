@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 2,
+   "complete_single": 616,
+   "completeness_pct": 91.96,
+   "fragmented": 34,
+   "lineage": "metazoa_odb12",
+   "missing": 20,
+   "short_summary_c_pct": 92.0
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 0,
+   "complete_single": 121,
+   "completeness_pct": 93.8,
+   "fragmented": 7,
+   "lineage": "eukaryota_odb12",
+   "missing": 1,
+   "short_summary_c_pct": 93.8
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "atlas species",
+ "n_interpro_match": 18624,
+ "n_proteins": 24656,
+ "n_sprot_hit": 18308,
+ "n_uncharacterized_name": 6349,
+ "n_unlabelled": 5731,
+ "proteome_taxid": "8496",
+ "species": "Alligator mississippiensis",
+ "uncharacterized_name_pct": 25.75,
+ "unlabelled_pct": 23.24,
+ "upid": "UP000050525"
+}

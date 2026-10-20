@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 2,
+   "complete_single": 562,
+   "completeness_pct": 83.93,
+   "fragmented": 49,
+   "lineage": "metazoa_odb12",
+   "missing": 59,
+   "short_summary_c_pct": 83.9
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 106,
+   "completeness_pct": 82.95,
+   "fragmented": 14,
+   "lineage": "eukaryota_odb12",
+   "missing": 8,
+   "short_summary_c_pct": 82.9
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "random control",
+ "n_interpro_match": 9261,
+ "n_proteins": 14253,
+ "n_sprot_hit": 8034,
+ "n_uncharacterized_name": 5245,
+ "n_unlabelled": 4878,
+ "proteome_taxid": "166423",
+ "species": "Melipona quadrifasciata",
+ "uncharacterized_name_pct": 36.8,
+ "unlabelled_pct": 34.22,
+ "upid": "UP000053105"
+}

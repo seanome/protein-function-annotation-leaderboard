@@ -1,0 +1,17 @@
+# BUSCO version is: 6.1.0 
+# The lineage dataset is: metazoa_odb12 (Creation date: 2026-05-22, number of genomes: 206, number of BUSCOs: 672)
+# Summarized benchmarking in BUSCO notation for file /scratch/users/olgabot/nature-solved-it/unreadable/out/UP001710656/proteins.fasta
+# BUSCO was run in mode: proteins
+
+	***** Results: *****
+
+	C:71.6%[S:69.3%,D:2.2%],F:14.6%,M:13.8%,n:672	   
+	481	Complete BUSCOs (C)			   
+	466	Complete and single-copy BUSCOs (S)	   
+	15	Complete and duplicated BUSCOs (D)	   
+	98	Fragmented BUSCOs (F)			   
+	93	Missing BUSCOs (M)			   
+	672	Total BUSCO groups searched		   
+
+Dependencies and versions:
+	hmmsearch: 3.4

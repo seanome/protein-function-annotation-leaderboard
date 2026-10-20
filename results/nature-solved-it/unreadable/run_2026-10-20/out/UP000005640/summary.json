@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 10,
+   "complete_single": 662,
+   "completeness_pct": 100.0,
+   "fragmented": 0,
+   "lineage": "metazoa_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 100.0
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 2,
+   "complete_single": 127,
+   "completeness_pct": 100.0,
+   "fragmented": 0,
+   "lineage": "eukaryota_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 100.0
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "0.0",
+ "group": "model organism",
+ "n_interpro_match": 19972,
+ "n_proteins": 20652,
+ "n_sprot_hit": 20459,
+ "n_uncharacterized_name": 125,
+ "n_unlabelled": 181,
+ "proteome_taxid": "9606",
+ "species": "Homo sapiens",
+ "uncharacterized_name_pct": 0.61,
+ "unlabelled_pct": 0.88,
+ "upid": "UP000005640"
+}
