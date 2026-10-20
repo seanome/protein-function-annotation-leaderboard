@@ -31,6 +31,7 @@ import json
 import re
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -131,9 +132,14 @@ def uniprot_entry(acc: str, cache: dict) -> dict | None:
             j = json.load(r)
         entry = {"organism": j["organism"]["scientificName"], "taxon_id": j["organism"]["taxonId"],
                  "length": j["sequence"]["length"], "fetched": dt.date.today().isoformat()}
-    except Exception as e:  # noqa: BLE001  a missing entry and a network error both mean "unknown"
+    except urllib.error.HTTPError as e:
         print(f"UniProt {acc}: {e}", file=sys.stderr)
+        if e.code != 404:  # a real "no such entry" is cached; other failures are tried again next run
+            return None
         entry = None
+    except Exception as e:  # noqa: BLE001  network error or bad reply: unknown now, not cached
+        print(f"UniProt {acc}: {e}", file=sys.stderr)
+        return None
     cache[acc] = entry
     return entry
 
