@@ -126,7 +126,7 @@
   },
   {
    "tag": "p",
-   "text": "Setting s7, searching one relative (mean over the 15 relatives it searched): 0.0787 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.1 GB. That is about $0.00351 at $0.044625 per CPU-hour. Building its databases: not measured."
+   "text": "Setting s7, searching one relative (mean over the 15 relatives it searched): 0.0787 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.1 GB. That is about $0.00351 at $0.044625 per CPU-hour. Building its databases took 0.00889 core-hours over 7 databases. A database is built once and reused, so this is not in the per-query cost."
   },
   {
    "tag": "p",
@@ -268,7 +268,7 @@
   "cost_per_1000_queries": {
    "core_h_reserved_per_relative": 0.07867587025903659,
    "n_relatives": 15,
-   "database_build_core_h": null,
+   "database_build_core_h": 0.008888888888888889,
    "database_build_gpu_h": null,
    "peak_rss_gb": 1.1,
    "hardware": "Stanford Sherlock, SLURM partition hns"

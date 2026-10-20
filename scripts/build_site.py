@@ -40,7 +40,7 @@ R_GPU = 1.006
 TRUTH = {"swissprot": "Swiss-Prot features", "pfam": "Pfam", "pfamn": "Pfam-N"}
 DEFAULTS = {
     "truth": "pfam", "calls": "raw", "species": "zebrafish", "axis": "all",
-    "stratum": "all", "metric": "fmax", "sort": "fmax", "dir": "desc",
+    "stratum": "all", "x": "cpu", "y": "fmax", "sort": "fmax", "dir": "desc",
     "r_cpu": R_CPU, "r_gpu": R_GPU,
 }
 # Divergence times from human, in million years (Mya), read by main() from results.parquet's
@@ -116,6 +116,27 @@ METRICS = [
     {"id": "fmax", "label": "Fmax", "field": "fmax"},
     {"id": "auprc", "label": "AUPRC", "field": "auprc"},
     {"id": "iou", "label": "Median IoU", "field": "iou"},
+]
+# The columns Figure 1 on cost.html can put on its axes. Scores run 0 to 1 on a linear
+# axis, higher is better. Cost, time and memory span orders of magnitude and go on an
+# axis where each step is ten times the last, lower is better. "less" finishes the
+# sentence "no other tool is both ... and better" for the line through the best trade-offs;
+# "short" names the quantity in the list of rows not plotted.
+AXES = [
+    {"id": "fmax", "label": "Fmax, 0 to 1", "short": "Fmax", "kind": "score", "better": "higher"},
+    {"id": "auprc", "label": "AUPRC, 0 to 1", "short": "AUPRC", "kind": "score", "better": "higher"},
+    {"id": "iou", "label": "Median IoU of correct calls, 0 to 1", "short": "median IoU", "kind": "score",
+     "better": "higher"},
+    {"id": "cpu", "label": "Core-hours per 1,000 queries, per relative searched", "short": "core-hours",
+     "kind": "cost", "better": "lower", "less": "cheaper in core-hours"},
+    {"id": "cost", "label": "Estimated cost, USD per 1,000 queries, per relative searched", "short": "cost",
+     "kind": "cost", "better": "lower", "less": "cheaper"},
+    {"id": "wall", "label": "Wall-clock hours per 1,000 queries, per relative searched", "short": "wall-clock time",
+     "kind": "cost", "better": "lower", "less": "faster"},
+    {"id": "ram", "label": "Peak RAM of the search, GB", "short": "peak RAM", "kind": "cost", "better": "lower",
+     "less": "lighter on memory"},
+    {"id": "db", "label": "Database build, core-hours per database built", "short": "database build time",
+     "kind": "cost", "better": "lower", "less": "quicker to build its databases"},
 ]
 STRATUM_WORDS = {
     "identity": dict(IDENTITY),
@@ -204,7 +225,7 @@ def mark_empty(rows: list[dict], res: pl.DataFrame) -> list[dict]:
 def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
            head: str = "", description: str = "") -> str:
     up = "../" * depth
-    nav = [("index.html", "Leaderboard", "leaderboard"), ("cost.html", "Score against cost", "cost"),
+    nav = [("index.html", "Leaderboard", "leaderboard"), ("cost.html", "Compare two columns", "cost"),
            ("pileup.html", "Region pile-up", "pileup"), ("claims.html", "Claims", "claims"),
            ("tools/index.html", "Tool cards", "tools"), ("coverage.html", "Coverage", "coverage"),
            ("methods.html", "Methods", "methods")]
@@ -310,12 +331,15 @@ def load(data: Path):
     build = c.filter((pl.col("setting") == "database build") | pl.col("step").str.contains("Index|Db|DB"))
     rows = []
     for r in search.iter_rows(named=True):
-        b = build.filter((pl.col("tool") == r["tool"]) & pl.col("setting").is_in([r["setting"], "database build"]))
+        # MMseqs2's two search tools share one database build, recorded under "mmseqs2".
+        b = build.filter(pl.col("tool").is_in([r["tool"], r["tool"].split("_")[0]])
+                         & pl.col("setting").is_in([r["setting"], "database build"]))
         rows.append({
             "tool": r["tool"], "setting": r["setting"], "step": r["step"],
             "n_relatives": r["n_target_dbs"], "n_queries": r["n_queries"], "cores": r["cores"],
             "wall_s": r["wall_s"], "cpu_h_total": r["cpu_h"],
             "cpu_h_per_1000_queries": r["cpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
+            "wall_h_per_1000_queries": r["wall_s"] / 3600 / r["n_target_dbs"] * 1000 / r["n_queries"],
             "peak_rss_gb": r["peak_ram_gb"],
             "gpu": "none" if r["gpu_type"] in (None, "none") else r["gpu_type"],
             "gpu_h_per_1000_queries": 0.0 if r["gpu_h"] is None else r["gpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
@@ -373,6 +397,12 @@ def compute_json(comp: pl.DataFrame) -> dict:
             "gpu_h_per_1000": r["gpu_h_per_1000_queries"],
             "hardware": r["hardware"],
             "n_relatives": r["n_relatives"],
+            "cores": r["cores"],
+            "wall_h_per_1000": r["wall_h_per_1000_queries"],
+            # Mean core-hours to build one relative's database, over the builds the run's task
+            # records hold (a build reused from an earlier run left no record).
+            "db_cpu_h_per_db": None if r["db_cpu_h"] is None else r["db_cpu_h"] / r["db_n"],
+            "db_n": r["db_n"],
         }
     return out
 
@@ -464,40 +494,54 @@ def page_cost(meta_json: str, src: dict, n_queries: int, tools_used: set[str]) -
             else:
                 legend.append(f'<span class="item">{svg_marker(info["shape"], k["color"])}{esc(info["name"])}</span>')
     body = f"""
-<h1>Score against cost</h1>
-<p class="lede">The same tools and filters as the leaderboard, drawn as score against compute time.
-The line joins the tools that no other tool beats on both: none is both cheaper and better.
-Colour is the kind of method; within a kind, marker shape is the tool, and for kmerseek the
-alphabet. Peak memory is not on this figure; it is in Table 1.</p>
-<form class="filters" onsubmit="return false" aria-label="Filters"><div id="filters"></div>
+<h1>Compare two columns</h1>
+<p class="lede">Any two columns of the leaderboard, drawn against each other: a score against
+what the search cost, or one score against another. Pick the column for each axis below.</p>
+<div class="axispick" id="axispick" aria-label="Columns on the axes"></div>
+<details class="choices" id="choices">
+<summary><span class="choices-label">Change what is plotted</span>
+<span class="choices-now" id="filtersummary"></span></summary>
+<form class="filters" id="filters-form" onsubmit="return false" aria-label="Filters">
+<div id="filters"></div>
 <p class="axisnote">The benchmark split the proteins along one of the last four rows at a time,
-so picking a value in one of them sets the other three back to "any".</p></form>
-<div class="metricpick" role="group" aria-label="Score on the vertical axis">
-<span>Score on the vertical axis:</span>
-<button type="button" class="chip" data-metric="fmax">Fmax</button>
-<button type="button" class="chip" data-metric="auprc">AUPRC</button>
-<button type="button" class="chip" data-metric="iou">Median IoU</button>
+so picking a value in one of them sets the other three back to "any".</p>
+</form>
+<div class="prices" aria-label="Prices used for the estimated cost">
+<label>r_cpu, USD per CPU-hour <input id="r_cpu" type="number" min="0" step="0.001" inputmode="decimal"></label>
+<label>r_gpu, USD per GPU-hour <input id="r_gpu" type="number" min="0" step="0.01" inputmode="decimal"></label>
+<span class="muted">Used only when the horizontal axis is the estimated cost. Default prices are AWS
+on-demand rates for US East (N. Virginia), Linux, read 2026-10-15 from the
+<a href="{PRICE_PAGE}">EC2 on-demand price page</a>: $0.044625 per CPU-hour (a c7i.large, $0.08925 per hour for 2 vCPU) and
+$1.006 per GPU-hour (a g5.xlarge with one NVIDIA A10G).</span>
 </div>
+</details>
 <figure>
-<figcaption><b>Figure 1.</b> Score against core-hours per 1,000 queries for searching one relative
-(the mean over the relatives each tool searched), one marker per tool and setting: <span id="filterline"></span> Right is more expensive, up is better. Each step along the
-horizontal axis is ten times more CPU time than the last. Hover or focus a marker to see its row;
-click it to open the tool's card.</figcaption>
+<figcaption><b>Figure 1.</b> <span id="plotcaption"></span> One marker per tool and setting:
+<span id="filterline"></span> Hover or focus a marker to see its row; click it to open the tool's card.</figcaption>
 <div class="legend" aria-label="Key to Figure 1">
 {"".join(legend)}
-<span class="item"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.6"/></svg>
-no other tool is both cheaper and better</span>
-<span class="item">{svg_marker("circle", "var(--ink)")} filled: cost measured on Sherlock</span>
-<span class="item">{svg_marker("circle", "var(--ink)", False)} open: cost reported by a submitter (none yet)</span>
+<span class="item" id="frontier-key"><svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--ink)" stroke-width="1.6"/></svg>
+<span id="frontier-words">no other tool is both cheaper and better</span></span>
+<span class="item" data-cost-key>{svg_marker("circle", "var(--ink)")} filled: cost measured on Sherlock</span>
+<span class="item" data-cost-key>{svg_marker("circle", "var(--ink)", False)} open: cost reported by a submitter (none yet)</span>
 </div>
 <div class="plotbox" id="plot"></div>
 </figure>
 <p id="notplotted" class="prose muted"></p>
+<p class="prose muted">Colour is the kind of method; within a kind, marker shape is the tool, and for
+kmerseek the alphabet. Core-hours, cost and wall-clock time are per 1,000 queries for searching
+one relative, the mean over the relatives each tool searched, measured on Stanford's Sherlock
+cluster. Peak RAM is the largest memory any one search task used. Wall-clock
+time is on the cores each tool was given (between 4 and 16; hover a marker for the number), so it
+can rank tools differently from core-hours. The database build is the mean over the builds the run's task records
+hold; a database reused from an earlier run left no record. Definitions:
+<a href="methods.html">Methods</a>.</p>
 <script type="application/json" id="lb-data">{meta_json}</script>
 <script src="assets/app.js"></script>
 """
-    return layout("Score against cost", "cost", body, src,
-                  description="Fmax, AUPRC or median IoU against measured CPU-hours per 1,000 queries.")
+    return layout("Compare two columns", "cost", body, src,
+                  description="Any two leaderboard columns against each other: Fmax, AUPRC or median IoU "
+                              "against measured core-hours, cost, wall-clock time, peak RAM or database build time.")
 
 
 def fnum(x, d=3):
@@ -1485,6 +1529,7 @@ def main() -> None:
                     for s in SPECIES},
         "truthNames": TRUTH,
         "metrics": METRICS,
+        "axes": AXES,
         "searched": searched,
         "source": src,
     }
@@ -1569,8 +1614,11 @@ def main() -> None:
               "truth|calls|species|stratum_axis|stratum, then tool|setting -> [fmax, auprc, median_iou_tp, "
               "n_truth_instances, n_tp_calls]; compute keyed tool|setting|species.", **full,
               "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU, "source": PRICE_PAGE, "price_file": PRICE_FILE}})
-    page_json(out, "cost.html", src, {"note": "Same rows as index.html.json; the plot is score against "
-              "cpu_h_per_1000 for every tool and setting that has both.", "results": full["results"],
+    page_json(out, "cost.html", src, {"note": "Same rows as index.html.json. Figure 1 plots any two of "
+              "the columns in 'axes' for every tool and setting that has both: scores from results "
+              "[fmax, auprc, median_iou_tp], cpu = cpu_h_per_1000, cost = cpu_h_per_1000 * r_cpu + "
+              "gpu_h_per_1000 * r_gpu, wall = wall_h_per_1000, ram = peak_rss_gb, db = db_cpu_h_per_db.",
+              "axes": AXES, "prices": {"r_cpu": R_CPU, "r_gpu": R_GPU}, "results": full["results"],
               "compute": full["compute"], "rows": full["meta"]["rows"]})
     page_json(out, "coverage.html", src, {"tables": [
         {"columns": h[1:], "rows": [{"tool": r[0], "instances": {c: (int(v.replace(",", "")) if v else None)
