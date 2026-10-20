@@ -143,8 +143,15 @@ def read_issues(path: Path | None) -> list[dict]:
         return json.loads(path.read_text())
     out = subprocess.run(["gh", "api", "--paginate", f"repos/{REPO}/issues?labels={LABEL}&state=all&per_page=100"],
                          check=True, capture_output=True, text=True).stdout
-    # --paginate writes one JSON array per page.
-    return [i for page in re.findall(r"\[.*?\](?=\s*\[|\s*$)", out, flags=re.S) for i in json.loads(page)]
+    # --paginate writes one JSON array per page, back to back.
+    dec, pos, issues = json.JSONDecoder(), 0, []
+    while pos < len(out):
+        if out[pos].isspace():
+            pos += 1
+            continue
+        page, pos = dec.raw_decode(out, pos)
+        issues.extend(page)
+    return issues
 
 
 def read_decisions() -> pl.DataFrame:
