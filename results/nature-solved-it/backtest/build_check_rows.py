@@ -9,7 +9,7 @@ import csv, json
 from pathlib import Path
 
 SCRATCH = Path(__file__).resolve().parent
-HERE = Path("/Users/olga/code/pfal-transferability-backtest/results/nature-solved-it/backtest")
+HERE = Path(__file__).resolve().parent
 
 fda = json.load((SCRATCH / "check_fda_raw.json").open())
 ctg = json.load((SCRATCH / "check_ctg_raw.json").open())

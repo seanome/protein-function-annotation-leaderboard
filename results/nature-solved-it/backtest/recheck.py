@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 from scipy.stats import mannwhitneyu
 
-HERE = Path("/Users/olga/code/pfal-transferability-backtest/results/nature-solved-it/backtest")
+HERE = Path(__file__).resolve().parent
 
 
 def rd(name):

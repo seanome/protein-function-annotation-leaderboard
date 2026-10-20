@@ -1,7 +1,7 @@
 """Compare the checking agent's blind re-score with blind_scores.csv."""
 import csv
 from pathlib import Path
-HERE = Path("/Users/olga/code/pfal-transferability-backtest/results/nature-solved-it/backtest")
+HERE = Path(__file__).resolve().parent
 MINE = HERE / "rescore.csv"
 mine = {r["blind_id"]: r for r in csv.DictReader(MINE.open())}
 theirs = {r["blind_id"]: r for r in csv.DictReader((HERE / "blind_scores.csv").open())}

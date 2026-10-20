@@ -2,12 +2,12 @@
 
 Run as three parts, in the order below. The drugsfda and ClinicalTrials.gov answers were
 saved as check_fda_raw.json and check_ctg_raw.json, which build_check_rows.py reads.
-Paths point at the scratchpad they were run from; change them to rerun.
+sets.csv is read from this folder.
 """
 
 # --- part 1: openFDA drugsfda, the 19 Set A application numbers ---
 import json, urllib.request, urllib.parse, csv, time, sys
-rows=[r for r in csv.DictReader(open('/Users/olga/code/pfal-transferability-backtest/results/nature-solved-it/backtest/sets.csv')) if r['set']=='A']
+rows=[r for r in csv.DictReader(open(__import__('pathlib').Path(__file__).resolve().parent / 'sets.csv')) if r['set']=='A']
 out={}
 for r in rows:
     rec=r['record_id'].split()[0]
@@ -34,7 +34,7 @@ for k,v in out.items():
 
 # --- part 2: ClinicalTrials.gov v2, the 15 Set B(i) trials ---
 import json, urllib.request, csv, time
-rows=[r for r in csv.DictReader(open('/Users/olga/code/pfal-transferability-backtest/results/nature-solved-it/backtest/sets.csv')) if r['set']=='B_i']
+rows=[r for r in csv.DictReader(open(__import__('pathlib').Path(__file__).resolve().parent / 'sets.csv')) if r['set']=='B_i']
 out={}
 for r in rows:
     nct=r['record_id'].split()[0]
