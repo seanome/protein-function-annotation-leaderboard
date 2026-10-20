@@ -1,0 +1,51 @@
+{
+ "page": "proteins.html",
+ "title": "Protein map",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+  "commit_date": "2026-10-20T13:23:48Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-20T13:27:30Z",
+  "sha256": {
+   "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
+   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
+   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
+   "provenance.json": "928a70476164c3fa5f5da18160695a1fe80594d5f614e332509c1d0a341b636d",
+   "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
+  },
+  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4"
+ },
+ "text": [
+  {
+   "tag": "h1",
+   "text": "Protein map"
+  },
+  {
+   "tag": "p",
+   "text": "Which proteins each kind of tool labels, one tile per protein."
+  },
+  {
+   "tag": "p",
+   "text": "Data from 20 Oct 2026, commit 7eca428b (source)"
+  },
+  {
+   "tag": "p",
+   "text": "This page stands in for the organism page, which is being built separately; the same draw function (draw_proteome_map in scripts/pileup_figures.py) takes one row per protein of any organism. Here it shows the human proteins of the region pile-up, searched against zebrafish: these are the only proteins the copied tables hold call by call."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 17. Every protein of the pile-up set as a tile, coloured by which kinds of tool found one of its true regions. Tiles with more kinds come first. The 2,435 true Pfam regions on 998 human proteins of the region pile-up page, zebrafish as the relative, raw calls. A region counts as found by a tool when the tool made a correct call that overlaps it with an IoU of at least 0.5. kmerseek is shown at one setting (gbmr4, k = 21), the one on its tool card. hmmscan is left out: Pfam's regions are defined by its models."
+  },
+  {
+   "tag": "p",
+   "text": "Of the 998 proteins, 110 had regions found, between them, by all four kinds of tool, and 117 had no region found. For 16, the k-mer tool was the only kind that found any of its regions."
+  }
+ ],
+ "data": {
+  "note": "Figure 17 is drawn from data/pileup/ (regions.parquet, calls.parquet); data/upset.json lists the regions behind each column of Figure 15."
+ }
+}
