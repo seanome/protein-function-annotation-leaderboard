@@ -87,5 +87,5 @@ foldseek search \
 
 The first command (one per proteome, on a GPU) predicts the 3Di letters. The second is the search the cost columns measure.
 
-Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
+Tool id `prostt5`. Numbers from seanome/2024-kmerseek-analysis commit `275e195e`.
 

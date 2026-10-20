@@ -1,7 +1,9 @@
 # Source of the tables: a commit of seanome/2024-kmerseek-analysis that holds
 # results/leaderboard/, written there by `make leaderboard-tables`.
 SOURCE_REPO ?= seanome/2024-kmerseek-analysis
-SOURCE_COMMIT ?= 7eca428b
+# 275e195e: the analysis repo's olgabot/leaderboard-query-strata (PR 164) after it merged
+# 7eca428b, so one commit holds the tables with TimeTree divergence times and query_strata/.
+SOURCE_COMMIT ?= 275e195e
 PILEUP_COMMIT ?= 39d81ec9
 PY ?= .venv/bin/python
 

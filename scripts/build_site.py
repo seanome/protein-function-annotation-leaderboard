@@ -95,6 +95,44 @@ FEATURE_WORDS = {
     "MOTIF": "short motif", "REGION": "region of interest", "REPEAT": "repeat",
     "SITE": "other site", "TRANSMEM": "membrane-spanning", "ZN_FING": "zinc finger",
 }
+# Subsets an annotator can compute from their own proteins, with no known annotation
+# (seanome/2024-kmerseek-analysis results/leaderboard/query_strata/RULES.md): axis, chip-row
+# label, help, and (stored bin, chip words). Methods has the commands that compute them.
+QUERY_STRATA = [
+    ("nearest_identity", "Nearest protein in the relative: % identity",
+     "identity of the whole human protein to its best hit in the relative's proteome "
+     "(MMseqs2, E-value under 0.001). For your proteins: search the proteome you copy "
+     "annotations from",
+     [("no hit", "no hit"), ("<30%", "under 30%"), ("30-50%", "30–50%"), ("50-90%", "50–90%"),
+      (">=90%", "90% or more")]),
+    ("membrane", "Membrane class",
+     "DeepTMHMM's call for the protein: crosses the membrane as helices, as a beta-barrel, "
+     "or neither",
+     [("alpha-helical TM", "helices cross the membrane"), ("beta-barrel", "beta-barrel"),
+      ("neither", "neither")]),
+    ("low_complexity", "Low-complexity share",
+     "share of the protein's residues that SEG masks as low complexity (repeats of a few "
+     "amino acids)",
+     [("<5%", "under 5%"), ("5-20%", "5–20%"), (">20%", "over 20%")]),
+    ("protein_length", "Protein length", "residues in the whole protein",
+     [("<100", "under 100 aa"), ("100-300", "100–300 aa"), ("300-1000", "300–1,000 aa"),
+      (">1000", "over 1,000 aa")]),
+    ("region_length", "Region length (end − start + 1)",
+     "residues in the annotated region the call must find",
+     [("<30", "under 30 aa"), ("30-100", "30–100 aa"), (">100", "over 100 aa")]),
+    ("family_superkingdoms", "Pfam family: found in archaea, bacteria, eukaryotes",
+     "how many of the three domains of life have a protein with the region's Pfam family, "
+     "in Pfam 38's reference proteomes; Pfam truth sets only",
+     [("1", "one"), ("2", "two"), ("3", "all three"), ("not found", "not found")]),
+    ("family_phyla", "Pfam family: phyla",
+     "how many phyla have a protein with the region's Pfam family, in Pfam 38's reference "
+     "proteomes; Pfam truth sets only",
+     [("1", "1"), ("2-5", "2–5"), ("6-20", "6–20"), (">20", "over 20"), ("not found", "not found")]),
+    ("busco", "BUSCO gene model",
+     "BUSCO (primates_odb12) on the whole human proteome: the protein is a complete or a "
+     "fragmented copy of a gene expected in every primate, or not one of those genes",
+     [("complete", "complete"), ("fragmented", "fragmented"), ("not a BUSCO gene", "not a BUSCO gene")]),
+]
 SPECIES_GROUPS = [
     # Within a group, nearest first by TimeTree 5 age (mouse and rat tie at 84 Mya, cow and dog at 89).
     ("mammals", ["ptroglodytes", "mouse", "rnorvegicus", "btaurus", "clupus", "mdomestica"]),
@@ -312,6 +350,7 @@ STRATUM_WORDS = {
     "feature_length_bin": dict(LENGTH_SHORT + LENGTH_DOMAIN + [("whole_protein", "whole protein")]),
     "plddt": dict(PLDDT),
     "feature_type": dict(FEATURE_WORDS),
+    **{axis: dict(bins) for axis, _, _, bins in QUERY_STRATA},
 }
 AXIS_WORDS = {
     "identity": "identity to the closest same-family domain in the relative",
@@ -375,6 +414,9 @@ def chiprows(species_mya: dict) -> list[dict]:
         {"id": "ftype", "kind": "stratum", "axis": "feature_type", "label": "Feature type",
          "help": "the kind of Swiss-Prot feature; only the Swiss-Prot truth set has these",
          "groups": [{"chips": [c("all", "any")] + [c(k, FEATURE_WORDS[k], f"{k}: {v}") for k, v in FEATURES.items()]}]},
+        *[{"id": axis, "kind": "stratum", "axis": axis, "label": label, "help": help_, "query_side": True,
+           "groups": [{"chips": [c("all", "any")] + [c(v, w) for v, w in bins]}]}
+          for axis, label, help_, bins in QUERY_STRATA],
     ]
 
 
@@ -650,6 +692,7 @@ GPU: a g5.xlarge with one NVIDIA A10G costs $1.006 per hour.</span>
 <span class="tablebtns"><button type="button" class="chip" id="viewbtn">Show every setting</button>
 <button type="button" class="chip" id="colbtn" aria-pressed="false">More columns</button></span></figcaption>
 {key_line(tools_used)}
+<p class="fewnote"><span class="sw">0.123</span> Grey numbers: the subset has fewer than 30 true instances, so one or two calls swing the score.</p>
 <div class="tablebox"><table class="lb" id="lb"><thead><tr></tr></thead><tbody></tbody></table></div>
 </figure>
 <details class="key"><summary>The marks and colours in Table 1, in full</summary>
@@ -1368,6 +1411,89 @@ experiment's output came from, and which outputs were left out and why:
                   description="Which tool, subset and experiment combinations have been measured and which have not been run.")
 
 
+def query_strata_counts(data: Path) -> dict | None:
+    """Queries per bin of each protein-level query-side axis, from query_strata.tsv, and per
+    relative for nearest-protein identity, from query_nearest_hits.tsv. None when the copied
+    commit has no query-strata tables."""
+    qs = data / "query_strata"
+    if not (qs / "query_strata.tsv").exists():
+        return None
+    q = pl.read_csv(qs / "query_strata.tsv", separator="\t")
+    hits = pl.read_csv(qs / "query_nearest_hits.tsv", separator="\t")
+    words = {axis: dict(bins) for axis, _, _, bins in QUERY_STRATA}
+    labels = {axis: label for axis, label, _, _ in QUERY_STRATA}
+    axes = []
+    for axis in ["membrane", "low_complexity", "protein_length", "busco"]:
+        n = dict(q.group_by(axis).len().iter_rows())
+        axes.append({"axis": axis, "label": labels[axis],
+                     "bins": [(v, words[axis][v], n.get(v, 0)) for v in words[axis]]})
+    ident_bins = list(words["nearest_identity"])
+    by_sp: dict = {}
+    for sp, b, n in hits.group_by("species", "nearest_identity").len().iter_rows():
+        by_sp.setdefault(sp, {})[b] = n
+    busco = json.loads((qs / "busco_summary.json").read_text())
+    src = json.loads((data / "SOURCE.json").read_text())
+    return {"commit": src.get("query_strata_commit") or src["commit"], "repo": src["repo"],
+            "n_queries": q.height, "axes": axes, "ident_bins": ident_bins,
+            "ident": {sp: [by_sp[sp].get(b, 0) for b in ident_bins] for sp in sorted(by_sp)},
+            "busco": busco, "commands": (qs / "commands.sh").read_text()}
+
+
+def query_strata_section(qc: dict | None, res: pl.DataFrame) -> str:
+    """Methods: the query-side subsets, how many queries fall in each bin, and the commands."""
+    if qc is None:
+        return ""
+    scored = res.filter(pl.col("stratum_axis").is_in([a for a, _, _, _ in QUERY_STRATA])).height
+    status = ("The leaderboard's chip rows for these subsets read the rescored run."
+              if scored else
+              "The run behind the leaderboard has not yet been scored on these subsets, so their "
+              "chips say \u201cnot run\u201d. The counts below are of the queries alone.")
+    words = {axis: dict(bins) for axis, _, _, bins in QUERY_STRATA}
+    rows = "".join(
+        f'<tr data-axis="{esc(a["axis"])}" data-bin="{esc(v)}"><td>{esc(a["label"])}</td>'
+        f'<td>{esc(w)}</td><td class="num">{n:,}</td></tr>'
+        for a in qc["axes"] for v, w, n in a["bins"])
+    head = "".join(f"<th>{esc(words['nearest_identity'][b])}</th>" for b in qc["ident_bins"])
+    irows = "".join(
+        f'<tr data-species="{esc(sp)}"><td>{esc(SPECIES.get(sp, sp))}</td>'
+        + "".join(f'<td class="num" data-bin="{esc(b)}">{n:,}</td>'
+                  for b, n in zip(qc["ident_bins"], ns))
+        + "</tr>" for sp, ns in qc["ident"].items())
+    br = qc["busco"]["results"]
+    pct = {k: br.get(k) for k in ("Complete percentage", "Fragmented percentage",
+                                  "Missing percentage")}
+    busco_line = (f"BUSCO on the whole human proteome ({esc(qc['busco']['lineage'])}): complete "
+                  f"{pct['Complete percentage']}%, fragmented {pct['Fragmented percentage']}%, "
+                  f"missing {pct['Missing percentage']}% of {br.get('n_markers')} genes."
+                  if None not in pct.values() else "")
+    return f"""
+<h2 id="your-proteome">Subsets you can compute for your own proteome</h2>
+<p>Eight more ways to cut the proteins need no known annotation, so you can compute them for your
+own proteins and read off the rows that match. {status} The subset tables come from
+<a class="mono" href="https://github.com/{qc['repo']}/commit/{qc['commit']}">{qc['commit'][:8]}</a>
+(<span class="mono">results/leaderboard/query_strata</span>).</p>
+<ul>
+<li><b>Nearest protein in the relative, % identity</b>: the whole protein's identity to its best
+MMseqs2 hit in the relative's proteome. Identity to Swiss-Prot would say nothing here, because every
+one of the {qc['n_queries']:,} human queries is itself in Swiss-Prot. So the reference is the
+proteome you copy annotations from. This differs from the identity subset above, which is per
+domain and per family.</li>
+<li><b>Membrane class</b> (DeepTMHMM), <b>low-complexity share</b> (SEG), <b>protein length</b> and
+<b>BUSCO gene model</b>: one value per protein.</li>
+<li><b>Region length</b>, and how widely the region's Pfam family occurs: in how many of the
+<b>three domains of life</b> (archaea, bacteria, eukaryotes) and in how many <b>phyla</b>. One value
+per annotated region; the family spread exists for the Pfam truth sets only.</li>
+</ul>
+<div class="box" id="qs-box"><b>Compute these for your proteome</b>
+<pre id="qs-commands">{esc(qc['commands'])}</pre></div>
+<table class="qs" id="qs-counts"><caption>Queries in each bin, of {qc['n_queries']:,}</caption>
+<thead><tr><th>subset</th><th>bin</th><th>queries</th></tr></thead><tbody>{rows}</tbody></table>
+<table class="qs" id="qs-ident"><caption>Queries by identity to their nearest protein in each relative</caption>
+<thead><tr><th>relative</th>{head}</tr></thead><tbody>{irows}</tbody></table>
+<p id="qs-busco">{busco_line}</p>
+"""
+
+
 def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict) -> str:
     ex = best_by(res, tool="hmmer3_phmmer", setting="default", truth_set="pfam", calls="raw",
                  species="zebrafish", stratum_axis="all", stratum="all").row(0, named=True)
@@ -1403,7 +1529,7 @@ how the truth sets were built.</p>
 <li><a href="#scores">The scores</a>: <a href="#fmax">Fmax</a>, <a href="#auprc">AUPRC</a>, <a href="#iou">median IoU</a>,
 <a href="#n">true instances</a>, <a href="#cpu">core-hours</a>, <a href="#cost">estimated cost</a></li>
 <li><a href="#truth">Truth sets</a></li><li><a href="#dedup">Dedup against raw</a></li>
-<li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#checks">Checks on this site</a></li>
+<li><a href="#subsets">Subsets of the proteins</a></li><li><a href="#your-proteome">Subsets you can compute for your own proteome</a></li><li><a href="#checks">Checks on this site</a></li>
 <li><a href="#experiments">Experiments in the tables</a></li></ol></nav>
 <div class="prose">
 <h2 id="data">The benchmark run</h2>
@@ -1578,6 +1704,7 @@ marks regions without a fixed shape.</li>
 </ul>
 <p>The run computed each subset on its own, so two subsets cannot be combined; a combination with
 no row shows × and "not run".</p>
+{query_strata_section(query_strata_counts(Path(DATA_DIR)), res)}
 
 <h2 id="checks">Checks on this site</h2>
 <p>A headless browser renders every filter combination and confirms that each × on the
