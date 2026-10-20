@@ -6,7 +6,7 @@
   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
   "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-20T14:06:46Z",
+  "copied_at": "2026-10-20T14:15:57Z",
   "sha256": {
    "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -17,11 +17,20 @@
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
    "no_search_baselines.parquet": "977198351dda8a58becfc86819d6c6eba8cc3fb72522f5f7b4193675a8db3f2b",
-   "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81"
+   "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81",
+   "best_hit/rows.parquet": "22492bed2e0b82895e18651a9d3148089f0dba5bf89fd2cc98e8ef6bd6458894",
+   "best_hit/compute.parquet": "af3dd9994ae2b7ab063ffd0faed3bc8dce3c00f5664fba1bff6b897f1b29caf7",
+   "best_hit/call_rules.parquet": "c4ec3c68d8924c8bf67848ba212f84496729a4b3ae871b0899a0636a9a53f25c",
+   "best_hit/cards/diamond_besthit.sensitive.json": "913553aad4f7a1c7f4af63b17fc66a902d2f37c46b6475209ef0c98475be696a",
+   "best_hit/cards/diamond_besthit.ultra-sensitive.json": "ba5121d09f559360f17c2518ccfe5f441507a3ffc66aa74b76087671ea3dea43",
+   "best_hit/cards/mmseqs2_besthit.s7.5.json": "a8437d4451f07dae114eb47eb96160fb0901344c09ac4ad69d331371a5718db6",
+   "best_hit/fmax_best_hit_vs_qfo_relatives_midi_plus.png": "7e52633f4c40cf7d65fd59f126fa03ac6946fc863ec4f2af23fe2fdd0d9588d9",
+   "best_hit/median_iou_best_hit_vs_qfo_relatives_midi_plus.png": "1ff5271264ae492e34f6fbe1e4222fbce67f75093b9b879267d8082020101948"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
   "nosearch_commit": "5b644dc8195cba4535d06d59c6b15748a30874b0",
-  "nosearch_path": "results/leaderboard"
+  "nosearch_path": "results/leaderboard",
+  "besthit_commit": "f0802ebe12a15d752580798f37a32c0033d6a81a"
  },
  "text": [
   {
