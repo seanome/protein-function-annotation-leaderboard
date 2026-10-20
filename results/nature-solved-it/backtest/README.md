@@ -1,13 +1,97 @@
-# Transferability back-test: the two sets, collected blind of the scoring
+# Transferability back-test: T does not predict which animal molecules became drugs
 
 Does the transferability score T, scored without knowing the outcome, separate
-animal-derived molecules that became approved drugs from animal-derived programmes that
-did not? `INCLUSION.md` holds the inclusion rules and the pass/fail rule, written and
-committed before any entry was collected. This page says what is in the files.
+animal-derived molecules that became approved drugs from animal-derived molecules that did
+not? It does not. Under the rule written before collection, T fails on two of its three
+conditions, so it stays a checklist of six questions and is not used to rank programmes.
 
-This half of the work is collection only. T has not been scored here, and no statistic
-has been computed. A separate agent that has not seen these sets scores T from
-`blind_input.csv`.
+`INCLUSION.md` holds the inclusion rules and the pass/fail rule, written and committed
+before any entry was collected. The sets were collected before any score existed, and the
+scores were made by an agent that saw only `blind_input.csv`: an opaque id and a mechanism
+description, no name and no outcome.
+
+![T counts for the two sets](figures/transferability_t_distribution_backtest.png)
+
+Each mark is the number of entries with that score. Blue filled circles are the 19 that
+became approved drugs, orange open squares the 24 that did not. The two series are drawn
+slightly apart at each score so neither hides the other. Higher T means the molecule
+should be easier to move into a human.
+
+## The result
+
+| Statistic | Value | What the rule asked for |
+|---|---|---|
+| n, approved (Set A) | 19 | at least 15 |
+| n, not approved (Set B) | 24 (15 in B(i), 9 in B(ii)) | at least 15 |
+| Median T, Set A | 5 | |
+| Median T, Set B | 3.5 | at least 2 points below Set A |
+| Median gap | 1.5 points | fails |
+| Mann-Whitney U (Set A over Set B) | 259.5 of 456 pairs | |
+| p, two-sided | 0.44 | |
+| p, one-sided (Set A higher) | 0.22 | |
+| AUC | 0.569 | at least 0.75, fails |
+
+The AUC is the chance that a randomly picked approved entry scores higher than a randomly
+picked not-approved one, counting a tie as half. 0.5 is no information, 1 is perfect. At
+0.569 the score is close to no information: of the 456 approved and not-approved pairs,
+222 go the way T predicts, 75 are ties, and 159 go the other way.
+
+Both sets clear 15 entries, so the test is not underpowered. T fails the median condition
+and the AUC condition, so the rule's answer is that T does not predict approval.
+
+## Where the small separation comes from
+
+Set B has two kinds of entry, and they behave differently.
+
+| Comparison | n | Median T | AUC | p, two-sided |
+|---|---|---|---|---|
+| Set A, approved | 19 | 5 | | |
+| Set B(i), reached a trial, no approval | 15 | 5 | 0.470 | 0.78 |
+| Set B(ii), named molecule, no candidate in trials | 9 | 2 | 0.734 | 0.048 |
+
+Against the molecules that reached a clinical trial and stopped there, T is at chance
+(AUC 0.470, below 0.5). The whole of the small separation comes from the nine mechanism
+programmes that have a named molecule but nothing in trials, and even that comparison
+sits just under the 0.75 the rule asks for.
+
+Read plainly: T separates a molecule in hand from a mechanism described in a paper. It
+does not separate a molecule that became a drug from a molecule that was tried and
+failed. That is the step the score was hoped to predict.
+
+## What this means for the Idea Scoring Board
+
+T is a checklist of six questions to ask about a molecule, and nothing more. It must not
+be used to rank programmes against each other, to order a shortlist, or to argue that one
+idea is more likely to reach a drug than another. The Idea Scoring Board should say so
+next to the score. A high T means the molecule has the properties that make it easy to
+move; it does not mean it will become a drug, and this back-test is the evidence.
+
+## The venom, saliva and secretion count
+
+The narrow claim, that venoms and secretions are the class with a drug record, rests on
+this count: 6 of the 19 approved entries (32%) have a source material that the animal
+releases outside its body, counted as venom, saliva, or another oral or skin secretion.
+Those six are captopril, exenatide, ziconotide, eptifibatide, bivalirudin and desirudin.
+Counting salmon calcitonin, a hormone the fish secretes into its own blood, gives 7 of 19.
+Counting every approved entry whose active molecule is a peptide or protein gives 10 of 19.
+
+Within Set A the externally secreted six have a median T of 6 against 3 for the other
+thirteen, so the venom and saliva molecules are the high-T end of the approved set. They
+are not the bulk of it: the other 13 approvals are tissue extracts, a sugar chain, DNA
+fragments, lung surfactants and two small molecules from marine animals.
+
+## The age gap between the sets, which was stated before the run
+
+| Set | Year recorded | Earliest | Median | Latest |
+|---|---|---|---|---|
+| A | approval | 1972 | 2003 | 2016 |
+| B(i) | trial start | 1994 | 2004 | 2026 |
+| B(ii) | year of the paper naming the molecule | 2004 | 2013 | 2023 |
+
+Set A is survivors and Set B is whatever could be found. Set A approvals are older than
+Set B(ii) papers by about a decade at the median, which is what a survivor set looks like:
+a molecule named in a 2023 paper has had no time to become a drug. The comparison that
+matters least from this bias, Set A against Set B(i), is the one where T is at chance.
 
 ## Files
 
@@ -16,55 +100,54 @@ has been computed. A separate agent that has not seen these sets scores T from
 | `INCLUSION.md` | The inclusion rules and the pass/fail rule, fixed before collection |
 | `build_sets.py` | The records read on 2026-10-19, and the code that writes the CSVs |
 | `sets.csv` | One row per entry, with the set, species, molecule, human target, year, agency or registry record, and citation |
-| `excluded.csv` | Candidates checked and left out, with the reason and the record checked |
+| `excluded.csv` | 30 candidates checked and left out, with the reason and the record checked |
 | `blind_input.csv` | Opaque id and mechanism description only, row order shuffled with seed 20261019 |
 | `key.csv` | Blind id to entry, held back from the scoring agent |
+| `score_blind.py`, `blind_scores.csv` | The scoring agent's script and its T1 to T6 scores with a reason for each point |
+| `analyze.py` | Rejoins the scores with the outcome, runs the statistics, draws the figure |
+| `scored.csv` | The rejoined table: set, entry, T1 to T6 with reasons, T, year |
+| `results.json` | Every number reported here |
+| `figures/` | The figure as PNG, PDF and SVG |
+| `VERIFY_TODO.md` | What the checking agent re-opens and recomputes |
 
-## Counts
+## How the numbers were made
 
-| Set | Entries |
-|---|---|
-| A, approved | 19 |
-| B(i), reached a registered trial, no approval | 15 |
-| B(ii), named gene from a tolerant animal, no candidate in trials | 9 |
-| Excluded | 30 |
+* Collection: every year, application number, trial identifier, DOI and PMID in
+  `sets.csv` was read on 2026-10-19 from Drugs@FDA or an FDA label through the openFDA
+  API, from ClinicalTrials.gov through its v2 API, or from the PubMed tool. Where a source
+  gives no species binomial, the species column says so in the source's own words.
+* Scoring: a separate agent read `blind_input.csv` and nothing else, and returned T1 to T6
+  with a reason per point. No score was changed in the rejoin.
+* Statistics: `scipy.stats.mannwhitneyu` for U and both p values. The AUC is U divided by
+  the number of approved and not-approved pairs, computed by hand, checked by counting
+  pairs directly, and checked a third time against `sklearn.metrics.roc_auc_score`. All
+  three give 0.5691.
+* Figure: the Nature Biotechnology style from the `publication-figures` skill, 89 mm wide,
+  Arial embedded as TrueType in the PDF, PNG written with a 256-colour palette.
 
-Set B has 24 entries in all. The pass/fail rule asks for at least 15 per set; both sets
-clear that, and the two kinds of Set B entry are kept separate so the analysis can report
-them apart as well as together.
+Rerun with:
 
-## Where the facts come from
+```
+/Users/olga/anaconda3/envs/2025-kmerseek-analysis/bin/python analyze.py
+```
 
-Every year, application number, trial identifier, DOI and PMID in `sets.csv` was read on
-2026-10-19 from one of three places, named per row in the `citation` and `source_type`
-columns:
+## What the scoring agent decided, in its own words
 
-* Drugs@FDA and FDA product labels, through the openFDA `drugsfda` and `label` APIs.
-* ClinicalTrials.gov, through its v2 API.
-* PubMed, through the PubMed tool, which returned the DOI and PMID as written.
+The scorer recorded these judgement calls, which the rejoin did not change:
 
-Where a source does not give a species binomial, the species column says so in the words
-the source used (for example "pig (the label says porcine intestinal mucosa; no binomial
-given)"). Rows whose origin claim rests on a review rather than the primary paper are
-marked "review" in `source_type`.
+* ice counted as a conserved target for the fish antifreeze protein;
+* the two small molecules from marine animals scored a point for size;
+* two antimicrobial peptides lost the "secreted" point because the description says they
+  are stored inside the cell that makes them;
+* cross-linked cow haemoglobin lost the "secreted" point;
+* an enzyme whose size the description did not state lost the size point.
 
-## How the blind file was made
-
-`blind_input.csv` carries the mechanism description and nothing else: species, molecule,
-where it acts, what it binds, size, and whether it needs partners. It holds no drug name,
-no brand name, no agency, no year, no trial identifier, and no word that says how the
-entry ended up. Row order is shuffled with seed 20261019, recorded in `key.csv` and in
-`build_sets.py`. The descriptions are the same text as the `mechanism_description` column
-of `sets.csv`, so the scoring agent and the rejoined table cannot drift apart.
+These are visible per entry in `scored.csv`, with the reason the scorer gave for each
+point.
 
 ## Known weakness, stated before the run
 
 Set A is survivors; Set B is whatever could be found. The sets differ in age and in how
-well they are documented. `sets.csv` carries the approval year for Set A and the start
-year for Set B so the gap can be read off directly.
-
-## Still to do
-
-Blind scoring of T, the rejoin, the figure, the three statistics (median difference,
-Mann-Whitney U with its p value, AUC), the share of Set A that is a venom, saliva or
-secretion peptide, and the second-agent check.
+well they are documented, and both year columns are in `sets.csv` so the gap can be read
+off. Set B(ii) is the weakest part: "did not become a drug" has no registry, so those nine
+entries are the ones that could be found, not a sample of anything.
