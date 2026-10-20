@@ -100,3 +100,12 @@ them silently.
 
 Negative rows (diseases with no species and no number): 18.
 
+
+## Already spot-checked by the agent that built the atlas
+
+Three identifiers from the blocks collected in parallel were opened again with the PubMed
+tool and matched their rows: PMID 42572112 (cyanogenic glucoside biosynthesis in
+Heliconiini, which carries the independent-origins claim in the cyanide row), PMID
+16363165 (chlorpyrifos resistance in Culex quinquefasciatus) and PMID 27649274 (the
+tardigrade genome paper with the Dsup result in human cells). Everything else in the list
+above is unchecked.
