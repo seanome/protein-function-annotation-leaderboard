@@ -10,9 +10,13 @@
 #   bash scripts/nature_solved_it/unreadable/submit_all.sh [RUN_DIR]
 # RUN_DIR defaults to $SCRATCH/nature-solved-it/unreadable. The run list is
 # results/nature-solved-it/unreadable/proteomes.tsv of this checkout (draw_controls.py).
-# Job ids go to $RUN/job_ids.txt; logs to $RUN/logs/.
+# Refuses while any unread-* job of this user is pending or running, so two chains cannot
+# share one run folder (2026-10-20: two submissions 13 s apart; the second setup failed and
+# its job_ids.txt hid the first run's ids).
+# Job ids go to $RUN/job_ids_<UTC time>.txt, one file per submission, and one line per
+# submission is appended to $RUN/submissions.log; logs to $RUN/logs/.
 # Outputs of an earlier submission (unreadable_table.tsv, sacct.txt, setup_ok, version files,
-# job_ids.txt, out/) are moved, not deleted, to $RUN/earlier-run-<UTC time>/ first, so they
+# job_ids.txt from before 2026-10-20, out/) are moved, not deleted, to $RUN/earlier-run-<UTC time>/ first, so they
 # cannot be read as this run's result. Downloaded inputs are kept: each is checked by sha256.
 set -euo pipefail
 
@@ -23,6 +27,12 @@ RUN=${1:-$SCRATCH/nature-solved-it/unreadable}
 PROTEOMES=$RES/proteomes.tsv
 MMSEQS_IMG=$SCRATCH/apptainer-cache/quay.io-biocontainers-mmseqs2@sha256-3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef.img
 
+active=$(squeue -u "$USER" -h -n unread-setup,unread-fetch,unread-label,unread-collect -o "%i %j %T" || echo "squeue failed")
+if [[ -n $active ]]; then
+    echo "refusing: unread-* jobs are pending or running; wait for them or scancel them first:" >&2
+    echo "$active" >&2
+    exit 1
+fi
 test -s "$PROTEOMES" || { echo "no run list at $PROTEOMES; run draw_controls.py first" >&2; exit 1; }
 test -s "$MMSEQS_IMG" || { echo "MMseqs2 image missing: $MMSEQS_IMG" >&2; exit 1; }
 N=$(( $(wc -l < "$PROTEOMES") - 1 ))
@@ -31,6 +41,7 @@ LAST=$(( N - 1 ))
 LABEL_TIME=$(/usr/bin/python3 -I "$HERE/predict_resources.py" --proteomes "$PROTEOMES" --sacct "$RES/sacct_47961379.txt" --time-ask label)
 FETCH_TIME=$(/usr/bin/python3 -I "$HERE/predict_resources.py" --proteomes "$PROTEOMES" --sacct "$RES/sacct_47961379.txt" --time-ask fetch)
 mkdir -p "$RUN/logs"
+STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 stale=()
 for f in unreadable_table.tsv sacct.txt setup_ok busco_version.txt mmseqs_version.txt job_ids.txt out; do
     if [[ -e $RUN/$f ]]; then stale+=("$f"); fi
@@ -64,5 +75,7 @@ COLLECT=$(sbatch --parsable --chdir "$RUN" --output="$RUN/logs/%x_%j.log" \
     echo "fetch $FETCH array 0-$LAST%8 time $FETCH_TIME"
     echo "label $LABEL array 0-$LAST%20 time $LABEL_TIME"
     echo "collect $COLLECT"
-} | tee "$RUN/job_ids.txt"
+} | tee "$RUN/job_ids_$STAMP.txt"
+echo "$STAMP setup $SETUP fetch $FETCH label $LABEL collect $COLLECT commit $COMMIT" >> "$RUN/submissions.log"
+echo "Job ids: $RUN/job_ids_$STAMP.txt"
 echo "Result table when collect $COLLECT ends: $RUN/unreadable_table.tsv"

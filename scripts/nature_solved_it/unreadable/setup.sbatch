@@ -38,6 +38,10 @@ command rm -f "$RUN/setup_ok"
 mkdir -p "$RUN/inputs" "$RUN/busco_downloads" "$RUN/images" "$APPTAINER_TMPDIR"
 /usr/bin/python3 -I "$HERE/fetch_inputs.py" --setup --out "$RUN/inputs"
 
+# One setup at a time may touch the image (2026-10-20: two submissions 13 s apart both built
+# it, and the second setup's mv onto the finished read-only image was refused).
+exec 9> "$RUN/images/busco_build.lock"
+flock -n 9 || { echo "refusing: another setup holds $RUN/images/busco_build.lock" >&2; exit 1; }
 # A sandbox left by an earlier setup is reused only if BUSCO starts in it.
 if [[ -d $BUSCO_IMG ]] && ! apptainer exec "$BUSCO_IMG" busco --version > /dev/null 2>&1; then
     echo "existing $BUSCO_IMG does not run; moving it aside" >&2
@@ -45,8 +49,15 @@ if [[ -d $BUSCO_IMG ]] && ! apptainer exec "$BUSCO_IMG" busco --version > /dev/n
     mv "$BUSCO_IMG" "$BUSCO_IMG.broken.$(date -u +%Y%m%dT%H%M%SZ)"
 fi
 if [[ ! -d $BUSCO_IMG ]]; then
-    command rm -rf "$BUSCO_IMG.part"  # a partial build of this run's own image, if any
+    if [[ -e $BUSCO_IMG.part ]]; then
+        echo "refusing: $BUSCO_IMG.part exists (an unfinished or duplicate build); remove it and resubmit" >&2
+        exit 1
+    fi
     apptainer build --sandbox "$BUSCO_IMG.part" "$BUSCO_URI"
+    if [[ -e $BUSCO_IMG ]]; then
+        echo "refusing: $BUSCO_IMG appeared during the build; not replacing it" >&2
+        exit 1
+    fi
     mv "$BUSCO_IMG.part" "$BUSCO_IMG"
 fi
 run() { apptainer exec --bind /scratch "$BUSCO_IMG" "$@"; }
