@@ -18,22 +18,22 @@
 <nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="cost.html" data-keep-filters>Score against cost</a><a href="pileup.html">Region pile-up</a><a href="claims.html">Claims</a><a href="tools/index.html">Tool cards</a><a href="coverage.html">Coverage</a><a href="methods.html" aria-current="page">Methods</a></nav>
 </div></header>
 <main class="wrap" data-page="methods">
-<p class="source" id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p class="source" id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <h1>Methods</h1>
 <div class="prose">
-<p>The tables hold 3,975,483 rows from 12 experiments (alphabet_ranking_three_cases, dark_set_accuracy, dark_set_gain, dark_set_pfam_fmax, deep_twilight, elm_cover, qfo_region_midi, qfo_region_midi_plus, qfo_region_mini, scope40_v040, scope40_v040_below_kmin, scope40_v040_shuffled_k2_seed1); the
+<p>The tables hold 4,386,981 rows from 12 experiments (alphabet_ranking_three_cases, dark_set_accuracy, dark_set_gain, dark_set_pfam_fmax, deep_twilight, elm_cover, qfo_region_midi, qfo_region_midi_plus, qfo_region_mini, scope40_v040, scope40_v040_below_kmin, scope40_v040_shuffled_k2_seed1); the
 coverage page counts all of them. Everything else on this site comes from one of those
 experiments, <span class="mono">qfo_region_midi_plus</span>, a single benchmark run. It searched 998 human
 proteins against the proteomes of 15 relatives from the Quest for Orthologs reference proteomes,
 release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune
 proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not
 record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock
-cluster. It has 205,653 of the 3,975,483 rows of <span class="mono">results.parquet</span>,
+cluster. It has 235,032 of the 4,386,981 rows of <span class="mono">results.parquet</span>,
 one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative,
 truth set, raw or dedup, and stratum. Its cost is in <span class="mono">compute.parquet</span>. Both
 tables were built by
 <span class="mono">make leaderboard-tables</span> in seanome/2024-kmerseek-analysis at commit
-<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a>.
+<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
 
 <h2>No tool wins everywhere</h2>
@@ -178,7 +178,9 @@ For phmmer on zebrafish (Pfam, all proteins): Fmax 0.333 raw and 0.457 dedup.</p
 closest domain of the same family in the relative. Bins: 0–20, 20–30, 30–40, 40–60 and 60–100%. A
 domain whose family is absent from the relative is "no same-family domain".</li>
 <li><b>Nearest reviewed relative, Mya</b>: the relative searched, labelled with how many million
-years ago its line split from ours.</li>
+years ago its line split from ours: the pairwise divergence time from human in
+<a href="https://timetree.org/">TimeTree 5</a>, rounded to the nearest million years. TimeTree
+gives no time for human and a bacterium, so E. coli has none.</li>
 <li><b>Region type and length</b>: the length of the annotated region, in residues. Bins up to 60
 aa are short features; 61 aa and up is the size of a folded domain. Whole-protein annotations
 were not scored in this run.</li>
@@ -201,7 +203,7 @@ in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
 
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="methods.html.json">methods.html.json</a></p>
 </div></footer>
