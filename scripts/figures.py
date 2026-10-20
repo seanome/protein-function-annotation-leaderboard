@@ -142,7 +142,7 @@ def draw_distance(t: pl.DataFrame) -> tuple[str, str]:
     ends = []
     for hl in (False, True):
         for (tool, setting), g in t.filter(pl.col("highlight") == hl).group_by(["tool", "setting"], maintain_order=True):
-            # relatives at the same Mya (dog and cow, 95) are joined lowest Fmax first
+            # relatives at the same Mya (cow and dog, 89) are joined lowest Fmax first
             g = g.sort("mya", "fmax")
             r0 = g.row(0, named=True)
             col = f"var(--k-{r0['kind']})"
@@ -167,8 +167,8 @@ def draw_distance(t: pl.DataFrame) -> tuple[str, str]:
     note = (f"kmerseek, its other {kmer_pale.select('setting').n_unique()} settings" if kmer_pale.height else None)
     # sentence: best tool at the nearest and the farthest relative, and kmerseek's drawn setting
     near, far = min(mya), max(mya)
-    bn = t.filter(pl.col("mya") == near).sort(["fmax", "tool"], descending=[True, False]).row(0, named=True)
-    bf = t.filter(pl.col("mya") == far).sort(["fmax", "tool"], descending=[True, False]).row(0, named=True)
+    bn = t.filter(pl.col("highlight") & (pl.col("mya") == near)).sort(["fmax", "tool"], descending=[True, False]).row(0, named=True)
+    bf = t.filter(pl.col("highlight") & (pl.col("mya") == far)).sort(["fmax", "tool"], descending=[True, False]).row(0, named=True)
     ks = t.filter((pl.col("tool") == "kmerseek") & pl.col("highlight")).sort("mya")
     hl = t.filter(pl.col("highlight"))
     a_near = hl.filter(pl.col("mya") == near).select("tool", "setting", pl.col("fmax").alias("f_near"))
@@ -262,7 +262,7 @@ def draw_identity(t: pl.DataFrame) -> tuple[str, str]:
     jb = bins.filter(pl.col("joined") & pl.col("enough"))
     first, last = jb.row(0, named=True), jb.row(jb.height - 1, named=True)
     nm = lambda r: r["name"] + (f" ({r['label']})" if r["tool"] == "kmerseek" else "")  # noqa: E731
-    top = lambda b_: t.filter(pl.col("bin") == b_).sort(["fmax", "tool", "setting"], descending=[True, False, False]).row(0, named=True)  # noqa: E731
+    top = lambda b_: t.filter(pl.col("highlight") & (pl.col("bin") == b_)).sort(["fmax", "tool", "setting"], descending=[True, False, False]).row(0, named=True)  # noqa: E731
     a, b = top(first["bin"]), top(last["bin"])
     s = (f"At {first['bin_label']} identity the best is {nm(a)} at Fmax {a['fmax']:.3f} "
          f"(n = {first['n']:,}); at {last['bin_label']} it is {nm(b)} at {b['fmax']:.3f} (n = {last['n']:,}).")
