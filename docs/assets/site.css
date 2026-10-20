@@ -1,6 +1,7 @@
 /* Protein annotation leaderboard. Palette from the kmerseek landing page
    (seanome/kmerseek docs/assets/site.css). One meaning per colour across the site:
    --k-letters / --k-profiles / --k-shapes / --k-kmers / --k-models  the kind of method
+   --k-nosearch  a no-search baseline row (context, pinned under the search tools)
    --measured  numbers measured on Sherlock      --reported  numbers a submitter reported
    --muted     words, never data                  --accent    links and the selected chip */
 @font-face{font-family:"Fantasque Sans Mono";font-weight:400;font-style:normal;font-display:swap;
@@ -10,16 +11,16 @@
 
 :root{--bg:#F6F7F5;--surface:#FFFFFF;--ink:#1C211F;--muted:#5E6663;--hair:#D9DDDA;
   --accent:#145A63;--chip:#EEF1EF;--null:#8E9290;--strip-a:#8C6D46;--strip-b:#DCCBAB;
-  --k-letters:#0072B2;--k-profiles:#E69F00;--k-shapes:#009E73;--k-kmers:#CC3311;--k-models:#6B4C9A;
+  --k-letters:#0072B2;--k-profiles:#E69F00;--k-shapes:#009E73;--k-kmers:#CC3311;--k-models:#6B4C9A;--k-nosearch:#777777;
   --measured:#1C211F;--reported:#8A5A00;--warn:#9A6200;--warn-bg:#FCEBC4;--nr:#8E9290;
   --shadow:0 14px 34px -26px rgba(0,40,50,.75)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141716;--surface:#1B1F1E;--ink:#E6EAE8;
   --muted:#A3ABA7;--hair:#2E3432;--accent:#7FD1D9;--chip:#232826;--null:#555B59;--strip-a:#A88A5F;--strip-b:#5E4C33;
-  --k-letters:#56B4E9;--k-profiles:#F0B640;--k-shapes:#3CC79A;--k-kmers:#FF6E54;--k-models:#B39DDB;
+  --k-letters:#56B4E9;--k-profiles:#F0B640;--k-shapes:#3CC79A;--k-kmers:#FF6E54;--k-models:#B39DDB;--k-nosearch:#9AA19E;
   --measured:#E6EAE8;--reported:#F2C46B;--warn:#F2C46B;--warn-bg:#3A2E12;--nr:#7C8380;--shadow:0 18px 44px -28px rgba(0,0,0,.85);color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#141716;--surface:#1B1F1E;--ink:#E6EAE8;
   --muted:#A3ABA7;--hair:#2E3432;--accent:#7FD1D9;--chip:#232826;--null:#555B59;--strip-a:#A88A5F;--strip-b:#5E4C33;
-  --k-letters:#56B4E9;--k-profiles:#F0B640;--k-shapes:#3CC79A;--k-kmers:#FF6E54;--k-models:#B39DDB;
+  --k-letters:#56B4E9;--k-profiles:#F0B640;--k-shapes:#3CC79A;--k-kmers:#FF6E54;--k-models:#B39DDB;--k-nosearch:#9AA19E;
   --measured:#E6EAE8;--reported:#F2C46B;--warn:#F2C46B;--warn-bg:#3A2E12;--nr:#7C8380;--shadow:0 18px 44px -28px rgba(0,0,0,.85);color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -112,7 +113,7 @@ td.missing{color:var(--muted);font-family:"Source Sans 3",sans-serif !important;
 .prov.reported{border:1.5px dashed var(--reported);color:var(--reported)}
 .kind{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:0}
 .k-letters{background:var(--k-letters)}.k-profiles{background:var(--k-profiles)}.k-shapes{background:var(--k-shapes)}
-.k-kmers{background:var(--k-kmers)}.k-models{background:var(--k-models)}
+.k-kmers{background:var(--k-kmers)}.k-models{background:var(--k-models)}.k-nosearch{background:var(--k-nosearch)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9rem;margin:8px 0 10px;align-items:center}
 .legend .item{display:inline-flex;align-items:center;gap:6px;min-width:0}
 @media (max-width:640px){.legend .item.kwrap{flex-wrap:wrap}}
@@ -503,3 +504,8 @@ details.fg-stratum>summary{cursor:pointer;font-weight:600}
 .fg-exhead{font-size:.9rem;margin:0 0 4px}
 .fg-res{font-size:.85rem;margin:4px 0 0}
 .fg-res .mono{overflow-wrap:anywhere}
+
+/* A no-search baseline row: pinned under the search tools, set apart by a rule above the first one. */
+#lb tbody tr.base-first td{border-top:2px solid var(--hair)}
+/* A long path that must wrap at phone width instead of pushing the page sideways. */
+.wrapany{overflow-wrap:anywhere;word-break:break-all}

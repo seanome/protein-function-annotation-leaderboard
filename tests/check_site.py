@@ -14,6 +14,10 @@
    exactly the rows with a value on both axes, each marker's x and y must equal the value
    computed here from the parquet files, every other row must be listed as not plotted, and
    the line through the best trade-offs must be drawn only for a cost against a score.
+   No-search baselines (data/no_search_baselines.parquet): every baseline row is in every
+   combination, below every search row; a cell it can address shows the parquet's numbers,
+   any other shows "not applicable" and no number; the sentence's picks leave baselines out
+   and name a baseline only when it is at or above the best search tool's Fmax.
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
    at phone width (375 px). Every number written before "Mya" or "million years" must be a
    relative's divergence time from human in the parquet's target_mya_to_human, rounded.
@@ -76,7 +80,7 @@ SNAP_TABLE = """(batch) => batch.map((s) => {
     return {tool: tr.dataset.tool, setting: tr.dataset.setting, hidden: tr.hidden, cells};
   });
   const v = document.getElementById('verdict').dataset;
-  return {s, rows, verdict: {best: v.best, cheap: v.cheap, auprc: v.auprc}};
+  return {s, rows, verdict: {best: v.best, cheap: v.cheap, auprc: v.auprc, floor: v.floor}};
 })"""
 
 SNAP_PLOT = """(batch) => batch.map((s) => {
@@ -108,6 +112,30 @@ def main() -> int:
         sp = "all" if r["target_db"] == "Pfam-A HMM library" else r["target_db"].removeprefix("QfO ")
         k = (truth[r["truth_source"]], r["dedup_or_raw"], sp, r["stratum_axis"], r["stratum_bin"], r["tool"], r["setting"])
         expect.setdefault(k, {"n_truth_instances": r["n_instances"]})[r["metric"]] = r["value"]
+    # No-search baselines: one row per baseline, setting, truth set and stratum, the same
+    # under every relative and under raw and dedup (they search no relative and make no
+    # copies to merge). A not-applicable row has no value at all.
+    base_tools = set()
+    nsb = a.data / "no_search_baselines.parquet"
+    rels = sorted({"all" if t == "Pfam-A HMM library" else t.removeprefix("QfO ")
+                   for t in long["target_db"].unique().to_list()})
+    if nsb.exists():
+        b = pl.read_parquet(nsb).filter((pl.col("experiment") == "qfo_region_midi_plus")
+                                        & pl.col("truth_source").is_in(list(truth))
+                                        & pl.col("metric").is_in(["fmax", "auprc", "median_iou_tp"]))
+        if b.filter(~pl.col("applicable") & pl.col("value").is_not_null()).height:
+            failures_early = "a not-applicable baseline row carries a value"
+            raise SystemExit(failures_early)
+        base_tools = set(b["tool"].unique().to_list())
+        for r in b.iter_rows(named=True):
+            for sp in rels:
+                for calls in ("raw", "dedup"):
+                    k = (truth[r["truth_source"]], calls, sp, r["stratum_axis"], r["stratum_bin"], r["tool"], r["setting"])
+                    e = expect.setdefault(k, {"n_truth_instances": r["n_instances"]})
+                    if r["applicable"]:
+                        e[r["metric"]] = r["value"]
+                    else:
+                        e["na"] = True
     for v in expect.values():
         v.setdefault("median_iou_tp", None)
     # Search cost per relative per 1,000 queries: cpu_h / n_target_dbs * 1000 / n_queries, for the
@@ -129,6 +157,17 @@ def main() -> int:
         "wall_h_per_1000_queries": r["wall_s"] / 3600 / r["n_target_dbs"] * 1000 / r["n_queries"],
         "db_cpu_h_per_db": db_per_db(r["tool"], r["setting"])} for r in search.iter_rows(named=True)}
     cexp = {(k[5], k[6], k[2]): per_ts[(k[5], k[6])] for k in expect if (k[5], k[6]) in per_ts}
+    # A baseline's cost: its own tasks' seconds per 1,000 queries, the same for every relative.
+    nsc = a.data / "no_search_compute.parquet"
+    if nsc.exists():
+        for r in pl.read_parquet(nsc).iter_rows(named=True):
+            for k in expect:
+                if k[5] == r["tool"] and not expect[k].get("na"):
+                    cexp[(k[5], k[6], k[2])] = {
+                        "cpu_h_per_1000_queries": r["cpu_h"] * 1000 / r["n_queries"],
+                        "peak_rss_gb": r["peak_ram_gb"], "gpu_h_per_1000_queries": 0.0,
+                        "wall_h_per_1000_queries": r["wall_s"] / 3600 * 1000 / r["n_queries"],
+                        "db_cpu_h_per_db": None}
 
     # Divergence time from human per relative, from the long table itself.
     mya_rows = long.select("target_db", "target_mya_to_human").unique()
@@ -188,6 +227,12 @@ def main() -> int:
                 cells = row["cells"]
                 tag = f"{key}"
                 cw = cexp.get((row["tool"], row["setting"], s["species"]))
+                if want is not None and want.get("na"):
+                    bad = [c for c, v in cells.items() if c != "tool" and (v["missing"] != "na" or v["text"] != "not applicable")]
+                    if bad:
+                        failures.append(f"{tag}: baseline cannot address this cell, but cells {bad} are not 'not applicable': {cells}")
+                    stats["not_applicable_cells"] = stats.get("not_applicable_cells", 0) + 1
+                    continue
                 if want is None:
                     bad = [c for c, v in cells.items() if c != "tool" and (v["missing"] != "results" or v["text"] != "× not run")]
                     if bad:
@@ -247,10 +292,19 @@ def main() -> int:
                 stats["best_rows_checked"] = stats.get("best_rows_checked", 0) + len(want_vis)
             elif sorted(visible) != sorted(order):
                 failures.append(f"{s}: every-setting view hides rows")
-            b = best_of(list(order), 0)
+            # Baselines are pinned under every search row, in the DOM order of the table.
+            kinds = [r["tool"] in base_tools for r in snap["rows"]]
+            if kinds != sorted(kinds):
+                failures.append(f"{s}: a baseline row is above a search row")
+            stats["pinned_checks"] = stats.get("pinned_checks", 0) + 1
+            search_keys = [k for k in order if k.split("|")[0] not in base_tools]
+            b = best_of(search_keys, 0)
+            fl = best_of([k for k in order if k.split("|")[0] in base_tools], 0)
+            floor = fl if (fl and b and vals[fl][0] >= vals[b][0]) else None
+            vals = {k: v for k, v in vals.items() if k.split("|")[0] not in base_tools}
             near = [k for k in vals if b and vals[k][0] is not None and vals[k][0] >= vals[b][0] - 0.01 and vals[k][2] is not None]
             cheap = min(near, key=lambda k: (vals[k][2], order[k])) if near else None
-            want_v = {"best": b or "", "cheap": cheap or "", "auprc": best_of(list(order), 1) or ""}
+            want_v = {"best": b or "", "cheap": cheap or "", "auprc": best_of(search_keys, 1) or "", "floor": floor or ""}
             if snap["verdict"] != want_v:
                 failures.append(f"{s}: sentence above Table 1 names {snap['verdict']}, expected {want_v}")
             stats["sentences_checked"] = stats.get("sentences_checked", 0) + 1
@@ -397,7 +451,7 @@ def main() -> int:
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "explainers.html", "tools/index.html"] + \
         [x for x in ("pileup.html", "proteins.html") if (a.site / x).exists()] + \
         [x for x in ("claims.html", "claims-schema.html") if (a.site / x).exists()] + \
-            [f"tools/{t}.html" for t in sorted(meta["tools"])]
+            [f"tools/{t}.html" for t in sorted(meta["tools"]) if meta["tools"][t]["kind"] != "nosearch"]
         files_ok = {str(q.relative_to(a.site)) for q in a.site.rglob("*") if q.is_file()}
         for width in (1280, 375):
             page.set_viewport_size({"width": width, "height": 900})
