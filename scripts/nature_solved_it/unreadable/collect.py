@@ -4,14 +4,18 @@ Python 3.6 standard library. Reads every $RUN/out/<upid>/summary.json and the sa
 written by collect.sbatch, and writes $RUN/unreadable_table.tsv. A proteome whose task
 failed keeps its row with status "failed" and empty numbers, so nothing drops out unseen.
 
+It refuses (exit status 2, no table) unless $RUN/setup_ok exists and names this run's setup
+job: a run whose setup failed has no result to collect.
+
     python3 -I collect.py --proteomes proteomes.tsv --run $RUN --sacct $RUN/sacct.txt \
-        --fetch-job 123 --label-job 124
+        --setup-job 122 --fetch-job 123 --label-job 124
 """
 
 import argparse
 import csv
 import json
 import os
+import sys
 
 
 def hours(t):
@@ -60,9 +64,16 @@ def main():
     ap.add_argument("--proteomes", required=True)
     ap.add_argument("--run", required=True)
     ap.add_argument("--sacct", required=True)
+    ap.add_argument("--setup-job", required=True)
     ap.add_argument("--fetch-job", required=True)
     ap.add_argument("--label-job", required=True)
     args = ap.parse_args()
+    marker = os.path.join(args.run, "setup_ok")
+    fields = dict(line.split(" ", 1) for line in open(marker).read().splitlines() if " " in line) if os.path.exists(marker) else {}
+    if fields.get("setup_job") != str(args.setup_job):
+        print("refusing to collect: {} {}; setup job {} did not finish".format(
+            marker, "names setup job " + fields["setup_job"] if fields else "is missing", args.setup_job), file=sys.stderr)
+        sys.exit(2)
     rows = list(csv.DictReader(open(args.proteomes), delimiter="\t"))
     fetch = sacct_by_task(args.sacct, args.fetch_job)
     label = sacct_by_task(args.sacct, args.label_job)

@@ -127,6 +127,37 @@ The oyster (UP000005408) is added to the run as a "leaderboard reference" row un
 already in a group. It repeats the 19.41% measurement and is labelled on the figure. It is in
 no group median.
 
+## First submission failed, 2026-10-20
+
+Olga submitted the chain at commit e18c94e. Setup job 48668645 failed after 22 s with
+"exec /usr/local/bin/busco failed: a shared library is likely missing in the image". The
+download and label arrays were cancelled and never ran. The collect job 48668661 ran anyway
+and wrote an `unreadable_table.tsv` listing all 42 proteomes as failed; that table is not a
+result.
+
+The cause: the shared BUSCO sandbox in `$SCRATCH/apptainer-cache`, the same folder that ran
+BUSCO in job 47961379 on 2026-10-15, had lost `usr/lib64` and its empty folders (`tmp`,
+`var/tmp` and others) on 2026-10-18 at 07:37-07:38 PDT. What removed them is not known. The
+image's programs ask for `/lib64/ld-linux-x86-64.so.2`, the program loader, which lived in
+`usr/lib64`, so none of them can start. Checked on a Sherlock login node on 2026-10-20:
+`busco --version` in that sandbox gives the same error, `readelf` shows the loader path, and
+the same Python starts (Python 3.12.13) when the loader still present elsewhere in the image is
+called directly. The image is x86-64, so the platform is not the problem.
+
+What changed:
+
+- `setup.sbatch` builds the run's own BUSCO sandbox under `$RUN/images/` from the same image
+  reference, checks that `busco --version` prints BUSCO 6.1.0 and that MMseqs2 starts, then
+  makes the sandbox read-only so a clean-up cannot delete files from it. The label tasks use
+  that sandbox. Setup now asks 4 CPUs, 16 GB and 3 hours for the build.
+- Setup's last step writes `$RUN/setup_ok`, naming its own job id. `collect.sbatch` and
+  `collect.py` refuse to write anything unless that file names this run's setup job.
+- `collect` now depends on `afterok` of setup as well as `afterany` of the label array, with
+  `--kill-on-invalid-dep=yes`, so it can never run after a failed setup.
+- `submit_all.sh` moves an earlier run's `unreadable_table.tsv`, `sacct.txt`, `setup_ok`,
+  version files, `job_ids.txt` and `out/` into `$RUN/earlier-run-<UTC time>/` before
+  submitting. Nothing is deleted; the downloaded inputs are kept and reused.
+
 ## Not done yet
 
 - The Sherlock run, the figure, `verdict.json`, the notebook and the claims-ledger row.

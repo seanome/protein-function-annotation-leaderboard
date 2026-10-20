@@ -24,7 +24,9 @@ HERE=$REPO/scripts/nature_solved_it/unreadable
 IMG_DIR=$SCRATCH/apptainer-cache
 # The MMseqs2 image of scripts/why/sherlock_labels.sbatch (MMseqs2 18.8cc5c).
 MMSEQS_IMG=$IMG_DIR/quay.io-biocontainers-mmseqs2@sha256-3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef.img
-BUSCO_IMG=$IMG_DIR/quay.io-biocontainers-busco-6.1.0--pyhdfd78af_2.sandbox
+# This run's own BUSCO sandbox, built and checked by setup.sbatch (the shared one in
+# $IMG_DIR lost its program loader on 2026-10-18; see setup.sbatch).
+BUSCO_IMG=$RUN/images/busco-6.1.0--pyhdfd78af_2.sandbox
 IN=$RUN/inputs
 SPROT=$IN/uniprot_sprot.fasta.gz
 

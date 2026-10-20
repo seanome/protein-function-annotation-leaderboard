@@ -71,4 +71,7 @@ queue wait is not counted.
 least 1 hour, rounded up to the hour, from `predict_resources.py --time-ask label`. The fetch
 array gets the same rule but at least 2 hours, because its speed on Sherlock is unmeasured. A
 fetch task that runs out of time can be resubmitted; files already downloaded and checked are
-not fetched again. Setup asks 2 hours and collect 30 minutes; neither is measured.
+not fetched again. Setup asks 4 CPUs, 16 GB and 3 hours, because since 2026-10-20 it builds the run's own BUSCO
+image. The one earlier build on Sherlock took about 10 minutes (its lock file is dated
+07:22 and the finished image 07:32 on 2026-10-15); nothing else about setup is measured.
+Collect asks 30 minutes, unmeasured.
