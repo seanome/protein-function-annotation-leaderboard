@@ -120,11 +120,14 @@ The rules were fixed before the searching. Here is each one and its outcome.
 diseases, 30 of 60, to have a named species with a measured number and a citation. 42 of
 60 do. The weak-foundation clause, fewer than 15 of 60, is far from being met.
 
-**The narrow version cannot be tested, because no row has an approved drug.** The rule
-asked whether every row with an approved drug has a transferability score of 5 or 6, and
-no row with a score of 2 or below does. Step 5 asks whether the molecule from the tolerant
-species became a drug. No row in the atlas has one, so the test has nothing to run on. Two
-near-misses were found and both are recorded in the rows:
+**The narrow version cannot be tested as written, because no row that reaches step 2 has an
+approved drug.** The rule asked whether every row with an approved drug has a transferability
+score of 5 or 6, and no row with a score of 2 or below does. One row does have an approved
+drug: gout (D21) lists rasburicase, with a score of 4. Read literally, that row does not meet
+"5 or 6". It is left out of the test because it has no species and so never reaches step 2.
+Step 5 asks whether the molecule from the tolerant species became a drug. No row that reaches
+step 5 has one, so the test has nothing to run on. Two near-misses were found and both are
+recorded in the rows:
 
 - Rasburicase (ELITEK, US FDA BLA 103946, approved 12 July 2002, page fetched today) is
   uricase, the enzyme humans lost. Its source is the fungus *Aspergillus flavus*, and the
