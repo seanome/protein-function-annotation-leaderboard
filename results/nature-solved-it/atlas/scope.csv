@@ -1,0 +1,61 @@
+disease_id,human_disease,insult_class
+D01,Snakebite envenoming,toxin
+D02,Scorpion sting envenoming,toxin
+D03,Cardiac glycoside poisoning (digoxin and plant or toad cardenolides),toxin
+D04,Tetrodotoxin poisoning,toxin
+D05,Paralytic shellfish poisoning (saxitoxin),toxin
+D06,Ciguatera poisoning (ciguatoxin),toxin
+D07,Nicotine poisoning,toxin
+D08,Ethanol poisoning and alcohol-related liver injury,toxin
+D09,Cadmium poisoning,toxin
+D10,Arsenic poisoning,toxin
+D11,Methylmercury poisoning,toxin
+D12,Lead poisoning,toxin
+D13,Cyanide poisoning,toxin
+D14,Hydrogen sulfide poisoning,toxin
+D15,Carbon monoxide poisoning,toxin
+D16,Organophosphate poisoning,toxin
+D17,Hyperammonaemia (urea cycle disorders and hepatic encephalopathy),metabolite that accumulates
+D18,Uraemia in kidney failure,metabolite that accumulates
+D19,Type 2 diabetes (chronic high blood glucose),metabolite that accumulates
+D20,Unconjugated hyperbilirubinaemia (jaundice),metabolite that accumulates
+D21,Hyperuricaemia and gout,metabolite that accumulates
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation),metabolite that accumulates
+D23,Iron overload (haemochromatosis),metabolite that accumulates
+D24,Copper overload (Wilson disease),metabolite that accumulates
+D25,Fatty liver disease (hepatic steatosis),metabolite that accumulates
+D26,Lactic acidosis,metabolite that accumulates
+D27,Hypercapnia (carbon dioxide retention and respiratory acidosis),metabolite that accumulates
+D28,Protein aggregation neurodegeneration,metabolite that accumulates
+D29,Hyperoxaluria and oxalate kidney stones,metabolite that accumulates
+D30,Hypercholesterolaemia and atherosclerosis,metabolite that accumulates
+D31,Ischaemic stroke,loss of oxygen
+D32,Myocardial infarction (ischaemic heart injury),loss of oxygen
+D33,Ischaemic acute kidney injury,loss of oxygen
+D34,Neonatal hypoxic-ischaemic encephalopathy,loss of oxygen
+D35,Brain injury after cardiac arrest,loss of oxygen
+D36,Chronic mountain sickness (high-altitude hypoxia),loss of oxygen
+D37,Hypoxic pulmonary hypertension,loss of oxygen
+D38,Obstructive sleep apnoea (intermittent hypoxia),loss of oxygen
+D39,Ischaemia-reperfusion injury in organ transplantation,loss of oxygen
+D40,Haemorrhagic shock,loss of oxygen
+D41,Frostbite,freezing
+D42,Freezing injury in cell and organ cryopreservation,freezing
+D43,Accidental hypothermia,freezing
+D44,Dry eye disease,drying
+D45,Severe dehydration,drying
+D46,Acute radiation syndrome,radiation
+D47,Ultraviolet skin damage (sunburn),radiation
+D48,Disuse osteoporosis (bone loss during immobility),long immobility
+D49,Disuse muscle atrophy,long immobility
+D50,Venous thromboembolism during immobility,long immobility
+D51,Limb loss (no regrowth after amputation),injury that scars instead of regrowing
+D52,Heart scarring after myocardial infarction,injury that scars instead of regrowing
+D53,Spinal cord injury,injury that scars instead of regrowing
+D54,Skin scarring after full-thickness wounds,injury that scars instead of regrowing
+D55,Liver fibrosis and cirrhosis,injury that scars instead of regrowing
+D56,Sensorineural hearing loss (hair cell loss),injury that scars instead of regrowing
+D57,Retinal degeneration (photoreceptor loss),injury that scars instead of regrowing
+D58,Tooth loss,injury that scars instead of regrowing
+D59,Pulmonary fibrosis,injury that scars instead of regrowing
+D60,Cancer in a large or long-lived body (Peto's paradox),cancer in a large or long-lived body
