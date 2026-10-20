@@ -27,6 +27,18 @@ same distance from human?
    the draw. If a bin has fewer unused candidates than atlas species, the draw takes every
    candidate in that bin and the shortfall is reported; it is not filled from another bin.
 
+   Details fixed before the draw (added 2026-10-19, before any proteome was fetched):
+   - Divergence time is TimeTree's `adjusted_age` from
+     `https://timetree.temple.edu/api/pairwise/9606/<taxid>` (its `precomputed_age` is
+     recorded next to it). TimeTree gives no row for human against itself; human is 0 My.
+   - Candidates are the Eukaryota rows of the UniProt reference proteomes README of the
+     release in use, minus every atlas species and the seven model organisms (they are
+     their own group).
+   - The candidates are shuffled once with `random.Random(seed).shuffle`, and read in that
+     order. A candidate joins the controls if TimeTree gives it a time and its bin still
+     needs a species. A candidate TimeTree cannot place is skipped and counted.
+   - The seed is 20261019. It is written in the output next to the draw.
+
 ## Measurement, identical for every proteome
 
 The measurement is the one that gave 19.41% for the Pacific oyster and 0.88% for human, in
