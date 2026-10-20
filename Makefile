@@ -1,18 +1,16 @@
 # Source of the tables: a commit of seanome/2024-kmerseek-analysis that holds
 # results/leaderboard/, written there by `make leaderboard-tables`.
 SOURCE_REPO ?= seanome/2024-kmerseek-analysis
-SOURCE_COMMIT ?= 7eca428b
+# 275e195e: the analysis repo's olgabot/leaderboard-query-strata (PR 164) after it merged
+# 7eca428b, so one commit holds the tables with TimeTree divergence times and query_strata/.
+SOURCE_COMMIT ?= 275e195e
 PILEUP_COMMIT ?= 39d81ec9
-# results/leaderboard/query_strata/ (the query-side subsets), from the analysis repo's branch
-# olgabot/leaderboard-query-strata. It branched before 7eca428b, so its results.parquet still has
-# the typed divergence times; only query_strata/ is read from it.
-QUERY_STRATA_COMMIT ?= 26a778cb
 PY ?= .venv/bin/python
 
 .PHONY: tables site check serve
 
 tables:
-	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --query-strata-commit $(QUERY_STRATA_COMMIT) --out data
+	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --out data
 
 site:
 	$(PY) scripts/build_site.py --data data --out docs

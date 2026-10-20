@@ -3,15 +3,15 @@
  "title": "Foldseek card",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
-  "commit_date": "2026-10-20T13:23:48Z",
+  "commit": "275e195e230a2a808881d320b036365af41beee9",
+  "commit_date": "2026-10-20T13:34:50Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-20T13:48:23Z",
+  "copied_at": "2026-10-20T14:15:37Z",
   "sha256": {
    "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
-   "coverage.md": "c10b26730d8dc44b16120bd2f6ee87eb8ed0db3efa40398b339ddac0b0cb7781",
-   "provenance.json": "928a70476164c3fa5f5da18160695a1fe80594d5f614e332509c1d0a341b636d",
+   "coverage.md": "cc1b2273680bd4c39806525bcade5c816506ce70ca1b0a7b5dbad137836d77e2",
+   "provenance.json": "1f1546005bbb39cd711ba1c2575896b59b790783f6d01c06e8cef244ceff3815",
    "inventory.md": "24402a32a0b75a1103fa3f9275e9191d2dfaa198075d93f12a0a11b94aea5e1c",
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
@@ -24,7 +24,7 @@
    "query_strata/provenance.json": "136f4e6d55028117591cd069e83b63ae543687f0f758630f846e3d703aa4cb0b"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
-  "query_strata_commit": "26a778cbe9c5dc12b00e3aac09ff13fdb4b4a01e"
+  "query_strata_commit": "275e195e230a2a808881d320b036365af41beee9"
  },
  "text": [
   {
@@ -205,7 +205,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool id foldseek. Numbers from seanome/2024-kmerseek-analysis commit 7eca428b."
+   "text": "Tool id foldseek. Numbers from seanome/2024-kmerseek-analysis commit 275e195e."
   },
   {
    "tag": "p",
@@ -236,7 +236,7 @@
   "command": "foldseek search \\\n    human-38fdd87d_fsdb/db zebrafish_fsdb/db result foldseek_tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
   "numbers_from": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+   "commit": "275e195e230a2a808881d320b036365af41beee9",
    "filters": "pfam, raw, zebrafish"
   },
   "best_setting": "3di_aa",
