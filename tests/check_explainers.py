@@ -209,9 +209,52 @@ def main() -> int:
         # ---- Figure 5 ----
         nums = [float(page.eval_on_selector(f"#{i}", "e => e.value")) for i in ("f5-cpu", "f5-gpu", "f5-rcpu", "f5-rgpu")]
         close("fig5 default cost", val("#f5-out"), nums[0] * nums[2] + nums[1] * nums[3], 1e-12)
+        # Drag the core-hours number 40 px right: 10 steps of 0.005 up, and the cost follows.
+        sp = page.locator("#fig5 .scrub[data-for='f5-cpu']")
+        sp.scroll_into_view_if_needed()
+        bb = sp.bounding_box()
+        page.mouse.move(bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2)
+        page.mouse.down()
+        page.mouse.move(bb["x"] + bb["width"] / 2 + 40, bb["y"] + bb["height"] / 2, steps=8)
+        page.mouse.up()
+        cpu2 = float(page.eval_on_selector("#f5-cpu", "e => e.value"))
+        close("fig5 drag core-hours +40 px", cpu2, nums[0] + 10 * 0.005, 1e-9)
+        close("fig5 cost after drag", val("#f5-out"), cpu2 * nums[2] + nums[1] * nums[3], 1e-12)
+        if sp.inner_text().strip() != str(cpu2):
+            fails.append(f"fig5: dragged number shows {sp.inner_text()!r}, box holds {cpu2}")
+        # Keyboard: focus the GPU-hours number and press the right arrow twice.
+        page.focus("#fig5 .scrub[data-for='f5-gpu']")
+        page.keyboard.press("ArrowRight"); page.keyboard.press("ArrowRight")
+        close("fig5 arrow keys on GPU-hours", float(page.eval_on_selector("#f5-gpu", "e => e.value")), 0.02, 1e-9)
+        page.click("#fig5 details.ex-exact summary")
+        page.fill("#f5-cpu", str(nums[0]))
         page.fill("#f5-gpu", "2.5")
         page.fill("#f5-rgpu", "1.006")
         close("fig5 with GPU", val("#f5-out"), nums[0] * nums[2] + 2.5 * 1.006, 1e-12)
+
+        # ---- Figure 6 drag: move the whole call, then one end ----
+        slide("#f3-start", 30); slide("#f3-end", 129)
+        bar = page.locator("#f3-track [data-drag='move']")
+        bar.scroll_into_view_if_needed()
+        bb = bar.bounding_box()
+        px_per_res = bb["width"] / (129 - 30)  # the bar spans residues 30 to 129
+        page.mouse.move(bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2)
+        page.mouse.down()
+        page.mouse.move(bb["x"] + bb["width"] / 2 + 20 * px_per_res, bb["y"] + bb["height"] / 2, steps=6)
+        page.mouse.up()
+        a = int(page.eval_on_selector("#f3-start", "e => e.value")); b = int(page.eval_on_selector("#f3-end", "e => e.value"))
+        if b - a != 99 or abs(a - 50) > 1:
+            fails.append(f"fig6 drag call +20 residues: now {a}-{b}, expected about 50-149")
+        inter = max(0, min(b, 109) - max(a, 10) + 1); union = max(b, 109) - min(a, 10) + 1
+        close("fig6 IoU after drag", val("#f3-iou"), inter / union)
+        h = page.locator("#f3-track [data-drag='end']").bounding_box()
+        page.mouse.move(h["x"] + h["width"] / 2, h["y"] + h["height"] / 2)
+        page.mouse.down()
+        page.mouse.move(h["x"] + h["width"] / 2 - 40 * px_per_res, h["y"] + h["height"] / 2, steps=6)
+        page.mouse.up()
+        a2 = int(page.eval_on_selector("#f3-start", "e => e.value")); b2 = int(page.eval_on_selector("#f3-end", "e => e.value"))
+        if a2 != a or abs(b2 - (b - 40)) > 1:
+            fails.append(f"fig6 drag end handle -40: now {a2}-{b2}, expected {a}-{b - 40}")
 
         # ---- phone width ----
         page.set_viewport_size({"width": 400, "height": 900})
