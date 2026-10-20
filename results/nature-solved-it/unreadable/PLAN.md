@@ -39,6 +39,35 @@ same distance from human?
      needs a species. A candidate TimeTree cannot place is skipped and counted.
    - The seed is 20261019. It is written in the output next to the draw.
 
+## Atlas list decisions, 2026-10-19 (after the atlas came in, before any proteome was measured)
+
+The tolerance atlas arrived as `results/nature-solved-it/atlas/atlas.csv` on branch
+`olgabot/tolerance-atlas` (PR 33). Its README lists 34 binomials from rows with a measured
+number. These decisions were taken after that list was seen and before `after_atlas.sh` ran,
+so before any proteome was fetched, drawn or measured.
+
+Taken by the coordinating agent:
+
+1. *Deinococcus radiodurans* and *Flavobacterium frigoris* are left out of the atlas group.
+   They are bacteria; the question is about animals, and the control pool is Eukaryota, so
+   they could not be matched.
+2. *Danio rerio* and *Drosophila melanogaster* stay in the model-organism group only and are
+   not counted in the atlas group, so no proteome sits in two groups.
+
+How the species column is read (needed to turn the atlas text into binomials):
+
+3. The atlas group is the binomials of rows with a measured number, as the atlas README lists
+   them. *Onychomys torridus*, whose row has no number, is not in it.
+4. Text in brackets or after a semicolon is dropped ("Rana sylvatica (also written
+   Lithobates sylvaticus)" is *Rana sylvatica*). A subspecies is read as its species
+   (*Chrysemys picta bellii* as *Chrysemys picta*, *Ursus arctos horribilis* as *Ursus
+   arctos*), and the reference proteome is looked up under the species.
+5. "none found" rows and the genus-only "Acomys spp." are not species.
+6. Every species named anywhere in the atlas, *Onychomys torridus* included, is left out of
+   the random-control pool.
+
+That leaves 30 atlas species before the reference-proteome lookup.
+
 ## Measurement, identical for every proteome
 
 The measurement is the one that gave 19.41% for the Pacific oyster and 0.88% for human, in
