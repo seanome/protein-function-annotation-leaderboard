@@ -26,7 +26,7 @@
 <h1>Methods</h1>
 <p class="lede">How each score and cost on this site is computed, which proteins were searched, and
 how the truth sets were built.</p>
-<p class="asof">Data from 15 Oct 2026, commit <span class="mono">4a4b1171</span> (<a href="#source-commit">source</a>)</p>
+<p class="asof">Data from 20 Oct 2026, commit <span class="mono">7eca428b</span> (<a href="#source-commit">source</a>)</p>
 <nav class="toc" aria-label="Contents"><b>Contents</b>
 <ol><li><a href="#data">The benchmark run</a></li><li><a href="#no-winner">No tool wins everywhere</a></li>
 <li><a href="#calls">From a search hit to a call</a></li>
@@ -43,12 +43,12 @@ proteins against the proteomes of 15 relatives from the Quest for Orthologs refe
 release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune
 proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not
 record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock
-cluster. It has 205,653 of the 3,975,483 rows of <span class="mono">results.parquet</span>,
+cluster. It has 235,032 of the 4,386,981 rows of <span class="mono">results.parquet</span>,
 one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative,
 truth set, raw or dedup, and subset. Its cost is in <span class="mono">compute.parquet</span>. Both
 tables were built by
 <span class="mono">make leaderboard-tables</span> in seanome/2024-kmerseek-analysis at commit
-<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a>.
+<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
 
 <h2 id="no-winner">No tool wins everywhere</h2>
@@ -196,7 +196,9 @@ The same calls drawn raw and after dedup, on a made-up protein: <a href="explain
 closest domain of the same family in the relative. Bins: 0–20, 20–30, 30–40, 40–60 and 60–100%. A
 domain whose family is absent from the relative is "no same-family domain".</li>
 <li><b>Nearest reviewed relative, Mya</b>: the relative searched, labelled with how many million
-years ago its line split from ours.</li>
+years ago its line split from ours: the pairwise divergence time from human in
+<a href="https://timetree.org/">TimeTree 5</a>, rounded to the nearest million years. TimeTree
+gives no time for human and a bacterium, so E. coli has none.</li>
 <li><b>Region type and length</b>: the length of the annotated region, in residues. Bins up to 60
 aa are short features; 61 aa and up is the size of a folded domain. Whole-protein annotations
 were not scored in this run.</li>
@@ -212,7 +214,7 @@ no row shows × and "not run".</p>
 leaderboard is a missing row in results.parquet, and that every number matches the tables. The
 source table checksums are in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
 <h2 id="experiments">Experiments in the tables</h2>
-<p>The tables hold 3,975,483 rows from 12 experiments; the coverage page counts all of
+<p>The tables hold 4,386,981 rows from 12 experiments; the coverage page counts all of
 them. Their ids: <span class="mono">alphabet_ranking_three_cases</span>, <span class="mono">dark_set_accuracy</span>, <span class="mono">dark_set_gain</span>, <span class="mono">dark_set_pfam_fmax</span>, <span class="mono">deep_twilight</span>, <span class="mono">elm_cover</span>, <span class="mono">qfo_region_midi</span>, <span class="mono">qfo_region_midi_plus</span>, <span class="mono">qfo_region_mini</span>, <span class="mono">scope40_v040</span>, <span class="mono">scope40_v040_below_kmin</span>, <span class="mono">scope40_v040_shuffled_k2_seed1</span>.</p>
 </div>
 <link rel="stylesheet" href="assets/katex/katex.min.css">
@@ -222,7 +224,7 @@ them. Their ids: <span class="mono">alphabet_ranking_three_cases</span>, <span c
 
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="methods.html.json">methods.html.json</a></p>
 </div></footer>

@@ -31,8 +31,8 @@
  "source": {
   "tables": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
-   "commit_date": "2026-10-15T13:12:56Z"
+   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
+   "commit_date": "2026-10-20T13:23:48Z"
   },
   "inventory": "seanome/2024-kmerseek-analysis data/experiments.json @ fe72334b (PR 97)"
  }
