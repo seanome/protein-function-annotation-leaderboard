@@ -2414,6 +2414,8 @@ def main() -> None:
     fm = fm_mod.site_json(fm_mod.load(), REPO, {t: TOOLS[t]["name"] for t in tools_used})
     (out / "data" / "failure_modes.json").write_text(json.dumps(fm, indent=1, ensure_ascii=False) + "\n")
     (out / "failure_modes").mkdir(parents=True, exist_ok=True)
+    for stale in (out / "failure_modes").glob("*"):  # drop copies whose source was removed
+        stale.unlink()
     for f in sorted((ROOT_DIR / "failure_modes").glob("*")):
         (out / "failure_modes" / f.name).write_text(f.read_text())
     (out / "failure-modes.html").write_text(page_failure_modes(src, fm))
