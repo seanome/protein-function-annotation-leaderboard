@@ -8,7 +8,11 @@
 2. Score against cost: render every combination for each of the three scores. The plotted
    markers must be exactly the rows with both a score and a measured cost.
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
-   at phone width (375 px).
+   at phone width (375 px). Every number written before "Mya" or "million years" must be a
+   relative's divergence time from human in the parquet's target_mya_to_human, rounded.
+4. Divergence times: each relative's chip label and the page's species table show the
+   parquet's target_mya_to_human rounded to whole million years, and no number where it is
+   null (E. coli).
 
 Uses the installed Google Chrome through Playwright (channel="chrome").
 """
@@ -18,6 +22,7 @@ import functools
 import http.server
 import itertools
 import json
+import re
 import socketserver
 import sys
 import threading
@@ -84,14 +89,40 @@ def main() -> int:
     ap.add_argument("--batch", type=int, default=150)
     a = ap.parse_args()
 
-    res = pl.read_parquet(a.data / "results.parquet").with_columns(
-        pl.when(pl.col("dedup")).then(pl.lit("dedup")).otherwise(pl.lit("raw")).alias("calls"))
-    comp = pl.read_parquet(a.data / "compute.parquet")
-    expect = {
-        (r["truth_set"], r["calls"], r["species"], r["stratum_axis"], r["stratum"], r["tool"], r["setting"]): r
-        for r in res.iter_rows(named=True)
-    }
-    cexp = {(r["tool"], r["setting"], r["species"]): r for r in comp.iter_rows(named=True)}
+    # Expected values, from the long tables directly (not through build_site.py).
+    long = pl.read_parquet(a.data / "results.parquet").filter(pl.col("experiment") == "qfo_region_midi_plus")
+    truth = {"Pfam-A domain instances": "pfam", "Pfam-N domain instances": "pfamn", "Swiss-Prot features": "swissprot"}
+    expect = {}
+    for r in long.filter(pl.col("metric").is_in(["fmax", "auprc", "median_iou_tp"])).iter_rows(named=True):
+        sp = "all" if r["target_db"] == "Pfam-A HMM library" else r["target_db"].removeprefix("QfO ")
+        k = (truth[r["truth_source"]], r["dedup_or_raw"], sp, r["stratum_axis"], r["stratum_bin"], r["tool"], r["setting"])
+        expect.setdefault(k, {"n_truth_instances": r["n_instances"]})[r["metric"]] = r["value"]
+    for v in expect.values():
+        v.setdefault("median_iou_tp", None)
+    # Search cost per relative per 1,000 queries: cpu_h / n_target_dbs * 1000 / n_queries, for the
+    # tool and setting's search step, shown for every relative that tool and setting searched.
+    comp = pl.read_parquet(a.data / "compute.parquet").filter(pl.col("experiment") == "qfo_region_midi_plus")
+    search = comp.filter((pl.col("setting") != "database build") & ~pl.col("step").str.contains("Index|Db|DB"))
+    per_ts = {(r["tool"], r["setting"]): {
+        "cpu_h_per_1000_queries": r["cpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
+        "peak_rss_gb": r["peak_ram_gb"], "gpu_h_per_1000_queries": 0.0 if r["gpu_h"] is None else r["gpu_h"] / r["n_target_dbs"] * 1000 / r["n_queries"],
+        "cpu_h_reported": None, "n_completed_runs": 1} for r in search.iter_rows(named=True)}
+    cexp = {(k[5], k[6], k[2]): per_ts[(k[5], k[6])] for k in expect if (k[5], k[6]) in per_ts}
+
+    # Divergence time from human per relative, from the long table itself.
+    mya_rows = long.select("target_db", "target_mya_to_human").unique()
+    mya_want = {}
+    for r in mya_rows.iter_rows(named=True):
+        if r["target_db"] == "Pfam-A HMM library":
+            continue
+        sp = r["target_db"].removeprefix("QfO ")
+        v = r["target_mya_to_human"]
+        if sp in mya_want and mya_want[sp] != v:
+            raise SystemExit(f"{sp}: more than one target_mya_to_human in the parquet")
+        mya_want[sp] = v
+    mya_shown = {sp: (None if v is None else int(round(v))) for sp, v in mya_want.items()}
+    mya_allowed = {v for v in mya_shown.values() if v is not None}
+    MYA_RE = re.compile(r"(\d[\d,]*)\s*(?:Mya|million years)")
 
     failures: list[str] = []
     stats = {"combinations": 0, "rows_checked": 0, "numbers_checked": 0, "dashes": 0,
@@ -109,6 +140,16 @@ def main() -> int:
         page.goto(base + "index.html")
         meta = page.evaluate("window.__lb.meta")
         all_combos = combos(meta)
+        chips = {c["value"]: c["label"] for r in meta["chiprows"] if r["id"] == "species"
+                 for g in r["groups"] for c in g["chips"]}
+        for sp, want in mya_shown.items():
+            name = meta["species"][sp]["name"]
+            want_label = name if want is None else f"{name} {want}"
+            if chips.get(sp) != want_label:
+                failures.append(f"chip {sp}: label {chips.get(sp)!r}, parquet says {want_label!r}")
+            if meta["species"][sp]["mya"] != want:
+                failures.append(f"species {sp}: mya {meta['species'][sp]['mya']}, parquet says {want}")
+            stats["mya_checked"] = stats.get("mya_checked", 0) + 1
         for i in range(0, len(all_combos), a.batch):
             for snap in page.evaluate(SNAP_TABLE, all_combos[i:i + a.batch]):
                 stats["combinations"] += 1
@@ -128,13 +169,13 @@ def main() -> int:
                         rest = cells[1:]
                     else:
                         shown = [c["text"] for c in cells[:4]]
-                        exp = [want["fmax"], want["auprc"], want["median_iou_tp"]]
+                        exp = [want.get("fmax"), want.get("auprc"), want.get("median_iou_tp")]
                         # Three decimals on the page: each value within half of the last
                         # digit (the page rounds halves up, Python's format rounds them to even).
                         bad = any(abs(float(t) - e) > 0.0005 + 1e-9 for t, e in zip(shown[:2], exp[:2]))
                         # A stored median IoU of 0 (no correct call longer than one residue)
                         # is shown as words, never as a number or a dash.
-                        if exp[2] == 0:
+                        if exp[2] is None or exp[2] == 0:
                             bad |= cells[2]["none"] != "iou" or shown[2] != "no correct calls"
                             stats["iou_as_words"] = stats.get("iou_as_words", 0) + 1
                         else:
@@ -192,7 +233,7 @@ def main() -> int:
                 for r in meta["rows"]:
                     k = (s["truth"], s["calls"], s["species"], s["axis"], s["stratum"], r["tool"], r["setting"])
                     if k in expect and (r["tool"], r["setting"], s["species"]) in cexp \
-                            and expect[k][field[s["metric"]]] not in (None, 0.0 if s["metric"] == "iou" else None):
+                            and expect[k].get(field[s["metric"]]) not in (None, 0.0 if s["metric"] == "iou" else None):
                         want.add(r["tool"] + "|" + r["setting"])
                 got = set(snap["marks"])
                 stats["markers_checked"] += len(got)
@@ -215,6 +256,12 @@ def main() -> int:
                 if over > 0:
                     failures.append(f"{pg} at {width}px: page scrolls sideways by {over}px")
                 if width == 1280:
+                    text = page.evaluate("document.body.innerText")
+                    for m in MYA_RE.finditer(text):
+                        stats["mya_mentions_checked"] = stats.get("mya_mentions_checked", 0) + 1
+                        if int(m.group(1).replace(",", "")) not in mya_allowed:
+                            failures.append(f"{pg}: {m.group(0)!r} is no relative's divergence time "
+                                            f"in the parquet ({sorted(mya_allowed)})")
                     for href in page.evaluate("[...document.querySelectorAll('a[href]')].map(a => a.getAttribute('href'))"):
                         u = urlparse(urljoin(base + pg, href))
                         if u.netloc != urlparse(base).netloc:

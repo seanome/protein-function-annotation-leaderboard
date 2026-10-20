@@ -18,9 +18,9 @@
 <nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../cost.html" data-keep-filters>Score against cost</a><a href="../pileup.html">Region pile-up</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../coverage.html">Coverage</a><a href="../methods.html">Methods</a></nav>
 </div></header>
 <main class="wrap" data-page="tools">
-<p class="source" id="source-commit" data-commit="39d81ec90815cacbf3744199d1fa8e99ab28c6f4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/39d81ec90815cacbf3744199d1fa8e99ab28c6f4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec90815cacbf3744199d1fa8e99ab28c6f4">39d81ec9</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p class="source" id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <div class="card"><h1>kmerseek</h1>
-<p>Tool id <code>kmerseek</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>39d81ec9</code>.</p>
+<p>Tool id <code>kmerseek</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>7eca428b</code>.</p>
 <h2>What it compares</h2>
 <p>Short words of k letters (k-mers) shared between two proteins. First, each amino acid is replaced by a letter from a smaller alphabet, for example H for hydrophobic and P for polar. Two proteins can then match where their residues differ but their pattern of residue types is the same.</p>
 <h2>What it needs</h2>
@@ -34,7 +34,7 @@
 <h2>How to read its score</h2>
 <p>region_enrichment: the number of k-mers the region shares with the target divided by the number expected by chance (fold enrichment). Higher ranks first. A region was kept when either test passed: its own score was at least 1.3, or the whole query protein's p-value was at most 0.05.</p>
 <h2>Strong and weak strata</h2>
-<p>Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is <code>gbmr4_k21_lcFalse</code>: Fmax 0.192 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.</p>
+<p>Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is <code>gbmr4_k21_lcFalse</code>: Fmax 0.192 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.</p>
 <p>Where it is closest to, or furthest ahead of, the best other tool:</p>
 <ul>
 <li>regions 16–30 aa long: Fmax 0.281 (n = 271); best other: HH-suite (hhsearch) <code>single_seq</code>, 0.066.</li>
@@ -53,9 +53,9 @@
 <li>Setting hp_thomas_dill2 k33 was scored, but no trace row holds its search task, so its cost is not measured, and the scoring task for it was not found either.</li>
 </ul>
 <h2>Cost per 1,000 queries</h2>
-<p>Setting <code>gbmr4_k21_lcFalse</code>, searching zebrafish: 0.0204 CPU-hours, measured on Sherlock. Peak memory 5.2 GB. That is about $0.000911 at $0.044625 per CPU-hour.
-Across the 15 relatives searched with this setting: 0.00106 to 0.0204 CPU-hours per 1,000 queries; peak memory up to 5.2 GB.</p>
-<p>CPU-hours count the search only, not building the relative's database.</p>
+<p>Setting <code>gbmr4_k21_lcFalse</code>, searching one relative (mean over the 15 relatives it searched): 0.0552 core-hours reserved per 1,000 queries (4 cores for the task's wall time), measured on Sherlock. Peak memory 5.2 GB. That is about $0.00246 at $0.044625 per CPU-hour.
+Building its databases took 0.147 core-hours over 6 databases. A database is built once and reused, so this is not in the per-query cost.</p>
+<p>The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.</p>
 <h2>Licence</h2>
 <ul>
 <li>Licence: MIT (<a href="https://github.com/seanome/kmerseek">source</a>)</li>
@@ -97,14 +97,14 @@ Across the 15 relatives searched with this setting: 0.00106 to 0.0204 CPU-hours 
 <p>Shown for setting hp_thomas_dill2 k24. Other settings change --alphabet and --ksize only.</p>
 <h2>Will it work for you?</h2>
 <ol>
-<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.005 (n = 563), 60–100% 0.297 (n = 1,289). If no, 20–30% 0.000 (n = 93), 30–40% 0.000 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting <code>gbmr4_k21_lcFalse</code>; strata with at least 30 true instances.)</li>
-<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.208 (n = 963), 121–250 aa 0.098 (n = 504), 251 aa or more 0.050 (n = 277). If no, 16–30 aa 0.281 (n = 271), 31–60 aa 0.232 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting <code>gbmr4_k21_lcFalse</code>.)</li>
-<li><strong>Can you spend about 0.0204 CPU-hours per 1,000 proteins for each relative you search?</strong> That is the measured cost against zebrafish; the range over relatives is under "Cost per 1,000 queries" above.</li>
+<li><strong>Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?</strong> If yes, Fmax here is 40–60% 0.005 (n = 563), 60–100% 0.297 (n = 1,289). If no, 20–30% 0.000 (n = 93), 30–40% 0.000 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting <code>gbmr4_k21_lcFalse</code>; strata with at least 30 true instances.)</li>
+<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.208 (n = 963), 121–250 aa 0.098 (n = 504), 251 aa or more 0.050 (n = 277). If no, 16–30 aa 0.281 (n = 271), 31–60 aa 0.232 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting <code>gbmr4_k21_lcFalse</code>.)</li>
+<li><strong>Can you spend about 0.0552 core-hours per 1,000 proteins for each relative you search?</strong> That is the measured mean per relative; see "Cost per 1,000 queries" above.</li>
 </ol></div>
 <p><a href="index.html">All tool cards</a> · <a href="kmerseek.md">this card as Markdown</a> · <a href="kmerseek.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/39d81ec90815cacbf3744199d1fa8e99ab28c6f4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec90815cacbf3744199d1fa8e99ab28c6f4">39d81ec9</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="kmerseek.html.json">kmerseek.html.json</a></p>
 </div></footer>

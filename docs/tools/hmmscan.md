@@ -1,6 +1,6 @@
 # hmmscan with Pfam
 
-Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `39d81ec9`.
+Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
 
 ## What it compares
 
@@ -35,10 +35,10 @@ Swiss-Prot feature types: not run.
 
 ## Cost per 1,000 queries
 
-Setting `direct`, scanning Pfam's models: 0.198 CPU-hours, measured on Sherlock. Peak memory 0.5 GB. That is about $0.00883 at $0.044625 per CPU-hour.
-This search completed 2 times; the runs took 0.198 to 0.313 CPU-hours per 1,000 queries, and the newest is shown.
+Setting `direct`, scanning Pfam's models: 0.389 core-hours reserved per 1,000 queries (4 cores for the task's wall time), measured on Sherlock. Peak memory 0.5 GB. That is about $0.0173 at $0.044625 per CPU-hour.
+Building its databases: not measured.
 
-CPU-hours count the search only, not building the relative's database.
+The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
 ## Licence
 
@@ -70,4 +70,4 @@ Query: the same 998 human proteins.
 
 1. **Is every family you expect to find already in Pfam?** If no, this tool cannot find it: it only reports families that have a Pfam model.
 2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)
-3. **Can you spend about 0.198 CPU-hours per 1,000 proteins?** That is the measured cost of scanning them against Pfam's models.
+3. **Can you spend about 0.389 core-hours per 1,000 proteins?** That is the measured cost of scanning them against Pfam's models.
