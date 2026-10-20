@@ -80,6 +80,10 @@ def values(data: Path) -> dict | None:
     shared = comp.filter(pl.col("tool") == "annotator_shared")
     out["_shared_cpu_h"] = float(shared["cpu_h"].sum())
     out["_shared_steps"] = sorted(shared["step"].to_list())
+    # Database builds, per tool: left out of the rows' search core-hours too.
+    db = comp.filter(pl.col("setting") == "database build")
+    out["_db_cpu_h"] = {t: float(db.filter(pl.col("tool") == t)["cpu_h"].sum())
+                        for t in ("diamond_besthit", "mmseqs2_besthit")}
     out["_n_queries"] = next(v["n_queries"] for k, v in out.items() if not k.startswith("_"))
     return out
 
@@ -148,19 +152,20 @@ the query is the call. The column "Fmax, whole aligned region" scores the same b
 Table 1's rule. The gap between a row's first two numbers is what the call rule adds.</p>
 <p class="prose">The target is Swiss-Prot without mammals, not one relative's proteome. So these rows
 have no time since the split from human, and the choices above Table 1 do not change them. They
-score Pfam domains on every protein, with duplicate calls kept. Rows are in the order they were
-run, not by score.
+score Pfam domains on every protein, with duplicate calls kept. The rows are in a fixed order,
+not sorted by score. The copied domains' median IoU is 1.000 because the hit proteins' domains
+were found with the same Pfam models that define the truth.
 Source: <a href="{PR160}">PR 160</a>, copied at commit <code>{esc(commit[:8])}</code>.</p>
 <figure class="lbfig">
 <figcaption><b>Table 2.</b> Best Swiss-Prot hit (Mammalia removed), {v['_n_queries']:,} human proteins.</figcaption>
 <div class="tablebox"><table class="lb" id="besthit-table"><thead><tr>
 <th scope="col">Search</th>
 <th scope="col">Fmax, domains copied through the alignment</th>
-<th scope="col">Fmax, whole aligned region (Table 1's rule)</th>
+<th scope="col">Fmax, best hit's whole aligned region (Table 1's rule)</th>
 <th scope="col">Precision at Fmax</th>
 <th scope="col">Recall at Fmax</th>
 <th scope="col">Median IoU, copied domains (correct calls)</th>
-<th scope="col">Median IoU, whole aligned region (correct calls)</th>
+<th scope="col">Median IoU, best hit's whole aligned region (correct calls)</th>
 <th scope="col">Pfam domains in the truth</th>
 <th scope="col">Proteins with a call</th>
 <th scope="col">Core-hours per 1,000 proteins, search alone</th>
@@ -173,8 +178,12 @@ Source: <a href="{PR160}">PR 160</a>, copied at commit <code>{esc(commit[:8])}</
 <p class="prose oneline">Three steps are shared by the three rows and left out of their core-hours:
 building the reference, listing the hit proteins, and running hmmscan on the hit proteins. Together
 they took <span id="besthit-shared" data-v="{v['_shared_cpu_h']}">{v['_shared_cpu_h']:.3f}</span>
-core-hours for the {v['_n_queries']:,} proteins. Core-hours are cores asked times wall time, from the
-run's task records.</p>
+core-hours for all {v['_n_queries']:,} proteins, not per 1,000. Building the search databases is left
+out of the rows too:
+<span id="besthit-db-diamond" data-v="{v['_db_cpu_h']['diamond_besthit']}">{v['_db_cpu_h']['diamond_besthit']:.4f}</span>
+core-hours for DIAMOND and
+<span id="besthit-db-mmseqs2" data-v="{v['_db_cpu_h']['mmseqs2_besthit']}">{v['_db_cpu_h']['mmseqs2_besthit']:.4f}</span>
+for MMseqs2. Core-hours are cores asked times wall time, from the run's task records.</p>
 {figs}
 </section>
 """

@@ -140,7 +140,9 @@ def best_hit_expect(data: Path) -> dict | None:
         if abs(placed["fmax"] - metric("fmax")) > 1e-12:
             raise SystemExit(f"{tool} {setting}: call_rules placed Fmax != rows Fmax")
     shared = comp.filter(pl.col("tool") == "annotator_shared")["cpu_h"].sum()
-    return {"rows": out, "shared": float(shared)}
+    db = {t: float(comp.filter((pl.col("tool") == t) & (pl.col("setting") == "database build"))["cpu_h"].sum())
+          for t in ("diamond_besthit", "mmseqs2_besthit")}
+    return {"rows": out, "shared": float(shared), "db": db}
 
 
 def main() -> int:
@@ -355,6 +357,8 @@ def main() -> int:
                 failures.append(f"Table 2 rows {[g['key'] for g in got]} != {list(bh['rows'])}")
             for g in got:
                 want = bh["rows"].get(g["key"], {})
+                if set(g["cells"]) != set(want):
+                    failures.append(f"Table 2 {g['key']}: cells {sorted(g['cells'])} != {sorted(want)}")
                 for k, (wv, wtext) in want.items():
                     c = g["cells"].get(k)
                     if c is None:
@@ -365,9 +369,13 @@ def main() -> int:
                     if not same or c["text"] != wtext:
                         failures.append(f"Table 2 {g['key']} {k}: page {c} != {wv!r} / {wtext!r}")
                     stats["besthit_numbers_checked"] = stats.get("besthit_numbers_checked", 0) + 1
-            shared = float(page.evaluate("document.getElementById('besthit-shared').dataset.v"))
-            if abs(shared - bh["shared"]) > 1e-9:
-                failures.append(f"Table 2 shared core-hours {shared} != {bh['shared']}")
+            for sid, want, fmt in (("besthit-shared", bh["shared"], ".3f"),
+                                   ("besthit-db-diamond", bh["db"]["diamond_besthit"], ".4f"),
+                                   ("besthit-db-mmseqs2", bh["db"]["mmseqs2_besthit"], ".4f")):
+                el = page.evaluate(f"(() => {{const e = document.getElementById('{sid}'); return [e.dataset.v, e.textContent];}})()")
+                if abs(float(el[0]) - want) > 1e-9 or el[1] != format(want, fmt):
+                    failures.append(f"Table 2 {sid}: page {el} != {want}")
+                stats["besthit_numbers_checked"] = stats.get("besthit_numbers_checked", 0) + 1
             order = page.evaluate("document.getElementById('lb').compareDocumentPosition(document.getElementById('besthit-table'))")
             if not order & 4 or page.evaluate("!!document.querySelector('#lb #besthit-table, #besthit-table #lb')"):
                 failures.append("Table 2 is not after Table 1, or one is inside the other")

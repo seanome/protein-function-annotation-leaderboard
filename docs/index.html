@@ -83,19 +83,20 @@ the query is the call. The column "Fmax, whole aligned region" scores the same b
 Table 1's rule. The gap between a row's first two numbers is what the call rule adds.</p>
 <p class="prose">The target is Swiss-Prot without mammals, not one relative's proteome. So these rows
 have no time since the split from human, and the choices above Table 1 do not change them. They
-score Pfam domains on every protein, with duplicate calls kept. Rows are in the order they were
-run, not by score.
+score Pfam domains on every protein, with duplicate calls kept. The rows are in a fixed order,
+not sorted by score. The copied domains' median IoU is 1.000 because the hit proteins' domains
+were found with the same Pfam models that define the truth.
 Source: <a href="https://github.com/seanome/2024-kmerseek-analysis/pull/160">PR 160</a>, copied at commit <code>81524636</code>.</p>
 <figure class="lbfig">
 <figcaption><b>Table 2.</b> Best Swiss-Prot hit (Mammalia removed), 998 human proteins.</figcaption>
 <div class="tablebox"><table class="lb" id="besthit-table"><thead><tr>
 <th scope="col">Search</th>
 <th scope="col">Fmax, domains copied through the alignment</th>
-<th scope="col">Fmax, whole aligned region (Table 1's rule)</th>
+<th scope="col">Fmax, best hit's whole aligned region (Table 1's rule)</th>
 <th scope="col">Precision at Fmax</th>
 <th scope="col">Recall at Fmax</th>
 <th scope="col">Median IoU, copied domains (correct calls)</th>
-<th scope="col">Median IoU, whole aligned region (correct calls)</th>
+<th scope="col">Median IoU, best hit's whole aligned region (correct calls)</th>
 <th scope="col">Pfam domains in the truth</th>
 <th scope="col">Proteins with a call</th>
 <th scope="col">Core-hours per 1,000 proteins, search alone</th>
@@ -108,8 +109,12 @@ Source: <a href="https://github.com/seanome/2024-kmerseek-analysis/pull/160">PR 
 <p class="prose oneline">Three steps are shared by the three rows and left out of their core-hours:
 building the reference, listing the hit proteins, and running hmmscan on the hit proteins. Together
 they took <span id="besthit-shared" data-v="0.7284722222222222">0.728</span>
-core-hours for the 998 proteins. Core-hours are cores asked times wall time, from the
-run's task records.</p>
+core-hours for all 998 proteins, not per 1,000. Building the search databases is left
+out of the rows too:
+<span id="besthit-db-diamond" data-v="0.003333333333333333">0.0033</span>
+core-hours for DIAMOND and
+<span id="besthit-db-mmseqs2" data-v="0.0022222222222222222">0.0022</span>
+for MMseqs2. Core-hours are cores asked times wall time, from the run's task records.</p>
 <figure class="lbfig"><img src="assets/best_hit/fmax_best_hit_vs_qfo_relatives_midi_plus.png" alt="Fmax per relative: phmmer, MMseqs2 and kmerseek against each QfO proteome, the three best-hit settings under both call rules, and the hmmscan ceiling" style="max-width:100%;height:auto" loading="lazy"><figcaption><b>Figure 18.</b> Fmax, the same 2,435 Pfam domains in every row. Circles: every hit's whole aligned region (filled: duplicate calls kept; open: merged), the rule of Table 1. Triangles: the best hit's whole aligned region. Squares: the best hit's Pfam domains copied through the alignment. Only the squares jump; kmerseek's light marks are its best of 15 settings for each relative, picked after seeing the result.</figcaption></figure><figure class="lbfig"><img src="assets/best_hit/median_iou_best_hit_vs_qfo_relatives_midi_plus.png" alt="Median IoU of correct calls for the same rows, colours and shapes" style="max-width:100%;height:auto" loading="lazy"><figcaption><b>Figure 19.</b> Median IoU of correct calls: the overlap between a call and the true domain, divided by their union. Beside each row, the fewest and most correct calls its medians rest on. A tool that finds few domains can still score a high IoU, so read it next to Fmax. The squares sit at 1.0 because the hit proteins' domains were found with the same Pfam models that define the truth.</figcaption></figure>
 </section>
 <p class="prose oneline">In plain words: <b>Fmax</b> asks whether a tool finds the real domains

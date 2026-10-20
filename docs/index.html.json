@@ -71,7 +71,7 @@
   },
   {
    "tag": "p",
-   "text": "The target is Swiss-Prot without mammals, not one relative's proteome. So these rows have no time since the split from human, and the choices above Table 1 do not change them. They score Pfam domains on every protein, with duplicate calls kept. Rows are in the order they were run, not by score. Source: PR 160, copied at commit 81524636."
+   "text": "The target is Swiss-Prot without mammals, not one relative's proteome. So these rows have no time since the split from human, and the choices above Table 1 do not change them. They score Pfam domains on every protein, with duplicate calls kept. The rows are in a fixed order, not sorted by score. The copied domains' median IoU is 1.000 because the hit proteins' domains were found with the same Pfam models that define the truth. Source: PR 160, copied at commit 81524636."
   },
   {
    "tag": "figcaption",
@@ -87,7 +87,7 @@
   },
   {
    "tag": "th",
-   "text": "Fmax, whole aligned region (Table 1's rule)"
+   "text": "Fmax, best hit's whole aligned region (Table 1's rule)"
   },
   {
    "tag": "th",
@@ -103,7 +103,7 @@
   },
   {
    "tag": "th",
-   "text": "Median IoU, whole aligned region (correct calls)"
+   "text": "Median IoU, best hit's whole aligned region (correct calls)"
   },
   {
    "tag": "th",
@@ -271,7 +271,7 @@
   },
   {
    "tag": "p",
-   "text": "Three steps are shared by the three rows and left out of their core-hours: building the reference, listing the hit proteins, and running hmmscan on the hit proteins. Together they took 0.728 core-hours for the 998 proteins. Core-hours are cores asked times wall time, from the run's task records."
+   "text": "Three steps are shared by the three rows and left out of their core-hours: building the reference, listing the hit proteins, and running hmmscan on the hit proteins. Together they took 0.728 core-hours for all 998 proteins, not per 1,000. Building the search databases is left out of the rows too: 0.0033 core-hours for DIAMOND and 0.0022 for MMseqs2. Core-hours are cores asked times wall time, from the run's task records."
   },
   {
    "tag": "figcaption",
