@@ -28,7 +28,7 @@ flowchart LR
 | Five proteome ids against rest.uniprot.org today (release 2026_03) | **Held, 5 of 5.** Species, taxon id and UniProt's `geneCount` equal `verdict.json` |
 | BUSCO C: value, four proteomes, from `short_summary` files | **Held.** *R. varieornatus* 84.8, *P. borchgrevinki* 91.1, *M. arenaria* 58.5, oyster 95.7 (metazoa_odb12) |
 | CPU-hours | **Held.** 38.18 h, the sum of TotalCPU over the 85 job rows in `run_2026-10-20/sacct.txt` |
-| `job_ids.txt` at the top of the run folder | **Wrong record.** It lists jobs 48677882-48677888, a second submission 12 s after the jobs of record. That setup job FAILED and the rest were CANCELLED (sacct, today). The jobs of record, 48677851-48677855, are in `earlier-run-20261020T205757Z/job_ids.txt` and in `verdict.json`. The numbers are not affected |
+| `job_ids.txt` at the top of the run folder | **Names the wrong chain.** It lists jobs 48677882-48677888, a second submission 12 s after the jobs of record. That setup job FAILED and the rest were CANCELLED (sacct, today). The jobs of record, 48677851-48677855, are in `earlier-run-20261020T205757Z/job_ids.txt` and in `verdict.json`. The numbers are not affected |
 
 ## How the shares were recounted
 
