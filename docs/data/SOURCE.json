@@ -3,7 +3,7 @@
  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
  "commit_date": "2026-10-15T13:12:56Z",
  "path": "results/leaderboard",
- "copied_at": "2026-10-20T12:59:49Z",
+ "copied_at": "2026-10-20T13:27:34Z",
  "sha256": {
   "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
   "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -21,11 +21,11 @@
   "best_hit/cards/diamond_besthit.sensitive.json": "913553aad4f7a1c7f4af63b17fc66a902d2f37c46b6475209ef0c98475be696a",
   "best_hit/cards/diamond_besthit.ultra-sensitive.json": "ba5121d09f559360f17c2518ccfe5f441507a3ffc66aa74b76087671ea3dea43",
   "best_hit/cards/mmseqs2_besthit.s7.5.json": "a8437d4451f07dae114eb47eb96160fb0901344c09ac4ad69d331371a5718db6",
-  "best_hit/fmax_best_hit_vs_qfo_relatives_midi_plus.png": "39e9dabc264e24948b0899c68b687f39aab3f2f9444e3daa16b21cf16caedf80",
-  "best_hit/median_iou_best_hit_vs_qfo_relatives_midi_plus.png": "00a017c58d23599770dba8f462b16604aaa5a2384c8daf2c6b8c866bb9f634a4"
+  "best_hit/fmax_best_hit_vs_qfo_relatives_midi_plus.png": "7e52633f4c40cf7d65fd59f126fa03ac6946fc863ec4f2af23fe2fdd0d9588d9",
+  "best_hit/median_iou_best_hit_vs_qfo_relatives_midi_plus.png": "1ff5271264ae492e34f6fbe1e4222fbce67f75093b9b879267d8082020101948"
  },
  "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
  "nosearch_commit": "5b644dc8195cba4535d06d59c6b15748a30874b0",
  "nosearch_path": "results/leaderboard",
- "besthit_commit": "81524636e86862abacaa2e5a4b5aeb23f5f27b31"
+ "besthit_commit": "f0802ebe12a15d752580798f37a32c0033d6a81a"
 }

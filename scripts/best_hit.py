@@ -128,7 +128,8 @@ def section(v: dict | None, src: dict) -> str:
             (FIGURES[0],
              "Fmax per relative: phmmer, MMseqs2 and kmerseek against each QfO proteome, the three "
              "best-hit settings under both call rules, and the hmmscan ceiling",
-             "<b>Figure 18.</b> Fmax, the same 2,435 Pfam domains in every row. Circles: every "
+             "<b>Figure 18.</b> Fmax, the same 2,435 Pfam domains in every row. Relatives are "
+             "ordered by their TimeTree 5 divergence time from human. Circles: every "
              "hit's whole aligned region (filled: duplicate calls kept; open: merged), the rule of "
              "Table 1. Triangles: the best hit's whole aligned region. Squares: the best hit's Pfam "
              "domains copied through the alignment. Only the squares jump; kmerseek's light marks "
@@ -136,7 +137,8 @@ def section(v: dict | None, src: dict) -> str:
             (FIGURES[1],
              "Median IoU of correct calls for the same rows, colours and shapes",
              "<b>Figure 19.</b> Median IoU of correct calls: the overlap between a call and the "
-             "true domain, divided by their union. Beside each row, the fewest and most correct "
+             "true domain, divided by their union. A call counts as correct only when its IoU "
+             "is at least 0.5, so every median is at least 0.5. Beside each row, the fewest and most correct "
              "calls its medians rest on. A tool that finds few domains can still score a high IoU, "
              "so read it next to Fmax. The squares sit at 1.0 because the hit proteins' domains "
              "were found with the same Pfam models that define the truth."),

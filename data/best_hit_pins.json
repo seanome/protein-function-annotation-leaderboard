@@ -1,7 +1,7 @@
 {
  "repo": "seanome/2024-kmerseek-analysis",
- "commit": "81524636e86862abacaa2e5a4b5aeb23f5f27b31",
- "note": "rows, compute and cards are byte for byte the files of 7ede75df (PR 160's run commit); 81524636 adds median IoU to call_rules.parquet and the two figures",
+ "commit": "f0802ebe12a15d752580798f37a32c0033d6a81a",
+ "note": "rows, compute and cards are byte for byte the files of 7ede75df (PR 160's run commit); later commits add median IoU to call_rules.parquet and the two figures, redrawn at f0802ebe with TimeTree 5 divergence times",
  "sha256": {
   "rows.parquet": "22492bed2e0b82895e18651a9d3148089f0dba5bf89fd2cc98e8ef6bd6458894",
   "compute.parquet": "af3dd9994ae2b7ab063ffd0faed3bc8dce3c00f5664fba1bff6b897f1b29caf7",
@@ -9,7 +9,7 @@
   "cards/diamond_besthit.sensitive.json": "913553aad4f7a1c7f4af63b17fc66a902d2f37c46b6475209ef0c98475be696a",
   "cards/diamond_besthit.ultra-sensitive.json": "ba5121d09f559360f17c2518ccfe5f441507a3ffc66aa74b76087671ea3dea43",
   "cards/mmseqs2_besthit.s7.5.json": "a8437d4451f07dae114eb47eb96160fb0901344c09ac4ad69d331371a5718db6",
-  "fmax_best_hit_vs_qfo_relatives_midi_plus.png": "39e9dabc264e24948b0899c68b687f39aab3f2f9444e3daa16b21cf16caedf80",
-  "median_iou_best_hit_vs_qfo_relatives_midi_plus.png": "00a017c58d23599770dba8f462b16604aaa5a2384c8daf2c6b8c866bb9f634a4"
+  "fmax_best_hit_vs_qfo_relatives_midi_plus.png": "7e52633f4c40cf7d65fd59f126fa03ac6946fc863ec4f2af23fe2fdd0d9588d9",
+  "median_iou_best_hit_vs_qfo_relatives_midi_plus.png": "1ff5271264ae492e34f6fbe1e4222fbce67f75093b9b879267d8082020101948"
  }
 }

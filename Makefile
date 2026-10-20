@@ -9,10 +9,11 @@ NOSEARCH_COMMIT ?= 5b644dc8
 NOSEARCH_PATH ?= results/leaderboard
 # Best-hit transfer rows (DIAMOND, MMseqs2 against Swiss-Prot minus Mammalia): the Sherlock
 # run of head job 48547660, PR 160 of the source repo. Rows, cost rows and cards were
-# committed at 7ede75df; 81524636 adds the median IoU to call_rules.parquet and the two
-# figures, and leaves those three files byte for byte as they were. sha256 of each file is
+# committed at 7ede75df; later commits add the median IoU to call_rules.parquet and the two
+# figures, and leave those three files byte for byte as they were. f0802ebe redraws the
+# figures with TimeTree 5 divergence times (PR 148 at 7eca428b). sha256 of each file is
 # pinned in data/best_hit_pins.json.
-BESTHIT_COMMIT ?= 81524636
+BESTHIT_COMMIT ?= f0802ebe
 PY ?= .venv/bin/python
 
 .PHONY: tables site check serve
