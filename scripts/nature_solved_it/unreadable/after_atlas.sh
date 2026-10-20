@@ -4,7 +4,8 @@
 #   1. atlas species -> UniProt reference proteomes and TimeTree times (atlas_proteomes.csv)
 #   2. random controls, seed 20261019, matched in 100-My bins (controls.csv, draw_record.json)
 #   3. the run list (proteomes.tsv) and its resource prediction (resources_run.tsv)
-# The draw can take an hour: when a bin runs short, every candidate gets a TimeTree lookup.
+# When a bin runs short, every candidate gets a TimeTree lookup: about 5 minutes for all 3,513
+# eukaryotic candidates of 2026_03 (stand-in test, 2026-10-19).
 #
 #   bash scripts/nature_solved_it/unreadable/after_atlas.sh <atlas.csv> [species column, default "species"]
 #
