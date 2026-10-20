@@ -19,7 +19,11 @@
    cost.html.json's "calculator" block is recomputed the same way at the default inputs.
    Every tool card has a hardware line whose task counts match data/hardware.parquet.
 3. Every page: no console errors, no broken internal links, and no horizontal page scroll
-   at phone width (375 px).
+   at phone width (375 px). Every number written before "Mya" or "million years" must be a
+   relative's divergence time from human in the parquet's target_mya_to_human, rounded.
+4. Divergence times: each relative's chip label and the page's species table show the
+   parquet's target_mya_to_human rounded to whole million years, and no number where it is
+   null (E. coli).
 
 Uses the installed Google Chrome through Playwright (channel="chrome").
 """
@@ -30,6 +34,7 @@ import http.server
 import itertools
 import json
 import random
+import re
 import socketserver
 import sys
 import threading
@@ -129,6 +134,21 @@ def main() -> int:
         "db_cpu_h_per_db": db_per_db(r["tool"], r["setting"])} for r in search.iter_rows(named=True)}
     cexp = {(k[5], k[6], k[2]): per_ts[(k[5], k[6])] for k in expect if (k[5], k[6]) in per_ts}
 
+    # Divergence time from human per relative, from the long table itself.
+    mya_rows = long.select("target_db", "target_mya_to_human").unique()
+    mya_want = {}
+    for r in mya_rows.iter_rows(named=True):
+        if r["target_db"] == "Pfam-A HMM library":
+            continue
+        sp = r["target_db"].removeprefix("QfO ")
+        v = r["target_mya_to_human"]
+        if sp in mya_want and mya_want[sp] != v:
+            raise SystemExit(f"{sp}: more than one target_mya_to_human in the parquet")
+        mya_want[sp] = v
+    mya_shown = {sp: (None if v is None else int(round(v))) for sp, v in mya_want.items()}
+    mya_allowed = {v for v in mya_shown.values() if v is not None}
+    MYA_RE = re.compile(r"(\d[\d,]*)\s*(?:Mya|million years)")
+
     failures: list[str] = []
     stats = {"combinations": 0, "rows_checked": 0, "numbers_checked": 0, "dashes": 0,
              "missing_results_cells": 0, "missing_compute_cells": 0, "missing_reported_cells": 0,
@@ -145,6 +165,16 @@ def main() -> int:
         page.goto(base + "index.html")
         meta = page.evaluate("window.__lb.meta")
         all_combos = combos(meta)
+        chips = {c["value"]: c["label"] for r in meta["chiprows"] if r["id"] == "species"
+                 for g in r["groups"] for c in g["chips"]}
+        for sp, want in mya_shown.items():
+            name = meta["species"][sp]["name"]
+            want_label = name if want is None else f"{name} {want}"
+            if chips.get(sp) != want_label:
+                failures.append(f"chip {sp}: label {chips.get(sp)!r}, parquet says {want_label!r}")
+            if meta["species"][sp]["mya"] != want:
+                failures.append(f"species {sp}: mya {meta['species'][sp]['mya']}, parquet says {want}")
+            stats["mya_checked"] = stats.get("mya_checked", 0) + 1
         for i in range(0, len(all_combos), a.batch):
             for snap in page.evaluate(SNAP_TABLE, all_combos[i:i + a.batch]):
                 stats["combinations"] += 1
@@ -388,6 +418,12 @@ def main() -> int:
                 if over > 0:
                     failures.append(f"{pg} at {width}px: page scrolls sideways by {over}px")
                 if width == 1280:
+                    text = page.evaluate("document.body.innerText")
+                    for m in MYA_RE.finditer(text):
+                        stats["mya_mentions_checked"] = stats.get("mya_mentions_checked", 0) + 1
+                        if int(m.group(1).replace(",", "")) not in mya_allowed:
+                            failures.append(f"{pg}: {m.group(0)!r} is no relative's divergence time "
+                                            f"in the parquet ({sorted(mya_allowed)})")
                     for href in page.evaluate("[...document.querySelectorAll('a[href]')].map(a => a.getAttribute('href'))"):
                         u = urlparse(urljoin(base + pg, href))
                         if u.netloc != urlparse(base).netloc:
