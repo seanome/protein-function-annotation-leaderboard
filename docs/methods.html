@@ -26,7 +26,7 @@
 <h1>Methods</h1>
 <p class="lede">How each score and cost on this site is computed, which proteins were searched, and
 how the truth sets were built.</p>
-<p class="asof">Data from 15 Oct 2026, commit <span class="mono">4a4b1171</span> (<a href="#source-commit">source</a>)</p>
+<p class="asof">Data from 20 Oct 2026, commit <span class="mono">7eca428b</span> (<a href="#source-commit">source</a>)</p>
 <nav class="toc" aria-label="Contents"><b>Contents</b>
 <ol><li><a href="#data">The benchmark run</a></li><li><a href="#no-winner">No tool wins everywhere</a></li>
 <li><a href="#calls">From a search hit to a call</a></li>
@@ -45,12 +45,12 @@ proteins against the proteomes of 15 relatives from the Quest for Orthologs refe
 release 2020_04. Most of the human proteins are encoded on chromosome 6; the rest are immune
 proteins (KIR and LILR receptors, CD1 and MR1, and β2-microglobulin). The copied tables do not
 record how many are in each group. The run finished on 2026-09-13 on Stanford's Sherlock
-cluster. It has 205,653 of the 3,975,483 rows of <span class="mono">results.parquet</span>,
+cluster. It has 235,032 of the 4,386,981 rows of <span class="mono">results.parquet</span>,
 one per score. The leaderboard groups them into 29,379 combinations of tool, setting, relative,
 truth set, raw or dedup, and subset. Its cost is in <span class="mono">compute.parquet</span>. Both
 tables were built by
 <span class="mono">make leaderboard-tables</span> in seanome/2024-kmerseek-analysis at commit
-<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a>.
+<a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a>.
 These 998 proteins are not a random sample of the human proteome.</p>
 
 <h2 id="no-winner">No tool wins everywhere</h2>
@@ -200,7 +200,9 @@ The same calls drawn raw and after dedup, on a made-up protein: <a href="explain
 closest domain of the same family in the relative. Bins: 0–20, 20–30, 30–40, 40–60 and 60–100%. A
 domain whose family is absent from the relative is "no same-family domain".</li>
 <li><b>Nearest reviewed relative, Mya</b>: the relative searched, labelled with how many million
-years ago its line split from ours.</li>
+years ago its line split from ours: the pairwise divergence time from human in
+<a href="https://timetree.org/">TimeTree 5</a>, rounded to the nearest million years. TimeTree
+gives no time for human and a bacterium, so E. coli has none.</li>
 <li><b>Region type and length</b>: the length of the annotated region, in residues. Bins up to 60
 aa are short features; 61 aa and up is the size of a folded domain. Whole-protein annotations
 were not scored in this run.</li>
@@ -217,7 +219,7 @@ It answers what score a reader gets with no database at all. Gillis and Pavlidis
 every function benchmark for such a row, after a method that gave every protein the same
 annotation scored well in the first CAFA. Each baseline is scored by the same code and
 against the same truth tables as the search tools.</p>
-<ul><li><b>Kyte-Doolittle scan</b>: Hydropathy (Kyte and Doolittle 1982) averaged over 19-residue windows; windows above 1.6 are called membrane-spanning. The scan of notebook 231. Can address: Swiss-Prot TRANSMEM and INTRAMEM features. Swiss-Prot features, INTRAMEM: Fmax 0.333 (n = 9, fewer than 30: too few to read); Swiss-Prot features, TRANSMEM: Fmax 0.778 (n = 1,124).</li><li><b>IUPred long</b>: IUPred 1.0, long mode; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet.</li><li><b>metapredict</b>: metapredict 3.0.1; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet.</li><li><b>SEG</b>: segmasker from BLAST+ 2.16.0 at its default settings (window 12, locut 2.2, hicut 2.5); each masked stretch is a call. Can address: Swiss-Prot COMPBIAS and REPEAT features. Not in this build's table yet.</li><li><b>Pfam family frequency</b>: Every query gets, over its whole length, the Pfam family held by the most human proteins of its length, the queries themselves left out. Can address: Pfam and Pfam-N. Pfam, all proteins: Fmax 0.035 (n = 2,435).</li></ul>
+<ul><li><b>Kyte-Doolittle scan</b>: Hydropathy (Kyte and Doolittle 1982) averaged over 19-residue windows; windows above 1.6 are called membrane-spanning. The scan of notebook 231. Can address: Swiss-Prot TRANSMEM and INTRAMEM features. Swiss-Prot features, INTRAMEM: Fmax 0.333 (n = 9, fewer than 30: too few to read); Swiss-Prot features, TRANSMEM: Fmax 0.777 (n = 1,124).</li><li><b>IUPred long</b>: IUPred 1.0, long mode; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Swiss-Prot features, REGION: Fmax 0.617 (n = 1,849).</li><li><b>metapredict</b>: metapredict 3.0.1; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Swiss-Prot features, REGION: Fmax 0.431 (n = 1,849).</li><li><b>SEG</b>: segmasker from BLAST+ 2.16.0 at its default settings (window 12, locut 2.2, hicut 2.5); each masked stretch is a call. Can address: Swiss-Prot COMPBIAS and REPEAT features. Swiss-Prot features, REPEAT: Fmax 0.040 (n = 589).</li><li><b>Pfam family frequency</b>: Every query gets, over its whole length, the Pfam family held by the most human proteins of its length, the queries themselves left out. Can address: Pfam and Pfam-N. Pfam, all proteins: Fmax 0.035 (n = 2,435).</li></ul>
 <p>Each baseline can address only some cells: a hydropathy scan can call a membrane-spanning
 segment but not a Pfam family. Every other cell shows <i>not applicable</i>, never 0. In Table 1
 the baselines sit under the search tools, whatever the sort.</p>
@@ -230,7 +232,7 @@ frequency row does no better than giving every protein the most common family of
 <p>A baseline row is the same under every relative and under raw and dedup, since it searches
 no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000
 queries, from the run's task records; where the table holds none, the cost reads
-<i>not measured</i>. Source of these rows: laptop check: tables/no_search_baselines_laptop_check (committed code, midi-plus truth tables copied from Sherlock).</p>
+<i>not measured</i>. Source of these rows: <span class="mono wrapany">/scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/no-search-baselines/no_search/no_search_baseline_metrics.parquet</span>.</p>
 <h2 id="scope40">SCOPe40: ranking a domain's relatives</h2>
 <p><b>Scored so far: Foldseek, MMseqs2 and kmerseek</b>, on the
 <a href="scope40.html">SCOPe40 page</a>. This section gives the rules. The question: given one known domain, does the tool rank the domain's
@@ -440,7 +442,7 @@ Proteins." <i>Nucleic Acids Research</i> 36, Database issue (2008): D211–17.
 leaderboard is a missing row in results.parquet, and that every number matches the tables. The
 source table checksums are in <span class="mono">data/SOURCE.json</span> of the site repository.</p>
 <h2 id="experiments">Experiments in the tables</h2>
-<p>The tables hold 3,975,483 rows from 12 experiments; the coverage page counts all of
+<p>The tables hold 4,386,981 rows from 12 experiments; the coverage page counts all of
 them. Their ids: <span class="mono">alphabet_ranking_three_cases</span>, <span class="mono">dark_set_accuracy</span>, <span class="mono">dark_set_gain</span>, <span class="mono">dark_set_pfam_fmax</span>, <span class="mono">deep_twilight</span>, <span class="mono">elm_cover</span>, <span class="mono">qfo_region_midi</span>, <span class="mono">qfo_region_midi_plus</span>, <span class="mono">qfo_region_mini</span>, <span class="mono">scope40_v040</span>, <span class="mono">scope40_v040_below_kmin</span>, <span class="mono">scope40_v040_shuffled_k2_seed1</span>.</p>
 </div>
 <link rel="stylesheet" href="assets/katex/katex.min.css">
@@ -450,7 +452,7 @@ them. Their ids: <span class="mono">alphabet_ranking_three_cases</span>, <span c
 
 </main>
 <footer class="site"><div class="wrap">
-<p id="source-commit" data-commit="4a4b11714ddb740f8a7e324058b26bee8fb35af4">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/4a4b11714ddb740f8a7e324058b26bee8fb35af4/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/4a4b11714ddb740f8a7e324058b26bee8fb35af4">4a4b1171</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-16.</p>
+<p id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="methods.html.json">methods.html.json</a></p>
 </div></footer>

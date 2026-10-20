@@ -1,12 +1,12 @@
 # Source of the tables: a commit of seanome/2024-kmerseek-analysis that holds
 # results/leaderboard/, written there by `make leaderboard-tables`.
 SOURCE_REPO ?= seanome/2024-kmerseek-analysis
-SOURCE_COMMIT ?= 4a4b1171
+SOURCE_COMMIT ?= 7eca428b
 PILEUP_COMMIT ?= 39d81ec9
-# No-search baseline rows: the laptop check on olgabot/no-search-baselines (PR 158 of the
-# source repo) until the Sherlock run's table replaces it.
-NOSEARCH_COMMIT ?= 05ca5528
-NOSEARCH_PATH ?= tables/no_search_baselines_laptop_check
+# No-search baseline rows and their cost: the Sherlock run (job 48547674) on
+# olgabot/no-search-baselines, PR 158 of the source repo.
+NOSEARCH_COMMIT ?= 5b644dc8
+NOSEARCH_PATH ?= results/leaderboard
 PY ?= .venv/bin/python
 
 .PHONY: tables site check serve

@@ -23,7 +23,7 @@
  "command": "kmerseek search \\\n    --alphabet hp_thomas_dill2 \\\n    --ksize    24 \\\n    --query    UP000005640_9606.fasta \\\n    --target   zebrafish.hp_thomas_dill2.k24.lcfalse.kmerseek.rocksdb \\\n    --threshold         0.0 \\\n    --min-shared-kmers  2 \\\n    --max-query-pvalue  0.05 \\\n    --min-region-score  1.3",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
+  "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "gbmr4_k21_lcFalse",
@@ -80,8 +80,8 @@
   "hardware": "Stanford Sherlock, SLURM partition hns"
  },
  "questions": [
-  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.005 (n = 563), 60\u2013100% 0.297 (n = 1,289). If no, 20\u201330% 0.000 (n = 93), 30\u201340% 0.000 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting gbmr4, k = 21; subsets with at least 30 true instances.)",
-  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.208 (n = 963), 121\u2013250 aa 0.098 (n = 504), 251 aa or more 0.050 (n = 277). If no, 16\u201330 aa 0.281 (n = 271), 31\u201360 aa 0.232 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting gbmr4, k = 21.)",
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.005 (n = 563), 60\u2013100% 0.297 (n = 1,289). If no, 20\u201330% 0.000 (n = 93), 30\u201340% 0.000 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting gbmr4, k = 21; subsets with at least 30 true instances.)",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.208 (n = 963), 121\u2013250 aa 0.098 (n = 504), 251 aa or more 0.050 (n = 277). If no, 16\u201330 aa 0.281 (n = 271), 31\u201360 aa 0.232 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting gbmr4, k = 21.)",
   "Can you spend about 0.0552 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" below."
  ],
  "markdown": "kmerseek.md"
