@@ -1,6 +1,6 @@
 # jackhmmer
 
-Tool id `hmmer3_jackhmmer`. Numbers from seanome/2024-kmerseek-analysis commit `4a4b1171`.
+Tool id `hmmer3_jackhmmer`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
 
 ## What it compares
 
@@ -22,7 +22,7 @@ Domain bit score: higher ranks first. The E-value cutoff was 10.
 
 ## Strong and weak strata
 
-Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is `n3`: Fmax 0.290 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
+Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is `n3`: Fmax 0.290 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
 
 Where it is closest to, or furthest ahead of, the best other tool:
 
@@ -77,6 +77,6 @@ Query: 998 human proteins. Target: the zebrafish proteome.
 
 ## Will it work for you?
 
-1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.217 (n = 563), 60–100% 0.264 (n = 1,289). If no, 20–30% 0.327 (n = 93), 30–40% 0.175 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`; strata with at least 30 true instances.)
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.210 (n = 963), 121–250 aa 0.333 (n = 504), 251 aa or more 0.427 (n = 277). If no, 16–30 aa 0.029 (n = 271), 31–60 aa 0.066 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`.)
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.217 (n = 563), 60–100% 0.264 (n = 1,289). If no, 20–30% 0.327 (n = 93), 30–40% 0.175 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `n3`; strata with at least 30 true instances.)
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.210 (n = 963), 121–250 aa 0.333 (n = 504), 251 aa or more 0.427 (n = 277). If no, 16–30 aa 0.029 (n = 271), 31–60 aa 0.066 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `n3`.)
 3. **Can you spend about 2.45 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" above.
