@@ -10,11 +10,101 @@
  },
  "reference": "AlphaFold models of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04 accessions), as a Foldseek database.",
  "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
- "failure_modes": [
+ "caveats": [
   "A protein with no AlphaFold model cannot be searched. Five relatives have no Foldseek rows at all (chimpanzee, cow, dog, opossum, western clawed frog): not run.",
   "AlphaFold models of long proteins come in overlapping pieces (F1, F2, ...). The task script moves piece n's coordinates 200 x (n - 1) residues along the protein; if a piece started elsewhere, its calls would land in the wrong place. Checked against the real piece starts: not measured."
  ],
  "version": "Foldseek 10.941cd33",
+ "known_failure_modes": [
+  {
+   "tool": "foldseek",
+   "tool_name": "Foldseek",
+   "file": "failure_modes/foldseek.yaml",
+   "id": "scored-without-a-structure",
+   "shown_on_cards": [
+    "foldseek"
+   ],
+   "finding": "In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model. It cannot search those, so its share of motifs found is low for a reason that is not the search.",
+   "number": null,
+   "number_note": "The source does not count the orthologs with no AlphaFold model.",
+   "evidence": [
+    {
+     "source": "seanome/2024-kmerseek-analysis results/leaderboard/inventory.md at 6df20c1f",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/blob/6df20c1f290fc123781df8d58097bf7b836535ac/results/leaderboard/inventory.md",
+     "quote": "Foldseek and Reseek were scored on orthologs with no AlphaFold model too, so their shares are low for a reason that is not the search"
+    }
+   ],
+   "run": "the elm_cover run (notebook 253, PR 72)",
+   "commit": {
+    "repo": "seanome/2024-kmerseek-analysis",
+    "sha": "ca051a6",
+    "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/ca051a6"
+   },
+   "pr": [
+    {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "number": 148,
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/148"
+    }
+   ],
+   "what_to_do": "Score a structure tool only on proteins that have a structure, and print how many proteins were left out.",
+   "date": "2026-10-15",
+   "status": "open",
+   "fixed": false
+  },
+  {
+   "tool": "hmmer3_phmmer",
+   "tool_name": "phmmer",
+   "file": "failure_modes/hmmer3_phmmer.yaml",
+   "id": "calls-run-past-domain-edges",
+   "shown_on_cards": [
+    "hmmer3_phmmer",
+    "hmmer3_jackhmmer",
+    "mmseqs2_seqseq",
+    "mmseqs2_iterative",
+    "hhblits",
+    "foldseek",
+    "prostt5"
+   ],
+   "finding": "Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early.",
+   "number": "median 5 to 21 residues early; 45% to 60% more than 100 residues early",
+   "number_note": null,
+   "evidence": [
+    {
+     "source": "seanome/2024-kmerseek-analysis PR 146",
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146",
+     "quote": "Over correct calls, the median of call start minus true start is 0 for hmmscan, whose models define the Pfam truth, so the 1-based reading of truth and aligners holds. Aligners start a median 5 to 21 residues early, because a call spans the whole aligned stretch."
+    },
+    {
+     "source": "PR 3, comment 6193138553",
+     "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553",
+     "quote": "45% to 60% of aligner calls start more than 100 residues early, not \"most\""
+    }
+   ],
+   "run": "`make leaderboard-pileup` and the region pile-up page (Figure 4)",
+   "commit": {
+    "repo": "seanome/2024-kmerseek-analysis",
+    "sha": "39d81ec9",
+    "url": "https://github.com/seanome/2024-kmerseek-analysis/commit/39d81ec9"
+   },
+   "pr": [
+    {
+     "repo": "seanome/2024-kmerseek-analysis",
+     "number": 146,
+     "url": "https://github.com/seanome/2024-kmerseek-analysis/pull/146"
+    },
+    {
+     "repo": "seanome/protein-function-annotation-leaderboard",
+     "number": 3,
+     "url": "https://github.com/seanome/protein-function-annotation-leaderboard/pull/3"
+    }
+   ],
+   "what_to_do": "Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment.",
+   "date": "2026-10-15",
+   "status": "open",
+   "fixed": false
+  }
+ ],
  "licence": "GPL-3.0",
  "commercial_use": "Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.",
  "licence_url": "https://github.com/steineggerlab/foldseek",

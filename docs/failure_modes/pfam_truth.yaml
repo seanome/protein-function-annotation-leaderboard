@@ -1,0 +1,31 @@
+# Known failures of the Pfam truth set itself. No tool card shows these; the
+# failure-modes page does.
+# Each quote must match its source character for character: scripts/failure_modes.py --check.
+# Schema: failure_modes/schema.json.
+
+tool: pfam_truth
+name: Pfam truth set
+updated: "2026-10-16"
+
+entries:
+  - id: domains-past-protein-end
+    finding: >-
+      9 Pfam truth domains lie partly or wholly past the end of their protein's QfO
+      sequence, for example P15692 PF14554 342–395 on a 232 aa protein. The Pfam
+      coordinates come from a different version of these sequences.
+    number: "9"
+    evidence:
+      - source: {kind: pr_body, repo: seanome/2024-kmerseek-analysis, pr: 146}
+        quote: >-
+          Found: 9 Pfam truth domains lie partly or wholly past the end of their protein's
+          QfO sequence, for example P15692 PF14554 342–395 on a 232 aa protein. The Pfam
+          coordinates come from a different version of these sequences.
+    run: "`make leaderboard-pileup`, the pile-up tables"
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 39d81ec9}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 146}
+    what_to_do: >-
+      Map Pfam coordinates onto the sequence version the tools searched, or leave those
+      domains out of scoring. The pile-up figure draws residues past a protein's end grey.
+    date: "2026-10-15"
+    status: open

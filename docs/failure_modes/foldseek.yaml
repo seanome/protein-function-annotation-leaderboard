@@ -1,0 +1,34 @@
+# Known failure modes of Foldseek.
+# Each quote must match its source character for character: scripts/failure_modes.py --check.
+# Schema: failure_modes/schema.json.
+
+tool: foldseek
+name: Foldseek
+updated: "2026-10-16"
+
+entries:
+  - id: scored-without-a-structure
+    finding: >-
+      In the ELM motif run, Foldseek was scored on orthologs that have no AlphaFold model.
+      It cannot search those, so its share of motifs found is low for a reason that is not
+      the search.
+    number: null
+    number_note: The source does not count the orthologs with no AlphaFold model.
+    evidence:
+      - source:
+          kind: file
+          repo: seanome/2024-kmerseek-analysis
+          commit: 6df20c1f290fc123781df8d58097bf7b836535ac
+          path: results/leaderboard/inventory.md
+        quote: >-
+          Foldseek and Reseek were scored on orthologs with no AlphaFold model too, so their
+          shares are low for a reason that is not the search
+    run: the elm_cover run (notebook 253, PR 72)
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: ca051a6}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 148}
+    what_to_do: >-
+      Score a structure tool only on proteins that have a structure, and print how many
+      proteins were left out.
+    date: "2026-10-15"
+    status: open

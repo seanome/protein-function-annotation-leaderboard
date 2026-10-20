@@ -1,0 +1,101 @@
+# Known failure modes of phmmer, and of the other tools where also_tools says so.
+# Each quote must match its source character for character: scripts/failure_modes.py --check.
+# Schema: failure_modes/schema.json.
+
+tool: hmmer3_phmmer
+name: phmmer
+updated: "2026-10-16"
+
+entries:
+  - id: evalue-two-significant-figures
+    finding: >-
+      HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those
+      rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The
+      dark set is the proteins that phmmer, jackhmmer and MMseqs2 all fail to place.
+    number: 2 to 222
+    evidence:
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 57, comment_id: 6151921382}
+        quote: >-
+          The pipeline's own dark set uses E ≤ cutoff, and HMMER rounds E-values to two
+          significant figures. Under that rule the dark counts are 2 to 222 lower; Botryllus
+          at E ≤ 10 is 2_039.
+      - source:
+          kind: file
+          repo: seanome/2024-kmerseek-analysis
+          commit: ec91da53b26d88474679989205045de45e38a162
+          path: nextflow-runs/invertebrate-dark-set/main.nf
+        quote: >-
+          The dark set is every protein in the query proteome that phmmer, jackhmmer and mmseqs2
+    run: notebook 289, dark set and kmerseek reach at E < 1 vs E < 10
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 029c47a}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 57}
+    what_to_do: >-
+      Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in
+      every count that is compared.
+    date: "2026-10-13"
+    status: open
+    also_tools: [hmmer3_jackhmmer]
+
+  - id: whole-alignment-call-misses-repeats
+    finding: >-
+      A call is the whole alignment, not the target's domain placed on the query, so a
+      long alignment over repeats never lands on one repeat. On a 23-aa LRR_1 repeat,
+      every MMseqs2 and phmmer call was 47 aa or longer, so none landed.
+    number: 47 aa or longer, on a 23-aa repeat
+    evidence:
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6154499159}
+        quote: >-
+          But every one of their calls is 47 aa or longer, so under half of it lies inside a
+          23-aa repeat, and the landing rule (at least half the call inside the domain)
+          rejects it.
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6154499159}
+        quote: >-
+          a call is the whole alignment, not the target's domain projected onto the query, so
+          long alignments over repeats never land on one repeat.
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6169102356}
+        quote: >-
+          Olga's decision (2026-10-14, before the test half was read): a call is the target
+          domain placed on the query through the hit, and MMseqs2 runs one round (2067fa1;
+          recorded in nb 280's first cell).
+    run: >-
+      the time-split pilot's tune half (notebook 280), rapeseed protein A0A078HBQ0, LRR_1
+      repeats 64-86 and 88-110
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 787bc31}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 121}
+    what_to_do: >-
+      Place the target's domain on the query through the alignment before scoring.
+      Notebook 280 switched to this rule; the leaderboard's own calls are still whole
+      alignments.
+    date: "2026-10-13"
+    status: open
+    also_tools: [mmseqs2_iterative]
+
+  - id: calls-run-past-domain-edges
+    finding: >-
+      Aligner calls run past the domain, because a call spans the whole aligned stretch.
+      Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45%
+      to 60% start more than 100 residues early.
+    number: median 5 to 21 residues early; 45% to 60% more than 100 residues early
+    evidence:
+      - source: {kind: pr_body, repo: seanome/2024-kmerseek-analysis, pr: 146}
+        quote: >-
+          Over correct calls, the median of call start minus true start is 0 for hmmscan,
+          whose models define the Pfam truth, so the 1-based reading of truth and aligners
+          holds. Aligners start a median 5 to 21 residues early, because a call spans the
+          whole aligned stretch.
+      - source: {kind: pr_comment, repo: seanome/protein-function-annotation-leaderboard, pr: 3, comment_id: 6193138553}
+        quote: >-
+          45% to 60% of aligner calls start more than 100 residues early, not "most"
+    run: "`make leaderboard-pileup` and the region pile-up page (Figure 4)"
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: 39d81ec9}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 146}
+      - {repo: seanome/protein-function-annotation-leaderboard, number: 3}
+    what_to_do: >-
+      Read a call's ends as the alignment's ends, not the domain's. To score where a domain
+      sits, place the target's domain through the alignment.
+    date: "2026-10-15"
+    status: open
+    also_tools: [hmmer3_jackhmmer, mmseqs2_seqseq, mmseqs2_iterative, hhblits, foldseek, prostt5]
