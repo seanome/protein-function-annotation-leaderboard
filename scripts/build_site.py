@@ -43,7 +43,32 @@ DEFAULTS = {
     "stratum": "all", "x": "cpu", "y": "fmax", "sort": "fmax", "dir": "desc",
     "view": "best", "r_cpu": R_CPU, "r_gpu": R_GPU,
 }
-DEFAULT_WORDS = "Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched"
+# Divergence times from human, in million years (Mya), read by main() from results.parquet's
+# target_mya_to_human (TimeTree 5 pairwise ages). E. coli, for which TimeTree has no age, is
+# absent. main() fills in DEFAULT_WORDS from it too.
+SPECIES_MYA: dict = {}
+DEFAULT_WORDS = "Pfam truth set, raw calls, zebrafish as the relative searched"
+
+
+def mya_label(v: float) -> int:
+    """A divergence time as the site shows it: the nearest whole million years."""
+    return int(round(v))
+
+
+def rel_age(sp: str) -> str:
+    """A relative's divergence time from human in words: "435 Mya", or that TimeTree has none."""
+    return f"{mya_label(SPECIES_MYA[sp]):,} Mya" if sp in SPECIES_MYA else "no TimeTree age"
+
+
+def rel_order_words(rel_order: list[str]) -> str:
+    """Nearest and farthest relative by divergence time, and any with no age, which sort last."""
+    aged = [sp for sp in rel_order if sp in SPECIES_MYA]
+    no_age = [SPECIES[sp] for sp in rel_order if sp not in SPECIES_MYA]
+    w = (f"from the nearest ({SPECIES[aged[0]]}, {rel_age(aged[0])}) to the farthest "
+         f"({SPECIES[aged[-1]]}, {rel_age(aged[-1])})")
+    return w + (f", then {' and '.join(no_age)}, which has no TimeTree age" if no_age else "")
+
+
 # A subset of the proteins (a stratum in the tables) enters a card's comparisons and
 # questions only with at least this many true instances; below it one or two calls swing
 # Fmax from 0 to 1.
@@ -71,7 +96,8 @@ FEATURE_WORDS = {
     "SITE": "other site", "TRANSMEM": "membrane-spanning", "ZN_FING": "zinc finger",
 }
 SPECIES_GROUPS = [
-    ("mammals", ["ptroglodytes", "rnorvegicus", "clupus", "btaurus", "mouse", "mdomestica"]),
+    # Within a group, nearest first by TimeTree 5 age (mouse and rat tie at 84 Mya, cow and dog at 89).
+    ("mammals", ["ptroglodytes", "mouse", "rnorvegicus", "btaurus", "clupus", "mdomestica"]),
     ("other vertebrates", ["chicken", "xtropicalis", "zebrafish"]),
     ("invertebrates", ["ciona", "fly", "worm"]),
     ("fungus, plant, bacterium", ["yeast", "arabidopsis", "ecoli"]),
@@ -322,9 +348,11 @@ def chiprows(species_mya: dict) -> list[dict]:
         {"id": "species", "kind": "plain", "label": "Nearest reviewed relative: time since split",
          "help": "the species whose annotated proteome is searched and whose annotations are "
                  "copied onto the human proteins; the number is how many million years (Mya) "
-                 "ago its line split from ours",
+                 "ago its line split from ours, from TimeTree 5",
          "groups": [{"label": g, "chips": [
-             c(s, SPECIES[s] if s == "all" else f"{SPECIES[s]} {int(species_mya[s])}")
+             c(s, f"{SPECIES[s]} {mya_label(species_mya[s])}") if s in species_mya
+             else c(s, SPECIES[s], None if s == "all" else
+                    "TimeTree 5 gives no divergence time for human and a bacterium")
              for s in members]} for g, members in SPECIES_GROUPS]},
         {"id": "identity", "kind": "stratum", "axis": "identity",
          "label": "Nearest reviewed relative: % identity",
@@ -1095,7 +1123,7 @@ def best_by_relative(res: pl.DataFrame) -> dict:
     return out
 
 
-def fmax_strip(t: str, best: dict, rel_order: list[str], mya: dict, ymax: float) -> str:
+def fmax_strip(t: str, best: dict, rel_order: list[str], ymax: float) -> str:
     """One bar per relative, nearest to farthest, height = the tool's best Fmax there on the
     0-to-ymax scale every card shares; a grey x where it was not run."""
     mine = best.get(t, {})
@@ -1116,14 +1144,14 @@ def fmax_strip(t: str, best: dict, rel_order: list[str], mya: dict, ymax: float)
         if v is None:
             cx, cy = x + bw / 2, sy(0) - 6
             parts.append(f'<path d="M{cx - 3.5:.1f},{cy - 3.5:.1f} l7,7 M{cx + 3.5:.1f},{cy - 3.5:.1f} l-7,7" class="st-nr"/>')
-            labels.append(f"{SPECIES[sp]} ({mya[sp]:,} Mya): not run")
+            labels.append(f"{SPECIES[sp]} ({rel_age(sp)}): not run")
         else:
             parts.append(f'<rect x="{x + 1.5:.1f}" y="{sy(v):.1f}" width="{bw - 3:.1f}" height="{sy(0) - sy(v):.1f}" '
-                         f'fill="var(--k-{TOOLS[t]["kind"]})"><title>{esc(SPECIES[sp])}, {mya[sp]:,} Mya: Fmax {v:.3f}</title></rect>')
-            labels.append(f"{SPECIES[sp]} ({mya[sp]:,} Mya): {v:.3f}")
+                         f'fill="var(--k-{TOOLS[t]["kind"]})"><title>{esc(SPECIES[sp])}, {rel_age(sp)}: Fmax {v:.3f}</title></rect>')
+            labels.append(f"{SPECIES[sp]} ({rel_age(sp)}): {v:.3f}")
     f, l = rel_order[0], rel_order[-1]
-    parts.append(f'<text x="{L}" y="{H - 12}" class="st-l">{esc(SPECIES[f])}, {mya[f]:,} Mya</text>')
-    parts.append(f'<text x="{W}" y="{H - 12}" text-anchor="end" class="st-l">{esc(SPECIES[l])}, {mya[l]:,} Mya</text>')
+    parts.append(f'<text x="{L}" y="{H - 12}" class="st-l">{esc(SPECIES[f])}, {rel_age(f)}</text>')
+    parts.append(f'<text x="{W}" y="{H - 12}" text-anchor="end" class="st-l">{esc(SPECIES[l])}, {rel_age(l)}</text>')
     return (f'<svg class="strip" viewBox="0 0 {W} {H}" role="img" aria-label="best Fmax at each relative: {esc("; ".join(labels))}">'
             f'{"".join(parts)}</svg>')
 
@@ -1133,9 +1161,8 @@ FILTER_GROUPS = [("structure", "3D structure prediction"), ("gpu", "GPU"), ("lic
 
 def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, comp: pl.DataFrame,
                      claims_by_tool: dict) -> str:
-    rel = res.filter(pl.col("species") != "all").select("species", "species_mya").unique().sort("species_mya", "species")
-    rel_order = rel["species"].to_list()
-    mya = {s: int(m) for s, m in rel.iter_rows()}
+    rel_order = (res.filter(pl.col("species") != "all").select("species", "species_mya").unique()
+                 .sort("species_mya", "species", nulls_last=True)["species"].to_list())
     best = best_by_relative(res)
     ymax = math.ceil(max(v for t in best.values() for sp, v in t.items() if sp != "all") * 20) / 20
     entries = []
@@ -1168,7 +1195,7 @@ def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, comp: p
 <h2 class="tc-name"><span class="kind k-{info['kind']}" aria-hidden="true"></span><a href="{t}.html">{esc(info["name"])}</a></h2>
 {nums_html}
 <p class="tc-desc">{esc(first)}</p>
-{fmax_strip(t, best, rel_order, mya, ymax)}
+{fmax_strip(t, best, rel_order, ymax)}
 <div class="tc-tags">{"".join(x for x in tags if x)}</div></li>""")
     rows = []
     for key, label in FILTER_GROUPS:
@@ -1186,8 +1213,7 @@ proteins, where it is strong and weak, what it costs, and the exact command that
 <div class="tc-fbox">{"".join(rows)}</div></details>
 <figure class="tcfig">
 <figcaption><b>Figure 1.</b> Each tool's best Fmax at each of the {len(rel_order)} relatives, one bar per
-relative from the nearest ({esc(SPECIES[rel_order[0]])}, {mya[rel_order[0]]:,} Mya) to the farthest
-({esc(SPECIES[rel_order[-1]])}, {mya[rel_order[-1]]:,} Mya): Pfam domains, raw calls, all proteins, best
+relative {esc(rel_order_words(rel_order))}: Pfam domains, raw calls, all proteins, best
 over the tool's settings. Every card uses the same scale, 0 to {ymax:.2f}. Hover a bar for its relative and number.</figcaption>
 {legend_kinds(tools_used)}
 <div class="legend"><span class="item">{x_mark} not run at that relative</span></div>
@@ -1541,7 +1567,9 @@ The same calls drawn raw and after dedup, on a made-up protein: <a href="explain
 closest domain of the same family in the relative. Bins: 0–20, 20–30, 30–40, 40–60 and 60–100%. A
 domain whose family is absent from the relative is "no same-family domain".</li>
 <li><b>Nearest reviewed relative, Mya</b>: the relative searched, labelled with how many million
-years ago its line split from ours.</li>
+years ago its line split from ours: the pairwise divergence time from human in
+<a href="https://timetree.org/">TimeTree 5</a>, rounded to the nearest million years. TimeTree
+gives no time for human and a bacterium, so E. coli has none.</li>
 <li><b>Region type and length</b>: the length of the annotated region, in residues. Bins up to 60
 aa are short features; 61 aa and up is the size of a folded domain. Whole-protein annotations
 were not scored in this run.</li>
@@ -1578,7 +1606,6 @@ def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dic
     n_in = n_all - sum(1 for r in regions if r["s"] > r["plen"])
     n_fam = len({r["fam"] for r in regions})
     n_prot = len({r["acc"] for r in regions})
-    zf_mya = int(res.filter(pl.col("species") == "zebrafish")["species_mya"][0])
     past = "".join(f'<li>{r["acc"]} {r["fam"]}: {r["s"]}–{r["e"]} on a {r["plen"]} aa sequence</li>'
                    for r in regions if r["past_end"])
     km = best_by(res, tool="kmerseek", truth_set="pfam", calls="raw", species="zebrafish",
@@ -1627,7 +1654,7 @@ def page_pileup(src: dict, res: pl.DataFrame, prov: dict, data: dict, check: dic
     body = f"""
 <h1>Region pile-up</h1>
 <p class="lede">Where each tool's calls fall around {n_all:,} known Pfam domains on {n_prot:,} human
-proteins, searching the zebrafish proteome ({zf_mya:,} million years since the split).</p>
+proteins, searching the zebrafish proteome ({mya_label(SPECIES_MYA["zebrafish"]):,} million years since the split).</p>
 <p class="verdict" id="pu-lead">{lead}</p>
 <p id="pu-loading" class="muted">Loading {len(data["panels"])} panels…</p>
 <figure>
@@ -2239,6 +2266,10 @@ def main() -> None:
     species_mya = {r["species"]: r["species_mya"] for r in
                    res.select("species", "species_mya").unique().iter_rows(named=True)
                    if r["species_mya"] is not None and not math.isnan(r["species_mya"])}
+    global SPECIES_MYA, DEFAULT_WORDS
+    SPECIES_MYA = species_mya
+    DEFAULT_WORDS = (f"Pfam truth set, raw calls, zebrafish ({mya_label(species_mya['zebrafish'])} Mya) "
+                     "as the relative searched")
     tools_used = set(res["tool"].unique())
     rows = row_order(res)
     searched = sorted({f'{r["tool"]}|{r["setting"]}|{r["species"]}'
@@ -2252,7 +2283,7 @@ def main() -> None:
                                if TOOLS[t]["needs"][k]]}
                   for t in sorted(tools_used)},
         "kinds": KINDS,
-        "species": {s: {"name": SPECIES[s], "mya": int(species_mya[s]) if s in species_mya else None}
+        "species": {s: {"name": SPECIES[s], "mya": mya_label(species_mya[s]) if s in species_mya else None}
                     for s in SPECIES},
         "truthNames": TRUTH,
         "metrics": METRICS,
