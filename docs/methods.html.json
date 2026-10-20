@@ -6,7 +6,7 @@
   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
   "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-16T17:43:58Z",
+  "copied_at": "2026-10-20T02:07:54Z",
   "sha256": {
    "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -16,11 +16,12 @@
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
-   "no_search_baselines.parquet": "e4d97b75d70a13473c23e98adbf5223d662a83a1e8560c18e8be77fa80441952"
+   "no_search_baselines.parquet": "977198351dda8a58becfc86819d6c6eba8cc3fb72522f5f7b4193675a8db3f2b",
+   "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
-  "nosearch_commit": "05ca5528683575b8d33d605785c2547d8ee824bf",
-  "nosearch_path": "tables/no_search_baselines_laptop_check"
+  "nosearch_commit": "5b644dc8195cba4535d06d59c6b15748a30874b0",
+  "nosearch_path": "results/leaderboard"
  },
  "text": [
   {
@@ -457,19 +458,19 @@
   },
   {
    "tag": "li",
-   "text": "Kyte-Doolittle scan: Hydropathy (Kyte and Doolittle 1982) averaged over 19-residue windows; windows above 1.6 are called membrane-spanning. The scan of notebook 231. Can address: Swiss-Prot TRANSMEM and INTRAMEM features. Swiss-Prot features, INTRAMEM: Fmax 0.333 (n = 9, fewer than 30: too few to read); Swiss-Prot features, TRANSMEM: Fmax 0.778 (n = 1,124)."
+   "text": "Kyte-Doolittle scan: Hydropathy (Kyte and Doolittle 1982) averaged over 19-residue windows; windows above 1.6 are called membrane-spanning. The scan of notebook 231. Can address: Swiss-Prot TRANSMEM and INTRAMEM features. Swiss-Prot features, INTRAMEM: Fmax 0.333 (n = 9, fewer than 30: too few to read); Swiss-Prot features, TRANSMEM: Fmax 0.777 (n = 1,124)."
   },
   {
    "tag": "li",
-   "text": "IUPred long: IUPred 1.0, long mode; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet."
+   "text": "IUPred long: IUPred 1.0, long mode; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Swiss-Prot features, REGION: Fmax 0.617 (n = 1,849)."
   },
   {
    "tag": "li",
-   "text": "metapredict: metapredict 3.0.1; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Not in this build's table yet."
+   "text": "metapredict: metapredict 3.0.1; runs of 20 or more residues scoring above 0.5 are called disordered. Can address: Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS. Swiss-Prot features, REGION: Fmax 0.431 (n = 1,849)."
   },
   {
    "tag": "li",
-   "text": "SEG: segmasker from BLAST+ 2.16.0 at its default settings (window 12, locut 2.2, hicut 2.5); each masked stretch is a call. Can address: Swiss-Prot COMPBIAS and REPEAT features. Not in this build's table yet."
+   "text": "SEG: segmasker from BLAST+ 2.16.0 at its default settings (window 12, locut 2.2, hicut 2.5); each masked stretch is a call. Can address: Swiss-Prot COMPBIAS and REPEAT features. Swiss-Prot features, REPEAT: Fmax 0.040 (n = 589)."
   },
   {
    "tag": "li",
@@ -485,7 +486,7 @@
   },
   {
    "tag": "p",
-   "text": "A baseline row is the same under every relative and under raw and dedup, since it searches no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000 queries, from the run's task records; where the table holds none, the cost reads not measured. Source of these rows: laptop check: tables/no_search_baselines_laptop_check (committed code, midi-plus truth tables copied from Sherlock)."
+   "text": "A baseline row is the same under every relative and under raw and dedup, since it searches no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000 queries, from the run's task records; where the table holds none, the cost reads not measured. Source of these rows: /scratch/users/olgabot/2024-kmerseek-analysis/nextflow-runs/qfo-pfam-region-benchmark/data/midi-plus/no-search-baselines/no_search/no_search_baseline_metrics.parquet."
   },
   {
    "tag": "h2",

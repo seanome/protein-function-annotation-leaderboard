@@ -571,6 +571,11 @@ def load_baselines(data: Path, res: pl.DataFrame) -> tuple[pl.DataFrame | None, 
     unknown = set(b["tool"].unique()) - set(BASELINES)
     if unknown:
         raise SystemExit(f"{NO_SEARCH}: baselines with no entry in tools.BASELINES: {unknown}")
+    # A setting with no cell it can address on this site (IUPred and metapredict called
+    # Disordered or COMPBIAS, SEG called COMPBIAS: their truth sets have no chip here)
+    # would be a row of "not applicable" in every view, so it is left out.
+    useful = b.filter(pl.col("applicable")).select("tool", "setting").unique()
+    b = b.join(useful, on=["tool", "setting"], how="semi")
     if b.filter(~pl.col("applicable") & pl.col("value").is_not_null()).height:
         raise SystemExit(f"{NO_SEARCH}: a not-applicable row carries a value")
     b = (b.filter(pl.col("metric").is_in(["fmax", "fmax_precision", "fmax_recall", "auprc", "median_iou_tp"]))
@@ -1825,7 +1830,7 @@ frequency row does no better than giving every protein the most common family of
 <p>A baseline row is the same under every relative and under raw and dedup, since it searches
 no relative and makes no copies to merge. Its cost is the run time of its own tasks per 1,000
 queries, from the run's task records; where the table holds none, the cost reads
-<i>not measured</i>. Source of these rows: {"; ".join(esc(x) for x in src_paths)}.</p>"""
+<i>not measured</i>. Source of these rows: {"; ".join(f"<span class=\"mono wrapany\">{esc(x)}</span>" for x in src_paths)}.</p>"""
 
 
 def page_methods(res: pl.DataFrame, comp: pl.DataFrame, src: dict, prov: dict, gallery: str = "",

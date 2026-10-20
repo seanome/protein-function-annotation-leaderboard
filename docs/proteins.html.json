@@ -6,7 +6,7 @@
   "commit": "4a4b11714ddb740f8a7e324058b26bee8fb35af4",
   "commit_date": "2026-10-15T13:12:56Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-16T17:43:58Z",
+  "copied_at": "2026-10-20T02:07:54Z",
   "sha256": {
    "results.parquet": "0c0cf94b5fc40587cab2ffbf7aaf84df9b5475037cc0d818ad2f452a9c73a837",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -16,11 +16,12 @@
    "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
-   "no_search_baselines.parquet": "e4d97b75d70a13473c23e98adbf5223d662a83a1e8560c18e8be77fa80441952"
+   "no_search_baselines.parquet": "977198351dda8a58becfc86819d6c6eba8cc3fb72522f5f7b4193675a8db3f2b",
+   "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
-  "nosearch_commit": "05ca5528683575b8d33d605785c2547d8ee824bf",
-  "nosearch_path": "tables/no_search_baselines_laptop_check"
+  "nosearch_commit": "5b644dc8195cba4535d06d59c6b15748a30874b0",
+  "nosearch_path": "results/leaderboard"
  },
  "text": [
   {

@@ -507,3 +507,5 @@ details.fg-stratum>summary{cursor:pointer;font-weight:600}
 
 /* A no-search baseline row: pinned under the search tools, set apart by a rule above the first one. */
 #lb tbody tr.base-first td{border-top:2px solid var(--hair)}
+/* A long path that must wrap at phone width instead of pushing the page sideways. */
+.wrapany{overflow-wrap:anywhere;word-break:break-all}
