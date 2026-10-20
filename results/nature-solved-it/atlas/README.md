@@ -247,3 +247,89 @@ Thirty-four binomials. Two of them are bacteria, *Deinococcus radiodurans* and
 *Flavobacterium frigoris*, and two are the standard laboratory animals
 *Drosophila melanogaster* and *Danio rerio*, which also sit in the model-organism group.
 Decide how to handle both before running anything.
+
+## Second-agent check
+
+A second agent that had not read this page or the PR body opened every identifier in the
+atlas on 2026-10-19 and recomputed the counts. Its report is `CHECK.md`, its row-by-row
+result `check_rows.csv`, and its script `scripts/check_tolerance_atlas.py`. Nothing in
+`atlas.csv` or `counts.json` was changed in response: the failures are reported here and
+left standing in the table, which is what the method asks for.
+
+| result | checks |
+|---|---|
+| held | 182 |
+| failed | 5 |
+| could not be opened | 0 |
+| nothing cited in that column, so nothing to open | 185 |
+| total, 62 rows by 6 checkable columns | 372 |
+
+Every PMID, DOI, UniProt accession and agency page resolved, and each resolved to the
+paper or entry the row cites. The counts came out identical: 60, 42, 29, 7, 0 with 18
+negative rows, and 60, 7, 7, 3, 0 for rows scoring 5 or 6.
+
+### The five failures
+
+Four are the same mistake in column 7, the human target: the paper shows a human protein,
+or a synthetic drug, acting in human cells, rather than the tolerant animal's own molecule
+from column 6.
+
+| row | disease | column | what the paper says |
+|---|---|---|---|
+| 3 | D03 cardiac glycoside poisoning | human target | The pump put into human kidney cells is the *Drosophila* sodium pump carrying the monarch's N122H change, not the *Danaus plexippus* protein in column 6. |
+| 23 | D23 iron overload | human target | The paper measures bat hepcidin mRNA and compares bats with healthy people. No bat molecule acts in a human cell. |
+| 27 | D27 hypercapnia | human target | The paper tests aprepitant, a synthetic antagonist, on human leukaemia cells. Naked mole-rat substance P was never put in a human cell. |
+| 33 | D32 myocardial infarction | human target | The paper raises human SIRT3 in human cardiomyocytes. The ground squirrel protein was not tested. |
+| 30 | D30 hypercholesterolaemia | the number | The syndecan-4 difference is in the paper, but the added sentence about no difference in plasma cholesterol between the two pigeon breeds is in neither cited paper. |
+
+The checker left a fifth case of the same pattern, D29 hyperoxaluria, as held, because the
+row says plainly that the human evidence is a trial of the whole bacterium rather than the
+two enzymes in column 6. A reader who wants step 4 to mean the animal's own molecule
+should drop that row too.
+
+### What the counts become if the failed rows are dropped
+
+| step | as published | dropping the four failed human-target rows |
+|---|---|---|
+| in scope | 60 | 60 |
+| named species with a measured number | 42 | 42 |
+| the molecule is named | 29 | 29 |
+| shown on a human target | 7 | 3 |
+| an approved drug | 0 | 0 |
+
+The three that remain at step 4 are D29 hyperoxaluria, D45 severe dehydration (brine
+shrimp p26 in human 293H cells) and D46 acute radiation syndrome (tardigrade Dsup in human
+HEK293 cells). Dropping D29 as well leaves 2. In the transferability 5-6 restriction, step
+4 falls from 3 to 1, leaving only D46. Steps 1, 2 and 3 and the drug count of 0 do not
+move, because all five failures are in columns 3 and 7.
+
+`CHECK.md` writes "D43 severe dehydration" in the sentence that lists the three survivors.
+That is a slip: severe dehydration is D45, and D43 is accidental hypothermia, which has no
+molecule and never reached step 4.
+
+Two further ways of reading the method, which the checker measured rather than argued:
+
+- Column 6 asks for a UniProt accession. Two diseases clear step 3 on a cell that names
+  the protein but no accession, D05 and D42, and both say so. Requiring an accession takes
+  step 3 from 29 to 27.
+- Three rows clear step 2 on a weak number: D37 (a habitat altitude of 3,600 m), D49 (no
+  change in muscle fibre size in seven bears, with no percentage) and D54 (a genus rather
+  than a binomial). Dropping all three takes step 2 from 42 to 39.
+
+### The rule outcome does not change
+
+The rule asked for at least 30 of 60 diseases with a named species, a measured number and
+a citation. The published count is 42, the strictest reading above gives 39, and both
+clear 30. The narrow version still has nothing to run on, because no row reaches an
+approved drug under any of these readings. The checker confirmed the rasburicase and
+aprepitant pages and agrees that neither is the tolerant species' molecule made into a
+drug.
+
+### What the checker did not do
+
+It did not re-run the PubMed queries, so a row that says a search returned nothing rests on
+the atlas's own record. It did not check the transferability or fit scores, or the lab
+affiliations behind them. Its smaller findings, eight of them, are in `CHECK.md`: rounding
+in two rows, a survival figure in D28 that is relative to a control rather than an absolute
+share, one claim in D49 that is not in the abstract and was not checked, and three places
+where a full text was available after all.
