@@ -6,19 +6,41 @@
   "use strict";
   const DATA = JSON.parse(document.getElementById("lb-data").textContent);
   const M = DATA.meta;
-  const RESULTS = DATA.results; // key -> {tool|setting: [fmax, auprc, iou, n]}
+  const RESULTS = DATA.results; // key -> {tool|setting: [fmax, auprc, median IoU, true instances]}
   const COMPUTE = DATA.compute; // tool|setting|species -> {...}
   const page = (document.querySelector("main[data-page]") || document.body).dataset.page;
 
   // ---------- state, kept in the URL hash so both pages share the filters ----------
   const state = Object.assign({}, M.defaults);
+  // The values each hash key may take, from the page's own data. Anything else in the hash
+  // is ignored and the default kept, so a hand-edited or stale link cannot break the page.
+  function chipValues(id) {
+    const row = M.chiprows.find((r) => r.id === id);
+    return row ? row.groups.flatMap((g) => g.chips.map((c) => c.value)) : [];
+  }
   function readHash() {
     const h = new URLSearchParams(location.hash.slice(1));
-    for (const k of ["truth", "calls", "species", "axis", "stratum", "metric", "sort", "dir"]) {
-      if (h.has(k)) state[k] = h.get(k);
+    const ok = {
+      truth: (v) => chipValues("truth").includes(v) && v in M.truthNames,
+      calls: (v) => chipValues("calls").includes(v),
+      species: (v) => chipValues("species").includes(v) && v in M.species,
+      metric: (v) => M.metrics.some((m) => m.id === v),
+      sort: (v) => COLS.some((c) => c.id === v),
+      dir: (v) => v === "asc" || v === "desc",
+    };
+    for (const k of Object.keys(ok)) {
+      if (h.has(k) && ok[k](h.get(k))) state[k] = h.get(k);
+    }
+    // Axis and stratum go together: the stratum must be a chip of that axis's row.
+    const axis = h.get("axis"), stratum = h.get("stratum");
+    const row = M.chiprows.find((r) => r.kind === "stratum" && r.axis === axis);
+    if (axis === "all" || (h.has("axis") && !row)) { state.axis = "all"; state.stratum = "all"; }
+    else if (row && stratum !== "all" && row.groups.some((g) => g.chips.some((c) => c.value === stratum))) {
+      state.axis = axis; state.stratum = stratum;
     }
     for (const k of ["r_cpu", "r_gpu"]) {
-      if (h.has(k) && isFinite(parseFloat(h.get(k)))) state[k] = parseFloat(h.get(k));
+      const v = Number(h.get(k));
+      if (h.has(k) && h.get(k) !== "" && isFinite(v) && v >= 0) state[k] = v;
     }
   }
   function writeHash() {
@@ -33,6 +55,17 @@
     });
   }
 
+  // truth|axis|stratum for every stratum that has a row under some relative and dedup choice.
+  const STRATA = new Set(Object.keys(RESULTS).map((k) => { const p = k.split("|"); return p[0] + "|" + p[3] + "|" + p[4]; }));
+  function stratumExists(truth, axis, stratum) {
+    return axis === "all" || STRATA.has(truth + "|" + axis + "|" + stratum);
+  }
+  // Colour of a kind of method, read from the page's CSS tokens at draw time so that it
+  // matches the legends in light and dark mode.
+  const rootStyle = getComputedStyle(document.documentElement);
+  function kindColor(kind) {
+    return rootStyle.getPropertyValue("--k-" + kind).trim() || M.kinds[kind].color;
+  }
   function resultKey(s) {
     return [s.truth, s.calls, s.species, s.axis, s.stratum].join("|");
   }
@@ -110,6 +143,11 @@
                 } else { state.axis = row.axis; state.stratum = c.value; }
               } else {
                 state[row.id] = c.value;
+                // A stratum the new truth set does not have (a Swiss-Prot feature type under
+                // Pfam) would leave every row "not run"; go back to all proteins instead.
+                if (row.id === "truth" && !stratumExists(state.truth, state.axis, state.stratum)) {
+                  state.axis = "all"; state.stratum = "all";
+                }
               }
               update();
             }, c.title)
@@ -144,13 +182,17 @@
       // A stored median IoU of 0 means no correct call on a region longer than one residue
       // (any such call has IoU >= 0.5), so it is shown as words and sorts with the missing.
       fmax: r ? r[0] : null, auprc: r ? r[1] : null, iou: r && r[2] ? r[2] : null, n: r ? r[3] : null,
-      ntp: r ? r[4] : null,
       cpu: c ? c.cpu_h_per_1000 : null,
       cpu_rep: c ? c.cpu_h_reported_per_1000 : null,
       ram: c ? c.peak_rss_gb : null,
       gpu: c ? c.gpu : null,
       cost: cost(c),
     };
+  }
+  // Words for a median IoU of 0. Fmax above 0 means at least one call was correct; with no
+  // IoU those correct calls were all on single-residue annotations.
+  function iouWords(v) {
+    return v.fmax > 0 ? "correct calls only on single residues" : "no correct calls";
   }
   function sortRows(vals) {
     const k = state.sort, dir = state.dir === "asc" ? 1 : -1;
@@ -165,6 +207,19 @@
       if (x > y) return dir;
       return a.row.order - b.row.order;
     });
+  }
+  // The caption's first words, from the current sort: "Tools ranked by Fmax, highest first".
+  const SORT_NAMES = {
+    tool: "tool name", setting: "setting name", fmax: "Fmax", auprc: "AUPRC", iou: "median IoU",
+    n: "true instances", cpu: "measured core-hours per 1,000 queries", cpu_rep: "reported CPU-hours per 1,000 queries",
+    ram: "peak RAM", gpu: "GPU in search", cost: "estimated cost",
+  };
+  function sortWords() {
+    const asc = state.dir === "asc";
+    if (state.sort === "tool" || state.sort === "setting" || state.sort === "gpu") {
+      return `Tools sorted by ${SORT_NAMES[state.sort]}, ${asc ? "A to Z" : "Z to A"}`;
+    }
+    return `Tools ranked by ${SORT_NAMES[state.sort] || state.sort}, ${asc ? "lowest" : "highest"} first`;
   }
   function missingCell(kind, words, span) {
     const td = document.createElement("td");
@@ -225,8 +280,8 @@
           const td = document.createElement("td");
           td.className = "none";
           td.dataset.none = "iou";
-          td.innerHTML = "<i>no correct calls</i>";
-          td.title = v.ntp ? "correct calls only on single residues, where IoU says nothing about the ends" : "no correct calls";
+          td.innerHTML = "<i>" + iouWords(v) + "</i>";
+          td.title = v.fmax > 0 ? "an IoU against one residue says nothing about where a call's ends are" : "no call was correct";
           tr.appendChild(td);
         } else tr.appendChild(numCell(fmt3(v.iou)));
         tr.appendChild(numCell(fmtInt(v.n)));
@@ -255,6 +310,8 @@
       }
       tbody.appendChild(tr);
     }
+    const rank = document.getElementById("rankline");
+    if (rank) rank.textContent = sortWords();
     const nRun = vals.filter((v) => v.r).length;
     document.getElementById("count").textContent = nRun
       ? nRun + " of " + vals.length + " tool and setting rows have results for these filters."
@@ -305,7 +362,7 @@
       const y = v[metric.field];
       if (!v.r) { notPlotted.push([row, "not run"]); continue; }
       if (!v.c || v.cpu == null) { notPlotted.push([row, "CPU-hours not measured"]); continue; }
-      if (y == null) { notPlotted.push([row, metric.id === "iou" ? "no correct calls" : "no value"]); continue; }
+      if (y == null) { notPlotted.push([row, metric.id === "iou" ? iouWords(v) : "no value"]); continue; }
       pts.push({ x: v.cpu, y, v, row });
     }
     const W = 760, H = 440, L = 64, R = 18, T = 14, B = 52;
@@ -347,7 +404,7 @@
       if (fr.length > 1) el("polyline", { points: fr.map((p) => sx(p.x) + "," + sy(p.y)).join(" "), class: "frontier" }, svg);
       for (const p of pts) {
         const t = M.tools[p.row.tool];
-        const m = marker(p.row.shape, sx(p.x), sy(p.y), 6, M.kinds[t.kind].color, true, svg);
+        const m = marker(p.row.shape, sx(p.x), sy(p.y), 6, kindColor(t.kind), true, svg);
         m.setAttribute("tabindex", "0");
         m.setAttribute("role", "link");
         m.dataset.tool = p.row.tool;
@@ -423,6 +480,20 @@
   };
 
   readHash();
+  // A link with a new hash, or back and forward, changes the filters without a reload.
+  window.addEventListener("hashchange", () => {
+    Object.assign(state, M.defaults);
+    readHash();
+    renderPrices();
+    update();
+  });
+  // Redraw when the colour theme changes, so the plot takes the new kind colours.
+  const redraw = () => update(false);
+  if (window.matchMedia) {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq.addEventListener) mq.addEventListener("change", redraw);
+  }
+  new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   if (page === "cost") {
     document.querySelectorAll("button[data-metric]").forEach((b) =>
       b.addEventListener("click", () => { state.metric = b.dataset.metric; update(false); }));

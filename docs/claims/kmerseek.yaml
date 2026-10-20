@@ -6,6 +6,9 @@
 # no longer matches that record. Status comes from the test, not from this file:
 # a claim is alive when its test runs and does not kill it, retired when it does,
 # untested when the test has not been run or the data cannot decide it.
+# A test's optional `verdict` is the wording of its verdict line, a Python format
+# string filled from the resolved test (record_compare gives a, b, a_plus_b, and, with
+# `total`, total and a_plus_b_share).
 # Schema: claims/schema.json. Check: scripts/claims.py.
 
 tool: kmerseek
@@ -45,7 +48,7 @@ claims:
           against: {tool: hmmer3_phmmer, setting: default}
           targets: [QfO ptroglodytes, QfO rnorvegicus, QfO clupus, QfO btaurus, QfO mouse, QfO mdomestica]
           kill_if: {abs_difference_above: 0.05}
-      - label: settings of 22 that pass on Swiss-Prot features (raw or dedup)
+      - label: settings that pass on Swiss-Prot features (raw or dedup)
         test:
           kind: table_count_passing
           experiment: qfo_region_midi_plus
@@ -92,6 +95,7 @@ claims:
       ours: {name: "kmerseek search queries per second", quote: "2.289115"}
       theirs: {name: "MMseqs2 queries per second", quote: "78.554595"}
       kill_if: {ours_below_theirs: true}
+      verdict: "{a:.2f} queries per second against MMseqs2's {b:.1f}"
     context:
       - label: kmerseek search peak memory, GB
         test: {kind: record, row: "239", name: "kmerseek hp k15 scaled10 search peak memory (GB)", quote: "82.68"}
@@ -108,7 +112,9 @@ claims:
       row: "076"
       ours: {name: "benchmark queries only kmerseek detects", quote: "0"}
       theirs: {name: "benchmark queries both detect", quote: "188"}
+      total: {field: dataset, quote: "5,713"}
       kill_if: {ours_at_most: 0}
+      verdict: "fired on {a_plus_b:,.0f} of {total:,.0f} benchmark queries ({a_plus_b_share:.1%}); {a:,.0f} that FoldSeek missed"
     context:
       - label: per-query family sensitivity, kmerseek better than FoldSeek on 228 shared queries (Wilcoxon)
         test: {kind: record, row: "076", name: "Wilcoxon p, kmerseek better than FoldSeek", quote: "p=0.1171"}

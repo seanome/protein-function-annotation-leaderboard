@@ -46,7 +46,7 @@
   },
   {
    "tag": "li",
-   "text": "settings of 22 that pass on Swiss-Prot features (raw or dedup): 2 of 30 setting and dedup choices pass (15 settings): hp_thomas_dill2_k24_lcFalse raw, hp_thomas_dill2_k24_lcFalse dedup"
+   "text": "settings that pass on Swiss-Prot features (raw or dedup): 2 of 30 setting and dedup choices pass (15 settings): hp_thomas_dill2_k24_lcFalse raw, hp_thomas_dill2_k24_lcFalse dedup"
   },
   {
    "tag": "p",
@@ -74,7 +74,7 @@
   },
   {
    "tag": "li",
-   "text": "○Exact HP seeds find homologs below 40% identitykill: Fmax under 0.05 in the under-40% identity bins on Pfam-N, for every hydrophobic-polar settinguntested · the under-40% bins hold at most 1 region each; at least 30 are needed to decide · nb 230 to 232"
+   "text": "○Exact HP seeds find homologs below 40% identitykill: Fmax under 0.05 in the under-40% identity bins on Pfam-N, for every hydrophobic-polar settinguntested · the 0-20%, 20-30%, 30-40% bins hold at most 1 region for any setting and relative; at least 30 are needed to decide · nb 230 to 232"
   },
   {
    "tag": "summary",
@@ -270,7 +270,7 @@
   },
   {
    "tag": "p",
-   "text": "Setting gbmr4_k21_lcFalse, searching one relative (mean over the 15 relatives it searched): 0.0552 core-hours reserved per 1,000 queries (4 cores for the task's wall time), measured on Sherlock. Peak memory 5.2 GB. That is about $0.00246 at $0.044625 per CPU-hour. Building its databases took 0.147 core-hours over 6 databases. A database is built once and reused, so this is not in the per-query cost."
+   "text": "Setting gbmr4_k21_lcFalse, searching one relative (mean over the 15 relatives it searched): 0.0552 core-hours reserved per 1,000 queries (4 cores for the task's wall time), measured on Sherlock. Peak memory 5.2 GB. That is about $0.00246 at $0.044625 per CPU-hour. Building its databases took 0.147 core-hours over 6 databases. A database is built once and reused, so this is not in the per-query cost. This covers the 6 database builds the task records hold; the search used 15 relatives."
   },
   {
    "tag": "p",

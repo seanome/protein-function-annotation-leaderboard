@@ -43,7 +43,7 @@ Swiss-Prot features, raw calls, zebrafish, setting `default`: best feature type 
 ## Cost per 1,000 queries
 
 Setting `default`, searching one relative (mean over the 15 relatives it searched): 0.417 core-hours reserved per 1,000 queries (8 cores for the task's wall time), measured on Sherlock. Peak memory 4.9 GB. That is about $0.0186 at $0.044625 per CPU-hour.
-Building its databases: not measured.
+Building its databases for setting `default`: not measured (no task record holds a database build for this tool and setting).
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 

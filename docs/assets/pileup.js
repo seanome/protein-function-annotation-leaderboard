@@ -9,6 +9,9 @@
   const META = JSON.parse(document.getElementById("pu-meta").textContent);
   const css = getComputedStyle(document.documentElement);
   const tok = (n) => css.getPropertyValue(n).trim();
+  // A kind's colour from the CSS tokens at draw time, so the canvases, curves and legends
+  // agree in light and dark mode.
+  const kindColor = (kind) => tok("--k-" + kind) || META.kinds[kind];
   let D, R, P, N, ALL_ROWS, FAMILY_ROWS, COV = [], state = { sort: "coverage", focus: 0, color: "coverage" };
 
   // ---------- matrix ----------
@@ -100,7 +103,7 @@
   function mix(a, b, t) { return a.map((x, i) => Math.round(x + (b[i] - x) * t)); }
   function colors(p) {
     return {
-      on: hexToRgb(META.kinds[p.kind]), off: hexToRgb(tok("--surface") || "#ffffff"),
+      on: hexToRgb(kindColor(p.kind)), off: hexToRgb(tok("--surface") || "#ffffff"),
       nul: hexToRgb(tok("--null") || "#b9bdbb"), stripA: hexToRgb(tok("--strip-a") || "#8c6d46"), stripB: hexToRgb(tok("--strip-b") || "#dccbab"),
     };
   }
@@ -191,7 +194,7 @@
       card.innerHTML = `<span class="pu-t"><span class="kind k-${p.kind}"></span>${panelTitle(p)}</span>`;
       const svg = el("svg", { class: "pu-curve", role: "img", "aria-label": "column average" });
       card.appendChild(svg);
-      drawCurve(svg, ro.curve, META.kinds[p.kind], false, readouts(COV[k], FAMILY_ROWS).curve);
+      drawCurve(svg, ro.curve, kindColor(p.kind), false, readouts(COV[k], FAMILY_ROWS).curve);
       const cv = document.createElement("canvas");
       cv.width = NCOL; cv.height = 180; cv.className = "pu-ov";
       card.appendChild(cv);
@@ -211,7 +214,7 @@
     vals.sort((a, b) => a - b);
     const sr = vals.length ? [vals[Math.floor(0.05 * (vals.length - 1))], vals[Math.floor(0.95 * (vals.length - 1))]] : [0, 1];
     document.getElementById("pu-ftitle").innerHTML = panelTitle(p);
-    drawCurve(document.getElementById("pu-fcurve"), ro.curve, META.kinds[p.kind], true, rf.curve);
+    drawCurve(document.getElementById("pu-fcurve"), ro.curve, kindColor(p.kind), true, rf.curve);
     const fc = document.getElementById("pu-fheat");
     fc.width = STRIP + NCOL * 2; fc.height = N;
     fc.parentElement.style.marginLeft = (100 * FOCUS_L / FOCUS_W) + "%";
@@ -226,7 +229,7 @@
     sb.querySelector(".name").textContent = `${META.names[p.tool]}: ${META.scores[p.tool]}, higher is better.`;
     sb.querySelector(".lo").textContent = sr[0].toPrecision(3);
     sb.querySelector(".hi").textContent = sr[1].toPrecision(3);
-    sb.style.setProperty("--kind", META.kinds[p.kind]);
+    sb.style.setProperty("--kind", kindColor(p.kind));
     document.querySelectorAll("button[data-sort]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sort === state.sort));
     document.querySelectorAll("button[data-color]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.color === state.color));
     window.__pileup.readouts = P.map((_, k) => readouts(COV[k]));
@@ -293,7 +296,7 @@
     for (const s of series) {
       let d = "";
       s.frac.forEach((v, b) => { d += (b ? "L" : "M") + sx(b).toFixed(1) + "," + sy(v).toFixed(1) + "H" + (sx(b) + bw).toFixed(1); });
-      el("path", { d, fill: "none", stroke: META.kinds[s.p.kind], "stroke-width": 1.8, "stroke-dasharray": s.h.dash || "", class: "pu-hs", "data-tool": s.h.tool }, svg);
+      el("path", { d, fill: "none", stroke: kindColor(s.p.kind), "stroke-width": 1.8, "stroke-dasharray": s.h.dash || "", class: "pu-hs", "data-tool": s.h.tool }, svg);
     }
     window.__pileup.hist = series.map((s) => ({ tool: s.h.tool, n: s.n }));
   }
@@ -312,6 +315,7 @@
     window.__pileup.cov = COV; window.__pileup.regions = R; window.__pileup.panels = P.map((p) => p.tool + "|" + p.setting);
     window.__pileup.setFocus = (k) => { state.focus = k; render(); };
     window.__pileup.setSort = (s) => { state.sort = s; render(); };
+    window.__pileup.hoverText = (i) => hoverText(i);
     window.__pileup.readoutsOf = (k, fam) => { const ro = readouts(COV[k], fam ? FAMILY_ROWS : null); return { missedFrac: ro.missedFrac, bodyMean: ro.bodyMean, flankMean: ro.flankMean, rowsScored: ro.rowsScored,
       startAbs: ro.startAbs.text, endAbs: ro.endAbs.text, startRel: ro.startRel.text, endRel: ro.endRel.text }; };
     document.querySelectorAll("button[data-sort]").forEach((b) => b.addEventListener("click", () => { state.sort = b.dataset.sort; render(); }));
@@ -330,6 +334,14 @@
     fc.addEventListener("mouseleave", () => (tip.hidden = true));
     render();
     drawHist();
+    // Redraw when the colour theme changes, so canvases and curves take the new kind colours.
+    const redraw = () => { render(); drawHist(); };
+    if (window.matchMedia) {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      if (mq.addEventListener) mq.addEventListener("change", redraw);
+    }
+    new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    window.__pileup.redraw = redraw;
     document.getElementById("pu-loading").hidden = true;
     window.__pileup.ready = true;
   });

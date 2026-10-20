@@ -43,7 +43,8 @@ Swiss-Prot features, raw calls, zebrafish, setting `s7`: best feature type ACT_S
 ## Cost per 1,000 queries
 
 Setting `s7`, searching one relative (mean over the 15 relatives it searched): 0.0252 core-hours reserved per 1,000 queries (16 cores for the task's wall time), measured on Sherlock. Peak memory 1.1 GB. That is about $0.00113 at $0.044625 per CPU-hour.
-Building its databases: not measured.
+Building its databases took 0.00889 core-hours over 7 databases. A database is built once and reused, so this is not in the per-query cost.
+This covers the 7 database builds the task records hold; the search used 15 relatives.
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 

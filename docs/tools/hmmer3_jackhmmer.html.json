@@ -122,7 +122,7 @@
   },
   {
    "tag": "p",
-   "text": "Setting n3, searching one relative (mean over the 15 relatives it searched): 2.45 core-hours reserved per 1,000 queries (8 cores for the task's wall time), measured on Sherlock. Peak memory 5.2 GB. That is about $0.109 at $0.044625 per CPU-hour. Building its databases: not measured."
+   "text": "Setting n3, searching one relative (mean over the 15 relatives it searched): 2.45 core-hours reserved per 1,000 queries (8 cores for the task's wall time), measured on Sherlock. Peak memory 5.2 GB. That is about $0.109 at $0.044625 per CPU-hour. Building its databases for setting n3: not measured (no task record holds a database build for this tool and setting)."
   },
   {
    "tag": "p",

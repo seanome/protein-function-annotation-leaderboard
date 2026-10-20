@@ -11,7 +11,7 @@
    "scope": "Swiss-Prot features, raw calls, setting hp_thomas_dill2_k24_lcFalse, 998 human queries",
    "status": "alive",
    "verdict": "−0.042 to +0.013 across 6 of 6",
-   "date": "2026-10-20",
+   "date": null,
    "source": "seanome/2024-kmerseek-analysis@7eca428b results.parquet",
    "context": [
     {
@@ -20,7 +20,7 @@
      "source": "seanome/2024-kmerseek-analysis@7eca428b results.parquet"
     },
     {
-     "label": "settings of 22 that pass on Swiss-Prot features (raw or dedup)",
+     "label": "settings that pass on Swiss-Prot features (raw or dedup)",
      "text": "2 of 30 setting and dedup choices pass (15 settings): hp_thomas_dill2_k24_lcFalse raw, hp_thomas_dill2_k24_lcFalse dedup",
      "source": null
     }
@@ -36,7 +36,7 @@
    "kill": "Fmax under 0.05 in the under-40% identity bins on Pfam-N, for every hydrophobic-polar setting",
    "scope": "Pfam-N regions, raw calls, kmerseek hp_thomas_dill2 settings, all 15 relatives",
    "status": "untested",
-   "verdict": "the under-40% bins hold at most 1 region each; at least 30 are needed to decide",
+   "verdict": "the 0-20%, 20-30%, 30-40% bins hold at most 1 region for any setting and relative; at least 30 are needed to decide",
    "date": null,
    "source": null,
    "context": [

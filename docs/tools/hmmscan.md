@@ -36,7 +36,7 @@ Swiss-Prot feature types: not run.
 ## Cost per 1,000 queries
 
 Setting `direct`, scanning Pfam's models: 0.389 core-hours reserved per 1,000 queries (4 cores for the task's wall time), measured on Sherlock. Peak memory 0.5 GB. That is about $0.0173 at $0.044625 per CPU-hour.
-Building its databases: not measured.
+Building its databases for setting `direct`: not measured (no task record holds a database build for this tool and setting).
 
 The per-query cost counts the search only. The run recorded cost per tool and setting, summed over all relatives, so the cost for one relative is the mean.
 
