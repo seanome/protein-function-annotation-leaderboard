@@ -82,3 +82,168 @@ D48, D49, D51 to D54, D60.
   record") if every row with an approved drug has T of 5 or 6, and no row with T of 2 or
   below does.
 - If fewer than a quarter (15 of 60) clear step 2, the belief is a weak foundation.
+
+---
+
+# Results
+
+Everything below was written after the searches, which ran on 2026-10-19. The scope list
+and the rules above were committed first and were not changed.
+
+## The funnel
+
+![Five steps of the tolerance atlas, with the counts on each bar](funnel_tolerance_atlas_pubmed_2026-10-19.png)
+
+Panel a counts every row. Panel b counts only rows whose transferability score is 5 or 6.
+A filled blue bar is the number of diseases that clear that step and every step before it.
+The hollow dashed bar on the right is the number of diseases with no species and no
+measured number in that set.
+
+| step | diseases, every row | diseases, rows with transferability 5 or 6 |
+|---|---|---|
+| in scope | 60 | 60 |
+| a named species with a measured number | 42 | 7 |
+| the molecule is named | 29 | 7 |
+| the molecule shown on a human target | 7 | 3 |
+| an approved drug | 0 | 0 |
+| no species and no number (the negative bar) | 18 | 53 |
+
+62 rows in all: 44 with a measured number across 42 diseases (two diseases carry two
+species each), 18 negative rows. 235 PubMed queries, all in `queries.csv`, at least three
+per disease.
+
+## The rule, and what held
+
+The rules were fixed before the searching. Here is each one and its outcome.
+
+**The belief as stated is supported.** The rule asked for at least half of the in-scope
+diseases, 30 of 60, to have a named species with a measured number and a citation. 42 of
+60 do. The weak-foundation clause, fewer than 15 of 60, is far from being met.
+
+**The narrow version cannot be tested, because no row has an approved drug.** The rule
+asked whether every row with an approved drug has a transferability score of 5 or 6, and
+no row with a score of 2 or below does. Step 5 asks whether the molecule from the tolerant
+species became a drug. No row in the atlas has one, so the test has nothing to run on. Two
+near-misses were found and both are recorded in the rows:
+
+- Rasburicase (ELITEK, US FDA BLA 103946, approved 12 July 2002, page fetched today) is
+  uricase, the enzyme humans lost. Its source is the fungus *Aspergillus flavus*, and the
+  search found no animal that tolerates high urate with a measured number, so the gout row
+  has no species and does not reach step 2.
+- Aprepitant (EMEND, US FDA NDA 021549, approved 26 March 2003, page fetched today) blocks
+  the human receptor for substance P, the molecule the naked mole rat row is about. It is a
+  synthetic antagonist of that molecule's receptor, developed without reference to the
+  naked mole rat, so it is not the animal's molecule made into a drug. The column reads
+  "no" and says why.
+
+**The drop is between the molecule and the human target.** 29 diseases have a named
+molecule, and 7 of those have a paper showing it acting in a human cell, on a human
+receptor or in a human assay. That gap, not the search for species, is where the atlas
+thins out.
+
+## What the transferability score says
+
+Transferability was scored once, by one person, from the molecule column and the
+human-target column only, before the drug column was read for that row. The six points and
+the readings fixed before scoring are in `scripts/transferability.py`; every row's score is
+written out in column 9 of `atlas.csv`. The five blocks of rows were collected in parallel
+and each had written its own reading of the six points, so none of their scores were used.
+
+Seven rows score 5 or 6:
+
+| disease | species | molecule | T |
+|---|---|---|---|
+| organophosphate poisoning | *Culex quinquefasciatus* | acetylcholinesterase carrying G119S | 6 |
+| iron overload | *Desmodus rotundus* | hepcidin, a 25-residue peptide | 6 |
+| hypercapnia | *Heterocephalus glaber* | substance P, an 11-residue peptide | 6 |
+| frostbite | *Tenebrio molitor* | the beetle's antifreeze protein | 5 |
+| freezing in cryopreservation | *Flavobacterium frigoris* | its ice-binding protein | 5 |
+| acute radiation syndrome | *Ramazzottius varieornatus* | Dsup | 5 |
+| spinal cord injury | *Danio rerio* | Ctgfa, the fish form of human CCN2 | 5 |
+
+Six of the seven are secreted proteins or peptides, which is what the score rewards. The
+seventh, Dsup, works inside the nucleus and scores 5 on its other five points. Two rows,
+hepcidin and substance P, give a UniProt accession for the human protein as well, because
+no entry exists for the bat version of that gene; the rows say so.
+
+## What was checked today, and what was not
+
+Checked, by opening the source today:
+
+- Every number in column 3 was read from the abstract of the cited paper, or from its
+  PubMed Central full text where the row says so.
+- Every UniProt accession in column 6 was read from the REST API today. Where no entry
+  exists for the tolerant species, the row says so and gives the human or sister-species
+  accession instead, marked.
+- The two drug-approval pages above were fetched from Drugs@FDA today. No other approval is
+  claimed anywhere in the atlas, and no other agency page was opened.
+- Every PubMed query is in `queries.csv` as it was typed.
+
+Not checked, and stated as such in the rows:
+
+- Independent origins (column 5) is a count in only a handful of rows. Most rows say "not
+  found". A few rest on a review for that count and are marked.
+- The human-target column is "not found" in most rows, and no second search was run to
+  rescue it.
+- Several numbers are weaker than the step asks for, and each such row says so: a rate
+  ratio rather than days to regrowth (limb regrowth), tooth generations at hatching rather
+  than over a lifetime (tooth loss), a control value inside a toxicity study (shark urea),
+  and one habitat altitude rather than a pressure measurement (llama lung).
+- `Acomys spp.` in the skin-scarring row is a genus, not a binomial, because the full-text
+  tool strips italic species names. It is the one row that breaks the "species are named by
+  binomial" rule, and it is marked.
+- Rows D02, D04, D07, D09, D13, D21 and D50 name a species or a molecule but have no
+  measured number, so they count as negative rows in the funnel. The negative bar mixes
+  them with rows where nothing at all was found.
+- No row was checked a second time by anyone else. `VERIFY_TODO.md` lists what the second
+  agent has to open.
+
+## How the rows were collected
+
+All 60 diseases were reached. Rows D01 to D10 were collected directly. The other five
+blocks of ten were collected in parallel by five agents working from the same written
+method, each writing only its own file, under the same instruction never to write an
+identifier that had not come back from a tool call. Their transferability scores were
+discarded and rescored here. Their numbers, citations and accessions were kept as written,
+and they are what the second agent has to check.
+
+## Files
+
+| file | holds |
+|---|---|
+| `scope.csv` | the 60 in-scope diseases and their insult class, committed before any species search |
+| `atlas.csv` | the eleven columns, one row per disease and species |
+| `queries.csv` | every PubMed query, verbatim, with the disease it was run for |
+| `counts.json` | the five counts, the negative-row count, and the same for rows with transferability 5 or 6 |
+| `rows/block-*.jsonl` | what each block of ten diseases returned, before assembly |
+| `funnel_tolerance_atlas_pubmed_2026-10-19.{pdf,svg,png}` | the figure |
+| `VERIFY_TODO.md` | what the checking agent must open |
+
+Rebuild everything from the row files with:
+
+```bash
+python scripts/build_tolerance_atlas.py
+```
+
+## The species, for the annotation question
+
+These are the binomials in column 2 of rows that have a measured number. They are the input
+to the next question: whether the species that tolerate a human insult have a larger share
+of proteins with no functional label than model organisms do.
+
+*Acomys cahirinus*, *Alligator mississippiensis*, *Ambystoma mexicanum*, *Anser anser*,
+*Anser indicus*, *Artemia franciscana*, *Calypte anna*, *Chrysemys picta bellii*,
+*Columba livia*, *Culex quinquefasciatus*, *Danaus plexippus*, *Danio rerio*,
+*Deinococcus radiodurans*, *Desmodus rotundus*, *Didelphis aurita*,
+*Drosophila melanogaster*, *Flavobacterium frigoris*, *Gallus gallus*,
+*Heterocephalus glaber*, *Ictidomys tridecemlineatus*, *Lama glama*, *Loxodonta africana*,
+*Mirounga angustirostris*, *Mya arenaria*, *Neotoma albigula*,
+*Periophthalmodon schlosseri*, *Poecilia mexicana*, *Ramazzottius varieornatus*,
+*Rana sylvatica* (also written *Lithobates sylvaticus*), *Squalus acanthias*,
+*Tenebrio molitor*, *Urocitellus parryii*, *Ursus americanus*, *Ursus arctos horribilis*.
+Plus *Acomys* spp., a genus, which cannot be used as a row.
+
+Thirty-four binomials. Two of them are bacteria, *Deinococcus radiodurans* and
+*Flavobacterium frigoris*, and two are the standard laboratory animals
+*Drosophila melanogaster* and *Danio rerio*, which also sit in the model-organism group.
+Decide how to handle both before running anything.
