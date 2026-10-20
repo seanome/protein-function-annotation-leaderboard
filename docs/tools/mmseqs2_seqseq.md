@@ -1,6 +1,33 @@
 # MMseqs2
 
-Tool id `mmseqs2_seqseq`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
+Amino-acid letters: it first keeps target proteins that share similar short words with the query, then aligns only those, which makes it much faster than aligning every pair.
+
+## Will it work for you?
+
+1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.249 (n = 563), 60–100% 0.297 (n = 1,289). If no, 20–30% 0.325 (n = 93), 30–40% 0.188 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting sensitivity 7; subsets with at least 30 true instances.)
+2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.243 (n = 963), 121–250 aa 0.305 (n = 504), 251 aa or more 0.462 (n = 277). If no, 16–30 aa 0.027 (n = 271), 31–60 aa 0.089 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting sensitivity 7.)
+3. **Can you spend about 0.0252 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" below.
+
+## Best Fmax and cost
+
+Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is sensitivity 7 (`s7`): Fmax 0.327 over 2,435 true instances. Searching costs about $0.00113 per 1,000 queries (0.0252 core-hours), for each relative searched.
+
+## Where it is strong and weak
+
+Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
+
+Where it is closest to, or furthest ahead of, the best other tool:
+
+- identity 40–60% to the closest same-family domain: Fmax 0.249 (n = 563); best other: phmmer, default options, 0.252.
+- AlphaFold confidence (pLDDT) 90–100: Fmax 0.480 (n = 186); best other: MMseqs2, three rounds, sensitivity 7, 3 rounds, 0.484.
+
+Where it is furthest behind the best other tool:
+
+- regions 16–30 aa long: Fmax 0.027 (n = 271); best other: kmerseek, wwmj5, k = 11, 0.330.
+- regions 31–60 aa long: Fmax 0.089 (n = 420); best other: kmerseek, gbmr4, k = 21, 0.232.
+
+Swiss-Prot features, raw calls, zebrafish, setting sensitivity 7: best feature type active site, Fmax 0.312 (n = 176); worst short motif, Fmax 0.000 (n = 190).
+
 
 ## What it compares
 
@@ -19,22 +46,6 @@ The relative's proteome (Quest for Orthologs reference proteomes, release 2020_0
 ## How to read its score
 
 Bit score: higher ranks first. The E-value cutoff was 10.
-
-## Strong and weak strata
-
-Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is `s7`: Fmax 0.327 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.
-
-Where it is closest to, or furthest ahead of, the best other tool:
-
-- identity 40–60% to the closest same-family domain: Fmax 0.249 (n = 563); best other: phmmer `default`, 0.252.
-- AlphaFold confidence (pLDDT) 90–100: Fmax 0.480 (n = 186); best other: MMseqs2, three rounds `s7`, 0.484.
-
-Where it is furthest behind the best other tool:
-
-- regions 16–30 aa long: Fmax 0.027 (n = 271); best other: kmerseek `wwmj5_k11_lcFalse`, 0.330.
-- regions 31–60 aa long: Fmax 0.089 (n = 420); best other: kmerseek `gbmr4_k21_lcFalse`, 0.232.
-
-Swiss-Prot features, raw calls, zebrafish, setting `s7`: best feature type ACT_SITE (active site residue), Fmax 0.312 (n = 176); worst MOTIF (short motif), Fmax 0.000 (n = 190).
 
 ## Known failure modes {#failure-modes}
 
@@ -55,7 +66,7 @@ The per-query cost counts the search only. The run recorded cost per tool and se
 
 ## Settings in the table
 
-- `s7`: sensitivity 7 (-s 7), one round
+- sensitivity 7 (`s7`): sensitivity 7 (-s 7), one round
 
 ## Version, container, command
 
@@ -73,8 +84,5 @@ mmseqs search \
 
 Followed by mmseqs convertalis to write the table of hits.
 
-## Will it work for you?
+Tool id `mmseqs2_seqseq`. Numbers from seanome/2024-kmerseek-analysis commit `7eca428b`.
 
-1. **Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins?** If yes, Fmax here is 40–60% 0.249 (n = 563), 60–100% 0.297 (n = 1,289). If no, 20–30% 0.325 (n = 93), 30–40% 0.188 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `s7`; strata with at least 30 true instances.)
-2. **Are the features you care about longer than 60 residues?** If yes, Fmax here is 61–120 aa 0.243 (n = 963), 121–250 aa 0.305 (n = 504), 251 aa or more 0.462 (n = 277). If no, 16–30 aa 0.027 (n = 271), 31–60 aa 0.089 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `s7`.)
-3. **Can you spend about 0.0252 core-hours per 1,000 proteins for each relative you search?** That is the measured mean per relative; see "Cost per 1,000 queries" above.

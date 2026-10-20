@@ -21,10 +21,6 @@
  },
  "text": [
   {
-   "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 7eca428b (results/leaderboard), copied 2026-10-20."
-  },
-  {
    "tag": "h1",
    "text": "claims.yaml"
   },
@@ -50,7 +46,7 @@
   },
   {
    "tag": "p",
-   "text": "A claim retired by a record test is dated with the date of that inventory record. A claim retired by a table test has no date, because the tables are recomputed on every build and the build cannot tell when the kill first held. The \"last kill\" date on a card counts only dated kills."
+   "text": "A claim retired by a record test is dated with the date of that inventory record. A claim retired by a table test has no date, because the tables are recomputed on every build and the build cannot tell when the claim was first disproved. The \"last disproved\" date on a card counts only dated results."
   },
   {
    "tag": "p",

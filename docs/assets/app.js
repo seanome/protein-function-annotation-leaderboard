@@ -1,4 +1,4 @@
-/* Leaderboard and score-against-cost pages. Reads the JSON that build_site.py inlines
+/* Leaderboard and compare-two-columns pages. Reads the JSON that build_site.py inlines
    into the page (#lb-data); never computes a metric, only looks rows up. A (tool,
    setting) with no row for the chosen filters is drawn as "—" and the words "not run";
    a missing compute row is "—" and "not measured". */
@@ -24,9 +24,11 @@
       truth: (v) => chipValues("truth").includes(v) && v in M.truthNames,
       calls: (v) => chipValues("calls").includes(v),
       species: (v) => chipValues("species").includes(v) && v in M.species,
-      metric: (v) => M.metrics.some((m) => m.id === v),
+      x: (v) => M.axes.some((a) => a.id === v),
+      y: (v) => M.axes.some((a) => a.id === v && a.kind === "score"),
       sort: (v) => COLS.some((c) => c.id === v),
       dir: (v) => v === "asc" || v === "desc",
+      view: (v) => v === "best" || v === "all",
     };
     for (const k of Object.keys(ok)) {
       if (h.has(k) && ok[k](h.get(k))) state[k] = h.get(k);
@@ -38,6 +40,8 @@
     else if (row && stratum !== "all" && row.groups.some((g) => g.chips.some((c) => c.value === stratum))) {
       state.axis = axis; state.stratum = stratum;
     }
+    // Links made before both axes could be chosen name the score as "metric".
+    if (h.has("metric") && !h.has("y") && ok.y(h.get("metric"))) state.y = h.get("metric");
     for (const k of ["r_cpu", "r_gpu"]) {
       const v = Number(h.get(k));
       if (h.has(k) && h.get(k) !== "" && isFinite(v) && v >= 0) state[k] = v;
@@ -45,7 +49,7 @@
   }
   function writeHash() {
     const h = new URLSearchParams();
-    for (const k of ["truth", "calls", "species", "axis", "stratum", "metric", "sort", "dir", "r_cpu", "r_gpu"]) {
+    for (const k of ["truth", "calls", "species", "axis", "stratum", "x", "y", "sort", "dir", "view", "r_cpu", "r_gpu"]) {
       if (state[k] !== undefined && state[k] !== null) h.set(k, state[k]);
     }
     try { history.replaceState(null, "", "#" + h.toString()); } catch (e) { /* framed viewers may refuse */ }
@@ -113,7 +117,8 @@
       r.dataset.row = row.id;
       const a = document.createElement("div");
       a.className = "axis";
-      a.innerHTML = row.label + (row.help ? "<small>" + row.help + "</small>" : "");
+      a.innerHTML = row.label + (M.terms && M.terms.filters[row.id] ? " " + M.terms.filters[row.id] : "") +
+        (row.help ? "<small>" + row.help + "</small>" : "");
       r.appendChild(a);
       const chips = document.createElement("div");
       chips.className = "chips";
@@ -161,19 +166,19 @@
   }
 
   // ---------- leaderboard table ----------
+  // "wide" columns show from 641 px up; "more" columns only after "More columns". Raw field
+  // names are the hover text of each column name (and are in the page's JSON).
   const COLS = [
     { id: "tool", label: "Tool", txt: true },
-    { id: "setting", label: "Setting", txt: true },
-    { id: "fmax", label: "Fmax", key: "fmax" },
-    { id: "auprc", label: "AUPRC", key: "auprc" },
-    { id: "iou", label: "Median IoU", key: "median_iou_tp" },
-    { id: "n", label: "True instances", key: "n_truth_instances" },
-    { id: "cpu", label: 'Core-hours per 1,000 queries, per relative <span class="prov measured">measured</span>', key: "cpu_h" },
-    { id: "cpu_rep", label: 'CPU-h per 1,000 queries <span class="prov reported">reported</span>', key: "cpu_h_reported" },
-    { id: "ram", label: 'Peak RAM, GB <span class="prov measured">measured</span>', key: "peak_rss_gb" },
-    { id: "gpu", label: "GPU in search", key: "gpu" },
-    { id: "cost", label: "Estimated cost, USD per 1,000 queries", key: "cost_usd_est" },
+    { id: "fmax", label: "Fmax", key: "fmax", term: "fmax" },
+    { id: "cost", label: "Estimated cost per 1,000 queries", key: "cost_usd_est", term: "cost" },
+    { id: "auprc", label: "AUPRC", key: "auprc", term: "auprc", cls: "c-wide" },
+    { id: "iou", label: "Median IoU", key: "median_iou_tp", term: "iou", cls: "c-wide" },
+    { id: "n", label: "True instances", key: "n_truth_instances", term: "n", cls: "c-more" },
+    { id: "cpu", label: "Core-hours per 1,000 queries", key: "cpu_h_per_1000", term: "cpu", cls: "c-more" },
+    { id: "ram", label: "Peak RAM, GB", key: "peak_rss_gb", term: "ram", cls: "c-more" },
   ];
+  const LOWER_FIRST = new Set(["tool", "cpu", "ram", "cost"]);
   function rowValues(s, row) {
     const r = lookup(s, row);
     const c = computeRow(s, row);
@@ -183,10 +188,10 @@
       // (any such call has IoU >= 0.5), so it is shown as words and sorts with the missing.
       fmax: r ? r[0] : null, auprc: r ? r[1] : null, iou: r && r[2] ? r[2] : null, n: r ? r[3] : null,
       cpu: c ? c.cpu_h_per_1000 : null,
-      cpu_rep: c ? c.cpu_h_reported_per_1000 : null,
       ram: c ? c.peak_rss_gb : null,
       gpu: c ? c.gpu : null,
-      cost: cost(c),
+      // A cost belongs to a row that has results: a search that was not scored was not run.
+      cost: r ? cost(c) : null,
     };
   }
   // Words for a median IoU of 0. Fmax above 0 means at least one call was correct; with no
@@ -197,8 +202,8 @@
   function sortRows(vals) {
     const k = state.sort, dir = state.dir === "asc" ? 1 : -1;
     return vals.sort((a, b) => {
-      let x = k === "tool" ? M.tools[a.row.tool].name : k === "setting" ? a.row.setting : a[k];
-      let y = k === "tool" ? M.tools[b.row.tool].name : k === "setting" ? b.row.setting : b[k];
+      let x = k === "tool" ? M.tools[a.row.tool].name : a[k];
+      let y = k === "tool" ? M.tools[b.row.tool].name : b[k];
       // Missing values always sort last, whichever way the column is sorted.
       if (x == null && y == null) return a.row.order - b.row.order;
       if (x == null) return 1;
@@ -210,112 +215,189 @@
   }
   // The caption's first words, from the current sort: "Tools ranked by Fmax, highest first".
   const SORT_NAMES = {
-    tool: "tool name", setting: "setting name", fmax: "Fmax", auprc: "AUPRC", iou: "median IoU",
-    n: "true instances", cpu: "measured core-hours per 1,000 queries", cpu_rep: "reported CPU-hours per 1,000 queries",
-    ram: "peak RAM", gpu: "GPU in search", cost: "estimated cost",
+    tool: "tool name", fmax: "Fmax", auprc: "AUPRC", iou: "median IoU", n: "true instances",
+    cpu: "core-hours per 1,000 queries", ram: "peak RAM", cost: "estimated cost",
   };
   function sortWords() {
     const asc = state.dir === "asc";
-    if (state.sort === "tool" || state.sort === "setting" || state.sort === "gpu") {
-      return `Tools sorted by ${SORT_NAMES[state.sort]}, ${asc ? "A to Z" : "Z to A"}`;
-    }
+    if (state.sort === "tool") return `Tools sorted by name, ${asc ? "A to Z" : "Z to A"}`;
     return `Tools ranked by ${SORT_NAMES[state.sort] || state.sort}, ${asc ? "lowest" : "highest"} first`;
   }
-  function missingCell(kind, words, span) {
+  const NR = '<span class="nr" aria-hidden="true">×</span> ';
+  function missingCell(col, kind, why) {
     const td = document.createElement("td");
     td.className = "missing";
+    td.dataset.col = col.id;
     td.dataset.missing = kind;
-    if (span) td.colSpan = span;
-    td.innerHTML = "— " + words;
+    if (col.cls) td.classList.add(col.cls);
+    // "not run" takes the site's one not-run mark; "not measured" is words only.
+    td.innerHTML = why === "not run" ? NR + '<span class="mw">not run</span>' : "<i>" + why + "</i>";
     return td;
   }
-  function numCell(text) {
+  function numCell(col, text) {
     const td = document.createElement("td");
     td.className = "num";
+    if (col.cls) td.classList.add(col.cls);
+    td.dataset.col = col.id;
     td.textContent = text;
     return td;
   }
-  function renderTable() {
-    const thead = document.querySelector("#lb thead tr");
-    thead.innerHTML = "";
-    for (const col of COLS) {
-      const th = document.createElement("th");
-      th.scope = "col";
-      if (col.txt) th.className = "txt";
-      if (state.sort === col.id) th.setAttribute("aria-sort", state.dir === "asc" ? "ascending" : "descending");
+  function fmtCost(x) { return "$" + sig(x, 3); }
+  function toolCell(v, nOthers, open) {
+    const t = M.tools[v.row.tool];
+    const td = document.createElement("td");
+    td.className = "txt tool";
+    td.dataset.col = "tool";
+    const tags = (t.tags || []).map((x) => '<span class="tag">' + x + "</span>");
+    if (v.c && v.c.gpu_h_per_1000) tags.push('<span class="tag">GPU in search</span>');
+    if (v.row.tool === "hmmscan" && state.truth === "pfam") tags.push('<span class="tag warn">graded on its own models</span>');
+    td.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="tools/' + v.row.tool + '.html">' + t.name + "</a>" +
+      '<span class="set" title="' + v.row.setting + ": " + v.row.words + '">' + v.row.label + "</span>" +
+      (tags.length ? '<span class="tags">' + tags.join(" ") + "</span>" : "");
+    if (nOthers) {
       const b = document.createElement("button");
-      b.innerHTML = col.label + '<span class="arrow"></span>' + (col.key ? '<span class="key">' + col.key + "</span>" : "");
+      b.type = "button";
+      b.className = "moreset";
+      b.setAttribute("aria-expanded", open ? "true" : "false");
+      b.textContent = open ? "hide " + nOthers + " other setting" + (nOthers > 1 ? "s" : "") : "+" + nOthers + " more setting" + (nOthers > 1 ? "s" : "");
       b.addEventListener("click", () => {
-        if (state.sort === col.id) state.dir = state.dir === "asc" ? "desc" : "asc";
-        else { state.sort = col.id; state.dir = col.txt || col.id === "cpu" || col.id === "cpu_rep" || col.id === "ram" || col.id === "cost" ? "asc" : "desc"; }
-        update();
+        if (open) expanded.delete(v.row.tool); else expanded.add(v.row.tool);
+        update(false);
       });
-      th.appendChild(b);
-      thead.appendChild(th);
+      td.appendChild(b);
     }
-    const tbody = document.querySelector("#lb tbody");
-    tbody.innerHTML = "";
-    const vals = sortRows(M.rows.map((row) => rowValues(state, row)));
-    for (const v of vals) {
-      const tr = document.createElement("tr");
-      tr.dataset.tool = v.row.tool;
-      tr.dataset.setting = v.row.setting;
-      const t = M.tools[v.row.tool];
-      const td1 = document.createElement("td");
-      td1.className = "txt";
-      const tags = (t.tags || []).map((x) => '<span class="tag">' + x + "</span>");
-      if (v.row.tool === "hmmscan" && state.truth === "pfam") tags.push('<span class="tag warn">graded on its own models</span>');
-      td1.innerHTML = '<span class="kind k-' + t.kind + '" aria-hidden="true"></span><a href="tools/' + v.row.tool + '.html">' + t.name + "</a>" +
-        (tags.length ? "<br>" + tags.join(" ") : "");
-      tr.appendChild(td1);
-      const td2 = document.createElement("td");
-      td2.className = "txt mono";
-      td2.textContent = v.row.setting;
-      td2.title = v.row.words;
-      tr.appendChild(td2);
-      if (v.r) {
-        tr.appendChild(numCell(fmt3(v.fmax)));
-        tr.appendChild(numCell(fmt3(v.auprc)));
-        if (v.iou == null) {
+    return td;
+  }
+  function rowEl(v, lead, nOthers, open) {
+    const tr = document.createElement("tr");
+    tr.dataset.tool = v.row.tool;
+    tr.dataset.setting = v.row.setting;
+    if (!lead) tr.className = "sub";
+    tr.appendChild(toolCell(v, lead ? nOthers : 0, open));
+    const why = v.r ? null : "not run";
+    const cwhy = v.r && !v.c ? (M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species) ? "not measured" : "not run") : why;
+    for (const col of COLS.slice(1)) {
+      if (["fmax", "auprc", "iou", "n"].includes(col.id)) {
+        if (!v.r) { tr.appendChild(missingCell(col, "results", "not run")); continue; }
+        if (col.id === "iou" && v.iou == null) {
           const td = document.createElement("td");
-          td.className = "none";
+          td.className = "none " + (col.cls || "");
+          td.dataset.col = "iou";
           td.dataset.none = "iou";
           td.innerHTML = "<i>" + iouWords(v) + "</i>";
           td.title = v.fmax > 0 ? "an IoU against one residue says nothing about where a call's ends are" : "no call was correct";
           tr.appendChild(td);
-        } else tr.appendChild(numCell(fmt3(v.iou)));
-        tr.appendChild(numCell(fmtInt(v.n)));
+        } else tr.appendChild(numCell(col, col.id === "n" ? fmtInt(v.n) : fmt3(v[col.id])));
       } else {
-        tr.appendChild(missingCell("results", "not run", 4));
+        if (!v.r || !v.c) { tr.appendChild(missingCell(col, v.r ? "compute" : "results", cwhy)); continue; }
+        if (col.id === "cost") {
+          const td = numCell(col, fmtCost(v.cost));
+          if (v.c.gpu_h_per_1000) td.title = "includes " + sig(v.c.gpu_h_per_1000, 3) + " GPU-hours";
+          tr.appendChild(td);
+        } else if (col.id === "cpu") tr.appendChild(numCell(col, sig(v.cpu, 3)));
+        else tr.appendChild(numCell(col, v.ram.toFixed(1)));
       }
-      if (v.c) {
-        const cc = numCell(sig(v.cpu, 3));
-        if (v.c.n_runs > 1) cc.innerHTML += ` <span class="muted runs">(${sig(v.c.cpu_min, 3)}–${sig(v.c.cpu_max, 3)}, ${v.c.n_runs} runs)</span>`;
-        tr.appendChild(cc);
-        tr.appendChild(v.cpu_rep == null ? missingCell("reported", "none reported") : numCell(sig(v.cpu_rep, 3)));
-        tr.appendChild(numCell(v.ram.toFixed(1)));
-        const g = numCell(v.c.gpu_h_per_1000 ? sig(v.c.gpu_h_per_1000, 3) + " GPU-h" : "none");
-        if (v.c.gpu_h_per_1000) g.title = "one GPU, while predicting 3Di letters for the queries";
-        tr.appendChild(g);
-        tr.appendChild(numCell("$" + sig(v.cost, 3)));
-      } else {
-        // "not measured" only when this tool searched this relative (it has result rows
-        // under some filter) but no trace row holds the search task.
-        const why = M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species) ? "not measured" : "not run";
-        tr.appendChild(missingCell("compute", why));
-        tr.appendChild(missingCell("reported", "none reported"));
-        tr.appendChild(missingCell("compute", why));
-        tr.appendChild(missingCell("compute", why));
-        tr.appendChild(missingCell("compute", why));
+    }
+    return tr;
+  }
+  const expanded = new Set();
+  let allCols = false;
+  function renderTable() {
+    const table = document.getElementById("lb");
+    table.classList.toggle("allcols", allCols);
+    const thead = table.querySelector("thead tr");
+    thead.innerHTML = "";
+    for (const col of COLS) {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.dataset.col = col.id;
+      if (col.txt) th.className = "txt";
+      if (col.cls) th.classList.add(col.cls);
+      if (state.sort === col.id) th.setAttribute("aria-sort", state.dir === "asc" ? "ascending" : "descending");
+      const b = document.createElement("button");
+      b.innerHTML = col.label + '<span class="arrow"></span>';
+      if (col.key) b.title = "field " + col.key;
+      b.addEventListener("click", () => {
+        if (state.sort === col.id) state.dir = state.dir === "asc" ? "desc" : "asc";
+        else { state.sort = col.id; state.dir = LOWER_FIRST.has(col.id) ? "asc" : "desc"; }
+        update();
+      });
+      th.appendChild(b);
+      // The "?" sits beside the sort button, not inside it, so it never sorts.
+      if (col.term && M.terms) th.insertAdjacentHTML("beforeend", M.terms.th[col.term]);
+      thead.appendChild(th);
+    }
+    const tbody = table.querySelector("tbody");
+    tbody.innerHTML = "";
+    const vals = sortRows(M.rows.map((row) => rowValues(state, row)));
+    // One row per tool: its first row in the current order (its best setting by the sorted
+    // column), then, when opened, its other settings right under it.
+    const byTool = new Map();
+    for (const v of vals) { if (!byTool.has(v.row.tool)) byTool.set(v.row.tool, []); byTool.get(v.row.tool).push(v); }
+    const shown = [];
+    if (state.view === "all") {
+      for (const v of vals) tbody.appendChild(rowEl(v, true, 0, false));
+    } else {
+      for (const [tool, list] of byTool) {
+        const open = expanded.has(tool);
+        tbody.appendChild(rowEl(list[0], true, list.length - 1, open));
+        shown.push(list[0]);
+        for (const v of list.slice(1)) {
+          const tr = rowEl(v, false, 0, false);
+          if (!open) tr.hidden = true;
+          tbody.appendChild(tr);
+        }
       }
-      tbody.appendChild(tr);
     }
     const rank = document.getElementById("rankline");
-    if (rank) rank.textContent = sortWords();
+    if (rank) rank.textContent = sortWords() + (state.view === "all" ? ", every setting" : ", best setting of each tool") + ".";
     const nRun = vals.filter((v) => v.r).length;
+    const nTools = [...byTool.values()].filter((l) => l.some((v) => v.r)).length;
     document.getElementById("count").textContent = nRun
-      ? nRun + " of " + vals.length + " tool and setting rows have results for these filters."
-      : "No tool has results for these filters: either this stratum holds no regions for this relative, or it was not scored.";
+      ? `${nTools} of ${byTool.size} tools (${nRun} of ${vals.length} settings) have results for these filters.`
+      : "No tool has results for these filters: either this subset holds no regions for this relative, or it was not scored.";
+    const vb = document.getElementById("viewbtn");
+    if (vb) vb.textContent = state.view === "all" ? "One row per tool" : "Show every setting";
+    const cb = document.getElementById("colbtn");
+    if (cb) { cb.textContent = allCols ? "Fewer columns" : "More columns"; cb.setAttribute("aria-pressed", allCols); }
+    renderVerdict(vals);
+  }
+  // One sentence above the table, from the rows on screen: the best tool by Fmax, the
+  // cheapest tool within 0.01 of it, and the top tool by AUPRC when that is another tool.
+  function renderVerdict(vals) {
+    const box = document.getElementById("verdict");
+    if (!box) return;
+    const byOrder = (a, b) => a.row.order - b.row.order;
+    const top = (k) => vals.filter((v) => v[k] != null).sort((a, b) => b[k] - a[k] || byOrder(a, b))[0];
+    const best = top("fmax");
+    const name = (v) => `<b>${M.tools[v.row.tool].name}</b> (${v.row.label})`;
+    box.dataset.best = best ? best.row.tool + "|" + best.row.setting : "";
+    box.dataset.cheap = ""; box.dataset.auprc = "";
+    if (!best) { box.innerHTML = "No tool has results for these filters."; return; }
+    let t = `Highest Fmax: ${name(best)}, ${fmt3(best.fmax)}.`;
+    const near = vals.filter((v) => v.fmax != null && v.fmax >= best.fmax - 0.01 && v.cost != null)
+      .sort((a, b) => a.cost - b.cost || byOrder(a, b));
+    const cheap = near[0];
+    if (cheap && cheap !== best) {
+      box.dataset.cheap = cheap.row.tool + "|" + cheap.row.setting;
+      t += ` ${cheap.row.tool === best.row.tool ? "Its setting " + cheap.row.label : name(cheap)} is within 0.01 of it (${fmt3(cheap.fmax)})`;
+      if (best.cost != null && cheap.cost > 0) {
+        const r = best.cost / cheap.cost;
+        t += ` at ${r >= 1.95 ? "1/" + Math.round(r) + " of the cost" : "less cost"}: ${fmtCost(cheap.cost)} against ${fmtCost(best.cost)} per 1,000 queries.`;
+      } else t += ` for ${fmtCost(cheap.cost)} per 1,000 queries; the top tool's cost was not measured.`;
+    } else if (cheap) {
+      box.dataset.cheap = cheap.row.tool + "|" + cheap.row.setting;
+      t += ` No tool within 0.01 of it costs less (${fmtCost(cheap.cost)} per 1,000 queries).`;
+    }
+    const ap = top("auprc");
+    if (ap) {
+      box.dataset.auprc = ap.row.tool + "|" + ap.row.setting;
+      t += ap.row.tool !== best.row.tool
+        ? ` Ranked by AUPRC instead, ${name(ap)} comes first (${fmt3(ap.auprc)} against ${fmt3(best.auprc)}).`
+        : " AUPRC puts the same tool first.";
+    }
+    if (best.row.tool === "hmmscan" && state.truth === "pfam") t += " hmmscan is graded on its own models here, so read its row as an upper limit.";
+    box.innerHTML = t;
   }
 
   // ---------- prices ----------
@@ -331,7 +413,7 @@
     }
   }
 
-  // ---------- score against cost ----------
+  // ---------- Figure 1: any two columns against each other ----------
   const SVGNS = "http://www.w3.org/2000/svg";
   function el(name, attrs, parent) {
     const e = document.createElementNS(SVGNS, name);
@@ -347,81 +429,208 @@
     return el("circle", Object.assign({ cx: x, cy: y, r: r }, common), parent);
   }
   function frontier(points) {
-    // Points no other point beats on both axes: no other point has lower or equal cost
-    // AND a higher or equal score with at least one strictly better.
+    // Only for a lower-is-better x against a higher-is-better y. A point is on the line when
+    // no other point has lower or equal x AND higher or equal y, with one of them strictly.
     return points.filter((p) => !points.some((q) => q !== p && q.x <= p.x && q.y >= p.y && (q.x < p.x || q.y > p.y)))
       .sort((a, b) => a.x - b.x);
   }
+  function axisDef(id, fallback) {
+    return M.axes.find((a) => a.id === id) || M.axes.find((a) => a.id === fallback);
+  }
+  // The value a row has on one axis, or the reason it has none ("— not run" and so on).
+  function axisValue(ax, v) {
+    if (ax.kind === "score") {
+      if (!v.r) return { why: "not run" };
+      const y = v[ax.id];
+      if (y == null) return { why: ax.id === "iou" ? "no correct calls" : "no " + ax.short };
+      return { val: y };
+    }
+    if (!v.c) {
+      const searched = M.searched.includes(v.row.tool + "|" + v.row.setting + "|" + state.species);
+      return { why: searched ? ax.short + " not measured" : "not run" };
+    }
+    const val = { cpu: v.cpu, cost: v.cost, wall: v.c.wall_h_per_1000, ram: v.ram, db: v.c.db_cpu_h_per_db }[ax.id];
+    if (val == null) return { why: ax.id === "db" ? "no database build in the run's records" : ax.short + " not measured" };
+    // An axis where each step is ten times the last has no place for zero.
+    if (val <= 0) return { why: ax.short + " is zero, which this axis cannot show" };
+    return { val };
+  }
+  function fmtAxis(ax, x) {
+    if (ax.kind === "score") return fmt3(x);
+    if (ax.id === "cost") return "$" + sig(x, 3);
+    return sig(x, 3);
+  }
+  function unitWords(ax) {
+    return { cpu: "core-hours", cost: "cost", wall: "time", ram: "memory", db: "build time" }[ax.id] || "";
+  }
+  // Split a label into lines of at most maxChars characters, at spaces.
+  function wrap(text, maxChars) {
+    const lines = [];
+    let cur = "";
+    for (const w of text.split(" ")) {
+      if (cur && (cur + " " + w).length > maxChars) { lines.push(cur); cur = w; } else cur = cur ? cur + " " + w : w;
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+  function scale(ax, vals, lo0, hi0) {
+    // Cost, time and memory: each step is ten times the last. Scores: linear, padded.
+    if (ax.kind !== "score") {
+      let lo = Math.floor(Math.log10(Math.min(...vals))), hi = Math.ceil(Math.log10(Math.max(...vals)));
+      if (hi === lo) hi = lo + 1;
+      const f = (x) => lo0 + ((Math.log10(x) - lo) / (hi - lo)) * (hi0 - lo0);
+      const ticks = [];
+      for (let e = lo; e <= hi; e++) {
+        for (const m of [1, 2, 5]) {
+          const x = m * Math.pow(10, e);
+          if (Math.log10(x) > hi + 1e-9) continue;
+          ticks.push({ x, major: m === 1, label: m === 1 || hi - lo <= 2 ? (ax.id === "cost" ? "$" : "") + sig(x, 1) : null });
+        }
+      }
+      return { f, ticks };
+    }
+    const vmax = Math.max(...vals), vmin = Math.min(...vals);
+    const pad = (vmax - vmin) * 0.08 || 0.02;
+    const a = Math.max(0, vmin - pad), b = vmax + pad;
+    const f = (x) => lo0 + ((x - a) / (b - a)) * (hi0 - lo0);
+    const step = niceStep((b - a) / 5);
+    const ticks = [];
+    for (let x = Math.ceil(a / step - 1e-9) * step; x <= b + 1e-12; x += step) {
+      ticks.push({ x, major: true, label: x.toFixed(step < 0.01 ? 3 : 2) });
+    }
+    return { f, ticks };
+  }
+  let plotted = [];
+  function renderAxisPick() {
+    const box = document.getElementById("axispick");
+    if (!box) return;
+    box.innerHTML = "";
+    for (const [key, label, opts] of [
+      ["y", "Vertical axis, a score:", M.axes.filter((a) => a.kind === "score")],
+      ["x", "Horizontal axis:", M.axes],
+    ]) {
+      const r = document.createElement("div");
+      r.className = "pickrow";
+      r.setAttribute("role", "group");
+      r.setAttribute("aria-label", label);
+      r.dataset.axis = key;
+      const s = document.createElement("span");
+      s.className = "picklabel";
+      s.textContent = label;
+      r.appendChild(s);
+      const chips = document.createElement("span");
+      chips.className = "chips";
+      for (const ax of opts) {
+        const other = key === "x" ? state.y : state.x;
+        const b = chip(ax.short.charAt(0).toUpperCase() + ax.short.slice(1), state[key] === ax.id, () => {
+          state[key] = ax.id;
+          update(false);
+        }, ax.label);
+        b.dataset.pick = ax.id;
+        // The same column on both axes would put every marker on the diagonal.
+        if (ax.id === other) { b.disabled = true; b.title = "already on the other axis"; }
+        const wrapEl = document.createElement("span");
+        wrapEl.className = "pickchip";
+        wrapEl.appendChild(b);
+        // Its definition, as in Table 1's column names.
+        const tb = M.terms && M.terms.axes && M.terms.axes[ax.id];
+        if (tb) wrapEl.insertAdjacentHTML("beforeend", tb.replaceAll("-ax\"", "-ax-" + key + "\""));
+        chips.appendChild(wrapEl);
+      }
+      r.appendChild(chips);
+      box.appendChild(r);
+    }
+  }
   function renderPlot() {
-    const metric = M.metrics.find((m) => m.id === state.metric) || M.metrics[0];
+    if (!M.axes.some((a) => a.id === state.y && a.kind === "score")) state.y = "fmax";
+    const ya = axisDef(state.y, "fmax");
+    let xa = axisDef(state.x, "cpu");
+    if (xa.id === ya.id) xa = axisDef("cpu");
+    state.x = xa.id;
+    renderAxisPick();
     const box = document.getElementById("plot");
     box.innerHTML = "";
     const pts = [], notPlotted = [];
     for (const row of M.rows) {
       const v = rowValues(state, row);
-      const y = v[metric.field];
-      if (!v.r) { notPlotted.push([row, "not run"]); continue; }
-      if (!v.c || v.cpu == null) { notPlotted.push([row, "CPU-hours not measured"]); continue; }
-      if (y == null) { notPlotted.push([row, metric.id === "iou" ? iouWords(v) : "no value"]); continue; }
-      pts.push({ x: v.cpu, y, v, row });
+      const py = axisValue(ya, v), px = axisValue(xa, v);
+      // A row with no result has no score and no cost to speak of: one reason, "not run".
+      const why = !v.r ? "not run" : py.why || px.why;
+      if (why) { notPlotted.push([row, why]); continue; }
+      pts.push({ x: px.val, y: py.val, v, row });
     }
-    const W = 760, H = 440, L = 64, R = 18, T = 14, B = 52;
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Score against CPU-hours, one marker per tool and setting" }, box);
+    const pareto = xa.better === "lower" && ya.better === "higher";
+    // Draw at the box's own width so the 12-13 px text stays that size on a phone.
+    const W = Math.max(300, Math.min(900, (box.clientWidth || 760) - 14));
+    const narrow = W < 560;
+    const H = narrow ? Math.round(W * 1.0) : 440;
+    const maxChars = Math.floor((W - 40) / 7);
+    const xlines = wrap(xa.label + ` (${xa.better} is better)`, maxChars);
+    const L = narrow ? 52 : 64, R = 14, T = 12, B = 34 + 16 * xlines.length;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+      "aria-label": `${ya.short} against ${xa.short}, one marker per tool and setting` }, box);
     const tip = document.createElement("div");
     tip.className = "tip";
     box.appendChild(tip);
+    let fr = [];
     if (!pts.length) {
-      el("text", { x: W / 2, y: H / 2, "text-anchor": "middle" }, svg).textContent = "No tool has both a score and a measured cost for these filters.";
+      for (const [i, line] of wrap(`No tool has both ${ya.short} and ${xa.short} for these filters.`, maxChars).entries())
+        el("text", { x: W / 2, y: H / 2 + i * 18, "text-anchor": "middle" }, svg).textContent = line;
     } else {
-      const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
-      let lo = Math.floor(Math.log10(Math.min(...xs))), hi = Math.ceil(Math.log10(Math.max(...xs)));
-      if (hi === lo) hi = lo + 1;
-      const ymax = Math.max(...ys), ymin = Math.min(...ys);
-      const pad = (ymax - ymin) * 0.08 || 0.02;
-      const y0 = Math.max(0, ymin - pad), y1 = ymax + pad;
-      const sx = (x) => L + ((Math.log10(x) - lo) / (hi - lo)) * (W - L - R);
-      const sy = (y) => T + (1 - (y - y0) / (y1 - y0)) * (H - T - B);
-      // x ticks at every power of ten, with 2 and 5 in between.
+      const sx = scale(xa, pts.map((p) => p.x), L, W - R);
+      const sy = scale(ya, pts.map((p) => p.y), H - B, T);
       const g = el("g", { class: "tick" }, svg);
-      for (let e = lo; e <= hi; e++) {
-        for (const m of [1, 2, 5]) {
-          const x = m * Math.pow(10, e);
-          if (Math.log10(x) > hi + 1e-9) continue;
-          el("line", { x1: sx(x), x2: sx(x), y1: T, y2: H - B, class: "grid", "stroke-width": m === 1 ? 1 : 0.5 }, g);
-          if (m === 1 || hi - lo <= 2) el("text", { x: sx(x), y: H - B + 16, "text-anchor": "middle" }, g).textContent = sig(x, 1);
+      let lastRight = -1e9;
+      for (const t of sx.ticks) {
+        const X = sx.f(t.x);
+        el("line", { x1: X, x2: X, y1: T, y2: H - B, class: "grid", "stroke-width": t.major ? 1 : 0.5 }, g);
+        // Skip a tick label that would run into the one before it.
+        if (t.label && X - t.label.length * 3.6 > lastRight + 4) {
+          el("text", { x: X, y: H - B + 16, "text-anchor": "middle" }, g).textContent = t.label;
+          lastRight = X + t.label.length * 3.6;
         }
       }
-      const step = niceStep((y1 - y0) / 5);
-      for (let y = Math.ceil(y0 / step) * step; y <= y1 + 1e-12; y += step) {
-        el("line", { x1: L, x2: W - R, y1: sy(y), y2: sy(y), class: "grid" }, g);
-        el("text", { x: L - 6, y: sy(y) + 4, "text-anchor": "end" }, g).textContent = y.toFixed(step < 0.01 ? 3 : 2);
+      for (const t of sy.ticks) {
+        const Y = sy.f(t.x);
+        el("line", { x1: L, x2: W - R, y1: Y, y2: Y, class: "grid", "stroke-width": t.major ? 1 : 0.5 }, g);
+        if (t.label) el("text", { x: L - 6, y: Y + 4, "text-anchor": "end" }, g).textContent = t.label;
       }
-      el("text", { x: (L + W - R) / 2, y: H - 10, "text-anchor": "middle", "font-size": 13 }, svg).textContent =
-        "core-hours per 1,000 queries per relative, measured on Sherlock (less is cheaper)";
-      el("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 13, transform: `rotate(-90 14 ${(T + H - B) / 2})` }, svg).textContent =
-        metric.label + " (higher is better)";
-      const fr = frontier(pts);
-      if (fr.length > 1) el("polyline", { points: fr.map((p) => sx(p.x) + "," + sy(p.y)).join(" "), class: "frontier" }, svg);
+      xlines.forEach((line, i) => {
+        el("text", { x: (L + W - R) / 2, y: H - B + 36 + i * 16, "text-anchor": "middle", "font-size": 13 }, svg).textContent = line;
+      });
+      const ymid = (T + H - B) / 2;
+      el("text", { x: 14, y: ymid, "text-anchor": "middle", "font-size": 13, transform: `rotate(-90 14 ${ymid})` }, svg).textContent =
+        ya.label + " (higher is better)";
+      fr = pareto ? frontier(pts) : [];
+      if (fr.length > 1) el("polyline", { points: fr.map((p) => sx.f(p.x) + "," + sy.f(p.y)).join(" "), class: "frontier" }, svg);
       for (const p of pts) {
         const t = M.tools[p.row.tool];
-        const m = marker(p.row.shape, sx(p.x), sy(p.y), 6, kindColor(t.kind), true, svg);
+        const X = sx.f(p.x), Y = sy.f(p.y);
+        const m = marker(p.row.shape, X, Y, narrow ? 5 : 6, kindColor(t.kind), true, svg);
         m.setAttribute("tabindex", "0");
         m.setAttribute("role", "link");
         m.dataset.tool = p.row.tool;
         m.dataset.setting = p.row.setting;
+        m.dataset.x = String(p.x);
+        m.dataset.y = String(p.y);
         m.style.cursor = "pointer";
-        m.setAttribute("aria-label", `${t.name} ${p.row.setting}: ${metric.label} ${fmt3(p.y)}, ${sig(p.x, 3)} CPU-hours per 1,000 queries`);
+        m.setAttribute("aria-label", `${t.name}, ${p.row.label}: ${ya.short} ${fmtAxis(ya, p.y)}, ${xa.short} ${fmtAxis(xa, p.x)}`);
         const show = (ev) => {
+          const c = p.v.c;
           tip.style.display = "block";
-          tip.innerHTML = `<b>${t.name}</b> <span class="mono">${p.row.setting}</span><br>${metric.label} ${fmt3(p.y)}<br>` +
-            `Fmax ${fmt3(p.v.fmax)} · AUPRC ${fmt3(p.v.auprc)} · median IoU ${p.v.iou == null ? "—" : fmt3(p.v.iou)}<br>` +
-            `${fmtInt(p.v.n)} true instances<br>${sig(p.x, 3)} core-hours per 1,000 queries per relative · peak RAM ${p.v.ram.toFixed(1)} GB` +
-            (p.v.c.gpu_h_per_1000 ? `<br>plus ${sig(p.v.c.gpu_h_per_1000, 3)} GPU-h (not on the axis)` : "") +
-            (fr.includes(p) ? "<br>On the line: no other tool is both cheaper and better here." : "");
+          tip.innerHTML = `<b>${t.name}</b>, ${p.row.label} <span class="mono muted">(${p.row.setting})</span><br>` +
+            `Fmax ${fmt3(p.v.fmax)} · AUPRC ${fmt3(p.v.auprc)} · median IoU ${p.v.iou == null ? "— no correct calls" : fmt3(p.v.iou)}<br>` +
+            `${fmtInt(p.v.n)} true instances<br>` +
+            (c ? `${sig(c.cpu_h_per_1000, 3)} core-hours · $${sig(p.v.cost, 3)} · ${sig(c.wall_h_per_1000, 3)} wall-clock hours on ${c.cores} cores, per 1,000 queries per relative<br>` +
+              `peak RAM ${p.v.ram.toFixed(1)} GB · database build ` +
+              (c.db_cpu_h_per_db == null ? "— no record" : `${sig(c.db_cpu_h_per_db, 3)} core-hours per database (${c.db_n} recorded)`) +
+              (c.gpu_h_per_1000 ? `<br>plus ${sig(c.gpu_h_per_1000, 3)} GPU-h` : "")
+              : "cost — not measured") +
+            (fr.includes(p) ? `<br>On the line: no other tool is both ${xa.less} and better.` : "");
           const bb = box.getBoundingClientRect();
-          const mx = (ev.clientX || bb.left + (sx(p.x) / W) * bb.width) - bb.left;
-          const my = (ev.clientY || bb.top + (sy(p.y) / H) * bb.height) - bb.top;
-          tip.style.left = Math.min(mx + 12, bb.width - 290) + "px";
+          const mx = (ev.clientX || bb.left + (X / W) * bb.width) - bb.left;
+          const my = (ev.clientY || bb.top + (Y / H) * bb.height) - bb.top;
+          tip.style.left = Math.max(0, Math.min(mx + 12, bb.width - 290)) + "px";
           tip.style.top = Math.max(0, my - 10) + "px";
         };
         m.addEventListener("mousemove", show);
@@ -432,14 +641,34 @@
         m.addEventListener("click", go);
         m.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
       }
-      box.dataset.nPlotted = pts.length;
-      box.dataset.nFrontier = fr.length;
+    }
+    box.dataset.nPlotted = pts.length;
+    box.dataset.nFrontier = fr.length;
+    plotted = pts.map((p) => ({ tool: p.row.tool, setting: p.row.setting, x: p.x, y: p.y, frontier: fr.includes(p) }));
+
+    // Caption and key follow the chosen axes.
+    const fk = document.getElementById("frontier-key");
+    if (fk) fk.hidden = !(pareto && fr.length > 1);
+    const fw = document.getElementById("frontier-words");
+    if (fw && pareto) fw.textContent = `the line: no other tool is both ${xa.less} and better on ${ya.short}`;
+    const cap = document.getElementById("plotcaption");
+    if (cap) {
+      let words = `${ya.short.charAt(0).toUpperCase() + ya.short.slice(1)} against ${xa.short}. Up is better`;
+      words += xa.better === "lower" ? `; left is ${xa.less}.` : "; right is better.";
+      if (xa.kind !== "score") words += ` Each step along the horizontal axis is ten times the ${unitWords(xa)} of the last.`;
+      if (!pareto) words += " No line is drawn: both axes are scores, where higher is better.";
+      else if (fr.length === 1) {
+        const p = fr[0];
+        words += ` No line is drawn: one marker, ${M.tools[p.row.tool].name} (${p.row.label}), beats or ties every other on both axes.`;
+      }
+      if (xa.kind === "score") words += " The two scores can rank tools in opposite orders.";
+      cap.textContent = words;
     }
     const np = document.getElementById("notplotted");
     np.innerHTML = notPlotted.length
-      ? "<b>Not plotted:</b> " + notPlotted.map(([row, why]) => `${M.tools[row.tool].name} <span class="mono">${row.setting}</span> (— ${why})`).join("; ") + "."
+      ? "<b>Not plotted:</b> " + notPlotted.map(([row, why]) =>
+        `<span class="np" data-tool="${row.tool}" data-setting="${row.setting}" title="${row.setting}">${M.tools[row.tool].name}, ${row.label} (${why === "not run" ? NR + "not run" : why})</span>`).join("; ") + "."
       : "";
-    document.querySelectorAll("button[data-metric]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.metric === metric.id ? "true" : "false"));
   }
   function niceStep(raw) {
     const p = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -447,10 +676,10 @@
     return 10 * p;
   }
 
+  // The filters in words, printed once: in the "Change what is ranked" summary line.
   function describe() {
-    const d = document.getElementById("filterline");
     const short = document.getElementById("filtersummary");
-    if (!d) return;
+    if (!short) return;
     const sp = M.species[state.species];
     let strat = "all proteins";
     if (state.axis !== "all") {
@@ -458,9 +687,8 @@
       const c = row.groups.flatMap((g) => g.chips).find((c) => c.value === state.stratum);
       strat = row.label.toLowerCase() + ": " + (c ? c.label : state.stratum);
     }
-    d.textContent = `${M.truthNames[state.truth]}, ${state.calls === "dedup" ? "overlapping calls merged" : "raw calls"}, ` +
+    short.textContent = `${M.truthNames[state.truth]}, ${state.calls === "dedup" ? "overlapping calls merged" : "raw calls"}, ` +
       `relative searched: ${sp.name}${sp.mya != null ? " (" + sp.mya + " Mya)" : ""}, ${strat}.`;
-    if (short) short.textContent = "now: " + d.textContent;
   }
 
   function update(rebuildFilters = true) {
@@ -476,7 +704,11 @@
   window.__lb = {
     meta: M,
     set(s) { Object.assign(state, s); update(); },
+    // Open or close every tool's other settings (for the check); true opens all.
+    expandAll(on) { expanded.clear(); if (on) for (const r of M.rows) expanded.add(r.tool); update(false); },
     state: () => Object.assign({}, state),
+    // What Figure 1 drew: one entry per marker, with the raw x and y values.
+    plotted: () => plotted.map((p) => Object.assign({}, p)),
   };
 
   readHash();
@@ -495,9 +727,17 @@
   }
   new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   if (page === "cost") {
-    document.querySelectorAll("button[data-metric]").forEach((b) =>
-      b.addEventListener("click", () => { state.metric = b.dataset.metric; update(false); }));
+    // Redraw at the new width, so the text keeps its size on a phone.
+    let pending = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(pending);
+      pending = setTimeout(() => renderPlot(), 150);
+    });
   }
+  const vb = document.getElementById("viewbtn");
+  if (vb) vb.addEventListener("click", () => { state.view = state.view === "all" ? "best" : "all"; update(false); });
+  const cb = document.getElementById("colbtn");
+  if (cb) cb.addEventListener("click", () => { allCols = !allCols; update(false); });
   renderPrices();
   update();
 })();

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How the scores work</title>
+<meta name="description" content="Fmax, AUPRC, median IoU, raw against dedup and the cost formula, each worked through on a made-up protein you can change.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<script defer src="assets/terms.js"></script>
+<script defer src="assets/nav.js"></script>
+
+</head>
+<body data-page="explainers">
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html" aria-current="page">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><details class="navmore"><summary>More</summary>
+<div class="navpop"><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: How the scores work">How the scores work</summary>
+<div class="navpop"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html" aria-current="page">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><a href="claims.html">Claims</a><a href="coverage.html">Coverage</a></div></details>
+</div></header>
+<main class="wrap" data-page="explainers">
+<h1>How the scores work</h1>
+<p class="lede">The leaderboard ranks tools by three scores and one cost. Each section below
+works one of them through on a made-up protein that you can change. Every number in Figures 4 to
+7 is computed in your browser from that made-up example, not from the benchmark.</p>
+<p class="asof">Data from 20 Oct 2026, commit <span class="mono">7eca428b</span> (<a href="#source-commit">source</a>)</p>
+<nav class="toc" aria-label="Contents"><b>Contents</b>
+<ol><li><a href="#example">The made-up example</a></li>
+<li><a href="#fmax">Fmax: the best single score cutoff</a> (Figure 4)</li>
+<li><a href="#auprc">AUPRC: every cutoff at once</a> (Figure 5)</li>
+<li><a href="#iou">Median IoU: are the ends in the right place?</a> (Figure 6)</li>
+<li><a href="#dedup">Raw or dedup: one domain, many calls</a> (Figure 7)</li>
+<li><a href="#cost">Cost: core-hours, GPU-hours and the price of an hour</a> (Figure 8)</li></ol></nav>
+
+<h2 id="example">The made-up example</h2>
+<div class="prose">
+<p>Protein A is 400 residues (aa) long and has three true domains: the known annotations a tool
+should find. A tool searched it and made seven <b>calls</b>. A call is a region the tool says
+carries a domain of a given family, copied from a protein of the relative it searched. Each call
+has the tool's <b>score</b>: higher means the tool is more sure. The family names are only labels.</p>
+<p>A call is <b>correct</b> when it names the family of a true domain and overlaps that domain
+with an IoU of at least 0.5 (Figure 6 shows IoU). Each true domain can be found once. If two calls
+find the same domain, the higher-scoring one is correct and the other counts as wrong, as on the
+leaderboard.</p>
+<p>In this example every domain can be found in the relative, and every call lies on an annotated
+part of the protein. So the small differences in what Fmax and AUPRC count (see
+<a href="methods.html">Methods</a>) do not arise here.</p>
+</div>
+
+<h2 id="fmax">Fmax: the best single score cutoff</h2>
+<div class="prose">
+<p>To use a tool's calls you pick a <b>score cutoff</b>: you keep every call scoring at least that
+much and drop the rest. At a cutoff, <b>precision</b> is the share of kept calls that are correct.
+<b>Recall</b> is the share of true domains that a kept, correct call found. A high cutoff keeps
+few calls, mostly correct; a low cutoff finds more domains but keeps more wrong calls. <b>F</b>
+combines the two into one number, high only when both are high:</p>
+<p>\[F = \frac{2 \times \text{precision} \times \text{recall}}{\text{precision} + \text{recall}}\]</p>
+<p><b>Fmax</b> is the highest F over all cutoffs: the score of the tool at its best single cutoff.
+Move the slider in Figure 4 to try each cutoff.</p>
+</div>
+<figure class="ex-fig" id="fig1">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 4.</b> Fmax on protein A. <details class="capmore"><summary>How to read Figure 4</summary>Top: the
+protein as a line with its three true domains as boxes. Each call is a bar below it, at the
+residues it covers, labelled with its family and score. Bottom: F at each cutoff. Move the cutoff
+and read off which calls are kept and what F they give; the ring marks the highest F, which is the
+Fmax.</details></figcaption>
+<div class="ex-legend" aria-label="Key to Figure 4">
+<span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><line x1="0" y1="8" x2="30" y2="8" class="ex-backbone"/><rect x="7" y="2" width="16" height="12" rx="2" class="ex-true"/></svg> true domain on the protein line</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><rect x="2" y="3" width="26" height="10" rx="2" class="ex-kept"/></svg> call kept at this cutoff</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><rect x="2" y="3" width="26" height="10" rx="2" class="ex-drop"/></svg> call below the cutoff: not counted</span><span class="item"><b>✓</b> correct</span><span class="item"><b>✗</b> wrong</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><path d="M1,12 H10 V6 H20 V3 H29" class="ex-line"/></svg> F at each cutoff</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><line x1="15" y1="0" x2="15" y2="16" class="ex-cut"/></svg> your cutoff</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="15" cy="8" r="6" class="ex-ring"/></svg> highest F (Fmax)</span>
+</div>
+<div class="ex-controls">
+<label for="f1-cut"><span>Score cutoff: keep calls scoring at least <span class="v mono" id="f1-t"></span></span>
+<input type="range" id="f1-cut" min="0" max="100" step="1" value="50"></label>
+<button type="button" class="chip" id="f1-go">Go to the best cutoff</button>
+</div>
+<div class="ex-box" id="f1-track"></div>
+<p class="ex-read" id="f1-read">Kept: <span class="v" id="f1-kept"></span> calls, <span class="v" id="f1-correct"></span> of them
+correct. Precision = correct ÷ kept = <span class="v" id="f1-p"></span>. Recall = domains found ÷ true domains
+= <span class="v" id="f1-found"></span> ÷ <span class="v" id="f1-ntrue"></span> = <span class="v" id="f1-r"></span>.
+F = <span class="v" id="f1-f"></span>.<br>Highest F over all cutoffs (Fmax): <span class="v" id="f1-fmax"></span>,
+for any cutoff in <span class="v" id="f1-best"></span>.</p>
+<div class="ex-box" id="f1-curve"></div>
+</figure>
+<details class="prose ex-more"><summary>How the leaderboard does this over many proteins</summary>
+<p>The leaderboard has many proteins, not one. At each cutoff it works out precision and recall
+for each protein, then averages them over proteins; F comes from the two averages. This is the
+protein-by-protein Fmax of the CAFA function-prediction challenge. Precision is averaged over the
+proteins with at least one call kept; recall over every protein with a true annotation. The
+<b>true instances</b> (n) on the leaderboard are those true annotations, the denominator of
+recall. The leaderboard tries 101 cutoffs, evenly spaced through the tool's own scores; here
+every whole-number cutoff from 0 to 100 is tried.</p>
+</details>
+
+<h2 id="auprc">AUPRC: every cutoff at once</h2>
+<div class="prose">
+<p>Fmax keeps one cutoff. <b>AUPRC</b>, the area under the precision-recall curve, looks at every
+cutoff. Put every call in one list, best score first. Take the calls one at a time; after each,
+write down the precision and recall so far. Each call that finds a new domain adds a strip of
+area: its width is the recall gained and its height is the precision at that point.</p>
+<p>\[\text{AUPRC} = \sum_k (R_k - R_{k-1})\,P_k\]</p>
+<p>Here \(P_k\) and \(R_k\) are the precision and recall after the \(k\)-th call of the list.
+A wrong call adds no area itself, but it lowers the precision, and so the height of every strip
+after it. AUPRC runs from 0 to 1, and higher is better.</p>
+</div>
+<figure class="ex-fig" id="fig2">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 5.</b> The precision-recall curve
+of protein A's calls, and what happens when protein B is added. <details class="capmore"><summary>How to read Figure 5</summary>Each point is one call, taken in
+score order; its position is the precision and recall after taking it. The shaded strips add up to
+the AUPRC. Lower the cutoff to add calls one by one, and switch protein B on to see Fmax and
+AUPRC move in opposite directions.</details></figcaption>
+<div class="ex-legend" aria-label="Key to Figure 5">
+<span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="15" cy="8" r="4" class="ex-dot"/></svg> call taken: precision and recall after it</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="15" cy="8" r="4" class="ex-dot-off"/></svg> call below the cutoff</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><rect x="2" y="2" width="26" height="12" class="ex-area"/></svg> area of the calls taken</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><rect x="2" y="2" width="26" height="12" class="ex-area-off"/></svg> area the lower-scoring calls would add</span>
+</div>
+<div class="ex-controls">
+<label for="f2-cut"><span>Score cutoff: take calls scoring at least <span class="v mono" id="f2-t"></span></span>
+<input type="range" id="f2-cut" min="0" max="100" step="1" value="0"></label>
+<span class="chipgroup" id="f2-which" role="group" aria-label="Proteins in the list">
+<button type="button" class="chip" data-b="0" aria-pressed="true">protein A only</button>
+<button type="button" class="chip" data-b="1" aria-pressed="false">add protein B</button></span>
+</div>
+<div class="ex-box" id="f2-curve"></div>
+<p class="ex-read">Area of the calls taken so far: <span class="v" id="f2-area"></span>. AUPRC, with every
+call taken: <span class="v" id="f2-auprc"></span>. Fmax of the same proteins: <span class="v" id="f2-fmax"></span>.</p>
+<div class="ex-scroll"><table class="ex-t" id="f2-table"><thead><tr><th>score</th><th data-col="a">protein A only</th><th data-col="ab">A and B</th></tr></thead>
+<tbody><tr><td>Fmax</td><td class="mono" data-col="a" id="f2-a-only-fmax"></td><td class="mono" data-col="ab" id="f2-ab-fmax"></td></tr>
+<tr><td>AUPRC</td><td class="mono" data-col="a" id="f2-a-only-auprc"></td><td class="mono" data-col="ab" id="f2-ab-auprc"></td></tr></tbody></table></div>
+<p class="ex-read">The list behind the curve, best score first. Grey rows score below the cutoff.</p>
+<div class="ex-scroll"><table class="ex-t" id="f2-list"><thead><tr><th>rank</th><th>protein</th><th>call</th><th></th>
+<th>precision</th><th>recall</th><th>area added</th></tr></thead><tbody></tbody></table></div>
+</figure>
+<details class="prose ex-more"><summary>Why adding protein B moves Fmax up and AUPRC down</summary>
+<p>Protein B has five Ig domains, and its five calls are all correct, but they score 45 to 60.
+Fmax averages protein by protein, so protein B counts as one protein of two, whatever its number
+of domains. On its own protein B is perfect, so Fmax goes up. AUPRC pools every call of every
+protein into one list. Protein B's domains are five of the eight true domains. In the list its
+calls come after one or two of protein A's wrong calls (scores 70 and 55), so AUPRC goes down.
+Use Fmax when
+you will keep every call above one cutoff. Use AUPRC when you will rank calls and read down the
+list.</p>
+</details>
+
+<h2 id="iou">Median IoU: are the ends in the right place?</h2>
+<div class="prose">
+<p><b>IoU</b> (intersection over union) is the number of residues the call and the true domain
+share, divided by the number of residues covered by either. It is 1 when the call starts and ends
+where the domain does, and 0 when they do not overlap. A call needs an IoU of 0.5 or more to be correct.</p>
+<p>\[\text{IoU} = \frac{|\text{call} \cap \text{true domain}|}{|\text{call} \cup \text{true domain}|}\]</p>
+</div>
+<figure class="ex-fig" id="fig3">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 6.</b> IoU of one call with one true
+domain. <details class="capmore"><summary>How to read Figure 6</summary>Top: a 200-residue protein with one true domain, and the call below it; the brackets
+underneath show the shared residues and the residues covered by either. It starts at the example on
+the Methods page (call 30–129, domain 10–109). Move the call's ends to see IoU change. Bottom: the IoU
+of each correct call of protein A in Figure 4, with your call added when it is correct; the dashed
+line is their median.</details></figcaption>
+<div class="ex-legend" aria-label="Key to Figure 6">
+<span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><line x1="0" y1="8" x2="30" y2="8" class="ex-backbone"/><rect x="7" y="2" width="16" height="12" rx="2" class="ex-true"/></svg> true domain</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><rect x="2" y="3" width="26" height="10" rx="2" class="ex-kept"/></svg> the call you set</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><path d="M2,4 V11 H28 V4" class="ex-bracket"/></svg> shared residues, and residues covered by either</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="15" cy="8" r="4" class="ex-dot"/></svg> IoU of a correct call of protein A</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="15" cy="8" r="4.5" class="ex-ring-small"/></svg> IoU of your call</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><line x1="15" y1="0" x2="15" y2="16" class="ex-median"/></svg> median</span>
+</div>
+<div class="ex-controls">
+<label for="f3-start"><span>Call starts at residue <span class="v mono" id="f3-start-v"></span></span>
+<input type="range" id="f3-start" min="1" max="200" step="1" value="30"></label>
+<label for="f3-end"><span>Call ends at residue <span class="v mono" id="f3-end-v"></span></span>
+<input type="range" id="f3-end" min="1" max="200" step="1" value="129"></label>
+</div>
+<div class="ex-box" id="f3-track"></div>
+<p class="ex-read">IoU = shared ÷ covered by either = <span class="v" id="f3-inter"></span> ÷
+<span class="v" id="f3-union"></span> = <span class="v" id="f3-iou"></span>: <span id="f3-verdict"></span>.</p>
+<div class="ex-box" id="f3-strip"></div>
+<p class="ex-read">Median IoU of the <span class="v" id="f3-n"></span> correct calls:
+<span class="v" id="f3-median"></span>. <span id="f3-mine"></span></p>
+</figure>
+<details class="prose ex-more"><summary>Median IoU on the leaderboard</summary>
+<p><b>Median IoU</b> on the leaderboard is the middle IoU of all of a tool's correct calls. Half of
+the correct calls match their domain at least that well. Since a correct call has an IoU of at least
+0.5, the median runs from 0.5 to 1. Single-residue annotations, such as an active site, are left
+out: an IoU against one residue says nothing about where the ends are.</p>
+</details>
+
+<h2 id="dedup">Raw or dedup: one domain, many calls</h2>
+<div class="prose">
+<p>A tool often finds the same domain through several proteins of the relative, and reports one
+call for each. <b>Raw</b> keeps every call: the first copy can be correct, and every other copy
+counts as wrong. <b>Dedup</b> merges calls of the same family on the same protein that overlap each
+other with an IoU of 0.5 or more, keeping the highest-scoring one. Two copies of a domain side by
+side barely overlap, so both are kept.</p>
+</div>
+<figure class="ex-fig" id="fig4">
+<figcaption><span class="ex-made-up">made-up example</span><b>Figure 7.</b> Protein A's seven calls, raw
+and after dedup. <details class="capmore"><summary>How to read Figure 7</summary>Switch between the two: dedup merges the two lower-scoring PH calls into the PH
+call scoring 95, and the table shows how the scores change.</details></figcaption>
+<div class="ex-legend" aria-label="Key to Figure 7">
+<span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><line x1="0" y1="8" x2="30" y2="8" class="ex-backbone"/><rect x="7" y="2" width="16" height="12" rx="2" class="ex-true"/></svg> true domain</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><rect x="2" y="3" width="26" height="10" rx="2" class="ex-kept"/></svg> call that counts</span><span class="item"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><rect x="2" y="3" width="26" height="10" rx="2" class="ex-drop"/></svg> call merged into a higher-scoring one: not counted</span><span class="item"><b>✓</b> correct</span><span class="item"><b>✗</b> wrong</span>
+</div>
+<div class="ex-controls">
+<span class="chipgroup" id="f4-which" role="group" aria-label="Raw or dedup">
+<button type="button" class="chip" data-mode="raw" aria-pressed="true">raw</button>
+<button type="button" class="chip" data-mode="dedup" aria-pressed="false">dedup</button></span>
+</div>
+<div class="ex-box" id="f4-track"></div>
+<div class="ex-scroll"><table class="ex-t" id="f4-table"><thead><tr><th>score</th><th data-col="raw">raw</th><th data-col="dedup">dedup</th></tr></thead>
+<tbody><tr><td>calls</td><td class="mono" data-col="raw" id="f4-raw-n"></td><td class="mono" data-col="dedup" id="f4-dedup-n"></td></tr>
+<tr><td>precision, every call kept</td><td class="mono" data-col="raw" id="f4-raw-p0"></td><td class="mono" data-col="dedup" id="f4-dedup-p0"></td></tr>
+<tr><td>Fmax</td><td class="mono" data-col="raw" id="f4-raw-fmax"></td><td class="mono" data-col="dedup" id="f4-dedup-fmax"></td></tr>
+<tr><td>AUPRC</td><td class="mono" data-col="raw" id="f4-raw-auprc"></td><td class="mono" data-col="dedup" id="f4-dedup-auprc"></td></tr></tbody></table></div>
+</figure>
+<details class="prose ex-more"><summary>When dedup raises a score, and when it lowers one</summary>
+<p>Here both merged calls were wrong copies, so recall does not change, and precision, Fmax and
+AUPRC go up. Dedup can also lower a score: when the higher-scoring call misses the domain's ends
+and a lower-scoring copy matches them, dedup keeps the one that misses. Comparing raw with dedup
+separates finding a domain from reporting it many times.</p>
+</details>
+
+<h2 id="cost">Cost: core-hours, GPU-hours and the price of an hour</h2>
+<div class="prose">
+<p><b>Core-hours</b> are the cores a search reserved multiplied by its wall time, so a task that sat
+partly idle still counts all its cores. They come from the run's own task records on Stanford's
+Sherlock cluster, so they are marked <span class="prov measured">measured</span>. Numbers a tool's
+submitter gives, on hardware they name, would be marked <span class="prov reported">reported</span>
+(CPU-h reported); none have been submitted yet. The leaderboard divides the search's core-hours by
+the number of relatives searched and scales them to 1,000 human proteins (queries). <b>GPU-hours</b>
+are the same for GPU time; no search here used a GPU. <b>Peak RAM</b> is the largest memory any of
+the search's tasks held, in GB; it is not priced.</p>
+<p>The estimated cost, cost_usd_est, puts a price on each hour:</p>
+<p>\[\begin{aligned}\text{cost\_usd\_est} &= \text{core-hours} \times r_\text{cpu}\\ &+ \text{GPU-hours} \times r_\text{gpu}\end{aligned}\]</p>
+<p>per 1,000 queries, where \(r_\text{cpu}\) is the price of one CPU-hour and \(r_\text{gpu}\) of one
+GPU-hour, in US dollars. A core-hour is priced as one CPU-hour.</p>
+</div>
+<figure class="ex-fig" id="fig5">
+<figcaption><b>Figure 8.</b> The cost formula with your own numbers. <details class="capmore"><summary>How to read Figure 8</summary>It starts at phmmer's measured
+core-hours per 1,000 queries against zebrafish (from Table 1) and the site's default prices. These
+are AWS on-demand rates for a c7i.large CPU (half its 2-vCPU hourly price) and a g5.xlarge GPU. Change any
+box to see the cost change.</details></figcaption>
+<div class="ex-controls">
+<label for="f5-cpu">core-hours per 1,000 queries <input type="number" id="f5-cpu" min="0" step="any" inputmode="decimal" value="0.4165"></label>
+<label for="f5-gpu">GPU-hours per 1,000 queries <input type="number" id="f5-gpu" min="0" step="any" inputmode="decimal" value="0"></label>
+<label for="f5-rcpu">r_cpu, USD per CPU-hour <input type="number" id="f5-rcpu" min="0" step="any" inputmode="decimal" value="0.044625"></label>
+<label for="f5-rgpu">r_gpu, USD per GPU-hour <input type="number" id="f5-rgpu" min="0" step="any" inputmode="decimal" value="1.006"></label>
+</div>
+<p class="ex-read">cost_usd_est = <span class="v" id="f5-line"></span> = <span class="v" id="f5-out"></span>
+per 1,000 queries.</p>
+</figure>
+<p class="prose muted">The made-up example is also in this page's JSON copy. Definitions of every
+score as the benchmark computes them, with a worked example from the real data, are on
+<a href="methods.html">Methods</a>.</p>
+<script type="application/json" id="toy-data">{"note":"A made-up example for explaining the scores. Not benchmark data.","proteins":{"A":{"name":"protein A","short":"A","length":400,"true":[{"family":"PH","start":20,"end":120},{"family":"SH2","start":150,"end":230},{"family":"SH3","start":280,"end":340}],"calls":[{"id":"a1","family":"PH","start":25,"end":118,"score":95},{"id":"a2","family":"SH2","start":155,"end":228,"score":80},{"id":"a3","family":"PH","start":30,"end":115,"score":70},{"id":"a4","family":"PDZ","start":160,"end":225,"score":55},{"id":"a5","family":"SH3","start":285,"end":338,"score":40},{"id":"a6","family":"SH3","start":200,"end":260,"score":25},{"id":"a7","family":"PH","start":22,"end":120,"score":15}]},"B":{"name":"protein B","short":"B","length":600,"true":[{"family":"Ig","start":20,"end":110},{"family":"Ig","start":130,"end":220},{"family":"Ig","start":240,"end":330},{"family":"Ig","start":350,"end":440},{"family":"Ig","start":460,"end":550}],"calls":[{"id":"b1","family":"Ig","start":22,"end":108,"score":60},{"id":"b2","family":"Ig","start":132,"end":218,"score":58},{"id":"b3","family":"Ig","start":242,"end":328,"score":52},{"id":"b4","family":"Ig","start":352,"end":438,"score":50},{"id":"b5","family":"Ig","start":462,"end":548,"score":45}]}},"iou":{"length":200,"true":{"start":10,"end":109},"call":{"start":30,"end":129}}}</script>
+<script defer src="assets/explainers.js"></script>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+
+</main>
+<footer class="site"><div class="wrap">
+<p id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+<p>This page as JSON, for scripts and agents: <a class="mono" href="explainers.html.json">explainers.html.json</a></p>
+</div></footer>
+</body>
+</html>

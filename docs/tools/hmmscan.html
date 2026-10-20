@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>hmmscan with Pfam card</title>
 <meta name="description" content="What hmmscan with Pfam compares, what it needs, where it is strong and weak, and what it costs.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,18 +10,41 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script defer src="../assets/terms.js"></script>
+<script defer src="../assets/nav.js"></script>
 
 </head>
 <body data-page="tools">
 <header class="site"><div class="wrap">
 <a class="brand" href="../index.html">Protein annotation leaderboard</a>
-<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../cost.html" data-keep-filters>Score against cost</a><a href="../pileup.html">Region pile-up</a><a href="../claims.html">Claims</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../coverage.html">Coverage</a><a href="../methods.html">Methods</a></nav>
+<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><details class="navmore"><summary>More</summary>
+<div class="navpop"><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Tool cards">Tool cards</summary>
+<div class="navpop"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details>
 </div></header>
 <main class="wrap" data-page="tools">
-<p class="source" id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
-<div class="card"><h1>hmmscan with Pfam</h1>
-<p>Tool id <code>hmmscan</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>7eca428b</code>.</p>
-<h2>What it compares</h2>
+<nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Tool cards</a> › hmmscan with Pfam</nav><div class="card"><h1>hmmscan with Pfam</h1>
+<p>Each query protein against the curated profile models of every Pfam family, without searching any relative.</p>
+<h2>Will it work for you?</h2>
+<ol>
+<li><strong>Is every family you expect to find already in Pfam?</strong> If no, this tool cannot find it: it only reports families that have a Pfam model.</li>
+<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting Pfam models.)</li>
+<li><strong>Can you spend about 0.389 core-hours per 1,000 proteins?</strong> That is the measured cost of scanning them against Pfam's models.</li>
+</ol>
+<h2>Best Fmax and cost</h2>
+<p>Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is Pfam models (<code>direct</code>): Fmax 0.886 over 2,435 true instances. Searching costs about $0.0173 per 1,000 queries (0.389 core-hours), for scanning Pfam's models.</p>
+<h2>Where it is strong and weak</h2>
+<p>Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.</p>
+<p>No other tool was scored on the same subsets, so no comparison: not run.</p>
+<p>Swiss-Prot feature types: not run.</p><figure class="cardfig">
+<figcaption><b>Figure 2.</b> Where hmmscan with Pfam is ahead and behind: its Fmax on each subset of the
+proteins, against the best other tool on that subset (Pfam truth set, raw calls, no relative; its best setting,
+Pfam models).</figcaption>
+<div class="legend"><span class="item"><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="var(--k-models)"/></svg>hmmscan with Pfam</span>
+<span class="item"><svg width="14" height="14" aria-hidden="true"><path d="M7,2 l5,5 l-5,5 l-5,-5 z" class="cf-o"/></svg>best other tool on that subset, named at the right</span></div>
+<svg class="cf" viewBox="0 0 360 176" role="img" aria-label="Fmax by subset for hmmscan with Pfam and the best other tool"><text x="0" y="22" class="cf-h">length of the annotated region</text><line x1="104" x2="238" y1="44" y2="44" class="cf-row"/><text x="98" y="48" text-anchor="end" class="cf-l">16–30 aa</text><circle cx="190.4" cy="44" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.580, n = 271</title></circle><line x1="104" x2="238" y1="64" y2="64" class="cf-row"/><text x="98" y="68" text-anchor="end" class="cf-l">31–60 aa</text><circle cx="189.3" cy="64" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.573, n = 420</title></circle><line x1="104" x2="238" y1="84" y2="84" class="cf-row"/><text x="98" y="88" text-anchor="end" class="cf-l">61–120 aa</text><circle cx="220.9" cy="84" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.785, n = 963</title></circle><line x1="104" x2="238" y1="104" y2="104" class="cf-row"/><text x="98" y="108" text-anchor="end" class="cf-l">121–250 aa</text><circle cx="223.4" cy="104" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.802, n = 504</title></circle><line x1="104" x2="238" y1="124" y2="124" class="cf-row"/><text x="98" y="128" text-anchor="end" class="cf-l">251 aa or more</text><circle cx="233.6" cy="124" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.871, n = 277</title></circle><line x1="104.0" x2="104.0" y1="28" y2="138" class="cf-grid"/><text x="104.0" y="152" text-anchor="middle" class="cf-t">0</text><line x1="133.8" x2="133.8" y1="28" y2="138" class="cf-grid"/><text x="133.8" y="152" text-anchor="middle" class="cf-t">0.2</text><line x1="163.6" x2="163.6" y1="28" y2="138" class="cf-grid"/><text x="163.6" y="152" text-anchor="middle" class="cf-t">0.4</text><line x1="193.3" x2="193.3" y1="28" y2="138" class="cf-grid"/><text x="193.3" y="152" text-anchor="middle" class="cf-t">0.6</text><line x1="223.1" x2="223.1" y1="28" y2="138" class="cf-grid"/><text x="223.1" y="152" text-anchor="middle" class="cf-t">0.8</text><text x="171.0" y="168" text-anchor="middle" class="cf-l">Fmax (higher is better)</text></svg>
+</figure></div>
+<div class="card card-rest"><h2>What it compares</h2>
 <p>Each query protein against the curated profile models of every Pfam family, without searching any relative.</p>
 <h2>What it needs</h2>
 <ul>
@@ -33,10 +56,6 @@
 <p>Pfam-A 38.2 family models (30,134 models).</p>
 <h2>How to read its score</h2>
 <p>Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).</p>
-<h2>Strong and weak strata</h2>
-<p>Under the Pfam truth set, raw calls, no relative (hmmscan searches the Pfam models), its best setting is <code>direct</code>: Fmax 0.886 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared.</p>
-<p>No other tool was scored in the same strata, so no comparison: not run.</p>
-<p>Swiss-Prot feature types: not run.</p>
 <h2 id="failure-modes">Known failure modes</h2>
 <ul>
 <li>Pfam domains are defined by these same models, so scoring hmmscan against the Pfam truth set grades the models against their own output. Read its Pfam row as the best a search could do, not as a competitor.</li>
@@ -53,7 +72,7 @@ Building its databases for setting <code>direct</code>: not measured (no task re
 </ul>
 <h2>Settings in the table</h2>
 <ul>
-<li><code>direct</code>: scans Pfam's models; no relative searched</li>
+<li>Pfam models (<code>direct</code>): scans Pfam's models; no relative searched</li>
 </ul>
 <h2>Version, container, command</h2>
 <ul>
@@ -69,16 +88,11 @@ Building its databases for setting <code>direct</code>: not measured (no task re
     Pfam-A.hmm UP000005640_9606.fasta
 </code></pre>
 <p>Query: the same 998 human proteins.</p>
-<h2>Will it work for you?</h2>
-<ol>
-<li><strong>Is every family you expect to find already in Pfam?</strong> If no, this tool cannot find it: it only reports families that have a Pfam model.</li>
-<li><strong>Are the features you care about longer than 60 residues?</strong> If yes, Fmax here is 61–120 aa 0.785 (n = 963), 121–250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16–30 aa 0.580 (n = 271), 31–60 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting <code>direct</code>.)</li>
-<li><strong>Can you spend about 0.389 core-hours per 1,000 proteins?</strong> That is the measured cost of scanning them against Pfam's models.</li>
-</ol></div>
+<p>Tool id <code>hmmscan</code>. Numbers from seanome/2024-kmerseek-analysis commit <code>7eca428b</code>.</p></div>
 <p><a href="index.html">All tool cards</a> · <a href="hmmscan.md">this card as Markdown</a> · <a href="hmmscan.json">as JSON</a></p>
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
+<p id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="hmmscan.html.json">hmmscan.html.json</a></p>
 </div></footer>

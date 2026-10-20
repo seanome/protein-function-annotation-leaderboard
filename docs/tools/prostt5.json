@@ -79,9 +79,9 @@
   "hardware": "Stanford Sherlock, SLURM partition hns"
  },
  "questions": [
-  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.139 (n = 563), 60\u2013100% 0.209 (n = 1,289). If no, 20\u201330% 0.247 (n = 93), 30\u201340% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `3di_from_seq`; strata with at least 30 true instances.)",
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.139 (n = 563), 60\u2013100% 0.209 (n = 1,289). If no, 20\u201330% 0.247 (n = 93), 30\u201340% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting shape letters from sequence; subsets with at least 30 true instances.)",
   "Do you have a GPU to predict the 3Di letters for your proteins? The run used one GPU for that step; its cost is not counted here.",
-  "Can you spend about 0.109 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" above."
+  "Can you spend about 0.109 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" below."
  ],
  "markdown": "prostt5.md"
 }

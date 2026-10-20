@@ -78,9 +78,9 @@
   "hardware": "Stanford Sherlock, SLURM partition hns"
  },
  "questions": [
-  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.248 (n = 563), 60\u2013100% 0.283 (n = 1,289). If no, 20\u201330% 0.321 (n = 93), 30\u201340% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `single_seq`; strata with at least 30 true instances.)",
-  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.230 (n = 963), 121\u2013250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16\u201330 aa 0.066 (n = 271), 31\u201360 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting `single_seq`.)",
-  "Can you spend about 24.8 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" above."
+  "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40\u201360% 0.248 (n = 563), 60\u2013100% 0.283 (n = 1,289). If no, 20\u201330% 0.321 (n = 93), 30\u201340% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting single-protein profiles; subsets with at least 30 true instances.)",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.230 (n = 963), 121\u2013250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16\u201330 aa 0.066 (n = 271), 31\u201360 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, setting single-protein profiles.)",
+  "Can you spend about 24.8 core-hours per 1,000 proteins for each relative you search? That is the measured mean per relative; see \"Cost per 1,000 queries\" below."
  ],
  "markdown": "hhblits.md"
 }

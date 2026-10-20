@@ -27,22 +27,6 @@
   "per_residue_recall_mean_over_regions": 0.8483205755353327,
   "n_regions_any_body_residue_covered": 2067
  },
- "kmerseek|gbmr4_k15_lcFalse": {
-  "per_residue_recall_mean_over_regions": 0.14253051350906487,
-  "n_regions_any_body_residue_covered": 442
- },
- "kmerseek|gbmr4_k17_lcFalse": {
-  "per_residue_recall_mean_over_regions": 0.14221077687541492,
-  "n_regions_any_body_residue_covered": 445
- },
- "kmerseek|gbmr4_k19_lcFalse": {
-  "per_residue_recall_mean_over_regions": 0.13665904822162891,
-  "n_regions_any_body_residue_covered": 430
- },
- "kmerseek|gbmr4_k21_lcFalse": {
-  "per_residue_recall_mean_over_regions": 0.13019629917647363,
-  "n_regions_any_body_residue_covered": 415
- },
  "kmerseek|hp_thomas_dill2_k24_lcFalse": {
   "per_residue_recall_mean_over_regions": 0.15688521640008812,
   "n_regions_any_body_residue_covered": 506
@@ -59,17 +43,21 @@
   "per_residue_recall_mean_over_regions": 0.10758527884819558,
   "n_regions_any_body_residue_covered": 347
  },
- "kmerseek|protein20_k6_lcFalse": {
-  "per_residue_recall_mean_over_regions": 0.03555520072415217,
-  "n_regions_any_body_residue_covered": 119
+ "kmerseek|gbmr4_k15_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.14253051350906487,
+  "n_regions_any_body_residue_covered": 442
  },
- "kmerseek|protein20_k7_lcFalse": {
-  "per_residue_recall_mean_over_regions": 0.03593216672106615,
-  "n_regions_any_body_residue_covered": 119
+ "kmerseek|gbmr4_k17_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.14221077687541492,
+  "n_regions_any_body_residue_covered": 445
  },
- "kmerseek|protein20_k8_lcFalse": {
-  "per_residue_recall_mean_over_regions": 0.03593216672106615,
-  "n_regions_any_body_residue_covered": 119
+ "kmerseek|gbmr4_k19_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.13665904822162891,
+  "n_regions_any_body_residue_covered": 430
+ },
+ "kmerseek|gbmr4_k21_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.13019629917647363,
+  "n_regions_any_body_residue_covered": 415
  },
  "kmerseek|wwmj5_k11_lcFalse": {
   "per_residue_recall_mean_over_regions": 0.07217085084321488,
@@ -86,6 +74,18 @@
  "kmerseek|wwmj5_k15_lcFalse": {
   "per_residue_recall_mean_over_regions": 0.06444959779618813,
   "n_regions_any_body_residue_covered": 225
+ },
+ "kmerseek|protein20_k6_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.03555520072415217,
+  "n_regions_any_body_residue_covered": 119
+ },
+ "kmerseek|protein20_k7_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.03593216672106615,
+  "n_regions_any_body_residue_covered": 119
+ },
+ "kmerseek|protein20_k8_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.03593216672106615,
+  "n_regions_any_body_residue_covered": 119
  },
  "hmmscan|direct": {
   "per_residue_recall_mean_over_regions": 0.9945592342774506,

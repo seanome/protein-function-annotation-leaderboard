@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>claims.yaml</title>
 <meta name="description" content="The claims.yaml format, the CI check and the badge.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,15 +10,19 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="assets/site.css">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<script defer src="assets/terms.js"></script>
+<script defer src="assets/nav.js"></script>
 
 </head>
 <body data-page="claims">
 <header class="site"><div class="wrap">
 <a class="brand" href="index.html">Protein annotation leaderboard</a>
-<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="cost.html" data-keep-filters>Score against cost</a><a href="pileup.html">Region pile-up</a><a href="claims.html" aria-current="page">Claims</a><a href="tools/index.html">Tool cards</a><a href="coverage.html">Coverage</a><a href="methods.html">Methods</a></nav>
+<nav class="site" aria-label="Pages"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><details class="navmore"><summary class="cur">More</summary>
+<div class="navpop"><a href="claims.html" aria-current="page">Claims</a><a href="coverage.html">Coverage</a></div></details></nav>
+<details class="navmenu"><summary aria-label="Pages: Claims">Claims</summary>
+<div class="navpop"><a href="index.html" data-keep-filters>Leaderboard</a><a href="tools/index.html">Tool cards</a><a href="cost.html" data-keep-filters>Compare two columns</a><a href="explainers.html">How the scores work</a><a href="pileup.html">Region pile-up</a><a href="methods.html">Methods</a><a href="claims.html" aria-current="page">Claims</a><a href="coverage.html">Coverage</a></div></details>
 </div></header>
 <main class="wrap" data-page="claims">
-<p class="source" id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <h1>claims.yaml</h1>
 <div class="prose">
 <p>One file per tool, <span class="mono">claims/&lt;tool&gt;.yaml</span>, lists the tool's claims. Each claim
@@ -40,7 +44,8 @@ is updated.</li>
 filled in. Without one, the line is the test's own result.</p>
 <p>A claim retired by a record test is dated with the date of that inventory record. A claim retired
 by a table test has no date, because the tables are recomputed on every build and the build cannot
-tell when the kill first held. The "last kill" date on a card counts only dated kills.</p>
+tell when the claim was first disproved. The "last disproved" date on a card counts only dated
+results.</p>
 <p>The full schema: <a class="mono" href="claims/schema.json">claims/schema.json</a>. The first claim of
 <a class="mono" href="claims/kmerseek.yaml">claims/kmerseek.yaml</a>:</p>
 <pre><code>  - id: phmmer-parity-mammals
@@ -98,7 +103,7 @@ page differs from the committed one. The build also writes a badge per tool from
 </div>
 </main>
 <footer class="site"><div class="wrap">
-<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
+<p id="source-commit" data-commit="7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0">7eca428b</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-20.</p>
 <p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
 <p>This page as JSON, for scripts and agents: <a class="mono" href="claims-schema.html.json">claims-schema.html.json</a></p>
 </div></footer>

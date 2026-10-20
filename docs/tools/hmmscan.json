@@ -38,7 +38,7 @@
  },
  "questions": [
   "Is every family you expect to find already in Pfam? If no, this tool cannot find it: it only reports families that have a Pfam model.",
-  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.785 (n = 963), 121\u2013250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16\u201330 aa 0.580 (n = 271), 31\u201360 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting `direct`.)",
+  "Are the features you care about longer than 60 residues? If yes, Fmax here is 61\u2013120 aa 0.785 (n = 963), 121\u2013250 aa 0.802 (n = 504), 251 aa or more 0.871 (n = 277). If no, 16\u201330 aa 0.580 (n = 271), 31\u201360 aa 0.573 (n = 420). (Pfam truth set, raw calls, no relative searched, setting Pfam models.)",
   "Can you spend about 0.389 core-hours per 1,000 proteins? That is the measured cost of scanning them against Pfam's models."
  ],
  "markdown": "hmmscan.md"
