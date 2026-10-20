@@ -1,5 +1,7 @@
 # Protein annotation leaderboard
 
+![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-kmerseek.svg)
+
 Which tool finds the known domains and features of a protein, and what does it cost to run?
 A static site, served by GitHub Pages from `docs/`:
 https://seanome.github.io/protein-function-annotation-leaderboard/
@@ -49,3 +51,12 @@ then runs the prose checker on every page.
 - `scripts/tools.py`: what each tool compares, needs, and was run with (read from the run itself)
 - `docs/assets/`: stylesheet, page script, Fantasque Sans Mono 1.8.0 (SIL Open Font License)
 - `tests/check_site.py`, `tests/check_prose_all.py`: the checks above
+
+## Claims
+
+`claims/<tool>.yaml` lists a tool's claims, each with the result that would retire it
+(schema: `claims/schema.json`). `scripts/claims.py` sets each status from its test: table
+tests are recomputed from `data/results.parquet`, record tests must quote the experiment
+inventory (`data/experiments.json`, from seanome/2024-kmerseek-analysis PR 97) exactly. The
+`claims` GitHub Action runs `python scripts/claims.py --check` on every push; the build writes
+`docs/badges/claims-<tool>.svg`.

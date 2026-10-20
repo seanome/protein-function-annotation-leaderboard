@@ -14,6 +14,7 @@ site:
 	$(PY) scripts/build_site.py --data data --out docs
 
 check:
+	$(PY) scripts/claims.py --data data --check
 	$(PY) tests/check_site.py --site docs
 	$(PY) tests/check_prose_all.py --site docs
 

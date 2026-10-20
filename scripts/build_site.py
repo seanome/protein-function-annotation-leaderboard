@@ -19,6 +19,7 @@ import markdown
 import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT_DIR = Path(__file__).resolve().parents[1]
 from tools import KINDS, SPECIES, TOOLS  # noqa: E402
 
 SITE = "Protein annotation leaderboard"
@@ -204,7 +205,7 @@ def layout(title: str, page: str, body: str, src: dict, depth: int = 0,
            head: str = "", description: str = "") -> str:
     up = "../" * depth
     nav = [("index.html", "Leaderboard", "leaderboard"), ("cost.html", "Score against cost", "cost"),
-           ("pileup.html", "Region pile-up", "pileup"),
+           ("pileup.html", "Region pile-up", "pileup"), ("claims.html", "Claims", "claims"),
            ("tools/index.html", "Tool cards", "tools"), ("coverage.html", "Coverage", "coverage"),
            ("methods.html", "Methods", "methods")]
     links = "".join(
@@ -731,29 +732,136 @@ def questions(tool: str, nums: dict) -> list[str]:
     return q
 
 
-def page_card(tool: str, md: str, src: dict) -> str:
+def page_card(tool: str, md: str, src: dict, cl: dict | None = None) -> str:
     body_html = markdown.markdown(md, extensions=["fenced_code", "attr_list", "tables"])
-    body = f'<div class="card">{body_html}</div>\n<p><a href="index.html">All tool cards</a> · ' \
+    body = (claims_card(cl, up="../") if cl else "") + f'<div class="card">{body_html}</div>\n<p><a href="index.html">All tool cards</a> · ' \
            f'<a href="{tool}.md">this card as Markdown</a> · <a href="{tool}.json">as JSON</a></p>'
     return layout(f"{TOOLS[tool]['name']} card", "tools", body, src, depth=1,
                   description=f"What {TOOLS[tool]['name']} compares, what it needs, where it is strong and weak, and what it costs.")
 
 
-def page_tools_index(src: dict, tools_used: set[str]) -> str:
-    items = []
+SHORT_KIND = {"letters": "aligns letters", "profiles": "family profiles", "shapes": "3-D shape letters",
+              "kmers": "reduced-alphabet k-mers", "models": "Pfam models"}
+
+
+def tool_tags(t: str, cl: dict | None) -> list[str]:
+    """Categories a reader filters by, all read from the tool facts or the claims file."""
+    info = TOOLS[t]
+    tags = [SHORT_KIND[info["kind"]]]
+    needs = info["needs"]
+    tags.append("needs AlphaFold model" if needs["AlphaFold model"] else "sequence only")
+    if needs["GPU"]:
+        tags.append("needs GPU")
+    tags.append("GPL-3.0" if "GPL" in info["licence"] else "permissive licence")
+    if t == "hmmscan":
+        tags.append("reference")
+    if cl:
+        tags.append("has claims")
+    return tags
+
+
+def dot_grid(t: str, res: pl.DataFrame, rel_order: list[str]) -> str:
+    """One dot per relative, nearest first (rows of five), area proportional to the tool's best
+    Fmax there (Pfam domains, raw calls, all regions); an open ring where it was not run."""
+    q = res.filter((pl.col("tool") == t) & (pl.col("truth_set") == "pfam") & (pl.col("calls") == "raw")
+                   & (pl.col("stratum_axis") == "all"))
+    best = {r["species"]: r["fmax"] for r in q.group_by("species").agg(pl.col("fmax").max()).iter_rows(named=True)}
+    if list(best) == ["all"]:
+        return (f'<svg class="dg" viewBox="0 0 110 66" role="img" aria-label="searches no relative">'
+                f'<text x="55" y="37" text-anchor="middle" class="dg-t">no relative</text></svg>')
+    cells, labels = [], []
+    for k, sp in enumerate(rel_order):
+        cx, cy = 11 + 22 * (k % 5), 11 + 22 * (k // 5)
+        v = best.get(sp)
+        if v is None:
+            cells.append(f'<circle cx="{cx}" cy="{cy}" r="3" fill="none" stroke="var(--muted)" stroke-width="1"/>')
+            labels.append(f"{SPECIES[sp]}: not run")
+        else:
+            r = 1.2 + 9 * (v / 0.5) ** 0.5   # area grows with Fmax; Fmax 0.5 fills the cell
+            cells.append(f'<circle cx="{cx}" cy="{cy}" r="{min(r, 10):.2f}" fill="var(--k-{TOOLS[t]["kind"]})"/>')
+            labels.append(f"{SPECIES[sp]}: {v:.3f}")
+    return (f'<svg class="dg" viewBox="0 0 110 66" role="img" aria-label="best Fmax by relative: {esc("; ".join(labels))}">'
+            f'<title>{esc("; ".join(labels))}</title>{"".join(cells)}</svg>')
+
+
+def page_tools_index(src: dict, tools_used: set[str], res: pl.DataFrame, claims_by_tool: dict) -> str:
+    rel_order = (res.filter(pl.col("species") != "all").select("species", "species_mya").unique()
+                 .sort("species_mya", "species", nulls_last=True)["species"].to_list())
+    # Legend words for the dot order, from the same divergence times.
+    aged = [sp for sp in rel_order if sp in SPECIES_MYA]
+    no_age = [SPECIES[sp] for sp in rel_order if sp not in SPECIES_MYA]
+    order_words = (f"nearest ({SPECIES[aged[0]]}, {mya_label(SPECIES_MYA[aged[0]]):,} Mya) top left to farthest "
+                   f"({SPECIES[aged[-1]]}, {mya_label(SPECIES_MYA[aged[-1]]):,} Mya)")
+    order_words += (f", then {' and '.join(no_age)}, which has no TimeTree age, bottom right" if no_age
+                    else " bottom right")
+    cards, all_tags = [], []
     for kind in KINDS:
         for t, info in TOOLS.items():
-            if info["kind"] == kind and t in tools_used:
-                items.append(f'<li><span class="kind k-{kind}" aria-hidden="true"></span>'
-                             f'<a href="{t}.html"><b>{esc(info["name"])}</b></a><br>'
-                             f'<span class="muted">{esc(KINDS[kind]["label"])}</span></li>')
+            if info["kind"] != kind or t not in tools_used:
+                continue
+            cl = claims_by_tool.get(t)
+            tags = tool_tags(t, cl)
+            all_tags += [x for x in tags if x not in all_tags]
+            q = res.filter(pl.col("tool") == t)
+            n_set = q["setting"].n_unique()
+            n_rel = q.filter(pl.col("species") != "all")["species"].n_unique()
+            n_truth = q["truth_set"].n_unique()
+            stats = [f"<b>{n_set}</b> setting{'s' if n_set != 1 else ''}",
+                     f"<b>{n_rel}</b> relative{'s' if n_rel != 1 else ''}" if n_rel else "<b>0</b> relatives",
+                     f"<b>{n_truth}</b> truth set{'s' if n_truth != 1 else ''}"]
+            if cl:
+                c = cl["counts"]
+                stats.append(f'<b>{c["alive"]}</b> alive, <b>{c["retired"]}</b> retired, <b>{c["untested"]}</b> untested claims')
+            first = info["compares"].split(". ")[0].rstrip(".") + "."
+            cards.append(f"""<li class="tc" data-tags="{esc('|'.join(tags))}" data-text="{esc((info['name'] + ' ' + info['compares'] + ' ' + ' '.join(tags)).lower())}">
+<div class="tc-top"><div class="tc-tags">{"".join(f'<span class="tc-tag">{esc(x)}</span>' for x in tags)}</div>{dot_grid(t, res, rel_order)}</div>
+<h2 class="tc-name"><span class="kind k-{kind}" aria-hidden="true"></span><a href="{t}.html">{esc(info["name"])}</a></h2>
+<p class="tc-desc">{esc(first)}</p>
+<div class="tc-foot">{" · ".join(stats)}</div></li>""")
+    group = ([SHORT_KIND[k] for k in KINDS] + ["sequence only", "needs AlphaFold model", "needs GPU",
+                                              "permissive licence", "GPL-3.0", "reference", "has claims"])
+    all_tags = [x for x in group if x in all_tags] + [x for x in all_tags if x not in group]
+    chips = '<button type="button" class="chip" data-tag="" aria-pressed="true">All</button>' + "".join(
+        f'<button type="button" class="chip" data-tag="{esc(x)}" aria-pressed="false">{esc(x)}</button>' for x in all_tags)
     body = f"""<h1>Tool cards</h1>
 <p class="lede">One card per tool: what it compares, what it needs, how to read its score, where it
-is strong and weak in the table, what it costs, and the exact command that was run.</p>
+is strong and weak in the table, what it costs, its licence, and the exact command that was run.</p>
+<div class="tc-bar"><label class="tc-search"><span class="sr">Search tools</span>
+<input id="tc-q" type="search" placeholder="Search tools…" autocomplete="off"></label>
+<span id="tc-count" class="mono muted"></span></div>
+<div class="chips tc-chips" role="group" aria-label="Filter by category">{chips}</div>
 {legend_kinds(tools_used)}
-<ul class="tools">{"".join(items)}</ul>"""
+<div class="legend" aria-label="Key to the dots"><span class="item"><svg width="44" height="14" aria-hidden="true">
+<circle cx="7" cy="7" r="6" fill="var(--ink)"/><circle cx="24" cy="7" r="3" fill="var(--ink)"/><circle cx="38" cy="7" r="3" fill="none" stroke="var(--muted)"/></svg>
+dots: one per relative, {order_words};
+larger means a higher best Fmax on Pfam domains (raw calls, all regions); an open ring means not run.
+Hover the dots for the numbers.</span></div>
+<ul class="tc-grid" id="tc-grid">{"".join(cards)}</ul>
+<script>
+(function () {{
+  const cards = [...document.querySelectorAll(".tc")], q = document.getElementById("tc-q");
+  const count = document.getElementById("tc-count");
+  let tag = "";
+  function apply() {{
+    const s = q.value.trim().toLowerCase();
+    let n = 0;
+    for (const c of cards) {{
+      const ok = (!tag || c.dataset.tags.split("|").includes(tag)) && (!s || c.dataset.text.includes(s));
+      c.hidden = !ok; n += ok;
+    }}
+    count.textContent = "showing " + n + " of " + cards.length;
+  }}
+  document.querySelectorAll(".tc-chips .chip").forEach((b) => b.addEventListener("click", () => {{
+    tag = b.dataset.tag;
+    document.querySelectorAll(".tc-chips .chip").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    apply();
+  }}));
+  q.addEventListener("input", apply);
+  apply();
+}})();
+</script>"""
     return layout("Tool cards", "tools", body, src, depth=1,
-                  description="One card per protein annotation tool.")
+                  description="One card per protein annotation tool, filterable by category.")
 
 
 def parse_tables(md: str) -> list[tuple[list[str], list[list[str]]]]:
@@ -1242,6 +1350,101 @@ def page_json(out: Path, rel: str, src: dict, data) -> None:
     (out / rel).write_text(html_text.replace("</div></footer>", link + "</div></footer>", 1))
 
 
+
+def fmt_date(d):
+    if not d:
+        return ""
+    y, m, dd = d[:10].split("-")
+    return f"{int(dd)} {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][int(m) - 1]} {y}"
+
+
+MARK = {"alive": "●", "retired": "×", "untested": "○"}
+
+
+def claims_card(cl: dict, up: str = "") -> str:
+    """One tool's claims, as resolved by scripts/claims.py: the claim, the test that kills it,
+    the verdict with its number, and the evidence."""
+    c = cl["counts"]
+    pills = (f'<span class="cl-pill alive">● {c["alive"]} alive</span>'
+             f'<span class="cl-pill retired">× {c["retired"]} retired</span>'
+             f'<span class="cl-pill untested">○ {c["untested"]} untested</span>'
+             + (f'<span class="cl-pill plain">last kill {fmt_date(cl["last_kill"])}</span>' if cl["last_kill"] else ""))
+    rows = []
+    for x in cl["claims"]:
+        ev = x.get("evidence") or {}
+        href = ev.get("href", "")
+        if href and not href.startswith("http"):
+            href = up + href
+        when = f' {fmt_date(x["date"])}' if x["status"] == "retired" and x.get("date") else ""
+        verdict = f'<span class="cl-st {x["status"]}">{x["status"]}{when}</span> · {esc(x["verdict"])}'
+        if href:
+            verdict += f' · <a href="{esc(href)}">{esc(ev["label"])}</a>'
+        ctx = "".join(f'<li>{esc(k["label"])}: <span class="mono">{esc(k["text"])}</span></li>' for k in x["context"])
+        more = (f'<details class="cl-more"><summary>Scope and related numbers</summary>'
+                f'<p>{esc(x.get("scope") or "")}</p><ul>{ctx}</ul>'
+                + (f'<p class="muted">Source: <span class="mono">{esc(x["source"])}</span></p>' if x.get("source") else "")
+                + '</details>')
+        rows.append(f'<li class="cl-row" data-status="{x["status"]}"><span class="cl-mark" aria-hidden="true">{MARK[x["status"]]}</span>'
+                    f'<div><div class="cl-claim">{esc(x["claim"])}</div><div class="cl-kill">kill: {esc(x["kill"])}</div>'
+                    f'<div class="cl-verdict">{verdict}</div>{more}</div></li>')
+    return f"""<section class="cl-card" aria-label="Claims about {esc(cl['title'])}">
+<div class="cl-head"><h2 class="cl-title">{esc(cl['title'])}</h2>
+<span class="cl-file"><a class="mono" href="{up}claims/{cl['tool']}.yaml">claims/{cl['tool']}.yaml</a>, updated {fmt_date(cl['updated'])}</span></div>
+<div class="cl-pills">{pills}</div>
+<p class="cl-sub">each row: the claim, the test that kills it, the verdict with its number, the evidence</p>
+<ul class="cl-rows">{"".join(rows)}</ul>
+<div class="cl-buttons"><a class="cl-btn" href="{up}claims-schema.html">claims.yaml schema ↗</a>
+<a class="cl-btn" href="{up}claims-schema.html#badge">badge and CI check ↗</a></div>
+</section>"""
+
+
+def page_claims(src: dict, cards: list[dict]) -> str:
+    body = f"""<h1>Claims</h1>
+<p class="lede">What each tool's authors claim, the result that would retire each claim, and where it
+stands. A claim is <b>alive</b> when its test has run and did not retire it, <b>retired</b> when the
+test retired it, and <b>untested</b> when the test has not run or the data cannot decide it. The build
+recomputes every verdict from the tables or checks it against the recorded notebook output, so
+nothing on a card is typed in by hand.</p>
+<div class="legend" aria-label="Key to the claims cards"><span class="item">● alive</span><span class="item">× retired</span>
+<span class="item">○ untested</span></div>
+{"".join(claims_card(c) for c in cards)}"""
+    return layout("Claims", "claims", body, src, description="Each tool's claims, the test that would retire each one, and its verdict.")
+
+
+def page_claims_schema(src: dict, cards: list[dict]) -> str:
+    example = (ROOT_DIR / "claims" / "kmerseek.yaml").read_text().split("claims:\n", 1)[1].split("\n\n  - id:", 1)[0]
+    badges = "".join(f'<p><img src="badges/claims-{c["tool"]}.svg" alt="claims for {esc(c["tool"])}: '
+                     f'{c["counts"]["alive"]} alive, {c["counts"]["retired"]} retired, {c["counts"]["untested"]} untested"></p>'
+                     f'<pre><code>![claims](https://seanome.github.io/protein-function-annotation-leaderboard/badges/claims-{c["tool"]}.svg)</code></pre>'
+                     for c in cards)
+    body = f"""<h1>claims.yaml</h1>
+<div class="prose">
+<p>One file per tool, <span class="mono">claims/&lt;tool&gt;.yaml</span>, lists the tool's claims. Each claim
+has the claim in plain words, the result that would retire it (<b>kill</b>), the data it is tested on
+(<b>scope</b>), and a <b>test</b>. The file never states a verdict. <span class="mono">scripts/claims.py</span>
+runs each test and sets the status:</p>
+<ul>
+<li><b>table</b>, <b>table_bins</b>, <b>table_max</b>, <b>table_count_passing</b>: recomputed from
+<span class="mono">results.parquet</span> on every build.</li>
+<li><b>record</b>, <b>record_compare</b>: a number quoted from the experiment inventory
+(<span class="mono">data/experiments.json</span>, seanome/2024-kmerseek-analysis PR 97). The quote must
+match the recorded value character for character, so a notebook that changes a number fails the check until the claim
+is updated.</li>
+<li><b>not_run</b>: no test yet; the claim is untested and the reason is shown.</li>
+</ul>
+<p>The full schema: <a class="mono" href="claims/schema.json">claims/schema.json</a>. The first claim of
+<a class="mono" href="claims/kmerseek.yaml">claims/kmerseek.yaml</a>:</p>
+<pre><code>{esc(example)}</code></pre>
+<h2 id="badge">Badge and CI check</h2>
+<p>Every push and pull request runs <span class="mono">python scripts/claims.py --check</span> in a GitHub
+Action (<a class="mono" href="https://github.com/{REPO}/blob/main/.github/workflows/claims.yml">.github/workflows/claims.yml</a>).
+It fails when a file breaks the schema, a quote no longer matches its record, or a table test cannot
+find its rows. The build also writes a badge per tool from the same verdicts:</p>
+{badges}
+</div>"""
+    return layout("claims.yaml", "claims", body, src, description="The claims.yaml format, the CI check and the badge.")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", type=Path, default=Path("data"))
@@ -1297,7 +1500,24 @@ def main() -> None:
     (out / "cost.html").write_text(page_cost(payload, src, n_q, tools_used))
     (out / "coverage.html").write_text(page_coverage(cov, src, species_mya))
     (out / "methods.html").write_text(page_methods(res, comp, src, prov))
-    (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used))
+    import claims as claims_mod
+    schema = json.loads((ROOT_DIR / "claims/schema.json").read_text())
+    resolver = claims_mod.Resolver(a.data)
+    cards = []
+    (out / "claims").mkdir(parents=True, exist_ok=True)
+    for f in sorted((ROOT_DIR / "claims").glob("*.yaml")):
+        cl = claims_mod.resolve_file(f, resolver, schema)
+        cards.append(cl)
+        (out / "claims" / f.name).write_text(f.read_text())
+        (out / "data/claims").mkdir(parents=True, exist_ok=True)
+        (out / f"data/claims/{cl['tool']}.json").write_text(json.dumps(cl, indent=1, ensure_ascii=False) + "\n")
+        (out / "badges").mkdir(parents=True, exist_ok=True)
+        (out / f"badges/claims-{cl['tool']}.svg").write_text(claims_mod.badge(cl["tool"], cl["counts"]))
+    (out / "claims" / "schema.json").write_text((ROOT_DIR / "claims/schema.json").read_text())
+    claims_by_tool = {c["tool"]: c for c in cards}
+    (out / "claims.html").write_text(page_claims(src, cards))
+    (out / "tools" / "index.html").write_text(page_tools_index(src, tools_used, res, claims_by_tool))
+    (out / "claims-schema.html").write_text(page_claims_schema(src, cards))
     for t in sorted(tools_used):
         nums = card_numbers(t, res, comp)
         md = card_markdown(t, nums, src)
@@ -1325,7 +1545,7 @@ def main() -> None:
             "markdown": f"{t}.md",
         }
         (out / "tools" / f"{t}.json").write_text(json.dumps(card, indent=1, allow_nan=False) + "\n")
-        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src))
+        (out / "tools" / f"{t}.html").write_text(page_card(t, md, src, claims_by_tool.get(t)))
     (out / "data" / "SOURCE.json").write_text(json.dumps(src, indent=1) + "\n")
     if (a.data / "pileup/regions.parquet").exists():
         import pileup
@@ -1356,6 +1576,8 @@ def main() -> None:
         (out / "data" / "inventory.md").write_text((a.data / "inventory.md").read_text())
     page_json(out, "methods.html", src, None)
     page_json(out, "tools/index.html", src, {"cards": [f"{t}.json" for t in sorted(tools_used)]})
+    page_json(out, "claims.html", src, {"claims": cards})
+    page_json(out, "claims-schema.html", src, {"schema": json.loads((ROOT_DIR / "claims/schema.json").read_text())})
     if (out / "pileup.html").exists():
         page_json(out, "pileup.html", src, {
             "note": "Readouts computed by scripts/pileup.py readouts(), the same rules as the page's "

@@ -25,6 +25,146 @@
    "text": "Numbers from seanome/2024-kmerseek-analysis at commit 7eca428b (results/leaderboard), copied 2026-10-20."
   },
   {
+   "tag": "h2",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "p",
+   "text": "each row: the claim, the test that kills it, the verdict with its number, the evidence"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Swiss-Prot features, raw calls, setting hp_thomas_dill2_k24_lcFalse, 998 human queries"
+  },
+  {
+   "tag": "li",
+   "text": "on Pfam domains, the best kmerseek setting for each mammal: −0.193 to +0.130 across 6 of 6; furthest: clupus −0.193"
+  },
+  {
+   "tag": "li",
+   "text": "settings of 22 that pass on Swiss-Prot features (raw or dedup): 2 of 30 setting and dedup choices pass (15 settings): hp_thomas_dill2_k24_lcFalse raw, hp_thomas_dill2_k24_lcFalse dedup"
+  },
+  {
+   "tag": "p",
+   "text": "Source: seanome/2024-kmerseek-analysis@7eca428b results.parquet"
+  },
+  {
+   "tag": "li",
+   "text": "●Parity with phmmer inside mammalskill: Fmax more than 0.05 from phmmer's on any of the 6 mammalsalive · −0.042 to +0.013 across 6 of 6 · leaderboard"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Pfam-N regions, raw calls, kmerseek hp_thomas_dill2 settings, all 15 relatives"
+  },
+  {
+   "tag": "li",
+   "text": "share of Pfam pairs at 20-30% identity sharing one exact hp_thomas_dill2 23-mer: 0.038"
+  },
+  {
+   "tag": "li",
+   "text": "recall at a 0.001 false-positive rate for an exact 23-mer seed, Pfam 20-30%: 0.039"
+  },
+  {
+   "tag": "li",
+   "text": "○Exact HP seeds find homologs below 40% identitykill: Fmax under 0.05 in the under-40% identity bins on Pfam-N, for every hydrophobic-polar settinguntested · the under-40% bins hold at most 1 region each; at least 30 are needed to decide · nb 230 to 232"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "1,000 Swiss-Prot queries against Swiss-Prot on one laptop; kmerseek hp k15, scaled 10"
+  },
+  {
+   "tag": "li",
+   "text": "kmerseek search peak memory, GB: 82.68"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2 -s 5.7 search peak memory, GB: 2.55"
+  },
+  {
+   "tag": "p",
+   "text": "Source: notebooks/239_laptop_scale_swissprot.ipynb @ ba20e8b, cell 1"
+  },
+  {
+   "tag": "li",
+   "text": "×Faster per query than MMseqs2kill: kmerseek answers fewer queries per second than MMseqs2 on the same 1,000 Swiss-Prot queriesretired 13 Sep 2026 · 2.29 queries per second against MMseqs2's 78.6 · nb 239"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "SCOPe40, hp_thomas_dill at k 26, family level"
+  },
+  {
+   "tag": "li",
+   "text": "per-query family sensitivity, kmerseek better than FoldSeek on 228 shared queries (Wilcoxon): p=0.1171"
+  },
+  {
+   "tag": "li",
+   "text": "best kmerseek 0.4 AUC over all 5,713 reference queries (family), any setting: 0.295 (mmseqs12.k6.c_max|region_evalue, n = 5,713 queries)"
+  },
+  {
+   "tag": "li",
+   "text": "best kmerseek 0.4 AUC over only the queries it fires on (family), any setting: 0.999 (uniprot18.k9.exact|f_weighted_target_in_query, n = 753 queries)"
+  },
+  {
+   "tag": "p",
+   "text": "Source: notebooks/076_hp_alphabet_sweep_per_class.ipynb @ 31f53c1, cell 19"
+  },
+  {
+   "tag": "li",
+   "text": "×Outperforms Foldseek on SCOPekill: inside FoldSeek's 5,713-query SCOPe40 benchmark, kmerseek detects no query that FoldSeek missesretired 30 Aug 2026 · fired on 188 of 5,713 benchmark queries (3.3%); 0 that FoldSeek missed · nb 076"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "the 87 short Swiss-Prot features of nb 244 where kmerseek drew the boundary and every other tool's call ran past it"
+  },
+  {
+   "tag": "li",
+   "text": "short features passing every criterion in nb 244: 87"
+  },
+  {
+   "tag": "li",
+   "text": "across all Swiss-Prot features, not only short ones, kmerseek settings above a Kyte-Doolittle scan: 0 of 406"
+  },
+  {
+   "tag": "li",
+   "text": "○Short features under 60 aa placed at 50 to 90% identitykill: a Kyte-Doolittle hydrophobicity window, with no search, lands on as many of the 87 casesuntested · the Kyte-Doolittle window was not run on the 87 cases · nb 244"
+  },
+  {
+   "tag": "summary",
+   "text": "Scope and related numbers"
+  },
+  {
+   "tag": "p",
+   "text": "Botryllus histocompatibility factor (BHF)"
+  },
+  {
+   "tag": "li",
+   "text": "best E-value of any human protein for BHF, any kmerseek setting (nb 241): 0.609548"
+  },
+  {
+   "tag": "li",
+   "text": "○The BHF membrane tether is a find other tools misskill: a Kyte-Doolittle window on BHF calls the same regionuntested · no Kyte-Doolittle window has been run on BHF · nb 241"
+  },
+  {
    "tag": "h1",
    "text": "kmerseek"
   },

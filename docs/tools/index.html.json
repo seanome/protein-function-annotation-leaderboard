@@ -30,43 +30,115 @@
   },
   {
    "tag": "p",
-   "text": "One card per tool: what it compares, what it needs, how to read its score, where it is strong and weak in the table, what it costs, and the exact command that was run."
+   "text": "One card per tool: what it compares, what it needs, how to read its score, where it is strong and weak in the table, what it costs, its licence, and the exact command that was run."
+  },
+  {
+   "tag": "h2",
+   "text": "phmmer"
+  },
+  {
+   "tag": "p",
+   "text": "Amino-acid letters, one query protein against each protein of the relative, scored with a substitution matrix the way BLAST does but with HMMER's model of insertions and deletions."
   },
   {
    "tag": "li",
-   "text": "phmmeraligns amino-acid letters"
+   "text": "aligns letterssequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
+  },
+  {
+   "tag": "h2",
+   "text": "MMseqs2"
+  },
+  {
+   "tag": "p",
+   "text": "Amino-acid letters: it first keeps target proteins that share similar short words with the query, then aligns only those, which makes it much faster than aligning every pair."
   },
   {
    "tag": "li",
-   "text": "MMseqs2aligns amino-acid letters"
+   "text": "aligns letterssequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
+  },
+  {
+   "tag": "h2",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "p",
+   "text": "A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all."
   },
   {
    "tag": "li",
-   "text": "jackhmmerbuilds a profile of a protein family"
+   "text": "family profilessequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
+  },
+  {
+   "tag": "h2",
+   "text": "MMseqs2, three rounds"
+  },
+  {
+   "tag": "p",
+   "text": "A profile of a protein family, built by MMseqs2 from its own hits over three rounds of search, as jackhmmer does."
   },
   {
    "tag": "li",
-   "text": "MMseqs2, three roundsbuilds a profile of a protein family"
+   "text": "family profilessequence onlypermissive licence 1 setting · 15 relatives · 3 truth sets"
+  },
+  {
+   "tag": "h2",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "p",
+   "text": "Two profiles against each other."
   },
   {
    "tag": "li",
-   "text": "HH-suite (hhsearch)builds a profile of a protein family"
+   "text": "family profilessequence onlyGPL-3.0 1 setting · 15 relatives · 3 truth sets"
+  },
+  {
+   "tag": "h2",
+   "text": "Foldseek"
+  },
+  {
+   "tag": "p",
+   "text": "Predicted 3-D shapes."
   },
   {
    "tag": "li",
-   "text": "Foldseekcompares 3-D shape letters (3Di)"
+   "text": "3-D shape lettersneeds AlphaFold modelGPL-3.0 1 setting · 10 relatives · 3 truth sets"
+  },
+  {
+   "tag": "h2",
+   "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "p",
+   "text": "Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protein language model, then searched with Foldseek, so no AlphaFold model is needed."
   },
   {
    "tag": "li",
-   "text": "ProstT5 + Foldseekcompares 3-D shape letters (3Di)"
+   "text": "3-D shape letterssequence onlyneeds GPUGPL-3.0 1 setting · 15 relatives · 3 truth sets"
+  },
+  {
+   "tag": "h2",
+   "text": "kmerseek"
+  },
+  {
+   "tag": "p",
+   "text": "Short words of k letters (k-mers) shared between two proteins."
   },
   {
    "tag": "li",
-   "text": "kmerseekcounts shared k-mers in a reduced alphabet"
+   "text": "reduced-alphabet k-merssequence onlypermissive licencehas claims 15 settings · 15 relatives · 3 truth sets · 1 alive, 2 retired, 3 untested claims"
+  },
+  {
+   "tag": "h2",
+   "text": "hmmscan with Pfam"
+  },
+  {
+   "tag": "p",
+   "text": "Each query protein against the curated profile models of every Pfam family, without searching any relative."
   },
   {
    "tag": "li",
-   "text": "hmmscan with Pfamscans curated Pfam family models"
+   "text": "Pfam modelssequence onlypermissive licencereference 1 setting · 0 relatives · 1 truth set"
   }
  ],
  "data": {
