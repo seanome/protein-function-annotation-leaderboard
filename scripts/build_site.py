@@ -42,7 +42,16 @@ DEFAULTS = {
     "stratum": "all", "metric": "fmax", "sort": "fmax", "dir": "desc",
     "r_cpu": R_CPU, "r_gpu": R_GPU,
 }
-DEFAULT_WORDS = "Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched"
+# Divergence times from human, in million years (Mya), read by main() from results.parquet's
+# target_mya_to_human (TimeTree 5 pairwise ages). E. coli, for which TimeTree has no age, is
+# absent. main() fills in DEFAULT_WORDS from it too.
+SPECIES_MYA: dict = {}
+DEFAULT_WORDS = "Pfam truth set, raw calls, zebrafish as the relative searched"
+
+
+def mya_label(v: float) -> int:
+    """A divergence time as the site shows it: the nearest whole million years."""
+    return int(round(v))
 # A stratum enters a card's comparisons and questions only with at least this many true
 # instances; below it one or two calls swing Fmax from 0 to 1.
 MIN_N = 30
@@ -61,7 +70,8 @@ FEATURES = {
     "TRANSMEM": "membrane-spanning segment", "ZN_FING": "zinc finger",
 }
 SPECIES_GROUPS = [
-    ("mammals", ["ptroglodytes", "rnorvegicus", "clupus", "btaurus", "mouse", "mdomestica"]),
+    # Within a group, nearest first by TimeTree 5 age (mouse and rat tie at 84 Mya, cow and dog at 89).
+    ("mammals", ["ptroglodytes", "mouse", "rnorvegicus", "btaurus", "clupus", "mdomestica"]),
     ("other vertebrates", ["chicken", "xtropicalis", "zebrafish"]),
     ("invertebrates", ["ciona", "fly", "worm"]),
     ("fungus, plant, bacterium", ["yeast", "arabidopsis", "ecoli"]),
@@ -147,9 +157,11 @@ def chiprows(species_mya: dict) -> list[dict]:
         {"id": "species", "kind": "plain", "label": "Nearest reviewed relative: time since split",
          "help": "the species whose annotated proteome is searched and whose annotations are "
                  "copied onto the human proteins; the number is how many million years (Mya) "
-                 "ago its line split from ours",
+                 "ago its line split from ours, from TimeTree 5",
          "groups": [{"label": g, "chips": [
-             c(s, SPECIES[s] if s == "all" else f"{SPECIES[s]} {int(species_mya[s])}")
+             c(s, f"{SPECIES[s]} {mya_label(species_mya[s])}") if s in species_mya
+             else c(s, SPECIES[s], None if s == "all" else
+                    "TimeTree 5 gives no divergence time for human and a bacterium")
              for s in members]} for g, members in SPECIES_GROUPS]},
         {"id": "identity", "kind": "stratum", "axis": "identity",
          "label": "Nearest reviewed relative: % identity",
@@ -1013,7 +1025,9 @@ For phmmer on zebrafish (Pfam, all proteins): Fmax {ex['fmax']:.3f} raw and {ded
 closest domain of the same family in the relative. Bins: 0–20, 20–30, 30–40, 40–60 and 60–100%. A
 domain whose family is absent from the relative is "no same-family domain".</li>
 <li><b>Nearest reviewed relative, Mya</b>: the relative searched, labelled with how many million
-years ago its line split from ours.</li>
+years ago its line split from ours: the pairwise divergence time from human in
+<a href="https://timetree.org/">TimeTree 5</a>, rounded to the nearest million years. TimeTree
+gives no time for human and a bacterium, so E. coli has none.</li>
 <li><b>Region type and length</b>: the length of the annotated region, in residues. Bins up to 60
 aa are short features; 61 aa and up is the size of a folded domain. Whole-protein annotations
 were not scored in this run.</li>
@@ -1089,7 +1103,7 @@ human protein that a tool matched to a zebrafish protein carrying a Pfam domain.
 domain and spans the whole matched stretch, which can be much wider than the domain itself.
 Every row below is one <b>region</b>: one of the {n_all:,} Pfam domains on the 998 human query
 proteins. Every panel is one tool and setting searching the zebrafish proteome (zebrafish and
-human last shared an ancestor about 430 million years ago), and every panel has the same rows.</p>
+human last shared an ancestor about {mya_label(SPECIES_MYA["zebrafish"])} million years ago), and every panel has the same rows.</p>
 <p class="prose">A residue counts as <b>covered</b> when a call naming that region's own Pfam family
 spans it, at any score the tool reported (E-value cutoff 10). Covered does not mean correctly
 placed: a call that runs far past the domain still covers it. Each row shows 100 residues before
@@ -1243,6 +1257,10 @@ def main() -> None:
     species_mya = {r["species"]: r["species_mya"] for r in
                    res.select("species", "species_mya").unique().iter_rows(named=True)
                    if r["species_mya"] is not None and not math.isnan(r["species_mya"])}
+    global SPECIES_MYA, DEFAULT_WORDS
+    SPECIES_MYA = species_mya
+    DEFAULT_WORDS = (f"Pfam truth set, raw calls, zebrafish ({mya_label(species_mya['zebrafish'])} Mya) "
+                     "as the relative searched")
     tools_used = set(res["tool"].unique())
     rows = row_order(res)
     searched = sorted({f'{r["tool"]}|{r["setting"]}|{r["species"]}'
@@ -1256,7 +1274,7 @@ def main() -> None:
                                if TOOLS[t]["needs"][k]]}
                   for t in tools_used},
         "kinds": KINDS,
-        "species": {s: {"name": SPECIES[s], "mya": int(species_mya[s]) if s in species_mya else None}
+        "species": {s: {"name": SPECIES[s], "mya": mya_label(species_mya[s]) if s in species_mya else None}
                     for s in SPECIES},
         "truthNames": TRUTH,
         "metrics": METRICS,
