@@ -58,6 +58,11 @@ Read plainly: T separates a molecule in hand from a mechanism described in a pap
 does not separate a molecule that became a drug from a molecule that was tried and
 failed. That is the step the score was hoped to predict.
 
+Neither split is a verdict on its own. Set A against Set B(ii) has 9 entries on the
+not-approved side, below the 15 the rule asks for, so it is underpowered; Set A against
+Set B(i) has exactly 15 but is a comparison inside Set B rather than the one the rule
+names. The verdict stays the pooled comparison above.
+
 ## What this means for the Idea Scoring Board
 
 T is a checklist of six questions to ask about a molecule, and nothing more. It must not
@@ -109,6 +114,9 @@ matters least from this bias, Set A against Set B(i), is the one where T is at c
 | `results.json` | Every number reported here |
 | `figures/` | The figure as PNG, PDF and SVG |
 | `VERIFY_TODO.md` | What the checking agent re-opens and recomputes |
+| `CHECK.md` | The second agent's report: records held or failed, its ten blind re-scores, its recomputed statistics |
+| `check_rows.csv`, `rescore.csv` | The second agent's per-record detail and its own scores |
+| `check_records.py`, `recheck.py`, `compare_scores.py`, `build_check_rows.py` | The second agent's scripts, with the raw API answers in `check_fda_raw.json` and `check_ctg_raw.json` |
 
 ## How the numbers were made
 
@@ -144,6 +152,95 @@ The scorer recorded these judgement calls, which the rejoin did not change:
 
 These are visible per entry in `scored.csv`, with the reason the scorer gave for each
 point.
+
+## Second-agent check
+
+A second agent followed `VERIFY_TODO.md` without reading this page or the scores first.
+Its full report is `CHECK.md`, with the per-record detail in `check_rows.csv` and its ten
+blind re-scores in `rescore.csv`.
+
+### Every record was reopened
+
+| Verdict | Records | Which |
+|---|---|---|
+| Held | 43 | all 19 Set A, all 15 Set B(i), all 9 Set B(ii) |
+| Failed | 0 | |
+| Could not be opened | 0 records, 1 check | the European half of the "no approval" test for Set B(i) |
+
+Every application number exists in Drugs@FDA and carries an original approval date whose
+year matches the row, to the day in all 19. Every trial identifier resolves with the start
+date, phase, status and intervention the row records. All nine Set B(ii) papers open and
+name the molecule in that species, and a registry search for each still returns nothing.
+
+The European Medicines Agency website answered every request with HTTP 403, so only the
+FDA half of the no-approval test was opened. `INCLUSION.md` asks for neither an FDA nor an
+EMA approval, so that half of the rule is checked for Set B(i) and the other half is not.
+
+### The statistics came out identical
+
+The checking agent recomputed everything from `scored.csv` with its own script, which does
+not import `analyze.py`. Every number matches `results.json`: n 19 and 24, medians 5 and
+3.5, U 259.5, p 0.4396 two-sided, AUC 0.5691 by both routes, and the two split
+comparisons. The verdict is unchanged.
+
+### Two scorers do not give the same T
+
+This is the finding that matters for how T is used. The checking agent re-scored ten
+entries from the mechanism text alone, before opening anything else:
+
+| Agreement | Count |
+|---|---|
+| T totals that match exactly | 3 of 10 |
+| Individual points that agree | 52 of 60 |
+| By point | T1 10/10, T2 10/10, T3 9/10, T4 8/10, T5 7/10, T6 8/10 |
+
+Most of the disagreement is T5, size: four of the eight differing points. The first scorer
+gave 0 whenever the description states no residue or domain count; the second read "one
+chain" as a single domain and gave the point. The rule as written does not say which is
+right. T4 and T6 account for the rest: T4 mixes two different tests, how conserved the
+target is and whether it is a partner of one species, and T6 is read either as "this
+molecule needs no cofactor" or as "this molecule works without other proteins".
+
+In plain words: T as written is not scored the same way twice. A one-point move on three
+of six points swings a total by up to 2, which is the size of the gap the pass rule asks
+for. Before anyone uses the checklist again it needs a stated rule for what to do when the
+size is not known, and T4 and T6 each need to be one question instead of two.
+
+### What the check flagged
+
+* Batroxobin and HBOC-201 are marketed through agencies outside the FDA and the EMA. Both
+  rows are correct under the rule, which looks only at those two agencies, but "did not
+  become a drug" is weaker for them than for the other 13 entries in Set B(i).
+* Set B(i) holds exendin(9-39), a shortened form of the same lizard peptide whose
+  full-length form sits in Set A as exenatide. Under the rule they are two molecules, so
+  both rows are placed correctly.
+* The `year` column for Set A is the year of the application named in `record_id`, not the
+  year the molecule first reached the market. Heparin and protamine were sold long before
+  those dates. The `year_type` column says so and nothing downstream treats these as first
+  market entry.
+* Row A12 writes the binomial Ovis aries where the cited paper says only "sheep testicular
+  hyaluronidase". The cell says so in its own parenthesis, but the binomial is the
+  collecting agent's, not the paper's.
+
+### Dropping the flagged rows does not change the answer
+
+| Dropped | Median gap | AUC | Rule |
+|---|---|---|---|
+| nothing | 1.5 | 0.569 | fails |
+| batroxobin | 2.0 | 0.574 | fails on AUC |
+| HBOC-201 | 1.0 | 0.552 | fails |
+| both | 1.5 | 0.556 | fails |
+| exendin(9-39) | 2.0 | 0.586 | fails on AUC |
+
+The AUC condition fails in every case, so T does not predict under any of them.
+
+### The two split comparisons are not a verdict
+
+The pass rule asks for at least 15 entries per set. Set A against Set B(ii) has 9 on the
+not-approved side, below that, so it is underpowered and is not called either way. Set A
+against Set B(i) has exactly 15, but it is a comparison within Set B rather than the
+comparison the rule names. Both splits are described above because they say where the
+pooled separation comes from, and neither is a result in its own right.
 
 ## Known weakness, stated before the run
 
