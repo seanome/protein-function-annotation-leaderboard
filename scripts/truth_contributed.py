@@ -233,6 +233,12 @@ def build(a) -> int:
               "orcid": pl.String, "provenance": pl.String, "curator": pl.String,
               "decided_on": pl.String, "reason": pl.String}
     table = pl.DataFrame(rows, schema=schema).sort("issue")
+    # The fourteen known cases are the table's first entries. They come from published
+    # experiments rather than from the issue queue, so they are kept in their own file and read
+    # back in at every build; their issue number is 0 and their issue_url is the paper's DOI.
+    seed = a.data / "truth_known_cases.tsv"
+    if seed.exists():
+        table = pl.concat([pl.read_csv(seed, separator="\t", schema=schema), table])
     out = a.data / "truth_contributed.tsv"
     table.write_csv(out, separator="\t")
 

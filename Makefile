@@ -5,7 +5,7 @@ SOURCE_COMMIT ?= 7eca428b
 PILEUP_COMMIT ?= 39d81ec9
 PY ?= .venv/bin/python
 
-.PHONY: tables site check serve score rescore truth
+.PHONY: tables site check serve score rescore truth known-cases
 
 # Score one submission folder the way the pull-request workflow does: make score SUB=submissions/<name>
 score:
@@ -18,6 +18,12 @@ truth:
 
 rescore: truth
 	for d in submissions/*/; do $(PY) scripts/score_submission.py --submission $$d --out scored/$$(basename $$d) || exit 1; done
+
+# The known cases: the pairs, their sequences and decoys. Needs the network the first time;
+# afterwards data/known_cases/sequences.json and alphafold.json answer for it.
+known-cases:
+	$(PY) scripts/known_cases.py --out data/known_cases
+	$(PY) scripts/known_cases_truth.py
 
 tables:
 	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --out data
@@ -34,6 +40,8 @@ check:
 	$(PY) tests/check_explainers.py --site docs
 	$(PY) tests/check_scorer.py
 	$(PY) tests/check_contribute.py
+	$(PY) tests/check_known_cases.py
+	$(PY) tests/check_known_cases_page.py --site docs
 	$(PY) tests/check_prose_all.py --site docs
 
 serve:
