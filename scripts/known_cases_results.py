@@ -23,7 +23,7 @@ IOU_FOUND = 0.5  # the same cutoff Table 1 uses
 FILES = {
     "hmmer3_phmmer": ("phmmer.domtbl", "domtbl"),
     "hmmer3_jackhmmer": ("jackhmmer.domtbl", "domtbl"),
-    "hmmscan": ("hmmscan.domtbl", "domtbl"),
+    "hmmscan": ("hmmscan.domtbl", "domtbl_scan"),
     "mmseqs2_seqseq": ("mmseqs2_seqseq.tsv", "blasttab"),
     "mmseqs2_iterative": ("mmseqs2_iterative.tsv", "blasttab"),
     "foldseek": ("foldseek.tsv", "blasttab"),
@@ -61,14 +61,17 @@ def read_hits(path: Path, kind: str) -> list[dict]:
     for line in path.read_text().splitlines():
         if not line.strip() or line.startswith("#"):
             continue
-        f = line.split("\t") if kind != "domtbl" else line.split()
-        if kind == "domtbl":
+        f = line.split() if kind.startswith("domtbl") else line.split("\t")
+        if kind.startswith("domtbl"):
             # HMMER's --domtblout: target name 0, query name 3, i-Evalue 12, domain score 13,
-            # hmm from/to 15/16, ali from/to 17/18. hmmscan swaps query and target.
+            # hmm from/to 15/16, ali from/to 17/18. In phmmer and jackhmmer the query is the
+            # profile, so its residues are hmm from/to and ali from/to sit on the target.
+            # In hmmscan the query is the sequence, so its residues are ali from/to.
             if len(f) < 23:
                 continue
+            c0, c1 = (17, 18) if kind == "domtbl_scan" else (15, 16)
             out.append({"query": f[3], "target": target_acc(f[0]),
-                        "qstart": int(f[17]), "qend": int(f[18]),
+                        "qstart": int(f[c0]), "qend": int(f[c1]),
                         "score": float(f[13]), "evalue": float(f[12]), "score_kind": "bits"})
         elif kind == "blasttab":
             if len(f) < 8:
