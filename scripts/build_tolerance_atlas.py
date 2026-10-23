@@ -46,7 +46,7 @@ STEP_LABELS = [
     "in scope",
     "named species\nwith a number",
     "molecule\nnamed",
-    "shown on a\nhuman target",
+    "reported human-\ntarget claim",
     "approved\ndrug",
 ]
 
@@ -148,7 +148,7 @@ def draw(all_counts, t56_counts, negatives, negatives_t56, out_stem):
         (axs[0], all_counts, negatives, "every row"),
         (axs[1], t56_counts, negatives_t56, "rows with transferability 5 or 6"),
     ):
-        ax.bar(x, counts, width=0.68, color=blue, label="diseases clearing the step (filled bar)")
+        ax.bar(x, counts, width=0.68, color=blue, label="diseases reported to clear the step (filled bar)")
         ax.bar(
             [5],
             [neg],
