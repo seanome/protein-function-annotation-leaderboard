@@ -20,7 +20,7 @@ from taxlib import Tax  # noqa: E402
 R = Path("/Users/olga/data/why-numbers/2026_03")
 S = R / "sherlock"
 C = HERE / "cache"
-W = Path("/Users/olga/code/protein-function-annotation-leaderboard/.claude/worktrees/why-numbers/results/why")
+W = HERE.parent
 
 # ---------------------------------------------------------------- sha256
 src = json.load(open(W / "sources.json"))
