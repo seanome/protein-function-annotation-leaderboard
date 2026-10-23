@@ -95,7 +95,7 @@ and the rules above were committed first and were not changed.
 ![Five steps of the tolerance atlas, with the counts on each bar](funnel_tolerance_atlas_pubmed_2026-10-19.png)
 
 Panel a counts every row. Panel b counts only rows whose transferability score is 5 or 6.
-A filled blue bar is the number of diseases that clear that step and every step before it.
+A filled blue bar counts diseases originally reported to clear that step and every step before it. These are screening claims, not verified transfers. The source check below rejected four of the seven human-target claims: three remain, or two if the animal molecule itself is required.
 The hollow dashed bar on the right is the number of diseases with no species and no
 measured number in that set.
 
@@ -104,7 +104,7 @@ measured number in that set.
 | in scope | 60 | 60 |
 | a named species with a measured number | 42 | 7 |
 | the molecule is named | 29 | 7 |
-| the molecule shown on a human target | 7 | 3 |
+| originally reported human-target claim (before source checking) | 7 | 3 |
 | an approved drug | 0 | 0 |
 | no species and no number (the negative bar) | 18 | 53 |
 
@@ -116,7 +116,7 @@ per disease.
 
 The rules were fixed before the searching. Here is each one and its outcome.
 
-**The belief as stated is supported.** The rule asked for at least half of the in-scope
+The registered screening threshold is met. This does not establish tolerance for every insult or lineage. The rule asked for at least half of the in-scope
 diseases, 30 of 60, to have a named species with a measured number and a citation. 42 of
 60 do. The weak-foundation clause, fewer than 15 of 60, is far from being met.
 
@@ -139,10 +139,7 @@ recorded in the rows:
   naked mole rat, so it is not the animal's molecule made into a drug. The column reads
   "no" and says why.
 
-**The drop is between the molecule and the human target.** 29 diseases have a named
-molecule, and 7 of those have a paper showing it acting in a human cell, on a human
-receptor or in a human assay. That gap, not the search for species, is where the atlas
-thins out.
+The original screen names molecules for 29 diseases and reports seven human-target claims. The committed source check rejects four of those claims, leaving three under its reading, or two when the tolerant animal molecule itself is required. The original counts are retained so the initial screen can be compared with that check.
 
 ## What the transferability score says
 
