@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 12,
+   "complete_single": 495,
+   "completeness_pct": 75.45,
+   "fragmented": 53,
+   "lineage": "metazoa_odb12",
+   "missing": 112,
+   "short_summary_c_pct": 75.4
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 5,
+   "complete_single": 112,
+   "completeness_pct": 90.7,
+   "fragmented": 7,
+   "lineage": "eukaryota_odb12",
+   "missing": 5,
+   "short_summary_c_pct": 90.7
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "random control",
+ "n_interpro_match": 16543,
+ "n_proteins": 28245,
+ "n_sprot_hit": 11434,
+ "n_uncharacterized_name": 11449,
+ "n_unlabelled": 11510,
+ "proteome_taxid": "1538716",
+ "species": "Pristionchus fissidentatus",
+ "uncharacterized_name_pct": 40.53,
+ "unlabelled_pct": 40.75,
+ "upid": "UP001432322"
+}

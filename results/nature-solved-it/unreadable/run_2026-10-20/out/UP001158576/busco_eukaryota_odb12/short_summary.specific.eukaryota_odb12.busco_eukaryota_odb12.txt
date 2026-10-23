@@ -1,0 +1,17 @@
+# BUSCO version is: 6.1.0 
+# The lineage dataset is: eukaryota_odb12 (Creation date: 2026-05-22, number of genomes: 456, number of BUSCOs: 129)
+# Summarized benchmarking in BUSCO notation for file /scratch/users/olgabot/nature-solved-it/unreadable/out/UP001158576/proteins.fasta
+# BUSCO was run in mode: proteins
+
+	***** Results: *****
+
+	C:75.2%[S:71.3%,D:3.9%],F:14.0%,M:10.9%,n:129	   
+	97	Complete BUSCOs (C)			   
+	92	Complete and single-copy BUSCOs (S)	   
+	5	Complete and duplicated BUSCOs (D)	   
+	18	Fragmented BUSCOs (F)			   
+	14	Missing BUSCOs (M)			   
+	129	Total BUSCO groups searched		   
+
+Dependencies and versions:
+	hmmsearch: 3.4

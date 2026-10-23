@@ -1,0 +1,17 @@
+# BUSCO version is: 6.1.0 
+# The lineage dataset is: viridiplantae_odb12 (Creation date: 2026-05-22, number of genomes: 78, number of BUSCOs: 822)
+# Summarized benchmarking in BUSCO notation for file /scratch/users/olgabot/nature-solved-it/unreadable/out/UP000006548/proteins.fasta
+# BUSCO was run in mode: proteins
+
+	***** Results: *****
+
+	C:98.8%[S:93.1%,D:5.7%],F:0.1%,M:1.1%,n:822	   
+	812	Complete BUSCOs (C)			   
+	765	Complete and single-copy BUSCOs (S)	   
+	47	Complete and duplicated BUSCOs (D)	   
+	1	Fragmented BUSCOs (F)			   
+	9	Missing BUSCOs (M)			   
+	822	Total BUSCO groups searched		   
+
+Dependencies and versions:
+	hmmsearch: 3.4

@@ -1,0 +1,66 @@
+{
+    "parameters": {
+        "out_path": "/scratch/users/olgabot/nature-solved-it/unreadable/out/UP000002311",
+        "cpu": "16",
+        "force": "True",
+        "restart": "False",
+        "quiet": "False",
+        "download_path": "/scratch/users/olgabot/nature-solved-it/unreadable/out/UP000002311/busco_downloads",
+        "datasets_version": "odb12",
+        "offline": "True",
+        "download_base_url": "https://busco-data.ezlab.org/v5/data/",
+        "auto-lineage": "False",
+        "auto-lineage-prok": "False",
+        "auto-lineage-euk": "False",
+        "use_augustus": "False",
+        "use_miniprot": "False",
+        "use_metaeuk": "False",
+        "skip_bbtools": "False",
+        "batch_mode": "False",
+        "tar": "False",
+        "opt-out-run-stats": "True",
+        "plot_percentages": "False",
+        "in": "/scratch/users/olgabot/nature-solved-it/unreadable/out/UP000002311/proteins.fasta",
+        "out": "busco_fungi_odb12",
+        "mode": "proteins",
+        "lineage_dataset": "busco_downloads_fungi_odb12/lineages/fungi_odb12",
+        "main_out": "/scratch/users/olgabot/nature-solved-it/unreadable/out/UP000002311/busco_fungi_odb12",
+        "lineage_results_dir": "run_fungi_odb12",
+        "domain": "eukaryota",
+        "ncbi_taxid": "4751",
+        "orthodb_version": "12.1",
+        "dataset_version": "02"
+    },
+    "lineage_dataset": {
+        "name": "fungi_odb12",
+        "creation_date": "2026-05-22",
+        "number_of_buscos": "1122",
+        "number_of_species": "144"
+    },
+    "versions": {
+        "python": [
+            3,
+            12,
+            13,
+            "final",
+            0
+        ],
+        "busco": "6.1.0",
+        "hmmsearch": 3.4
+    },
+    "results": {
+        "one_line_summary": "C:75.8%[S:69.5%,D:6.2%],F:2.7%,M:21.6%,n:1122",
+        "Complete percentage": 75.8,
+        "Complete BUSCOs": 850,
+        "Single copy percentage": 69.5,
+        "Single copy BUSCOs": 780,
+        "Multi copy percentage": 6.2,
+        "Multi copy BUSCOs": 70,
+        "Fragmented percentage": 2.7,
+        "Fragmented BUSCOs": 30,
+        "Missing percentage": 21.6,
+        "Missing BUSCOs": 242,
+        "n_markers": 1122,
+        "domain": "eukaryota"
+    }
+}

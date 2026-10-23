@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 15,
+   "complete_single": 402,
+   "completeness_pct": 62.05,
+   "fragmented": 96,
+   "lineage": "metazoa_odb12",
+   "missing": 159,
+   "short_summary_c_pct": 62.1
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 5,
+   "complete_single": 92,
+   "completeness_pct": 75.19,
+   "fragmented": 18,
+   "lineage": "eukaryota_odb12",
+   "missing": 14,
+   "short_summary_c_pct": 75.2
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "600.96099",
+ "group": "random control",
+ "n_interpro_match": 11748,
+ "n_proteins": 17075,
+ "n_sprot_hit": 8879,
+ "n_uncharacterized_name": 0,
+ "n_unlabelled": 5264,
+ "proteome_taxid": "34765",
+ "species": "Oikopleura dioica",
+ "uncharacterized_name_pct": 0.0,
+ "unlabelled_pct": 30.83,
+ "upid": "UP001158576"
+}

@@ -1,0 +1,20 @@
+{
+ "fasta": {
+  "bytes": 10417078,
+  "fetched_utc": "2026-10-20T21:17:05Z",
+  "file": "UP001164746_6604.fasta.gz",
+  "proteins": 37840,
+  "release": "2026_03",
+  "sha256": "38bb68ca5557baea4286d209c7bf76b4207c2a3d97b3e5607fd3bfce3e2d566c",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP001164746/UP001164746_6604.fasta.gz"
+ },
+ "uniprot": {
+  "bytes": 1084290,
+  "fetched_utc": "2026-10-20T21:19:43Z",
+  "file": "UP001164746_uniprot.tsv.gz",
+  "release": "2026_03",
+  "rows": 37840,
+  "sha256": "ab88609b67f9038bb2565cbe25e9dca183d60fdd7b759cc836168caa0a1b5ee5",
+  "url": "https://rest.uniprot.org/uniprotkb/search?query=proteome%3AUP001164746&fields=accession%2Cprotein_name%2Cxref_interpro%2Cxref_pfam%2Cxref_panther%2Cxref_cdd%2Cxref_gene3d%2Cxref_supfam%2Cxref_smart%2Cxref_prosite%2Cxref_prints%2Cxref_pirsf%2Cxref_hamap%2Cxref_sfld%2Cxref_ncbifam&format=tsv&size=500"
+ }
+}

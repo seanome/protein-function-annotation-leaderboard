@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 43,
+   "complete_single": 350,
+   "completeness_pct": 58.48,
+   "fragmented": 181,
+   "lineage": "metazoa_odb12",
+   "missing": 98,
+   "short_summary_c_pct": 58.5
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 8,
+   "complete_single": 76,
+   "completeness_pct": 65.12,
+   "fragmented": 32,
+   "lineage": "eukaryota_odb12",
+   "missing": 13,
+   "short_summary_c_pct": 65.1
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "atlas species",
+ "n_interpro_match": 27213,
+ "n_proteins": 37840,
+ "n_sprot_hit": 19670,
+ "n_uncharacterized_name": 11486,
+ "n_unlabelled": 10322,
+ "proteome_taxid": "6604",
+ "species": "Mya arenaria",
+ "uncharacterized_name_pct": 30.35,
+ "unlabelled_pct": 27.28,
+ "upid": "UP001164746"
+}

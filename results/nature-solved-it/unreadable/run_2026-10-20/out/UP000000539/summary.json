@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 78,
+   "complete_single": 571,
+   "completeness_pct": 96.58,
+   "fragmented": 15,
+   "lineage": "metazoa_odb12",
+   "missing": 8,
+   "short_summary_c_pct": 96.6
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 17,
+   "complete_single": 109,
+   "completeness_pct": 97.67,
+   "fragmented": 1,
+   "lineage": "eukaryota_odb12",
+   "missing": 2,
+   "short_summary_c_pct": 97.7
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "atlas species",
+ "n_interpro_match": 17915,
+ "n_proteins": 18373,
+ "n_sprot_hit": 17756,
+ "n_uncharacterized_name": 677,
+ "n_unlabelled": 372,
+ "proteome_taxid": "9031",
+ "species": "Gallus gallus",
+ "uncharacterized_name_pct": 3.68,
+ "unlabelled_pct": 2.02,
+ "upid": "UP000000539"
+}

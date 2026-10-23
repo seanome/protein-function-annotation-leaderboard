@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 7,
+   "complete_single": 665,
+   "completeness_pct": 100.0,
+   "fragmented": 0,
+   "lineage": "metazoa_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 100.0
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 128,
+   "completeness_pct": 100.0,
+   "fragmented": 0,
+   "lineage": "eukaryota_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 100.0
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "435.12563",
+ "group": "model organism",
+ "n_interpro_match": 25829,
+ "n_proteins": 26567,
+ "n_sprot_hit": 24202,
+ "n_uncharacterized_name": 548,
+ "n_unlabelled": 683,
+ "proteome_taxid": "7955",
+ "species": "Danio rerio",
+ "uncharacterized_name_pct": 2.06,
+ "unlabelled_pct": 2.57,
+ "upid": "UP000000437"
+}

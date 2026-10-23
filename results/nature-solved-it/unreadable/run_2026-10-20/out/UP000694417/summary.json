@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 5,
+   "complete_single": 640,
+   "completeness_pct": 95.98,
+   "fragmented": 18,
+   "lineage": "metazoa_odb12",
+   "missing": 9,
+   "short_summary_c_pct": 96.0
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 2,
+   "complete_single": 125,
+   "completeness_pct": 98.45,
+   "fragmented": 1,
+   "lineage": "eukaryota_odb12",
+   "missing": 1,
+   "short_summary_c_pct": 98.4
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "83.51396",
+ "group": "atlas species",
+ "n_interpro_match": 19144,
+ "n_proteins": 19631,
+ "n_sprot_hit": 19337,
+ "n_uncharacterized_name": 737,
+ "n_unlabelled": 259,
+ "proteome_taxid": "9999",
+ "species": "Urocitellus parryii",
+ "uncharacterized_name_pct": 3.75,
+ "unlabelled_pct": 1.32,
+ "upid": "UP000694417"
+}
