@@ -1,9 +1,11 @@
-# Transferability back-test: T does not predict which animal molecules became drugs
+# Transferability back-test: T fails the registered rule in 43 collected entries
 
 Does the transferability score T, scored without knowing the outcome, separate
 animal-derived molecules that became approved drugs from animal-derived molecules that did
-not? It does not. Under the rule written before collection, T fails on two of its three
-conditions, so it stays a checklist of six questions and is not used to rank programmes.
+not? In this collected panel, T fails two of the three criteria written before collection.
+The result does not establish that the score has no predictive association in another
+population. Under the fixed rule, it stays a checklist of six questions and is not used
+to rank programmes.
 
 `INCLUSION.md` holds the inclusion rules and the pass/fail rule, written and committed
 before any entry was collected. The sets were collected before any score existed, and the
@@ -36,8 +38,7 @@ picked not-approved one, counting a tie as half. 0.5 is no information, 1 is per
 0.569 the score is close to no information: of the 456 approved and not-approved pairs,
 222 go the way T predicts, 75 are ties, and 159 go the other way.
 
-Both sets clear 15 entries, so the test is not underpowered. T fails the median condition
-and the AUC condition, so the rule's answer is that T does not predict approval.
+Both sets meet the registered minimum of 15 entries. That minimum is not a power analysis and does not establish adequate power to detect an association. T fails the median and AUC conditions, so the panel does not meet the registered prediction criterion. No confidence interval or external validation is provided.
 
 ## Where the small separation comes from
 
@@ -49,17 +50,14 @@ Set B has two kinds of entry, and they behave differently.
 | Set B(i), reached a trial, no approval | 15 | 5 | 0.470 | 0.78 |
 | Set B(ii), named molecule, no candidate in trials | 9 | 2 | 0.734 | 0.048 |
 
-Against the molecules that reached a clinical trial and stopped there, T is at chance
-(AUC 0.470, below 0.5). The whole of the small separation comes from the nine mechanism
+Against the collected molecules that reached a clinical trial without approval, the observed AUC is 0.470. This does not establish equivalence to chance. The larger observed separation is against the nine mechanism
 programmes that have a named molecule but nothing in trials, and even that comparison
 sits just under the 0.75 the rule asks for.
 
-Read plainly: T separates a molecule in hand from a mechanism described in a paper. It
-does not separate a molecule that became a drug from a molecule that was tried and
-failed. That is the step the score was hoped to predict.
+In this panel the score separates approved drugs from the named mechanisms more strongly than it separates approved drugs from trial candidates. The selected entries and unequal documentation prevent a general conclusion about what the score can predict.
 
 Neither split is a verdict on its own. Set A against Set B(ii) has 9 entries on the
-not-approved side, below the 15 the rule asks for, so it is underpowered; Set A against
+not-approved side, below the 15 the rule asks for, so it fails the registered sample-size minimum; Set A against
 Set B(i) has exactly 15 but is a comparison inside Set B rather than the one the rule
 names. The verdict stays the pooled comparison above.
 
@@ -232,12 +230,12 @@ size is not known, and T4 and T6 each need to be one question instead of two.
 | both | 1.5 | 0.556 | fails |
 | exendin(9-39) | 2.0 | 0.586 | fails on AUC |
 
-The AUC condition fails in every case, so T does not predict under any of them.
+The AUC condition fails in each of these sensitivity analyses, so none meets the registered rule.
 
 ### The two split comparisons are not a verdict
 
 The pass rule asks for at least 15 entries per set. Set A against Set B(ii) has 9 on the
-not-approved side, below that, so it is underpowered and is not called either way. Set A
+not-approved side, below that, so it fails that registered minimum and is not called either way. Set A
 against Set B(i) has exactly 15, but it is a comparison within Set B rather than the
 comparison the rule names. Both splits are described above because they say where the
 pooled separation comes from, and neither is a result in its own right.
