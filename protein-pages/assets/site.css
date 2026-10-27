@@ -45,7 +45,7 @@ svg text{font-family:"Source Sans 3",system-ui,sans-serif}
 .sep{stroke:var(--line)}
 .grid{stroke:#eeeeee}
 .hit{cursor:pointer;outline:none}
-.hit:hover rect,.hit:focus rect{stroke:#000;stroke-width:1.5}
+.hit:focus-visible{outline:2px dotted #5a5a5a}
 #toggle,.filters button,#close{font:inherit;font-size:14px;padding:6px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer}
 .filters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}

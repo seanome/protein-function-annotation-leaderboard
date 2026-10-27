@@ -1,0 +1,30 @@
+{
+ "total": 50,
+ "none": 15,
+ "one": 13,
+ "agree": 22,
+ "disagree": 0,
+ "only_family": {
+  "mmseqs2": 2,
+  "kmerseek": 5,
+  "foldseek": 0,
+  "phmmer": 0,
+  "jackhmmer": 5,
+  "hhsearch": 0,
+  "hmmscan": 1,
+  "interproscan": 0
+ },
+ "run_status": {
+  "mmseqs2": "not run",
+  "mmseqs2_3rounds": "run",
+  "kmerseek": "run",
+  "foldseek": "not run",
+  "prostt5": "not run",
+  "phmmer": "run",
+  "jackhmmer": "run",
+  "hhsearch": "not run",
+  "hmmscan": "run",
+  "interproscan": "not run"
+ },
+ "seconds": 1.6
+}

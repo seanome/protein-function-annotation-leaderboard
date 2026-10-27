@@ -75,7 +75,7 @@ def test_last_round_keeps_final_round():
 def test_domtbl_seq_uses_hmm_columns_for_query(tmp_path):
     p = tmp_path / "phmmer.domtblout"
     p.write_text("# header\n" + " ".join(row("sp|P1|X_HUMAN", "q", 1e-9, 1e-9, hmm=(5, 40), ali=(100, 135))) + "\n")
-    h = build.parse_domtbl_seq(p, "phmmer")["q"][0]
+    h = build.materialize(build.parse_domtbl_seq(p, "phmmer")["q"][0])
     assert (h["q0"], h["q1"], h["t0"], h["t1"], h["target"]) == (5, 40, 100, 135, "P1")
 
 

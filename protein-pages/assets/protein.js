@@ -81,7 +81,7 @@
           lanes[li].push(h.q);
           parts.push(boxSvg(h, i, li));
         }
-        hgt = ROW_PAD + lanes.length * LANE_H + 4;
+        hgt = Math.max(ROW_PAD + lanes.length * LANE_H + 4, ROW_PAD + 34);
         const sep = rg.querySelector("line.sep");
         const line = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
         rg.innerHTML = (sep ? sep.outerHTML : "") + line + parts.join("");
@@ -212,7 +212,7 @@
   }
   function show(h, tseq) {
     const q = PAGE.q;
-    let html = `<h3>${esc(PAGE.tracks[h.k].name)}: ${esc(h.l)}</h3>`;
+    let html = `<h3>${esc(PAGE.tracks[h.k].name)}: ${esc(h.l)}` + (h.t && h.t !== h.l ? ` (Swiss-Prot ${esc(h.t)})` : "") + "</h3>";
     if (h.k !== "hhsearch" && !tseq) {
       html += `<p>${esc(h.t)} is not in swissprot.fasta, so its residues cannot be shown.</p>`;
     } else if (h.k === "kmerseek") {
@@ -227,8 +227,8 @@
         else mid += " ";
       }
       html += `<p>${ident} of ${n} identical` + (al ? `; ${same} of ${n} in the same class of ${esc(h.m)}.` : ".") + "</p>";
-      html += `<p class="note">kmerseek places the two segments side by side without gaps. Match line: | the same residue; + a different residue in the same class of the alphabet; blank: different classes. Class table read from kmerseek's source file src/rust/alphabets.rs.</p>`;
-      html += `<div class="aln">${esc(blocks(qs, ts, mid, h.q[0], h.r[0], "this protein", h.t))}</div>`;
+      html += `<p class="note">kmerseek places the two segments side by side without gaps. Match line: | the same residue; + a different residue in the same class of the alphabet; blank: different classes. Class table read from kmerseek_alphabets.rs in the input folder, a copy of kmerseek's own src/rust/alphabets.rs.</p>`;
+      html += `<div class="aln">${esc(blocks(qs, ts, mid, h.q[0], h.r[0], "this protein", h.l))}</div>`;
       if (al) {
         const groups = {};
         for (const [r, c] of Object.entries(al)) (groups[c] = groups[c] || []).push(r);
@@ -237,7 +237,7 @@
         let cm = "";
         for (let i = 0; i < n; i++) cm += qe[i] === te[i] && qe[i] !== "x" ? "|" : " ";
         html += `<p class="note">The same segments written as classes of ${esc(h.m)}: ${Object.entries(groups).map(([c, g]) => "<code>" + esc(c) + "</code> = <code>" + g.sort().join("") + "</code>").join(", ")}; x: a residue outside the 20 standard ones. Match line: | the same class.</p>`;
-        html += `<div class="aln">${esc(blocks(qe, te, cm, h.q[0], h.r[0], "this protein", h.t))}</div>`;
+        html += `<div class="aln">${esc(blocks(qe, te, cm, h.q[0], h.r[0], "this protein", h.l))}</div>`;
       } else {
         html += `<p class="note">No class table for ${esc(h.m || "this alphabet")} (kmerseek_alphabets.rs not given, or the alphabet is not in it), so only identical residues are marked.</p>`;
       }
@@ -262,7 +262,14 @@
           mid += same ? "|" : " "; if (same) ident++;
         }
         html += `<p>${ident} of ${a.q.length} aligned positions identical.</p><p class="note">${how} Match line: | the same residue. A - in a row is a gap.</p>`;
-        html += `<div class="aln">${esc(blocks(a.q, a.t, mid, a.qs, a.ts, "this protein", h.t))}</div>`;
+        const qe = a.qs + a.q.replace(/-/g, "").length - 1;
+        if (h.k !== "hhsearch" && (a.qs > h.q[0] || qe < h.q[1])) {
+          html += `<p class="note">This alignment covers residues ${a.qs}-${qe} of this protein; the tool reported ${h.q[0]}-${h.q[1]}. ` +
+            (h.k === "jackhmmer" || h.k === "mmseqs2_3rounds"
+              ? "This tool searched with a profile built from many proteins, so the two proteins on their own can align over less of the range."
+              : "The rest of the range does not align well enough with these scores.") + "</p>";
+        }
+        html += `<div class="aln">${esc(blocks(a.q, a.t, mid, a.qs, a.ts, "this protein", h.l))}</div>`;
       }
     }
     pbody.innerHTML = html;
