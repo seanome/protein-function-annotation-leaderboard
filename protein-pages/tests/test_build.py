@@ -120,3 +120,14 @@ def test_alphabets_from_kmerseek_source():
     al = build.parse_alphabets(src)
     assert al["hp_lehninger2"]["G"] == "h" and al["hp_lehninger2"]["S"] == "p"
     assert len(set(al["gbmr4"].values())) == 4
+
+
+def test_agreement_with_tied_hits_and_unknown_targets():
+    # Two families with a hit at the same range and the same E-value, targets with no known
+    # family: the pair search must not fail on the tie (it did on the full Botryllus run).
+    a = build.hit("phmmer", 10, 100, "P1", 1, 90, 1e-9, [], True)
+    b = build.hit("jackhmmer", 10, 100, "P2", 1, 90, 1e-9, [], True)
+    c = build.hit("jackhmmer", 200, 300, "P3", 1, 90, 1e-5, [], True)
+    for h in (a, b, c):
+        h["_names"] = build.target_names(h, {})
+    assert build.agreement([a, b, c], {})[1] == "overlap_unknown"

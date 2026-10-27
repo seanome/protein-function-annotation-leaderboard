@@ -77,6 +77,8 @@ are positions on the Swiss-Prot protein and your protein's positions are the `hm
 
 ## How to build
 
+Python 3.9 or newer, and Biopython 1.79 or newer:
+
 ```bash
 pip install biopython
 ```
@@ -86,6 +88,35 @@ python build.py path/to/inputs --out site --jobs 8
 ```
 
 Open `site/index.html` in a browser. The pages need no server.
+
+## Speed, memory and size
+
+Measured on 2026-10-27 (Sherlock job 49809991, 8 CPUs of an Intel Xeon E5-2620 v4, Python
+3.9, Biopython 1.79), on every Botryllus FUN protein that has search output: 7,216 proteins,
+with 1.3 million MMseqs2 three-round hits, 4.4 million phmmer hits and 11.1 million jackhmmer
+hits at E-value 0.001 or below, and all 575,748 Swiss-Prot sequences.
+
+| Step | Time |
+|---|---|
+| Read all files | 73 s |
+| Draw 7,216 pages | 114 s |
+| Whole build | 3 min 7 s |
+
+The main process peaked at 6.2 GB; Slurm measured 19.8 GB for the job with its 8 workers.
+The site was 2.0 GB, almost all of it pages of proteins with thousands of hits (the largest
+page, 2 MB).
+
+For 20,000 proteins with as many hits per protein (about 2,100), the time scales to about
+9 minutes on this processor, just under the 10-minute goal, but memory scales to about 55 GB,
+more than a laptop has. These 7,216 proteins are a hit-rich set (notebook 281 picked them),
+so a whole proteome, a third of it with no hit, needs less. The build was not run on a laptop:
+the input files (4.5 GB) stay on Sherlock.
+
+Two changes made it this fast. The rule that decides whether families agree stops at the first
+overlapping pair instead of comparing every pair of hits (that took 117 of 119 seconds on the
+50-protein set before). Python's cycle collector is turned off while reading, which cut reading
+from 224 s to 97 s; keeping each hit as its raw text line until a worker draws its page cut it
+to 73 s and took memory from over 32 GB (the first run was killed) to the numbers above.
 
 ## How the residue panel is made
 
@@ -114,3 +145,22 @@ Open `site/index.html` in a browser. The pages need no server.
 
 `test_inputs/` holds the scripts that cut a 50-protein test set out of real *Botryllus
 schlosseri* outputs on Sherlock. See `test_inputs/PROVENANCE.md`.
+
+## Checks
+
+```bash
+python -m pytest tests/
+```
+
+```bash
+python tests/check_site.py site
+```
+
+```bash
+python tests/check_boxes.py site path/to/inputs 3
+```
+
+`check_site.py` checks that every colour on a page is one the legend explains, that the five
+index numbers add up, and that each page's sentence matches its index row. `check_boxes.py`
+picks boxes at random and checks them against the line of the tool's file they came from.
+`tests/screenshots.py` takes full-page screenshots with Playwright.

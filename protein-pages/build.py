@@ -498,7 +498,8 @@ def agreement(hits, target_ann):
 
     def best_pair(xa, xb):
         """Lowest E-value of an overlapping pair, one range from each dict, or None."""
-        cand = sorted([(e, iv, xb) for iv, e in xa.items()] + [(e, iv, xa) for iv, e in xb.items()])
+        cand = sorted([(e, iv, xb) for iv, e in xa.items()] + [(e, iv, xa) for iv, e in xb.items()],
+                      key=lambda c: (c[0], c[1]))
         for e, (a0, a1), other in cand:
             if any(overlaps(a0, a1, b0, b1) for (b0, b1) in other):
                 return e
