@@ -1,0 +1,6 @@
+track	setting	database
+mmseqs2_3rounds	sensitivity 7 (-s 7), three rounds, E-value cutoff 10	Swiss-Prot without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
+kmerseek	kmerseek 0.4, alphabet hp_lehninger2, k = 17, regions extended (extend-c1)	Swiss-Prot without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
+phmmer	phmmer -E 10	Swiss-Prot without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
+jackhmmer	jackhmmer -N 3 -E 10; the last round is drawn	Swiss-Prot without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
+hmmscan	hmmscan -E 10 --domE 10	Pfam-A 38.2 (30,134 models)
