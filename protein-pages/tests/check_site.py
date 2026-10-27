@@ -3,7 +3,7 @@
 
     python tests/check_site.py SITE_DIR
 
-1. Every colour drawn on a protein page is one the legend explains (family colours, the protein
+1. Every colour drawn on a protein page is one the legend explains (program colours, the protein
    line, the agreement line, pLDDT and expression colours) or white / text ink.
 2. The five numbers on the index add up: no hit + exactly one + agree + disagree = total.
 3. Each protein page's sentence agrees with its row in the index table.
@@ -15,9 +15,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import build  # noqa: E402
 
-LEGEND = {c.lower() for c in [f["color"] for f in build.FAMILIES.values()]
+LEGEND = {c.lower() for c in [f["color"] for f in build.PROGRAMS.values()]
           + [build.PROTEIN_LINE, build.AGREEMENT, build.EXPRESSION] + [p[2] for p in build.PLDDT]}
-NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none"}
+NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "#c3c2b7"}  # #c3c2b7: frame of the residue panel's map
 
 
 def main():
@@ -40,21 +40,23 @@ def main():
         nums, none, one, agree, disagree, none + one + agree + disagree, total,
         "OK" if none + one + agree + disagree == total else "FAIL"))
 
-    rows = re.findall(r'<tr data-s="(\w+)" data-f="([^"]*)"><td class="mono"><a href="proteins/([^"]+)\.html">'
-                      r'.*?</a></td><td class="r" data-v="\d+">[^<]*</td><td class="r" data-v="(\d+)">', idx)
+    rows = re.findall(r'<tr data-n="\d" data-s="(\w+)" data-f="([^"]*)"><td><a class="mono" href="proteins/([^"]+)\.html">'
+                      r'.*?</td><td class="r" data-v="\d+">[^<]*</td><td class="r" data-v="(\d+)">', idx)
+    if len(rows) != total:  # a parse that reads no rows must not pass
+        sys.exit("3. read %d table rows, expected %d: the row pattern no longer fits index.html" % (len(rows), total))
     mism = []
-    for status, fams, pid, n in rows:
+    for status, progs, pid, n in rows:
         s = (site / "proteins" / (pid + ".html")).read_text()
         sent = re.search(r'<p class="summary">(.*?)</p>', s).group(1)
         n = int(n)
         if n == 0:
             ok = sent == "No tool reports a hit." and status == "none"
         else:
-            ok = sent.startswith("%d of 8 tool families" % n)
+            ok = sent.startswith("%d of 8 programs" % n)
             if status == "agree":
                 ok = ok and "They agree on" in sent
             elif status == "disagree":
-                ok = ok and ("do not agree" in sent or "no Pfam family is known" in sent)
+                ok = ok and ("do not name the same Pfam family" in sent or "no Pfam family is known" in sent)
             elif status == "one":
                 ok = ok and n == 1
         if not ok:

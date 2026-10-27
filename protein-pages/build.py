@@ -12,6 +12,7 @@ import csv
 import datetime
 import gc
 import gzip
+import hashlib
 import html
 import json
 import math
@@ -23,15 +24,16 @@ import sys
 import time
 from pathlib import Path
 
-E_MAX = 1e-3  # a hit counts when its E-value is at most this
+E_MAX = 10.0  # a hit counts when its E-value is at most this, the -E 10 the searches were run with
+TARGET_PFAM_E = 1e-3  # a Swiss-Prot protein's Pfam families: its hmmscan or InterProScan domains at or below this
 HH_PROB_MIN = 50.0  # hhsearch hits also need Prob of at least this
 OVERLAP = 0.5  # two intervals overlap when they share at least half of the shorter one
 TOP_N = 5  # hits drawn per track before "show all"
 
-# One colour per tool family. None of these is a hue the pLDDT scale uses (dark blue, light
+# One colour per program. None of these is a hue the pLDDT scale uses (dark blue, light
 # blue, yellow, orange), and the greys are kept for the protein line, expression bars and
 # InterProScan, at clearly different lightness.
-FAMILIES = {
+PROGRAMS = {
     "mmseqs2": {"name": "MMseqs2", "color": "#5E57A3"},
     "kmerseek": {"name": "kmerseek", "color": "#B2182B"},
     "foldseek": {"name": "Foldseek", "color": "#3A7D1E"},
@@ -51,41 +53,41 @@ PLDDT = [  # AlphaFold's own colours and bins
     (0, 50, "#FF7D45", "very low (below 50)"),
 ]
 
-# The ten tracks, in drawing order. "second" marks the second run of a family, drawn as an
+# The ten tracks, in drawing order. "second" marks the second run of a program, drawn as an
 # open box. Settings are the leaderboard's setting lines; run_settings.tsv can replace them.
 TRACKS = [
-    dict(key="mmseqs2", file="mmseqs2.m8", family="mmseqs2", second=False, name="MMseqs2",
+    dict(key="mmseqs2", file="mmseqs2.m8", program="mmseqs2", second=False, name="MMseqs2",
          setting="sensitivity 7 (-s 7), one round", database="Swiss-Prot",
          score="evalue", kind="m8"),
-    dict(key="mmseqs2_3rounds", file="mmseqs2_3rounds.m8", family="mmseqs2", second=True,
+    dict(key="mmseqs2_3rounds", file="mmseqs2_3rounds.m8", program="mmseqs2", second=True,
          name="MMseqs2, three rounds", setting="sensitivity 7 (-s 7), three rounds",
          database="Swiss-Prot", score="evalue", kind="m8"),
-    dict(key="kmerseek", file="kmerseek.tsv", family="kmerseek", second=False, name="kmerseek",
+    dict(key="kmerseek", file="kmerseek.tsv", program="kmerseek", second=False, name="kmerseek",
          setting="", database="Swiss-Prot", score="region_evalue", kind="kmerseek"),
-    dict(key="foldseek", file="foldseek.m8", family="foldseek", second=False, name="Foldseek",
+    dict(key="foldseek", file="foldseek.m8", program="foldseek", second=False, name="Foldseek",
          setting="3Di shape letters and amino acids together",
          database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8"),
-    dict(key="prostt5", file="prostt5_foldseek.m8", family="foldseek", second=True,
+    dict(key="prostt5", file="prostt5_foldseek.m8", program="foldseek", second=True,
          name="ProstT5 + Foldseek", setting="3Di letters predicted from sequence by ProstT5",
          database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8"),
-    dict(key="phmmer", file="phmmer.domtblout", family="phmmer", second=False, name="phmmer",
+    dict(key="phmmer", file="phmmer.domtblout", program="phmmer", second=False, name="phmmer",
          setting="phmmer's default options, E-value cutoff 10", database="Swiss-Prot",
          score="i-Evalue", kind="domtbl_seq"),
-    dict(key="jackhmmer", file="jackhmmer.domtblout", family="jackhmmer", second=False,
+    dict(key="jackhmmer", file="jackhmmer.domtblout", program="jackhmmer", second=False,
          name="jackhmmer", setting="three rounds of search (-N 3); the last round is drawn",
          database="Swiss-Prot", score="i-Evalue", kind="domtbl_seq"),
-    dict(key="hhsearch", file="hhsearch", family="hhsearch", second=False,
+    dict(key="hhsearch", file="hhsearch", program="hhsearch", second=False,
          name="HH-suite (hhsearch)", setting="one .hhr file per protein",
          database="Swiss-Prot or PDB70 profiles", score="Prob and E-value", kind="hhr"),
-    dict(key="hmmscan", file="hmmscan.domtblout", family="hmmscan", second=False,
+    dict(key="hmmscan", file="hmmscan.domtblout", program="hmmscan", second=False,
          name="hmmscan with Pfam", setting="scans Pfam's models; no other protein searched",
          database="Pfam-A", score="i-Evalue", kind="domtbl_pfam"),
-    dict(key="interproscan", file="interproscan.tsv", family="interproscan", second=False,
+    dict(key="interproscan", file="interproscan.tsv", program="interproscan", second=False,
          name="InterProScan", setting="its member databases' own cutoffs", database="InterPro",
          score="score column", kind="interproscan"),
 ]
 TRACK = {t["key"]: t for t in TRACKS}
-FAMILY_ORDER = list(FAMILIES)
+PROGRAM_ORDER = list(PROGRAMS)
 
 # InterProScan analyses that predict a feature of the protein (a coil, a membrane span, a
 # signal peptide, disorder) rather than a family or domain; they do not count as a hit.
@@ -147,18 +149,29 @@ M8_COLS = "query,target,fident,alnlen,qstart,qend,tstart,tend,evalue,bits".split
 # into hit records with m8_hit / domtbl_hit. Holding every hit as a record took over 32 GB for
 # 7,216 Botryllus proteins.
 USED_TARGETS = set()  # Swiss-Prot accessions of the search hits at the threshold
+PFAM_DESC = {}  # Pfam accession -> its one-line description, from hmmscan's last column
+# The tools' own alignments, from HMMER's main output (phmmer.out, jackhmmer.out, hmmscan.out):
+# (track, query, target, hmm from, hmm to, ali from, ali to) -> (model row, target row), the
+# two aligned rows exactly as HMMER printed them.
+HMMER_ALN = {}
 
 
 def m8_hit(line, key):
-    cols = M8_COLS + (["alntmscore", "theader"] if key in ("foldseek", "prostt5") else ["theader"])
+    """One MMseqs2 or Foldseek row. Two optional last columns, qaln and taln (the aligned
+    sequences, from --format-output ...,qaln,taln), give the tool's own alignment."""
+    cols = M8_COLS + (["alntmscore", "theader"] if key in ("foldseek", "prostt5") else ["theader"]) + ["qaln", "taln"]
     d = dict(zip(cols, line.rstrip("\n").split("\t")))
     e = fnum(d["evalue"])
     sc = [("evalue", d["evalue"]), ("fident", d.get("fident", "")), ("bits", d.get("bits", ""))]
     if key in ("foldseek", "prostt5"):
         sc.append(("alntmscore", d.get("alntmscore", "")))
     sc = [(k, v if v not in ("", None) else "not in the file") for k, v in sc]
+    aln = None
+    if d.get("qaln") and d.get("taln"):
+        aln = dict(q=d["qaln"], t=d["taln"], qs=int(d["qstart"]), ts=int(d["tstart"]),
+                   src="the alignment %s wrote (the qaln and taln columns of %s)" % (TRACK[key]["name"], TRACK[key]["file"]))
     return hit(key, d["qstart"], d["qend"], accession(d["target"]), int(d["tstart"]),
-               int(d["tend"]), e, sc, e is not None and e <= E_MAX)
+               int(d["tend"]), e, sc, e is not None and e <= E_MAX, aln)
 
 
 def parse_m8(path, key):
@@ -218,7 +231,57 @@ def domtbl_hit(line, key):
     f = line.split(None, 22)
     e = fnum(f[12])
     sc = [("i-Evalue", f[12]), ("score", f[13]), ("target env from-to", f[19] + "-" + f[20])]
-    return hit(key, f[15], f[16], accession(f[0]), int(f[17]), int(f[18]), e, sc, e is not None and e <= E_MAX)
+    h = hit(key, f[15], f[16], accession(f[0]), int(f[17]), int(f[18]), e, sc, e is not None and e <= E_MAX)
+    raw = HMMER_ALN.get((key, f[3], f[0], int(f[15]), int(f[16]), int(f[17]), int(f[18])))
+    if raw:
+        h["raw_aln"] = raw  # turned into rows in build_protein, which has the query's residues
+    return h
+
+
+def parse_hmmer_out(path, key, wanted):
+    """The domain alignments in HMMER's main output (-o, best with --notextw), for queries in
+    `wanted`. For jackhmmer, a query's later round replaces its earlier ones, so the last
+    round is kept, as for the table. Each block after '== domain N' holds, in order: optional
+    RF/CS lines, the model row ('name from residues to'), the match line, the target row
+    ('name from residues to') and a PP line."""
+    row = re.compile(r"^\s*(\S+)\s+(\d+)\s+(\S+)\s+(\d+)\s*$")
+    q, tgt, per_q, block = None, None, {}, None
+
+    def finish_block():
+        if block and len(block) >= 2:
+            (mn, mf, ms, mt), (tn, tf, ts, tt) = block[0], block[1]
+            per_q[(key, q, tgt, int(mf), int(mt), int(tf), int(tt))] = (ms, ts, int(mf), int(tf))
+
+    with open(path) as fh:
+        for line in fh:
+            if line.startswith("Query:"):
+                finish_block(); block = None
+                if q in wanted:
+                    HMMER_ALN.update(per_q)
+                q, per_q = line.split()[1], {}
+            elif line.startswith("@@ Round:"):
+                finish_block(); block = None
+                per_q = {}
+            elif line.startswith(">> "):
+                finish_block(); block = None
+                tgt = line[3:].split()[0]
+            elif line.lstrip().startswith("== domain"):
+                finish_block(); block = []
+            elif block is not None:
+                st = line.strip()
+                if not st:
+                    if block:
+                        finish_block(); block = None
+                    continue
+                if st.endswith(" RF") or st.endswith(" CS"):
+                    continue
+                m = row.match(line)
+                if m and (len(block) == 0 or m.group(1) == tgt or len(block) == 1):
+                    if len(block) < 2:
+                        block.append(m.groups())
+    finish_block()
+    if q in wanted:
+        HMMER_ALN.update(per_q)
 
 
 def materialize(x):
@@ -259,13 +322,19 @@ def parse_domtbl_pfam(path, proteins):
     for _, f in domtbl_rows(path):
         pf = f[1].split(".")[0] if f[1] != "-" else f[0]
         pfam_names[pf] = f[0]
+        if len(f) > 22 and f[22].strip():
+            PFAM_DESC[pf] = f[22].strip()
         e = fnum(f[12])
         if f[3] in proteins:
             sc = [("i-Evalue", f[12]), ("score", f[13]), ("Pfam", pf)]
             h = hit("hmmscan", f[19], f[20], f[0], None, None, e, sc, e is not None and e <= E_MAX)
             h["names"] = {pf}
+            h["hmm"] = [int(f[15]), int(f[16]), int(f[2])]  # model from, to, model length
+            raw = HMMER_ALN.get(("hmmscan", f[3], f[0], int(f[15]), int(f[16]), int(f[17]), int(f[18])))
+            if raw:
+                h["raw_aln"] = raw
             out.setdefault(f[3], []).append(h)
-        elif e is not None and e <= E_MAX:
+        elif e is not None and e <= TARGET_PFAM_E:
             target_pfam.setdefault(accession(f[3]), []).append((int(f[19]), int(f[20]), {pf}))
     return out, target_pfam, pfam_names
 
@@ -302,7 +371,7 @@ def parse_interproscan(path, proteins):
                 h["names"] = nm
                 h["db"] = analysis
                 out.setdefault(prot, []).append(h)
-            elif passes and nm:
+            elif passes and nm and (e is None or e <= TARGET_PFAM_E):
                 target_ann.setdefault(accession(prot), []).append((int(f[6]), int(f[7]), nm))
     return out, target_ann, names
 
@@ -463,37 +532,37 @@ def target_names(h, target_ann):
     return set().union(*[n for (d0, d1, n) in doms if overlaps(lo, hi, d0, d1)] or [set()])
 
 
-AGREE_OTHERS = [[]]  # the other agreeing families of the last protein agreement() looked at
+AGREE_OTHERS = [[]]  # the other agreeing Pfam families of the last protein agreement() looked at
 
 
 def agreement(hits, target_ann):
-    """Returns (families with a hit, status, agreed name id).
+    """Returns (programs with a hit, status, agreed name id).
     status: 'none', 'one', 'agree', 'overlap_unknown' (overlapping hits, no family known for
     at least one of them, none shared), or 'disagree'.
 
     Proteins with many hits (a kinase can have thousands) make comparing every pair slow, so
     hits are grouped by the family name they carry, repeated ranges are dropped, and the search
-    for an overlapping pair between two tool families stops at the first one found, best
+    for an overlapping pair between two programs stops at the first one found, best
     E-value first. This gives the same answer as comparing every pair."""
     passing = [h for h in hits if h["passes"]]
-    fams = sorted({TRACK[h["track"]]["family"] for h in passing}, key=FAMILY_ORDER.index)
+    progs = sorted({TRACK[h["track"]]["program"] for h in passing}, key=PROGRAM_ORDER.index)
     AGREE_OTHERS[0] = []
-    if not fams:
-        return fams, "none", None
-    if len(fams) == 1:
-        return fams, "one", None
-    by_name, unknown_hits, all_by_fam = {}, {}, {}
+    if not progs:
+        return progs, "none", None
+    if len(progs) == 1:
+        return progs, "one", None
+    by_name, unknown_hits, all_by_prog = {}, {}, {}
     for h in passing:
-        fam = TRACK[h["track"]]["family"]
+        prog = TRACK[h["track"]]["program"]
         e = h["evalue"] if h["evalue"] is not None else math.inf
         iv = (h["q0"], h["q1"])
-        all_by_fam.setdefault(fam, {})
-        all_by_fam[fam][iv] = min(e, all_by_fam[fam].get(iv, math.inf))
+        all_by_prog.setdefault(prog, {})
+        all_by_prog[prog][iv] = min(e, all_by_prog[prog].get(iv, math.inf))
         if h["_names"] is None:
-            unknown_hits.setdefault(fam, {})[iv] = min(e, unknown_hits.get(fam, {}).get(iv, math.inf))
+            unknown_hits.setdefault(prog, {})[iv] = min(e, unknown_hits.get(prog, {}).get(iv, math.inf))
             continue
         for n in h["_names"]:
-            d = by_name.setdefault(n, {}).setdefault(fam, {})
+            d = by_name.setdefault(n, {}).setdefault(prog, {})
             d[iv] = min(e, d.get(iv, math.inf))
 
     def best_pair(xa, xb):
@@ -506,16 +575,16 @@ def agreement(hits, target_ann):
         return None
 
     support = {}
-    for n, per_fam in by_name.items():
-        fs = list(per_fam)
+    for n, per_prog in by_name.items():
+        fs = list(per_prog)
         for i, fa in enumerate(fs):
             for fb in fs[i + 1:]:
-                e = best_pair(per_fam[fa], per_fam[fb])
+                e = best_pair(per_prog[fa], per_prog[fb])
                 if e is not None:
                     got, best = support.get(n, (set(), math.inf))
                     support[n] = (got | {fa, fb}, min(best, e))
     if support:
-        # The family named by the most tool families. On a tie, the one whose own domain on
+        # The Pfam family named by the most programs. On a tie, the one whose own domain on
         # this protein (an hmmscan or InterProScan hit) has the best E-value, then the best
         # E-value of an agreeing pair.
         own = {}
@@ -525,22 +594,22 @@ def agreement(hits, target_ann):
                     own[n] = min(own.get(n, math.inf), h["evalue"] if h["evalue"] is not None else math.inf)
         order = sorted(support, key=lambda n: (-len(support[n][0]), own.get(n, math.inf), support[n][1], n))
         AGREE_OTHERS[0] = order[1:]
-        return fams, "agree", order[0]
+        return progs, "agree", order[0]
     for fa, xa in unknown_hits.items():
-        for fb, xb in all_by_fam.items():
+        for fb, xb in all_by_prog.items():
             if fb != fa and best_pair(xa, xb) is not None:
-                return fams, "overlap_unknown", None
-    return fams, "disagree", None
+                return progs, "overlap_unknown", None
+    return progs, "disagree", None
 
 
 def coverage(hits, length):
-    """Number of families with a passing hit over each residue (list of length `length`)."""
-    per_fam = {}
+    """Number of programs with a passing hit over each residue (list of length `length`)."""
+    per_prog = {}
     for h in hits:
         if h["passes"]:
-            per_fam.setdefault(TRACK[h["track"]]["family"], []).append((h["q0"], h["q1"]))
+            per_prog.setdefault(TRACK[h["track"]]["program"], []).append((h["q0"], h["q1"]))
     diff = [0] * (length + 2)
-    for ivs in per_fam.values():
+    for ivs in per_prog.values():
         ivs = sorted((max(1, a), min(length, b)) for a, b in ivs if b >= a)
         merged = []
         for a, b in ivs:
@@ -645,8 +714,8 @@ LANE_H, BOX_H, ROW_PAD = 18, 14, 8
 
 
 def box_svg(h, idx, x0, x1, y, track):
-    fam = FAMILIES[track["family"]]
-    col = fam["color"]
+    prog = PROGRAMS[track["program"]]
+    col = prog["color"]
     w = max(2.0, x1 - x0)
     if track["second"]:
         rect = ('<rect x="%.1f" y="%d" width="%.1f" height="%d" rx="2" fill="#fff" stroke="%s" '
@@ -711,7 +780,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
             c = next((col for lo, hi, col, _ in PLDDT if lo <= v < hi), PLDDT[-1][2])
             g.append('<rect x="%.2f" y="%d" width="%.2f" height="%d" fill="%s"/>' % (i * px, ROW_PAD, px + 0.05, BOX_H, c))
         rows.append(("plddt", ROW_PAD + BOX_H + 8, '<text x="4" y="%d" class="tn">pLDDT</text>' % (ROW_PAD + 11), "".join(g)))
-    # families with a hit: step line, 0 to 8
+    # programs with a hit: step line, 0 to 8
     ah, top = 8 * 6, 10
     pts, prev = [], None
     for i, c in enumerate(cov):
@@ -724,7 +793,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
         pts.append("L%.2f,%.1f" % (L * px, top + ah - prev * 6))
     grid = "".join('<line x1="0" y1="%.1f" x2="%.1f" y2="%.1f" class="grid"/>' % (top + ah - v * 6, W, top + ah - v * 6) for v in (0, 2, 4, 6, 8))
     right = grid + '<path d="%s" fill="none" stroke="%s" stroke-width="1.6"/>' % ("".join(pts), AGREEMENT)
-    left = '<text x="4" y="%d" class="tn">families with a hit</text>' % (top + 12) + "".join(
+    left = '<text x="4" y="%d" class="tn">programs with a hit</text>' % (top + 12) + "".join(
         '<text x="100%%" dx="-4" y="%.1f" class="rl" text-anchor="end">%d</text>' % (top + ah - v * 6 + 3, v) for v in (0, 4, 8))
     rows.append(("agree", top + ah + 8, left, right))
     y, L_out, R_out = 0, [], []
@@ -737,11 +806,11 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
     return y, "".join(L_out), "".join(R_out)
 
 
-def legend_mark(t, w=16):
-    col = FAMILIES[t["family"]]["color"]
+def legend_mark(t, w=16, h=BOX_H):
+    col = PROGRAMS[t["program"]]["color"]
     if t["second"]:
-        return '<rect x="1" y="1" width="%d" height="%d" rx="2" fill="#fff" stroke="%s" stroke-width="2"/>' % (w - 2, BOX_H - 2, col)
-    return '<rect x="0" y="0" width="%d" height="%d" rx="2" fill="%s"/>' % (w, BOX_H, col)
+        return '<rect x="1" y="1" width="%d" height="%d" rx="2" fill="#fff" stroke="%s" stroke-width="2"/>' % (w - 2, h - 2, col)
+    return '<rect x="0" y="0" width="%d" height="%d" rx="2" fill="%s"/>' % (w, h, col)
 
 
 def svg_inline(inner, w, h, cls=""):
@@ -776,78 +845,144 @@ CSS_LINKS = (
 )
 
 
+ASSET_VER = [""]  # "?v=<hash of assets/>": a rebuilt site makes browsers fetch the new scripts
+
+
 def page_head(title, depth):
     pre = "../" * depth
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            '<title>%s</title>%s<link rel="stylesheet" href="%sassets/site.css"></head><body>'
-            % (esc(title), CSS_LINKS, pre))
+            '<title>%s</title>%s<link rel="stylesheet" href="%sassets/site.css%s"></head><body>'
+            % (esc(title), CSS_LINKS, pre, ASSET_VER[0]))
 
 
 def legend_html(ctx, has_plddt, has_expr):
-    rows = []
-    rows.append('<tr><th>Mark</th><th>Tool</th><th>Setting</th><th>Searched</th><th>Score (in the box\'s tooltip)</th><th>Counts as a hit when</th></tr>')
+    """The legend, as a narrow sidebar beside the drawing: one short entry per tool (mark, name,
+    the score that decides a hit, setting, database, which columns give the box), then the
+    other marks on the page."""
+    items = []
     for t in TRACKS:
         k = t["key"]
-        fam = FAMILIES[t["family"]]
-        mark = svg_inline(legend_mark(t), 16, BOX_H)
-        run = ctx["run_status"][k]
-        name = esc(t["name"])
-        if t["second"]:
-            name += '<div class="sub">open box: second run in the %s family</div>' % esc(fam["name"])
-        elif t["family"] in ("mmseqs2", "foldseek"):
-            name += '<div class="sub">solid box: first run in the %s family</div>' % esc(fam["name"])
-        coords = {"domtbl_seq": "box: hmm from-to, the positions on your protein",
-                  "domtbl_pfam": "box: env from-to (the domain's envelope)",
-                  "m8": "box: qstart-qend", "kmerseek": "box: region_start-region_end, plus 1 at the start",
-                  "hhr": "box: Query HMM range", "interproscan": "box: start-stop"}[t["kind"]]
-        name += '<div class="sub">%s</div>' % esc(coords)
-        lb = ctx["leaderboard"].get(k)
-        if lb:
-            name += '<div class="sub">%s</div>' % esc(lb)
-        if run == "not run":
-            thr = "not run: no %s in the input folder" % t["file"]
-            rows.append('<tr class="notrun"><td>%s</td><td>%s</td><td colspan="4">not run: no %s in the input folder</td></tr>'
-                        % (mark, name, esc(t["file"])))
+        prog = PROGRAMS[t["program"]]
+        mark = svg_inline(legend_mark(t, 12, 10), 12, 10)
+        if ctx["run_status"][k] == "not run":
+            items.append('<li class="off">%s<div><b>%s</b> not run: no %s in the input folder</div></li>'
+                         % (mark, esc(t["name"]), esc(t["file"])))
             continue
-        elif k == "hhsearch":
-            thr = "Prob ≥ 50 and E-value ≤ 0.001"
+        if k == "hhsearch":
+            thr = "Prob ≥ 50 and E-value at most 10"
         elif k == "interproscan":
-            thr = ("E-value ≤ 0.001 where the score column is an E-value; any match otherwise. "
-                   "Coils, disorder, membrane and signal-peptide predictions do not count")
+            thr = ("E-value at most 10 where there is one; coils, disorder, membrane and signal-peptide "
+                   "predictions do not count")
         else:
-            thr = "%s ≤ 0.001" % t["score"]
-        rows.append('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
-            mark, name, esc(ctx["settings"][k]), esc(ctx["databases"][k]), esc(t["score"]), esc(thr)))
+            thr = "%s at most 10" % t["score"]
+        coords = {"domtbl_seq": "hmm from-to (positions on your protein)",
+                  "domtbl_pfam": "env from-to (the domain's envelope)",
+                  "m8": "qstart-qend", "kmerseek": "region_start-region_end, plus 1 at the start",
+                  "hhr": "Query HMM range", "interproscan": "start-stop"}[t["kind"]]
+        run_note = ""
+        if t["second"]:
+            run_note = "; open box: second run of %s" % prog["name"]
+        elif t["program"] in ("mmseqs2", "foldseek"):
+            run_note = "; solid box: first run of %s" % prog["name"]
+        lb = ctx["leaderboard"].get(k)
+        items.append('<li>%s<div><b>%s</b> %s<span class="sub">%s · %s · box: %s%s%s</span></div></li>' % (
+            mark, esc(t["name"]), esc(thr), esc(ctx["settings"][k]), esc(ctx["databases"][k]), esc(coords),
+            esc(run_note), (" · " + esc(lb)) if lb else ""))
+    line = svg_inline('<line x1="0" y1="5" x2="12" y2="5" stroke="%s" stroke-width="2"/>' % PROTEIN_LINE, 12, 10)
+    items.append('<li>%s<div>The protein, residue 1 to the end; ruler ticks every 50 residues, numbers every 100.</div></li>' % line)
     if has_plddt:
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
-        rows.append('<tr><td colspan="2">pLDDT</td><td colspan="4">AlphaFold\'s confidence in each residue of your predicted structure, 0 to 100: %s</td></tr>' % sw)
-    line = svg_inline('<line x1="0" y1="7" x2="16" y2="7" stroke="%s" stroke-width="2"/>' % PROTEIN_LINE, 16, 14)
-    rows.append('<tr><td>%s</td><td colspan="5">The protein, from residue 1 to its last residue; the ruler has a tick every 50 residues and a number every 100.</td></tr>' % line)
-    step = svg_inline('<path d="M0,11 L6,11 L6,4 L12,4 L12,8 L16,8" fill="none" stroke="%s" stroke-width="1.6"/>' % AGREEMENT, 16, 14)
-    rows.append('<tr><td>%s</td><td colspan="5">Families with a hit: computed from the tracks above. At each residue, the number of the 8 tool families that have a hit over it at their threshold (0 to 8). Faint grey lines mark 0, 2, 4, 6 and 8; the numbers 0, 4 and 8 are on the left.</td></tr>' % step)
+        items.append('<li><span></span><div><b>pLDDT</b> AlphaFold\'s confidence in each residue, 0 to 100: %s</div></li>' % sw)
+    step = svg_inline('<path d="M0,9 L4,9 L4,2 L8,2 L8,6 L12,6" fill="none" stroke="%s" stroke-width="1.4"/>' % AGREEMENT, 12, 10)
+    items.append('<li>%s<div><b>Programs with a hit</b> at each residue, 0 to 8, counting each program once. '
+                 'Faint lines mark 0, 2, 4, 6 and 8.</div></li>' % step)
     if has_expr:
-        bar = svg_inline('<rect x="0" y="3" width="16" height="8" fill="%s"/>' % EXPRESSION, 16, 14)
-        rows.append('<tr><td>%s</td><td colspan="5">Expression of this protein\'s gene in each sample, from expression.tsv.</td></tr>' % bar)
-    return '<table class="legend">%s</table>' % "".join(rows)
+        bar = svg_inline('<rect x="0" y="2" width="12" height="6" fill="%s"/>' % EXPRESSION, 12, 10)
+        items.append('<li>%s<div>Expression of this protein\'s gene in each sample, from expression.tsv.</div></li>' % bar)
+    return ('<aside class="side legend"><h2>Legend</h2><p class="note">A box is one hit: one row of the tool\'s '
+            'output, drawn over the residues of this protein it covers.</p><ul>%s</ul></aside>' % "".join(items))
 
 
 def header_sentence(n, status, agreed, names):
     if n == 0:
         return "No tool reports a hit."
-    s = "%d of 8 tool families report%s a hit." % (n, "s" if n == 1 else "")
+    s = "%d of 8 programs report%s a hit." % (n, "s" if n == 1 else "")
     if n == 1:
         return s
     if status == "agree":
         return s + " They agree on %s." % family_label(agreed, names)
     if status == "overlap_unknown":
         return s + " Their hits overlap, but no Pfam family is known for the Swiss-Prot proteins they match."
-    return s + " They do not agree on a family."
+    return s + " They do not name the same Pfam family."
 
 
 def family_label(n, names):
     nm = names.get(n)
     return "%s (%s)" % (nm, n) if nm and nm != n else n
+
+
+def family_full(n, names):
+    """family_label plus Pfam's one-line description, e.g.
+    'MHC_I (PF00129): Class I Histocompatibility antigen, domains alpha 1 and 2'."""
+    lab, d = family_label(n, names), PFAM_DESC.get(n)
+    return "%s: %s" % (lab, d) if d and d != names.get(n) else lab
+
+
+def swissprot_header(h):
+    """(entry name, description, gene, organism) from a UniProt FASTA header such as
+    'sp|P04439|HLAA_HUMAN HLA class I histocompatibility antigen, A alpha chain OS=Homo sapiens
+    OX=9606 GN=HLA-A PE=1 SV=2'. Missing parts are ''."""
+    first, _, rest = h.partition(" ")
+    parts = first.split("|")
+    entry = parts[2] if len(parts) > 2 else ""
+    desc = re.split(r" (?:OS|OX|GN|PE|SV)=", " " + rest, maxsplit=1)[0].strip()
+    org = re.search(r" OS=(.*?)(?= (?:OX|GN|PE|SV)=|$)", " " + rest)
+    gene = re.search(r" GN=(\S+)", " " + rest)
+    return entry, desc, gene.group(1) if gene else "", org.group(1).strip() if org else ""
+
+
+def hmmer_rows(h, seq):
+    """HMMER's printed rows as an alignment of your protein against the other sequence.
+    phmmer/jackhmmer: the model was built from your protein, so its row is written out with
+    your protein's residues at the model positions ('.' in the model row: a residue the target
+    has and the model does not, a gap in your protein). hmmscan: your protein is the target
+    row, and the other row is the Pfam model's consensus ('.' becomes a gap)."""
+    ms, ts, mf, tf = h["raw_aln"]
+    tool = TRACK[h["track"]]["name"]
+    if h["track"] == "hmmscan":
+        return dict(q=ts, t=ms.replace(".", "-"), qs=tf, ts=mf,
+                    src="the alignment hmmscan wrote (hmmscan.out); the lower row is the Pfam model's consensus: "
+                        "capital letters where the family keeps one residue, small letters where it varies more")
+    q, pos = [], mf
+    for c in ms:
+        if c == ".":
+            q.append("-")
+        else:
+            q.append(seq[pos - 1] if pos - 1 < len(seq) else "X")
+            pos += 1
+    return dict(q="".join(q), t=ts.replace(".", "-"), qs=mf, ts=tf,
+                src="the alignment %s wrote (%s.out), with its model row written as your protein's residues"
+                    % (tool, h["track"]))
+
+
+def non_overlapping(doms, label):
+    """Domains to draw on a small map: in the given order, skipping any that overlap one kept."""
+    kept = []
+    for d0, d1, nm in doms:
+        if all(d1 < a or d0 > b for a, b, _ in kept):
+            kept.append((d0, d1, label(nm)))
+    return [list(k) for k in sorted(kept)]
+
+
+def id_gene_name(pid):
+    """The gene name a gene model's ID carries after its number (RFC5 in FUN000798_RFC5,
+    TTN in FUN019272_TTN.1), or None for an ID with no name (FUN017965_FUN017965)."""
+    head, _, rest = pid.partition("_")
+    rest = re.sub(r"\.\d+$", "", rest)
+    if not rest or rest == head or re.fullmatch(r"FUN\d+", rest):
+        return None
+    return rest
 
 
 def build_protein(task):
@@ -860,7 +995,7 @@ def build_protein(task):
     seq = p["seq"]
     for h in hits:
         h["_names"] = target_names(h, ctx["target_ann"])
-    fams, status, agreed = agreement(hits, ctx["target_ann"])
+    progs, status, agreed = agreement(hits, ctx["target_ann"])
     cov = coverage(hits, L)
     best_e = min([h["evalue"] for h in hits if h["passes"] and h["evalue"] is not None], default=None)
 
@@ -868,6 +1003,13 @@ def build_protein(task):
     by_track = {}
     data = []
     score_names = {}
+    terms = {}  # text the index page's search box looks through -> bit mask of the programs whose hits carry it
+    pname = ctx["prot_names"].get(pid)
+    if pname:
+        terms[pname] = 0  # 0: the protein's own name from protein_names.tsv, not a hit
+    gname = id_gene_name(pid)
+    gmask, gexample = 0, None  # programs with a hit on a Swiss-Prot protein of that gene
+    alns = {}  # hit number -> alignment rows, written next to the page and read on a click
     for t in TRACKS:
         hs = sorted([h for h in hits if h["track"] == t["key"] and h["passes"]],
                     key=lambda h: (h["evalue"] if h["evalue"] is not None else 1e300, h["q0"]))
@@ -875,19 +1017,62 @@ def build_protein(task):
             h["i"] = len(data)
             name = ctx["entry_names"].get(h["target"], h["target"]) if t["key"] not in ("hmmscan", "interproscan") else h["target"]
             h["label"] = name
-            d = dict(k=t["key"], l=name, q=[h["q0"], h["q1"]], s=[v for _, v in h["scores"]])
+            d = dict(k=t["key"], l=name, q=[h["q0"], h["q1"]], s=[v for _, v in h["scores"]], e=h["evalue"])
+            # For the tooltip and the search box: the full name, gene and species of a Swiss-Prot
+            # target, and the Pfam families on the matched part of it (or the family itself, for
+            # hmmscan and InterProScan). f is None when no Pfam output covers the target.
+            if t["key"] == "hmmscan":
+                pf = next(iter(h["names"]))
+                if PFAM_DESC.get(pf):
+                    d["n"] = PFAM_DESC[pf]
+            elif t["key"] != "interproscan":
+                info = ctx["target_info"].get(h["target"])
+                if info:
+                    d["n"], d["g"], d["o"] = info
+            d["f"] = None if h["_names"] is None else [family_full(n, ctx["names"]) for n in sorted(h["_names"])]
+            bit = 1 << PROGRAM_ORDER.index(t["program"])
+            for txt in [name, h["target"], d.get("n"), d.get("g")] + (d["f"] or []):
+                if txt:
+                    terms[txt] = terms.get(txt, 0) | bit
+            if gname:
+                entry_gene = name.split("_")[0] if "_" in name else ""
+                if gname.upper() in ((d.get("g") or "").upper(), entry_gene.upper()):
+                    gmask |= bit
+                    gexample = gexample or name
             score_names.setdefault(t["key"], [n for n, _ in h["scores"]])
-            if t["key"] not in ("interproscan", "hmmscan"):
+            a = None
+            if t["key"] == "hmmscan":
+                d["r"] = h["hmm"][:2]
+                d["tl"] = h["hmm"][2]
+                if h.get("raw_aln"):
+                    a = hmmer_rows(h, seq)
+            elif t["key"] != "interproscan":
                 d["t"] = h["target"]
                 d["r"] = [h["t0"], h["t1"]]
                 tseq = ctx["targets"].get(h["target"])
+                if tseq:
+                    d["tl"] = len(tseq)
+                doms = ctx["target_ann"].get(h["target"])
+                if doms:
+                    d["td"] = non_overlapping(doms, lambda nm: family_label(sorted(nm)[0], ctx["names"]) if nm else "")
                 if t["key"] == "hhsearch":
-                    d["a"] = h["aln"]
+                    a = dict(h["aln"], src="the alignment hhsearch wrote (the .hhr file)") if h.get("aln") else None
                 elif t["key"] == "kmerseek":
                     d["m"] = h.get("moltype")
+                elif h.get("aln"):
+                    a = h["aln"]
+                elif h.get("raw_aln"):
+                    a = hmmer_rows(h, seq)
                 elif tseq is not None and rank < TOP_N:
                     lo, hi = min(h["t0"], h["t1"]), max(h["t0"], h["t1"])
-                    d["a"] = recompute(seq[h["q0"] - 1:h["q1"]], h["q0"], tseq[lo - 1:hi], lo)
+                    a = recompute(seq[h["q0"] - 1:h["q1"]], h["q0"], tseq[lo - 1:hi], lo)
+                    if a:
+                        a["src"] = ("recomputed when the site was built, because %s was not given: the two ranges "
+                                    "aligned again with Biopython's PairwiseAligner (local, BLOSUM62, gap open -11, "
+                                    "gap extend -1)" % ("%s.out" % t["key"] if t["kind"] == "domtbl_seq" else "a qaln/taln column"))
+            if a:
+                alns[h["i"]] = a
+                d["a"] = 1
             data.append(d)
         by_track[t["key"]] = hs
 
@@ -912,44 +1097,64 @@ def build_protein(task):
                              % (esc(s), wpct, "missing" if v is None else "%g" % v))
             expr = '<section><h2>Expression</h2><p class="note">Values as in expression.tsv (count or TPM, whichever the file holds); bar length is relative to this protein\'s highest sample.</p>%s</section>' % "".join(items)
 
-    sentence = header_sentence(len(fams), status, agreed, ctx["names"])
+    sentence = header_sentence(len(progs), status, agreed, ctx["names"])
     others = AGREE_OTHERS[0]
     other_note = ""
     if others:
         shown_o = [family_label(n, ctx["names"]) for n in others[:8]]
         other_note = ('<p class="note">%d other Pfam famil%s also meet%s the rule: %s%s. The one named has hits '
-                      'from the most tool families; on a tie, the best E-value of its own hmmscan or InterProScan '
+                      'from the most programs; on a tie, the best E-value of its own hmmscan or InterProScan '
                       'domain on this protein.</p>' % (len(others), "y" if len(others) == 1 else "ies",
                                                        "s" if len(others) == 1 else "", esc(", ".join(shown_o)),
                                                        " and %d more" % (len(others) - 8) if len(others) > 8 else ""))
+    gnote = ""
+    if gname:
+        gps = [PROGRAMS[f]["name"] for b, f in enumerate(PROGRAM_ORDER) if gmask & (1 << b)]
+        gnote = ('<p class="note">The ID names the gene %s. %s</p>' % (esc(gname), (
+            "Hits on a Swiss-Prot protein of that gene (gene name or entry name %s_...): %s; for example %s."
+            % (esc(gname), esc(", ".join(gps)), esc(gexample))) if gps else
+            "No hit is on a Swiss-Prot protein with that gene name or entry name %s_..." % esc(gname)))
     out = [page_head("%s · tool comparison" % pid, 1)]
-    out.append('<header><a class="back" href="../index.html">All proteins</a><h1 class="mono">%s</h1>'
-               '<p class="len">%d amino acids</p><p class="summary">%s</p>%s</header><main>' % (esc(pid), L, esc(sentence), other_note))
-    out.append('<section><h2>Legend</h2>%s</section>' % legend_html(ctx, plddt is not None, bool(expr)))
+    out.append('<header class="wide"><a class="back" href="../index.html">All proteins</a><h1 class="mono">%s</h1>'
+               '<p class="len">%s%d amino acids</p><p class="summary">%s</p>%s%s</header><main class="wide">' % (
+        esc(pid), (esc(pname) + " · ") if pname else "", L, esc(sentence), other_note, gnote))
+    # E-value slider: from 1 (every drawn hit) down to the smallest E-value above 0 on this page.
+    pos_e = [h["evalue"] for v in by_track.values() for h in v if h["evalue"]]
+    lo = max(-300, math.floor(math.log10(min(pos_e)))) if pos_e else -1
+    slider = ('<div class="eslider"><label for="emax">Show hits with E-value at most <output id="ev">10</output></label>'
+              '<input id="emax" type="range" min="%d" max="1" step="1" value="1">'
+              '<span class="note">Moves in steps of 10 times. The sentence at the top, the "programs with a hit" '
+              'line and the index page always count hits with E-value at most 10.</span></div>' % lo) if pos_e else ""
     toggle = ""
     if n_more:
         toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
                   % (sum(len(v) for v in by_track.values()), n_more))
-    out.append('<section><h2>What each tool found</h2><p class="note">Each box is one hit at the '
-               'threshold: one row of the tool\'s output table, drawn over the residues of this protein it covers. '
-               'A Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
+    # The drawing comes first; each of its rows starts with the tool's name and mark, and the
+    # table under it gives each tool's setting, database and threshold.
+    out.append('<div class="withside"><section><h2>What each tool found</h2>%s%s%s<p class="note">Each box is one hit at the '
+               'threshold; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
                'E-value first (ties: the leftmost first); "+N more" under a tool\'s name counts the rest. Hover or '
-               'tap a box for its numbers; click it to see the residues. Wide proteins scroll sideways inside the '
-               'box below, so some boxes may start to the right of what you see.</p>%s%s</section>'
-               % (TOP_N, toggle, "".join(blocks)))
+               'tap a box for the protein\'s full name, gene, species and Pfam families, and the scores; click it '
+               'to see the residues. Wide proteins scroll sideways inside the box above.</p></section>'
+               % (slider, "".join(blocks), toggle, TOP_N))
+    out.append('%s</div>' % legend_html(ctx, plddt is not None, bool(expr)))
     out.append(expr)
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
     out.append('</main>%s' % ctx["footer"])
     page_data = dict(
         q=seq, px=px, w=W, top=TOP_N, hits=data, names=score_names, alpha=ctx["alphabets"],
-        tracks={t["key"]: dict(name=t["name"], color=FAMILIES[t["family"]]["color"], open=t["second"]) for t in TRACKS},
+        tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], open=t["second"], p=t["program"]) for t in TRACKS},
         shards=ctx["n_shards"])
-    out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js"></script></body></html>'
-               % json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"))
+    out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script></body></html>'
+               % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), ASSET_VER[0]))
     (ctx["out"] / "proteins" / (safe(pid) + ".html")).write_text("".join(out))
-    return dict(id=pid, length=L, n=len(fams), fams=fams, status=status,
+    (ctx["out"] / "proteins" / (safe(pid) + ".aln.js")).write_text(
+        "window.ALN=%s;" % json.dumps({str(k): v for k, v in alns.items()}, separators=(",", ":")))
+    return dict(id=pid, length=L, n=len(progs), progs=progs, status=status,
                 agreed=family_label(agreed, ctx["names"]) if agreed else None,
-                best_e=best_e, spark=sparkline(cov, L))
+                best_e=best_e, spark=sparkline(cov, L), terms=terms, name=pname,
+                gname=gname, gprogs=[PROGRAMS[f]["name"] for b, f in enumerate(PROGRAM_ORDER) if gmask & (1 << b)],
+                gexample=gexample)
 
 
 def shard_of(acc, n):
@@ -984,55 +1189,95 @@ CTX = {}
 
 def index_page(rows, ctx):
     total = len(rows)
+    pos_best = [r["best_e"] for r in rows if r["best_e"]]
+    lo_idx = max(-300, math.floor(math.log10(min(pos_best)))) if pos_best else -1
     cats = {"none": 0, "one": 0, "agree": 0, "disagree": 0}
-    only = {f: 0 for f in FAMILY_ORDER}
+    only = {f: 0 for f in PROGRAM_ORDER}
     for r in rows:
         c = r["status"] if r["status"] in ("none", "one", "agree") else "disagree"
         cats[c] += 1
         if r["n"] == 1:
-            only[r["fams"][0]] += 1
+            only[r["progs"][0]] += 1
     assert sum(cats.values()) == total
     out = [page_head("Protein annotation tools, side by side", 0)]
-    out.append('<header><h1>Which tools found something in each protein</h1></header><main>')
-    nums = [("all", total, "proteins in all"), ("none", cats["none"], "with no hit from any family"),
-            ("one", cats["one"], "with a hit from exactly one family"),
-            ("agree", cats["agree"], "where two or more families agree on a family"),
-            ("disagree", cats["disagree"], "where two or more families have hits but do not agree")]
+    out.append('<header class="wide"><h1>Which tools found something in each protein</h1></header><main class="wide">')
+    nums = [("all", total, "proteins in all"), ("none", cats["none"], "with no hit from any program"),
+            ("one", cats["one"], "with a hit from exactly one program"),
+            ("agree", cats["agree"], "where two or more programs name the same Pfam family"),
+            ("disagree", cats["disagree"], "where two or more programs have hits but do not name the same Pfam family")]
     out.append('<section class="nums">%s</section>' % "".join(
         '<a class="num" href="#%s"><span class="big">%s</span><span>%s</span></a>' % (k, "{:,}".format(v), esc(t)) for k, v, t in nums))
-    fam_rows = "".join('<tr><td>%s %s</td><td class="r">%s</td><td>%s</td></tr>' % (
-        svg_inline('<rect width="14" height="12" rx="2" fill="%s"/>' % FAMILIES[f]["color"], 14, 12),
-        esc(FAMILIES[f]["name"]), "{:,}".format(only[f]) if ctx["family_run"][f] else "", "" if ctx["family_run"][f] else "not run")
-        for f in FAMILY_ORDER)
-    out.append('<section><h2>Proteins only one family annotates</h2><table class="small"><tr><th>Tool family</th><th>Proteins where it is the only one with a hit</th><th></th></tr>%s</table></section>' % fam_rows)
-    filt = ['<button data-f="all">All</button>', '<button data-f="one">Exactly one family has a hit</button>',
-            '<button data-f="none">No family has a hit</button>', '<button data-f="disagree">Families disagree</button>',
-            '<button data-f="agree">Families agree</button>']
-    for f in FAMILY_ORDER:
-        if ctx["family_run"][f]:
-            filt.append('<button data-f="only-%s">Only %s has a hit</button>' % (f, esc(FAMILIES[f]["name"])))
-    out.append('<section><h2>Proteins</h2><p class="note">One page per protein of your proteome. On each page, every '
-               'tool\'s hits are drawn on the same ruler of residue positions. A tool family is one program; its two '
-               'runs (MMseqs2 one round and three rounds; Foldseek on predicted structures and ProstT5 + Foldseek) '
-               'count once. A hit counts when its E-value is at most 0.001 '
-               '(hhsearch: also Prob at least 50). "Agree" means two hits from different families overlap by '
+    # Sidebar: for each program, how many proteins only it has a hit on; each line filters the table.
+    side = []
+    for f in PROGRAM_ORDER:
+        mark = svg_inline('<rect width="10" height="10" rx="1.5" fill="%s"/>' % PROGRAMS[f]["color"], 10, 10)
+        if ctx["program_run"][f]:
+            side.append('<li><a data-f="only-%s" href="#only-%s">%s<span class="pn">%s</span><span class="pc">%s</span></a></li>'
+                        % (f, f, mark, esc(PROGRAMS[f]["name"]), "{:,}".format(only[f])))
+        else:
+            side.append('<li class="off">%s<span class="pn">%s</span><span class="pc">not run</span></li>'
+                        % (mark, esc(PROGRAMS[f]["name"])))
+    aside = ('<aside class="side"><h2>Only one program has a hit</h2><p class="note">Proteins on which this '
+             'program, and no other, reports a hit. Click one to list them.</p><ul>%s</ul></aside>' % "".join(side))
+    filt = ['<button data-f="all">All</button>', '<button data-f="one">Exactly one program has a hit</button>',
+            '<button data-f="none">No program has a hit</button>', '<button data-f="disagree">Programs disagree on the Pfam family</button>',
+            '<button data-f="agree">Programs agree on a Pfam family</button>']
+    out.append('<div class="withside"><section><h2>Proteins</h2><p class="note">One page per protein of your proteome. On each page, every '
+               'tool\'s hits are drawn on the same ruler of residue positions. Each program counts once, even when it was '
+               'run twice (MMseqs2 one round and three rounds; Foldseek on predicted structures and ProstT5 + Foldseek), '
+               'so there are 8 programs for 10 rows. A hit counts when its E-value is at most 10 '
+               '(hhsearch: also Prob at least 50). "Agree" means two hits from different programs overlap by '
                'at least half of the shorter one and name the same Pfam family or InterPro entry. The small '
-               'picture is the "families with a hit" line of each protein page: its height at each point is the '
-               'number of families (0 to 8) with a hit over that part of the protein, squeezed to the same 60-pixel width '
+               'picture is the "programs with a hit" line of each protein page: its height at each point is the '
+               'number of programs (0 to 8) with a hit over that part of the protein, squeezed to the same 60-pixel width '
                'for every protein whatever its length. "Best E-value, any tool" is the lowest E-value any tool printed '
                '(each tool computes its own, so they are not on one scale); 0 means the tool printed 0.</p>'
-               '<div class="filters" role="group" aria-label="Filter the table">%s</div><p id="count" class="note"></p>' % "".join(filt))
+               '<div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off" '
+               'placeholder="a gene, protein or Pfam family, e.g. HLA, immune, MHC, RING"></div>'
+               '<p class="note">The search looks at every hit counted above: the name, gene and species of '
+               'each Swiss-Prot protein a tool matched, the Pfam families on the matched part of it, and the '
+               'Pfam families hmmscan or InterProScan found on your protein. Every word typed must appear; the '
+               'last column shows what matched and which programs\' hits carry it.</p>'
+               '<div class="filters" role="group" aria-label="Filter the table">%s</div>'
+               '<div class="eslider"><label for="emax">Best E-value at most <output id="ev">10</output></label>'
+               '<input id="emax" type="range" min="%d" max="1" step="1" value="1"><span class="note">At 10, every '
+               'protein is listed, including those with no hit; moves in steps of 10 times.</span></div>'
+               '<label class="unnamed"><input id="unnamed" type="checkbox"> Only proteins with no gene name in '
+               'their ID (FUN…_FUN…), %s of %s</label>'
+               '<p id="count" class="note"></p>' % ("".join(filt), lo_idx, "{:,}".format(sum(1 for r in rows if not r["gname"])), "{:,}".format(total)))
     trs = []
     for r in rows:
-        trs.append('<tr data-s="%s" data-f="%s"><td class="mono"><a href="proteins/%s.html">%s</a></td><td class="r" data-v="%d">%s</td>'
+        trs.append('<tr data-s="%s" data-f="%s"><td><a class="mono" href="proteins/%s.html">%s</a>%s</td><td class="r" data-v="%d">%s</td>'
                    '<td class="r" data-v="%d">%d</td><td>%s</td><td class="r" data-v="%s">%s</td><td>%s</td></tr>' % (
-                       "disagree" if r["status"] == "overlap_unknown" else r["status"], " ".join(r["fams"]), safe(r["id"]), esc(r["id"]),
+                       "disagree" if r["status"] == "overlap_unknown" else r["status"], " ".join(r["progs"]), safe(r["id"]), esc(r["id"]),
+                       '<div class="pname">%s</div>' % esc(r["name"]) if r["name"] else "",
                        r["length"], "{:,}".format(r["length"]), r["n"], r["n"], esc(r["agreed"] or "none"),
                        "%g" % r["best_e"] if r["best_e"] is not None else "1e999", fmt_e(r["best_e"]) if r["best_e"] is not None else "no hit", r["spark"]))
+        if r["gname"]:
+            gcell = '<td data-v="%d"><span class="mono">%s</span> %s</td>' % (
+                len(r["gprogs"]), esc(r["gname"]),
+                ("found by " + esc(", ".join(r["gprogs"]))) if r["gprogs"] else '<span class="no">no hit has this gene</span>')
+        else:
+            gcell = '<td data-v="-1"></td>'
+        trs[-1] = trs[-1][:-5] + gcell + '<td class="m"></td></tr>'
+        trs[-1] = trs[-1].replace("<tr ", '<tr data-n="%d" ' % (1 if r["gname"] else 0), 1)
     out.append('<div class="tablewrap"><table id="t"><thead><tr><th data-k="0" data-t="s">Protein</th><th data-k="1">Length (aa)</th>'
-               '<th data-k="2">Families with a hit (of 8)</th><th data-k="3" data-t="s">Agreed family</th><th data-k="4">Best E-value, any tool</th>'
-               '<th>Families with a hit, along the protein</th></tr></thead><tbody>%s</tbody></table></div></section>' % "".join(trs))
-    out.append('</main>%s<script src="assets/index.js"></script></body></html>' % ctx["footer"])
+               '<th data-k="2">Programs with a hit (of 8)</th><th data-k="3" data-t="s">Pfam family they agree on</th><th data-k="4">Best E-value, any tool</th>'
+               '<th>Programs with a hit, along the protein</th><th data-k="6">Gene name in the ID, and the programs whose hits are on that gene</th><th class="m">What the search matched</th></tr></thead><tbody>%s</tbody></table></div></section>%s</div>' % ("".join(trs), aside))
+    # The search table: every distinct text once, then for each protein (in table order) pairs of
+    # [text number, program bit mask]. Kept in its own file so the table itself stays small.
+    vocab, pos, per_row = [], {}, []
+    for r in rows:
+        pairs = []
+        for txt, mask in r["terms"].items():
+            if txt not in pos:
+                pos[txt] = len(vocab)
+                vocab.append(txt)
+            pairs.extend((pos[txt], mask))
+        per_row.append(pairs)
+    (ctx["out"] / "search.js").write_text("window.SEARCH=%s;" % json.dumps(
+        dict(programs=[PROGRAMS[f]["name"] for f in PROGRAM_ORDER], text=vocab, rows=per_row), separators=(",", ":")))
+    out.append('</main>%s<script src="search.js%s"></script><script src="assets/index.js%s"></script></body></html>' % (ctx["footer"], ASSET_VER[0], ASSET_VER[0]))
     (ctx["out"] / "index.html").write_text("".join(out))
     return cats, only
 
@@ -1064,6 +1309,11 @@ def main():
     (out / "proteins").mkdir(parents=True)
     here = Path(__file__).resolve().parent
     shutil.copytree(here / "assets", out / "assets")
+    hsh = hashlib.sha1()
+    for f in sorted((here / "assets").rglob("*")):
+        if f.is_file():
+            hsh.update(f.read_bytes())
+    ASSET_VER[0] = "?v=" + hsh.hexdigest()[:10] + datetime.datetime.now().strftime("%y%m%d%H%M%S")
 
     def stamp(name):
         p = D / name
@@ -1078,24 +1328,37 @@ def main():
         return (name, st.st_size, datetime.datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M"))
 
     names_read = ["proteins.fasta", "swissprot.fasta"] + [t["file"] for t in TRACKS] + [
-        "plddt.tsv", "expression.tsv", "leaderboard.tsv", "run_settings.tsv", "kmerseek_alphabets.rs"]
+        "phmmer.out", "jackhmmer.out", "hmmscan.out", "protein_names.tsv", "plddt.tsv", "expression.tsv", "leaderboard.tsv", "run_settings.tsv", "kmerseek_alphabets.rs"]
     inputs = [stamp(n) for n in names_read]
 
     prots = {}
     for h, s in read_fasta(D / "proteins.fasta").items():
         s = s.rstrip("*")
         prots[h.split()[0]] = dict(seq=s, length=len(s))
-    entry_names, targets = {}, {}
+    # Optional: a name for some of your proteins (ID, tab, name), shown on its page and searched.
+    prot_names = {}
+    if (D / "protein_names.tsv").exists():
+        for line in open(D / "protein_names.tsv"):
+            f = line.rstrip("\n").split("\t")
+            if len(f) >= 2 and f[0] in prots and not line.startswith("#"):
+                prot_names[f[0]] = f[1]
+    entry_names, targets, target_info = {}, {}, {}
     if (D / "swissprot.fasta").exists():
         for h, s in read_fasta(D / "swissprot.fasta").items():
-            first = h.split()[0]
-            acc = accession(first)
-            parts = first.split("|")
-            if len(parts) > 2 and parts[2]:
-                entry_names[acc] = parts[2]
+            acc = accession(h.split()[0])
+            entry, desc, gene, org = swissprot_header(h)
+            if entry:
+                entry_names[acc] = entry
+            if desc or gene or org:
+                target_info[acc] = (desc, gene, org)
             targets[acc] = s
     print("read %d proteins, %d Swiss-Prot sequences (%.0f s)" % (len(prots), len(targets), time.time() - t_start), flush=True)
 
+    for key in ("phmmer", "jackhmmer", "hmmscan"):
+        if (D / (key + ".out")).exists():
+            n0 = len(HMMER_ALN)
+            parse_hmmer_out(D / (key + ".out"), key, set(prots))
+            print("  %s.out: %d alignments (%.0f s)" % (key, len(HMMER_ALN) - n0, time.time() - t_start), flush=True)
     hits, run_status, target_ann, names = {}, {}, {}, {}
     kmer_meta = {}
     hmmscan_target = {}
@@ -1131,7 +1394,7 @@ def main():
             if q in prots:
                 hits.setdefault(q, []).extend(hs)
         print("  %s: %d hits on %d proteins (%.0f s)" % (t["file"], sum(len(v) for v in got.values()), len(got), time.time() - t_start), flush=True)
-    # target families: InterProScan's output on that target if there is one, else hmmscan's
+    # Pfam families of targets: InterProScan's output on that target if there is one, else hmmscan's
     for acc, doms in hmmscan_target.items():
         target_ann.setdefault(acc, doms)
 
@@ -1179,12 +1442,13 @@ def main():
     used = kmer_meta.get("moltype", set())
     alphabets = {k: v for k, v in alphabets.items() if k in used}
 
-    family_run = {f: any(run_status[t["key"]] == "run" for t in TRACKS if t["family"] == f) for f in FAMILY_ORDER}
+    program_run = {f: any(run_status[t["key"]] == "run" for t in TRACKS if t["program"] == f) for f in PROGRAM_ORDER}
     built = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    CTX.update(dict(proteins=prots, hits=hits, target_ann=target_ann, names=names, entry_names=entry_names,
+    CTX.update(dict(proteins=prots, prot_names=prot_names, hits=hits, target_ann=target_ann, names=names, entry_names=entry_names,
+                    target_info=target_info,
                     targets=targets, run_status=run_status, settings=settings, databases=databases,
                     leaderboard=leaderboard, plddt=plddt, expression=expression, alphabets=alphabets,
-                    out=out, footer="", family_run=family_run))
+                    out=out, footer="", program_run=program_run))
     CTX["footer"] = footer(inputs, built)
     CTX["n_shards"], n_used = write_target_shards(out, hits, targets)
     print("wrote %d Swiss-Prot sequences into %d files (%.0f s)" % (n_used, CTX["n_shards"], time.time() - t_start), flush=True)
@@ -1199,7 +1463,7 @@ def main():
     secs = time.time() - t_start
     CTX["footer"] = footer(inputs, built, secs)
     cats, only = index_page(rows, CTX)
-    summary = dict(total=len(rows), **cats, only_family=only, run_status=run_status, seconds=round(time.time() - t_start, 1))
+    summary = dict(total=len(rows), **cats, only_program=only, run_status=run_status, seconds=round(time.time() - t_start, 1))
     (out / "summary.json").write_text(json.dumps(summary, indent=1))
     print(json.dumps(summary), flush=True)
 

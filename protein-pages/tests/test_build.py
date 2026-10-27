@@ -50,7 +50,7 @@ def test_hhr(tmp_path):
     assert [h["target"] for h in hits] == ["P10415", "Q07817"]
     a, b = hits
     assert (a["q0"], a["q1"], a["t0"], a["t1"]) == (11, 50, 91, 130)
-    assert a["passes"] and not b["passes"]  # b: Prob 45 is below 50 and E 0.002 above 0.001
+    assert a["passes"] and not b["passes"]  # b: Prob 45 is below 50
     assert a["aln"]["q"] == "MAHAGRTGYDNREIVMKYIHYKLSQRGYEWDAGDVGAAPP"
     assert a["aln"]["qs"] == 11 and a["aln"]["ts"] == 91
     assert b["aln"]["q"] == "MSQSNRELVV-DFLSYKLSQK"
@@ -99,13 +99,13 @@ def test_agreement_needs_same_family_and_overlap():
     ann = {"P1": [(1, 80, {"PF00069"})]}
     for h in (h1, h2):
         h["_names"] = build.target_names(h, ann)
-    fams, status, name = build.agreement([h1, h2], ann)
+    progs, status, name = build.agreement([h1, h2], ann)
     assert status == "agree" and name == "PF00069"
     h2["q0"], h2["q1"] = 200, 300  # no longer overlapping
     assert build.agreement([h1, h2], ann)[1] == "disagree"
 
 
-def test_coverage_counts_families_once():
+def test_coverage_counts_programs_once():
     a = build.hit("mmseqs2", 1, 10, "P1", 1, 10, 1e-9, [], True)
     b = build.hit("mmseqs2_3rounds", 5, 15, "P2", 1, 10, 1e-9, [], True)
     c = build.hit("phmmer", 8, 12, "P3", 1, 10, 1e-9, [], True)
@@ -123,7 +123,7 @@ def test_alphabets_from_kmerseek_source():
 
 
 def test_agreement_with_tied_hits_and_unknown_targets():
-    # Two families with a hit at the same range and the same E-value, targets with no known
+    # Two programs with a hit at the same range and the same E-value, targets with no known
     # family: the pair search must not fail on the tie (it did on the full Botryllus run).
     a = build.hit("phmmer", 10, 100, "P1", 1, 90, 1e-9, [], True)
     b = build.hit("jackhmmer", 10, 100, "P2", 1, 90, 1e-9, [], True)

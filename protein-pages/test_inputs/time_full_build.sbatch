@@ -6,12 +6,13 @@
 #
 #   cd <folder holding build.py> && sbatch test_inputs/time_full_build.sbatch $SCRATCH/protein-pages-full
 #
-# 8 CPUs, the number a laptop has. Memory: build.py keeps only hits at E <= 1e-3.
+# 8 CPUs, the number a laptop has. Memory: build.py keeps only hits at E < 1; 64 GB, since
+# at E <= 1e-3 the job already used 19.8 GB.
 #SBATCH -p hns,normal
 #SBATCH -A ayeletv
 #SBATCH -J protein-pages-time
 #SBATCH -c 8
-#SBATCH --mem 32G
+#SBATCH --mem 64G
 #SBATCH -t 2:00:00
 set -euo pipefail
 OUT=$1

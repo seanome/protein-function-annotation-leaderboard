@@ -28,8 +28,13 @@ KMERSEEK = S + "/invertebrate-dark-set/results-0.4/dark-regions/botryllus_dark_r
 KMERSEEK_MOLTYPE, KMERSEEK_K = "hp_lehninger2", "17"
 SPROT = S + "/botryllus-mhc-swissprot/db/swissprot/uniprot_sprot.fasta.gz"
 REFERENCE = S + "/invertebrate-dark-set/reference/minus_Ascidiacea/reference.fasta"
-E = 1e-3
+E = 1e-3  # used only to draw the 50 (none / one / two or more programs with a hit)
+E_TARGETS = 10.0  # targets of hits at or below this get hmmscan, so build.py can name their Pfam family
 N_NONE, N_ONE, N_TOTAL = 16, 16, 50
+# Added to the 50 drawn at random, after the draw, so the draw itself does not change.
+# FUN008084_FUN008084 is the Botryllus histocompatibility factor (BHF): its 252 residues equal
+# UniProt S5RI84, "Histocompatibility factor" (Voskoboynik et al. 2013, PubMed 23888037).
+ALWAYS = ["FUN008084_FUN008084"]
 OUT = sys.argv[1]
 
 
@@ -63,7 +68,7 @@ for p in FUN_CHUNKS:
 both = set(fun)
 print("FUN proteins", len(fun), flush=True)
 
-# Per tool, rows for the shared proteins, and families with a hit at E <= 1e-3.
+# Per tool, rows for the shared proteins, and programs with a hit at E <= 1e-3.
 fam_hits = {f: set() for f in both}
 rows = {"mmseqs2_3rounds": [], "phmmer": [], "jackhmmer": [], "kmerseek": []}
 header = {}
@@ -75,7 +80,7 @@ iq, ik, im, ie = kh.index("query_name"), kh.index("ksize"), kh.index("moltype"),
 
 
 def collect(keep):
-    """With keep=None, record which families hit each protein at E <= 1e-3 and store no rows
+    """With keep=None, record which programs hit each protein at E <= 1e-3 and store no rows
     (the jackhmmer tables alone are several GB). Otherwise store the rows of proteins in keep."""
     for p in sorted(glob.glob(QPOS + "/mmseqs2.chunk_*.tsv.gz")):
         for line in lines(p):
@@ -114,9 +119,9 @@ rng = random.Random(20261027)
 by_n = {}
 for p in sorted(both):
     by_n.setdefault(len(fam_hits[p]), []).append(p)
-print("proteins by number of families with a hit:", {k: len(v) for k, v in sorted(by_n.items())}, flush=True)
+print("proteins by number of programs with a hit:", {k: len(v) for k, v in sorted(by_n.items())}, flush=True)
 none = rng.sample(by_n.get(0, []), min(N_NONE, len(by_n.get(0, []))))
-# exactly one family: spread over which family it is
+# exactly one program: spread over which program it is
 one_pool = by_n.get(1, [])
 one_by_fam = {}
 for p in one_pool:
@@ -128,9 +133,13 @@ while len(one) < N_ONE and any(one_by_fam.values()):
             one.append(one_by_fam[fam].pop(rng.randrange(len(one_by_fam[fam]))))
 many_pool = [p for n, ps in by_n.items() if n >= 2 for p in ps]
 many = rng.sample(many_pool, N_TOTAL - len(none) - len(one))
-chosen = sorted(none + one + many)
+chosen = sorted(set(none + one + many + [p for p in ALWAYS if p in fun]))
+missing = [p for p in ALWAYS if p not in fun]
+if missing:
+    sys.exit("not in the searched proteins: " + ", ".join(missing))
 cs = set(chosen)
-print("chosen", len(chosen), "none", len(none), "one", len(one), "two or more", len(many), flush=True)
+print("chosen", len(chosen), "none", len(none), "one", len(one), "two or more", len(many),
+      "always", ALWAYS, flush=True)
 collect(cs)
 print({k: len(v) for k, v in rows.items()}, flush=True)
 
@@ -165,7 +174,7 @@ with open(OUT + "/kmerseek.tsv", "w") as fh:
         if f[iq] in cs:
             fh.write("\t".join(x.replace("\t", " ") for x in f) + "\n")
 
-# Swiss-Prot sequences for every target any file names; and the targets of hits at E <= 1e-3,
+# Swiss-Prot sequences for every target any file names; and the targets of hits at E <= 10,
 # which the sbatch runs hmmscan on so the agreement rule can name a target's Pfam family.
 targets, strong = set(), set()
 
@@ -182,7 +191,7 @@ for p in ("mmseqs2_3rounds.m8",):
     for line in open(OUT + "/" + p):
         f = line.rstrip("\n").split("\t")
         targets.add(acc(f[1]))
-        if float(f[8]) <= E:
+        if float(f[8]) <= E_TARGETS:
             strong.add(acc(f[1]))
 for p in ("phmmer.domtblout", "jackhmmer.domtblout"):
     for line in open(OUT + "/" + p):
@@ -190,28 +199,28 @@ for p in ("phmmer.domtblout", "jackhmmer.domtblout"):
             continue
         f = line.split()
         targets.add(acc(f[0]))
-        if float(f[12]) <= E:
+        if float(f[12]) <= E_TARGETS:
             strong.add(acc(f[0]))
 it = csv.reader(open(OUT + "/kmerseek.tsv"), delimiter="\t")
 next(it)
 it_t = kh.index("target_name")
 for f in it:
     targets.add(acc(f[it_t]))
-    if float(f[ie]) <= E:
+    if float(f[ie]) <= E_TARGETS:
         strong.add(acc(f[it_t]))
 
 found = {}
 for hdr, s in read_fasta(SPROT).items():
     a = hdr.split("|")[1]
     if a in targets:
-        found[a] = (hdr.split()[0], s)
+        found[a] = (hdr, s)  # whole header: the description, OS= and GN= are shown in the pages
 missing = targets - set(found)
 ref = read_fasta(REFERENCE)
 from_ref = 0
 for hdr, s in ref.items():
     a = hdr.split()[0]
     if a in missing:
-        found[a] = ("sp|" + a + "|", s)
+        found[a] = (" ".join(["sp|" + a + "|"] + hdr.split()[1:]), s)
         from_ref += 1
 print("targets", len(targets), "in Swiss-Prot 2026_03", len(targets) - len(missing),
       "taken from the dark-set reference", from_ref, "not found", len(targets - set(found)), flush=True)
@@ -228,5 +237,8 @@ print("hmmscan targets", len(strong & set(found)), flush=True)
 with open(OUT + "/../selection.tsv", "w") as fh:
     fh.write("protein\tgroup_at_selection\tfamilies_with_hit_at_selection\n")
     for p in chosen:
-        grp = "none" if p in none else ("one" if p in one else "two_or_more")
-        fh.write("%s\t%s\t%s\n" % (p, grp, ",".join(sorted(fam_hits[p]))))
+        n = len(fam_hits.get(p, ()))
+        grp = "none" if n == 0 else ("one" if n == 1 else "two_or_more")
+        if p in ALWAYS:
+            grp = "always_" + grp
+        fh.write("%s\t%s\t%s\n" % (p, grp, ",".join(sorted(fam_hits.get(p, ())))))
