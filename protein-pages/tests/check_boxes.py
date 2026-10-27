@@ -29,7 +29,11 @@ def main():
     for page in sorted((site / "proteins").glob("*.html")):
         m = re.search(r"const PAGE=(\{.*?\});</script>", page.read_text())
         data = json.loads(m.group(1).replace("<\\/", "</"))
+        aln_file = page.with_name(page.stem + ".aln.js")
+        alns = json.loads(aln_file.read_text()[len("window.ALN="):-1]) if aln_file.exists() else {}
         for i, h in enumerate(data["hits"]):
+            if h.get("a"):
+                h = dict(h, a=alns.get(str(i)))
             if h["k"] in ("mmseqs2_3rounds", "phmmer", "jackhmmer", "kmerseek") and i < 200:
                 boxes.append((page.stem, h, data))
     for pid, h, data in rng.sample(boxes, n):
@@ -56,13 +60,13 @@ def main():
         a = h.get("a")
         if a:
             ident = sum(1 for x, y in zip(a["q"], a["t"]) if x != "-" and x.upper() == y.upper())
-            qres, tres = a["q"].replace("-", ""), a["t"].replace("-", "")
-            q_ok = prots[pid][a["qs"] - 1:a["qs"] - 1 + len(qres)] == qres
-            t_ok = sp[h["t"]][a["ts"] - 1:a["ts"] - 1 + len(tres)] == tres
+            qres, tres = a["q"].replace("-", "").upper(), a["t"].replace("-", "").upper()
+            q_ok = prots[pid][a["qs"] - 1:a["qs"] - 1 + len(qres)].upper() == qres
+            t_ok = sp[h["t"]][a["ts"] - 1:a["ts"] - 1 + len(tres)].upper() == tres
             inside = a["qs"] >= h["q"][0] and a["qs"] + len(qres) - 1 <= h["q"][1]
-            print("alignment: %d of %d identical (recounted); query %d-%d matches proteins.fasta: %s; "
+            print("alignment (%s): %d of %d identical (recounted); query %d-%d matches proteins.fasta: %s; "
                   "target %d-%d matches swissprot.fasta: %s; inside the box: %s" % (
-                      ident, len(a["q"]), a["qs"], a["qs"] + len(qres) - 1, q_ok,
+                      a.get("src", "")[:40], ident, len(a["q"]), a["qs"], a["qs"] + len(qres) - 1, q_ok,
                       a["ts"], a["ts"] + len(tres) - 1, t_ok, inside))
         elif h["k"] == "kmerseek":
             q = prots[pid][h["q"][0] - 1:h["q"][1]]

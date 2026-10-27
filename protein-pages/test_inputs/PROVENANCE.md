@@ -27,15 +27,18 @@ counts at selection.
 
 ## Files
 
+The final input folder is `$SCRATCH/protein-pages-final/inputs`.
+
+
 | File | Source on Sherlock (`$SCRATCH` = `/scratch/users/olgabot`) | Change made |
 |---|---|---|
 | `proteins.fasta` | `botryllus-mhc/qpos/chunks/chunk_*.fasta` | the 51 only; trailing `*` removed |
-| `mmseqs2_3rounds.m8` | `botryllus-mhc/qpos/out/mmseqs2.chunk_*.tsv.gz` (`-s 7 --num-iterations 3 -e 10`) | columns put in build.py's order. That run did not write `fident`, `alnlen` or `theader`, so those columns are empty and the tooltip says "not in the file". |
-| `phmmer.domtblout` | `botryllus-mhc/qpos/out/phmmer.chunk_*.domtblout.gz` (`-E 10`) | rows of the 51 only |
-| `jackhmmer.domtblout` | `botryllus-mhc/qpos/out/jackhmmer.chunk_*.domtblout.gz` (`-N 3 -E 10`) | rows of the 51 only, all rounds (build.py keeps the last) |
+| `mmseqs2_3rounds.m8`, `phmmer.domtblout`, `phmmer.out`, `jackhmmer.domtblout`, `jackhmmer.out` | rerun by `rerun_with_alignments.sbatch` (job 49844850) on the 51, with the same images, database and settings as notebook 281's `botryllus-mhc/281_tool_search_query_positions.sbatch` (`-E 10`; jackhmmer `-N 3`; MMseqs2 `-s 7 --num-iterations 3 -e 10`), keeping the alignments (HMMER `-o --notextw`; MMseqs2 `qaln,taln`) | none. The rerun gave the same rows as notebook 281's tables: phmmer 29,448, jackhmmer 66,196 and MMseqs2 5,513 rows, all in both. |
 | `kmerseek.tsv` | `invertebrate-dark-set/results-0.4/dark-regions/botryllus_dark_regions.csv.gz` | rows of the 51 with `moltype` hp_lehninger2 and `ksize` 17 only (the file also holds 5 other settings); commas changed to tabs; column names kept. This file holds regions only for proteins the dark-set run found no other hit for, so most of the 50 have no kmerseek row. It has no GO column. |
-| `hmmscan.domtblout` | run here: hmmscan 3.4 (`-E 10 --domE 10`) against `$SCRATCH/data/pfam/Pfam-A.hmm` (30,134 models, Pfam-A 38.2) | on the 51 proteins and on the 16,262 Swiss-Prot proteins they match at E-value 0.001 or below, so build.py can name the Pfam family of a search hit's target |
-| `swissprot.fasta` | `botryllus-mhc-swissprot/db/swissprot/uniprot_sprot.fasta.gz` (release 2026_03) | only the 26,596 proteins any file names; 4 not in release 2026_03 were taken from the dark-set reference (`invertebrate-dark-set/reference/minus_Ascidiacea/reference.fasta`), with no entry name |
+| `hmmscan.domtblout` | run here: hmmscan 3.4 (`-E 10 --domE 10`) against `$SCRATCH/data/pfam/Pfam-A.hmm` (30,134 models, Pfam-A 38.2), in three jobs that each kept the earlier rows and scanned only new proteins: 49793015 (the first 50 and their targets at E <= 0.001), 49842799 (BHF and targets up to E < 1) and 49845538 (targets up to E <= 10) | on the 51 proteins and the 25,729 Swiss-Prot proteins they match at E-value 10 or below, so build.py can name the Pfam families of a search hit's target |
+| `hmmscan.out` | hmmscan's main output on the 51 proteins (job 49845108, same options), for the alignment of each Pfam model to the protein | none |
+| `swissprot.fasta` | `botryllus-mhc-swissprot/db/swissprot/uniprot_sprot.fasta.gz` (release 2026_03) | only the 26,602 proteins any file names, with UniProt's whole headers (name, species, gene); 4 not in release 2026_03 were taken from the dark-set reference (`invertebrate-dark-set/reference/minus_Ascidiacea/reference.fasta`), with no entry name |
+| `protein_names.tsv` | written by hand: BHF's name, from UniProt S5RI84 | |
 | `run_settings.tsv` | written by hand from the commands in the sbatch scripts above | |
 | `kmerseek_alphabets.rs` | `seanome/kmerseek` `src/rust/alphabets.rs` at commit fc3ce72c (2026-08-25, the last change to that file on the checkout read) | none |
 

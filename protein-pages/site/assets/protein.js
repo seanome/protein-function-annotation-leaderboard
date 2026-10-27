@@ -16,8 +16,25 @@
     if (h.r) rows += `<tr><td>${esc(h.t)}</td><td>${h.r[0]}-${h.r[1]}</td></tr>`;
     const names = PAGE.names[h.k] || [];
     h.s.forEach((v, i) => { rows += `<tr><td>${esc(names[i] || "")}</td><td>${esc(v)}</td></tr>`; });
-    return `<div>${esc(PAGE.tracks[h.k].name)}</div><b>${esc(h.l)}</b><table>${rows}</table>` +
-      (h.t ? "<div>Click to see the residues.</div>" : "");
+    return `<div>${esc(PAGE.tracks[h.k].name)}</div><b>${esc(h.l)}</b>${about(h)}<table>${rows}</table>` +
+      "<div>Click to see the residues.</div>";
+  }
+  // Full name, gene and species of the matched Swiss-Prot protein, and its Pfam families over
+  // the matched part (for hmmscan and InterProScan: the family itself).
+  function about(h) {
+    let s = "";
+    if (h.n) s += `<div class="full">${esc(h.n)}</div>`;
+    const gs = [h.g ? "gene " + h.g : "", h.o || ""].filter(Boolean).join(" · ");
+    if (gs) s += `<div>${esc(gs)}</div>`;
+    if (h.k === "hmmscan" || h.k === "interproscan") {
+      if (h.f && h.f.length) s += `<div>${h.k === "hmmscan" ? "Pfam family" : "Family"}: ${esc(h.f.join("; "))}</div>`;
+    } else if (h.f === null || h.f === undefined) {
+      s += "<div>Pfam families on the matched part: not known (no hmmscan or InterProScan output for this protein)</div>";
+    } else {
+      const shown = h.f.slice(0, 5).join("; ") + (h.f.length > 5 ? `; and ${h.f.length - 5} more` : "");
+      s += `<div>Pfam families on the matched part: ${h.f.length ? esc(shown) : "none"}</div>`;
+    }
+    return s;
   }
   function place(e) {
     const r = tip.getBoundingClientRect();
@@ -37,7 +54,7 @@
         tip.innerHTML = tipHtml(h); tip.hidden = false; place({ clientX: b.left, clientY: b.bottom });
       });
       g.addEventListener("blur", () => { tip.hidden = true; });
-      g.addEventListener("click", () => { tip.hidden = true; open(h); });
+      g.addEventListener("click", () => open(h));
       g.addEventListener("keydown", (e) => { if (e.key === "Enter") open(h); });
     });
   }
@@ -59,8 +76,9 @@
   }
   const tracksDiv = document.getElementById("tracks");
   const original = tracksDiv.innerHTML;
-  let allDrawn = null;
-  function drawAll() {
+  // Redraw the rows with only the hits below maxE, and all of them or the best PAGE.top per tool.
+  const fmtE = (v) => (v === 1 ? "10" : v === 0 ? "1" : "1e" + v);
+  function draw(maxE, showAll) {
     const tmp = document.createElement("div");
     tmp.innerHTML = original;
     const [ls, rs] = tmp.querySelectorAll("svg");
@@ -72,42 +90,82 @@
       const rg = rr[n], k = rg.dataset.k;
       let hgt = +rg.dataset.h;
       const idx = byTrack[k];
-      if (idx && idx.length > PAGE.top) {
-        const lanes = [], parts = [];
-        for (const i of idx) {
-          const h = H[i];
-          let li = lanes.findIndex((ends) => ends.every(([a, b]) => h.q[0] > b || h.q[1] < a));
-          if (li < 0) { lanes.push([]); li = lanes.length - 1; }
-          lanes[li].push(h.q);
-          parts.push(boxSvg(h, i, li));
+      if (idx) {
+        const kept = idx.filter((i) => H[i].e === null || H[i].e === undefined || H[i].e <= maxE);
+        const shown = showAll ? kept : kept.slice(0, PAGE.top);
+        const sep = rg.querySelector("line.sep"), old = lg.querySelector(".more");
+        if (old) old.remove();
+        if (!kept.length) {
+          rg.innerHTML = (sep ? sep.outerHTML : "") + `<text x="4" y="${ROW_PAD + 11}" class="nh">no hit with E-value at most ${fmtE(Math.round(Math.log10(maxE)))}</text>`;
+          hgt = ROW_PAD + 22;
+        } else {
+          const lanes = [], parts = [];
+          for (const i of shown) {
+            const h = H[i];
+            let li = lanes.findIndex((ends) => ends.every(([a, b]) => h.q[0] > b || h.q[1] < a));
+            if (li < 0) { lanes.push([]); li = lanes.length - 1; }
+            lanes[li].push(h.q);
+            parts.push(boxSvg(h, i, li));
+          }
+          hgt = ROW_PAD + lanes.length * LANE_H + 4;
+          const line = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
+          rg.innerHTML = (sep ? sep.outerHTML : "") + line + parts.join("");
+          const more = kept.length - shown.length;
+          const label = more > 0 ? `+${more} more` : (showAll && kept.length > PAGE.top ? `all ${kept.length}` : "");
+          if (label) {
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", 26); t.setAttribute("y", ROW_PAD + 26); t.setAttribute("class", "tm more");
+            t.textContent = label; lg.appendChild(t);
+            hgt = Math.max(hgt, ROW_PAD + 34);
+          }
         }
-        hgt = Math.max(ROW_PAD + lanes.length * LANE_H + 4, ROW_PAD + 34);
-        const sep = rg.querySelector("line.sep");
-        const line = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
-        rg.innerHTML = (sep ? sep.outerHTML : "") + line + parts.join("");
-        const more = lg.querySelector(".more");
-        if (more) more.textContent = `all ${idx.length}`;
       }
       lg.setAttribute("transform", `translate(0,${y})`);
       rg.setAttribute("transform", `translate(0,${y})`);
       y += hgt;
     });
-    for (const s of [ls, rs]) { s.setAttribute("height", y); s.setAttribute("viewBox", `0 0 ${s === ls ? "100%" : PAGE.w} ${y}`); }
-    ls.removeAttribute("viewBox");
+    // "programs with a hit" line, recounted from the hits below maxE (the same steps build.py draws)
+    const ag = rs.querySelector('g.row[data-k="agree"] path');
+    if (ag) {
+      const L = PAGE.q.length, per = {};
+      H.forEach((h) => { if (h.e === null || h.e === undefined || h.e <= maxE) (per[PAGE.tracks[h.k].p] = per[PAGE.tracks[h.k].p] || []).push(h.q); });
+      const diff = new Array(L + 2).fill(0);
+      for (const ivs of Object.values(per)) {
+        const cover = new Uint8Array(L + 2);
+        for (const [a, b] of ivs) for (let i = Math.max(1, a); i <= Math.min(L, b); i++) cover[i] = 1;
+        for (let i = 1; i <= L; i++) diff[i] += cover[i];
+      }
+      const yv = (c) => (10 + 48 - c * 6).toFixed(1);
+      let d = "", prev = null;
+      for (let i = 0; i < L; i++) {
+        const c = diff[i + 1];
+        if (c !== prev) { d += prev === null ? `M0,${yv(c)}` : `L${(i * PAGE.px).toFixed(2)},${yv(prev)}L${(i * PAGE.px).toFixed(2)},${yv(c)}`; prev = c; }
+      }
+      d += `L${(L * PAGE.px).toFixed(2)},${yv(prev)}`;
+      ag.setAttribute("d", d);
+    }
+    ls.setAttribute("height", y); ls.removeAttribute("viewBox");
+    rs.setAttribute("height", y); rs.setAttribute("viewBox", `0 0 ${PAGE.w} ${y}`);
     return tmp.innerHTML;
   }
-  const tg = document.getElementById("toggle");
-  if (tg) {
-    const label = tg.textContent;
-    let on = false;
-    tg.addEventListener("click", () => {
-      on = !on;
-      if (on && allDrawn === null) allDrawn = drawAll();
-      tracksDiv.innerHTML = on ? allDrawn : original;
-      wire(tracksDiv);
-      tg.textContent = on ? `Show the best ${PAGE.top} hits per tool` : label;
-    });
+  const tg = document.getElementById("toggle"), slider = document.getElementById("emax"), ev = document.getElementById("ev");
+  let showAll = false;
+  function redraw() {
+    const v = slider ? +slider.value : 1;
+    if (ev) ev.textContent = fmtE(v);
+    tracksDiv.innerHTML = v === 1 && !showAll ? original : draw(Math.pow(10, v), showAll);
+    wire(tracksDiv);
+    if (tg) {
+      const maxE = Math.pow(10, v), n = H.filter((h) => h.e === null || h.e === undefined || h.e <= maxE).length;
+      const byK = {};
+      H.forEach((h) => { if (h.e === null || h.e === undefined || h.e <= maxE) byK[h.k] = (byK[h.k] || 0) + 1; });
+      const more = Object.values(byK).reduce((s, c) => s + Math.max(0, c - PAGE.top), 0);
+      tg.hidden = !showAll && more === 0;
+      tg.textContent = showAll ? `Show the best ${PAGE.top} hits per tool` : `Show all ${n.toLocaleString()} hits (${more.toLocaleString()} more)`;
+    }
   }
+  if (tg) tg.addEventListener("click", () => { showAll = !showAll; redraw(); });
+  if (slider) slider.addEventListener("input", redraw);
   document.getElementById("close").addEventListener("click", () => { panel.hidden = true; });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") panel.hidden = true; });
 
@@ -187,92 +245,186 @@
     return { q: qa.reverse().join(""), t: ta.reverse().join(""), qs: i + 1, ts: j + 1 };
   }
 
-  function blocks(q, t, mid, qs, ts, qname, tname) {
-    const width = 60, lw = Math.max(qname.length, tname.length);
-    let out = [], qi = qs, ti = ts;
-    for (let s = 0; s < q.length; s += width) {
-      const qq = q.slice(s, s + width), tt = t.slice(s, s + width), mm = mid.slice(s, s + width);
-      const qn = qq.replace(/-/g, "").length, tn = tt.replace(/-/g, "").length;
-      const qe = qi + qn - 1, te = ti + tn - 1;
-      const pad = (x) => x.padEnd(lw);
-      out.push(`${pad(qname)} ${String(qi).padStart(6)} ${qq} ${qe}`);
-      out.push(`${pad("")} ${"".padStart(6)} ${mm}`);
-      out.push(`${pad(tname)} ${String(ti).padStart(6)} ${tt} ${te}`);
-      out.push("");
-      qi = qe + 1; ti = te + 1;
+  // ---------------------------------------------------------------- residue panel ----
+  // The tools' alignments are in <page>.aln.js next to the page, loaded on the first click.
+  let alnLoad = null;
+  function alignments() {
+    if (!alnLoad) alnLoad = new Promise((res) => {
+      const s = document.createElement("script");
+      s.src = location.pathname.split("/").pop().replace(/\.html$/, ".aln.js");
+      s.onload = () => res(window.ALN || {}); s.onerror = () => res({});
+      document.head.appendChild(s);
+    });
+    return alnLoad;
+  }
+  // Residue classes: the kmerseek alphabet of this page when there is one (hp_lehninger2 here),
+  // used to colour residues in every tool's alignment, so one colour means one class everywhere.
+  const ALPHA_NAME = Object.keys(PAGE.alpha || {})[0] || null;
+  const ALPHA = ALPHA_NAME ? PAGE.alpha[ALPHA_NAME] : null;
+  const CLASS_WORD = { h: "hydrophobic", p: "polar" };
+  const groups = {};
+  if (ALPHA) for (const [r, c] of Object.entries(ALPHA)) (groups[c] = groups[c] || []).push(r);
+  const classOf = (c) => (ALPHA && c && c !== "-" ? ALPHA[c.toUpperCase()] || null : null);
+  const cssClass = (c) => { const k = classOf(c); return k === "h" || k === "p" ? k : (k ? "o" : "x"); };
+  const similar = (a, b) => a !== "-" && b !== "-" && B62[idx(a.toUpperCase())][idx(b.toUpperCase())] > 0;
+
+  function stats(a) {
+    let ident = 0, sim = 0, gaps = 0;
+    for (let i = 0; i < a.q.length; i++) {
+      const x = a.q[i], y = a.t[i] || "-";
+      if (x === "-" || y === "-") { gaps++; continue; }
+      if (x.toUpperCase() === y.toUpperCase()) ident++;
+      else if (similar(x, y)) sim++;
     }
-    return out.join("\n");
+    return { cols: a.q.length, ident, sim, gaps };
+  }
+  const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
+
+  // One line of 60 columns: your protein, [its classes], a match line, [target classes], the target.
+  function chunkHtml(a, start, n, qpos, tpos, tname, kmer, flank) {
+    const W = 60, rowsQ = [], rowsT = [], mid = [], cq = [], ct = [];
+    let qi = qpos, ti = tpos;
+    const qFirst = qi, tFirst = ti;
+    for (let i = start; i < Math.min(start + W, n); i++) {
+      const x = a.q[i], y = a.t[i] || "-";
+      const fl = flank && (i < flank[0] || i >= n - flank[1]);
+      const same = x !== "-" && y !== "-" && x.toUpperCase() === y.toUpperCase();
+      const cell = (c, pos, who) => c === "-" ? `<i class="gap">-</i>` :
+        `<i class="${cssClass(c)}${same && !fl ? " same" : ""}${fl ? " flank" : ""}" data-c="${c}" data-p="${pos}" data-w="${esc(who)}">${c}</i>`;
+      rowsQ.push(cell(x, x === "-" ? 0 : qi, "your protein"));
+      rowsT.push(cell(y, y === "-" ? 0 : ti, tname));
+      const kx = classOf(x), ky = classOf(y);
+      if (kmer) {
+        cq.push(`<i class="${fl ? "flank" : ""}">${kx || (x === "-" ? "-" : "x")}</i>`);
+        ct.push(`<i class="${fl ? "flank" : ""}">${ky || (y === "-" ? "-" : "x")}</i>`);
+        mid.push(fl ? " " : same ? "|" : kx && kx === ky ? "+" : " ");
+      } else {
+        mid.push(same ? "|" : similar(x, y) ? "+" : " ");
+      }
+      if (x !== "-") qi++;
+      if (y !== "-") ti++;
+    }
+    const line = (lab, body, end, cls) => `<div class="lab">${lab}</div><div class="cells ${cls || ""}">${body}</div><div class="lab r">${end}</div>`;
+    let h = line(`your protein aa ${qFirst}`, rowsQ.join(""), qi - 1);
+    if (kmer) h += line(`your protein ${esc(ALPHA_NAME)}`, cq.join(""), "", "enc");
+    h += line("", mid.map((m) => `<i>${m === " " ? "&nbsp;" : m}</i>`).join(""), "", "marks");
+    if (kmer) h += line(`${esc(tname)} ${esc(ALPHA_NAME)}`, ct.join(""), "", "enc");
+    h += line(`${esc(tname)} aa ${tFirst}`, rowsT.join(""), ti - 1, "under");
+    return { html: `<div class="chunk">${h}</div>`, qi, ti };
+  }
+
+  // A small map: your protein across, the other sequence down, every hit on that sequence as a
+  // line in its tool's colour, the one shown drawn thick; Pfam domains of both along the edges.
+  function dotPlot(h, tlen, tname) {
+    const qL = PAGE.q.length, S = 200, sc = S / Math.max(qL, tlen);
+    const pw = qL * sc, ph = tlen * sc, ml = 34, mt = 26, tw = 22;
+    const W = ml + pw + tw + 70, Hh = mt + ph + 34;
+    const sx = (p) => ml + (p - 1) * sc, sy = (p) => mt + (p - 1) * sc;
+    let g = `<rect x="${ml}" y="${mt}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" fill="none" stroke="#c3c2b7"/>`;
+    // Pfam domains of your protein (hmmscan, best E-value first, not overlapping) along the top
+    const qd = [];
+    H.filter((x) => x.k === "hmmscan").sort((a, b) => (a.e ?? 1) - (b.e ?? 1)).forEach((x) => {
+      if (qd.every((d) => x.q[1] < d[0] || x.q[0] > d[1])) qd.push([x.q[0], x.q[1], x.l]);
+    });
+    g += `<line x1="${ml}" x2="${(ml + pw).toFixed(1)}" y1="12" y2="12" stroke="#C8C8C8" stroke-width="1.5"/>`;
+    for (const [a, b, l] of qd) g += `<rect x="${sx(a).toFixed(1)}" y="7" width="${((b - a + 1) * sc).toFixed(1)}" height="10" rx="1.5" fill="#fff" stroke="#6B6B00"><title>${esc(l)} ${a}-${b}</title></rect>`;
+    const tx = ml + pw + 6;
+    g += `<line x1="${tx + 6}" x2="${tx + 6}" y1="${mt}" y2="${(mt + ph).toFixed(1)}" stroke="#C8C8C8" stroke-width="1.5"/>`;
+    for (const [a, b, l] of h.td || []) {
+      g += `<rect x="${tx + 1}" y="${sy(a).toFixed(1)}" width="10" height="${((b - a + 1) * sc).toFixed(1)}" rx="1.5" fill="#fff" stroke="#6B6B00"><title>${esc(l)} ${a}-${b}</title></rect>`;
+      if ((b - a + 1) * sc > 9) g += `<text x="${tx + 14}" y="${(sy((a + b) / 2) + 3).toFixed(1)}" class="dl">${esc(l.split(" ")[0])}</text>`;
+    }
+    const same = H.filter((x) => (h.t ? x.t === h.t : x.k === h.k && x.l === h.l) && x.r);
+    const seg = (x, w, op) => `<line x1="${sx(x.q[0]).toFixed(1)}" y1="${sy(Math.min(x.r[0], x.r[1])).toFixed(1)}" x2="${sx(x.q[1]).toFixed(1)}" y2="${sy(Math.max(x.r[0], x.r[1])).toFixed(1)}" stroke="${PAGE.tracks[x.k].color}" stroke-width="${w}" stroke-linecap="round" opacity="${op}"/>`;
+    for (const x of same) if (x !== h) g += seg(x, 1.5, 0.55);
+    g += seg(h, 4, 1);
+    g += `<text x="${ml}" y="${(mt + ph + 12).toFixed(1)}" class="ax">1</text><text x="${(ml + pw).toFixed(1)}" y="${(mt + ph + 12).toFixed(1)}" class="ax" text-anchor="end">${qL}</text>`;
+    g += `<text x="${ml - 4}" y="${mt + 8}" class="ax" text-anchor="end">1</text><text x="${ml - 4}" y="${(mt + ph).toFixed(1)}" class="ax" text-anchor="end">${tlen}</text>`;
+    g += `<text x="${(ml + pw / 2).toFixed(1)}" y="${(mt + ph + 26).toFixed(1)}" class="ax" text-anchor="middle">your protein (aa)</text>`;
+    g += `<text x="10" y="${(mt + ph / 2).toFixed(1)}" class="ax" text-anchor="middle" transform="rotate(-90 10 ${(mt + ph / 2).toFixed(1)})">${esc(tname)} (aa)</text>`;
+    const tools = [...new Set(same.map((x) => x.k))];
+    const key = tools.map((k) => `<span><i style="background:${PAGE.tracks[k].color}"></i>${esc(PAGE.tracks[k].name)}</span>`).join("");
+    return `<div class="map"><p class="mapkey">Each line is one hit on ${esc(tname)}, in its tool's colour; the thick one is shown on the right. Boxes on the edges: Pfam domains.</p>` +
+      `<div class="mapkey tools">${key}</div><svg width="${W.toFixed(0)}" height="${Hh.toFixed(0)}">${g}</svg></div>`;
   }
 
   function open(h) {
-    if (!h.t) return;
-    if (h.k === "hhsearch") { show(h, null); return; }
+    tip.hidden = true;
     pbody.innerHTML = "<p>Loading the residues...</p>"; panel.hidden = false;
-    targetSeq(h.t).then((tseq) => show(h, tseq));
+    Promise.all([alignments(), h.t ? targetSeq(h.t) : Promise.resolve(null)]).then(([alns, tseq]) => show(h, alns[H.indexOf(h)], tseq));
   }
-  function show(h, tseq) {
-    const q = PAGE.q;
-    let html = `<h3>${esc(PAGE.tracks[h.k].name)}: ${esc(h.l)}` + (h.t && h.t !== h.l ? ` (Swiss-Prot ${esc(h.t)})` : "") + "</h3>";
-    if (h.k !== "hhsearch" && !tseq) {
-      html += `<p>${esc(h.t)} is not in swissprot.fasta, so its residues cannot be shown.</p>`;
-    } else if (h.k === "kmerseek") {
-      const al = PAGE.alpha[h.m];
-      const qs = q.slice(h.q[0] - 1, h.q[1]), ts = tseq.slice(h.r[0] - 1, h.r[1]);
-      let mid = "", same = 0, ident = 0;
-      const n = Math.max(qs.length, ts.length);
-      for (let i = 0; i < n; i++) {
-        const a = qs[i] || " ", b = ts[i] || " ";
-        if (a === b) { mid += "|"; ident++; same++; }
-        else if (al && al[a] && al[a] === al[b]) { mid += "+"; same++; }
-        else mid += " ";
-      }
-      html += `<p>${ident} of ${n} identical` + (al ? `; ${same} of ${n} in the same class of ${esc(h.m)}.` : ".") + "</p>";
-      html += `<p class="note">kmerseek places the two segments side by side without gaps. Match line: | the same residue; + a different residue in the same class of the alphabet; blank: different classes. Class table read from kmerseek_alphabets.rs in the input folder, a copy of kmerseek's own src/rust/alphabets.rs.</p>`;
-      html += `<div class="aln">${esc(blocks(qs, ts, mid, h.q[0], h.r[0], "this protein", h.l))}</div>`;
-      if (al) {
-        const groups = {};
-        for (const [r, c] of Object.entries(al)) (groups[c] = groups[c] || []).push(r);
-        const enc = (s) => Array.from(s, (r) => al[r] || "x").join("");
-        const qe = enc(qs), te = enc(ts);
-        let cm = "";
-        for (let i = 0; i < n; i++) cm += qe[i] === te[i] && qe[i] !== "x" ? "|" : " ";
-        html += `<p class="note">The same segments written as classes of ${esc(h.m)}: ${Object.entries(groups).map(([c, g]) => "<code>" + esc(c) + "</code> = <code>" + g.sort().join("") + "</code>").join(", ")}; x: a residue outside the 20 standard ones. Match line: | the same class.</p>`;
-        html += `<div class="aln">${esc(blocks(qe, te, cm, h.q[0], h.r[0], "this protein", h.l))}</div>`;
-      } else {
-        html += `<p class="note">No class table for ${esc(h.m || "this alphabet")} (kmerseek_alphabets.rs not given, or the alphabet is not in it), so only identical residues are marked.</p>`;
-      }
-    } else {
-      let a = h.a, how;
-      if (h.k === "hhsearch") {
-        how = "Alignment as printed in the .hhr file by hhsearch.";
-      } else if (a) {
-        how = "Alignment recomputed when the site was built, not taken from the tool's output: the two coordinate ranges were aligned again with Biopython's PairwiseAligner (local, BLOSUM62, gap open -11, gap extend -1).";
-      } else {
-        const lo = Math.min(h.r[0], h.r[1]), hi = Math.max(h.r[0], h.r[1]);
-        a = localAlign(q.slice(h.q[0] - 1, h.q[1]), tseq.slice(lo - 1, hi));
-        a.qs += h.q[0] - 1; a.ts += lo - 1;
-        how = "Alignment recomputed in your browser, not taken from the tool's output: the two coordinate ranges were aligned with the scores build.py gives Biopython for the best 5 hits per tool (local, BLOSUM62, gap open -11, gap extend -1).";
-      }
-      if (!a || !a.q) {
-        html += "<p>No alignment could be made from these residues.</p>";
-      } else {
-        let mid = "", ident = 0;
-        for (let i = 0; i < a.q.length; i++) {
-          const same = a.q[i] !== "-" && a.q[i].toUpperCase() === (a.t[i] || "").toUpperCase();
-          mid += same ? "|" : " "; if (same) ident++;
-        }
-        html += `<p>${ident} of ${a.q.length} aligned positions identical.</p><p class="note">${how} Match line: | the same residue. A - in a row is a gap.</p>`;
-        const qe = a.qs + a.q.replace(/-/g, "").length - 1;
-        if (h.k !== "hhsearch" && (a.qs > h.q[0] || qe < h.q[1])) {
-          html += `<p class="note">This alignment covers residues ${a.qs}-${qe} of this protein; the tool reported ${h.q[0]}-${h.q[1]}. ` +
-            (h.k === "jackhmmer" || h.k === "mmseqs2_3rounds"
-              ? "This tool searched with a profile built from many proteins, so the two proteins on their own can align over less of the range."
-              : "The rest of the range does not align well enough with these scores.") + "</p>";
-        }
-        html += `<div class="aln">${esc(blocks(a.q, a.t, mid, a.qs, a.ts, "this protein", h.l))}</div>`;
-      }
+
+  function show(h, a, tseq) {
+    const q = PAGE.q, tool = PAGE.tracks[h.k].name;
+    const tname = h.k === "hmmscan" ? `${h.l} model` : h.l;
+    const names = PAGE.names[h.k] || [];
+    let html = `<h3>${esc(tool)}: ${esc(h.l)}` + (h.t && h.t !== h.l ? ` <span class="w">Swiss-Prot ${esc(h.t)}</span>` : "") + "</h3>" + about(h);
+    const scoreBits = h.s.map((v, i) => [names[i], v]).filter(([, v]) => v !== "not in the file" && !/^no .* column/.test(v)).map(([n, v]) => `${esc(n || "")} <b>${esc(v)}</b>`).join(" · ");
+    let src = "", kmer = false, flank = null, note = "";
+    if (h.k === "kmerseek" && tseq) {
+      kmer = true;
+      const F = 10, q0 = Math.max(1, h.q[0] - F), t0 = Math.max(1, h.r[0] - F);
+      const lf = Math.min(h.q[0] - q0, h.r[0] - t0);
+      const rf = Math.min(q.length - h.q[1], tseq.length - h.r[1], F);
+      a = { q: q.slice(h.q[0] - 1 - lf, h.q[1] + rf), t: tseq.slice(h.r[0] - 1 - lf, h.r[1] + rf), qs: h.q[0] - lf, ts: h.r[0] - lf };
+      flank = [lf, rf];
+      src = `kmerseek matches the two segments side by side without gaps; ${lf} residues before and ${rf} after the match are shown faded.`;
+    } else if (!a && h.r && tseq && h.k !== "hhsearch") {
+      const lo = Math.min(h.r[0], h.r[1]), hi = Math.max(h.r[0], h.r[1]);
+      a = localAlign(q.slice(h.q[0] - 1, h.q[1]), tseq.slice(lo - 1, hi));
+      if (a && a.q) { a.qs += h.q[0] - 1; a.ts += lo - 1; }
+      src = "recomputed in your browser, because the tool's own alignment was not given: the two ranges aligned with BLOSUM62, gap open -11, gap extend -1";
+    } else if (a) {
+      src = a.src || "";
     }
+    const tlen = h.tl || (tseq ? tseq.length : null);
+    let statLine = `<p class="stats">${scoreBits}`;
+    if (a && a.q) {
+      const st = stats(flank ? { q: a.q.slice(flank[0], a.q.length - flank[1]), t: a.t.slice(flank[0], a.t.length - flank[1]) } : a);
+      statLine += ` · <b>${st.ident}</b> of ${st.cols} columns identical (${pct(st.ident, st.cols)}%)`;
+      statLine += kmer ? "" : ` · ${st.sim} more similar (BLOSUM62 score above 0) · ${st.gaps} gap columns`;
+    }
+    statLine += ` · your protein ${h.q[0]}-${h.q[1]} of ${q.length} aa (${pct(h.q[1] - h.q[0] + 1, q.length)}%)`;
+    if (h.r) statLine += ` · ${esc(tname)} ${Math.min(...h.r)}-${Math.max(...h.r)}` + (tlen ? ` of ${tlen} aa (${pct(Math.abs(h.r[1] - h.r[0]) + 1, tlen)}%)` : "");
+    html += statLine + "</p>";
+    if (h.k !== "hhsearch" && h.t && !tseq) html += `<p class="note">${esc(h.t)} is not in swissprot.fasta, so its residues cannot be shown.</p>`;
+    let right = "";
+    if (a && a.q) {
+      const leg = [];
+      if (ALPHA) {
+        for (const c of Object.keys(groups).sort()) leg.push(`<span><i class="${c === "h" || c === "p" ? c : "o"}">${c}</i>${esc(CLASS_WORD[c] || "class " + c)} in ${esc(ALPHA_NAME)}: <code>${groups[c].sort().join("")}</code></span>`);
+      }
+      leg.push(`<span><b class="mono">A</b> bold: the same residue in both</span>`);
+      leg.push(kmer ? `<span><b class="mono">|</b> same residue, <b class="mono">+</b> same class</span>` : `<span><b class="mono">|</b> same residue, <b class="mono">+</b> similar (BLOSUM62 above 0), <b class="mono">-</b> gap</span>`);
+      right += `<div class="alegend">${leg.join("")}</div>`;
+      let qi = a.qs, ti = a.ts, body = "";
+      for (let st = 0; st < a.q.length; st += 60) {
+        const c = chunkHtml(a, st, a.q.length, qi, ti, tname, kmer, flank);
+        body += c.html; qi = c.qi; ti = c.ti;
+      }
+      right += `<div class="seqs">${body}</div>`;
+      right += `<p class="note">Alignment: ${esc(src.replace(/\.$/, ""))}.</p>`;
+      if (!kmer && h.k !== "hhsearch" && h.k !== "hmmscan") {
+        const qe = a.qs + a.q.replace(/-/g, "").length - 1;
+        if (a.qs > h.q[0] || qe < h.q[1]) right += `<p class="note">This alignment covers residues ${a.qs}-${qe} of your protein; the tool reported ${h.q[0]}-${h.q[1]}.</p>`;
+      }
+    } else if (h.k === "hmmscan") {
+      right += `<p class="note">hmmscan's alignment of ${esc(h.l)} to your protein was not given (hmmscan.out is not in the input folder). Your protein's residues ${h.q[0]}-${h.q[1]}:</p><div class="seqs"><div class="chunk"><div class="lab">your protein aa ${h.q[0]}</div><div class="cells">${Array.from(q.slice(h.q[0] - 1, h.q[1]), (c, i) => `<i class="${cssClass(c)}" data-c="${c}" data-p="${h.q[0] + i}" data-w="your protein">${c}</i>`).join("")}</div><div class="lab r">${h.q[1]}</div></div></div>`;
+    } else {
+      right += "<p>No alignment could be made from these residues.</p>";
+    }
+    const map = tlen && h.r ? dotPlot(h, tlen, tname) : "";
+    html += `<div class="pgrid">${map}<div class="pright">${right}</div></div>`;
     pbody.innerHTML = html;
     panel.hidden = false;
+    pbody.querySelectorAll(".cells i[data-c]").forEach((c) => {
+      c.addEventListener("mouseenter", (e) => {
+        const k = classOf(c.dataset.c);
+        tip.innerHTML = `<b>${esc(c.dataset.c)} ${c.dataset.p} of ${esc(c.dataset.w)}</b>` +
+          (k ? `<div>${esc(CLASS_WORD[k] || "class")} (${esc(k)}) in ${esc(ALPHA_NAME)}: <span class="mono">${groups[k].sort().join("")}</span></div>` : "");
+        tip.hidden = false; place(e);
+      });
+      c.addEventListener("mouseleave", () => { tip.hidden = true; });
+    });
   }
 })();
