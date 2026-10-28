@@ -33,7 +33,7 @@ TOP_N = 5  # hits drawn per track before "show all"
 
 # Colour is the kind of program (three hues and a dark grey); inside a kind, the box's shape
 # tells the programs apart. Checked in greyscale and with a deuteranopia simulation (Machado
-# et al. 2009): the four colours differ by at least 7 in lightness (CIE L*) and by at least 24
+# et al. 2009): the four colours differ by at least 7 in lightness (CIE L*) and by at least 23
 # in colour difference (CIE76) under deuteranopia. None is a pLDDT colour, and none is the
 # orange or blue of the residue panel's hydrophobic and polar classes.
 CATEGORIES = {
