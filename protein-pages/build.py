@@ -911,17 +911,16 @@ def page_head(title, depth):
 
 
 def legend_html(ctx, has_plddt, has_expr):
-    """The legend, as a narrow sidebar beside the drawing: one short entry per tool (mark, name,
-    the score that decides a hit, setting, database, which columns give the box), then the
-    other marks on the page."""
+    """The legend, in a narrow column left of the drawing (above it on a phone), so the reader
+    meets the key before the marks: one line per tool, its mark then its name. The rule for a
+    hit, the setting, the database and the columns that give the box open on a click."""
     items = []
     for t in TRACKS:
         k = t["key"]
         prog = PROGRAMS[t["program"]]
         mark = svg_inline(legend_mark(t, 12, 10), 12, 10)
         if ctx["run_status"][k] == "not run":
-            items.append('<li class="off">%s<div><b>%s</b> not run: no %s in the input folder</div></li>'
-                         % (mark, esc(t["name"]), esc(t["file"])))
+            items.append('<li class="off">%s<span>%s: not run</span></li>' % (mark, esc(t["name"])))
             continue
         c, d = fmt_thr(COUNT_E), fmt_thr(E_MAX)
         if k == "hhsearch":
@@ -932,31 +931,27 @@ def legend_html(ctx, has_plddt, has_expr):
         else:
             thr = "counts at %s at most %s; drawn up to %s" % (t["score"], c, d)
         coords = {"domtbl_seq": "hmm from-to (positions on your protein)",
-                  "domtbl_pfam": "env from-to (the domain's envelope)",
+                  "domtbl_pfam": "env from-to, the domain's envelope: the stretch of your protein hmmscan assigns "
+                                 "to the domain, a little wider than the aligned part",
                   "m8": "qstart-qend", "kmerseek": "region_start-region_end, plus 1 at the start",
                   "hhr": "Query HMM range", "interproscan": "start-stop"}[t["kind"]]
-        run_note = ""
-        if t["second"]:
-            run_note = "; open box: second run of %s" % prog["name"]
-        elif t["program"] in ("mmseqs2", "foldseek"):
-            run_note = "; solid box: first run of %s" % prog["name"]
         lb = ctx["leaderboard"].get(k)
-        items.append('<li>%s<div><b>%s</b> %s<span class="sub">%s · %s · box: %s%s%s</span></div></li>' % (
-            mark, esc(t["name"]), esc(thr), esc(ctx["settings"][k]), esc(ctx["databases"][k]), esc(coords),
-            esc(run_note), (" · " + esc(lb)) if lb else ""))
+        detail = [thr, ctx["settings"][k], ctx["databases"][k], "box: " + coords] + ([lb] if lb else [])
+        items.append('<li><details><summary>%s<span>%s</span></summary><div class="sub">%s</div></details></li>' % (
+            mark, esc(t["name"]), "<br>".join(esc(x) for x in detail)))
     line = svg_inline('<line x1="0" y1="5" x2="12" y2="5" stroke="%s" stroke-width="2"/>' % PROTEIN_LINE, 12, 10)
-    items.append('<li>%s<div>The protein, residue 1 to the end; ruler ticks every 50 residues, numbers every 100.</div></li>' % line)
+    items.append('<li>%s<span>your protein, residue 1 to the end</span></li>' % line)
     if has_plddt:
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
-        items.append('<li><span></span><div><b>pLDDT</b> AlphaFold\'s confidence in each residue, 0 to 100: %s</div></li>' % sw)
+        items.append('<li><span></span><span><b>pLDDT</b>, AlphaFold\'s confidence in each residue, 0 to 100: %s</span></li>' % sw)
     step = svg_inline('<path d="M0,9 L4,9 L4,2 L8,2 L8,6 L12,6" fill="none" stroke="%s" stroke-width="1.4"/>' % AGREEMENT, 12, 10)
-    items.append('<li>%s<div><b>Programs with a hit</b> at each residue, 0 to %d (the programs run), counting each '
-                 'program once.</div></li>' % (step, ctx["n_run"]))
+    items.append('<li>%s<span>programs with a hit at each residue, 0 to %d (the programs run), each program counted once</span></li>'
+                 % (step, ctx["n_run"]))
     if has_expr:
         bar = svg_inline('<rect x="0" y="2" width="12" height="6" fill="%s"/>' % EXPRESSION, 12, 10)
-        items.append('<li>%s<div>Expression of this protein\'s gene in each sample, from expression.tsv.</div></li>' % bar)
-    return ('<aside class="side legend"><h2>Legend</h2><p class="note">A box is one hit: one row of the tool\'s '
-            'output, drawn over the residues of this protein it covers.</p><ul>%s</ul></aside>' % "".join(items))
+        items.append('<li>%s<span>expression of this protein\'s gene in each sample, from expression.tsv</span></li>' % bar)
+    return ('<aside class="side legend"><h2>Legend</h2><p class="note">Click a tool for its setting, database '
+            'and what makes a hit.</p><ul>%s</ul></aside>' % "".join(items))
 
 
 def of_programs(m):
@@ -1207,13 +1202,14 @@ def build_protein(task):
                   % (sum(len(v) for v in counted_by_track.values()), n_more))
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
-    out.append('<div class="withside"><section><h2>What each tool found</h2>%s%s%s<p class="note">Each box is one hit with '
+    out.append('<div class="withside">' + legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
+    out.append('<section><h2>What each tool found</h2>%s%s%s<p class="note">Each box is one hit with '
                'E-value at most the slider\'s value; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
                'E-value first (ties: the leftmost first); "+N more" under a tool\'s name counts the rest. Hover or '
                'tap a box for the protein\'s full name, gene, species and Pfam families, and the scores; click it '
                'to see the residues. Wide proteins scroll sideways inside the box above.</p></section>'
                % (slider, "".join(blocks), toggle, TOP_N))
-    out.append('%s</div>' % legend_html(ctx, plddt is not None, bool(expr)))
+    out.append('</div>')
     out.append(expr)
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
     out.append('</main>%s' % ctx["footer"])
@@ -1407,6 +1403,8 @@ def main():
         shutil.rmtree(out)
 
     (out / "proteins").mkdir(parents=True)
+    # marks the folder as this script's from the start, so a build that stops halfway can be redone
+    (out / "summary.json").write_text('{"finished": false}\n')
     here = Path(__file__).resolve().parent
     shutil.copytree(here / "assets", out / "assets")
     hsh = hashlib.sha1()

@@ -94,11 +94,17 @@ header.wide,main.wide{max-width:1380px}
 .side li.off{color:#8a8a8a;padding:2px 0}
 .side li.off .pc{font-style:italic}
 @media (max-width:900px){.withside{display:block}.side{position:static}}
-.withside:has(.legend){grid-template-columns:minmax(0,1fr) 270px}
-.side.legend li{align-items:flex-start;margin:0 0 7px}
-.side.legend li>svg,.side.legend li>span:first-child{flex:0 0 12px;margin-top:3px}
-.side.legend .sub{display:block;color:#5a5a5a;font-size:12px}
-.side.legend li.off{color:#8a8a8a;margin-bottom:3px}
+/* protein page: the legend is the left column, so it is read before the drawing; on a phone it
+   comes first, above the drawing */
+.withside:has(.legend){grid-template-columns:200px minmax(0,1fr)}
+.side.legend li{align-items:flex-start;margin:0 0 4px}
+.side.legend li>svg,.side.legend summary>svg{flex:0 0 12px;margin-top:3px}
+.side.legend details{width:100%}
+.side.legend summary{display:flex;align-items:flex-start;gap:6px;cursor:pointer;list-style:none}
+.side.legend summary::-webkit-details-marker{display:none}
+.side.legend summary span{text-decoration:underline dotted #8a8a8a}
+.side.legend .sub{display:block;color:#5a5a5a;font-size:12px;margin:2px 0 6px 18px}
+.side.legend li.off{color:#8a8a8a}
 #t .pname{font-size:12px;color:#5a5a5a}
 .eslider{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:8px 0}
 .eslider label{font-weight:600}
