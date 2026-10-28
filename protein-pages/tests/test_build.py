@@ -160,13 +160,28 @@ def test_coverage_counts_programs_once():
     assert cov[0] == 1 and cov[7] == 2 and cov[14] == 1 and cov[15] == 0
 
 
+DATA = Path(__file__).resolve().parents[1] / "test_inputs" / "data"
+
+
 def test_alphabets_from_kmerseek_source():
-    src = Path("/Users/olga/code/kmerseek/src/rust/alphabets.rs")
-    if not src.exists():
-        return
-    al = build.parse_alphabets(src)
+    al = build.parse_alphabets(DATA / "kmerseek_alphabets.rs")
     assert al["hp_lehninger2"]["G"] == "h" and al["hp_lehninger2"]["S"] == "p"
     assert len(set(al["gbmr4"].values())) == 4
+
+
+def test_site_from_test_data(tmp_path):
+    """Build the 51-protein site from test_inputs/data and run check_site.py on it."""
+    import json
+    import subprocess
+    here = Path(build.__file__).resolve().parent
+    out = tmp_path / "site"
+    r = subprocess.run([sys.executable, str(here / "build.py"), str(DATA), "--out", str(out), "--jobs", "2"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    summary = json.loads((out / "summary.json").read_text())
+    assert summary["total"] == 51 and summary["programs_run"] == 5
+    r = subprocess.run([sys.executable, str(here / "tests" / "check_site.py"), str(out)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
 
 
 def test_agreement_with_tied_hits_and_unknown_targets():

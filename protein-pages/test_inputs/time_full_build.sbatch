@@ -35,7 +35,7 @@ for f in r:
         w.writerow([x.replace("\t", " ") for x in f])' > "$IN/kmerseek.tsv"
 zcat $S/botryllus-mhc-swissprot/db/swissprot/uniprot_sprot.fasta.gz > "$IN/swissprot.fasta"
 cp $S/protein-pages-test/inputs/hmmscan.domtblout "$IN/"
-cp "$HERE/test_inputs/run_settings.tsv" "$HERE/test_inputs/kmerseek_alphabets.rs" "$IN/"
+cp "$HERE/test_inputs/data/run_settings.tsv" "$HERE/test_inputs/data/kmerseek_alphabets.rs" "$IN/"
 ls -la "$IN"
 ml biology py-biopython/1.79_py39
 /usr/bin/time -v python3 "$HERE/build.py" "$IN" --out "$OUT/site" --jobs "$SLURM_CPUS_PER_TASK"

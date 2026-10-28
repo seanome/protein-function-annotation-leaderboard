@@ -45,6 +45,23 @@ The final input folder is `$SCRATCH/protein-pages-final/inputs`.
 All searches above were against Swiss-Prot without its 120 sea-squirt (Ascidiacea) entries,
 572,850 proteins, the reference of the dark-set run (`invertebrate-dark-set/reference/minus_Ascidiacea`).
 
+## The copy in this repository, `test_inputs/data/`
+
+`cut_test_data.py` made `data/` from the final input folder, so anyone can build the test
+site without Sherlock (`python build.py test_inputs/data --out site`). It keeps what build.py
+reads and gzips the files still over 20 MB:
+
+| File | Cut |
+|---|---|
+| `hmmscan.domtblout.gz` | every row of the 51 proteins; for the Swiss-Prot proteins, only domains with i-Evalue at most 0.001, the only ones build.py uses for a target's families (152,140 of 1,182,305 rows) |
+| `jackhmmer.out.gz` | the last of the three rounds of each query, the only one build.py reads |
+| `phmmer.out.gz` | none, gzipped |
+| every other file | none |
+
+The site built from `data/` is the same, page for page, as the site built from the full
+folder (checked on 2026-10-27 by comparing the pages with the build time and asset version
+removed).
+
 ## Not run for these proteins
 
 No output exists on the FUN proteome for MMseqs2 one round, Foldseek, ProstT5 + Foldseek,

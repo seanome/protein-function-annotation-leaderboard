@@ -103,6 +103,11 @@ IPS_EVALUE = {"Pfam", "SMART", "SUPERFAMILY", "Gene3D", "CDD", "NCBIfam", "TIGRF
 
 # ----------------------------------------------------------------------------- reading ----
 
+def opentext(path):
+    """A text file, or its gzipped copy when the name ends in .gz."""
+    return gzip.open(path, "rt") if str(path).endswith(".gz") else open(path)
+
+
 def read_fasta(path):
     seqs, name, buf = {}, None, []
     op = gzip.open if str(path).endswith(".gz") else open
@@ -188,7 +193,7 @@ def m8_hit(line, key):
 
 def parse_m8(path, key):
     out = {}
-    with open(path) as fh:
+    with opentext(path) as fh:
         for line in fh:
             if not line.strip() or line.startswith("#") or line.startswith("query\t"):
                 continue
@@ -202,7 +207,7 @@ def parse_m8(path, key):
 
 
 def domtbl_rows(path):
-    with open(path) as fh:
+    with opentext(path) as fh:
         for line in fh:
             if line.startswith("#") or not line.strip():
                 continue
@@ -264,7 +269,7 @@ def parse_hmmer_out(path, key, wanted):
             (mn, mf, ms, mt), (tn, tf, ts, tt) = block[0], block[1]
             per_q[(key, q, tgt, int(mf), int(mt), int(tf), int(tt))] = (ms, ts, int(mf), int(tf))
 
-    with open(path) as fh:
+    with opentext(path) as fh:
         for line in fh:
             if line.startswith("Query:"):
                 finish_block(); block = None
@@ -353,7 +358,7 @@ def parse_domtbl_pfam(path, proteins):
 
 def parse_interproscan(path, proteins):
     out, target_ann, names = {}, {}, {}
-    with open(path) as fh:
+    with opentext(path) as fh:
         for line in fh:
             f = line.rstrip("\n").split("\t")
             if len(f) < 9:
@@ -398,7 +403,7 @@ def parse_hhr(path):
     """One .hhr file: the hit table (query and template ranges, Prob, E-value) and, for each
     hit, the alignment of the query and template residues as hhsearch printed it."""
     query, hits, alns, cur = None, {}, {}, None
-    with open(path) as fh:
+    with opentext(path) as fh:
         lines = fh.read().splitlines()
     in_table = False
     for line in lines:
@@ -451,7 +456,7 @@ def parse_kmerseek(path):
     """kmerseek regions. Column names are used as they are in the file. Region coordinates in
     kmerseek's output are 0-based and end-exclusive, so 1 is added to the start."""
     out, meta = {}, {}
-    with open(path) as fh:
+    with opentext(path) as fh:
         rd = csv.reader(fh, delimiter="\t")
         head = next(rd)
         col = {c: i for i, c in enumerate(head)}
@@ -519,7 +524,7 @@ def parse_alphabets(path):
 
 
 def read_tsv_table(path):
-    with open(path) as fh:
+    with opentext(path) as fh:
         rd = csv.reader(fh, delimiter="\t")
         head = next(rd)
         return head, [r for r in rd if r]
@@ -1389,6 +1394,10 @@ def main():
     # again while the files are read; the records hold no cycles, so it is turned off.
     gc.disable()
     D = a.inputs
+
+    def inp(name):
+        """D/name, or D/name.gz when only the gzipped copy is there."""
+        return D / name if (D / name).exists() or not (D / (name + ".gz")).exists() else D / (name + ".gz")
     out = a.out
     if out.exists():
         # Only an empty folder or a site this script built (it holds summary.json) is replaced.
@@ -1407,7 +1416,7 @@ def main():
     ASSET_VER[0] = "?v=" + hsh.hexdigest()[:10] + datetime.datetime.now().strftime("%y%m%d%H%M%S")
 
     def stamp(name):
-        p = D / name
+        p = inp(name)
         if not p.exists():
             return (name, None, None)
         if p.is_dir():
@@ -1416,26 +1425,26 @@ def main():
             mt = max((f.stat().st_mtime for f in files), default=p.stat().st_mtime)
             return (name + "/ (%d .hhr files)" % len(files), size, datetime.datetime.fromtimestamp(mt).strftime("%Y-%m-%d %H:%M"))
         st = p.stat()
-        return (name, st.st_size, datetime.datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M"))
+        return (p.name, st.st_size, datetime.datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M"))
 
     names_read = ["proteins.fasta", "swissprot.fasta"] + [t["file"] for t in TRACKS] + [
         "phmmer.out", "jackhmmer.out", "hmmscan.out", "protein_names.tsv", "plddt.tsv", "expression.tsv", "leaderboard.tsv", "run_settings.tsv", "kmerseek_alphabets.rs"]
     inputs = [stamp(n) for n in names_read]
 
     prots = {}
-    for h, s in read_fasta(D / "proteins.fasta").items():
+    for h, s in read_fasta(inp("proteins.fasta")).items():
         s = s.rstrip("*")
         prots[h.split()[0]] = dict(seq=s, length=len(s))
     # Optional: a name for some of your proteins (ID, tab, name), shown on its page and searched.
     prot_names = {}
-    if (D / "protein_names.tsv").exists():
-        for line in open(D / "protein_names.tsv"):
+    if inp("protein_names.tsv").exists():
+        for line in opentext(inp("protein_names.tsv")):
             f = line.rstrip("\n").split("\t")
             if len(f) >= 2 and f[0] in prots and not line.startswith("#"):
                 prot_names[f[0]] = f[1]
     entry_names, targets, target_info = {}, {}, {}
-    if (D / "swissprot.fasta").exists():
-        for h, s in read_fasta(D / "swissprot.fasta").items():
+    if inp("swissprot.fasta").exists():
+        for h, s in read_fasta(inp("swissprot.fasta")).items():
             acc = accession(h.split()[0])
             entry, desc, gene, org = swissprot_header(h)
             if entry:
@@ -1446,15 +1455,15 @@ def main():
     print("read %d proteins, %d Swiss-Prot sequences (%.0f s)" % (len(prots), len(targets), time.time() - t_start), flush=True)
 
     for key in ("phmmer", "jackhmmer", "hmmscan"):
-        if (D / (key + ".out")).exists():
+        if inp(key + ".out").exists():
             n0 = len(HMMER_ALN)
-            parse_hmmer_out(D / (key + ".out"), key, set(prots))
+            parse_hmmer_out(inp(key + ".out"), key, set(prots))
             print("  %s.out: %d alignments (%.0f s)" % (key, len(HMMER_ALN) - n0, time.time() - t_start), flush=True)
     hits, run_status, target_ann, names = {}, {}, {}, {}
     kmer_meta = {}
     hmmscan_target = {}
     for t in TRACKS:
-        p = D / t["file"]
+        p = inp(t["file"])
         if not p.exists():
             run_status[t["key"]] = "not run"
             continue
@@ -1493,8 +1502,8 @@ def main():
     databases = {t["key"]: t["database"] for t in TRACKS}
     if kmer_meta.get("moltype"):
         settings["kmerseek"] = "alphabet %s, k = %s" % (", ".join(sorted(kmer_meta["moltype"])), ", ".join(sorted(kmer_meta["ksize"])))
-    if (D / "run_settings.tsv").exists():
-        head, rws = read_tsv_table(D / "run_settings.tsv")
+    if inp("run_settings.tsv").exists():
+        head, rws = read_tsv_table(inp("run_settings.tsv"))
         for r in rws:
             d = dict(zip(head, r))
             if d.get("track") in settings:
@@ -1504,8 +1513,8 @@ def main():
                     databases[d["track"]] = d["database"]
 
     leaderboard = {}
-    if (D / "leaderboard.tsv").exists():
-        head, rws = read_tsv_table(D / "leaderboard.tsv")
+    if inp("leaderboard.tsv").exists():
+        head, rws = read_tsv_table(inp("leaderboard.tsv"))
         for r in rws:
             d = dict(zip(head, r))
             k = d.get("track") or d.get("tool")
@@ -1515,19 +1524,19 @@ def main():
                     d.get("date_read", "?"), d.get("fmax", "?"), d.get("cost_per_1000_queries", "?"))
 
     plddt = {}
-    if (D / "plddt.tsv").exists():
-        with open(D / "plddt.tsv") as fh:
+    if inp("plddt.tsv").exists():
+        with opentext(inp("plddt.tsv")) as fh:
             for line in fh:
                 f = line.rstrip("\n").split("\t")
                 if len(f) >= 2 and f[0] in prots:
                     plddt[f[0]] = [float(x) for x in f[1].split(",") if x]
     expression = None
-    if (D / "expression.tsv").exists():
-        head, rws = read_tsv_table(D / "expression.tsv")
+    if inp("expression.tsv").exists():
+        head, rws = read_tsv_table(inp("expression.tsv"))
         expression = (head[1:], {r[0]: [fnum(x) for x in r[1:]] for r in rws})
 
     alphabets = {}
-    for cand in (D / "kmerseek_alphabets.rs",):
+    for cand in (inp("kmerseek_alphabets.rs"),):
         if cand.exists():
             alphabets = parse_alphabets(cand)
     used = kmer_meta.get("moltype", set())
