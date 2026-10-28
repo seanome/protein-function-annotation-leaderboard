@@ -1,0 +1,29 @@
+# Build the protein pages from the 51-protein test set, run the tests and the site checks, and
+# keep the built site as a downloadable artifact of the run. The repository's GitHub Pages
+# site is served from a branch, not from a workflow, so nothing here deploys.
+name: protein pages
+on:
+  push:
+    paths: ["protein-pages/**", ".github/workflows/protein-pages.yml"]
+  pull_request:
+    paths: ["protein-pages/**", ".github/workflows/protein-pages.yml"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: protein-pages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install biopython pytest
+      - run: python -m pytest -q tests/
+      - run: python build.py test_inputs/data --out site --jobs 2
+      - run: python tests/check_site.py site
+      - run: python tests/check_boxes.py site test_inputs/data 9 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: protein-pages-site
+          path: protein-pages/site/
