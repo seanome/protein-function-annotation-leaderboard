@@ -20,13 +20,13 @@ import build  # noqa: E402
 
 LEGEND = {c.lower() for c in [f["color"] for f in build.PROGRAMS.values()]
           + [build.PROTEIN_LINE, build.AGREEMENT, build.EXPRESSION] + [p[2] for p in build.PLDDT]}
-NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "#c3c2b7"}  # #c3c2b7: frame of the residue panel's map
+NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "#c3c2b7"}  # #c3c2b7: outline of a residue in neither class
 
 
 STATUS_WORDS = {"none": "", "one": "", "agree": "They agree on",
                 "disagree": "name different Pfam families",
-                "overlap_unknown": "no Pfam family is known",
-                "apart": "do not overlap"}
+                "overlap_unknown": "no Pfam family is known on the matched part",
+                "apart": "different parts of the protein"}
 
 
 def SENT_LEAD(n, m):
@@ -74,6 +74,8 @@ def main():
         else:
             ok = sent.startswith(lead) and (status == "one") == (n == 1)
             ok = ok and STATUS_WORDS[status] in sent
+            if n == 1:  # with one program the sentence stops after the count
+                ok = ok and sent == lead + " reports a hit."
         if not ok:
             mism.append((pid, status, n, sent))
     print("3. pages whose sentence disagrees with the index (%d rows read):" % len(rows), mism or "none")

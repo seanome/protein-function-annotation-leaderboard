@@ -4,7 +4,7 @@
      #6A3D9A  structure programs (Foldseek, ProstT5 + Foldseek)
      #C0392B  k-mer programs (kmerseek)
      #3D3D3D  Pfam-model scans (hmmscan, InterProScan) and the Pfam domains in the residue map
-     #C8C8C8  the protein's backbone line
+     #C8C8C8  a protein's backbone line (yours in the drawing; both proteins in the residue map)
      #000000  the "programs with a hit" line
      #0053D6 #65CBF3 #FFDB13 #FF7D45  pLDDT bins, AlphaFold's own colours (only with plddt.tsv)
    Residue panel (its own legend above the residues):
@@ -12,9 +12,10 @@
      #d9e7f8 fill, #2a78d6 edge, #123b6b letter: a polar residue
      #c3c2b7  outline of a residue in neither class
    Text and page (not data):
-     #1a1a1a  text ink; also the outline of an expression bar, whose shape marks it
+     #1a1a1a  text ink; also the outline of an expression bar, whose shape marks it, and the
+              sample boxes of the legend's E-value key, whose fading is the point
      #5a5a5a  secondary text; #52514e secondary text in the residue panel
-     #8a8a8a  a program that was not run
+     #8a8a8a  a program that was not run; the dotted underline of a legend line that opens
      #1f4e8c  links
      #e3e3e3  rule between table rows and between the drawing's rows (they separate data)
      #f7f7f5  background behind the aligned residues

@@ -33,9 +33,11 @@ TOP_N = 5  # hits drawn per track before "show all"
 
 # Colour is the kind of program (three hues and a dark grey); inside a kind, the box's shape
 # tells the programs apart. Checked in greyscale and with a deuteranopia simulation (Machado
-# et al. 2009): the four colours differ by at least 7 in lightness (CIE L*) and by at least 23
-# in colour difference (CIE76) under deuteranopia. None is a pLDDT colour, and none is the
-# orange or blue of the residue panel's hydrophobic and polar classes.
+# et al. 2009, severity 1, applied in linear RGB). In normal vision the four differ by at least
+# 7 in lightness (CIE L*). Under deuteranopia they differ by at least 24 in colour (CIE76), but
+# sequence search and k-mer are then only 1 apart in lightness, so in greyscale those two are
+# told apart by hue alone, and by the row each box sits in. None is a pLDDT colour, and none is
+# the orange or blue of the residue panel's hydrophobic and polar classes.
 CATEGORIES = {
     "seq": {"name": "sequence search", "color": "#008B7A"},
     "struct": {"name": "structure", "color": "#6A3D9A"},
@@ -1045,7 +1047,8 @@ def header_sentence(n, status, agreed, names, m=8):
     if status == "agree":
         return s + " They agree on %s." % family_label(agreed, names)
     if status == "overlap_unknown":
-        return s + " Their hits overlap, but no Pfam family is known for the Swiss-Prot proteins they match."
+        return s + (" Their hits overlap, but for one of them no Pfam family is known on the matched part of the "
+                    "Swiss-Prot protein.")
     if status == "disagree":
         fams = DISAGREE_NAMES[0]
         # "Pkinase PF00069 (phmmer)": name and accession without a second pair of brackets
@@ -1055,7 +1058,8 @@ def header_sentence(n, status, agreed, names, m=8):
                            for n, ps in fams[:6])
         more = " and %d more" % (len(fams) - 6) if len(fams) > 6 else ""
         return s + " Their hits overlap but name different Pfam families: %s%s." % (listed, more)
-    return s + " Their hits are on different parts of the protein and do not overlap."
+    return s + (" Their hits are on different parts of the protein: no two programs' hits share at least half "
+                "of the shorter one.")
 
 
 
@@ -1174,7 +1178,7 @@ def build_protein(task):
                     d["n"], d["g"], d["o"] = info
             d["f"] = None if h["_names"] is None else [family_full(n, ctx["names"]) for n in sorted(h["_names"])]
             bit = 1 << PROGRAM_ORDER.index(t["program"])
-            for txt in [name, h["target"], d.get("n"), d.get("g")] + (d["f"] or []):
+            for txt in [name, h["target"], d.get("n"), d.get("g"), d.get("o")] + (d["f"] or []):
                 if txt:
                     terms[txt] = terms.get(txt, 0) | bit
             if gname and counts(h):

@@ -13,9 +13,16 @@ plus InterProScan.
 ## Two E-value thresholds
 
 - A hit is **drawn** when its E-value is at most 10, the `-E 10` the searches were run with.
-- A hit **counts** when its E-value is at most 0.001 (`--count-at`, a power of 10). Counting
-  means: the sentence at the top of a protein page, the "programs with a hit" line, the
-  index page's numbers and table, and `summary.json`. hhsearch hits also need Prob at least 50.
+- A hit **counts** when its E-value is at most 0.001 (`--count-at`, a power of 10). Counted
+  hits make the sentence at the top of a protein page, the "programs with a hit" line, the
+  index page's seven numbers, the table's program count, Pfam family, small line and gene
+  column, and `summary.json`.
+- Two things use every drawn hit instead: the table's "Best E-value, any tool" column, with
+  the index slider that filters on it, and the search box. So a protein with no counted hit
+  can still show a best E-value, such as BHF's 1.2e-03.
+- hhsearch hits with Prob below 50 are not drawn at all. An InterProScan match from a member
+  database whose score is not an E-value (PRINTS, PROSITE and others) is drawn and counts at
+  any threshold, unless it is a coil, disorder, membrane or signal-peptide prediction.
 
 Each protein page has an E-value slider that starts at 0.001. Moving it up draws weaker hits,
 up to 10; moving it down draws fewer. The sentence and the index do not move with it.
@@ -30,7 +37,8 @@ From top to bottom:
    run the sentence says "of 8 programs". There are 10 rows but 8 programs: MMseqs2 run once
    and run for three rounds is one program, and Foldseek on predicted structures and ProstT5 +
    Foldseek is another. Two runs of one program are not two opinions, so they count once.
-   ("Family" on these pages always means a Pfam protein family.)
+   ("Family" on these pages means a Pfam protein family, or an InterPro entry where
+   InterProScan gives one.)
    Hits of two programs **overlap** when they share at least half of the shorter hit. For a
    search hit, the family is the Pfam domain on the matched part of the Swiss-Prot protein,
    read from InterProScan's output on that protein, or hmmscan's if InterProScan has none.
@@ -38,9 +46,14 @@ From top to bottom:
    - **agree**: "They agree on MHC_I (PF00129)." Overlapping hits name the same family.
    - **disagree**: "Their hits overlap but name different Pfam families: A (phmmer),
      B (hmmscan with Pfam)." Overlapping hits both name a family, and none is shared.
-   - **overlap, but no family known**: "Their hits overlap, but no Pfam family is known for
-     the Swiss-Prot proteins they match."
-   - **apart**: "Their hits are on different parts of the protein and do not overlap."
+   - **overlap, but no family known**: "Their hits overlap, but for one of them no Pfam
+     family is known on the matched part of the Swiss-Prot protein." The Swiss-Prot protein
+     may have no Pfam output, or its domains may lie outside the matched part.
+   - **apart**: "Their hits are on different parts of the protein: no two programs' hits
+     share at least half of the shorter one." They may still touch.
+   The first of these that holds is used, in this order: agree, disagree, overlap but no
+   family known, apart. So an "agree" protein can also have overlapping hits that name other
+   families; the page lists the other families that also meet the rule.
    With one program there is nothing to compare, and the sentence stops after the count.
 2. The legend, in a column left of the drawing (above it on a phone), so it is read first.
    One line per tool, its mark and its name; a click opens what makes a hit, the setting, the
@@ -69,7 +82,10 @@ From top to bottom:
 | E-value | box opacity, on a log scale: 0.25 at E-value 10, full at 1e-30 or below |
 | The protein | a thin light grey line `#C8C8C8` |
 
-Three hues and one grey, checked in greyscale and with a deuteranopia simulation. A label
+Three hues and one grey. In normal vision they differ by at least 7 in lightness (CIE L*).
+Under a deuteranopia simulation (Machado et al. 2009) they differ by at least 24 in colour
+(CIE76), but the sequence-search teal and the kmerseek red are then nearly the same lightness,
+so in greyscale those two are told apart by their rows, not their colour. A label
 goes inside its box when it fits; otherwise it goes beside the box, joined to it by a thin
 line in the box's colour, and is never cut or made smaller. `assets/site.css` lists every
 colour on the pages and its one meaning.
