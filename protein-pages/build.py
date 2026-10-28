@@ -945,8 +945,8 @@ def legend_html(ctx, has_plddt, has_expr):
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
         items.append('<li><span></span><div><b>pLDDT</b> AlphaFold\'s confidence in each residue, 0 to 100: %s</div></li>' % sw)
     step = svg_inline('<path d="M0,9 L4,9 L4,2 L8,2 L8,6 L12,6" fill="none" stroke="%s" stroke-width="1.4"/>' % AGREEMENT, 12, 10)
-    items.append('<li>%s<div><b>Programs with a hit</b> at each residue, 0 to 8, counting each program once. '
-                 'Faint lines mark 0, 2, 4, 6 and 8.</div></li>' % step)
+    items.append('<li>%s<div><b>Programs with a hit</b> at each residue, 0 to %d (the programs run), counting each '
+                 'program once.</div></li>' % (step, ctx["n_run"]))
     if has_expr:
         bar = svg_inline('<rect x="0" y="2" width="12" height="6" fill="%s"/>' % EXPRESSION, 12, 10)
         items.append('<li>%s<div>Expression of this protein\'s gene in each sample, from expression.tsv.</div></li>' % bar)
@@ -954,10 +954,16 @@ def legend_html(ctx, has_plddt, has_expr):
             'output, drawn over the residues of this protein it covers.</p><ul>%s</ul></aside>' % "".join(items))
 
 
-def header_sentence(n, status, agreed, names):
+def of_programs(m):
+    """'of 8 programs' when every program was run, else 'of the 5 programs run'."""
+    return "of 8 programs" if m == 8 else "of the %d programs run" % m
+
+
+def header_sentence(n, status, agreed, names, m=8):
+    """The sentence at the top of a protein page. m: programs with at least one input file."""
     if n == 0:
-        return "No tool reports a hit."
-    s = "%d of 8 programs report%s a hit." % (n, "s" if n == 1 else "")
+        return "No tool reports a hit." if m == 8 else "None of the %d programs run reports a hit." % m
+    s = "%d %s report%s a hit." % (n, of_programs(m), "s" if n == 1 else "")
     if n == 1:
         return s
     if status == "agree":
@@ -1159,7 +1165,7 @@ def build_protein(task):
                              % (esc(s), wpct, "missing" if v is None else "%g" % v))
             expr = '<section><h2>Expression</h2><p class="note">Values as in expression.tsv (count or TPM, whichever the file holds); bar length is relative to this protein\'s highest sample.</p>%s</section>' % "".join(items)
 
-    sentence = header_sentence(len(progs), status, agreed, ctx["names"])
+    sentence = header_sentence(len(progs), status, agreed, ctx["names"], ctx["n_run"])
     others = AGREE_OTHERS[0]
     other_note = ""
     if others:
@@ -1297,11 +1303,11 @@ def index_page(rows, ctx):
     out.append('<div class="withside"><section><h2>Proteins</h2><p class="note">One page per protein of your proteome. On each page, every '
                'tool\'s hits are drawn on the same ruler of residue positions. Each program counts once, even when it was '
                'run twice (MMseqs2 one round and three rounds; Foldseek on predicted structures and ProstT5 + Foldseek), '
-               'so there are 8 programs for 10 rows. A hit counts when its E-value is at most %s '
+               'so there are 8 programs for 10 rows; %d of the 8 were run on this proteome. A hit counts when its E-value is at most %s '
                '(hhsearch: also Prob at least 50); the protein pages also draw weaker hits, up to E-value %s. "Agree" means two hits from different programs overlap by '
                'at least half of the shorter one and name the same Pfam family or InterPro entry. The small '
                'picture is the "programs with a hit" line of each protein page: its height at each point is the '
-               'number of programs (0 to 8) with a hit over that part of the protein, squeezed to the same 60-pixel width '
+               'number of programs (0 to %d) with a hit over that part of the protein, squeezed to the same 60-pixel width '
                'for every protein whatever its length. "Best E-value, any tool" is the lowest E-value any tool printed '
                '(each tool computes its own, so they are not on one scale); 0 means the tool printed 0.</p>'
                '<div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off" '
@@ -1316,7 +1322,7 @@ def index_page(rows, ctx):
                'protein is listed, including those with no hit; moves in steps of 10 times.</span></div>'
                '<label class="unnamed"><input id="unnamed" type="checkbox"> Only proteins with no gene name in '
                'their ID (FUN…_FUN…), %s of %s</label>'
-               '<p id="count" class="note"></p>' % (fmt_thr(COUNT_E), fmt_thr(E_MAX), fmt_thr(E_MAX), "".join(filt), lo_idx,
+               '<p id="count" class="note"></p>' % (ctx["n_run"], fmt_thr(COUNT_E), fmt_thr(E_MAX), ctx["n_run"], fmt_thr(E_MAX), "".join(filt), lo_idx,
  "{:,}".format(sum(1 for r in rows if not r["gname"])), "{:,}".format(total)))
     trs = []
     for r in rows:
@@ -1335,8 +1341,8 @@ def index_page(rows, ctx):
         trs[-1] = trs[-1][:-5] + gcell + '<td class="m"></td></tr>'
         trs[-1] = trs[-1].replace("<tr ", '<tr data-n="%d" ' % (1 if r["gname"] else 0), 1)
     out.append('<div class="tablewrap"><table id="t"><thead><tr><th data-k="0" data-t="s">Protein</th><th data-k="1">Length (aa)</th>'
-               '<th data-k="2">Programs with a hit (of 8)</th><th data-k="3" data-t="s">Pfam family they agree on</th><th data-k="4">Best E-value, any tool</th>'
-               '<th>Programs with a hit, along the protein</th><th data-k="6">Gene name in the ID, and the programs whose hits are on that gene</th><th class="m">What the search matched</th></tr></thead><tbody>%s</tbody></table></div></section>%s</div>' % ("".join(trs), aside))
+               '<th data-k="2">Programs with a hit (%s)</th><th data-k="3" data-t="s">Pfam family they agree on</th><th data-k="4">Best E-value, any tool</th>'
+               '<th>Programs with a hit, along the protein</th><th data-k="6">Gene name in the ID, and the programs whose hits are on that gene</th><th class="m">What the search matched</th></tr></thead><tbody>%s</tbody></table></div></section>%s</div>' % (esc(of_programs(ctx["n_run"])), "".join(trs), aside))
     # The search table: every distinct text once, then for each protein (in table order) pairs of
     # [text number, program bit mask]. Kept in its own file so the table itself stays small.
     vocab, pos, per_row = [], {}, []
@@ -1523,12 +1529,13 @@ def main():
     alphabets = {k: v for k, v in alphabets.items() if k in used}
 
     program_run = {f: any(run_status[t["key"]] == "run" for t in TRACKS if t["program"] == f) for f in PROGRAM_ORDER}
+    n_run = sum(program_run.values())  # M in "N of the M programs run"
     built = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     CTX.update(dict(proteins=prots, prot_names=prot_names, hits=hits, target_ann=target_ann, names=names, entry_names=entry_names,
                     target_info=target_info,
                     targets=targets, run_status=run_status, settings=settings, databases=databases,
                     leaderboard=leaderboard, plddt=plddt, expression=expression, alphabets=alphabets,
-                    out=out, footer="", program_run=program_run))
+                    out=out, footer="", program_run=program_run, n_run=n_run))
     CTX["footer"] = footer(inputs, built)
     CTX["n_shards"], n_used = write_target_shards(out, hits, targets)
     print("wrote %d Swiss-Prot sequences into %d files (%.0f s)" % (n_used, CTX["n_shards"], time.time() - t_start), flush=True)
@@ -1543,7 +1550,8 @@ def main():
     secs = time.time() - t_start
     CTX["footer"] = footer(inputs, built, secs)
     cats, only = index_page(rows, CTX)
-    summary = dict(count_at=COUNT_E, drawn_up_to=E_MAX, total=len(rows), **cats, only_program=only,
+    summary = dict(count_at=COUNT_E, drawn_up_to=E_MAX, programs_run=n_run, total=len(rows),
+ **cats, only_program=only,
                    run_status=run_status, seconds=round(time.time() - t_start, 1))
 
     (out / "summary.json").write_text(json.dumps(summary, indent=1))

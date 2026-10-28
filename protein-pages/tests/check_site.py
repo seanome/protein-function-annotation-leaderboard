@@ -7,7 +7,8 @@
    line, the agreement line, pLDDT and expression colours) or white / text ink.
 2. The six class numbers on the index add up to the total: no hit, exactly one program, agree,
    disagree, overlap but no family known, apart. summary.json holds the same numbers.
-3. Each protein page's sentence agrees with its row in the index table.
+3. Each protein page's sentence agrees with its row in the index table, including "N of the M
+   programs run" with M the programs that have an input file.
 """
 import json
 import re
@@ -28,8 +29,11 @@ STATUS_WORDS = {"none": "", "one": "", "agree": "They agree on",
                 "apart": "do not overlap"}
 
 
-def SENT_LEAD(n):
-    return "No tool reports a hit." if n == 0 else "%d of 8 programs" % n
+def SENT_LEAD(n, m):
+    """How the sentence starts for n programs with a hit, of m run (build.header_sentence)."""
+    if n == 0:
+        return "No tool reports a hit." if m == 8 else "None of the %d programs run" % m
+    return "%d %s" % (n, build.of_programs(m))
 
 
 def main():
@@ -64,7 +68,7 @@ def main():
         s = (site / "proteins" / (pid + ".html")).read_text()
         sent = re.search(r'<p class="summary">(.*?)</p>', s).group(1)
         n = int(n)
-        lead = SENT_LEAD(n)
+        lead = SENT_LEAD(n, summary["programs_run"])
         if n == 0:
             ok = sent.startswith(lead) and status == "none"
         else:

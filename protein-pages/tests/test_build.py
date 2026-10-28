@@ -178,3 +178,9 @@ def test_agreement_with_tied_hits_and_unknown_targets():
     for h in (a, b, c):
         h["_names"] = build.target_names(h, {})
     assert build.agreement([a, b, c], {})[1] == "overlap_unknown"
+
+
+def test_sentence_counts_programs_run():
+    assert build.header_sentence(2, "apart", None, {}, 5).startswith("2 of the 5 programs run report a hit.")
+    assert build.header_sentence(1, "one", None, {}, 8) == "1 of 8 programs reports a hit."
+    assert build.header_sentence(0, "none", None, {}, 5) == "None of the 5 programs run reports a hit."
