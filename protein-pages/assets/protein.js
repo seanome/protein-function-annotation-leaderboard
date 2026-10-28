@@ -300,13 +300,15 @@
   const cssClass = (c) => { const k = classOf(c); return k === "h" || k === "p" ? k : (k ? "o" : "x"); };
   const similar = (a, b) => a !== "-" && b !== "-" && B62[idx(a.toUpperCase())][idx(b.toUpperCase())] > 0;
 
-  function stats(a) {
+  // Counts over the shown alignment: identical columns, more similar (BLOSUM62 above 0; for
+  // kmerseek, the same class in its alphabet), and columns with a gap.
+  function stats(a, kmer) {
     let ident = 0, sim = 0, gaps = 0;
     for (let i = 0; i < a.q.length; i++) {
       const x = a.q[i], y = a.t[i] || "-";
       if (x === "-" || y === "-") { gaps++; continue; }
       if (x.toUpperCase() === y.toUpperCase()) ident++;
-      else if (similar(x, y)) sim++;
+      else if (kmer ? classOf(x) && classOf(x) === classOf(y) : similar(x, y)) sim++;
     }
     return { cols: a.q.length, ident, sim, gaps };
   }
@@ -413,11 +415,6 @@
     }
     const tlen = h.tl || (tseq ? tseq.length : null);
     let statLine = `<p class="stats">${scoreBits}`;
-    if (a && a.q) {
-      const st = stats(flank ? { q: a.q.slice(flank[0], a.q.length - flank[1]), t: a.t.slice(flank[0], a.t.length - flank[1]) } : a);
-      statLine += ` · <b>${st.ident}</b> of ${st.cols} columns identical (${pct(st.ident, st.cols)}%)`;
-      statLine += kmer ? "" : ` · ${st.sim} more similar (BLOSUM62 score above 0) · ${st.gaps} gap columns`;
-    }
     statLine += ` · your protein ${h.q[0]}-${h.q[1]} of ${q.length} aa (${pct(h.q[1] - h.q[0] + 1, q.length)}%)`;
     if (h.r) statLine += ` · ${esc(tname)} ${Math.min(...h.r)}-${Math.max(...h.r)}` + (tlen ? ` of ${tlen} aa (${pct(Math.abs(h.r[1] - h.r[0]) + 1, tlen)}%)` : "");
     html += statLine + "</p>";
@@ -430,6 +427,11 @@
       }
       leg.push(`<span><b class="mono">A</b> bold: the same residue in both</span>`);
       leg.push(kmer ? `<span><b class="mono">|</b> same residue, <b class="mono">+</b> same class</span>` : `<span><b class="mono">|</b> same residue, <b class="mono">+</b> similar (BLOSUM62 above 0), <b class="mono">-</b> gap</span>`);
+      const st = stats(flank ? { q: a.q.slice(flank[0], a.q.length - flank[1]), t: a.t.slice(flank[0], a.t.length - flank[1]) } : a, kmer);
+      right += `<p class="asum"><b>${st.ident} of ${st.cols}</b> aligned columns identical (${pct(st.ident, st.cols)}%), ` +
+        `${st.sim} more ${kmer ? `in the same ${esc(ALPHA_NAME)} class` : "similar (BLOSUM62 score above 0)"}, ` +
+        `${st.gaps} gap column${st.gaps === 1 ? "" : "s"}${flank ? " (the faded flanks not counted)" : ""}</p>`;
+      right += `<p class="asrc">Source: ${esc(src.replace(/\.$/, ""))}.</p>`;
       right += `<div class="alegend">${leg.join("")}</div>`;
       let qi = a.qs, ti = a.ts, body = "";
       for (let st = 0; st < a.q.length; st += 60) {
@@ -437,7 +439,6 @@
         body += c.html; qi = c.qi; ti = c.ti;
       }
       right += `<div class="seqs">${body}</div>`;
-      right += `<p class="note">Alignment: ${esc(src.replace(/\.$/, ""))}.</p>`;
       if (!kmer && h.k !== "hhsearch" && h.k !== "hmmscan") {
         const qe = a.qs + a.q.replace(/-/g, "").length - 1;
         if (a.qs > h.q[0] || qe < h.q[1]) right += `<p class="note">This alignment covers residues ${a.qs}-${qe} of your protein; the tool reported ${h.q[0]}-${h.q[1]}.</p>`;
