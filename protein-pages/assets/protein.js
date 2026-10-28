@@ -2,7 +2,7 @@
 // PAGE is set by the page: the protein sequence (q), the drawing scale (px, w), the hits
 // (k: track, l: label, q: range on this protein, s: score values, t: target, r: range on the
 // target, a: alignment if made at build time, m: kmerseek alphabet), score names per track,
-// kmerseek's class tables (alpha) and the number of Swiss-Prot sequence files (shards).
+// kmerseek's class tables (alpha) and the number of Swiss-Prot sequence files (tseq_files).
 (function () {
   const tip = document.getElementById("tip");
   const panel = document.getElementById("panel");
@@ -205,7 +205,7 @@
   function shardOf(acc) {
     let h = 0;
     for (const ch of acc) h = (Math.imul(h, 31) + ch.charCodeAt(0)) >>> 0;
-    return h % PAGE.shards;
+    return h % PAGE.tseq_files;
   }
   const loading = {};
   function targetSeq(acc) {

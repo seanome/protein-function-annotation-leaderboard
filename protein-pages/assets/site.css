@@ -172,3 +172,4 @@ header.wide,main.wide{max-width:1380px}
 .side.legend .kind{font-size:12px;margin:0 0 4px;color:var(--ink)}
 .side.legend .kk{display:inline-flex;align-items:center;gap:3px;margin-right:8px;white-space:nowrap}
 .side.legend .kk i{display:inline-block;width:10px;height:10px;border-radius:2px}
+.lead{margin:0 0 6px;font-weight:600}

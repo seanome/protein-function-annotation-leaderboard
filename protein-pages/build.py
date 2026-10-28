@@ -1279,11 +1279,12 @@ def build_protein(task):
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
     out.append('<div class="withside">' + legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
-    out.append('<section><h2>What each tool found</h2>%s%s%s<p class="note">Each box is one hit with '
+    out.append('<section><h2>What each tool found</h2><p class="lead">Each box is one hit, at the position the tool '
+               'reported on your protein.</p>%s%s%s<p class="note">A box is drawn for each hit with '
                'E-value at most the slider\'s value; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
                'E-value first (ties: the leftmost first); "+N more" under a tool\'s name counts the rest. Hover or '
                'tap a box for the protein\'s full name, gene, species and Pfam families, and the scores; click it '
-               'to see the residues. Wide proteins scroll sideways inside the box above.</p></section>'
+               'to see the residues. A long protein\'s drawing scrolls sideways.</p></section>'
                % (slider, "".join(blocks), toggle, TOP_N))
     out.append('</div>')
     out.append(expr)
@@ -1294,7 +1295,7 @@ def build_protein(task):
         tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], shape=PROGRAMS[t["program"]]["shape"],
                                cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},
         pfam_color=CATEGORIES["pfam"]["color"],
-        shards=ctx["n_shards"])
+        tseq_files=ctx["n_shards"])
     out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script></body></html>'
                % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), ASSET_VER[0]))
     (ctx["out"] / "proteins" / (safe(pid) + ".html")).write_text("".join(out))
