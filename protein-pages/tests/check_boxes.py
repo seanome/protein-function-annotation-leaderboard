@@ -36,12 +36,13 @@ def main():
                 h = dict(h, a=alns.get(str(i)))
             if h["k"] in ("mmseqs2_3rounds", "phmmer", "jackhmmer", "kmerseek") and i < 200:
                 boxes.append((page.stem, h, data))
+    fails = []
     for pid, h, data in rng.sample(boxes, n):
         print("=" * 70)
         print(pid, h["k"], h["l"], "page: query %s target %s %s scores %s" % (h["q"], h["t"], h["r"], h["s"]))
         f = {"mmseqs2_3rounds": "mmseqs2_3rounds.m8", "phmmer": "phmmer.domtblout",
              "jackhmmer": "jackhmmer.domtblout", "kmerseek": "kmerseek.tsv"}[h["k"]]
-        for line in open(inp / f):
+        for line in build.opentext(inp / f):
             if pid not in line or h["t"] not in line:
                 continue
             c = line.split("\t") if f.endswith((".m8", ".tsv")) else line.split()
@@ -57,6 +58,7 @@ def main():
         else:
             if h["k"] != "kmerseek":
                 print("input line: NOT FOUND")
+                fails.append((pid, h["l"], "no input line"))
         a = h.get("a")
         if a:
             ident = sum(1 for x, y in zip(a["q"], a["t"]) if x != "-" and x.upper() == y.upper())
@@ -68,6 +70,8 @@ def main():
                   "target %d-%d matches swissprot.fasta: %s; inside the box: %s" % (
                       a.get("src", "")[:40], ident, len(a["q"]), a["qs"], a["qs"] + len(qres) - 1, q_ok,
                       a["ts"], a["ts"] + len(tres) - 1, t_ok, inside))
+            if not (q_ok and t_ok and inside):
+                fails.append((pid, h["l"], "alignment"))
         elif h["k"] == "kmerseek":
             q = prots[pid][h["q"][0] - 1:h["q"][1]]
             t = sp[h["t"]][h["r"][0] - 1:h["r"][1]]
@@ -80,8 +84,13 @@ def main():
                               d["region_start"], d["region_end"], d["target_start"], d["target_end"],
                               d["region_subseq"] == q, d["target_subseq"] == t,
                               sum(x == y for x, y in zip(q, t)), len(q)))
+                    if not (d["region_subseq"] == q and d["target_subseq"] == t):
+                        fails.append((pid, h["l"], "kmerseek residues"))
         else:
             print("no alignment stored (beyond the best 5; the page aligns it in the browser)")
+    print("=" * 70)
+    print("%d of %d boxes checked failed%s" % (len(fails), n, (": %s" % fails) if fails else ""))
+    sys.exit(1 if fails else 0)
 
 
 if __name__ == "__main__":
