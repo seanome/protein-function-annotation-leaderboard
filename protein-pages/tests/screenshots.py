@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Full-page screenshots of the index and some protein pages, 1280 px wide, light theme.
 
-    python tests/screenshots.py SITE_DIR OUT_DIR PROTEIN_ID [PROTEIN_ID ...]
+    python tests/screenshots.py SITE_DIR OUT_DIR PROTEIN_ID[:ROW] [PROTEIN_ID[:ROW] ...]
 
-For each protein it saves the page, and the page with the residue panel of its first box open.
+For each protein it saves the page, and the page with the residue panel of its first box open
+(the first box of row ROW, such as kmerseek or hmmscan, when one is given).
 The index is also saved at phone width (375 px). Needs Playwright and Google Chrome.
 """
 import functools
@@ -33,11 +34,12 @@ def main():
         page.goto(base + "index.html")
         page.wait_for_timeout(800)
         page.screenshot(path=str(out / "0_index.png"), full_page=True)
-        for n, pid in enumerate(ids, 1):
+        for n, arg in enumerate(ids, 1):
+            pid, _, row = arg.partition(":")
             page.goto(base + "proteins/%s.html" % pid)
             page.wait_for_timeout(800)
             page.screenshot(path=str(out / ("%d_%s.png" % (n, pid))), full_page=True)
-            box = page.query_selector("#tracks .hit")
+            box = page.query_selector('#tracks svg.trk g.row%s .hit rect' % ('[data-k="%s"]' % row if row else ""))
             if box:
                 box.scroll_into_view_if_needed()
                 box.click()
@@ -48,9 +50,9 @@ def main():
         phone.wait_for_timeout(800)
         phone.screenshot(path=str(out / "0_index_phone.png"), full_page=True)
         if ids:
-            phone.goto(base + "proteins/%s.html" % ids[0])
+            phone.goto(base + "proteins/%s.html" % ids[0].partition(":")[0])
             phone.wait_for_timeout(800)
-            phone.screenshot(path=str(out / ("1_%s_phone.png" % ids[0])), full_page=True)
+            phone.screenshot(path=str(out / ("1_%s_phone.png" % ids[0].partition(":")[0])), full_page=True)
         b.close()
     httpd.shutdown()
 

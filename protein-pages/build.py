@@ -843,7 +843,7 @@ def box_svg(h, idx, x0, x1, y, track, side="in", lx=None):
         l0, l1 = (x0 + w, lx - 1) if side == "right" else (lx + lw + 1, x0)
         lead = ('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" stroke-width="1"/>'
                 % (l0, y + BOX_H / 2, l1, y + BOX_H / 2, prog["color"])) if l1 > l0 else ""
-        lab = lead + '<text x="%.1f" y="%d" fill="#1a1a1a" class="bl">%s</text>' % (lx, ty, esc(h["label"]))
+        lab = lead + '<text x="%.1f" y="%d" fill="#1a1a1a" class="bl out">%s</text>' % (lx, ty, esc(h["label"]))
     return '<g class="hit" tabindex="0" data-i="%d">%s%s</g>' % (idx, rect, lab)
 
 

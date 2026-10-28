@@ -175,3 +175,4 @@ header.wide,main.wide{max-width:1380px}
 .lead{margin:0 0 6px;font-weight:600}
 #panel .asum{font-size:14px;margin:0}
 #panel .asrc{font-size:13px;color:var(--muted);margin:0 0 6px}
+.bl.out{pointer-events:auto;cursor:pointer}  /* a label beside its box opens the box too */

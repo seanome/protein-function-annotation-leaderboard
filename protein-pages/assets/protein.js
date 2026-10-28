@@ -102,7 +102,7 @@
     } else {
       const lw = textW(h.l), [l0, l1] = side === "right" ? [x0 + w, lx - 1] : [lx + lw + 1, x0];
       const lead = l1 > l0 ? `<line x1="${l0.toFixed(1)}" y1="${y + BOX_H / 2}" x2="${l1.toFixed(1)}" y2="${y + BOX_H / 2}" stroke="${tr.color}" stroke-width="1"/>` : "";
-      lab = lead + `<text x="${lx.toFixed(1)}" y="${ty}" fill="#1a1a1a" class="bl">${esc(h.l)}</text>`;
+      lab = lead + `<text x="${lx.toFixed(1)}" y="${ty}" fill="#1a1a1a" class="bl out">${esc(h.l)}</text>`;
     }
     return `<g class="hit" tabindex="0" data-i="${i}">${rect}${lab}</g>`;
   }
