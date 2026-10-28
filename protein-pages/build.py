@@ -31,19 +31,30 @@ HH_PROB_MIN = 50.0  # hhsearch hits also need Prob of at least this
 OVERLAP = 0.5  # two intervals overlap when they share at least half of the shorter one
 TOP_N = 5  # hits drawn per track before "show all"
 
-# One colour per program. None of these is a hue the pLDDT scale uses (dark blue, light
-# blue, yellow, orange), and the greys are kept for the protein line, expression bars and
-# InterProScan, at clearly different lightness.
-PROGRAMS = {
-    "mmseqs2": {"name": "MMseqs2", "color": "#5E57A3"},
-    "kmerseek": {"name": "kmerseek", "color": "#B2182B"},
-    "foldseek": {"name": "Foldseek", "color": "#3A7D1E"},
-    "phmmer": {"name": "phmmer", "color": "#C46A1B"},
-    "jackhmmer": {"name": "jackhmmer", "color": "#E7298A"},
-    "hhsearch": {"name": "HH-suite (hhsearch)", "color": "#00796B"},
-    "hmmscan": {"name": "hmmscan with Pfam", "color": "#6B6B00"},
-    "interproscan": {"name": "InterProScan", "color": "#4A4A4A"},
+# Colour is the kind of program (three hues and a dark grey); inside a kind, the box's shape
+# tells the programs apart. Checked in greyscale and with a deuteranopia simulation (Machado
+# et al. 2009): the four colours differ by at least 7 in lightness (CIE L*) and by at least 24
+# in colour difference (CIE76) under deuteranopia. None is a pLDDT colour, and none is the
+# orange or blue of the residue panel's hydrophobic and polar classes.
+CATEGORIES = {
+    "seq": {"name": "sequence search", "color": "#008B7A"},
+    "struct": {"name": "structure", "color": "#6A3D9A"},
+    "kmer": {"name": "k-mer", "color": "#C0392B"},
+    "pfam": {"name": "Pfam-model scan", "color": "#3D3D3D"},
 }
+SHAPES = ("filled", "open", "hatched", "rounded")
+PROGRAMS = {
+    "mmseqs2": {"name": "MMseqs2", "cat": "seq", "shape": "filled"},
+    "kmerseek": {"name": "kmerseek", "cat": "kmer", "shape": "filled"},
+    "foldseek": {"name": "Foldseek", "cat": "struct", "shape": "filled"},
+    "phmmer": {"name": "phmmer", "cat": "seq", "shape": "open"},
+    "jackhmmer": {"name": "jackhmmer", "cat": "seq", "shape": "hatched"},
+    "hhsearch": {"name": "HH-suite (hhsearch)", "cat": "seq", "shape": "rounded"},
+    "hmmscan": {"name": "hmmscan with Pfam", "cat": "pfam", "shape": "filled"},
+    "interproscan": {"name": "InterProScan", "cat": "pfam", "shape": "open"},
+}
+for _p in PROGRAMS.values():
+    _p["color"] = CATEGORIES[_p["cat"]]["color"]
 PROTEIN_LINE = "#C8C8C8"
 AGREEMENT = "#000000"
 EXPRESSION = "#8C8C8C"
@@ -54,8 +65,9 @@ PLDDT = [  # AlphaFold's own colours and bins
     (0, 50, "#FF7D45", "very low (below 50)"),
 ]
 
-# The ten tracks, in drawing order. "second" marks the second run of a program, drawn as an
-# open box. Settings are the leaderboard's setting lines; run_settings.tsv can replace them.
+# The ten tracks, in drawing order. "second" marks the second run of a program (MMseqs2 three
+# rounds, ProstT5 + Foldseek); it takes its program's colour and shape and has its own row.
+# Settings are the leaderboard's setting lines; run_settings.tsv can replace them.
 TRACKS = [
     dict(key="mmseqs2", file="mmseqs2.m8", program="mmseqs2", second=False, name="MMseqs2",
          setting="sensitivity 7 (-s 7), one round", database="Swiss-Prot",
@@ -767,17 +779,32 @@ def lanes_for(hits):
 LANE_H, BOX_H, ROW_PAD = 18, 14, 8
 
 
+def shape_svg(x, y, w, h, prog, extra=""):
+    """A program's box: its kind's colour, its own shape (filled, open, hatched, rounded)."""
+    col, shape = prog["color"], prog["shape"]
+    if shape == "open":
+        return ('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="#fff" stroke="%s" stroke-width="2"%s/>'
+                % (x + 1, y + 1, max(1.0, w - 2), h - 2, col, extra))
+    if shape == "hatched":
+        return ('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="url(#hatch-%s)" stroke="%s" '
+                'stroke-width="1"%s/>' % (x + 0.5, y + 0.5, max(1.0, w - 1), h - 1, prog["cat"], col, extra))
+    rx = h / 2 if shape == "rounded" else 2
+    return '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="%.1f" fill="%s"%s/>' % (x, y, w, h, rx, col, extra)
+
+
+def hatch_defs():
+    """The hatch patterns, one per colour, in a hidden SVG that every drawing on the page uses."""
+    pats = "".join('<pattern id="hatch-%s" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+                   '<rect width="4" height="4" fill="#fff"/><line x1="1" y1="0" x2="1" y2="4" stroke="%s" stroke-width="1.6"/>'
+                   '</pattern>' % (k, c["color"]) for k, c in CATEGORIES.items())
+    return '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>%s</defs></svg>' % pats
+
+
 def box_svg(h, idx, x0, x1, y, track):
     prog = PROGRAMS[track["program"]]
-    col = prog["color"]
     w = max(2.0, x1 - x0)
-    if track["second"]:
-        rect = ('<rect x="%.1f" y="%d" width="%.1f" height="%d" rx="2" fill="#fff" stroke="%s" '
-                'stroke-width="2"/>' % (x0 + 1, y + 1, max(1.0, w - 2), BOX_H - 2, col))
-        tcol = "#1a1a1a"
-    else:
-        rect = '<rect x="%.1f" y="%d" width="%.1f" height="%d" rx="2" fill="%s"/>' % (x0, y, w, BOX_H, col)
-        tcol = "#ffffff"
+    rect = shape_svg(x0, y, w, BOX_H, prog)
+    tcol, halo = ("#ffffff", "") if prog["shape"] in ("filled", "rounded") else ("#1a1a1a", " halo")
     label = h["label"]
     lab = ""
     if text_w(label) + 6 <= w:
@@ -786,7 +813,7 @@ def box_svg(h, idx, x0, x1, y, track):
         n = int((w - 6) / (11 * 0.56)) - 1
         shown = label[:n] + "…" if n >= 3 else ""
     if shown:
-        lab = '<text x="%.1f" y="%d" fill="%s" class="bl">%s</text>' % (x0 + 3, y + BOX_H - 3, tcol, esc(shown))
+        lab = '<text x="%.1f" y="%d" fill="%s" class="bl%s">%s</text>' % (x0 + 3, y + BOX_H - 3, tcol, halo, esc(shown))
     return ('<g class="hit" tabindex="0" data-i="%d">%s%s</g>' % (idx, rect, lab))
 
 
@@ -861,10 +888,15 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
 
 
 def legend_mark(t, w=16, h=BOX_H):
-    col = PROGRAMS[t["program"]]["color"]
-    if t["second"]:
-        return '<rect x="1" y="1" width="%d" height="%d" rx="2" fill="#fff" stroke="%s" stroke-width="2"/>' % (w - 2, h - 2, col)
-    return '<rect x="0" y="0" width="%d" height="%d" rx="2" fill="%s"/>' % (w, h, col)
+    return shape_svg(0, 0, w, h, PROGRAMS[t["program"]])
+
+
+def kind_key():
+    """The two lines that open the legend: colour = kind of program, shape = program."""
+    sw = "".join('<span class="kk"><i style="background:%s"></i>%s</span>' % (c["color"], esc(c["name"]))
+                 for c in CATEGORIES.values())
+    return ('<p class="kind">Colour: the kind of program. %s</p><p class="kind">Shape: which program, inside a '
+            'kind: filled, open, hatched or rounded.</p>' % sw)
 
 
 def svg_inline(inner, w, h, cls=""):
@@ -906,8 +938,8 @@ def page_head(title, depth):
     pre = "../" * depth
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            '<title>%s</title>%s<link rel="stylesheet" href="%sassets/site.css%s"></head><body>'
-            % (esc(title), CSS_LINKS, pre, ASSET_VER[0]))
+            '<title>%s</title>%s<link rel="stylesheet" href="%sassets/site.css%s"></head><body>%s'
+            % (esc(title), CSS_LINKS, pre, ASSET_VER[0], hatch_defs()))
 
 
 def legend_html(ctx, has_plddt, has_expr):
@@ -950,8 +982,8 @@ def legend_html(ctx, has_plddt, has_expr):
     if has_expr:
         bar = svg_inline('<rect x="0" y="2" width="12" height="6" fill="%s"/>' % EXPRESSION, 12, 10)
         items.append('<li>%s<span>expression of this protein\'s gene in each sample, from expression.tsv</span></li>' % bar)
-    return ('<aside class="side legend"><h2>Legend</h2><p class="note">Click a tool for its setting, database '
-            'and what makes a hit.</p><ul>%s</ul></aside>' % "".join(items))
+    return ('<aside class="side legend"><h2>Legend</h2>%s<p class="note">Click a tool for its setting, database '
+            'and what makes a hit.</p><ul>%s</ul></aside>' % (kind_key(), "".join(items)))
 
 
 def of_programs(m):
@@ -1215,7 +1247,9 @@ def build_protein(task):
     out.append('</main>%s' % ctx["footer"])
     page_data = dict(
         q=seq, px=px, w=W, top=TOP_N, hits=data, names=score_names, alpha=ctx["alphabets"],
-        tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], open=t["second"], p=t["program"]) for t in TRACKS},
+        tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], shape=PROGRAMS[t["program"]]["shape"],
+                               cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},
+        pfam_color=CATEGORIES["pfam"]["color"],
         shards=ctx["n_shards"])
     out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script></body></html>'
                % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), ASSET_VER[0]))
@@ -1291,7 +1325,7 @@ def index_page(rows, ctx):
     # Sidebar: for each program, how many proteins only it has a hit on; each line filters the table.
     side = []
     for f in PROGRAM_ORDER:
-        mark = svg_inline('<rect width="10" height="10" rx="1.5" fill="%s"/>' % PROGRAMS[f]["color"], 10, 10)
+        mark = svg_inline(shape_svg(0, 0, 12, 10, PROGRAMS[f]), 12, 10)
         if ctx["program_run"][f]:
             side.append('<li><a data-f="only-%s" href="#only-%s">%s<span class="pn">%s</span><span class="pc">%s</span></a></li>'
                         % (f, f, mark, esc(PROGRAMS[f]["name"]), "{:,}".format(only[f])))

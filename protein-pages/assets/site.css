@@ -146,3 +146,7 @@ header.wide,main.wide{max-width:1380px}
 .cells.under i.flank,.cells.under i.gap{box-shadow:none}
 .cells i[data-c]:hover{outline:2px solid #1a1a1a;outline-offset:-1px}
 @media (max-width:760px){.pgrid{grid-template-columns:1fr}}
+.bl.halo{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.side.legend .kind{font-size:12px;margin:0 0 4px;color:var(--ink)}
+.side.legend .kk{display:inline-flex;align-items:center;gap:3px;margin-right:8px;white-space:nowrap}
+.side.legend .kk i{display:inline-block;width:10px;height:10px;border-radius:2px}

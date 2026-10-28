@@ -63,15 +63,21 @@
   // "Show all": redraw each tool's row with all of its hits, with the same lanes, boxes and
   // labels build.py draws for the best few, then move the rows below it down.
   const LANE_H = 18, BOX_H = 14, ROW_PAD = 8;
+  // The same box as build.py's shape_svg: the kind's colour, the program's shape.
+  function shapeSvg(x, y, w, hh, tr) {
+    const f = (v) => v.toFixed(1);
+    if (tr.shape === "open") return `<rect x="${f(x + 1)}" y="${f(y + 1)}" width="${f(Math.max(1, w - 2))}" height="${f(hh - 2)}" rx="2" fill="#fff" stroke="${tr.color}" stroke-width="2"/>`;
+    if (tr.shape === "hatched") return `<rect x="${f(x + 0.5)}" y="${f(y + 0.5)}" width="${f(Math.max(1, w - 1))}" height="${f(hh - 1)}" rx="2" fill="url(#hatch-${tr.cat})" stroke="${tr.color}" stroke-width="1"/>`;
+    return `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(hh)}" rx="${f(tr.shape === "rounded" ? hh / 2 : 2)}" fill="${tr.color}"/>`;
+  }
   function boxSvg(h, i, lane) {
     const tr = PAGE.tracks[h.k];
     const x0 = (h.q[0] - 1) * PAGE.px, w = Math.max(2, h.q[1] * PAGE.px - x0), y = ROW_PAD + lane * LANE_H;
-    const rect = tr.open
-      ? `<rect x="${(x0 + 1).toFixed(1)}" y="${y + 1}" width="${Math.max(1, w - 2).toFixed(1)}" height="${BOX_H - 2}" rx="2" fill="#fff" stroke="${tr.color}" stroke-width="2"/>`
-      : `<rect x="${x0.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="${BOX_H}" rx="2" fill="${tr.color}"/>`;
+    const rect = shapeSvg(x0, y, w, BOX_H, tr);
+    const solid = tr.shape === "filled" || tr.shape === "rounded";
     let shown = h.l;
     if (h.l.length * 11 * 0.56 + 6 > w) { const n = Math.floor((w - 6) / (11 * 0.56)) - 1; shown = n >= 3 ? h.l.slice(0, n) + "…" : ""; }
-    const lab = shown ? `<text x="${(x0 + 3).toFixed(1)}" y="${y + BOX_H - 3}" fill="${tr.open ? "#1a1a1a" : "#ffffff"}" class="bl">${esc(shown)}</text>` : "";
+    const lab = shown ? `<text x="${(x0 + 3).toFixed(1)}" y="${y + BOX_H - 3}" fill="${solid ? "#ffffff" : "#1a1a1a"}" class="bl${solid ? "" : " halo"}">${esc(shown)}</text>` : "";
     return `<g class="hit" tabindex="0" data-i="${i}">${rect}${lab}</g>`;
   }
   const tracksDiv = document.getElementById("tracks");
@@ -331,11 +337,11 @@
       if (qd.every((d) => x.q[1] < d[0] || x.q[0] > d[1])) qd.push([x.q[0], x.q[1], x.l]);
     });
     g += `<line x1="${ml}" x2="${(ml + pw).toFixed(1)}" y1="12" y2="12" stroke="#C8C8C8" stroke-width="1.5"/>`;
-    for (const [a, b, l] of qd) g += `<rect x="${sx(a).toFixed(1)}" y="7" width="${((b - a + 1) * sc).toFixed(1)}" height="10" rx="1.5" fill="#fff" stroke="#6B6B00"><title>${esc(l)} ${a}-${b}</title></rect>`;
+    for (const [a, b, l] of qd) g += `<rect x="${sx(a).toFixed(1)}" y="7" width="${((b - a + 1) * sc).toFixed(1)}" height="10" rx="1.5" fill="#fff" stroke="${PAGE.pfam_color}"><title>${esc(l)} ${a}-${b}</title></rect>`;
     const tx = ml + pw + 6;
     g += `<line x1="${tx + 6}" x2="${tx + 6}" y1="${mt}" y2="${(mt + ph).toFixed(1)}" stroke="#C8C8C8" stroke-width="1.5"/>`;
     for (const [a, b, l] of h.td || []) {
-      g += `<rect x="${tx + 1}" y="${sy(a).toFixed(1)}" width="10" height="${((b - a + 1) * sc).toFixed(1)}" rx="1.5" fill="#fff" stroke="#6B6B00"><title>${esc(l)} ${a}-${b}</title></rect>`;
+      g += `<rect x="${tx + 1}" y="${sy(a).toFixed(1)}" width="10" height="${((b - a + 1) * sc).toFixed(1)}" rx="1.5" fill="#fff" stroke="${PAGE.pfam_color}"><title>${esc(l)} ${a}-${b}</title></rect>`;
       if ((b - a + 1) * sc > 9) g += `<text x="${tx + 14}" y="${(sy((a + b) / 2) + 3).toFixed(1)}" class="dl">${esc(l.split(" ")[0])}</text>`;
     }
     const same = H.filter((x) => (h.t ? x.t === h.t : x.k === h.k && x.l === h.l) && x.r);
@@ -346,9 +352,11 @@
     g += `<text x="${ml - 4}" y="${mt + 8}" class="ax" text-anchor="end">1</text><text x="${ml - 4}" y="${(mt + ph).toFixed(1)}" class="ax" text-anchor="end">${tlen}</text>`;
     g += `<text x="${(ml + pw / 2).toFixed(1)}" y="${(mt + ph + 26).toFixed(1)}" class="ax" text-anchor="middle">your protein (aa)</text>`;
     g += `<text x="10" y="${(mt + ph / 2).toFixed(1)}" class="ax" text-anchor="middle" transform="rotate(-90 10 ${(mt + ph / 2).toFixed(1)})">${esc(tname)} (aa)</text>`;
-    const tools = [...new Set(same.map((x) => x.k))];
-    const key = tools.map((k) => `<span><i style="background:${PAGE.tracks[k].color}"></i>${esc(PAGE.tracks[k].name)}</span>`).join("");
-    return `<div class="map"><p class="mapkey">Each line is one hit on ${esc(tname)}, in its tool's colour; the thick one is shown on the right. Boxes on the edges: Pfam domains.</p>` +
+    // the lines take the colour of their kind of program; the key names the programs of each colour
+    const kinds = {};
+    for (const x of same) { const tr = PAGE.tracks[x.k]; (kinds[tr.color] = kinds[tr.color] || new Set()).add(tr.name); }
+    const key = Object.entries(kinds).map(([c, ns]) => `<span><i style="background:${c}"></i>${esc([...ns].join(", "))}</span>`).join("");
+    return `<div class="map"><p class="mapkey">Each line is one hit on ${esc(tname)}, in the colour of its kind of program; the thick one is shown on the right. Boxes on the edges: Pfam domains.</p>` +
       `<div class="mapkey tools">${key}</div><svg width="${W.toFixed(0)}" height="${Hh.toFixed(0)}">${g}</svg></div>`;
   }
 

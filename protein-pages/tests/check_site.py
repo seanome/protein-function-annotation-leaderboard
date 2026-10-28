@@ -44,7 +44,7 @@ def main():
         used = {c.lower() for c in re.findall(r'(?:fill|stroke)="([^"]+)"', s)}
         js = (site / "assets" / "protein.js").read_text()
         used |= {c.lower() for c in re.findall(r'(?:fill|stroke)="(#[0-9A-Fa-f]{3,6})"', js)}
-        extra = used - LEGEND - NEUTRAL
+        extra = {c for c in used - LEGEND - NEUTRAL if not c.startswith("url(#hatch-")}  # hatch: a kind's colour
         if extra:
             bad[page.name] = extra
     print("1. colours outside the legend:", bad or "none")
