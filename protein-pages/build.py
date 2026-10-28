@@ -547,12 +547,19 @@ def target_names(h, target_ann):
 
 
 AGREE_OTHERS = [[]]  # the other agreeing Pfam families of the last protein agreement() looked at
+# For a 'disagree' protein: [(Pfam family, [programs that named it]), ...] from the overlapping
+# pairs of hits, best E-value first.
+DISAGREE_NAMES = [[]]
 
 
 def agreement(hits, target_ann):
-    """Returns (programs with a hit, status, agreed name id).
-    status: 'none', 'one', 'agree', 'overlap_unknown' (overlapping hits, no family known for
-    at least one of them, none shared), or 'disagree'.
+    """Returns (programs with a counted hit, status, agreed name id).
+    status, for two or more programs:
+      'agree': hits of two programs overlap and name the same Pfam family or InterPro entry;
+      'disagree': hits of two programs overlap, both name a family, and none is shared;
+      'overlap_unknown': hits of two programs overlap, but no family is known for one of them;
+      'apart': no hit of one program overlaps a hit of another.
+    'disagree' is checked before 'overlap_unknown'; for one program, 'one'; for none, 'none'.
 
     Proteins with many hits (a kinase can have thousands) make comparing every pair slow, so
     hits are grouped by the family name they carry, repeated ranges are dropped, and the search
@@ -561,31 +568,41 @@ def agreement(hits, target_ann):
     passing = [h for h in hits if counts(h)]
     progs = sorted({TRACK[h["track"]]["program"] for h in passing}, key=PROGRAM_ORDER.index)
     AGREE_OTHERS[0] = []
+    DISAGREE_NAMES[0] = []
     if not progs:
         return progs, "none", None
     if len(progs) == 1:
         return progs, "one", None
-    by_name, unknown_hits, all_by_prog = {}, {}, {}
+    # by_name: family -> program -> {range: best E-value}; known: program -> {range: (best
+    # E-value, families)} for hits that name a family; unknown_hits: the same for hits that name
+    # none (target not annotated, or no family on the matched part).
+    by_name, unknown_hits, known, all_by_prog = {}, {}, {}, {}
     for h in passing:
         prog = TRACK[h["track"]]["program"]
         e = h["evalue"] if h["evalue"] is not None else math.inf
         iv = (h["q0"], h["q1"])
         all_by_prog.setdefault(prog, {})
         all_by_prog[prog][iv] = min(e, all_by_prog[prog].get(iv, math.inf))
-        if h["_names"] is None:
+        if not h["_names"]:
             unknown_hits.setdefault(prog, {})[iv] = min(e, unknown_hits.get(prog, {}).get(iv, math.inf))
             continue
+        ke, kn = known.setdefault(prog, {}).get(iv, (math.inf, set()))
+        known[prog][iv] = (min(e, ke), kn | h["_names"])
         for n in h["_names"]:
             d = by_name.setdefault(n, {}).setdefault(prog, {})
             d[iv] = min(e, d.get(iv, math.inf))
 
-    def best_pair(xa, xb):
-        """Lowest E-value of an overlapping pair, one range from each dict, or None."""
-        cand = sorted([(e, iv, xb) for iv, e in xa.items()] + [(e, iv, xa) for iv, e in xb.items()],
+    def best_pair(xa, xb, ranges=False):
+        """Lowest E-value of an overlapping pair, one range from each dict, or None. With
+        ranges=True, returns (E-value, range from xa, range from xb)."""
+        cand = sorted([(e, iv, xb, 0) for iv, e in xa.items()] + [(e, iv, xa, 1) for iv, e in xb.items()],
                       key=lambda c: (c[0], c[1]))
-        for e, (a0, a1), other in cand:
-            if any(overlaps(a0, a1, b0, b1) for (b0, b1) in other):
-                return e
+        for e, (a0, a1), other, side in cand:
+            for (b0, b1) in other:
+                if overlaps(a0, a1, b0, b1):
+                    if not ranges:
+                        return e
+                    return (e, (a0, a1), (b0, b1)) if side == 0 else (e, (b0, b1), (a0, a1))
         return None
 
     support = {}
@@ -609,11 +626,29 @@ def agreement(hits, target_ann):
         order = sorted(support, key=lambda n: (-len(support[n][0]), own.get(n, math.inf), support[n][1], n))
         AGREE_OTHERS[0] = order[1:]
         return progs, "agree", order[0]
+    # No family is shared. Overlapping hits that both name a family: 'disagree'. The first
+    # overlapping pair (best E-value first) of each two programs gives the families listed.
+    named, kp = {}, sorted(known, key=PROGRAM_ORDER.index)
+    for i, fa in enumerate(kp):
+        for fb in kp[i + 1:]:
+            ea = {iv: v[0] for iv, v in known[fa].items()}
+            eb = {iv: v[0] for iv, v in known[fb].items()}
+            got = best_pair(ea, eb, ranges=True)
+            if got:
+                e, ra, rb = got
+                for prog, n_set in ((fa, known[fa][ra][1]), (fb, known[fb][rb][1])):
+                    for n in sorted(n_set):
+                        best, ps = named.get(n, (math.inf, []))
+                        named[n] = (min(best, e), ps + [prog] if prog not in ps else ps)
+    if named:
+        DISAGREE_NAMES[0] = [(n, sorted(named[n][1], key=PROGRAM_ORDER.index))
+                             for n in sorted(named, key=lambda n: (named[n][0], n))]
+        return progs, "disagree", None
     for fa, xa in unknown_hits.items():
         for fb, xb in all_by_prog.items():
             if fb != fa and best_pair(xa, xb) is not None:
                 return progs, "overlap_unknown", None
-    return progs, "disagree", None
+    return progs, "apart", None
 
 
 def coverage(hits, length):
@@ -929,7 +964,17 @@ def header_sentence(n, status, agreed, names):
         return s + " They agree on %s." % family_label(agreed, names)
     if status == "overlap_unknown":
         return s + " Their hits overlap, but no Pfam family is known for the Swiss-Prot proteins they match."
-    return s + " They do not name the same Pfam family."
+    if status == "disagree":
+        fams = DISAGREE_NAMES[0]
+        # "Pkinase PF00069 (phmmer)": name and accession without a second pair of brackets
+        listed = ", ".join("%s (%s)" % (" ".join(dict.fromkeys([names.get(n) or n, n])),
+                                        ", ".join(PROGRAMS[p]["name"] for p in ps))
+
+                           for n, ps in fams[:6])
+        more = " and %d more" % (len(fams) - 6) if len(fams) > 6 else ""
+        return s + " Their hits overlap but name different Pfam families: %s%s." % (listed, more)
+    return s + " Their hits are on different parts of the protein and do not overlap."
+
 
 
 def family_label(n, names):

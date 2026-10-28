@@ -102,7 +102,54 @@ def test_agreement_needs_same_family_and_overlap():
     progs, status, name = build.agreement([h1, h2], ann)
     assert status == "agree" and name == "PF00069"
     h2["q0"], h2["q1"] = 200, 300  # no longer overlapping
-    assert build.agreement([h1, h2], ann)[1] == "disagree"
+    assert build.agreement([h1, h2], ann)[1] == "apart"
+
+
+def _two(names_a, names_b, a=(10, 100), b=(20, 110)):
+    """A phmmer hit on P1 and an hmmscan hit, with the given families on each."""
+    h1 = build.hit("phmmer", a[0], a[1], "P1", 1, 90, 1e-9, [], True)
+    h2 = build.hit("hmmscan", b[0], b[1], "Pf", None, None, 1e-9, [], True)
+    h2["names"] = names_b
+    ann = {"P1": [(1, 80, names_a)]} if names_a is not None else {}
+    for h in (h1, h2):
+        h["_names"] = build.target_names(h, ann)
+    return [h1, h2], ann
+
+
+def test_status_agree():
+    hits, ann = _two({"PF00069"}, {"PF00069"})
+    assert build.agreement(hits, ann)[1:] == ("agree", "PF00069")
+
+
+def test_status_disagree_lists_families_with_programs():
+    hits, ann = _two({"PF00069"}, {"PF07714"})
+    assert build.agreement(hits, ann)[1] == "disagree"
+    assert build.DISAGREE_NAMES[0] == [("PF00069", ["phmmer"]), ("PF07714", ["hmmscan"])]
+    s = build.header_sentence(2, "disagree", None, {"PF00069": "Pkinase", "PF07714": "PK_Tyr_Ser-Thr"})
+    assert s.endswith("name different Pfam families: Pkinase PF00069 (phmmer), PK_Tyr_Ser-Thr PF07714 (hmmscan with Pfam).")
+
+
+def test_status_overlap_unknown():
+    hits, ann = _two(None, {"PF00069"})  # P1 has no Pfam output
+    assert build.agreement(hits, ann)[1] == "overlap_unknown"
+
+
+def test_status_apart():
+    hits, ann = _two({"PF00069"}, {"PF07714"}, b=(200, 300))
+    assert build.agreement(hits, ann)[1] == "apart"
+
+
+def test_status_none_and_one():
+    hits, ann = _two({"PF00069"}, {"PF00069"})
+    assert build.agreement([], ann)[1] == "none"
+    assert build.agreement(hits[:1], ann)[1] == "one"
+
+
+def test_weak_hits_do_not_count():
+    hits, ann = _two({"PF00069"}, {"PF00069"})
+    hits[1]["evalue"] = 0.5  # drawn (at most 10) but above the counting threshold 0.001
+    assert build.agreement(hits, ann)[1] == "one"
+
 
 
 def test_coverage_counts_programs_once():
