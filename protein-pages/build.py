@@ -792,6 +792,14 @@ def shape_svg(x, y, w, h, prog, extra=""):
     return '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="%.1f" fill="%s"%s/>' % (x, y, w, h, rx, col, extra)
 
 
+def e_opacity(e):
+    """E-value as box opacity, on a log scale: 0.25 at E-value 10, full at 1e-30 or below (and
+    for an E-value of 0 or none). The eye ranks hits by strength without reading tooltips."""
+    if e is None or e <= 0:
+        return 1.0
+    return round(max(0.25, min(1.0, 0.25 + 0.75 * (1 - math.log10(e)) / 31)), 2)
+
+
 def hatch_defs():
     """The hatch patterns, one per colour, in a hidden SVG that every drawing on the page uses."""
     pats = "".join('<pattern id="hatch-%s" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
@@ -803,8 +811,10 @@ def hatch_defs():
 def box_svg(h, idx, x0, x1, y, track):
     prog = PROGRAMS[track["program"]]
     w = max(2.0, x1 - x0)
-    rect = shape_svg(x0, y, w, BOX_H, prog)
-    tcol, halo = ("#ffffff", "") if prog["shape"] in ("filled", "rounded") else ("#1a1a1a", " halo")
+    op = e_opacity(h["evalue"])
+    rect = shape_svg(x0, y, w, BOX_H, prog, ' opacity="%.2f"' % op if op < 1 else "")
+    solid = prog["shape"] in ("filled", "rounded") and op >= 0.6  # white text needs a dark box
+    tcol, halo = ("#ffffff", "") if solid else ("#1a1a1a", " halo")
     label = h["label"]
     lab = ""
     if text_w(label) + 6 <= w:
@@ -894,12 +904,20 @@ def legend_mark(t, w=16, h=BOX_H):
     return shape_svg(0, 0, w, h, PROGRAMS[t["program"]])
 
 
+def evalue_key():
+    """Boxes at four E-values, as drawn: fainter is weaker."""
+    marks = "".join('<span class="kk">%s%s</span>' % (svg_inline(
+        '<rect width="12" height="10" rx="2" fill="#1a1a1a" opacity="%.2f"/>' % e_opacity(e), 12, 10), lab)
+        for e, lab in ((10, "10"), (1e-3, "0.001"), (1e-10, "1e-10"), (1e-30, "1e-30 or less")))
+    return '<p class="kind">Fainter box: higher (weaker) E-value. %s</p>' % marks
+
+
 def kind_key():
     """The two lines that open the legend: colour = kind of program, shape = program."""
     sw = "".join('<span class="kk"><i style="background:%s"></i>%s</span>' % (c["color"], esc(c["name"]))
                  for c in CATEGORIES.values())
     return ('<p class="kind">Colour: the kind of program. %s</p><p class="kind">Shape: which program, inside a '
-            'kind: filled, open, hatched or rounded.</p>' % sw)
+            'kind: filled, open, hatched or rounded.</p>' % sw) + evalue_key()
 
 
 def svg_inline(inner, w, h, cls=""):
@@ -1252,7 +1270,7 @@ def build_protein(task):
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
     out.append('</main>%s' % ctx["footer"])
     page_data = dict(
-        q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], hits=data, names=score_names, alpha=ctx["alphabets"],
+        id=pid, q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], hits=data, names=score_names, alpha=ctx["alphabets"],
         tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], shape=PROGRAMS[t["program"]]["shape"],
                                cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},
         pfam_color=CATEGORIES["pfam"]["color"],

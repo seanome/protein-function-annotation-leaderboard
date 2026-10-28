@@ -64,17 +64,20 @@
   // labels build.py draws for the best few, then move the rows below it down.
   const LANE_H = 18, BOX_H = 14, ROW_PAD = 8;
   // The same box as build.py's shape_svg: the kind's colour, the program's shape.
-  function shapeSvg(x, y, w, hh, tr) {
-    const f = (v) => v.toFixed(1);
-    if (tr.shape === "open") return `<rect x="${f(x + 1)}" y="${f(y + 1)}" width="${f(Math.max(1, w - 2))}" height="${f(hh - 2)}" rx="2" fill="#fff" stroke="${tr.color}" stroke-width="2"/>`;
-    if (tr.shape === "hatched") return `<rect x="${f(x + 0.5)}" y="${f(y + 0.5)}" width="${f(Math.max(1, w - 1))}" height="${f(hh - 1)}" rx="2" fill="url(#hatch-${tr.cat})" stroke="${tr.color}" stroke-width="1"/>`;
-    return `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(hh)}" rx="${f(tr.shape === "rounded" ? hh / 2 : 2)}" fill="${tr.color}"/>`;
+  // E-value as opacity, as build.py's e_opacity: 0.25 at 10, full at 1e-30 or below
+  const eOpacity = (e) => (e === null || e === undefined || e <= 0 ? 1 : Math.round(100 * Math.max(0.25, Math.min(1, 0.25 + (0.75 * (1 - Math.log10(e))) / 31))) / 100);
+  function shapeSvg(x, y, w, hh, tr, op) {
+    const f = (v) => v.toFixed(1), o = op < 1 ? ` opacity="${op.toFixed(2)}"` : "";
+    if (tr.shape === "open") return `<rect x="${f(x + 1)}" y="${f(y + 1)}" width="${f(Math.max(1, w - 2))}" height="${f(hh - 2)}" rx="2" fill="#fff" stroke="${tr.color}" stroke-width="2"${o}/>`;
+    if (tr.shape === "hatched") return `<rect x="${f(x + 0.5)}" y="${f(y + 0.5)}" width="${f(Math.max(1, w - 1))}" height="${f(hh - 1)}" rx="2" fill="url(#hatch-${tr.cat})" stroke="${tr.color}" stroke-width="1"${o}/>`;
+    return `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(hh)}" rx="${f(tr.shape === "rounded" ? hh / 2 : 2)}" fill="${tr.color}"${o}/>`;
   }
   function boxSvg(h, i, lane) {
     const tr = PAGE.tracks[h.k];
     const x0 = (h.q[0] - 1) * PAGE.px, w = Math.max(2, h.q[1] * PAGE.px - x0), y = ROW_PAD + lane * LANE_H;
-    const rect = shapeSvg(x0, y, w, BOX_H, tr);
-    const solid = tr.shape === "filled" || tr.shape === "rounded";
+    const op = eOpacity(h.e);
+    const rect = shapeSvg(x0, y, w, BOX_H, tr, op);
+    const solid = (tr.shape === "filled" || tr.shape === "rounded") && op >= 0.6;
     let shown = h.l;
     if (h.l.length * 11 * 0.56 + 6 > w) { const n = Math.floor((w - 6) / (11 * 0.56)) - 1; shown = n >= 3 ? h.l.slice(0, n) + "…" : ""; }
     const lab = shown ? `<text x="${(x0 + 3).toFixed(1)}" y="${y + BOX_H - 3}" fill="${solid ? "#ffffff" : "#1a1a1a"}" class="bl${solid ? "" : " halo"}">${esc(shown)}</text>` : "";
@@ -350,7 +353,7 @@
     g += seg(h, 4, 1);
     g += `<text x="${ml}" y="${(mt + ph + 12).toFixed(1)}" class="ax">1</text><text x="${(ml + pw).toFixed(1)}" y="${(mt + ph + 12).toFixed(1)}" class="ax" text-anchor="end">${qL}</text>`;
     g += `<text x="${ml - 4}" y="${mt + 8}" class="ax" text-anchor="end">1</text><text x="${ml - 4}" y="${(mt + ph).toFixed(1)}" class="ax" text-anchor="end">${tlen}</text>`;
-    g += `<text x="${(ml + pw / 2).toFixed(1)}" y="${(mt + ph + 26).toFixed(1)}" class="ax" text-anchor="middle">your protein (aa)</text>`;
+    g += `<text x="${(ml + pw / 2).toFixed(1)}" y="${(mt + ph + 26).toFixed(1)}" class="ax" text-anchor="middle">${esc(PAGE.id)} (aa)</text>`;
     g += `<text x="10" y="${(mt + ph / 2).toFixed(1)}" class="ax" text-anchor="middle" transform="rotate(-90 10 ${(mt + ph / 2).toFixed(1)})">${esc(tname)} (aa)</text>`;
     // the lines take the colour of their kind of program; the key names the programs of each colour
     const kinds = {};
