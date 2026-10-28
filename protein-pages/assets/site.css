@@ -1,3 +1,26 @@
+/* Every colour on the pages, and its one meaning.
+   Marks in the drawing (each is in the legend):
+     #008B7A  sequence-search programs (MMseqs2, phmmer, jackhmmer, hhsearch)
+     #6A3D9A  structure programs (Foldseek, ProstT5 + Foldseek)
+     #C0392B  k-mer programs (kmerseek)
+     #3D3D3D  Pfam-model scans (hmmscan, InterProScan) and the Pfam domains in the residue map
+     #C8C8C8  the protein's backbone line
+     #000000  the "programs with a hit" line
+     #0053D6 #65CBF3 #FFDB13 #FF7D45  pLDDT bins, AlphaFold's own colours (only with plddt.tsv)
+   Residue panel (its own legend above the residues):
+     #f9dfd0 fill, #eb6834 edge, #6b2a10 letter: a hydrophobic residue in the kmerseek alphabet
+     #d9e7f8 fill, #2a78d6 edge, #123b6b letter: a polar residue
+     #c3c2b7  outline of a residue in neither class
+   Text and page (not data):
+     #1a1a1a  text ink; also the outline of an expression bar, whose shape marks it
+     #5a5a5a  secondary text; #52514e secondary text in the residue panel
+     #8a8a8a  a program that was not run
+     #1f4e8c  links
+     #e3e3e3  rule between table rows and between the drawing's rows
+     #f7f7f5  background behind the aligned residues
+     #f0f0f0  background of a sidebar line under the pointer
+     #999 #bbb  borders of buttons, the search box and the tooltip
+     #ffffff  page; the inside of open and hatched boxes */
 @font-face{font-family:"Fantasque Sans Mono";font-weight:400;font-style:normal;font-display:swap;
   src:url("fonts/FantasqueSansMono-Regular.woff2") format("woff2")}
 @font-face{font-family:"Fantasque Sans Mono";font-weight:700;font-style:normal;font-display:swap;
@@ -64,8 +87,8 @@ svg text{font-family:"Source Sans 3",system-ui,sans-serif}
 #t th[data-k]{cursor:pointer;text-decoration:underline dotted}
 #t td .spark{display:block}
 .er{display:grid;grid-template-columns:minmax(80px,200px) 1fr 70px;gap:8px;align-items:center;font-size:14px}
-.eb{background:#f0f0f0;height:12px;display:block}
-.eb span{display:block;height:12px;background:#8C8C8C}
+.eb{height:8px;display:block}
+.eb span{display:block;height:8px;border:1px solid var(--ink);background:none}
 .ev{text-align:right;font-variant-numeric:tabular-nums}
 @media (max-width:640px){
   .tracks{grid-template-columns:160px 1fr}

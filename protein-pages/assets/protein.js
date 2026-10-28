@@ -330,7 +330,7 @@
     const pw = qL * sc, ph = tlen * sc, ml = 34, mt = 26, tw = 22;
     const W = ml + pw + tw + 70, Hh = mt + ph + 34;
     const sx = (p) => ml + (p - 1) * sc, sy = (p) => mt + (p - 1) * sc;
-    let g = `<rect x="${ml}" y="${mt}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" fill="none" stroke="#c3c2b7"/>`;
+    let g = "";
     // Pfam domains of your protein (hmmscan, best E-value first, not overlapping) along the top
     const qd = [];
     H.filter((x) => x.k === "hmmscan").sort((a, b) => (a.e ?? 1) - (b.e ?? 1)).forEach((x) => {

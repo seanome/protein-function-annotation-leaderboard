@@ -55,9 +55,9 @@ PROGRAMS = {
 }
 for _p in PROGRAMS.values():
     _p["color"] = CATEGORIES[_p["cat"]]["color"]
-PROTEIN_LINE = "#C8C8C8"
+PROTEIN_LINE = "#C8C8C8"  # the protein's backbone line, and only that
 AGREEMENT = "#000000"
-EXPRESSION = "#8C8C8C"
+EXPRESSION = "#1a1a1a"  # expression bars are thin outlines in text ink; their shape, not a grey, marks them
 PLDDT = [  # AlphaFold's own colours and bins
     (90, 101, "#0053D6", "very high (above 90)"),
     (70, 90, "#65CBF3", "confident (70 to 90)"),
@@ -980,7 +980,7 @@ def legend_html(ctx, has_plddt, has_expr):
     items.append('<li>%s<span>programs with a hit at each residue, 0 to %d (the programs run), each program counted once</span></li>'
                  % (step, ctx["n_run"]))
     if has_expr:
-        bar = svg_inline('<rect x="0" y="2" width="12" height="6" fill="%s"/>' % EXPRESSION, 12, 10)
+        bar = svg_inline('<rect x="0.5" y="2.5" width="11" height="5" fill="none" stroke="%s"/>' % EXPRESSION, 12, 10)
         items.append('<li>%s<span>expression of this protein\'s gene in each sample, from expression.tsv</span></li>' % bar)
     return ('<aside class="side legend"><h2>Legend</h2>%s<p class="note">Click a tool for its setting, database '
             'and what makes a hit.</p><ul>%s</ul></aside>' % (kind_key(), "".join(items)))
