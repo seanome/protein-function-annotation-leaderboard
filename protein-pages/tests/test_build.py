@@ -184,3 +184,13 @@ def test_sentence_counts_programs_run():
     assert build.header_sentence(2, "apart", None, {}, 5).startswith("2 of the 5 programs run report a hit.")
     assert build.header_sentence(1, "one", None, {}, 8) == "1 of 8 programs reports a hit."
     assert build.header_sentence(0, "none", None, {}, 5) == "None of the 5 programs run reports a hit."
+
+
+def test_out_folder_that_is_not_a_site_is_kept(tmp_path):
+    import subprocess
+    out = tmp_path / "mine"
+    out.mkdir()
+    (out / "notes.txt").write_text("keep me")
+    r = subprocess.run([sys.executable, str(Path(build.__file__)), str(tmp_path), "--out", str(out)],
+                       capture_output=True, text=True)
+    assert r.returncode == 2 and (out / "notes.txt").exists()

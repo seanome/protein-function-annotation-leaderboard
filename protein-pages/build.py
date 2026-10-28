@@ -1391,7 +1391,12 @@ def main():
     D = a.inputs
     out = a.out
     if out.exists():
+        # Only an empty folder or a site this script built (it holds summary.json) is replaced.
+        if not out.is_dir() or (any(out.iterdir()) and not (out / "summary.json").exists()):
+            print("not replacing %s: it is not empty and holds no summary.json, so it is not a site build.py made" % out)
+            sys.exit(2)
         shutil.rmtree(out)
+
     (out / "proteins").mkdir(parents=True)
     here = Path(__file__).resolve().parent
     shutil.copytree(here / "assets", out / "assets")
