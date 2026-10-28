@@ -836,7 +836,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
     r = ['<line x1="0" y1="18" x2="%.1f" y2="18" stroke="%s" stroke-width="2"/>' % (W, PROTEIN_LINE)]
     for pos in range(50, L + 1, 50):
         x = (pos - 0.5) * px
-        r.append('<line x1="%.1f" y1="12" x2="%.1f" y2="24" stroke="%s"/>' % (x, x, PROTEIN_LINE))
+        r.append('<line x1="%.1f" y1="18" x2="%.1f" y2="%d" stroke="%s"/>' % (x, x, 22 if pos % 100 else 24, PROTEIN_LINE))
         if pos % 100 == 0:
             r.append('<text x="%.1f" y="10" class="rl" text-anchor="middle">%d</text>' % (x, pos))
     r.append('<text x="1" y="10" class="rl">1</text>')
