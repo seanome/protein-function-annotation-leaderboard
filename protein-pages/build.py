@@ -758,21 +758,41 @@ def fmt_e(e):
 
 
 def text_w(s, px=11):
-    return len(s) * px * 0.56
+    """Width of a box label in the monospace font, measured: 0.58 of the font size per character."""
+    return len(s) * px * 0.58
 
 
-def lanes_for(hits):
-    """Stack boxes that overlap into separate lanes, best E-value first."""
+LABEL_GAP = 8  # px between a box and a label placed beside it
+
+
+def place_labels(hits, px, W):
+    """Where each box's label goes, and the lane (row inside the tool's row) of each box.
+    A label that fits inside its box goes inside. Otherwise it goes to the right of the box,
+    joined to it by a short leader line, or to the left when the right would leave the drawing;
+    the font is never made smaller and the name is never cut. Boxes stack into lanes by the
+    room they take with their label, so no two labels or boxes overlap. Returns, per hit,
+    (lane, side, label x) with side 'in', 'right' or 'left'; and the number of lanes."""
     lanes, out = [], []
     for h in hits:
+        x0, x1 = (h["q0"] - 1) * px, h["q1"] * px
+        w = max(2.0, x1 - x0)
+        lw = text_w(h["label"])
+        if lw + 6 <= w:
+            side, lx, a, b = "in", x0 + 3, x0, x0 + w
+        elif x1 + LABEL_GAP + lw <= W or x0 - LABEL_GAP - lw < 0:
+            lx = min(x1 + LABEL_GAP, W - lw)
+            side, a, b = "right", x0, max(x0 + w, lx + lw)
+        else:
+            lx = x0 - LABEL_GAP - lw
+            side, a, b = "left", lx, x0 + w
         for li, ends in enumerate(lanes):
-            if all(h["q0"] > b or h["q1"] < a for a, b in ends):
-                ends.append((h["q0"], h["q1"]))
-                out.append(li)
+            if all(a > e1 + 4 or b < e0 - 4 for e0, e1 in ends):
+                ends.append((a, b))
                 break
         else:
-            lanes.append([(h["q0"], h["q1"])])
-            out.append(len(lanes) - 1)
+            lanes.append([(a, b)])
+            li = len(lanes) - 1
+        out.append((li, side, lx))
     return out, max(1, len(lanes))
 
 
@@ -808,23 +828,23 @@ def hatch_defs():
     return '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>%s</defs></svg>' % pats
 
 
-def box_svg(h, idx, x0, x1, y, track):
+def box_svg(h, idx, x0, x1, y, track, side="in", lx=None):
     prog = PROGRAMS[track["program"]]
     w = max(2.0, x1 - x0)
     op = e_opacity(h["evalue"])
     rect = shape_svg(x0, y, w, BOX_H, prog, ' opacity="%.2f"' % op if op < 1 else "")
-    solid = prog["shape"] in ("filled", "rounded") and op >= 0.6  # white text needs a dark box
-    tcol, halo = ("#ffffff", "") if solid else ("#1a1a1a", " halo")
-    label = h["label"]
-    lab = ""
-    if text_w(label) + 6 <= w:
-        shown = label
-    else:
-        n = int((w - 6) / (11 * 0.56)) - 1
-        shown = label[:n] + "…" if n >= 3 else ""
-    if shown:
-        lab = '<text x="%.1f" y="%d" fill="%s" class="bl%s">%s</text>' % (x0 + 3, y + BOX_H - 3, tcol, halo, esc(shown))
-    return ('<g class="hit" tabindex="0" data-i="%d">%s%s</g>' % (idx, rect, lab))
+    ty = y + BOX_H - 3
+    if side == "in":
+        solid = prog["shape"] in ("filled", "rounded") and op >= 0.6  # white text needs a dark box
+        tcol, cls = ("#ffffff", "bl") if solid else ("#1a1a1a", "bl halo")
+        lab = '<text x="%.1f" y="%d" fill="%s" class="%s">%s</text>' % (x0 + 3, ty, tcol, cls, esc(h["label"]))
+    else:  # beside the box, with a leader line in the box's colour
+        lw = text_w(h["label"])
+        l0, l1 = (x0 + w, lx - 1) if side == "right" else (lx + lw + 1, x0)
+        lead = ('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" stroke-width="1"/>'
+                % (l0, y + BOX_H / 2, l1, y + BOX_H / 2, prog["color"])) if l1 > l0 else ""
+        lab = lead + '<text x="%.1f" y="%d" fill="#1a1a1a" class="bl">%s</text>' % (lx, ty, esc(h["label"]))
+    return '<g class="hit" tabindex="0" data-i="%d">%s%s</g>' % (idx, rect, lab)
 
 
 def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
@@ -846,7 +866,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
         k = t["key"]
         hs = hits_by_track.get(k, [])
         shown = hs[:TOP_N]
-        lane_of, n_l = lanes_for(shown)
+        place, n_l = place_labels(shown, px, W)
         h_row = ROW_PAD + n_l * LANE_H + 4
         if run_status[k] == "not run":
             g = ['<text x="4" y="%d" class="nr">not run: no %s in the input folder</text>'
@@ -856,8 +876,8 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
         else:
             g = ['<line x1="0" y1="%d" x2="%.1f" y2="%d" stroke="%s" stroke-width="1.5"/>'
                  % (ROW_PAD + BOX_H // 2, W, ROW_PAD + BOX_H // 2, PROTEIN_LINE)]
-        for h, li in zip(shown, lane_of):
-            g.append(box_svg(h, h["i"], (h["q0"] - 1) * px, h["q1"] * px, ROW_PAD + li * LANE_H, t))
+        for h, (li, side, lx) in zip(shown, place):
+            g.append(box_svg(h, h["i"], (h["q0"] - 1) * px, h["q1"] * px, ROW_PAD + li * LANE_H, t, side, lx))
         more = len(hs) - len(shown)
         if more > 0:
             h_row = max(h_row, ROW_PAD + 34)  # room for the "+N more" line under the name

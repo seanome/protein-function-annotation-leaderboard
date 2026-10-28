@@ -72,15 +72,38 @@
     if (tr.shape === "hatched") return `<rect x="${f(x + 0.5)}" y="${f(y + 0.5)}" width="${f(Math.max(1, w - 1))}" height="${f(hh - 1)}" rx="2" fill="url(#hatch-${tr.cat})" stroke="${tr.color}" stroke-width="1"${o}/>`;
     return `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(hh)}" rx="${f(tr.shape === "rounded" ? hh / 2 : 2)}" fill="${tr.color}"${o}/>`;
   }
-  function boxSvg(h, i, lane) {
+  // Label placing, as build.py's place_labels: inside the box when it fits, else beside it
+  // (right, or left at the drawing's right edge) with a leader line; never cut or shrunk.
+  const textW = (t) => t.length * 11 * 0.58, GAP = 8;
+  function placeLabels(list) {
+    const lanes = [], out = [];
+    for (const h of list) {
+      const x0 = (h.q[0] - 1) * PAGE.px, x1 = h.q[1] * PAGE.px, w = Math.max(2, x1 - x0), lw = textW(h.l);
+      let side, lx, a, b;
+      if (lw + 6 <= w) { side = "in"; lx = x0 + 3; a = x0; b = x0 + w; }
+      else if (x1 + GAP + lw <= PAGE.w || x0 - GAP - lw < 0) { side = "right"; lx = Math.min(x1 + GAP, PAGE.w - lw); a = x0; b = Math.max(x0 + w, lx + lw); }
+      else { side = "left"; lx = x0 - GAP - lw; a = lx; b = x0 + w; }
+      let li = lanes.findIndex((ends) => ends.every(([e0, e1]) => a > e1 + 4 || b < e0 - 4));
+      if (li < 0) { lanes.push([]); li = lanes.length - 1; }
+      lanes[li].push([a, b]);
+      out.push([li, side, lx]);
+    }
+    return [out, Math.max(1, lanes.length)];
+  }
+  function boxSvg(h, i, lane, side, lx) {
     const tr = PAGE.tracks[h.k];
     const x0 = (h.q[0] - 1) * PAGE.px, w = Math.max(2, h.q[1] * PAGE.px - x0), y = ROW_PAD + lane * LANE_H;
     const op = eOpacity(h.e);
-    const rect = shapeSvg(x0, y, w, BOX_H, tr, op);
-    const solid = (tr.shape === "filled" || tr.shape === "rounded") && op >= 0.6;
-    let shown = h.l;
-    if (h.l.length * 11 * 0.56 + 6 > w) { const n = Math.floor((w - 6) / (11 * 0.56)) - 1; shown = n >= 3 ? h.l.slice(0, n) + "…" : ""; }
-    const lab = shown ? `<text x="${(x0 + 3).toFixed(1)}" y="${y + BOX_H - 3}" fill="${solid ? "#ffffff" : "#1a1a1a"}" class="bl${solid ? "" : " halo"}">${esc(shown)}</text>` : "";
+    const rect = shapeSvg(x0, y, w, BOX_H, tr, op), ty = y + BOX_H - 3;
+    let lab;
+    if (side === "in") {
+      const solid = (tr.shape === "filled" || tr.shape === "rounded") && op >= 0.6;
+      lab = `<text x="${(x0 + 3).toFixed(1)}" y="${ty}" fill="${solid ? "#ffffff" : "#1a1a1a"}" class="bl${solid ? "" : " halo"}">${esc(h.l)}</text>`;
+    } else {
+      const lw = textW(h.l), [l0, l1] = side === "right" ? [x0 + w, lx - 1] : [lx + lw + 1, x0];
+      const lead = l1 > l0 ? `<line x1="${l0.toFixed(1)}" y1="${y + BOX_H / 2}" x2="${l1.toFixed(1)}" y2="${y + BOX_H / 2}" stroke="${tr.color}" stroke-width="1"/>` : "";
+      lab = lead + `<text x="${lx.toFixed(1)}" y="${ty}" fill="#1a1a1a" class="bl">${esc(h.l)}</text>`;
+    }
     return `<g class="hit" tabindex="0" data-i="${i}">${rect}${lab}</g>`;
   }
   const tracksDiv = document.getElementById("tracks");
@@ -100,6 +123,8 @@
       const rg = rr[n], k = rg.dataset.k;
       let hgt = +rg.dataset.h;
       const idx = byTrack[k];
+      const nh = !idx && rg.querySelector("text.nh");  // a row with no hit even at E-value 10
+      if (nh) nh.textContent = `no hit with E-value at most ${fmtE(Math.round(Math.log10(maxE)))}`;
       if (idx) {
         const kept = idx.filter((i) => H[i].e === null || H[i].e === undefined || H[i].e <= maxE);
         const shown = showAll ? kept : kept.slice(0, PAGE.top);
@@ -109,15 +134,9 @@
           rg.innerHTML = (sep ? sep.outerHTML : "") + `<text x="4" y="${ROW_PAD + 11}" class="nh">no hit with E-value at most ${fmtE(Math.round(Math.log10(maxE)))}</text>`;
           hgt = ROW_PAD + 22;
         } else {
-          const lanes = [], parts = [];
-          for (const i of shown) {
-            const h = H[i];
-            let li = lanes.findIndex((ends) => ends.every(([a, b]) => h.q[0] > b || h.q[1] < a));
-            if (li < 0) { lanes.push([]); li = lanes.length - 1; }
-            lanes[li].push(h.q);
-            parts.push(boxSvg(h, i, li));
-          }
-          hgt = ROW_PAD + lanes.length * LANE_H + 4;
+          const [place, nLanes] = placeLabels(shown.map((i) => H[i]));
+          const parts = shown.map((i, n) => boxSvg(H[i], i, ...place[n]));
+          hgt = ROW_PAD + nLanes * LANE_H + 4;
           const line = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
           rg.innerHTML = (sep ? sep.outerHTML : "") + line + parts.join("");
           const more = kept.length - shown.length;
