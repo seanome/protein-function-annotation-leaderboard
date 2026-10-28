@@ -77,7 +77,8 @@
   const tracksDiv = document.getElementById("tracks");
   const original = tracksDiv.innerHTML;
   // Redraw the rows with only the hits below maxE, and all of them or the best PAGE.top per tool.
-  const fmtE = (v) => (v === 1 ? "10" : v === 0 ? "1" : "1e" + v);
+  // slider position v is log10 of the E-value limit: 1 -> 10, -3 -> 0.001, -7 -> 1e-7
+  const fmtE = (v) => (v >= -3 ? String(+Math.pow(10, v).toFixed(3)) : "1e" + v);
   function draw(maxE, showAll) {
     const tmp = document.createElement("div");
     tmp.innerHTML = original;
@@ -150,10 +151,13 @@
   }
   const tg = document.getElementById("toggle"), slider = document.getElementById("emax"), ev = document.getElementById("ev");
   let showAll = false;
+  // The drawing as built shows the hits at the slider's starting value (the counting threshold).
+  const START = slider ? +slider.dataset.start : 1;
   function redraw() {
-    const v = slider ? +slider.value : 1;
+    const v = slider ? +slider.value : START;
     if (ev) ev.textContent = fmtE(v);
-    tracksDiv.innerHTML = v === 1 && !showAll ? original : draw(Math.pow(10, v), showAll);
+    tracksDiv.innerHTML = v === START && !showAll ? original : draw(Math.pow(10, v), showAll);
+
     wire(tracksDiv);
     if (tg) {
       const maxE = Math.pow(10, v), n = H.filter((h) => h.e === null || h.e === undefined || h.e <= maxE).length;

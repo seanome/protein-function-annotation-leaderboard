@@ -24,7 +24,8 @@ import sys
 import time
 from pathlib import Path
 
-E_MAX = 10.0  # a hit counts when its E-value is at most this, the -E 10 the searches were run with
+E_MAX = 10.0  # a hit is drawn when its E-value is at most this, the -E 10 the searches were run with
+COUNT_E = 1e-3  # a hit counts (sentence, index, summary.json) when its E-value is at most this; --count-at
 TARGET_PFAM_E = 1e-3  # a Swiss-Prot protein's Pfam families: its hmmscan or InterProScan domains at or below this
 HH_PROB_MIN = 50.0  # hhsearch hits also need Prob of at least this
 OVERLAP = 0.5  # two intervals overlap when they share at least half of the shorter one
@@ -126,6 +127,17 @@ def accession(t):
         parts = t.split("|")
         return parts[1] if len(parts) > 1 else t
     return t
+
+
+def counts(h):
+    """A drawn hit counts when its E-value is at most COUNT_E. A hit with no E-value (an
+    InterProScan match from a member database whose score is not an E-value) counts if drawn."""
+    return h["passes"] and (h["evalue"] is None or h["evalue"] <= COUNT_E)
+
+
+def fmt_thr(e):
+    """0.001, 10, 1e-05: how a threshold is written in page text."""
+    return "%g" % e
 
 
 def fnum(x):
@@ -367,7 +379,9 @@ def parse_interproscan(path, proteins):
             if prot in proteins:
                 sc = [("member database", analysis), ("signature", sig), ("score", score),
                       ("InterPro entry", (ipr + " " + ipr_desc) if ipr else "none")]
-                h = hit("interproscan", f[6], f[7], desc or sig, None, None, e, sc, passes)
+                # the score is kept as an E-value only where it is one
+                h = hit("interproscan", f[6], f[7], desc or sig, None, None,
+                        e if analysis in IPS_EVALUE else None, sc, passes)
                 h["names"] = nm
                 h["db"] = analysis
                 out.setdefault(prot, []).append(h)
@@ -544,7 +558,7 @@ def agreement(hits, target_ann):
     hits are grouped by the family name they carry, repeated ranges are dropped, and the search
     for an overlapping pair between two programs stops at the first one found, best
     E-value first. This gives the same answer as comparing every pair."""
-    passing = [h for h in hits if h["passes"]]
+    passing = [h for h in hits if counts(h)]
     progs = sorted({TRACK[h["track"]]["program"] for h in passing}, key=PROGRAM_ORDER.index)
     AGREE_OTHERS[0] = []
     if not progs:
@@ -603,10 +617,10 @@ def agreement(hits, target_ann):
 
 
 def coverage(hits, length):
-    """Number of programs with a passing hit over each residue (list of length `length`)."""
+    """Number of programs with a counted hit over each residue (list of length `length`)."""
     per_prog = {}
     for h in hits:
-        if h["passes"]:
+        if counts(h):
             per_prog.setdefault(TRACK[h["track"]]["program"], []).append((h["q0"], h["q1"]))
     diff = [0] * (length + 2)
     for ivs in per_prog.values():
@@ -761,7 +775,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
             g = ['<text x="4" y="%d" class="nr">not run: no %s in the input folder</text>'
                  % (ROW_PAD + 11, esc(t["file"]))]
         elif not hs:
-            g = ['<text x="4" y="%d" class="nh">no hit at the threshold</text>' % (ROW_PAD + 11)]
+            g = ['<text x="4" y="%d" class="nh">no hit with E-value at most %s</text>' % (ROW_PAD + 11, fmt_thr(COUNT_E))]
         else:
             g = ['<line x1="0" y1="%d" x2="%.1f" y2="%d" stroke="%s" stroke-width="1.5"/>'
                  % (ROW_PAD + BOX_H // 2, W, ROW_PAD + BOX_H // 2, PROTEIN_LINE)]
@@ -869,13 +883,14 @@ def legend_html(ctx, has_plddt, has_expr):
             items.append('<li class="off">%s<div><b>%s</b> not run: no %s in the input folder</div></li>'
                          % (mark, esc(t["name"]), esc(t["file"])))
             continue
+        c, d = fmt_thr(COUNT_E), fmt_thr(E_MAX)
         if k == "hhsearch":
-            thr = "Prob ≥ 50 and E-value at most 10"
+            thr = "counts at Prob ≥ 50 and E-value at most %s; drawn up to E-value %s" % (c, d)
         elif k == "interproscan":
-            thr = ("E-value at most 10 where there is one; coils, disorder, membrane and signal-peptide "
-                   "predictions do not count")
+            thr = ("counts at E-value at most %s where there is one, drawn up to %s; coils, disorder, membrane "
+                   "and signal-peptide predictions do not count" % (c, d))
         else:
-            thr = "%s at most 10" % t["score"]
+            thr = "counts at %s at most %s; drawn up to %s" % (t["score"], c, d)
         coords = {"domtbl_seq": "hmm from-to (positions on your protein)",
                   "domtbl_pfam": "env from-to (the domain's envelope)",
                   "m8": "qstart-qend", "kmerseek": "region_start-region_end, plus 1 at the start",
@@ -999,7 +1014,8 @@ def build_protein(task):
     cov = coverage(hits, L)
     best_e = min([h["evalue"] for h in hits if h["passes"] and h["evalue"] is not None], default=None)
 
-    # draw only hits at the threshold; per track, best E-value first
+    # every hit with E-value at most E_MAX goes into the page's data; per track, best E-value first.
+    # The drawing as built shows the hits that count (E-value at most COUNT_E); the slider shows more.
     by_track = {}
     data = []
     score_names = {}
@@ -1034,7 +1050,7 @@ def build_protein(task):
             for txt in [name, h["target"], d.get("n"), d.get("g")] + (d["f"] or []):
                 if txt:
                     terms[txt] = terms.get(txt, 0) | bit
-            if gname:
+            if gname and counts(h):
                 entry_gene = name.split("_")[0] if "_" in name else ""
                 if gname.upper() in ((d.get("g") or "").upper(), entry_gene.upper()):
                     gmask |= bit
@@ -1079,10 +1095,11 @@ def build_protein(task):
     plddt = ctx["plddt"].get(pid)
     W = int(max(640, min(L * 2.0, 3200)))
     px = W / L
-    hgt, left, right = page_svg(p, by_track, cov, plddt, W, px, ctx["run_status"])
+    counted_by_track = {k: [h for h in v if counts(h)] for k, v in by_track.items()}
+    hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"])
     blocks = ['<div class="tracks" id="tracks"><div class="names">%s</div><div class="scroll">%s</div></div>'
               % (svg_inline(left, "100%", hgt), svg_inline(right, W, hgt, "trk"))]
-    n_more = sum(max(0, len(v) - TOP_N) for v in by_track.values())
+    n_more = sum(max(0, len(v) - TOP_N) for v in counted_by_track.values())
 
     expr = ""
     if ctx["expression"]:
@@ -1118,21 +1135,24 @@ def build_protein(task):
     out.append('<header class="wide"><a class="back" href="../index.html">All proteins</a><h1 class="mono">%s</h1>'
                '<p class="len">%s%d amino acids</p><p class="summary">%s</p>%s%s</header><main class="wide">' % (
         esc(pid), (esc(pname) + " · ") if pname else "", L, esc(sentence), other_note, gnote))
-    # E-value slider: from 1 (every drawn hit) down to the smallest E-value above 0 on this page.
+    # E-value slider, in steps of 10 times: from 10 (every drawn hit) down to the smallest
+    # E-value above 0 on this page. It starts at the counting threshold.
     pos_e = [h["evalue"] for v in by_track.values() for h in v if h["evalue"]]
-    lo = max(-300, math.floor(math.log10(min(pos_e)))) if pos_e else -1
-    slider = ('<div class="eslider"><label for="emax">Show hits with E-value at most <output id="ev">10</output></label>'
-              '<input id="emax" type="range" min="%d" max="1" step="1" value="1">'
-              '<span class="note">Moves in steps of 10 times. The sentence at the top, the "programs with a hit" '
-              'line and the index page always count hits with E-value at most 10.</span></div>' % lo) if pos_e else ""
+    c_pos = int(round(math.log10(COUNT_E)))
+    lo = min(c_pos, max(-300, math.floor(math.log10(min(pos_e))))) if pos_e else c_pos
+    slider = ('<div class="eslider"><label for="emax">Show hits with E-value at most <output id="ev">%s</output></label>'
+              '<input id="emax" type="range" min="%d" max="1" step="1" value="%d" data-start="%d">'
+              '<span class="note">The sentence at the top and the index count hits at E-value at most %s. Move the '
+              'slider up to see weaker hits, down to see fewer.</span></div>'
+              % (fmt_thr(COUNT_E), lo, c_pos, c_pos, fmt_thr(COUNT_E))) if by_track else ""
     toggle = ""
     if n_more:
         toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
-                  % (sum(len(v) for v in by_track.values()), n_more))
+                  % (sum(len(v) for v in counted_by_track.values()), n_more))
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
-    out.append('<div class="withside"><section><h2>What each tool found</h2>%s%s%s<p class="note">Each box is one hit at the '
-               'threshold; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
+    out.append('<div class="withside"><section><h2>What each tool found</h2>%s%s%s<p class="note">Each box is one hit with '
+               'E-value at most the slider\'s value; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
                'E-value first (ties: the leftmost first); "+N more" under a tool\'s name counts the rest. Hover or '
                'tap a box for the protein\'s full name, gene, species and Pfam families, and the scores; click it '
                'to see the residues. Wide proteins scroll sideways inside the box above.</p></section>'
@@ -1225,8 +1245,8 @@ def index_page(rows, ctx):
     out.append('<div class="withside"><section><h2>Proteins</h2><p class="note">One page per protein of your proteome. On each page, every '
                'tool\'s hits are drawn on the same ruler of residue positions. Each program counts once, even when it was '
                'run twice (MMseqs2 one round and three rounds; Foldseek on predicted structures and ProstT5 + Foldseek), '
-               'so there are 8 programs for 10 rows. A hit counts when its E-value is at most 10 '
-               '(hhsearch: also Prob at least 50). "Agree" means two hits from different programs overlap by '
+               'so there are 8 programs for 10 rows. A hit counts when its E-value is at most %s '
+               '(hhsearch: also Prob at least 50); the protein pages also draw weaker hits, up to E-value %s. "Agree" means two hits from different programs overlap by '
                'at least half of the shorter one and name the same Pfam family or InterPro entry. The small '
                'picture is the "programs with a hit" line of each protein page: its height at each point is the '
                'number of programs (0 to 8) with a hit over that part of the protein, squeezed to the same 60-pixel width '
@@ -1234,7 +1254,7 @@ def index_page(rows, ctx):
                '(each tool computes its own, so they are not on one scale); 0 means the tool printed 0.</p>'
                '<div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off" '
                'placeholder="a gene, protein or Pfam family, e.g. HLA, immune, MHC, RING"></div>'
-               '<p class="note">The search looks at every hit counted above: the name, gene and species of '
+               '<p class="note">The search looks at every hit drawn on the protein pages (E-value at most %s): the name, gene and species of '
                'each Swiss-Prot protein a tool matched, the Pfam families on the matched part of it, and the '
                'Pfam families hmmscan or InterProScan found on your protein. Every word typed must appear; the '
                'last column shows what matched and which programs\' hits carry it.</p>'
@@ -1244,7 +1264,8 @@ def index_page(rows, ctx):
                'protein is listed, including those with no hit; moves in steps of 10 times.</span></div>'
                '<label class="unnamed"><input id="unnamed" type="checkbox"> Only proteins with no gene name in '
                'their ID (FUN…_FUN…), %s of %s</label>'
-               '<p id="count" class="note"></p>' % ("".join(filt), lo_idx, "{:,}".format(sum(1 for r in rows if not r["gname"])), "{:,}".format(total)))
+               '<p id="count" class="note"></p>' % (fmt_thr(COUNT_E), fmt_thr(E_MAX), fmt_thr(E_MAX), "".join(filt), lo_idx,
+ "{:,}".format(sum(1 for r in rows if not r["gname"])), "{:,}".format(total)))
     trs = []
     for r in rows:
         trs.append('<tr data-s="%s" data-f="%s"><td><a class="mono" href="proteins/%s.html">%s</a>%s</td><td class="r" data-v="%d">%s</td>'
@@ -1297,7 +1318,14 @@ def main():
     ap.add_argument("inputs", type=Path)
     ap.add_argument("--out", type=Path, default=Path("site"))
     ap.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2) - 1))
+    ap.add_argument("--count-at", type=float, default=COUNT_E,
+                    help="a hit counts when its E-value is at most this (a power of 10; default 0.001)")
     a = ap.parse_args()
+    lg = math.log10(a.count_at) if a.count_at > 0 else None
+    if lg is None or abs(lg - round(lg)) > 1e-9 or a.count_at > E_MAX:
+        print("--count-at must be a power of 10 no larger than %g (the slider moves in steps of 10 times)" % E_MAX)
+        sys.exit(2)
+    globals()["COUNT_E"] = a.count_at
     t_start = time.time()
     # Millions of small hit records make Python's cycle collector rescan the heap again and
     # again while the files are read; the records hold no cycles, so it is turned off.
@@ -1463,7 +1491,9 @@ def main():
     secs = time.time() - t_start
     CTX["footer"] = footer(inputs, built, secs)
     cats, only = index_page(rows, CTX)
-    summary = dict(total=len(rows), **cats, only_program=only, run_status=run_status, seconds=round(time.time() - t_start, 1))
+    summary = dict(count_at=COUNT_E, drawn_up_to=E_MAX, total=len(rows), **cats, only_program=only,
+                   run_status=run_status, seconds=round(time.time() - t_start, 1))
+
     (out / "summary.json").write_text(json.dumps(summary, indent=1))
     print(json.dumps(summary), flush=True)
 
