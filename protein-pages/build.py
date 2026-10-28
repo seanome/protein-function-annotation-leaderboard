@@ -1252,24 +1252,33 @@ def safe(pid):
 CTX = {}
 
 
+# The six classes of protein, in the order of the index tiles: (tile text, filter button text).
+STATUSES = {
+    "none": ("with no hit from any program", "No program has a hit"),
+    "one": ("with a hit from exactly one program", "Exactly one program has a hit"),
+    "agree": ("where hits of two programs overlap and name the same Pfam family", "Programs agree on a Pfam family"),
+    "disagree": ("where hits of two programs overlap and name different Pfam families", "Programs name different families"),
+    "overlap_unknown": ("where hits of two programs overlap but no Pfam family is known for one of them",
+                        "Overlap, but no family known"),
+    "apart": ("where two or more programs have hits, but on different parts of the protein", "Hits do not overlap"),
+}
+
+
 def index_page(rows, ctx):
+
     total = len(rows)
     pos_best = [r["best_e"] for r in rows if r["best_e"]]
     lo_idx = max(-300, math.floor(math.log10(min(pos_best)))) if pos_best else -1
-    cats = {"none": 0, "one": 0, "agree": 0, "disagree": 0}
+    cats = {s: 0 for s in STATUSES}
     only = {f: 0 for f in PROGRAM_ORDER}
     for r in rows:
-        c = r["status"] if r["status"] in ("none", "one", "agree") else "disagree"
-        cats[c] += 1
+        cats[r["status"]] += 1
         if r["n"] == 1:
             only[r["progs"][0]] += 1
     assert sum(cats.values()) == total
     out = [page_head("Protein annotation tools, side by side", 0)]
     out.append('<header class="wide"><h1>Which tools found something in each protein</h1></header><main class="wide">')
-    nums = [("all", total, "proteins in all"), ("none", cats["none"], "with no hit from any program"),
-            ("one", cats["one"], "with a hit from exactly one program"),
-            ("agree", cats["agree"], "where two or more programs name the same Pfam family"),
-            ("disagree", cats["disagree"], "where two or more programs have hits but do not name the same Pfam family")]
+    nums = [("all", total, "proteins in all")] + [(s, cats[s], STATUSES[s][0]) for s in STATUSES]
     out.append('<section class="nums">%s</section>' % "".join(
         '<a class="num" href="#%s"><span class="big">%s</span><span>%s</span></a>' % (k, "{:,}".format(v), esc(t)) for k, v, t in nums))
     # Sidebar: for each program, how many proteins only it has a hit on; each line filters the table.
@@ -1284,9 +1293,7 @@ def index_page(rows, ctx):
                         % (mark, esc(PROGRAMS[f]["name"])))
     aside = ('<aside class="side"><h2>Only one program has a hit</h2><p class="note">Proteins on which this '
              'program, and no other, reports a hit. Click one to list them.</p><ul>%s</ul></aside>' % "".join(side))
-    filt = ['<button data-f="all">All</button>', '<button data-f="one">Exactly one program has a hit</button>',
-            '<button data-f="none">No program has a hit</button>', '<button data-f="disagree">Programs disagree on the Pfam family</button>',
-            '<button data-f="agree">Programs agree on a Pfam family</button>']
+    filt = ['<button data-f="all">All</button>'] + ['<button data-f="%s">%s</button>' % (s, esc(STATUSES[s][1])) for s in STATUSES]
     out.append('<div class="withside"><section><h2>Proteins</h2><p class="note">One page per protein of your proteome. On each page, every '
                'tool\'s hits are drawn on the same ruler of residue positions. Each program counts once, even when it was '
                'run twice (MMseqs2 one round and three rounds; Foldseek on predicted structures and ProstT5 + Foldseek), '
@@ -1315,7 +1322,7 @@ def index_page(rows, ctx):
     for r in rows:
         trs.append('<tr data-s="%s" data-f="%s"><td><a class="mono" href="proteins/%s.html">%s</a>%s</td><td class="r" data-v="%d">%s</td>'
                    '<td class="r" data-v="%d">%d</td><td>%s</td><td class="r" data-v="%s">%s</td><td>%s</td></tr>' % (
-                       "disagree" if r["status"] == "overlap_unknown" else r["status"], " ".join(r["progs"]), safe(r["id"]), esc(r["id"]),
+                       r["status"], " ".join(r["progs"]), safe(r["id"]), esc(r["id"]),
                        '<div class="pname">%s</div>' % esc(r["name"]) if r["name"] else "",
                        r["length"], "{:,}".format(r["length"]), r["n"], r["n"], esc(r["agreed"] or "none"),
                        "%g" % r["best_e"] if r["best_e"] is not None else "1e999", fmt_e(r["best_e"]) if r["best_e"] is not None else "no hit", r["spark"]))
