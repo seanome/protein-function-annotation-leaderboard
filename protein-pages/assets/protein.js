@@ -118,7 +118,7 @@
           const line = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
           rg.innerHTML = (sep ? sep.outerHTML : "") + line + parts.join("");
           const more = kept.length - shown.length;
-          const label = more > 0 ? `+${more} more` : (showAll && kept.length > PAGE.top ? `all ${kept.length}` : "");
+          const label = more > 0 ? `+${more} more hit${more === 1 ? "" : "s"}` : (showAll && kept.length > PAGE.top ? `all ${kept.length} hits` : "");
           if (label) {
             const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
             t.setAttribute("x", 26); t.setAttribute("y", ROW_PAD + 26); t.setAttribute("class", "tm more");
@@ -142,7 +142,7 @@
         for (const [a, b] of ivs) for (let i = Math.max(1, a); i <= Math.min(L, b); i++) cover[i] = 1;
         for (let i = 1; i <= L; i++) diff[i] += cover[i];
       }
-      const yv = (c) => (10 + 48 - c * 6).toFixed(1);
+      const yv = (c) => (10 + 48 - (c * 48) / Math.max(1, PAGE.m)).toFixed(1);
       let d = "", prev = null;
       for (let i = 0; i < L; i++) {
         const c = diff[i + 1];

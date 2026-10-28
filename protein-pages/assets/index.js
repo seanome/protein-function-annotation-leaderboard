@@ -94,4 +94,16 @@
     rows.sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir; });
     for (const r of rows) tbody.appendChild(r);
   }));
+  // Hover on a row's small line: the position under the pointer and the programs with a hit there.
+  const tip = document.getElementById("tip");
+  document.querySelectorAll("#t svg.spark[data-c]").forEach((sv) => {
+    const c = sv.dataset.c, L = +sv.dataset.l, m = +sv.dataset.m;
+    sv.addEventListener("mousemove", (e) => {
+      const r = sv.getBoundingClientRect(), b = Math.min(c.length - 1, Math.max(0, Math.floor(((e.clientX - r.left) / r.width) * c.length)));
+      const pos = Math.max(1, Math.round(((b + 0.5) * L) / c.length));
+      tip.textContent = `position ${pos} aa: ${parseInt(c[b], 16)} of ${m} programs`;
+      tip.hidden = false; tip.style.left = e.clientX + 12 + "px"; tip.style.top = e.clientY + 12 + "px";
+    });
+    sv.addEventListener("mouseleave", () => { tip.hidden = true; });
+  });
 })();

@@ -817,7 +817,7 @@ def box_svg(h, idx, x0, x1, y, track):
     return ('<g class="hit" tabindex="0" data-i="%d">%s%s</g>' % (idx, rect, lab))
 
 
-def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
+def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
     """The track area as two SVGs (names on the left, the drawing on the right), with the best
     TOP_N hits of each tool. Each row is a <g class="row"> in its own coordinates, so the
     page's script can redraw a tool's row with all of its hits ("Show all")."""
@@ -830,7 +830,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
         if pos % 100 == 0:
             r.append('<text x="%.1f" y="10" class="rl" text-anchor="middle">%d</text>' % (x, pos))
     r.append('<text x="1" y="10" class="rl">1</text>')
-    r.append('<text x="%.1f" y="30" class="rl" text-anchor="end">%d</text>' % (W - 1, L))
+    r.append('<text x="%.1f" y="30" class="rl" text-anchor="end">%d aa</text>' % (W - 1, L))
     rows.append(("ruler", 32, '<text x="4" y="20" class="tn">residue</text>', "".join(r)))
     for t in TRACKS:
         k = t["key"]
@@ -851,7 +851,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
         more = len(hs) - len(shown)
         if more > 0:
             h_row = max(h_row, ROW_PAD + 34)  # room for the "+N more" line under the name
-        extra = ('<text x="26" y="%d" class="tm more">+%d more</text>' % (ROW_PAD + 26, more)) if more > 0 else ""
+        extra = ('<text x="26" y="%d" class="tm more">+%d more hit%s</text>' % (ROW_PAD + 26, more, "" if more == 1 else "s")) if more > 0 else ""
         left = ('<g transform="translate(4,%d)">%s</g><text x="26" y="%d" class="tn">%s</text>%s'
                 % (ROW_PAD, legend_mark(t), ROW_PAD + 11, esc(t["name"]), extra))
         rows.append((k, h_row, left, "".join(g)))
@@ -861,21 +861,24 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status):
             c = next((col for lo, hi, col, _ in PLDDT if lo <= v < hi), PLDDT[-1][2])
             g.append('<rect x="%.2f" y="%d" width="%.2f" height="%d" fill="%s"/>' % (i * px, ROW_PAD, px + 0.05, BOX_H, c))
         rows.append(("plddt", ROW_PAD + BOX_H + 8, '<text x="4" y="%d" class="tn">pLDDT</text>' % (ROW_PAD + 11), "".join(g)))
-    # programs with a hit: step line, 0 to 8
-    ah, top = 8 * 6, 10
+    # programs with a hit: a step line from 0 to m, the programs run; 48 px tall whatever m is
+    ah, top = 48, 10
+    step_h = ah / max(1, m)
     pts, prev = [], None
     for i, c in enumerate(cov):
         if c != prev:
             if prev is not None:
-                pts.append("L%.2f,%.1f" % (i * px, top + ah - prev * 6))
-            pts.append(("M" if prev is None else "L") + "%.2f,%.1f" % (i * px, top + ah - c * 6))
+                pts.append("L%.2f,%.1f" % (i * px, top + ah - prev * step_h))
+            pts.append(("M" if prev is None else "L") + "%.2f,%.1f" % (i * px, top + ah - c * step_h))
             prev = c
     if prev is not None:
-        pts.append("L%.2f,%.1f" % (L * px, top + ah - prev * 6))
-    grid = "".join('<line x1="0" y1="%.1f" x2="%.1f" y2="%.1f" class="grid"/>' % (top + ah - v * 6, W, top + ah - v * 6) for v in (0, 2, 4, 6, 8))
-    right = grid + '<path d="%s" fill="none" stroke="%s" stroke-width="1.6"/>' % ("".join(pts), AGREEMENT)
+        pts.append("L%.2f,%.1f" % (L * px, top + ah - prev * step_h))
+    ticks = "".join('<line x1="0" y1="%.1f" x2="5" y2="%.1f" stroke="%s"/>' % (top + ah - v * step_h, top + ah - v * step_h, AGREEMENT)
+                    for v in (0, m))
+    right = ticks + '<path d="%s" fill="none" stroke="%s" stroke-width="1.6"/>' % ("".join(pts), AGREEMENT)
     left = '<text x="4" y="%d" class="tn">programs with a hit</text>' % (top + 12) + "".join(
-        '<text x="100%%" dx="-4" y="%.1f" class="rl" text-anchor="end">%d</text>' % (top + ah - v * 6 + 3, v) for v in (0, 4, 8))
+        '<text x="100%%" dx="-4" y="%.1f" class="rl" text-anchor="end">%s</text>' % (top + ah - v * step_h + 3, lab)
+        for v, lab in ((0, "0"), (m, "%d programs" % m)))
     rows.append(("agree", top + ah + 8, left, right))
     y, L_out, R_out = 0, [], []
     for k, hgt, left, right in rows:
@@ -905,7 +908,9 @@ def svg_inline(inner, w, h, cls=""):
         cls, w, h, vb, inner)
 
 
-def sparkline(cov, length, w=60, h=16):
+def sparkline(cov, length, m=8, w=90, h=16):
+    """The "programs with a hit" line squeezed to w pixels, 0 to m programs high, the same
+    scale for every protein. data-c holds the highest count in each pixel, for the hover."""
     if not cov:
         return svg_inline("", w, h)
     bins = []
@@ -915,10 +920,11 @@ def sparkline(cov, length, w=60, h=16):
         bins.append(max(cov[a0:a1]))
     d = []
     for b, c in enumerate(bins):
-        yy = h - 1 - c * (h - 2) / 8
+        yy = h - 1 - c * (h - 2) / max(1, m)
         d.append(("M" if b == 0 else "L") + "%d,%.1f L%d,%.1f" % (b, yy, b + 1, yy))
     base = '<line x1="0" y1="%d" x2="%d" y2="%d" stroke="%s"/>' % (h - 0.5, w, h - 0.5, PROTEIN_LINE)
-    return svg_inline(base + '<path d="%s" fill="none" stroke="%s" stroke-width="1.2"/>' % (" ".join(d), AGREEMENT), w, h, "spark")
+    svg = svg_inline(base + '<path d="%s" fill="none" stroke="%s" stroke-width="1.2"/>' % (" ".join(d), AGREEMENT), w, h, "spark")
+    return svg.replace("<svg ", '<svg data-c="%s" data-l="%d" data-m="%d" ' % ("".join("%x" % min(c, 15) for c in bins), length, m), 1)
 
 
 # --------------------------------------------------------------------------- pages ----
@@ -1179,7 +1185,7 @@ def build_protein(task):
     W = int(max(640, min(L * 2.0, 3200)))
     px = W / L
     counted_by_track = {k: [h for h in v if counts(h)] for k, v in by_track.items()}
-    hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"])
+    hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"], ctx["n_run"])
     blocks = ['<div class="tracks" id="tracks"><div class="names">%s</div><div class="scroll">%s</div></div>'
               % (svg_inline(left, "100%", hgt), svg_inline(right, W, hgt, "trk"))]
     n_more = sum(max(0, len(v) - TOP_N) for v in counted_by_track.values())
@@ -1246,7 +1252,7 @@ def build_protein(task):
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
     out.append('</main>%s' % ctx["footer"])
     page_data = dict(
-        q=seq, px=px, w=W, top=TOP_N, hits=data, names=score_names, alpha=ctx["alphabets"],
+        q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], hits=data, names=score_names, alpha=ctx["alphabets"],
         tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], shape=PROGRAMS[t["program"]]["shape"],
                                cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},
         pfam_color=CATEGORIES["pfam"]["color"],
@@ -1258,7 +1264,7 @@ def build_protein(task):
         "window.ALN=%s;" % json.dumps({str(k): v for k, v in alns.items()}, separators=(",", ":")))
     return dict(id=pid, length=L, n=len(progs), progs=progs, status=status,
                 agreed=family_label(agreed, ctx["names"]) if agreed else None,
-                best_e=best_e, spark=sparkline(cov, L), terms=terms, name=pname,
+                best_e=best_e, spark=sparkline(cov, L, ctx["n_run"]), terms=terms, name=pname,
                 gname=gname, gprogs=[PROGRAMS[f]["name"] for b, f in enumerate(PROGRAM_ORDER) if gmask & (1 << b)],
                 gexample=gexample)
 
@@ -1342,8 +1348,8 @@ def index_page(rows, ctx):
                '(hhsearch: also Prob at least 50); the protein pages also draw weaker hits, up to E-value %s. "Agree" means two hits from different programs overlap by '
                'at least half of the shorter one and name the same Pfam family or InterPro entry. The small '
                'picture is the "programs with a hit" line of each protein page: its height at each point is the '
-               'number of programs (0 to %d) with a hit over that part of the protein, squeezed to the same 60-pixel width '
-               'for every protein whatever its length. "Best E-value, any tool" is the lowest E-value any tool printed '
+               'number of programs (0 to %d) with a hit over that part of the protein, squeezed to the same 90-pixel width '
+               'and the same 0-to-%d height for every protein whatever its length; hover over it for the position and count. "Best E-value, any tool" is the lowest E-value any tool printed '
                '(each tool computes its own, so they are not on one scale); 0 means the tool printed 0.</p>'
                '<div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off" '
                'placeholder="a gene, protein or Pfam family, e.g. HLA, immune, MHC, RING"></div>'
@@ -1357,7 +1363,7 @@ def index_page(rows, ctx):
                'protein is listed, including those with no hit; moves in steps of 10 times.</span></div>'
                '<label class="unnamed"><input id="unnamed" type="checkbox"> Only proteins with no gene name in '
                'their ID (FUN…_FUN…), %s of %s</label>'
-               '<p id="count" class="note"></p>' % (ctx["n_run"], fmt_thr(COUNT_E), fmt_thr(E_MAX), ctx["n_run"], fmt_thr(E_MAX), "".join(filt), lo_idx,
+               '<p id="count" class="note"></p>' % (ctx["n_run"], fmt_thr(COUNT_E), fmt_thr(E_MAX), ctx["n_run"], ctx["n_run"], fmt_thr(E_MAX), "".join(filt), lo_idx,
  "{:,}".format(sum(1 for r in rows if not r["gname"])), "{:,}".format(total)))
     trs = []
     for r in rows:
@@ -1391,7 +1397,7 @@ def index_page(rows, ctx):
         per_row.append(pairs)
     (ctx["out"] / "search.js").write_text("window.SEARCH=%s;" % json.dumps(
         dict(programs=[PROGRAMS[f]["name"] for f in PROGRAM_ORDER], text=vocab, rows=per_row), separators=(",", ":")))
-    out.append('</main>%s<script src="search.js%s"></script><script src="assets/index.js%s"></script></body></html>' % (ctx["footer"], ASSET_VER[0], ASSET_VER[0]))
+    out.append('<div id="tip" role="tooltip" hidden></div></main>%s<script src="search.js%s"></script><script src="assets/index.js%s"></script></body></html>' % (ctx["footer"], ASSET_VER[0], ASSET_VER[0]))
     (ctx["out"] / "index.html").write_text("".join(out))
     return cats, only
 
