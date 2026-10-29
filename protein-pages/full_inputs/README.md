@@ -31,4 +31,5 @@ Two things about the tables that build_full.py works around:
 
 None of the tables gives where on the protein a hit or domain lies, so the pages list them and
 draw nothing along the protein. The plan says the Pfam step kept domain positions; asking for
-that file, and for DIAMOND's `qstart qend`, would let the pages draw them.
+that file, and for DIAMOND's `qstart qend`, would let the pages draw them. The request is
+drafted in `biomni_request_positions.md`.
