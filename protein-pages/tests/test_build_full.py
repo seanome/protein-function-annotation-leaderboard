@@ -116,3 +116,14 @@ def test_out_guard(tmp_path):
     (d / "keep.txt").write_text("not a site")
     r = subprocess.run([sys.executable, str(HERE / "build_full.py"), str(FULL), "--out", str(d)], capture_output=True)
     assert r.returncode == 2 and (d / "keep.txt").exists()
+
+
+def test_protein_missing_from_clusters_is_a_clear_error(tmp_path):
+    d = tmp_path / "in"
+    shutil.copytree(FULL, d)
+    f = d / "botryllus_mmseqs_clusters.tsv"
+    lines = f.read_text().splitlines(keepends=True)
+    f.write_text("".join(lines[1:]))
+    with pytest.raises(SystemExit) as e:
+        build_full.load(d)
+    assert "no row in botryllus_mmseqs_clusters.tsv" in str(e.value)
