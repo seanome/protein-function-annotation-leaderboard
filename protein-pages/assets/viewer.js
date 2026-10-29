@@ -29,7 +29,9 @@
   }
   function link(id) { return "<a class=\"mono\" href=\"protein.html#" + encodeURIComponent(id) + "\">" + esc(id) + "</a>"; }
   function show() {
-    var id = decodeURIComponent(location.hash.slice(1)), r = byId[id];
+    var id = location.hash.slice(1), r;
+    try { id = decodeURIComponent(id); } catch (e) { /* malformed escape: keep the raw text */ }
+    r = byId[id];
     document.getElementById("pid").textContent = id || "No protein named";
     if (!r) { main.innerHTML = "<p>No protein " + esc(id) + " in this proteome. <a href=\"index.html\">Search all proteins</a>.</p>"; return; }
     document.title = id + (r[3] || r[2] ? " " + (r[3] || r[2]) : "") + " · Botryllus protein";
