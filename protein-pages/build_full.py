@@ -129,6 +129,9 @@ def load(folder):
     for f in csv.reader(opentext(inp(folder, "botryllus_mmseqs_clusters.tsv")), delimiter="\t"):
         rep_of[f[1]] = f[0]
         members[f[0]].append(f[1])
+    missing = set(lengths) - set(rep_of)
+    if missing:
+        sys.exit("%d proteins have no row in botryllus_mmseqs_clusters.tsv, e.g. %s" % (len(missing), sorted(missing)[0]))
     for k in (set(immune) | set(jh) | set(allo) | set(rep_of)) - set(lengths):
         sys.exit("%s is in a table but not in the proteome" % k)
     return ann, lengths, immune, jh, allo, rep_of, members
