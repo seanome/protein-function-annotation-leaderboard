@@ -12,8 +12,9 @@
      #d9e7f8 fill, #2a78d6 edge, #123b6b letter: a polar residue
      #c3c2b7  outline of a residue in neither class
    Text and page (not data):
-     #1a1a1a  text ink; also the outline of an expression bar, whose shape marks it, and the
-              sample boxes of the legend's E-value key, whose fading is the point
+     #1a1a1a  text ink; also the outline of an expression bar, whose shape marks it, the
+              sample boxes of the legend's E-value key, whose fading is the point, and the
+              filled count bars on the index of every protein (index.html of build_full.py)
      #5a5a5a  secondary text; #52514e secondary text in the residue panel
      #8a8a8a  a program that was not run; the dotted underline of a legend line that opens
      #1f4e8c  links
@@ -177,3 +178,25 @@ header.wide,main.wide{max-width:1380px}
 #panel .asum{font-size:14px;margin:0}
 #panel .asrc{font-size:13px;color:var(--muted);margin:0 0 6px}
 .bl.out{pointer-events:auto;cursor:pointer}  /* a label beside its box opens the box too */
+
+/* index of every protein (build_full.py) */
+button.num{display:block;align-self:start;font:inherit;text-align:left;background:none;border:0;cursor:pointer;border-radius:4px;padding:4px 6px;margin:0 -6px}
+button.num:hover span:last-child{text-decoration:underline}
+button.num.on{background:#f0f0f0}
+.twocol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+@media (max-width:760px){.twocol{grid-template-columns:minmax(0,1fr)}}
+.bars{display:grid;gap:1px}
+.bar{display:grid;grid-template-columns:minmax(0,13em) minmax(0,1fr) 4.5em;align-items:center;gap:8px;font:inherit;font-size:14px;
+  background:none;border:0;padding:2px 4px;margin:0 -4px;text-align:left;cursor:pointer;border-radius:3px;color:var(--ink);font-family:inherit}
+.bar:hover{background:#f0f0f0}
+.bar.on{background:#f0f0f0;font-weight:600}
+.bar .bt{height:10px}
+.bar .bt i{display:block;height:10px;background:#1a1a1a}
+.bar .bn{text-align:right;font-variant-numeric:tabular-nums}
+table.full{font-size:14px}
+table.full th[data-k]{cursor:pointer}
+table.full th[aria-sort=ascending]::after{content:" \2191"}
+table.full th[aria-sort=descending]::after{content:" \2193"}
+#more{font:inherit;padding:4px 12px;border:1px solid #999;border-radius:6px;background:#fff;cursor:pointer}
+h3{font-size:16px;margin:16px 0 4px}
+.chips a{margin-right:6px;font-size:14px}
