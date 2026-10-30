@@ -1,0 +1,101 @@
+protein_id	kind	claude-haiku-5-5:name	claude-haiku-5-5:confidence	claude-haiku-5-5:verdict	claude-haiku-5-5:recommended	claude-haiku-5-5:numbers_not_on_sheet	claude-haiku-5-5:dark_overconfident	claude-haiku-5-5:verdict_wrong_kind	claude-opus-5-5:name	claude-opus-5-5:confidence	claude-opus-5-5:verdict	claude-opus-5-5:recommended	claude-opus-5-5:numbers_not_on_sheet	claude-opus-5-5:dark_overconfident	claude-opus-5-5:verdict_wrong_kind
+FUN008084	new	BHF-like	medium	not_applicable	BHF-like		0	0							
+FUN009411	unconfirmed	TLR-like protein	low	not_applicable	TLR-like protein		0	0							
+FUN000002	conflict_like_only	NLRC5-like	low	same_gene	NLRC5-like		0	0	NLRC5-like NACHT domain protein (NLR family)	low	same_gene	NLRC5-like NACHT domain protein (NLR family)		0	0
+FUN035341	conflict_different_gene	histone H4	high	proposed	histone H4		0	0	Histone H4	high	proposed	Histone H4		0	0
+FUN006619	new	Fester-like	medium	not_applicable	Fester-like		0	0							
+FUN040347	conflict_different_gene	NLR family protein	low	family_only	NLR family protein		0	0	NACHT domain protein (NLR family)	low	family_only	NACHT domain protein (NLR family)		0	0
+FUN016313	conflict_different_gene	PDE4-like	high	family_only	PDE4-like		0	0	cAMP-specific 3',5'-cyclic phosphodiesterase 4 (PDE4)	high	existing	PDE4 (cAMP-specific phosphodiesterase 4)		0	0
+FUN025637	conflict_different_gene	PEX5-like	medium	family_only	PEX5-like		0	0	Peroxisomal targeting signal 1 receptor (PEX5)	medium	proposed	PEX5		0	0
+FUN032937	conflict_different_gene	SLC5A8/12-like transporter	medium	family_only	SLC5A8/12-like transporter		0	0	sodium-coupled monocarboxylate transporter, SLC5A8/SLC5A12 family	medium	family_only	SLC5A8/SLC5A12-like sodium-coupled monocarboxylate transporter		0	0
+FUN002975	conflict_different_gene	TCP11-like	low	family_only	TCP11-like		0	0	TCP11 family protein	low	family_only	TCP11 family protein		0	0
+FUN042328	conflict_different_gene	G protein-coupled receptor-like	low	proposed	G protein-coupled receptor-like		0	0	rhodopsin-family G protein-coupled receptor, LGR-like	medium	neither	rhodopsin-family G protein-coupled receptor, LGR-like		0	0
+FUN019179	conflict_different_gene	PARP14-like mono-ADP-ribosyltransferase	medium	proposed	PARP14-like		0	0	PARP14-like macrodomain-containing ADP-ribosyltransferase	medium	proposed	PARP14-like		0	0
+FUN019835	conflict_different_gene	SLC5A8/SLC5A12-like sodium monocarboxylate transporter	medium	family_only	SLC5A8/SLC5A12-like sodium monocarboxylate transporter		0	0	sodium-coupled monocarboxylate transporter, SLC5A8/SLC5A12 family	medium	family_only	SLC5A8/SLC5A12-like sodium-coupled monocarboxylate transporter		0	0
+FUN009050	conflict_different_gene	Serpin-like protein	medium	neither	serpin family protein		0	0	serpin family protein	medium	neither	serpin family protein		0	0
+FUN026102	conflict_different_gene	Secreted phospholipase A2-like	medium	family_only	Secreted phospholipase A2-like		0	0	secreted phospholipase A2 family protein	medium	neither	secreted phospholipase A2 family protein		0	0
+FUN021578	conflict_different_gene	Beta-keto-L-gulonate decarboxylase (Bkgd)	high	proposed	Bkgd (beta-keto-L-gulonate decarboxylase)		0	0	beta-keto L-gulonate decarboxylase (BKGD)	high	proposed	beta-keto L-gulonate decarboxylase (BKGD)		0	0
+FUN032938	conflict_different_gene	SLC5A8/SLC5A12-like sodium monocarboxylate transporter	medium	family_only	SLC5A8/SLC5A12-like sodium monocarboxylate transporter		0	0	sodium-coupled monocarboxylate transporter-like (SLC5A8/SLC5A12 family)	medium	family_only	sodium-coupled monocarboxylate transporter-like (SLC5A8/SLC5A12 family)		0	0
+FUN010516.2	conflict_different_gene	SLC5A8/SLC5A12-like sodium monocarboxylate transporter	medium	family_only	SLC5A8/SLC5A12-like sodium monocarboxylate transporter		0	0	sodium-coupled monocarboxylate transporter-like (SLC5A8/SLC5A12 family)	medium	family_only	sodium-coupled monocarboxylate transporter-like (SLC5A8/SLC5A12 family)		0	0
+FUN011361.3	conflict_different_gene	SLC2A5-like (GLUT5-like) sugar transporter	medium	proposed	SLC2A5-like (GLUT5-like)		0	0	SLC2A family facilitated sugar transporter (GLUT-like)	medium	family_only	SLC2A family facilitated sugar transporter (GLUT-like)		0	0
+FUN012537	conflict_different_gene	G protein-coupled receptor-like	low	proposed	G protein-coupled receptor-like		0	0	rhodopsin-like (class A) G protein-coupled receptor	low	neither	rhodopsin-like (class A) G protein-coupled receptor		0	0
+FUN006047	conflict_different_gene	Semaphorin-like	medium	family_only	Semaphorin-like		0	0	semaphorin family protein	medium	family_only	semaphorin family protein		0	0
+FUN001944	conflict_different_gene	RNF19-like E3 ubiquitin ligase	high	family_only	RNF19-like E3 ubiquitin ligase		0	0	RNF19 (E3 ubiquitin-protein ligase RNF19A/B)	high	family_only	RNF19		0	0
+FUN021249	conflict_different_gene	Cytochrome P450-like	high	neither	Cytochrome P450-like		0	0	cytochrome P450 family 3-like (CYP3A-like)	medium	family_only	cytochrome P450 family 3-like (CYP3A-like)		0	0
+FUN010505	conflict_different_gene	Sodium-coupled monocarboxylate transporter-like	medium	family_only	Sodium-coupled monocarboxylate transporter-like		0	0	sodium-coupled monocarboxylate transporter, SLC5A8/SLC5A12-like	medium	family_only	sodium-coupled monocarboxylate transporter, SLC5A8/SLC5A12-like		0	0
+FUN027633	conflict_different_gene	Death domain serine/threonine kinase-like	low	neither	Death domain serine/threonine kinase-like		0	0	death domain-containing serine/threonine kinase, RIPK/IRAK-like	low	neither	death domain-containing serine/threonine kinase, RIPK/IRAK-like		0	0
+FUN035441.2	conflict_different_gene	Serine/threonine protein kinase-like	low	neither	Serine/threonine protein kinase-like		0	0	protein kinase-like protein	low	neither	protein kinase-like protein		0	0
+FUN033165	conflict_different_gene	S-adenosylmethionine-dependent methyltransferase-like	medium	neither	S-adenosylmethionine-dependent methyltransferase-like		0	0	SAM-dependent methyltransferase family protein	medium	neither	SAM-dependent methyltransferase family protein		0	0
+FUN024894	conflict_different_gene	Caspase-like	medium	family_only	Caspase-like		0	0	CASP2-like caspase	medium	proposed	CASP2-like caspase		0	0
+FUN006390	conflict_different_gene	Cathepsin L-like	high	existing	Cathepsin L-like		0	0	cathepsin L-like cysteine protease (CTSL-like)	high	existing	CTSL-like (cathepsin L-like)		0	0
+FUN004229	conflict_different_gene	RAB33-like small GTPase	high	existing	RAB33-like small GTPase		0	0	RAB33	high	existing	RAB33		0	0
+FUN039162	conflict_different_gene	Histone H4	high	proposed	Histone H4		0	0	histone H4	high	proposed	histone H4		0	0
+FUN025851	conflict_different_gene	Kelch-like protein (KLHL family)	low	family_only	Kelch-like protein (KLHL family)		0	0	kelch-like family protein	low	family_only	kelch-like family protein		0	0
+FUN031274.2	conflict_different_gene	uncharacterized protein	none	neither	uncharacterized protein		0	0	KAP family P-loop NTPase domain-containing protein (putative)	low	family_only	KAP family P-loop domain-containing protein		0	0
+FUN039594	conflict_different_gene	2-hydroxyacyl-CoA lyase 2 (HACL2)	high	same_gene	2-hydroxyacyl-CoA lyase 2 (HACL2)		0	0	HACL2 (2-hydroxyacyl-CoA lyase 2; ILVBL)	high	same_gene	HACL2 (ILVBL)		0	0
+FUN013892	conflict_different_gene	PIAP	medium	proposed	PIAP		0	0	BIR domain-containing IAP family protein (cIAP-like)	low	family_only	IAP family protein, cIAP-like (BIRC2/3-like)		0	0
+FUN017899	conflict_different_gene	SLC35A1-like CMP-sialic acid transporter	medium	proposed	SLC35A1-like CMP-sialic acid transporter		0	0	SLC35A1-like nucleotide-sugar transporter	medium	proposed	SLC35A1-like		0	0
+FUN019396	conflict_like_only	CHCHD6-like	low	same_gene	CHCHD6-like		0	0	CHCHD6-like (MICOS subunit MIC25/MIC19 family)	low	same_gene	CHCHD6-like (MIC25-like)		0	0
+FUN044669	conflict_like_only	ZMYM1-like	medium	same_gene	ZMYM1-like		0	0	hAT transposase-derived protein, ZMYM1-like	low	same_gene	hAT transposase-derived protein, ZMYM1-like		0	0
+FUN024063	conflict_like_only	Rhodopsin-like GPCR (class A)	medium	family_only	Rhodopsin-like GPCR (class A)		0	0	class A (rhodopsin-like) G protein-coupled receptor	low	neither	class A (rhodopsin-like) G protein-coupled receptor		0	0
+FUN036064	conflict_like_only	Mcl1-like Bcl-2 family protein	medium	same_gene	Mcl1-like Bcl-2 family protein		0	0	Bcl-2 family protein, MCL1-like	medium	same_gene	Bcl-2 family protein, MCL1-like		0	0
+FUN040051	conflict_like_only	TRPA1-like	medium	family_only	TRPA1-like		0	0	TRPA1-like (transient receptor potential ankyrin channel)	medium	same_gene	TRPA1-like		0	0
+FUN043004	conflict_like_only	Peroxiredoxin-like	medium	family_only	Peroxiredoxin-like		0	0	peroxiredoxin-5-like (type II peroxiredoxin)	medium	neither	peroxiredoxin-5-like (type II peroxiredoxin)		0	0
+FUN009967	conflict_like_only	Class A GPCR-like	low	family_only	Class A GPCR-like		0	0	class A (rhodopsin-like) G protein-coupled receptor	low	neither	class A (rhodopsin-like) G protein-coupled receptor		0	0
+FUN041783	conflict_like_only	PPT2-like	high	same_gene	PPT2-like		0	0	lysosomal thioesterase PPT2	high	same_gene	PPT2		0	0
+FUN010831	agree	Arylsulfatase	high	not_applicable	Arylsulfatase		0	0							
+FUN000513.2	agree	Hedgehog (shhb)	medium	not_applicable	Hedgehog (shhb)		0	0							
+FUN028980	agree	Pancreatic lipase-related protein-like	medium	not_applicable	Pancreatic lipase-related protein-like		0	0							
+FUN004042	agree	Acyl-CoA synthetase-like (AMP-binding enzyme)	medium	not_applicable	Acyl-CoA synthetase-like (AMP-binding enzyme)		0	0							
+FUN010581	agree	Ficolin-like	medium	not_applicable	Ficolin-like		0	0							
+FUN015796	agree	NAT10	high	not_applicable	NAT10		0	0							
+FUN030586	agree	KDM2A-like	medium	not_applicable	KDM2A-like		0	0							
+FUN038646	agree	LUC7L2	high	same_gene	LUC7L2		0	1							
+FUN012095.2	agree	EXT1	high	not_applicable	EXT1		0	0							
+FUN007327	agree	Polyamine oxidase-like	low	not_applicable	Polyamine oxidase-like		0	0							
+FUN038703	agree	Steryl-sulfatase-like	medium	not_applicable	Steryl-sulfatase-like		0	0							
+FUN004899	agree	CLASP-like	medium	family_only	CLASP-like		0	1							
+FUN005738	unconfirmed	GAS2-like	medium	not_applicable	GAS2-like		0	0							
+FUN025739	unconfirmed	ZGRF1-like	low	not_applicable	ZGRF1-like		0	0							
+FUN013264	unconfirmed	DRAP1-like	medium	not_applicable	DRAP1-like		0	0							
+FUN003850	unconfirmed	TSHZ1-like	medium	not_applicable	TSHZ1-like		0	0							
+FUN026859	unconfirmed	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN021236.2	unconfirmed	USP6NL	medium	not_applicable	USP6NL		0	0							
+FUN026812	unconfirmed	Ficolin-like fibrinogen-domain lectin	medium	not_applicable	Ficolin-like fibrinogen-domain lectin		0	0							
+FUN032261.2	unconfirmed	alpha-tectorin-like protein	low	not_applicable	alpha-tectorin-like protein		0	0							
+FUN002375.3	unconfirmed	TMEM150B-like membrane protein	low	not_applicable	TMEM150B-like membrane protein		0	0							
+FUN008703	unconfirmed	THAP domain-containing protein	medium	not_applicable	THAP domain-containing protein		0	0							
+FUN019209.3	new	SLC23A2	high	not_applicable	SLC23A2		0	0							
+FUN006976	new	NLRC5-like NACHT-domain protein	medium	not_applicable	NLRC5-like NACHT-domain protein		0	0							
+FUN006471	new	CCDC174	medium	not_applicable	CCDC174		0	0							
+FUN035852	new	UPF0598 family protein	low	not_applicable	UPF0598 family protein		0	0							
+FUN031582	new	CFAP206	high	not_applicable	CFAP206		0	0							
+FUN005278	new	SLC26 family sulfate transporter	medium	not_applicable	SLC26 family sulfate transporter		0	0							
+FUN007936	new	Fibrinogen-related domain protein	low	not_applicable	Fibrinogen-related domain protein		0	0							
+FUN017106	new	Fibrinogen-related domain protein	low	not_applicable	Fibrinogen-related domain protein		0	0							
+FUN038504.2	new	Receptor-type protein tyrosine phosphatase (PTPRA-like)	medium	not_applicable	Receptor-type protein tyrosine phosphatase (PTPRA-like)		0	0							
+FUN022255	new	Concentrative nucleoside transporter (SLC28A2-like)	high	not_applicable	Concentrative nucleoside transporter (SLC28A2-like)		0	0							
+FUN015754	immune	IL-17 receptor-like protein	medium	not_applicable	IL-17 receptor-like protein		0	0							
+FUN024066	immune	C-type lectin-like protein	medium	not_applicable	C-type lectin-like protein		0	0							
+FUN009766	immune	NLR-like NACHT protein	medium	not_applicable	NLR-like NACHT protein		0	0							
+FUN019563	immune	SUEL-type lectin-like protein	low	not_applicable	SUEL-type lectin-like protein		0	0							
+FUN018038	immune	TIR domain-containing protein	low	not_applicable	TIR domain-containing protein		0	0							
+FUN040423	immune	C-type lectin-like protein	medium	not_applicable	C-type lectin-like protein		0	0							
+FUN019539	immune	NACHT domain NLR-like protein	medium	not_applicable	NACHT domain NLR-like protein		0	0							
+FUN014556	immune	NLR family protein	medium	not_applicable	NLR family protein		0	0							
+FUN040434	immune	Fibrinogen C-terminal domain-containing protein	low	not_applicable	Fibrinogen C-terminal domain-containing protein		0	0							
+FUN040947	immune	SUEL-type lectin	medium	not_applicable	SUEL-type lectin		0	0							
+FUN004046	fantasia_only	uncharacterized protein	none	not_applicable	uncharacterized protein		0	0							
+FUN020790	fantasia_only	uncharacterized protein	none	not_applicable	uncharacterized protein		0	0							
+FUN026934	fantasia_only	uncharacterized protein	none	not_applicable	uncharacterized protein		0	0							
+FUN011665	fantasia_only	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN044580	fantasia_only	uncharacterized protein	none	not_applicable	uncharacterized protein		0	0							
+FUN006981	fantasia_only	uncharacterized protein	none	not_applicable	uncharacterized protein		0	0							
+FUN003588	fantasia_only	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN043547	fantasia_only	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN028198	fantasia_only	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN034838	fantasia_only	uncharacterized protein	none	not_applicable	uncharacterized protein		0	0							
+FUN033952	fantasia_only	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN012121	fantasia_only	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN025283	fantasia_only	uncharacterized protein	low	not_applicable	uncharacterized protein		0	0							
+FUN001100	fantasia_only	uncharacterized protein	none	not_applicable	uncharacterized protein		0	0							

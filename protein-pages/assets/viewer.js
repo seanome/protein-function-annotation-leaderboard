@@ -79,7 +79,7 @@
       h.push("<h2>Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
         "check it against the tables below.</p><p>" + esc(c.summary) + "</p><p><b>Confidence: " + esc(c.confidence) + ".</b> " + esc(c.confidence_reason) + "</p>");
       if (v && v.choice !== "not_applicable") h.push("<p><b>Header name " + esc(r[2]) + " or proposed name " + esc(r[3]) + "?</b> " +
-        esc(F.verdicts[v.choice] || v.choice) + "; suggested name <b>" + esc(v.recommended_name) + "</b>. " + esc(v.reason) + "</p>");
+        esc((F.verdicts[v.choice] || v.choice).replace(/^./, function (x) { return x.toUpperCase(); })) + "; suggested name <b>" + esc(v.recommended_name) + "</b>. " + esc(v.reason) + "</p>");
     }
     return h;
   }
