@@ -26,6 +26,7 @@ from pathlib import Path
 
 E_MAX = 10.0  # a hit is drawn when its E-value is at most this, the -E 10 the searches were run with
 COUNT_E = 1e-3  # a hit counts (sentence, index, summary.json) when its E-value is at most this; --count-at
+SHOW_E = 10.0  # the E-value slider on a protein page starts here, so every drawn hit shows at first; --show-at
 TARGET_PFAM_E = 1e-3  # a Swiss-Prot protein's Pfam families: its hmmscan or InterProScan domains at or below this
 HH_PROB_MIN = 50.0  # hhsearch hits also need Prob of at least this
 OVERLAP = 0.5  # two intervals overlap when they share at least half of the shorter one
@@ -1267,15 +1268,16 @@ def build_protein(task):
                '<p class="len">%s%d amino acids</p><p class="summary">%s</p>%s%s</header><main class="wide">' % (
         esc(pid), (esc(pname) + " · ") if pname else "", L, esc(sentence), other_note, gnote))
     # E-value slider, in steps of 10 times: from 10 (every drawn hit) down to the smallest
-    # E-value above 0 on this page. It starts at the counting threshold.
+    # E-value above 0 on this page. It starts at SHOW_E; the drawing as built is at the counting threshold.
     pos_e = [h["evalue"] for v in by_track.values() for h in v if h["evalue"]]
     c_pos = int(round(math.log10(COUNT_E)))
-    lo = min(c_pos, max(-300, math.floor(math.log10(min(pos_e))))) if pos_e else c_pos
+    s_pos = int(round(math.log10(SHOW_E)))
+    lo = min(c_pos, s_pos, max(-300, math.floor(math.log10(min(pos_e))))) if pos_e else min(c_pos, s_pos)
     slider = ('<div class="eslider"><label for="emax">Show hits with E-value at most <output id="ev">%s</output></label>'
               '<input id="emax" type="range" min="%d" max="1" step="1" value="%d" data-start="%d">'
               '<span class="note">The sentence at the top and the index count hits at E-value at most %s. Move the '
-              'slider up to see weaker hits, down to see fewer.</span></div>'
-              % (fmt_thr(COUNT_E), lo, c_pos, c_pos, fmt_thr(COUNT_E))) if by_track else ""
+              'slider down to see fewer, stronger hits.</span></div>'
+              % (fmt_thr(SHOW_E), lo, s_pos, c_pos, fmt_thr(COUNT_E))) if by_track else ""
     toggle = ""
     if n_more:
         toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
@@ -1462,12 +1464,18 @@ def main():
     ap.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--count-at", type=float, default=COUNT_E,
                     help="a hit counts when its E-value is at most this (a power of 10; default 0.001)")
+    ap.add_argument("--show-at", type=float, default=SHOW_E,
+                    help="the E-value slider on each protein page starts here (a power of 10, at most 10; default 10)")
     a = ap.parse_args()
     lg = math.log10(a.count_at) if a.count_at > 0 else None
     if lg is None or abs(lg - round(lg)) > 1e-9 or a.count_at > E_MAX:
         print("--count-at must be a power of 10 no larger than %g (the slider moves in steps of 10 times)" % E_MAX)
         sys.exit(2)
     globals()["COUNT_E"] = a.count_at
+    ls = math.log10(a.show_at) if a.show_at > 0 else None
+    if ls is None or abs(ls - round(ls)) > 1e-9 or a.show_at > E_MAX:
+        sys.exit("--show-at must be a power of 10, at most %s" % fmt_thr(E_MAX))
+    globals()["SHOW_E"] = a.show_at
     t_start = time.time()
     # Millions of small hit records make Python's cycle collector rescan the heap again and
     # again while the files are read; the records hold no cycles, so it is turned off.

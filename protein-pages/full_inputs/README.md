@@ -18,6 +18,9 @@ The proteome is `botryllus_new_genome_protein.fasta` (45,339 proteins; on the la
 | `botryllus_mmseqs_clusters.tsv` | 27,483 MMseqs2 clusters: representative, member (45,339 rows) | Not in the plan; the clustering settings are not recorded |
 | `allorecognition_references.tsv` | The NCBI title of each of the 96 reference proteins | NCBI E-utilities `esummary`, db=protein, fetched 2026-10-28 |
 | `proteome_lengths.tsv.gz` | Each protein's ID as the tables name it, its length and the MD5 of its sequence | `make_proteome_lengths.py` on the proteome FASTA |
+| `botryllus_protein_annotations_v2.tsv.gz`, `botryllus_immune_genes_v2.tsv.gz` | The same tables with four FANTASIA columns added: the nearest experimentally annotated UniProt protein by ProtT5 embedding, its cosine distance, a reliability index and the GO terms copied from it. FANTASIA was run on the 26,676 proteins with no Swiss-Prot match or in the immune table. Every other column is the same as in the first version | Biomni, downloaded 2026-10-30; `biomni_report_v2.md` is its report |
+| `uniprot_names.tsv.gz` | Protein name, gene and organism of every Swiss-Prot match and FANTASIA reference protein (16,113 of 16,250; the other 137 are TrEMBL entries no longer in UniProt) | `../gene_cards/fetch_names.py`, UniProt REST, 2026-10-30 |
+| `go_names.tsv.gz` | Name and namespace of every GO term in the tables (16,652) | `../gene_cards/fetch_names.py`, go-basic.obo, 2026-10-30 |
 
 Two things about the tables that build_full.py works around:
 

@@ -24,8 +24,9 @@ plus InterProScan.
   database whose score is not an E-value (PRINTS, PROSITE and others) is drawn and counts at
   any threshold, unless it is a coil, disorder, membrane or signal-peptide prediction.
 
-Each protein page has an E-value slider that starts at 0.001. Moving it up draws weaker hits,
-up to 10; moving it down draws fewer. The sentence and the index do not move with it.
+Each protein page has an E-value slider that starts at 10 (`--show-at`), so every drawn hit
+shows at first; moving it down draws fewer. The sentence and the index count at 0.001 and do not
+move with it, so a weak hit is shown but does not make the page say two programs agree.
 
 ## What a protein page shows
 

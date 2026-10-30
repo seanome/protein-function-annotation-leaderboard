@@ -179,7 +179,8 @@
   }
   const tg = document.getElementById("toggle"), slider = document.getElementById("emax"), ev = document.getElementById("ev");
   let showAll = false;
-  // The drawing as built shows the hits at the slider's starting value (the counting threshold).
+  // The drawing as built shows the hits at the counting threshold (data-start); the slider may start
+  // elsewhere (build.py --show-at), and then the page redraws once on load.
   const START = slider ? +slider.dataset.start : 1;
   function redraw() {
     const v = slider ? +slider.value : START;
@@ -198,6 +199,7 @@
   }
   if (tg) tg.addEventListener("click", () => { showAll = !showAll; redraw(); });
   if (slider) slider.addEventListener("input", redraw);
+  if (slider && +slider.value !== START) redraw();
   document.getElementById("close").addEventListener("click", () => { panel.hidden = true; });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") panel.hidden = true; });
 
