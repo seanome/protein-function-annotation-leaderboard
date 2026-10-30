@@ -56,6 +56,16 @@ NAME_CHECK = [
 ]
 
 
+# How a gene card's name_verdict reads on the page (gene_cards/prompt.md defines the choices)
+VERDICT_TEXT = {
+    "existing": "the header name is better supported",
+    "proposed": "the proposed name is better supported",
+    "same_gene": "both names mean the same gene",
+    "family_only": "both are in one family and the evidence cannot tell which member",
+    "neither": "the evidence supports neither name",
+}
+
+
 def opentext(path):
     return gzip.open(path, "rt") if str(path).endswith(".gz") else open(path)
 
@@ -107,14 +117,15 @@ def read_fasta_md5(path):
 
 def load(folder):
     tsv = lambda name: list(csv.DictReader(opentext(inp(folder, name)), delimiter="\t"))
-    ann = tsv("botryllus_protein_annotations.tsv")
+    v2 = inp(folder, "botryllus_protein_annotations_v2.tsv").exists()  # v2 adds the FANTASIA columns
+    ann = tsv("botryllus_protein_annotations_v2.tsv" if v2 else "botryllus_protein_annotations.tsv")
     lengths = {r["protein_id"]: (int(r["length"]), r["md5"]) for r in tsv("proteome_lengths.tsv")}
     ids = [r["protein_id"] for r in ann]
     if len(set(ids)) != len(ids):
         sys.exit("botryllus_protein_annotations.tsv names a protein twice")
     if set(ids) != set(lengths):
         sys.exit("proteome_lengths.tsv and the annotation table name different proteins")
-    immune = {r["protein_id"]: r for r in tsv("botryllus_immune_genes.tsv")}
+    immune = {r["protein_id"]: r for r in tsv("botryllus_immune_genes_v2.tsv" if v2 else "botryllus_immune_genes.tsv")}
     jh = defaultdict(list)
     for r in tsv("botryllus_jackhmmer_immune.tsv"):
         jh[r["target"]].append([r["seed_family"], r["seed"], int(r["iteration"]), r["e_value"], r["score"]])
@@ -134,7 +145,20 @@ def load(folder):
         sys.exit("%d proteins have no row in botryllus_mmseqs_clusters.tsv, e.g. %s" % (len(missing), sorted(missing)[0]))
     for k in (set(immune) | set(jh) | set(allo) | set(rep_of)) - set(lengths):
         sys.exit("%s is in a table but not in the proteome" % k)
-    return ann, lengths, immune, jh, allo, rep_of, members
+    # Names fetched by gene_cards/fetch_names.py; optional, the pages show bare IDs without them
+    uni = {r["accession"]: r for r in tsv("uniprot_names.tsv")} if inp(folder, "uniprot_names.tsv").exists() else {}
+    go = {r["go_id"]: r["name"] for r in tsv("go_names.tsv")} if inp(folder, "go_names.tsv").exists() else {}
+    return ann, lengths, immune, jh, allo, rep_of, members, uni, go
+
+
+def read_cards(paths):
+    """Gene cards from gene_cards/run_cards.py; a later file wins for a protein in two."""
+    cards = {}
+    for p in paths or []:
+        for line in open(p):
+            c = json.loads(line)
+            cards[c["protein_id"]] = c
+    return cards
 
 
 def evidence_list(s):
@@ -147,9 +171,10 @@ def evidence_list(s):
     return out
 
 
-def build_site(folder, out, drawn=None, drawn_fasta=None):
+def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     t0 = time.time()
-    ann, lengths, immune, jh, allo, rep_of, members = load(folder)
+    ann, lengths, immune, jh, allo, rep_of, members, uni, go = load(folder)
+    cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
     if len(cats) > 31:
@@ -186,8 +211,18 @@ def build_site(folder, out, drawn=None, drawn_fasta=None):
                      ", ".join(dict.fromkeys(n for _, n in pf)), mask,
                      "%s, %.1f%%" % (al[0][1] or al[0][0], al[0][2]) if al else "", size, drawn_page.get(pid, "")])
         mem = [m for m in members[rep] if m != pid]
+        u = uni.get(r["sp_acc"], {})
+        fa = None
+        if r.get("fantasia_uniprot"):
+            fu = uni.get(r["fantasia_uniprot"], {})
+            fa = [r["fantasia_uniprot"], fu.get("protein_name", ""), fu.get("gene", ""), fu.get("organism", ""),
+                  round(float(r["fantasia_distance"]), 3), round(float(r["fantasia_ri"]), 3),
+                  [g.split("|", 1) for g in split_list(r["fantasia_go_terms"]) if "|" in g]]
+        card = cards.get(pid)
         shards[shard_of(pid)][pid] = dict(
-            go=split_list(r["go_terms"]), kw=split_list(r["sp_keywords"]), pfam=pf,
+            go=[[g, go.get(g, "")] for g in split_list(r["go_terms"])], kw=split_list(r["sp_keywords"]), pfam=pf,
+            sp_gene=u.get("gene", ""), sp_org=u.get("organism", ""), fa=fa,
+            card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
             sp_e=r["sp_evalue"], ev=evidence_list(im["evidence"]) if im else [],
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), al=al, rep=rep,
             mem=[[m, name[m]] for m in mem[:MEMBERS_MAX]], more=max(0, len(mem) - MEMBERS_MAX))
@@ -202,7 +237,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None):
         (out / "full" / ("%03d.js" % s)).write_text(
             "window.FULL_SHARD=Object.assign(window.FULL_SHARD||{},%s);" % json.dumps(shards.get(s, {}), separators=(",", ":")))
     (out / "full" / "rows.js").write_text("window.FULL=%s;" % json.dumps(
-        dict(cats=cats, check=[t for _, t in NAME_CHECK], rows=rows), separators=(",", ":")))
+        dict(cats=cats, check=[t for _, t in NAME_CHECK], verdicts=VERDICT_TEXT, rows=rows), separators=(",", ":")))
 
     n = len(rows)
     summ = dict(
@@ -311,6 +346,7 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--drawn", type=Path, help="a site made by build.py, to link to and copy in")
     ap.add_argument("--drawn-fasta", type=Path, help="the proteins.fasta that site was built from")
+    ap.add_argument("--cards", type=Path, nargs="*", help="gene cards from gene_cards/run_cards.py (.jsonl)")
     a = ap.parse_args()
     if bool(a.drawn) != bool(a.drawn_fasta):
         sys.exit("--drawn and --drawn-fasta go together")
@@ -321,7 +357,7 @@ def main():
         shutil.rmtree(a.out)
     a.out.mkdir(parents=True)
     (a.out / "full_summary.json").write_text('{"finished": false}\n')
-    build_site(a.inputs, a.out, a.drawn, a.drawn_fasta)
+    build_site(a.inputs, a.out, a.drawn, a.drawn_fasta, a.cards)
 
 
 if __name__ == "__main__":

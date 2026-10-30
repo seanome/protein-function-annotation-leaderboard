@@ -37,15 +37,57 @@
     document.title = id + (r[3] || r[2] ? " " + (r[3] || r[2]) : "") + " · Botryllus protein";
     load(shardOf(id), function () { render(id, r, window.FULL_SHARD[id]); window.scrollTo(0, 0); });
   }
+  function uni(acc) { return "<a class=\"mono\" href=\"https://www.uniprot.org/uniprotkb/" + encodeURIComponent(acc) + "\">" + esc(acc) + "</a>"; }
+  // The top of every protein page, in the same order as a drawn page: name line, one sentence on
+  // which programs report a hit, then one row per program with its best hit.
+  function top(id, r, d) {
+    var cats = []; for (var i = 0; i < CATS.length; i++) if (r[11] >> i & 1) cats.push(CATS[i]);
+    var progs = [], rows = [];
+    function row(name, found, hit, score, where) {
+      if (found) progs.push(name);
+      rows.push(["<b>" + esc(name) + "</b>", found ? hit : "<i>no hit</i>", found ? score : "", found ? where : ""]);
+    }
+    var nowhere = "not in the table";
+    row("DIAMOND against Swiss-Prot", !!r[6], r[6] ? uni(r[6]) + " " + esc(r[5]) + (d.sp_gene ? " (" + esc(d.sp_gene) + ")" : "") + (d.sp_org ? ", <i>" + esc(d.sp_org) + "</i>" : "") : "",
+      r[6] ? (r[7] === null ? "" : r[7].toFixed(1) + "% identity over " + Math.round(r[8]) + "% of your protein, ") + "E-value " + esc(d.sp_e) : "", nowhere);
+    var pf = {}; d.pfam.forEach(function (p) { pf[p[1]] = (pf[p[1]] || 0) + 1; });
+    row("hmmsearch with Pfam", d.pfam.length > 0, Object.keys(pf).map(function (n) { return esc(n) + (pf[n] > 1 ? " ×" + pf[n] : ""); }).join(", "),
+      "gathering threshold", nowhere);
+    var j = d.jh[0];
+    row("jackhmmer from immune seed proteins", d.jh.length > 0, j ? esc(j[0]) + " (seed " + esc(j[1]) + ")" + (d.jh.length > 1 ? " and " + (d.jh.length - 1) + " more" : "") : "",
+      j ? "E-value " + esc(j[3]) + ", round " + j[2] : "", nowhere);
+    var a = d.al[0];
+    row("DIAMOND against Fester and BHF", d.al.length > 0, a ? esc(a[1] || a[0]) + " <a class=\"mono\" href=\"https://www.ncbi.nlm.nih.gov/protein/" + encodeURIComponent(a[0]) + "\">" + esc(a[0]) + "</a>" : "",
+      a ? a[2].toFixed(1) + "% identity over " + fmt(a[3]) + " columns, E-value " + esc(a[4]) : "", nowhere);
+    var f = d.fa;
+    row("FANTASIA (nearest protein by embedding)", !!f, f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "",
+      f ? "cosine distance " + f[4].toFixed(2) + ", reliability " + f[5].toFixed(2) : "", f ? "whole protein, no alignment" : "");
+    var name = (d.card && d.card.card_name) || r[3] || r[2] || "";
+    var line = d.card ? d.card.one_line : (cats.length ? "immune-gene candidate: " + cats.join(", ") : "");
+    document.getElementById("sub").textContent = (name ? name + " · " : "") + (line ? line + " · " : "") + fmt(r[1]) + " amino acids";
+    var n = progs.length, sentence = n === 0 ? "None of the 5 programs reports a hit." :
+      n + " of the 5 programs report" + (n === 1 ? "s" : "") + " a hit: " + progs.join(", ") + ".";
+    var h = ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
+      "<p class=\"note\">The best hit of each program. The Biomni tables do not say where on the protein a hit lies, " +
+      "so nothing is drawn along it" + (r[14] ? "; the drawing below comes from separate searches." : ".") + "</p>",
+      table([["Program"], ["Best hit"], ["Score"], ["Where on your protein"]], rows)];
+    if (r[14]) h.push("<h2>Every program's hits drawn along this protein</h2><p class=\"note\">From separate searches against Swiss-Prot, " +
+      "matched to this protein by its sequence. <a href=\"" + esc(r[14]) + "\">Open the drawing on its own page</a>.</p>" +
+      "<iframe class=\"drawn\" title=\"Hits drawn along " + esc(id) + "\" src=\"" + esc(r[14]) + "\" loading=\"lazy\"></iframe>");
+    if (d.card) {
+      var c = d.card, v = c.name_verdict;
+      h.push("<h2>Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
+        "check it against the tables below.</p><p>" + esc(c.summary) + "</p><p><b>Confidence: " + esc(c.confidence) + ".</b> " + esc(c.confidence_reason) + "</p>");
+      if (v && v.choice !== "not_applicable") h.push("<p><b>Header name " + esc(r[2]) + " or proposed name " + esc(r[3]) + "?</b> " +
+        esc(F.verdicts[v.choice] || v.choice) + "; suggested name <b>" + esc(v.recommended_name) + "</b>. " + esc(v.reason) + "</p>");
+    }
+    return h;
+  }
   function render(id, r, d) {
-    var sub = fmt(r[1]) + " aa";
-    document.getElementById("sub").textContent = sub;
-    var h = [];
+    var h = top(id, r, d);
     // Names
     h.push("<h2>Name</h2>" + table([["Existing name (FASTA header)"], ["Proposed name"], ["Comparison"]],
       [[esc(r[2]) || "none", esc(r[3]) || "none", esc(F.check[r[4]])]]));
-    if (r[14]) h.push("<p><a href=\"" + esc(r[14]) + "\">Every annotation program's hits drawn along this protein</a> " +
-      "(a page made from separate searches, matched to this protein by its sequence).</p>");
     // Best Swiss-Prot match
     h.push("<h2>Best Swiss-Prot match (DIAMOND)</h2>");
     if (r[6]) {
@@ -54,7 +96,7 @@
           esc(r[5]), r[7] === null ? "" : r[7].toFixed(1), r[8] === null ? "" : Math.round(r[8]), esc(d.sp_e)]]));
       h.push("<p class=\"note\">Where on your protein the match lies is not in the table this page was built from.</p>");
       if (d.go.length) h.push("<h3>GO terms of the matched Swiss-Prot entry (not measured on your protein)</h3><p class=\"chips\">" + d.go.map(function (g) {
-        return "<a class=\"mono\" href=\"https://www.ebi.ac.uk/QuickGO/term/" + encodeURIComponent(g) + "\">" + esc(g) + "</a>"; }).join(" ") + "</p>");
+        return "<a href=\"https://www.ebi.ac.uk/QuickGO/term/" + encodeURIComponent(g[0]) + "\">" + esc(g[1] || g[0]) + "</a>"; }).join(" · ") + "</p>");
       if (d.kw.length) h.push("<h3>UniProt keywords of that entry</h3><p>" + d.kw.map(esc).join(", ") + "</p>");
     } else h.push("<p>No Swiss-Prot match at E-value 0.001 or below.</p>");
     // Pfam
