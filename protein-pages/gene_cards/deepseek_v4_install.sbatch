@@ -2,26 +2,22 @@
 #SBATCH --job-name=cards-v4-install
 #SBATCH --partition=hns,normal
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
-#SBATCH --time=02:00:00
+#SBATCH --mem=32G
+#SBATCH --time=03:00:00
 #SBATCH --output=%x-%j.out
-# vLLM 0.31.0 (released 2026-10-05) in a Python environment in $GROUP_HOME, then the
-# DeepSeek-V4-Flash weights (160 GB) into the Hugging Face cache on $SCRATCH. Sherlock's
-# py-vllm module is 0.19.1, which cannot run DeepSeek V4 (DeepseekV4ForCausalLM is not in its
-# model list); vLLM 0.31.0 has the model, its chat format and its reasoning parser.
+# vLLM 0.31.0 (released 2026-10-05) as vLLM's own container image, then the DeepSeek-V4-Flash
+# weights (160 GB) into the Hugging Face cache on $SCRATCH. Sherlock's py-vllm module is
+# 0.19.1, which cannot run DeepSeek V4, and pip cannot install a newer vLLM on Sherlock:
+# CentOS 7's glibc 2.17 is too old for recent PyTorch wheels (job 50528214 found only
+# torch up to 2.6). The image (docker://vllm/vllm-openai:v0.31.0, 9 GB) goes in $GROUP_HOME.
 #
 #   sbatch gene_cards/deepseek_v4_install.sbatch
 set -euo pipefail
-ENV=$GROUP_HOME/olgabot/envs/vllm-0.31.0
-ml python/3.12.1
-if [ ! -x "$ENV/bin/vllm" ]; then
-  mkdir -p "$(dirname "$ENV")"
-  python3 -m venv "$ENV"
-  "$ENV/bin/pip" install --quiet --upgrade pip
-  "$ENV/bin/pip" install --quiet vllm==0.31.0
-fi
-"$ENV/bin/python" -c "import vllm, torch; print('vllm', vllm.__version__, 'torch', torch.__version__, 'cuda', torch.version.cuda)"
-"$ENV/bin/python" -c "import inspect, vllm.model_executor.models.registry as r; assert 'DeepseekV4ForCausalLM' in inspect.getsource(r); print('DeepseekV4ForCausalLM is in the model list')"
+SIF=$GROUP_HOME/olgabot/containers/vllm-openai_v0.31.0.sif
+export APPTAINER_CACHEDIR=$SCRATCH/.apptainer-cache APPTAINER_TMPDIR=${L_SCRATCH:-$SCRATCH}/apptainer-tmp
+mkdir -p "$(dirname "$SIF")" "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
+[ -f "$SIF" ] || apptainer pull "$SIF" docker://vllm/vllm-openai:v0.31.0
+apptainer exec "$SIF" python3 -c "import inspect, vllm, vllm.model_executor.models.registry as r; assert 'DeepseekV4ForCausalLM' in inspect.getsource(r); print('vllm', vllm.__version__, 'has DeepseekV4ForCausalLM')"
 export HF_HUB_CACHE=$SCRATCH/.huggingface
-"$ENV/bin/hf" download deepseek-ai/DeepSeek-V4-Flash
+apptainer exec --bind /scratch --env HF_HUB_CACHE="$HF_HUB_CACHE" "$SIF" hf download deepseek-ai/DeepSeek-V4-Flash
 du -sh "$HF_HUB_CACHE/models--deepseek-ai--DeepSeek-V4-Flash"
