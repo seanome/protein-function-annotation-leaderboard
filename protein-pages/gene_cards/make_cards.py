@@ -67,8 +67,57 @@ def load(folder):
     for f in csv.reader(open(inp(folder, "botryllus_mmseqs_clusters.tsv")), delimiter="\t"):
         members[f[0]].append(f[1])
         rep_of[f[1]] = f[0]
+    # Optional: kmerseek's best hit against Swiss-Prot and UniFIRE's predictions (full_inputs/make_*_table.py)
+    km = {r["protein_id"]: r for r in tsv(folder, "kmerseek_best_per_protein.tsv")} if inp(folder, "kmerseek_best_per_protein.tsv").exists() else None
+    uf = None
+    if inp(folder, "unifire_predictions.tsv").exists():
+        uf = collections.defaultdict(list)
+        for r in tsv(folder, "unifire_predictions.tsv"):
+            uf[r["protein_id"]].append(r)
+    mm = {r["protein_id"]: r for r in tsv(folder, "mmseqs2_best_per_protein.tsv")} if inp(folder, "mmseqs2_best_per_protein.tsv").exists() else None
+    ips = None
+    if inp(folder, "interproscan.tsv").exists():
+        ips = collections.defaultdict(list)
+        for f in csv.reader(opentext(inp(folder, "interproscan.tsv")), delimiter="\t"):
+            ips[f[0]].append(f)
     return dict(ann=ann, by_id={r["protein_id"]: r for r in ann}, immune=immune, uni=uni, go=go,
-                lengths=lengths, refs=refs, jh=jh, allo=allo, members=members, rep_of=rep_of)
+                lengths=lengths, refs=refs, jh=jh, allo=allo, members=members, rep_of=rep_of, km=km, uf=uf, mm=mm, ips=ips)
+
+
+UF_TYPES = [("protein.recommendedName.fullName", "name"), ("comment.similarity", "family"),
+            ("comment.function", "function"), ("comment.catalytic_activity", "reaction"),
+            ("comment.subcellular_location", "location in the cell"), ("comment.pathway", "pathway"),
+            ("keyword", "keywords"), ("xref.GO", "GO terms")]
+
+
+def unifire_lines(d, pid):
+    """UniFIRE's predictions in one line per kind, each value once, reactions without their Rhea and
+    ChEBI cross-references; sites and regions are counted, not listed."""
+    rows = d["uf"].get(pid, [])
+    if not rows:
+        return ["UniFIRE (UniProt's ARBA, UniRule and PIRSR annotation rules applied to InterProScan matches): "
+                + ("not run, the protein is over 5,000 amino acids." if d["lengths"].get(pid, 0) > 5000 else "no prediction.")]
+    out = []
+    for t, lab in UF_TYPES:
+        vals = []
+        for r in rows:
+            if r["type"] != t:
+                continue
+            v = r["value"]
+            if t == "comment.catalytic_activity":
+                v = v.split(";")[0].replace("Reaction=", "")
+            if t == "xref.GO":
+                v = d["go"].get(v, {}).get("name", v)
+            if v not in vals:
+                vals.append(v)
+        if vals:
+            out.append("%s: %s" % (lab, "; ".join(vals[:15])))
+    feats = collections.Counter(r["type"][8:].lower().replace("_", " ") for r in rows if r["type"].startswith("feature."))
+    if feats:
+        out.append("predicted sites and regions: " + ", ".join("%s x%d" % (k, n) for k, n in feats.items()))
+    rules = sorted({"%s %s" % (r["source"], r["rule"]) for r in rows})
+    return ["UniFIRE (UniProt's annotation rules applied to InterProScan matches; %d rules: %s): %s"
+            % (len(rules), ", ".join(rules[:6]) + (" and more" if len(rules) > 6 else ""), "; ".join(out))]
 
 
 def uname(d, acc):
@@ -123,6 +172,35 @@ def evidence(d, pid):
         out.append("FANTASIA (protein-language-model embedding, nearest experimentally annotated UniProt protein, no sequence alignment): "
                    "nearest protein %s, cosine distance %.2f, reliability index %.2f (1 is best). GO terms copied from it: %s"
                    % (uname(d, r["fantasia_uniprot"]), float(r["fantasia_distance"]), float(r["fantasia_ri"]), "; ".join(gos) or "none"))
+    if d["mm"] is not None:
+        m = d["mm"].get(pid)
+        out.append("MMseqs2 against Swiss-Prot (kept at E-value 0.001 or below): " + (
+            "best hit %s, %.1f%% identity, residues %s-%s of the Botryllus protein, E-value %s."
+            % (uname(d, m["target"]), 100 * float(m["fident"]), m["qstart"], m["qend"], m["evalue"]) if m else "no hit."))
+    if d["ips"] is not None:
+        rows = d["ips"].get(pid, [])
+        if not rows:
+            out.append("InterProScan 5.59 (all member databases): " + ("not run, over 5,000 amino acids." if d["lengths"].get(pid, 0) > 5000 else "no match."))
+        else:
+            seen, items = set(), []
+            for f in sorted(rows, key=lambda f: int(f[6])):
+                lab = "%s %s" % (f[11], f[12]) if f[11] != "-" else "%s %s (%s)" % (f[4], f[5], f[3])
+                if lab not in seen:
+                    seen.add(lab)
+                    items.append("%s at %s-%s" % (lab, f[6], f[7]))
+            out.append("InterProScan 5.59 matches (all member databases; InterPro entry where there is one, else signature and database), "
+                       "along the protein: " + "; ".join(items[:20]) + (" (and %d more)" % (len(items) - 20) if len(items) > 20 else ""))
+    if d["km"] is not None:
+        k = d["km"].get(pid)
+        if k and k["evalue"]:
+            out.append("kmerseek (reduced-alphabet k-mer search, no full alignment) against all of Swiss-Prot, best hit over %s settings: "
+                       "%s %s, %s, region E-value %s (%s, k = %s); %s of the settings found a hit at E-value 0.001 or below."
+                       % (k["n_settings"], k["target"], k["target_name"], k["target_organism"], k["evalue"], k["alphabet"], k["ksize"],
+                          k["n_settings_strong"]))
+        else:
+            out.append("kmerseek against all of Swiss-Prot: no hit.")
+    if d["uf"] is not None:
+        out += unifire_lines(d, pid)
     rep = d["rep_of"].get(pid)
     mem = d["members"].get(rep, [])
     if len(mem) > 1:
@@ -139,11 +217,14 @@ def main():
     ap.add_argument("out", type=Path)
     ap.add_argument("--pilot", type=int, default=0, help="draw this many proteins covering every kind of case")
     ap.add_argument("--seed", type=int, default=20261030)
+    ap.add_argument("--only", nargs="*", help="write sheets for these proteins only")
     a = ap.parse_args()
     d = load(a.inputs)
     kinds = {r["protein_id"]: kind(r, d["immune"]) for r in d["ann"]}
     a.out.mkdir(parents=True, exist_ok=True)
-    if a.pilot:
+    if a.only:
+        ids = a.only
+    elif a.pilot:
         rng = random.Random(a.seed)
         ids = list(FIXED)
         for k, n in PILOT_MIX.items():

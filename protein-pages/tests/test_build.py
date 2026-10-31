@@ -191,7 +191,7 @@ def test_site_from_test_data(tmp_path):
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
     summary = json.loads((out / "summary.json").read_text())
-    assert summary["total"] == 51 and summary["programs_run"] == 5
+    assert summary["total"] == 51 and summary["programs_run"] == 6  # Foldseek and hhsearch not run
     r = subprocess.run([sys.executable, str(here / "tests" / "check_site.py"), str(out)], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
 

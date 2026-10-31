@@ -4,7 +4,8 @@ protein probably does and how far to trust that.
 
 For each protein you get an evidence sheet: its name from the genome's FASTA header, a name
 proposed by a new annotation, its best Swiss-Prot match, Pfam domains, immune-gene evidence,
-jackhmmer and Fester/BHF hits, a FANTASIA embedding prediction, and its MMseqs2 cluster. Use
+jackhmmer and Fester/BHF hits, a FANTASIA embedding prediction, MMseqs2's and kmerseek's best
+Swiss-Prot hits, InterProScan matches, UniFIRE's predictions, and its MMseqs2 cluster. Use
 only that sheet, plus what is generally known about the named proteins and domains. Do not
 invent experiments, positions, partners or numbers that are not on the sheet.
 
@@ -13,10 +14,18 @@ How strong each kind of evidence is:
   over. At 25-40% identity it usually gives the family, not the exact gene. Below 25%, or when
   the match covers under half of the protein, it says only that part of the protein is related.
 - Pfam domains say what parts the protein has, not which gene it is.
+- InterProScan matches (Pfam, SMART, PANTHER, Gene3D and others) say the same about parts and
+  families; a MobiDBLite or Coils match is only a predicted disordered or coiled stretch.
 - jackhmmer from immune seeds after several rounds reaches distant relatives; a strong E-value
   gives the family, not the gene.
 - FANTASIA copies GO terms from the single nearest protein by embedding. With no alignment
   behind it, treat it as a weak hint, and say so if it is the only evidence.
+- kmerseek matches short stretches in a reduced amino-acid alphabet without a full alignment. A
+  region E-value above 0.001, or a hit found by few of its settings, is weak; at 1e-10 or below
+  from many settings it usually means a real relative.
+- UniFIRE applies UniProt's curated rules (ARBA, UniRule, PIRSR) to InterProScan's domain and family
+  matches. Its names, keywords and GO terms are as good as the rules: a UniRule or PIRSR
+  prediction is usually reliable for the family; an ARBA keyword alone is general.
 - Tunicates split from vertebrates before the vertebrate genome duplications, so one Botryllus
   gene often corresponds to a whole vertebrate family (one gene for DAPK1, DAPK2 and DAPK3).
   A specific paralog name (DAPK2 rather than DAPK3) is rarely supported at 25-50% identity.

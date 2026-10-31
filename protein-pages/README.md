@@ -29,11 +29,12 @@ every step of the slider (`sentence_steps`) and the page swaps it in. At E-value
 count, so two programs can "agree" on a Pfam family from hits that would not count at 0.001;
 move the slider down to see which programs still report a hit.
 
-In the site made by `build_full.py`, a protein that has a drawn page opens on that page, with
-the Biomni annotation's table (DIAMOND against Swiss-Prot, hmmsearch with Pfam, jackhmmer from
-immune seeds, DIAMOND against Fester and BHF, FANTASIA) above the drawing and the rest of the
-Biomni tables under it. Biomni kept those hits at E-value 0.001 or below, so the slider does
-not change them.
+In the site made by `build_full.py`, a protein that has a drawn page opens on that page. The
+drawing comes first, under the title. Under it is a table of what the whole-proteome programs
+found (Biomni's DIAMOND against Swiss-Prot, hmmsearch with Pfam, jackhmmer from immune seeds,
+DIAMOND against Fester and BHF and FANTASIA, and UniFIRE), then the gene card and the rest of
+those tables. Biomni kept its hits at E-value 0.001 or below, so the slider does not change
+them.
 
 ## What a protein page shows
 

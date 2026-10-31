@@ -34,10 +34,12 @@ The final input folder is `$SCRATCH/protein-pages-final/inputs`.
 |---|---|---|
 | `proteins.fasta` | `botryllus-mhc/qpos/chunks/chunk_*.fasta` | the 51 only; trailing `*` removed |
 | `mmseqs2_3rounds.m8`, `phmmer.domtblout`, `phmmer.out`, `jackhmmer.domtblout`, `jackhmmer.out` | rerun by `rerun_with_alignments.sbatch` (job 49844850) on the 51, with the same images, database and settings as notebook 281's `botryllus-mhc/281_tool_search_query_positions.sbatch` (`-E 10`; jackhmmer `-N 3`; MMseqs2 `-s 7 --num-iterations 3 -e 10`), keeping the alignments (HMMER `-o --notextw`; MMseqs2 `qaln,taln`) | none. The rerun gave the same rows as notebook 281's tables: phmmer 29,448, jackhmmer 66,196 and MMseqs2 5,513 rows, all in both. |
-| `kmerseek.tsv` | `invertebrate-dark-set/results-0.4/dark-regions/botryllus_dark_regions.csv.gz` | rows of the 51 with `moltype` hp_lehninger2 and `ksize` 17 only (the file also holds 5 other settings); commas changed to tabs; column names kept. This file holds regions only for proteins the dark-set run found no other hit for, so most of the 50 have no kmerseek row. It has no GO column. |
+| `kmerseek.tsv.gz` | `botryllus-kmerseek-swissprot/results/matches/` (the whole proteome against all of Swiss-Prot 2026_03, 38 alphabet and k-mer size settings), cut by `extract_kmerseek.sbatch` (job 50499774, 2026-10-31) | regions of the 51 with region E-value at most 10, from the 35 settings whose E-value fit worked (34,052 rows; every one of the 51 has some); a subset of the columns. Replaces the first file, cut from the dark-set run's `dark-regions/`, which only held proteins with no other hit, at one setting. |
+| `mmseqs2.m8` | `botryllus_mmseqs2_sp.m8` from Olga, 2026-10-31: MMseqs2 one round of the whole proteome against Swiss-Prot, kept at E-value 0.001 or below (its search settings are not recorded with it) | rows of the 51, matched by sequence MD5 to `full_inputs/proteome_lengths.tsv.gz`; columns put in build.py's order (query, target, fident, alnlen, qstart, qend, tstart, tend, evalue, bits) |
+| `interproscan.tsv` | InterProScan 5.59, all member databases, from nf-core/proteinannotator (olgabot/botryllus-mhc PR 13; `$SCRATCH/botryllus-annotation-full/results/proteinannotator/interproscan/*.xml`), turned into InterProScan's TSV layout by `interproscan_xml_to_tsv.py` (job 50500198) | rows of the 51, matched by sequence MD5; 767 rows on 38 proteins |
 | `hmmscan.domtblout` | run here: hmmscan 3.4 (`-E 10 --domE 10`) against `$SCRATCH/data/pfam/Pfam-A.hmm` (30,134 models, Pfam-A 38.2), in three jobs that each kept the earlier rows and scanned only new proteins: 49793015 (the first 50 and their targets at E <= 0.001), 49842799 (BHF and targets up to E < 1) and 49845538 (targets up to E <= 10) | on the 51 proteins and the 25,729 Swiss-Prot proteins they match at E-value 10 or below, so build.py can name the Pfam families of a search hit's target |
 | `hmmscan.out` | hmmscan's main output on the 51 proteins (job 49845108, same options), for the alignment of each Pfam model to the protein | none |
-| `swissprot.fasta` | `botryllus-mhc-swissprot/db/swissprot/uniprot_sprot.fasta.gz` (release 2026_03) | only the 26,602 proteins any file names, with UniProt's whole headers (name, species, gene); 4 not in release 2026_03 were taken from the dark-set reference (`invertebrate-dark-set/reference/minus_Ascidiacea/reference.fasta`), with no entry name |
+| `swissprot.fasta` | `botryllus-mhc-swissprot/db/swissprot/uniprot_sprot.fasta.gz` (release 2026_03) | only the 26,602 proteins any file names, plus the 4,225 kmerseek and MMseqs2 targets added on 2026-10-31 (from `botryllus-kmerseek-swissprot/input/uniprot_sprot_2026_03.fasta.gz`; their Pfam families are not in `hmmscan.domtblout`), with UniProt's whole headers (name, species, gene); 4 not in release 2026_03 were taken from the dark-set reference (`invertebrate-dark-set/reference/minus_Ascidiacea/reference.fasta`), with no entry name |
 | `protein_names.tsv` | written by hand: BHF's name, from UniProt S5RI84 | |
 | `run_settings.tsv` | written by hand from the commands in the sbatch scripts above | |
 | `kmerseek_alphabets.rs` | `seanome/kmerseek` `src/rust/alphabets.rs` at commit fc3ce72c (2026-08-25, the last change to that file on the checkout read) | none |
@@ -64,8 +66,6 @@ removed).
 
 ## Not run for these proteins
 
-No output exists on the FUN proteome for MMseqs2 one round, Foldseek, ProstT5 + Foldseek,
-hhsearch or InterProScan, and the proteome has no predicted structures (`plddt.tsv`) or
-expression table. Those tracks read "not run". An older Botryllus gene set (ids like
-`g21357.t1`) was searched with MMseqs2 one round and ProstT5 + Foldseek, but it is a
-different set of gene models and is not used.
+No output exists on the FUN proteome for Foldseek, ProstT5 + Foldseek or hhsearch, and the
+proteome has no predicted structures (`plddt.tsv`) or expression table. Those tracks read
+"not run".

@@ -1313,7 +1313,9 @@ def build_protein(task):
                   % (sum(len(v) for v in counted_by_track.values()), n_more))
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
-    out.append('<div class="withside">' + legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
+    # The drawing comes first in the page, so a narrow screen shows it right under the title; on a
+    # wide screen site.css moves the legend into a column on its left.
+    out.append('<div class="withside">')
     out.append('<section><h2>What each tool found</h2><p class="lead">Each box is one hit, at the position the tool '
                'reported on your protein.</p>%s%s%s<p class="note">A box is drawn for each hit with '
                'E-value at most the slider\'s value; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
@@ -1321,6 +1323,7 @@ def build_protein(task):
                'tap a box for the protein\'s full name, gene, species and Pfam families, and the scores; click it '
                'to see the residues. A long protein\'s drawing scrolls sideways.</p></section>'
                % (slider, "".join(blocks), toggle, TOP_N))
+    out.append(legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
     out.append('</div>')
     out.append(expr)
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')

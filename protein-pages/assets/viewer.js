@@ -66,16 +66,58 @@
     var f = d.fa;
     row("FANTASIA (nearest protein by embedding)", !!f, f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "",
       f ? "cosine distance " + f[4].toFixed(2) + ", reliability " + f[5].toFixed(2) : "", f ? "whole protein, no alignment" : "");
+    if (d.mm !== undefined && d.mm !== null) {
+      var m = d.mm;
+      row("MMseqs2 against Swiss-Prot", !!m, m ? uni(m[0]) + " " + esc(m[6] || "") + (m[7] ? ", <i>" + esc(m[7]) + "</i>" : "") : "",
+        m ? (100 * m[1]).toFixed(1) + "% identity, E-value " + esc(m[4]) : "", m ? "residues " + m[2] + "-" + m[3] : "");
+    }
+    if (d.ips !== undefined && d.ips !== null) {
+      var IPS_FEAT = { Coils: 1, MobiDBLite: 1, Phobius: 1, TMHMM: 1, AntiFam: 1 };
+      if (d.ips === "not run") rows.push(["<b>InterProScan</b>", "<i>not run (over 5,000 aa)</i>", "", ""]);
+      else {
+        var dom = d.ips.filter(function (x) { return !IPS_FEAT[x[0]]; }), feat = d.ips.filter(function (x) { return IPS_FEAT[x[0]]; });
+        var ent = {}; dom.forEach(function (x) { var k = x[7] || x[2] || x[1]; if (!ent[k]) ent[k] = [x[3], x[4]]; });
+        var dbs = {}; d.ips.forEach(function (x) { dbs[x[0]] = 1; });
+        var ek = Object.keys(ent);
+        row("InterProScan", d.ips.length > 0, ek.length ? ek.slice(0, 4).map(esc).join(", ") + (ek.length > 4 ? " and " + (ek.length - 4) + " more" : "") :
+          "only " + Object.keys(dbs).map(esc).join(", ") + " (disorder, coils or membrane)",
+          d.ips.length + " matches from " + Object.keys(dbs).length + " member databases",
+          ek.length ? ek.slice(0, 4).map(function (k) { return ent[k][0] + "-" + ent[k][1]; }).join(", ") :
+          feat.map(function (x) { return x[3] + "-" + x[4]; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(", "));
+      }
+    }
+    if (d.km !== undefined && d.km !== null) {
+      var k = d.km;
+      row("kmerseek against Swiss-Prot", !!k, k ? uni(k[2]) + " " + esc(k[3]) + (k[4] ? ", <i>" + esc(k[4]) + "</i>" : "") : "",
+        k ? "E-value " + k[1].toPrecision(3) + ", best of " + k[5] + " settings (" + esc(k[0]) + ")" : "", k ? (box ? "drawn above" : "not in this table") : "");
+    }
+    if (d.uf === "not run") rows.push(["<b>UniFIRE (UniProt's annotation rules)</b>", "<i>not run (over 5,000 aa)</i>", "", ""]);
+    else if (d.uf) {
+      var u = d.uf, pick = function (t) { return u.filter(function (x) { return x[2] === t; }).map(function (x) { return x[3]; }); };
+      var nm = pick("protein.recommendedName.fullName")[0] || pick("comment.similarity")[0] ||
+        pick("keyword").filter(function (k, i, a) { return a.indexOf(k) === i; }).slice(0, 5).join(", ");
+      var src = {}; u.forEach(function (x) { src[x[0]] = src[x[0]] || {}; src[x[0]][x[1]] = 1; });
+      var feats = u.filter(function (x) { return x[4] !== null; });
+      row("UniFIRE (UniProt's annotation rules)", u.length > 0, esc(nm),
+        u.length + " predictions from " + Object.keys(src).map(function (k) { var n = Object.keys(src[k]).length; return n + " " + k + " rule" + (n > 1 ? "s" : ""); }).join(", "),
+        feats.length ? feats.length + " sites or regions; see below" : "whole protein");
+    }
+    var N = rows.length;
     var name = (d.card && d.card.card_name) || r[3] || r[2] || "";
     var line = d.card ? d.card.one_line : (cats.length ? "immune-gene candidate: " + cats.join(", ") : "");
     if (!box) document.getElementById("sub").textContent = (name ? name + " · " : "") + (line ? line + " · " : "") + fmt(r[1]) + " amino acids";
-    var n = progs.length, sentence = n === 0 ? "None of the 5 programs reports a hit." :
-      n + " of the 5 programs report" + (n === 1 ? "s" : "") + " a hit: " + progs.join(", ") + ".";
-    var h = box ? ["<h2>What the Biomni annotation found</h2><p class=\"lead\">" + esc(sentence) + "</p>",
-      "<p class=\"note\">Five more programs, run by Biomni on the whole proteome (" + esc(id) + ") and kept at E-value 0.001 or below, " +
-      "so the slider below does not change them. Their tables do not say where on the protein a hit lies, so they are not drawn.</p>"] :
+    var n = progs.length, sentence = n === 0 ? "None of the " + N + " programs reports a hit." :
+      n + " of the " + N + " programs report" + (n === 1 ? "s" : "") + " a hit: " + progs.join(", ") + ".";
+    var h = box ? ["<h2>What the whole-proteome annotation found</h2><p class=\"lead\">" + esc(sentence) + "</p>",
+      "<p class=\"note\">Programs run on the whole proteome (" + esc(id) + "), each protein's best hit: five by Biomni, kept at E-value 0.001 or below" +
+      (d.mm !== undefined ? "; MMseqs2 against Swiss-Prot, kept at 0.001 or below" : "") +
+      (d.ips !== undefined ? "; InterProScan 5.59 with all member databases" : "") +
+      (d.km !== undefined ? "; kmerseek against all of Swiss-Prot, best of its settings, at E-value 10 or below" : "") +
+      (d.uf ? "; and UniFIRE, which applies UniProt's annotation rules (ARBA, UniRule, PIRSR) to InterProScan's matches" : "") +
+      ". The slider above does not change this table.</p>"] :
       ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
-      "<p class=\"note\">The best hit of each program. The Biomni tables do not say where on the protein a hit lies, so nothing is drawn along it.</p>"];
+      "<p class=\"note\">The best hit of each program. The Biomni tables do not say where on the protein a hit lies, so nothing is drawn along it" +
+      (d.uf ? "; UniFIRE gives positions only for the sites it predicts, listed in its table below." : ".") + "</p>"];
     h.push(table([["Program"], ["Best hit"], ["Score"], ["Where on your protein"]], rows));
     return box ? h : h.concat(card(r, d));
   }
@@ -92,7 +134,7 @@
   }
   function render(id, r, d) {
     var h = top(id, r, d);
-    if (box) {  // on a drawn page: the table above the drawing, the rest under it
+    if (box) {  // on a drawn page, under the drawing: the table, then the gene card and the rest
       box.innerHTML = h.join("");
       main = document.getElementById("biomni-more");
       h = card(r, d).concat(["<h2>More from the Biomni annotation</h2>"]);
@@ -142,6 +184,51 @@
           a[2].toFixed(1), fmt(a[3]), esc(a[4]), a[5].toFixed(0), fmt(a[7])];
       })));
     else h.push("<p>None.</p>");
+    // InterProScan
+    if (d.ips) {
+      h.push("<h2>InterProScan matches</h2>");
+      if (d.ips === "not run") h.push("<p>Not run: InterProScan was not run on proteins over 5,000 amino acids.</p>");
+      else if (!d.ips.length) h.push("<p>No match.</p>");
+      else h.push(table([["Member database"], ["Signature"], ["Description"], ["Residues", 1], ["Score or E-value", 1], ["InterPro entry"]],
+        d.ips.map(function (x) {
+          return [esc(x[0]), "<span class=\"mono\">" + esc(x[1]) + "</span>", esc(x[2]), x[3] + "-" + x[4], esc(x[5]),
+            x[6] ? "<a class=\"mono\" href=\"https://www.ebi.ac.uk/interpro/entry/InterPro/" + encodeURIComponent(x[6]) + "\">" + esc(x[6]) + "</a> " + esc(x[7]) : ""];
+        })) + "<p class=\"note\">InterProScan 5.59, all member databases, run on the whole proteome; in order along your protein.</p>");
+    }
+    // UniFIRE
+    if (d.uf) {
+      h.push("<h2>UniFIRE predictions (UniProt's annotation rules)</h2>");
+      if (d.uf === "not run") h.push("<p>Not run: UniFIRE was not run on proteins over 5,000 amino acids.</p>");
+      else if (!d.uf.length) h.push("<p>No prediction.</p>");
+      else {
+        var LAB = { "keyword": "UniProt keyword", "xref.GO": "GO term", "comment.subcellular_location": "where in the cell",
+          "comment.similarity": "family", "comment.catalytic_activity": "reaction it catalyses", "comment.function": "function",
+          "comment.cofactor": "cofactor", "comment.pathway": "pathway", "comment.subunit": "subunit", "comment.domain": "domain",
+          "comment.PTM": "modification", "protein.recommendedName.fullName": "name", "protein.recommendedName.shortName": "short name",
+          "protein.recommendedName.ecNumber": "EC number", "protein.alternativeName.fullName": "other name",
+          "protein.alternativeName.shortName": "other short name", "protein.alternativeName.ecNumber": "other EC number",
+          "gene.name.primary": "gene name" };
+        var ORDER = Object.keys(LAB);
+        function rank(t) { var i = ORDER.indexOf(t); return i < 0 ? 100 + (t.indexOf("feature.") === 0 ? 0 : 1) : i; }
+        function label(t) { return LAB[t] || (t.indexOf("feature.") === 0 ? "site: " + t.slice(8).toLowerCase().replace(/_/g, " ") : t); }
+        function rule(x) {
+          var url = x[1].indexOf("ARBA") === 0 ? "https://www.uniprot.org/arba/" : "https://www.uniprot.org/unirule/";
+          return esc(x[0]) + " <a class=\"mono\" href=\"" + url + encodeURIComponent(x[1]) + "\">" + esc(x[1]) + "</a>";
+        }
+        var seenV = {}, urows = [];
+        d.uf.slice().sort(function (a, b) { return rank(a[2]) - rank(b[2]) || (a[4] || 0) - (b[4] || 0); }).forEach(function (x) {
+          var k = x[2] + "|" + x[3] + "|" + x[4] + "|" + x[5];
+          if (seenV[k]) { seenV[k].push(rule(x)); return; }
+          seenV[k] = [rule(x)];
+          urows.push([x, seenV[k]]);
+        });
+        h.push(table([["What"], ["Prediction"], ["Where on your protein"], ["Rule"]], urows.map(function (z) {
+          var x = z[0];
+          return [esc(label(x[2])), esc(x[3]), x[4] === null ? "" : x[4] + (x[5] !== x[4] ? "-" + x[5] : ""), z[1].join("<br>")];
+        })));
+        h.push("<p class=\"note\">A prediction several rules make is listed once, with each rule. Positions are residue numbers on your protein.</p>");
+      }
+    }
     // Cluster
     h.push("<h2>MMseqs2 cluster</h2>");
     if (r[13] > 1) {
