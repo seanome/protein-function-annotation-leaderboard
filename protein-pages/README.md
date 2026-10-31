@@ -279,6 +279,15 @@ python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/pro
 - `--out` follows the same rule as build.py's: an empty folder, or one holding
   `full_summary.json`, else the script exits with status 2.
 
+## Hosting at Stanford
+
+`deploy_stanford.sh <site folder>` copies a built site to Stanford personal web space
+(`~/WWW` on AFS, served at `https://web.stanford.edu/~<SUNet ID>/botryllus-proteins/`). It
+writes an `.htaccess` file that lets in only people with a Stanford affiliation, after
+Stanford's web login, because the pages hold unpublished data. The upload goes through
+`rice.stanford.edu` and asks for the SUNet password and Duo. The site is about 240 MB;
+the default AFS quota is 5 GB.
+
 ## Test set
 
 `test_inputs/data/` holds the 51-protein test set: 50 *Botryllus schlosseri* proteins drawn at
