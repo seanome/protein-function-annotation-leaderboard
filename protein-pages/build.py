@@ -110,6 +110,22 @@ PROGRAM_ORDER = list(PROGRAMS)
 IPS_FEATURES = {"Coils", "MobiDBLite", "Phobius", "TMHMM", "DeepTMHMM", "SignalP_EUK",
                 "SignalP_GRAM_POSITIVE", "SignalP_GRAM_NEGATIVE", "SignalP-noTM", "SignalP-TM",
                 "SignalP", "AntiFam"}
+# The InterProScan feature predictions drawn on its row, as dashed boxes that never count:
+# analysis -> {signature or "*": the word drawn}. Phobius's topology pieces (cytoplasmic,
+# non-cytoplasmic, the n-, h- and c-regions of a signal peptide) are left out.
+IPS_DRAWN = {"MobiDBLite": {"*": "disorder"}, "Coils": {"*": "coiled coil"},
+             "Phobius": {"TRANSMEMBRANE": "membrane span", "SIGNAL_PEPTIDE": "signal peptide"},
+             "TMHMM": {"*": "membrane span"}, "DeepTMHMM": {"*": "membrane span"},
+             "SignalP_EUK": {"*": "signal peptide"}, "SignalP-noTM": {"*": "signal peptide"},
+             "SignalP-TM": {"*": "signal peptide"}, "SignalP": {"*": "signal peptide"}}
+
+
+def feature_word(analysis, sig):
+    """The word drawn for an InterProScan feature prediction, or None if it is not drawn."""
+    m = IPS_DRAWN.get(analysis, {})
+    return m.get(sig) or m.get("*")
+
+
 # InterProScan analyses whose score column is an E-value; for the others the score is not an
 # E-value and the match counts if the member database reported it.
 IPS_EVALUE = {"Pfam", "SMART", "SUPERFAMILY", "Gene3D", "CDD", "NCBIfam", "TIGRFAM", "PIRSF",
@@ -151,8 +167,9 @@ def accession(t):
 
 def counts(h):
     """A drawn hit counts when its E-value is at most COUNT_E. A hit with no E-value (an
-    InterProScan match from a member database whose score is not an E-value) counts if drawn."""
-    return h["passes"] and (h["evalue"] is None or h["evalue"] <= COUNT_E)
+    InterProScan match from a member database whose score is not an E-value) counts if drawn.
+    An InterProScan feature prediction (disorder, a coil, a membrane span) is drawn, never counted."""
+    return h["passes"] and not h.get("feature") and (h["evalue"] is None or h["evalue"] <= COUNT_E)
 
 
 def fmt_thr(e):
@@ -383,7 +400,10 @@ def parse_interproscan(path, proteins):
             ipr_desc = f[12] if len(f) > 12 else ""
             score = f[8]
             e = fnum(score)
-            if analysis in IPS_FEATURES:
+            word = feature_word(analysis, sig)
+            if word:
+                passes = True
+            elif analysis in IPS_FEATURES:
                 passes = False
             elif analysis in IPS_EVALUE and e is not None:
                 passes = e <= E_MAX
@@ -404,8 +424,10 @@ def parse_interproscan(path, proteins):
                         e if analysis in IPS_EVALUE else None, sc, passes)
                 h["names"] = nm
                 h["db"] = analysis
+                if word:
+                    h.update(feature=True, target=word, names=set())
                 out.setdefault(prot, []).append(h)
-            elif passes and nm and (e is None or e <= TARGET_PFAM_E):
+            elif passes and not word and nm and (e is None or e <= TARGET_PFAM_E):
                 target_ann.setdefault(accession(prot), []).append((int(f[6]), int(f[7]), nm))
     return out, target_ann, names
 
@@ -831,14 +853,23 @@ def hatch_defs():
     return '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>%s</defs></svg>' % pats
 
 
+def feature_svg(x, y, w, h, col):
+    """An InterProScan feature prediction: a dashed box in InterProScan's colour, no fill."""
+    return ('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="none" stroke="%s" stroke-width="1.5" '
+            'stroke-dasharray="3 2"/>' % (x + 1, y + 1, max(1.0, w - 2), h - 2, col))
+
+
 def box_svg(h, idx, x0, x1, y, track, side="in", lx=None):
     prog = PROGRAMS[track["program"]]
     w = max(2.0, x1 - x0)
     op = e_opacity(h["evalue"])
-    rect = shape_svg(x0, y, w, BOX_H, prog, ' opacity="%.2f"' % op if op < 1 else "")
+    if h.get("feature"):
+        op, rect = 1.0, feature_svg(x0, y, w, BOX_H, prog["color"])
+    else:
+        rect = shape_svg(x0, y, w, BOX_H, prog, ' opacity="%.2f"' % op if op < 1 else "")
     ty = y + BOX_H - 3
     if side == "in":
-        solid = prog["shape"] in ("filled", "rounded") and op >= 0.6  # white text needs a dark box
+        solid = prog["shape"] in ("filled", "rounded") and op >= 0.6 and not h.get("feature")  # white text needs a dark box
         tcol, cls = ("#ffffff", "bl") if solid else ("#1a1a1a", "bl halo")
         lab = '<text x="%.1f" y="%d" fill="%s" class="%s">%s</text>' % (x0 + 3, ty, tcol, cls, esc(h["label"]))
     else:  # beside the box, with a leader line in the box's colour
@@ -868,7 +899,8 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
     for t in TRACKS:
         k = t["key"]
         hs = hits_by_track.get(k, [])
-        shown = hs[:TOP_N]
+        real = [h for h in hs if not h.get("feature")]
+        shown = real[:TOP_N] + [h for h in hs if h.get("feature")]
         place, n_l = place_labels(shown, px, W)
         h_row = ROW_PAD + n_l * LANE_H + 4
         if run_status[k] == "not run":
@@ -876,12 +908,19 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
                  % (ROW_PAD + 11, esc(t["file"]))]
         elif not hs:
             g = ['<text x="4" y="%d" class="nh">no hit with E-value at most %s</text>' % (ROW_PAD + 11, fmt_thr(COUNT_E))]
+        elif not real:  # only feature predictions: the row still says it has no hit
+            g = ['<line x1="0" y1="%d" x2="%.1f" y2="%d" stroke="%s" stroke-width="1.5"/>'
+                 % (ROW_PAD + BOX_H // 2, W, ROW_PAD + BOX_H // 2, PROTEIN_LINE)]
+            n_l += 1
+            h_row = ROW_PAD + n_l * LANE_H + 4
+            g.append('<text x="4" y="%d" class="nh">no hit with E-value at most %s; dashed: predictions, not counted</text>'
+                     % (ROW_PAD + (n_l - 1) * LANE_H + 11, fmt_thr(COUNT_E)))
         else:
             g = ['<line x1="0" y1="%d" x2="%.1f" y2="%d" stroke="%s" stroke-width="1.5"/>'
                  % (ROW_PAD + BOX_H // 2, W, ROW_PAD + BOX_H // 2, PROTEIN_LINE)]
         for h, (li, side, lx) in zip(shown, place):
             g.append(box_svg(h, h["i"], (h["q0"] - 1) * px, h["q1"] * px, ROW_PAD + li * LANE_H, t, side, lx))
-        more = len(hs) - len(shown)
+        more = len(real) - min(len(real), TOP_N)
         if more > 0:
             h_row = max(h_row, ROW_PAD + 34)  # room for the "+N more" line under the name
         extra = ('<text x="26" y="%d" class="tm more">+%d more hit%s</text>' % (ROW_PAD + 26, more, "" if more == 1 else "s")) if more > 0 else ""
@@ -1005,8 +1044,8 @@ def legend_html(ctx, has_plddt, has_expr):
         if k == "hhsearch":
             thr = "counts at Prob ≥ 50 and E-value at most %s; drawn up to E-value %s" % (c, d)
         elif k == "interproscan":
-            thr = ("counts at E-value at most %s where there is one, drawn up to %s; coils, disorder, membrane "
-                   "and signal-peptide predictions do not count" % (c, d))
+            thr = ("counts at E-value at most %s where there is one, drawn up to %s; disorder, coiled-coil, "
+                   "membrane-span and signal-peptide predictions are drawn as dashed boxes and do not count" % (c, d))
         else:
             thr = "counts at %s at most %s; drawn up to %s" % (t["score"], c, d)
         coords = {"domtbl_seq": "hmm from-to (positions on your protein)",
@@ -1020,6 +1059,10 @@ def legend_html(ctx, has_plddt, has_expr):
             mark, esc(t["name"]), "<br>".join(esc(x) for x in detail)))
     line = svg_inline('<line x1="0" y1="5" x2="12" y2="5" stroke="%s" stroke-width="2"/>' % PROTEIN_LINE, 12, 10)
     items.append('<li>%s<span>your protein, residue 1 to the end</span></li>' % line)
+    if ctx["run_status"].get("interproscan") != "not run":
+        dash = svg_inline(feature_svg(0, 0, 12, 10, PROGRAMS["interproscan"]["color"]), 12, 10)
+        items.append('<li>%s<span>on the InterProScan row: a disorder, coiled-coil, membrane-span or signal-peptide '
+                     'prediction; drawn, never counted as a hit</span></li>' % dash)
     if has_plddt:
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
         items.append('<li><span></span><span><b>pLDDT</b>, AlphaFold\'s confidence in each residue, 0 to 100: %s</span></li>' % sw)
@@ -1202,6 +1245,8 @@ def build_protein(task):
             name = ctx["entry_names"].get(h["target"], h["target"]) if t["key"] not in ("hmmscan", "interproscan") else h["target"]
             h["label"] = name
             d = dict(k=t["key"], l=name, q=[h["q0"], h["q1"]], s=[v for _, v in h["scores"]], e=h["evalue"])
+            if h.get("feature"):
+                d["x"] = 1  # a feature prediction: drawn as a dashed box, never counted
             # For the tooltip and the search box: the full name, gene and species of a Swiss-Prot
             # target, and the Pfam families on the matched part of it (or the family itself, for
             # hmmscan and InterProScan). f is None when no Pfam output covers the target.
@@ -1263,11 +1308,11 @@ def build_protein(task):
     plddt = ctx["plddt"].get(pid)
     W = int(max(640, min(L * 2.0, 3200)))
     px = W / L
-    counted_by_track = {k: [h for h in v if counts(h)] for k, v in by_track.items()}
+    counted_by_track = {k: [h for h in v if counts(h) or h.get("feature")] for k, v in by_track.items()}
     hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"], ctx["n_run"])
     blocks = ['<div class="tracks" id="tracks"><div class="names">%s</div><div class="scroll">%s</div></div>'
               % (svg_inline(left, "100%", hgt), svg_inline(right, W, hgt, "trk"))]
-    n_more = sum(max(0, len(v) - TOP_N) for v in counted_by_track.values())
+    n_more = sum(max(0, sum(not h.get("feature") for h in v) - TOP_N) for v in counted_by_track.values())
 
     expr = ""
     if ctx["expression"]:
@@ -1310,7 +1355,7 @@ def build_protein(task):
     toggle = ""
     if n_more:
         toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
-                  % (sum(len(v) for v in counted_by_track.values()), n_more))
+                  % (sum(1 for v in counted_by_track.values() for h in v if not h.get("feature")), n_more))
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
     # The drawing comes first in the page, so a narrow screen shows it right under the title; on a

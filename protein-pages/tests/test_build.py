@@ -88,7 +88,10 @@ def test_interproscan(tmp_path):
     out, target_ann, names = build.parse_interproscan(p, {"q": {}})
     a, b = out["q"]
     assert a["passes"] and a["names"] == {"PF00452", "IPR046371"}
-    assert not b["passes"]  # a disorder prediction is not a family
+    # a disorder prediction is drawn, labelled "disorder", and never counts as a hit
+    assert b["feature"] and b["target"] == "disorder" and not build.counts(b)
+    b["_names"] = None
+    assert not build.agreement([b], target_ann)[0]  # alone, the protein has no program with a hit
     assert target_ann["P10415"][0][:2] == (93, 191)
 
 
