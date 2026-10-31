@@ -1,19 +1,31 @@
-"""Ask a Claude model for gene cards, a batch of proteins per call, through the `claude` command
-line (Olga's Claude subscription; no API key on this machine). Each call gets prompt.md as its
-system prompt, no tools, and a JSON schema for the answer. Answers are appended to
+"""Ask a model for gene cards, a batch of proteins per call. Each call gets prompt.md, the
+evidence sheets (never a sequence) and a JSON schema for the answer. Answers are appended to
 out/cards.<model>.jsonl; a protein already there is not asked again, so a stopped run resumes.
 
-  python gene_cards/run_cards.py gene_cards/out --model haiku --batch 10
-  python gene_cards/run_cards.py gene_cards/out --model opus --effort high --only-kind conflict_different_gene --batch 5
+Two ways to reach a model:
 
---model takes the command line's names (haiku, sonnet, opus); the model that answered, as the
-command line reports it, is stored with each card.
+* Claude, through the `claude` command line (Olga's Claude subscription; no API key on this
+  machine). --model takes the command line's names (haiku, sonnet, opus); the model that
+  answered, as the command line reports it, is stored with each card.
+
+    python gene_cards/run_cards.py gene_cards/out --model haiku --batch 10
+    python gene_cards/run_cards.py gene_cards/out --model opus --effort high --only-kind conflict_different_gene --batch 5
+
+* An open-weights model served by vLLM on the same Sherlock GPU node (--server), so the
+  evidence never leaves Sherlock; see deepseek_cards.sbatch. --model is the name vLLM serves.
+  DeepSeek's R1 models are asked without a system prompt, as DeepSeek recommends, so prompt.md
+  goes at the top of the user message; vLLM's deepseek_r1 reasoning parser keeps the model's
+  thinking out of the answer, and the answer is held to the JSON schema.
+
+    python gene_cards/run_cards.py gene_cards/out --server http://127.0.0.1:8000 \
+        --model DeepSeek-R1-Distill-Qwen-32B --batch 1 --parallel 16
 """
 import argparse
 import json
 import subprocess
 import sys
 import time
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -64,6 +76,33 @@ def ask(batch, model, effort):
     return []
 
 
+def ask_server(batch, server, model):
+    """One call to an OpenAI-compatible server (vLLM) on this node."""
+    user = (HERE / "prompt.md").read_text() + "\n\nWrite a gene card for each of these %d proteins.\n\n" % len(batch) + \
+        "\n\n".join("=== %s ===\n%s" % (b["protein_id"], b["evidence"]) for b in batch)
+    body = dict(model=model, messages=[{"role": "user", "content": user}], temperature=0.6, top_p=0.95,
+                max_tokens=16384, response_format={"type": "json_schema",
+                                                   "json_schema": {"name": "cards", "schema": SCHEMA, "strict": True}})
+    req = urllib.request.Request(server.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(),
+                                 headers={"Content-Type": "application/json"})
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=3600) as r:
+                res = json.load(r)
+            msg = res["choices"][0]["message"]
+            cards = {c["protein_id"]: c for c in json.loads(msg["content"])["cards"]}
+            missing = [b["protein_id"] for b in batch if b["protein_id"] not in cards]
+            if missing:
+                raise ValueError("no card for %s" % missing)
+            return [dict(cards[b["protein_id"]], model=res.get("model", model), effort="",
+                         reasoning_tokens=len((msg.get("reasoning_content") or msg.get("reasoning") or "").split()),
+                         cost_usd=0) for b in batch]
+        except Exception as e:
+            print("batch %s attempt %d failed: %s" % (batch[0]["protein_id"], attempt + 1, str(e)[:300]), file=sys.stderr)
+            time.sleep(5)
+    return []
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out", type=Path)
@@ -73,6 +112,7 @@ def main():
     ap.add_argument("--parallel", type=int, default=3)
     ap.add_argument("--only-kind", nargs="*", default=None)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--server", default=None, help="an OpenAI-compatible server on this node, such as vLLM")
     a = ap.parse_args()
     ev = [json.loads(l) for l in open(a.out / "evidence.jsonl")]
     if a.only_kind:
@@ -85,7 +125,8 @@ def main():
     batches = [todo[i:i + a.batch] for i in range(0, len(todo), a.batch)]
     print(len(todo), "proteins in", len(batches), "calls to", a.model, file=sys.stderr)
     with ThreadPoolExecutor(a.parallel) as pool, open(path, "a") as fh:
-        for cards in pool.map(lambda b: ask(b, a.model, a.effort), batches):
+        call = (lambda b: ask_server(b, a.server, a.model)) if a.server else (lambda b: ask(b, a.model, a.effort))
+        for cards in pool.map(call, batches):
             for c in cards:
                 fh.write(json.dumps(c) + "\n")
             fh.flush()
