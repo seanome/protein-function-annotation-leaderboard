@@ -90,14 +90,16 @@
     }
     return [out, Math.max(1, lanes.length)];
   }
+  // An InterProScan feature prediction (h.x), as build.py's feature_svg: a dashed box, never counted
+  const featureSvg = (x, y, w, hh, col) => `<rect x="${(x + 1).toFixed(1)}" y="${(y + 1).toFixed(1)}" width="${Math.max(1, w - 2).toFixed(1)}" height="${(hh - 2).toFixed(1)}" rx="2" fill="none" stroke="${col}" stroke-width="1.5" stroke-dasharray="3 2"/>`;
   function boxSvg(h, i, lane, side, lx) {
     const tr = PAGE.tracks[h.k];
     const x0 = (h.q[0] - 1) * PAGE.px, w = Math.max(2, h.q[1] * PAGE.px - x0), y = ROW_PAD + lane * LANE_H;
-    const op = eOpacity(h.e);
-    const rect = shapeSvg(x0, y, w, BOX_H, tr, op), ty = y + BOX_H - 3;
+    const op = h.x ? 1 : eOpacity(h.e);
+    const rect = h.x ? featureSvg(x0, y, w, BOX_H, tr.color) : shapeSvg(x0, y, w, BOX_H, tr, op), ty = y + BOX_H - 3;
     let lab;
     if (side === "in") {
-      const solid = (tr.shape === "filled" || tr.shape === "rounded") && op >= 0.6;
+      const solid = (tr.shape === "filled" || tr.shape === "rounded") && op >= 0.6 && !h.x;
       lab = `<text x="${(x0 + 3).toFixed(1)}" y="${ty}" fill="${solid ? "#ffffff" : "#1a1a1a"}" class="bl${solid ? "" : " halo"}">${esc(h.l)}</text>`;
     } else {
       const lw = textW(h.l), [l0, l1] = side === "right" ? [x0 + w, lx - 1] : [lx + lw + 1, x0];
@@ -126,17 +128,23 @@
       const nh = !idx && rg.querySelector("text.nh");  // a row with no hit even at E-value 10
       if (nh) nh.textContent = `no hit with E-value at most ${fmtE(Math.round(Math.log10(maxE)))}`;
       if (idx) {
-        const kept = idx.filter((i) => H[i].e === null || H[i].e === undefined || H[i].e <= maxE);
-        const shown = showAll ? kept : kept.slice(0, PAGE.top);
+        const all = idx.filter((i) => H[i].e === null || H[i].e === undefined || H[i].e <= maxE);
+        // feature predictions are always drawn and never count among the best PAGE.top hits
+        const kept = all.filter((i) => !H[i].x), feats = all.filter((i) => H[i].x);
+        const shown = (showAll ? kept : kept.slice(0, PAGE.top)).concat(feats);
         const sep = rg.querySelector("line.sep"), old = lg.querySelector(".more");
         if (old) old.remove();
-        if (!kept.length) {
+        if (!all.length) {
           rg.innerHTML = (sep ? sep.outerHTML : "") + `<text x="4" y="${ROW_PAD + 11}" class="nh">no hit with E-value at most ${fmtE(Math.round(Math.log10(maxE)))}</text>`;
           hgt = ROW_PAD + 22;
         } else {
           const [place, nLanes] = placeLabels(shown.map((i) => H[i]));
           const parts = shown.map((i, n) => boxSvg(H[i], i, ...place[n]));
           hgt = ROW_PAD + nLanes * LANE_H + 4;
+          if (!kept.length) {  // only feature predictions: the row still says it has no hit
+            parts.push(`<text x="4" y="${ROW_PAD + nLanes * LANE_H + 11}" class="nh">no hit with E-value at most ${fmtE(Math.round(Math.log10(maxE)))}; dashed: predictions, not counted</text>`);
+            hgt += LANE_H;
+          }
           const line = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
           rg.innerHTML = (sep ? sep.outerHTML : "") + line + parts.join("");
           const more = kept.length - shown.length;
@@ -157,7 +165,7 @@
     const ag = rs.querySelector('g.row[data-k="agree"] path');
     if (ag) {
       const L = PAGE.q.length, per = {};
-      H.forEach((h) => { if (h.e === null || h.e === undefined || h.e <= maxE) (per[PAGE.tracks[h.k].p] = per[PAGE.tracks[h.k].p] || []).push(h.q); });
+      H.forEach((h) => { if (!h.x && (h.e === null || h.e === undefined || h.e <= maxE)) (per[PAGE.tracks[h.k].p] = per[PAGE.tracks[h.k].p] || []).push(h.q); });
       const diff = new Array(L + 2).fill(0);
       for (const ivs of Object.values(per)) {
         const cover = new Uint8Array(L + 2);
@@ -196,9 +204,9 @@
 
     wire(tracksDiv);
     if (tg) {
-      const maxE = Math.pow(10, v), n = H.filter((h) => h.e === null || h.e === undefined || h.e <= maxE).length;
+      const maxE = Math.pow(10, v), n = H.filter((h) => !h.x && (h.e === null || h.e === undefined || h.e <= maxE)).length;
       const byK = {};
-      H.forEach((h) => { if (h.e === null || h.e === undefined || h.e <= maxE) byK[h.k] = (byK[h.k] || 0) + 1; });
+      H.forEach((h) => { if (h.x) return; if (h.e === null || h.e === undefined || h.e <= maxE) byK[h.k] = (byK[h.k] || 0) + 1; });
       const more = Object.values(byK).reduce((s, c) => s + Math.max(0, c - PAGE.top), 0);
       tg.hidden = !showAll && more === 0;
       tg.textContent = showAll ? `Show the best ${PAGE.top} hits per tool` : `Show all ${n.toLocaleString()} hits (${more.toLocaleString()} more)`;
