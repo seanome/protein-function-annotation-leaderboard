@@ -13,9 +13,9 @@ Reads, from the input folder (see full_inputs/README.md for where each file came
     proteome_lengths.tsv[.gz]                 each protein's length and the MD5 of its sequence
 
 None of these tables gives where on the protein a hit lies, so these pages list hits in tables
-and draw nothing on a ruler. Proteins also in a site made by build.py (--drawn) link to that
-page, where every program's hits are drawn; they are matched by sequence (--drawn-fasta), since
-the two FASTA files number isoforms differently.
+and draw nothing on a ruler. Proteins also in a site made by build.py (--drawn) open on that
+page, where every program's hits are drawn, with these tables added above and under the drawing;
+they are matched by sequence (--drawn-fasta), since the two FASTA files number isoforms differently.
 
 Writes into --out:
     index.html          every protein: search, filters, counts
@@ -227,11 +227,26 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), al=al, rep=rep,
             mem=[[m, name[m]] for m in mem[:MEMBERS_MAX]], more=max(0, len(mem) - MEMBERS_MAX))
 
+    (out / "full").mkdir(parents=True, exist_ok=True)
+    asset_ver = "?v=" + hashlib.md5(b"".join(p.read_bytes() for p in sorted((Path(__file__).parent / "assets").glob("*.*")))).hexdigest()[:8]
     if drawn:
         shutil.copytree(drawn, out, dirs_exist_ok=True)
         (out / "index.html").rename(out / "drawn.html")
-    (out / "full").mkdir(parents=True, exist_ok=True)
-    asset_ver = "?v=" + hashlib.md5(b"".join(p.read_bytes() for p in sorted((Path(__file__).parent / "assets").glob("*.*")))).hexdigest()[:8]
+        # The drawn page is the protein's page: add the Biomni tables to it (assets/viewer.js
+        # fills #biomni above the drawing and #biomni-more at the end)
+        first = {}
+        for pid, page in drawn_page.items():
+            first.setdefault(page, pid)
+        for page, pid in first.items():
+            f = out / page
+            html = f.read_text()
+            html = html.replace('<div class="withside">', '<section id="biomni" data-id="%s"></section><div class="withside">' % pid, 1)
+            html = html.replace("</main>", '<section id="biomni-more"></section></main>', 1)
+            html = html.replace("</body>", '<script src="../full/rows.js%s"></script><script src="../assets/viewer.js%s"></script></body>'
+                                % (asset_ver, asset_ver), 1)
+            if html.count('id="biomni') != 2:
+                sys.exit("could not add the Biomni tables to %s" % page)
+            f.write_text(html)
     shutil.copytree(Path(__file__).parent / "assets", out / "assets", dirs_exist_ok=True)
     for s in range(N_SHARDS):
         (out / "full" / ("%03d.js" % s)).write_text(

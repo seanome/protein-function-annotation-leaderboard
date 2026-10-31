@@ -25,7 +25,7 @@ import time
 from pathlib import Path
 
 E_MAX = 10.0  # a hit is drawn when its E-value is at most this, the -E 10 the searches were run with
-COUNT_E = 1e-3  # a hit counts (sentence, index, summary.json) when its E-value is at most this; --count-at
+COUNT_E = 10.0  # a hit counts (sentence as built, index, summary.json) when its E-value is at most this; --count-at
 SHOW_E = 10.0  # the E-value slider on a protein page starts here, so every drawn hit shows at first; --show-at
 TARGET_PFAM_E = 1e-3  # a Swiss-Prot protein's Pfam families: its hmmscan or InterProScan domains at or below this
 HH_PROB_MIN = 50.0  # hhsearch hits also need Prob of at least this
@@ -1064,6 +1064,42 @@ def header_sentence(n, status, agreed, names, m=8):
 
 
 
+def other_families_note(others, names):
+    """The note under the sentence naming the other Pfam families that also meet the agreement rule."""
+    if not others:
+        return ""
+    shown_o = [family_label(n, names) for n in others[:8]]
+    return ('<p class="note">%d other Pfam famil%s also meet%s the rule: %s%s. The one named has hits '
+            'from the most programs; on a tie, the best E-value of its own hmmscan or InterProScan '
+            'domain on this protein.</p>' % (len(others), "y" if len(others) == 1 else "ies",
+                                             "s" if len(others) == 1 else "", esc(", ".join(shown_o)),
+                                             " and %d more" % (len(others) - 8) if len(others) > 8 else ""))
+
+
+def sentence_steps(hits, ctx, lo):
+    """The sentence at the top and its note at each E-value slider step from 10**lo to 10, so the
+    page can change them with the slider. The hits that count change only at a step equal to some
+    hit's E-value rounded up to a power of 10, so only those steps are worked out; the page uses
+    the last entry at or below the slider's step. Returns [[step, sentence, note], ...]."""
+    global COUNT_E
+    keep = COUNT_E
+    cuts = {lo} | {min(1, max(lo, math.ceil(math.log10(h["evalue"]) - 1e-9)))
+                   for h in hits if h["passes"] and h["evalue"]}
+    out, prev = [], None
+    try:
+        for pos in sorted(cuts):
+            COUNT_E = 10.0 ** pos
+            progs, status, agreed = agreement(hits, ctx["target_ann"])
+            cur = (header_sentence(len(progs), status, agreed, ctx["names"], ctx["n_run"]),
+                   other_families_note(AGREE_OTHERS[0], ctx["names"]))
+            if cur != prev:
+                out.append([pos, cur[0], cur[1]])
+                prev = cur
+    finally:
+        COUNT_E = keep
+    return out
+
+
 def family_label(n, names):
     nm = names.get(n)
     return "%s (%s)" % (nm, n) if nm and nm != n else n
@@ -1247,15 +1283,7 @@ def build_protein(task):
             expr = '<section><h2>Expression</h2><p class="note">Values as in expression.tsv (count or TPM, whichever the file holds); bar length is relative to this protein\'s highest sample.</p>%s</section>' % "".join(items)
 
     sentence = header_sentence(len(progs), status, agreed, ctx["names"], ctx["n_run"])
-    others = AGREE_OTHERS[0]
-    other_note = ""
-    if others:
-        shown_o = [family_label(n, ctx["names"]) for n in others[:8]]
-        other_note = ('<p class="note">%d other Pfam famil%s also meet%s the rule: %s%s. The one named has hits '
-                      'from the most programs; on a tie, the best E-value of its own hmmscan or InterProScan '
-                      'domain on this protein.</p>' % (len(others), "y" if len(others) == 1 else "ies",
-                                                       "s" if len(others) == 1 else "", esc(", ".join(shown_o)),
-                                                       " and %d more" % (len(others) - 8) if len(others) > 8 else ""))
+    other_note = other_families_note(AGREE_OTHERS[0], ctx["names"])
     gnote = ""
     if gname:
         gps = [PROGRAMS[f]["name"] for b, f in enumerate(PROGRAM_ORDER) if gmask & (1 << b)]
@@ -1265,7 +1293,7 @@ def build_protein(task):
             "No hit is on a Swiss-Prot protein with that gene name or entry name %s_..." % esc(gname)))
     out = [page_head("%s · tool comparison" % pid, 1)]
     out.append('<header class="wide"><a class="back" href="../index.html">All proteins</a><h1 class="mono">%s</h1>'
-               '<p class="len">%s%d amino acids</p><p class="summary">%s</p>%s%s</header><main class="wide">' % (
+               '<p class="len">%s%d amino acids</p><p class="summary" id="sent">%s</p><div id="sentnote">%s</div>%s</header><main class="wide">' % (
         esc(pid), (esc(pname) + " · ") if pname else "", L, esc(sentence), other_note, gnote))
     # E-value slider, in steps of 10 times: from 10 (every drawn hit) down to the smallest
     # E-value above 0 on this page. It starts at SHOW_E; the drawing as built is at the counting threshold.
@@ -1273,10 +1301,11 @@ def build_protein(task):
     c_pos = int(round(math.log10(COUNT_E)))
     s_pos = int(round(math.log10(SHOW_E)))
     lo = min(c_pos, s_pos, max(-300, math.floor(math.log10(min(pos_e))))) if pos_e else min(c_pos, s_pos)
+    steps = sentence_steps(hits, ctx, lo)
     slider = ('<div class="eslider"><label for="emax">Show hits with E-value at most <output id="ev">%s</output></label>'
               '<input id="emax" type="range" min="%d" max="1" step="1" value="%d" data-start="%d">'
-              '<span class="note">The sentence at the top and the index count hits at E-value at most %s. Move the '
-              'slider down to see fewer, stronger hits.</span></div>'
+              '<span class="note">The sentence at the top counts the hits the slider shows. Move the slider down to '
+              'see fewer, stronger hits. The index counts hits at E-value at most %s.</span></div>'
               % (fmt_thr(SHOW_E), lo, s_pos, c_pos, fmt_thr(COUNT_E))) if by_track else ""
     toggle = ""
     if n_more:
@@ -1297,7 +1326,7 @@ def build_protein(task):
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
     out.append('</main>%s' % ctx["footer"])
     page_data = dict(
-        id=pid, q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], hits=data, names=score_names, alpha=ctx["alphabets"],
+        id=pid, q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], sent=steps, hits=data, names=score_names, alpha=ctx["alphabets"],
         tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], shape=PROGRAMS[t["program"]]["shape"],
                                cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},
         pfam_color=CATEGORIES["pfam"]["color"],
