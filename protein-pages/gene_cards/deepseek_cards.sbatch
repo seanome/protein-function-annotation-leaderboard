@@ -15,8 +15,11 @@
 #
 # <evidence folder> holds evidence.jsonl (make_cards.py); cards go to
 # <evidence folder>/cards.<model name>.jsonl, and a rerun asks only for the missing proteins.
-# The weights must already be in $SCRATCH/hf_models (gene_cards/deepseek_download.sbatch).
+# The weights must already be in the Hugging Face cache the py-vllm module sets
+# ($HF_HUB_CACHE, $SCRATCH/.huggingface); gene_cards/deepseek_download.sbatch puts them there.
 #
+# Test on 2026-10-31 (job 50515504 then 50515505, two L40S): model loaded in 287 s, 100 cards
+# in 558 s in all, no failed call.
 # DeepSeek-R1-Distill-Qwen-32B in bf16 is 65.5 GB: split over two GPUs of 48 GB (L40S) or
 # 80 GB (H100), which leaves room for the model's working memory on 16 proteins at a time.
 set -euo pipefail
@@ -25,7 +28,7 @@ MODEL=${2:-deepseek-ai/DeepSeek-R1-Distill-Qwen-32B}
 NAME=$(basename "$MODEL")
 HERE=$(dirname "$(readlink -f "$0")")
 [ -f "$HERE/run_cards.py" ] || HERE=$SLURM_SUBMIT_DIR/gene_cards
-export HF_HOME=$SCRATCH/hf_models HF_HUB_OFFLINE=1 VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1
+export HF_HUB_OFFLINE=1 VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1
 ml math py-vllm/0.19.1_py314
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 PORT=$((20000 + SLURM_JOB_ID % 20000))

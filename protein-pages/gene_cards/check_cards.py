@@ -1,7 +1,7 @@
-"""Check gene cards against the evidence they were written from, and compare two models' name
-verdicts on the same proteins.
+"""Check gene cards against the evidence they were written from, and compare the models' name
+verdicts on the same proteins, each pair of models in turn.
 
-  python gene_cards/check_cards.py gene_cards/out claude-haiku-5-5 claude-opus-5-5
+  python gene_cards/check_cards.py gene_cards/out claude-haiku-5-5 claude-opus-5-5 DeepSeek-R1-Distill-Qwen-32B
 
 Checks, per card:
   numbers   every percentage and E-value written in the summary or verdict is on the evidence
@@ -81,13 +81,13 @@ def main(out, *models):
         w.writerows(rows)
     for k in sorted(counts):
         print("%s\t%s\t%d" % (k[0], k[1], counts[k]))
-    if len(models) == 2:
-        a, b = models
-        both = [r for r in rows if r["kind"].startswith("conflict") and a + ":verdict" in r and b + ":verdict" in r]
-        agree = sum(r[a + ":verdict"] == r[b + ":verdict"] for r in both)
-        print("verdicts on %d conflicts: %s and %s agree on %d" % (len(both), a, b, agree))
-        for (x, y), n in sorted(collections.Counter((r[a + ":verdict"], r[b + ":verdict"]) for r in both).items()):
-            print("  %s -> %s: %d" % (x, y, n))
+    for i, a in enumerate(models):
+      for b in models[i + 1:]:
+          both = [r for r in rows if r["kind"].startswith("conflict") and a + ":verdict" in r and b + ":verdict" in r]
+          agree = sum(r[a + ":verdict"] == r[b + ":verdict"] for r in both)
+          print("verdicts on %d conflicts: %s and %s agree on %d" % (len(both), a, b, agree))
+          for (x, y), n in sorted(collections.Counter((r[a + ":verdict"], r[b + ":verdict"]) for r in both).items()):
+              print("  %s -> %s: %d" % (x, y, n))
 
 
 if __name__ == "__main__":
