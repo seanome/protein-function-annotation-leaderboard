@@ -48,7 +48,7 @@
     var h = [];
     for (var j = 0; j < Math.min(st.shown, list.length); j++) {
       var r = R[list[j]];
-      h.push("<tr><td><a class=\"mono\" href=\"protein.html#" + encodeURIComponent(r[0]) + "\">" + esc(r[0]) + "</a></td>" +
+      h.push("<tr><td><a class=\"mono\" href=\"" + (r[14] ? esc(r[14]) : "protein.html#" + encodeURIComponent(r[0])) + "\">" + esc(r[0]) + "</a></td>" +
         "<td class=\"r\">" + fmt(r[1]) + "</td><td>" + esc(r[2]) + "</td><td>" + esc(r[3]) + "</td>" +
         "<td>" + esc(r[5]) + "</td><td class=\"r\">" + (r[7] === null ? "" : r[7].toFixed(1)) + "</td>" +
         "<td class=\"r\">" + (r[8] === null ? "" : Math.round(r[8])) + "</td><td>" + esc(r[10]) + "</td>" +

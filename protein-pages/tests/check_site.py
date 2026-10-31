@@ -66,7 +66,7 @@ def main():
     mism = []
     for status, progs, pid, n in rows:
         s = (site / "proteins" / (pid + ".html")).read_text()
-        sent = re.search(r'<p class="summary">(.*?)</p>', s).group(1)
+        sent = re.search(r'<p class="summary"[^>]*>(.*?)</p>', s).group(1)
         n = int(n)
         lead = SENT_LEAD(n, summary["programs_run"])
         if n == 0:

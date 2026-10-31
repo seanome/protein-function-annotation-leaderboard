@@ -145,10 +145,22 @@ def test_status_none_and_one():
     assert build.agreement(hits[:1], ann)[1] == "one"
 
 
-def test_weak_hits_do_not_count():
+def test_weak_hits_do_not_count(monkeypatch):
+    monkeypatch.setattr(build, "COUNT_E", 1e-3)
     hits, ann = _two({"PF00069"}, {"PF00069"})
-    hits[1]["evalue"] = 0.5  # drawn (at most 10) but above the counting threshold 0.001
+    hits[1]["evalue"] = 0.5  # drawn (at most 10) but above a counting threshold of 0.001
     assert build.agreement(hits, ann)[1] == "one"
+
+
+def test_sentence_follows_the_slider():
+    hits, ann = _two({"PF00069"}, {"PF00069"})
+    hits[1]["evalue"] = 0.5
+    ctx = dict(target_ann=ann, names={"PF00069": "Pkinase"}, n_run=5)
+    steps = build.sentence_steps(hits, ctx, -6)
+    at = lambda v: [x for x in steps if x[0] <= v][-1][1]
+    assert at(-3).startswith("1 of the 5 programs run reports a hit")
+    assert at(0).startswith("2 of the 5 programs run report a hit. They agree on Pkinase")
+    assert build.COUNT_E == 10.0  # put back afterwards
 
 
 

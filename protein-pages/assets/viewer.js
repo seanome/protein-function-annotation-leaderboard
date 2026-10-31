@@ -1,7 +1,10 @@
 // protein.html: one page for any protein. The ID after "#" picks the protein; its data are in
 // full/NNN.js, where NNN is the same hash of the ID that build_full.py's shard_of computes.
+// A protein with a drawn page (build.py) goes straight to it: build_full.py adds an element
+// #biomni to that page, and this script fills it with the same tables.
 (function () {
   var F = window.FULL, CATS = F.cats, N_SHARDS = 96;
+  var box = document.getElementById("biomni"), BASE = box ? "../" : "";
   var byId = {};
   F.rows.forEach(function (r) { byId[r[0]] = r; });
   function shardOf(id) {
@@ -11,11 +14,11 @@
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function fmt(n) { return n.toLocaleString("en-US"); }
-  var main = document.getElementById("main"), loaded = {};
+  var main = box || document.getElementById("main"), loaded = {};
   function load(s, then) {
     if (loaded[s]) return then();
     var el = document.createElement("script");
-    el.src = "full/" + ("00" + s).slice(-3) + ".js";
+    el.src = BASE + "full/" + ("00" + s).slice(-3) + ".js";
     el.onload = function () { loaded[s] = true; then(); };
     el.onerror = function () { main.innerHTML = "<p>Could not load " + esc(el.src) + ".</p>"; };
     document.head.appendChild(el);
@@ -27,13 +30,14 @@
       return "<tr>" + r.map(function (c, i) { return "<td" + (head[i][1] ? " class=\"r\"" : "") + ">" + c + "</td>"; }).join("") + "</tr>";
     }).join("") + "</tbody></table></div>";
   }
-  function link(id) { return "<a class=\"mono\" href=\"protein.html#" + encodeURIComponent(id) + "\">" + esc(id) + "</a>"; }
+  function link(id) { return "<a class=\"mono\" href=\"" + BASE + "protein.html#" + encodeURIComponent(id) + "\">" + esc(id) + "</a>"; }
   function show() {
     var id = location.hash.slice(1), r;
     try { id = decodeURIComponent(id); } catch (e) { /* malformed escape: keep the raw text */ }
     r = byId[id];
     document.getElementById("pid").textContent = id || "No protein named";
     if (!r) { main.innerHTML = "<p>No protein " + esc(id) + " in this proteome. <a href=\"index.html\">Search all proteins</a>.</p>"; return; }
+    if (r[14]) { location.replace(r[14]); return; }  // the drawn page is this protein's page
     document.title = id + (r[3] || r[2] ? " " + (r[3] || r[2]) : "") + " · Botryllus protein";
     load(shardOf(id), function () { render(id, r, window.FULL_SHARD[id]); window.scrollTo(0, 0); });
   }
@@ -64,16 +68,19 @@
       f ? "cosine distance " + f[4].toFixed(2) + ", reliability " + f[5].toFixed(2) : "", f ? "whole protein, no alignment" : "");
     var name = (d.card && d.card.card_name) || r[3] || r[2] || "";
     var line = d.card ? d.card.one_line : (cats.length ? "immune-gene candidate: " + cats.join(", ") : "");
-    document.getElementById("sub").textContent = (name ? name + " · " : "") + (line ? line + " · " : "") + fmt(r[1]) + " amino acids";
+    if (!box) document.getElementById("sub").textContent = (name ? name + " · " : "") + (line ? line + " · " : "") + fmt(r[1]) + " amino acids";
     var n = progs.length, sentence = n === 0 ? "None of the 5 programs reports a hit." :
       n + " of the 5 programs report" + (n === 1 ? "s" : "") + " a hit: " + progs.join(", ") + ".";
-    var h = ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
-      "<p class=\"note\">The best hit of each program. The Biomni tables do not say where on the protein a hit lies, " +
-      "so nothing is drawn along it" + (r[14] ? "; the drawing below comes from separate searches." : ".") + "</p>",
-      table([["Program"], ["Best hit"], ["Score"], ["Where on your protein"]], rows)];
-    if (r[14]) h.push("<h2>Every program's hits drawn along this protein</h2><p class=\"note\">From separate searches against Swiss-Prot, " +
-      "matched to this protein by its sequence. <a href=\"" + esc(r[14]) + "\">Open the drawing on its own page</a>.</p>" +
-      "<iframe class=\"drawn\" title=\"Hits drawn along " + esc(id) + "\" src=\"" + esc(r[14]) + "\" loading=\"lazy\"></iframe>");
+    var h = box ? ["<h2>What the Biomni annotation found</h2><p class=\"lead\">" + esc(sentence) + "</p>",
+      "<p class=\"note\">Five more programs, run by Biomni on the whole proteome (" + esc(id) + ") and kept at E-value 0.001 or below, " +
+      "so the slider below does not change them. Their tables do not say where on the protein a hit lies, so they are not drawn.</p>"] :
+      ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
+      "<p class=\"note\">The best hit of each program. The Biomni tables do not say where on the protein a hit lies, so nothing is drawn along it.</p>"];
+    h.push(table([["Program"], ["Best hit"], ["Score"], ["Where on your protein"]], rows));
+    return box ? h : h.concat(card(r, d));
+  }
+  function card(r, d) {
+    var h = [];
     if (d.card) {
       var c = d.card, v = c.name_verdict;
       h.push("<h2>Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
@@ -85,6 +92,11 @@
   }
   function render(id, r, d) {
     var h = top(id, r, d);
+    if (box) {  // on a drawn page: the table above the drawing, the rest under it
+      box.innerHTML = h.join("");
+      main = document.getElementById("biomni-more");
+      h = card(r, d).concat(["<h2>More from the Biomni annotation</h2>"]);
+    }
     // Names
     h.push("<h2>Name</h2>" + table([["Existing name (FASTA header)"], ["Proposed name"], ["Comparison"]],
       [[esc(r[2]) || "none", esc(r[3]) || "none", esc(F.check[r[4]])]]));
@@ -139,6 +151,11 @@
     } else h.push("<p>Alone in its cluster.</p>");
     main.innerHTML = h.join("");
   }
-  window.addEventListener("hashchange", show);
-  show();
+  if (box) {
+    var id = box.dataset.id;
+    load(shardOf(id), function () { render(id, byId[id], window.FULL_SHARD[id]); });
+  } else {
+    window.addEventListener("hashchange", show);
+    show();
+  }
 })();

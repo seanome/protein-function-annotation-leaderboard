@@ -185,6 +185,13 @@
   function redraw() {
     const v = slider ? +slider.value : START;
     if (ev) ev.textContent = fmtE(v);
+    // The sentence at the top counts the hits at the slider's E-value (build.py sentence_steps).
+    if (PAGE.sent && PAGE.sent.length) {
+      let st = PAGE.sent[0];
+      PAGE.sent.forEach((x) => { if (x[0] <= v) st = x; });
+      document.getElementById("sent").textContent = st[1];
+      document.getElementById("sentnote").innerHTML = st[2];
+    }
     tracksDiv.innerHTML = v === START && !showAll ? original : draw(Math.pow(10, v), showAll);
 
     wire(tracksDiv);

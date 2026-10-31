@@ -13,20 +13,27 @@ plus InterProScan.
 ## Two E-value thresholds
 
 - A hit is **drawn** when its E-value is at most 10, the `-E 10` the searches were run with.
-- A hit **counts** when its E-value is at most 0.001 (`--count-at`, a power of 10). Counted
-  hits make the sentence at the top of a protein page, the "programs with a hit" line, the
-  index page's seven numbers, the table's program count, Pfam family, small line and gene
-  column, and `summary.json`.
-- Two things use every drawn hit instead: the table's "Best E-value, any tool" column, with
-  the index slider that filters on it, and the search box. So a protein with no counted hit
-  can still show a best E-value, such as BHF's 1.2e-03.
+- A hit **counts** when its E-value is at most 10 (`--count-at`, a power of 10), the same
+  as drawn. Counted hits make the sentence at the top of a protein page as built, the
+  "programs with a hit" line, the index page's seven numbers, the table's program count, Pfam
+  family, small line and gene column, and `summary.json`.
+- Two things use every drawn hit: the table's "Best E-value, any tool" column, with the index
+  slider that filters on it, and the search box.
 - hhsearch hits with Prob below 50 are not drawn at all. An InterProScan match from a member
   database whose score is not an E-value (PRINTS, PROSITE and others) is drawn and counts at
   any threshold, unless it is a coil, disorder, membrane or signal-peptide prediction.
 
-Each protein page has an E-value slider that starts at 10 (`--show-at`), so every drawn hit
-shows at first; moving it down draws fewer. The sentence and the index count at 0.001 and do not
-move with it, so a weak hit is shown but does not make the page say two programs agree.
+Each protein page has an E-value slider that starts at 10 (`--show-at`). Moving it down draws
+fewer hits, and the sentence at the top changes with it: build.py works out the sentence at
+every step of the slider (`sentence_steps`) and the page swaps it in. At E-value 10 weak hits
+count, so two programs can "agree" on a Pfam family from hits that would not count at 0.001;
+move the slider down to see which programs still report a hit.
+
+In the site made by `build_full.py`, a protein that has a drawn page opens on that page, with
+the Biomni annotation's table (DIAMOND against Swiss-Prot, hmmsearch with Pfam, jackhmmer from
+immune seeds, DIAMOND against Fester and BHF, FANTASIA) above the drawing and the rest of the
+Biomni tables under it. Biomni kept those hits at E-value 0.001 or below, so the slider does
+not change them.
 
 ## What a protein page shows
 
