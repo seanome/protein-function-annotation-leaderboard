@@ -121,6 +121,7 @@ header.wide,main.wide{max-width:1380px}
 /* protein page: the legend is the left column, so it is read before the drawing; on a phone it
    comes first, above the drawing */
 .withside:has(.legend){grid-template-columns:200px minmax(0,1fr)}
+.withside>.legend{order:-1}
 .side.legend li{align-items:flex-start;margin:0 0 4px}
 .side.legend li>svg,.side.legend summary>svg{flex:0 0 12px;margin-top:3px}
 .side.legend details{width:100%}

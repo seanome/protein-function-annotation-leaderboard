@@ -127,3 +127,18 @@ def test_protein_missing_from_clusters_is_a_clear_error(tmp_path):
     with pytest.raises(SystemExit) as e:
         build_full.load(d)
     assert "no row in botryllus_mmseqs_clusters.tsv" in str(e.value)
+
+
+def test_unifire_on_the_pages(site):
+    """UniFIRE predictions reach the right protein: a later copy of a repeated header
+    (FUN000051.2 is UniFIRE's FUN000051_GALNT6.2), and proteins over 5,000 aa read "not run"."""
+    out, summ = site
+    uf = {}
+    for s in range(build_full.N_SHARDS):
+        for pid, d in read_js(out / "full" / ("%03d.js" % s), "window.FULL_SHARD=").items():
+            uf[pid] = d["uf"]
+    assert sum(1 for v in uf.values() if v and v != "not run") == 19001
+    assert sum(1 for v in uf.values() if v == "not run") == 50
+    raw = [r for r in csv.DictReader(gzip.open(FULL / "unifire_predictions.tsv.gz", "rt"), delimiter="\t")
+           if r["protein_id"] == "FUN000051.2"]
+    assert raw and len(uf["FUN000051.2"]) == len(raw)

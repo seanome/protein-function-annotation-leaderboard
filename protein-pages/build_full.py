@@ -14,7 +14,7 @@ Reads, from the input folder (see full_inputs/README.md for where each file came
 
 None of these tables gives where on the protein a hit lies, so these pages list hits in tables
 and draw nothing on a ruler. Proteins also in a site made by build.py (--drawn) open on that
-page, where every program's hits are drawn, with these tables added above and under the drawing;
+page, where every program's hits are drawn, with these tables added under the drawing;
 they are matched by sequence (--drawn-fasta), since the two FASTA files number isoforms differently.
 
 Writes into --out:
@@ -115,6 +115,10 @@ def read_fasta_md5(path):
     return {k: hashlib.md5("".join(v).rstrip("*").encode()).hexdigest() for k, v in seqs.items()}
 
 
+KMERSEEK_MAX_E = 10.0  # a kmerseek best hit is shown when its E-value is at most this
+UNIFIRE_MAX_AA = 5000  # longer proteins were not run through InterProScan and UniFIRE (botryllus-mhc PR 13)
+
+
 def load(folder):
     tsv = lambda name: list(csv.DictReader(opentext(inp(folder, name)), delimiter="\t"))
     v2 = inp(folder, "botryllus_protein_annotations_v2.tsv").exists()  # v2 adds the FANTASIA columns
@@ -148,7 +152,42 @@ def load(folder):
     # Names fetched by gene_cards/fetch_names.py; optional, the pages show bare IDs without them
     uni = {r["accession"]: r for r in tsv("uniprot_names.tsv")} if inp(folder, "uniprot_names.tsv").exists() else {}
     go = {r["go_id"]: r["name"] for r in tsv("go_names.tsv")} if inp(folder, "go_names.tsv").exists() else {}
-    return ann, lengths, immune, jh, allo, rep_of, members, uni, go
+    # UniFIRE predictions (full_inputs/make_unifire_table.py); optional
+    uf = None
+    if inp(folder, "unifire_predictions.tsv").exists():
+        uf = defaultdict(list)
+        for r in tsv("unifire_predictions.tsv"):
+            if r["protein_id"] not in lengths:
+                sys.exit("%s is in unifire_predictions.tsv but not in the proteome" % r["protein_id"])
+            v = r["value"]
+            if r["type"] == "xref.GO" and go.get(v):
+                v = "%s %s" % (v, go[v])
+            uf[r["protein_id"]].append([r["source"], r["rule"], r["type"], v, int(r["start"]) if r["start"] else None,
+                                        int(r["end"]) if r["end"] else None])
+    # Best kmerseek hit against Swiss-Prot (full_inputs/make_kmerseek_table.py); optional
+    km = None
+    if inp(folder, "kmerseek_best_per_protein.tsv").exists():
+        km = {}
+        for r in tsv("kmerseek_best_per_protein.tsv"):
+            if r["protein_id"] not in lengths:
+                sys.exit("%s is in kmerseek_best_per_protein.tsv but not in the proteome" % r["protein_id"])
+            if r["evalue"] and float(r["evalue"]) <= KMERSEEK_MAX_E:
+                km[r["protein_id"]] = ["%s, k = %s" % (r["alphabet"], r["ksize"]), float(r["evalue"]), r["target"],
+                                       r["target_name"], r["target_organism"], int(r["n_settings"])]
+    # Whole-proteome InterProScan matches and best MMseqs2 hit per protein (make_interproscan_table.py,
+    # mmseqs2_best_per_protein.tsv); optional
+    ips = None
+    if inp(folder, "interproscan.tsv").exists():
+        ips = defaultdict(list)
+        for f in csv.reader(opentext(inp(folder, "interproscan.tsv")), delimiter="\t"):
+            ips[f[0]].append([f[3], f[4], f[5] if f[5] != "-" else "", int(f[6]), int(f[7]), f[8] if f[8] != "-" else "",
+                              f[11] if f[11] != "-" else "", f[12] if f[12] != "-" else ""])
+    mm = None
+    if inp(folder, "mmseqs2_best_per_protein.tsv").exists():
+        mm = {r["protein_id"]: [r["target"], float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
+                                uni.get(r["target"], {}).get("protein_name", ""), uni.get(r["target"], {}).get("organism", "")]
+              for r in tsv("mmseqs2_best_per_protein.tsv")}
+    return ann, lengths, immune, jh, allo, rep_of, members, uni, go, uf, km, ips, mm
 
 
 def read_cards(paths):
@@ -173,7 +212,7 @@ def evidence_list(s):
 
 def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     t0 = time.time()
-    ann, lengths, immune, jh, allo, rep_of, members, uni, go = load(folder)
+    ann, lengths, immune, jh, allo, rep_of, members, uni, go, uf, km, ips, mm = load(folder)
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -222,6 +261,11 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         shards[shard_of(pid)][pid] = dict(
             go=[[g, go.get(g, "")] for g in split_list(r["go_terms"])], kw=split_list(r["sp_keywords"]), pfam=pf,
             sp_gene=u.get("gene", ""), sp_org=u.get("organism", ""), fa=fa,
+            # UniFIRE: its predictions; "not run" for proteins over UNIFIRE_MAX_AA, which it skipped
+            km=None if km is None else km.get(pid, 0),
+            mm=None if mm is None else mm.get(pid, 0),
+            ips=None if ips is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not ips.get(pid) else sorted(ips.get(pid, []), key=lambda x: (x[3], x[4]))),  # 0: searched, no hit at E-value KMERSEEK_MAX_E or below
+            uf=None if uf is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not uf.get(pid) else uf.get(pid, [])),
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
             sp_e=r["sp_evalue"], ev=evidence_list(im["evidence"]) if im else [],
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), al=al, rep=rep,
@@ -233,15 +277,14 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         shutil.copytree(drawn, out, dirs_exist_ok=True)
         (out / "index.html").rename(out / "drawn.html")
         # The drawn page is the protein's page: add the Biomni tables to it (assets/viewer.js
-        # fills #biomni above the drawing and #biomni-more at the end)
+        # fills #biomni and #biomni-more under the drawing)
         first = {}
         for pid, page in drawn_page.items():
             first.setdefault(page, pid)
         for page, pid in first.items():
             f = out / page
             html = f.read_text()
-            html = html.replace('<div class="withside">', '<section id="biomni" data-id="%s"></section><div class="withside">' % pid, 1)
-            html = html.replace("</main>", '<section id="biomni-more"></section></main>', 1)
+            html = html.replace("</main>", '<section id="biomni" data-id="%s"></section><section id="biomni-more"></section></main>' % pid, 1)
             html = html.replace("</body>", '<script src="../full/rows.js%s"></script><script src="../assets/viewer.js%s"></script></body>'
                                 % (asset_ver, asset_ver), 1)
             if html.count('id="biomni') != 2:
