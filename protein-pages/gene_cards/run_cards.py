@@ -19,6 +19,8 @@ Two ways to reach a model:
 
     python gene_cards/run_cards.py gene_cards/out --server http://127.0.0.1:8000 \
         --model DeepSeek-R1-Distill-Qwen-32B --batch 1 --parallel 16
+    python gene_cards/run_cards.py gene_cards/out --server http://127.0.0.1:8000 \
+        --model DeepSeek-V4-Flash --temperature 1 --top-p 1 --reasoning-effort high --batch 1 --parallel 16
 """
 import argparse
 import json
@@ -76,13 +78,15 @@ def ask(batch, model, effort):
     return []
 
 
-def ask_server(batch, server, model):
+def ask_server(batch, server, model, temperature=0.6, top_p=0.95, effort=None):
     """One call to an OpenAI-compatible server (vLLM) on this node."""
     user = (HERE / "prompt.md").read_text() + "\n\nWrite a gene card for each of these %d proteins.\n\n" % len(batch) + \
         "\n\n".join("=== %s ===\n%s" % (b["protein_id"], b["evidence"]) for b in batch)
-    body = dict(model=model, messages=[{"role": "user", "content": user}], temperature=0.6, top_p=0.95,
+    body = dict(model=model, messages=[{"role": "user", "content": user}], temperature=temperature, top_p=top_p,
                 max_tokens=16384, response_format={"type": "json_schema",
                                                    "json_schema": {"name": "cards", "schema": SCHEMA, "strict": True}})
+    if effort:
+        body["reasoning_effort"] = effort
     req = urllib.request.Request(server.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
     for attempt in range(3):
@@ -94,7 +98,7 @@ def ask_server(batch, server, model):
             missing = [b["protein_id"] for b in batch if b["protein_id"] not in cards]
             if missing:
                 raise ValueError("no card for %s" % missing)
-            return [dict(cards[b["protein_id"]], model=res.get("model", model), effort="",
+            return [dict(cards[b["protein_id"]], model=res.get("model", model), effort=effort or "",
                          reasoning_tokens=len((msg.get("reasoning_content") or msg.get("reasoning") or "").split()),
                          cost_usd=0) for b in batch]
         except Exception as e:
@@ -113,6 +117,9 @@ def main():
     ap.add_argument("--only-kind", nargs="*", default=None)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--server", default=None, help="an OpenAI-compatible server on this node, such as vLLM")
+    ap.add_argument("--temperature", type=float, default=0.6, help="--server only; DeepSeek's advice: R1 0.6, V4 1.0")
+    ap.add_argument("--top-p", type=float, default=0.95, help="--server only; DeepSeek's advice: R1 0.95, V4 1.0")
+    ap.add_argument("--reasoning-effort", default=None, help="--server only; V4: high (Think High) or max")
     a = ap.parse_args()
     ev = [json.loads(l) for l in open(a.out / "evidence.jsonl")]
     if a.only_kind:
@@ -125,7 +132,7 @@ def main():
     batches = [todo[i:i + a.batch] for i in range(0, len(todo), a.batch)]
     print(len(todo), "proteins in", len(batches), "calls to", a.model, file=sys.stderr)
     with ThreadPoolExecutor(a.parallel) as pool, open(path, "a") as fh:
-        call = (lambda b: ask_server(b, a.server, a.model)) if a.server else (lambda b: ask(b, a.model, a.effort))
+        call = (lambda b: ask_server(b, a.server, a.model, a.temperature, a.top_p, a.reasoning_effort)) if a.server else (lambda b: ask(b, a.model, a.effort))
         for cards in pool.map(call, batches):
             for c in cards:
                 fh.write(json.dumps(c) + "\n")
