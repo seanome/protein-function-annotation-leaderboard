@@ -61,6 +61,12 @@ reads and gzips the files still over 20 MB:
 | `phmmer.out.gz` | none, gzipped |
 | every other file | none |
 
+One file in `data/` was made here, not cut from Sherlock:
+
+| File | Source | How |
+|---|---|---|
+| `target_pfam_interpro.tsv` | InterPro REST API, `https://www.ebi.ac.uk/interpro/api/entry/pfam/protein/uniprot/<accession>/` for a protein and `https://www.ebi.ac.uk/interpro/api/protein/uniprot/<accession>/?isoforms=<isoform>` for an isoform (P12345-2), one request per protein, at most 3 at a time; HTTP 204 means no Pfam match. Read on 2026-11-01 (InterPro's release of that day). | `fetch_target_pfam.py test_inputs/data`, run on a laptop. It lists the Swiss-Prot proteins that a drawn hit (E-value at most 10) on the 51 pages points to and that have no domain in `hmmscan.domtblout.gz` or `interproscan.tsv`. Those two cover few targets: the hmmscan rows of Swiss-Prot proteins were cut to i-Evalue 0.001, and the 4,225 kmerseek and MMseqs2 targets and 3,486 ProstT5 + Foldseek targets added later were never scanned. 10,660 proteins were missing (2,846 of them isoforms that ProstT5 + Foldseek matched). InterPro gives at least one Pfam match for 10,113 and none for 547; 30,601 rows, one per Pfam match, with its start and end on the protein. After it, no drawn target on the 51 pages lacks domain data. |
+
 The site built from `data/` is the same, page for page, as the site built from the full
 folder (checked on 2026-10-27 by comparing the pages with the build time and asset version
 removed).
