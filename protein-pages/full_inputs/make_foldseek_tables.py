@@ -18,6 +18,10 @@ import csv
 import gzip
 import hashlib
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from build import af_accession  # noqa: E402  keeps an isoform's -2
 
 
 def fasta_md5(path):
@@ -53,7 +57,7 @@ def main(m8, lengths, drawn_fasta, best_out, drawn_out):
             if b is None or (e, -bits) < (float(b[10]), -float(b[11])):
                 best[q] = f
             if q in drawn:
-                acc = f[1].split("-")[1] if f[1].startswith("AF-") else f[1]
+                acc = af_accession(f[1]) if f[1].startswith("AF-") else f[1]
                 dw.write("\t".join([drawn[q], f[1], f[2], f[3], f[6], f[7], f[8], f[9], f[10], f[11], "", acc]) + "\n")
     with gzip.open(best_out, "wt") as bw:
         w = csv.writer(bw, delimiter="\t", lineterminator="\n")

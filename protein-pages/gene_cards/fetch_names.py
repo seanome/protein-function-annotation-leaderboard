@@ -15,6 +15,9 @@ import time
 import urllib.request
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from build import af_accession  # noqa: E402  keeps an isoform's -2
+
 UNIPROT = "https://rest.uniprot.org/uniprotkb/accessions?accessions={}&fields=accession,protein_name,gene_primary,organism_name&format=tsv&size=500"
 GO_OBO = "https://purl.obolibrary.org/obo/go/go-basic.obo"
 
@@ -37,7 +40,7 @@ def main(folder):
     rows = list(csv.DictReader(gzip.open(folder / "botryllus_protein_annotations_v2.tsv.gz", "rt"), delimiter="\t"))
     accs = sorted({r["sp_acc"] for r in rows if r["sp_acc"]} | {r["fantasia_uniprot"] for r in rows if r["fantasia_uniprot"]}
                   | {r["target"] for r in csv.DictReader(gzip.open(folder / "mmseqs2_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
-                  | {r["target"].split("-")[1] for r in csv.DictReader(gzip.open(folder / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")})
+                  | {af_accession(r["target"]) for r in csv.DictReader(gzip.open(folder / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")})
     go = sorted({t for r in rows for t in r["go_terms"].split(";") if t}
                 | {t.split("|")[0] for r in rows for t in r["fantasia_go_terms"].split(";") if t}
                 | {r["value"] for r in csv.DictReader(gzip.open(folder / "unifire_predictions.tsv.gz", "rt"), delimiter="\t")

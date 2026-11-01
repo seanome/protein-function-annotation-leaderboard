@@ -196,7 +196,7 @@ def load(folder):
             if r["protein_id"] not in lengths:
                 sys.exit("%s is in foldseek_best_per_protein.tsv but not in the proteome" % r["protein_id"])
             if float(r["evalue"]) <= FOLDSEEK_MAX_E:
-                acc = r["target"].split("-")[1]  # AF-P12345-F1-model_v6
+                acc = build.af_accession(r["target"])  # AF-P12345-F1-model_v6, AF-C3VPR6-2-F1-model_v6
                 fs[r["protein_id"]] = [acc, float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
                                        uni.get(acc, {}).get("protein_name", ""), uni.get(acc, {}).get("organism", "")]
     return ann, lengths, immune, jh, allo, rep_of, members, uni, go, uf, km, ips, mm, fs

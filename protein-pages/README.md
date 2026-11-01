@@ -70,7 +70,9 @@ From top to bottom:
 3. The drawing. Each box is one hit, at the position the tool reported on your protein.
    - a ruler of residue positions, in aa;
    - one row per tool. A row says "not run" when that tool's file is not in the input
-     folder. The best 5 hits per tool are drawn; "Show all hits" draws the rest;
+     folder. The row "Foldseek, 3-D structures" is Foldseek on predicted 3-D structures;
+     when only ProstT5 + Foldseek was run, it says so and points to that next row. The best
+     5 hits per tool are drawn; "Show all hits" draws the rest;
    - if `plddt.tsv` is given, a strip coloured by AlphaFold's confidence scale;
    - "Programs with a hit": at each residue, how many of the programs run (0 to M) have a
      counted hit over it.
