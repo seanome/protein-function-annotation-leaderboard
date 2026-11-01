@@ -142,8 +142,6 @@
   // A program can be folded when it has at least one hit (feature predictions do not count).
   const FOLDABLE = {};
   H.forEach((h) => { if (!h.x) FOLDABLE[h.k] = true; });
-  // Programs whose every hit is drawn, not only the best PAGE.top (for this visit only).
-  const expanded = {};
   // The folded row: the count of hits over each residue, darker for more, in the program's colour.
   function densitySvg(list, tr) {
     const L = PAGE.q.length, diff = new Int32Array(L + 2);
@@ -152,8 +150,8 @@
     const cnt = new Int32Array(L + 1);
     for (let p = 1; p <= L; p++) { c += diff[p]; cnt[p] = c; if (c > max) max = c; }
     const op = (n) => (max <= 1 ? 1 : 0.15 + (0.85 * (n - 1)) / (max - 1));
-    // a see-through area over the whole row first, so a double-click anywhere on it unfolds the row
-    let g = `<rect class="dens" x="0" y="0" width="${PAGE.w}" height="${ROW_PAD + BOX_H + 18}" fill="transparent"><title>Double-click to draw every hit</title></rect>` +
+    // a see-through area over the whole row first, so a click anywhere on it unfolds the row
+    let g = `<rect class="dens" x="0" y="0" width="${PAGE.w}" height="${ROW_PAD + BOX_H + 18}" fill="transparent"><title>Click to show each hit</title></rect>` +
       `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
     for (let a = 1; a <= L;) {
       let b = a;
@@ -193,9 +191,8 @@
         // feature predictions are always drawn and never count among the best PAGE.top hits
         const kept = all.filter((i) => !H[i].x), feats = all.filter((i) => H[i].x);
         // While searching, the best PAGE.top matching hits are drawn too, after the best PAGE.top hits.
-        const open = showAll || expanded[k];
-        const best = open ? kept : kept.slice(0, PAGE.top);
-        const shown = best.concat(words.length && !open ? kept.slice(PAGE.top).filter(matches).slice(0, PAGE.top - best.filter(matches).length) : [], feats);
+        const best = showAll ? kept : kept.slice(0, PAGE.top);
+        const shown = best.concat(words.length && !showAll ? kept.slice(PAGE.top).filter(matches).slice(0, PAGE.top - best.filter(matches).length) : [], feats);
         const sep = rg.querySelector("line.sep");
         lg.querySelectorAll(".more").forEach((o) => o.remove());
         const nMatch = words.length ? kept.filter(matches).length : 0;
@@ -219,11 +216,8 @@
           }
           const line = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
           rg.innerHTML = (sep ? sep.outerHTML : "") + line + parts.join("");
-          const more = kept.length - (shown.length - feats.length);
-          if (more > 0) leftLines.push([`Show all ${hits(kept.length)}`, "expand"]);
-          else if (expanded[k] && !showAll && kept.length > PAGE.top) leftLines.push([`Show the best ${PAGE.top} only`, "expand"]);
+          if (kept.length && !words.length) leftLines.push([hits(kept.length), ""]);
         }
-        if (kept.length) leftLines.push([folded[k] ? "Show each hit" : "Fold into one row", "fold"]);
         leftLines.forEach(([label, act], n) => {
           const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
           t.setAttribute("x", 26); t.setAttribute("y", ROW_PAD + 26 + 15 * n);
@@ -262,7 +256,7 @@
     return tmp.innerHTML;
   }
   const tg = document.getElementById("toggle"), slider = document.getElementById("emax"), ev = document.getElementById("ev");
-  let showAll = false;
+  const showAll = true;  // every hit up to the slider's E-value is drawn
   // The drawing as built shows the hits at the counting threshold (data-start); the slider may start
   // elsewhere (build.py --show-at), and then the page redraws once on load.
   const START = slider ? +slider.dataset.start : 1;
@@ -278,6 +272,8 @@
     }
     tracksDiv.innerHTML = draw(Math.pow(10, v), showAll);
     wire(tracksDiv);
+    decorate();
+    hitTable(Math.pow(10, v));
     if (hqn) {
       const maxE = Math.pow(10, v);
       const shownHits = H.map((h, i) => i).filter((i) => !H[i].x && (H[i].e === null || H[i].e === undefined || H[i].e <= maxE));
@@ -289,14 +285,102 @@
           (tools.length ? `: ${tools.join(", ")}` : "") + ".";
       }
     }
-    if (tg) {
-      const maxE = Math.pow(10, v), n = H.filter((h) => !h.x && (h.e === null || h.e === undefined || h.e <= maxE)).length;
-      const byK = {};
-      H.forEach((h) => { if (h.x) return; if (h.e === null || h.e === undefined || h.e <= maxE) byK[h.k] = (byK[h.k] || 0) + 1; });
-      const more = Object.values(byK).reduce((s, c) => s + Math.max(0, c - PAGE.top), 0);
-      tg.hidden = !showAll && more === 0;
-      tg.textContent = showAll ? `Show the best ${PAGE.top} hits per tool` : `Show all ${n.toLocaleString()} hits (${more.toLocaleString()} more)`;
-    }
+  }
+  // Every hit the drawing shows (the slider's E-value and the search), in a table sorted by a
+  // column the reader clicks: E-value first. Feature predictions (dashed boxes) are left out.
+  const htDiv = document.getElementById("ht");
+  let htSort = { c: 3, up: true };
+  const num = (v) => { const x = parseFloat(v); return isNaN(x) ? null : x; };
+  function scoreOf(h) {  // [value for sorting, text]: bits, or hhsearch's Prob, or InterProScan's score
+    const k = h.k;
+    if (k === "mmseqs2" || k === "mmseqs2_3rounds" || k === "prostt5") return [num(h.s[2]), h.s[2] + " bits"];
+    if (k === "phmmer" || k === "jackhmmer" || k === "hmmscan") return [num(h.s[1]), h.s[1] + " bits"];
+    if (k === "hhsearch") return [num(h.s[0]), "Prob " + h.s[0]];
+    return [null, ""];
+  }
+  function identOf(h) {
+    const k = h.k;
+    if (k === "mmseqs2" || k === "mmseqs2_3rounds" || k === "prostt5") { const f = num(h.s[1]); return f === null ? null : 100 * f; }
+    return null;
+  }
+  const HT_COLS = [
+    ["Program", (h) => PAGE.tracks[h.k].name],
+    ["Hit", (h) => h.l || ""],
+    ["Protein, species", (h) => [h.n, h.o].filter(Boolean).join(", ")],
+    ["E-value", (h) => (h.e === null || h.e === undefined ? null : h.e)],
+    ["Score", (h) => scoreOf(h)[0]],
+    ["Identity (%)", identOf],
+    ["Your protein (aa)", (h) => h.q[0]],
+    ["Pfam families on the hit", (h) => (h.f || []).join("; ")],
+  ];
+  function hitTable(maxE) {
+    if (!htDiv) return;
+    let rows = H.map((h, i) => i).filter((i) => !H[i].x && (H[i].e === null || H[i].e === undefined || H[i].e <= maxE));
+    if (words.length) rows = rows.filter(matches);
+    const get = HT_COLS[htSort.c][1];
+    rows.sort((a, b) => {
+      const x = get(H[a]), y = get(H[b]);
+      if (x === null || x === "") return (y === null || y === "") ? 0 : 1;  // empty values last either way
+      if (y === null || y === "") return -1;
+      const d = typeof x === "number" ? x - y : String(x).localeCompare(String(y));
+      return htSort.up ? d : -d;
+    });
+    const head = HT_COLS.map((c, n) => `<th data-c="${n}" class="${n === htSort.c ? (htSort.up ? "up" : "down") : ""}" ` +
+      `aria-sort="${n === htSort.c ? (htSort.up ? "ascending" : "descending") : "none"}">${esc(c[0])}</th>`).join("");
+    const body = rows.map((i) => {
+      const h = H[i], sc = scoreOf(h), idt = identOf(h);
+      return `<tr data-i="${i}"><td>${esc(PAGE.tracks[h.k].name)}</td><td class="mono">${esc(h.l || "")}` +
+        (h.t && h.t !== h.l ? ` ${uniHtml(h.t)}` : "") + `</td><td>${esc(h.n || "")}${h.o ? ", <i>" + esc(h.o) + "</i>" : ""}</td>` +
+        `<td class="r">${h.e === null || h.e === undefined ? "" : esc(h.s[k_e(h)] || h.e)}</td><td class="r">${esc(sc[1])}</td>` +
+        `<td class="r">${idt === null ? "" : idt.toFixed(1)}</td><td class="r">${h.q[0]}-${h.q[1]}</td>` +
+        `<td>${accHtml((h.f || []).slice(0, 3).join("; ") + ((h.f || []).length > 3 ? "; and " + (h.f.length - 3) + " more" : ""))}</td></tr>`;
+    }).join("");
+    htDiv.innerHTML = `<p class="note">${rows.length.toLocaleString()} hit${rows.length === 1 ? "" : "s"}. Click a column name to sort by it; click a row to see the residues.</p>` +
+      `<div class="tablewrap"><table class="small hits"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  }
+  // the E-value as the program printed it: the score column that holds it
+  function k_e(h) {
+    const names = PAGE.names[h.k] || [];
+    const n = names.findIndex((x) => /e-?value/i.test(x));
+    return n < 0 ? -1 : n;
+  }
+  if (htDiv) htDiv.addEventListener("click", (e) => {
+    const th = e.target.closest("th[data-c]");
+    if (th) { const c = +th.dataset.c; htSort = { c, up: htSort.c === c ? !htSort.up : c !== 4 }; hitTable(currentMaxE()); return; }
+    if (e.target.closest("a")) return;
+    const tr = e.target.closest("tr[data-i]");
+    if (tr) open(H[+tr.dataset.i]);
+  });
+  const currentMaxE = () => Math.pow(10, slider ? +slider.value : START);
+  // Each program's name (mark, name and a small triangle) becomes a button that folds its row.
+  function decorate() {
+    tracksDiv.querySelectorAll(".names g.row").forEach((lg) => {
+      const k = lg.dataset.k, t = lg.querySelector("text.tn");
+      if (!FOLDABLE[k] || !t || lg.querySelector(".fold")) return;
+      const g = document.createElementNS(SVGNS, "g");
+      g.setAttribute("class", "fold"); g.setAttribute("role", "button"); g.setAttribute("tabindex", "0");
+      g.dataset.k = k;
+      g.setAttribute("aria-expanded", folded[k] ? "false" : "true");
+      const name = PAGE.tracks[k].name;
+      g.setAttribute("aria-label", folded[k] ? `${name}: show each hit again` : `${name}: fold its hits into one row`);
+      const tt = document.createElementNS(SVGNS, "title");
+      tt.textContent = folded[k] ? "Click to show each hit again" : "Click to fold these hits into one row";
+      const mark = t.previousElementSibling;
+      g.appendChild(tt);
+      if (mark && mark.tagName === "g") g.appendChild(mark);
+      g.appendChild(t);
+      lg.appendChild(g);
+      // a small triangle after the name: pointing down while the hits are shown, right when folded
+      const x = +t.getAttribute("x") + t.getComputedTextLength() + 6, y = +t.getAttribute("y") - 5;
+      const tri = document.createElementNS(SVGNS, "path");
+      tri.setAttribute("class", "tri");
+      tri.setAttribute("d", folded[k] ? `M${x},${y - 5}l7,5l-7,5z` : `M${x},${y - 3}l9,0l-4.5,7z`);
+      g.appendChild(tri);
+      const area = document.createElementNS(SVGNS, "rect");  // one click target over mark, name and triangle
+      area.setAttribute("x", 0); area.setAttribute("y", y - 9); area.setAttribute("width", x + 12); area.setAttribute("height", 18);
+      area.setAttribute("fill", "transparent");
+      g.insertBefore(area, g.firstChild.nextSibling);
+    });
   }
   function toggleFold(k) {
     folded[k] = !folded[k];
@@ -304,33 +388,19 @@
     try { localStorage.setItem(FOLD_KEY, JSON.stringify(folded)); } catch (e) { /* no storage: fold for this visit only */ }
     redraw();
   }
-  // The links under each program's name: show all its hits, or fold them into one row.
-  function act(el) {
-    const k = el.dataset.k, a = el.dataset.act;
-    if (a === "fold") toggleFold(k);
-    else { expanded[k] = !expanded[k]; redraw(); }
-    const f = tracksDiv.querySelector(`.act[data-k="${k}"][data-act="${a}"]`);
-    if (f) f.focus();
-  }
-  tracksDiv.addEventListener("click", (e) => { const f = e.target.closest(".act"); if (f) act(f); });
-  // Double-click a program's name or its folded strip: unfold it and draw every hit.
-  tracksDiv.addEventListener("dblclick", (e) => {
-    if (e.target.closest(".act, .hit")) return;
-    const row = e.target.closest("g.row"), k = row && row.dataset.k;
-    if (!k || !FOLDABLE[k] || !PAGE.tracks[k]) return;
-    e.preventDefault();
-    const sel = window.getSelection && window.getSelection();
-    if (sel) sel.removeAllRanges();  // the double-click selected the name's text
-    expanded[k] = true;
-    if (folded[k]) toggleFold(k); else redraw();
+  // Click a program's name (or its triangle) to fold or unfold its row; click a folded row to unfold it.
+  tracksDiv.addEventListener("click", (e) => {
+    const f = e.target.closest(".fold");
+    if (f) { toggleFold(f.dataset.k); const g = tracksDiv.querySelector(`.fold[data-k="${f.dataset.k}"]`); if (g) g.focus(); return; }
+    const d = e.target.closest(".dens"), row = d && d.closest("g.row");
+    if (row && folded[row.dataset.k]) toggleFold(row.dataset.k);
   });
   tracksDiv.addEventListener("keydown", (e) => {
-    const f = e.target.closest(".act");
-    if (f && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); act(f); }
+    const f = e.target.closest(".fold");
+    if (f && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggleFold(f.dataset.k); }
   });
   const hq = document.getElementById("hq"), hqn = document.getElementById("hqn");
   if (hq) hq.addEventListener("input", () => { words = hq.value.toLowerCase().split(/\s+/).filter(Boolean); redraw(); });
-  if (tg) tg.addEventListener("click", () => { showAll = !showAll; redraw(); });
   if (slider) slider.addEventListener("input", redraw);
   if (hq && hq.value) words = hq.value.toLowerCase().split(/\s+/).filter(Boolean);  // text the browser kept on reload
   redraw();  // the drawing as built has no links; this adds them and applies the slider, folds and search

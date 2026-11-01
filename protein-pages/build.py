@@ -1545,15 +1545,10 @@ def build_protein(task):
                    '<span id="hqn" class="note" aria-live="polite"></span>'
                    '<span class="note">Looks through the matched protein\'s name, gene, accession, species, Pfam '
                    'families and GO terms. Every word typed must appear. Hits that do not match are drawn faint, '
-                   'and the best %d matching hits of each tool are drawn even when they are not among its best %d.</span></div>'
-                   % (TOP_N, TOP_N) +
-                   '<p class="note" id="foldnote">Under each program\'s name, "Show all" draws every hit, and "Fold into '
-                   'one row" draws one row shaded by how many hits cover each residue. Double-click a program\'s name or its '
-                   'folded row to draw every hit.</p>')
+                   'and the table under the drawing lists only the matching ones.</span></div>' +
+                   '<p class="note" id="foldnote">Click a program\'s name to fold its hits into one row shaded by how many '
+                   'hits cover each residue; click the name or the folded row again to see each hit.</p>')
     toggle = ""
-    if n_more:
-        toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
-                  % (sum(1 for v in counted_by_track.values() for h in v if not h.get("feature")), n_more))
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
     # The drawing comes first in the page, so a narrow screen shows it right under the title; on a
@@ -1561,14 +1556,18 @@ def build_protein(task):
     out.append('<div class="withside">')
     out.append('<section><h2>What each tool found</h2><p class="lead">Each box is one hit, at the position the tool '
                'reported on your protein.</p>%s%s%s<p class="note">A box is drawn for each hit with '
-               'E-value at most the slider\'s value; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
-               'E-value first (ties: the leftmost first); "Show all" under a tool\'s name draws the rest. Hover or '
+               'E-value at most the slider\'s value; a Swiss-Prot protein matched in two places gives two boxes. Every hit is drawn, best '
+               'E-value at the top (ties: the leftmost first); the count under a tool\'s name says how many. Hover or '
                'tap a box for the protein\'s full name, gene, species and Pfam families, and the scores; click it '
                'to see the residues. A long protein\'s drawing scrolls sideways. The last rows (DIAMOND, jackhmmer from '
                'immune seeds, FANTASIA, UniFIRE) come from Biomni\'s run on the whole proteome, which kept only each '
                'protein\'s best hit and not where it lies, so they name the hit with no box; each counts in the sentence '
                'at the top by its own cutoff, which the slider does not change.</p></section>'
-               % (slider, "".join(blocks), toggle, TOP_N))
+               '<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
+               'and matching the search. Each program computes its own E-value and score, so compare them within one '
+               'program. Score is in bits, except hhsearch\'s Prob (the chance, out of 100, that the hit is a true '
+               'relative); identity is given by MMseqs2 and Foldseek only.</p><div id="ht"></div></section>'
+               % (slider, "".join(blocks), toggle))
     out.append(legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
     out.append('</div>')
     out.append(expr)
