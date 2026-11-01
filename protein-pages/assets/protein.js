@@ -9,6 +9,15 @@
   const pbody = document.getElementById("pbody");
   const SVGNS = "http://www.w3.org/2000/svg";
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  // Links to other sites open in a new tab. accHtml escapes s and makes every Pfam (PF00069,
+  // PF00069.32) and InterPro (IPR000719) accession in it a link; the accessions are letters and
+  // digits, so escaping leaves them as they were. uniHtml links a UniProt accession (P12345,
+  // A0A0B4J2F0, P12345-2) and only escapes anything else, such as a PDB chain from hhsearch.
+  const ext = (url, text) => `<a class="mono" href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}</a>`;
+  const accHtml = (s) => esc(s).replace(/\b(PF\d{5}|IPR\d{6})(\.\d+)?\b/g, (m, a) =>
+    ext(`https://www.ebi.ac.uk/interpro/entry/${a.startsWith("PF") ? "pfam" : "InterPro"}/${a}/`, m));
+  const UNIPROT = /^(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2})(?:-\d+)?$/;
+  const uniHtml = (acc) => UNIPROT.test(acc || "") ? ext(`https://www.uniprot.org/uniprotkb/${encodeURIComponent(acc)}/entry`, acc) : esc(acc);
   const H = PAGE.hits;
   // A target's Pfam domains are stored once per page (PAGE.td); give each hit its own reference
   if (PAGE.td) for (const h of H) if (h.t && PAGE.td[h.t]) h.td = PAGE.td[h.t];
@@ -20,24 +29,25 @@
     if (h.r) rows += `<tr><td>${esc(h.t)}</td><td>${h.r[0]}-${h.r[1]}</td></tr>`;
     const names = PAGE.names[h.k] || [];
     h.s.forEach((v, i) => { rows += `<tr><td>${esc(names[i] || "")}</td><td>${esc(v)}</td></tr>`; });
-    return `<div>${esc(PAGE.tracks[h.k].name)}</div><b>${esc(h.l)}</b>${about(h)}<table>${rows}</table>` +
+    return `<div>${esc(PAGE.tracks[h.k].name)}</div><b>${esc(h.l)}</b>${about(h, esc)}<table>${rows}</table>` +
       "<div>Click to see the residues.</div>";
   }
   // Full name, gene and species of the matched Swiss-Prot protein, and its Pfam families over
-  // the matched part (for hmmscan and InterProScan: the family itself).
-  function about(h) {
+  // the matched part (for hmmscan and InterProScan: the family itself). txt turns text into HTML:
+  // esc in the tooltip, which cannot be clicked; accHtml in the panel, so accessions are links.
+  function about(h, txt) {
     let s = "";
     if (h.n) s += `<div class="full">${esc(h.n)}</div>`;
     const gs = [h.g ? "gene " + h.g : "", h.o || ""].filter(Boolean).join(" · ");
     if (gs) s += `<div>${esc(gs)}</div>`;
     if (h.k === "hmmscan" || h.k === "interproscan") {
-      if (h.f && h.f.length) s += `<div>${h.k === "hmmscan" ? "Pfam family" : "Family"}: ${esc(h.f.join("; "))}</div>`;
+      if (h.f && h.f.length) s += `<div>${h.k === "hmmscan" ? "Pfam family" : "Family"}: ${txt(h.f.join("; "))}</div>`;
     } else if (h.f === null || h.f === undefined) {
       s += "<div>Pfam families on the matched part: not known (no Pfam search output for this protein)</div>";
     } else {
       const shown = h.f.slice(0, 5).join("; ") + (h.f.length > 5 ? `; and ${h.f.length - 5} more` : "");
       const from = h.ds && SRC[h.ds] ? ` (${SRC[h.ds](h.t)})` : "";
-      s += `<div>Pfam families on the matched part: ${h.f.length ? esc(shown) : "none"}${esc(from)}</div>`;
+      s += `<div>Pfam families on the matched part: ${h.f.length ? txt(shown) : "none"}${esc(from)}</div>`;
     }
     return s;
   }
@@ -261,7 +271,7 @@
     if (PAGE.sent && PAGE.sent.length) {
       let st = PAGE.sent[0];
       PAGE.sent.forEach((x) => { if (x[0] <= v) st = x; });
-      document.getElementById("sent").textContent = st[1];
+      document.getElementById("sent").innerHTML = st[1];  // HTML from build.py: escaped, accessions as links
       document.getElementById("sentnote").innerHTML = st[2];
     }
     tracksDiv.innerHTML = draw(Math.pow(10, v), showAll);
@@ -568,9 +578,9 @@
     const topLine = top.length ? `Along the top, ${top.join("; ")}.` : "Along the top: nothing; hmmscan and InterProScan found no family or prediction on your protein.";
     let rightLine;
     if (h.k === "hmmscan") rightLine = "The y axis is the Pfam model itself, so nothing is drawn on its edge.";
-    else if (h.td && h.td.length) rightLine = `Along the right, open boxes: Pfam domains of ${esc(h.t)}, ${esc((SRC[h.ds] || (() => "source not recorded"))(h.t))}; where two overlap, only the first is drawn.`;
-    else if (h.ds) rightLine = `Along the right: nothing; no Pfam domain is known on ${esc(h.t)} (${esc(SRC[h.ds](h.t))}).`;
-    else rightLine = `Along the right: nothing; the Pfam domains of ${esc(h.t)} are not known (no Pfam search output for it).`;
+    else if (h.td && h.td.length) rightLine = `Along the right, open boxes: Pfam domains of ${uniHtml(h.t)}, ${esc((SRC[h.ds] || (() => "source not recorded"))(h.t))}; where two overlap, only the first is drawn.`;
+    else if (h.ds) rightLine = `Along the right: nothing; no Pfam domain is known on ${uniHtml(h.t)} (${esc(SRC[h.ds](h.t))}).`;
+    else rightLine = `Along the right: nothing; the Pfam domains of ${uniHtml(h.t)} are not known (no Pfam search output for it).`;
     return `<div class="map" style="max-width:${W}px"><p class="mapkey">Across: your protein. Down: ${esc(tname)}. Each line is one hit between the two, in the colour of its kind of program; the thick one is the hit shown on the right.</p>` +
       `<div class="mapkey tools">${tools}</div><p class="mapkey">${esc(topLine)}</p><p class="mapkey">${rightLine}</p>` +
       `<svg viewBox="0 0 ${W} ${Hh}" width="${W}" height="${Hh}" role="img" aria-label="Map of the hits between your protein and ${esc(tname)}">${g}</svg></div>`;
@@ -587,8 +597,8 @@
     setAlphabet(h.k === "kmerseek" ? h.m : null);
     const tname = h.k === "hmmscan" ? `${h.l} model` : h.l;
     const names = PAGE.names[h.k] || [];
-    let html = `<h3>${esc(tool)}: ${esc(h.l)}` + (h.t && h.t !== h.l ? ` <span class="w">Swiss-Prot ${esc(h.t)}</span>` : "") + "</h3>" + about(h);
-    const scoreBits = h.s.map((v, i) => [names[i], v]).filter(([, v]) => v !== "not in the file" && !/^no .* column/.test(v)).map(([n, v]) => `${esc(n || "")} <b>${esc(v)}</b>`).join(" · ");
+    let html = `<h3>${esc(tool)}: ${esc(h.l)}` + (h.t && h.t !== h.l ? ` <span class="w">Swiss-Prot ${uniHtml(h.t)}</span>` : "") + "</h3>" + about(h, accHtml);
+    const scoreBits = h.s.map((v, i) => [names[i], v]).filter(([, v]) => v !== "not in the file" && !/^no .* column/.test(v)).map(([n, v]) => `${esc(n || "")} <b>${accHtml(v)}</b>`).join(" · ");
     let src = "", kmer = false, flank = null, note = "";
     if (h.k === "kmerseek" && tseq) {
       kmer = true;
@@ -611,7 +621,7 @@
     statLine += ` · your protein ${h.q[0]}-${h.q[1]} of ${q.length} aa (${pct(h.q[1] - h.q[0] + 1, q.length)}%)`;
     if (h.r) statLine += ` · ${esc(tname)} ${Math.min(...h.r)}-${Math.max(...h.r)}` + (tlen ? ` of ${tlen} aa (${pct(Math.abs(h.r[1] - h.r[0]) + 1, tlen)}%)` : "");
     html += statLine + "</p>";
-    if (h.k !== "hhsearch" && h.t && !tseq) html += `<p class="note">${esc(h.t)} is not in swissprot.fasta, so its residues cannot be shown.</p>`;
+    if (h.k !== "hhsearch" && h.t && !tseq) html += `<p class="note">${uniHtml(h.t)} is not in swissprot.fasta, so its residues cannot be shown.</p>`;
     let right = "";
     if (a && a.q) {
       const leg = [], kk = h.kk ? `, k = ${h.kk}` : "";

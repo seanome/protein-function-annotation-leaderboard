@@ -219,6 +219,23 @@ def test_site_from_test_data(tmp_path):
     page = json.loads(re.search(r"const PAGE=(.*?);</script>", html).group(1).replace("<\\/", "</"))
     rrp36 = [h for h in page["hits"] if "rrp36" in " ".join(str(h.get(f) or "") for f in "ltngo").lower()]
     assert len(rrp36) == 5 and {h["k"] for h in rrp36} == {"prostt5"}
+    # The BHF sentence and the note under it link each Pfam accession to its InterPro page, as
+    # built and in the slider's copies the page swaps in (PAGE.sent).
+    vpr = ('VPR (<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF00522/" '
+           'target="_blank" rel="noopener">PF00522</a>)')
+    assert vpr in re.search(r'<p class="summary" id="sent">(.*?)</p>', html).group(1)
+    note = re.search(r'<div id="sentnote">(.*?)</div>', html).group(1)
+    assert 'GrpE (<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF01025/"' in note
+    assert any(vpr in s[1] for s in page["sent"])
+    assert not [s for s in page["sent"] if re.search(r"\(PF\d{5}\)", s[1] + s[2])]
+
+
+def test_acc_html_links_and_escapes():
+    s = build.acc_html('A<b> & "x" PF00069.32, IPR000719; PF1234 xPF00069')
+    assert s.startswith("A&lt;b&gt; &amp; &quot;x&quot; ")
+    assert '<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF00069/" target="_blank" rel="noopener">PF00069.32</a>' in s
+    assert 'href="https://www.ebi.ac.uk/interpro/entry/InterPro/IPR000719/"' in s
+    assert s.count("<a ") == 2  # PF1234 is too short; xPF00069 is part of a longer word
 
 
 def test_accession_keeps_isoform_number():

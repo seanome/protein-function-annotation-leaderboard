@@ -842,6 +842,22 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
+# A Pfam (PF00069, PF00069.32) or InterPro (IPR000719) accession inside a piece of text.
+ACC_RE = re.compile(r"\b(PF\d{5}|IPR\d{6})(\.\d+)?\b")
+
+
+def acc_url(acc):
+    """InterPro's page for a Pfam or InterPro accession (without a version number)."""
+    return "https://www.ebi.ac.uk/interpro/entry/%s/%s/" % ("pfam" if acc.startswith("PF") else "InterPro", acc)
+
+
+def acc_html(s):
+    """s escaped for HTML, with every Pfam and InterPro accession in it made a link. The
+    accessions are letters and digits only, so they read the same before and after escaping."""
+    return ACC_RE.sub(lambda m: '<a class="mono" href="%s" target="_blank" rel="noopener">%s</a>' % (
+        acc_url(m.group(1)), m.group(0)), esc(s))
+
+
 def fmt_e(e):
     if e is None:
         return "none"
@@ -1187,15 +1203,16 @@ def other_families_note(others, names):
     return ('<p class="note">%d other Pfam famil%s also meet%s the rule: %s%s. The one named has hits '
             'from the most programs; on a tie, the best E-value of its own hmmscan or InterProScan '
             'domain on this protein.</p>' % (len(others), "y" if len(others) == 1 else "ies",
-                                             "s" if len(others) == 1 else "", esc(", ".join(shown_o)),
+                                             "s" if len(others) == 1 else "", acc_html(", ".join(shown_o)),
                                              " and %d more" % (len(others) - 8) if len(others) > 8 else ""))
 
 
 def sentence_steps(hits, ctx, lo):
     """The sentence at the top and its note at each E-value slider step from 10**lo to 10, so the
-    page can change them with the slider. The hits that count change only at a step equal to some
-    hit's E-value rounded up to a power of 10, so only those steps are worked out; the page uses
-    the last entry at or below the slider's step. Returns [[step, sentence, note], ...]."""
+    page can change them with the slider. Both are HTML, with Pfam and InterPro accessions as
+    links. The hits that count change only at a step equal to some hit's E-value rounded up to a
+    power of 10, so only those steps are worked out; the page uses the last entry at or below the
+    slider's step. Returns [[step, sentence, note], ...]."""
     global COUNT_E
     keep = COUNT_E
     cuts = {lo} | {min(1, max(lo, math.ceil(math.log10(h["evalue"]) - 1e-9)))
@@ -1205,7 +1222,7 @@ def sentence_steps(hits, ctx, lo):
         for pos in sorted(cuts):
             COUNT_E = 10.0 ** pos
             progs, status, agreed = agreement(hits, ctx["target_ann"])
-            cur = (header_sentence(len(progs), status, agreed, ctx["names"], ctx["n_run"]),
+            cur = (acc_html(header_sentence(len(progs), status, agreed, ctx["names"], ctx["n_run"])),
                    other_families_note(AGREE_OTHERS[0], ctx["names"]))
             if cur != prev:
                 out.append([pos, cur[0], cur[1]])
@@ -1427,7 +1444,7 @@ def build_protein(task):
     out = [page_head("%s · tool comparison" % pid, 1)]
     out.append('<header class="wide"><a class="back" href="../index.html">All proteins</a><h1 class="mono">%s</h1>'
                '<p class="len">%s%d amino acids</p><p class="summary" id="sent">%s</p><div id="sentnote">%s</div>%s</header><main class="wide">' % (
-        esc(pid), (esc(pname) + " · ") if pname else "", L, esc(sentence), other_note, gnote))
+        esc(pid), (esc(pname) + " · ") if pname else "", L, acc_html(sentence), other_note, gnote))
     # E-value slider, in steps of 10 times: from 10 (every drawn hit) down to the smallest
     # E-value above 0 on this page. It starts at SHOW_E; the drawing as built is at the counting threshold.
     pos_e = [h["evalue"] for v in by_track.values() for h in v if h["evalue"]]
@@ -1595,7 +1612,7 @@ def index_page(rows, ctx):
                    '<td class="r" data-v="%d">%d</td><td>%s</td><td class="r" data-v="%s">%s</td><td>%s</td></tr>' % (
                        r["status"], " ".join(r["progs"]), safe(r["id"]), esc(r["id"]),
                        '<div class="pname">%s</div>' % esc(r["name"]) if r["name"] else "",
-                       r["length"], "{:,}".format(r["length"]), r["n"], r["n"], esc(r["agreed"] or "none"),
+                       r["length"], "{:,}".format(r["length"]), r["n"], r["n"], acc_html(r["agreed"] or "none"),
                        "%g" % r["best_e"] if r["best_e"] is not None else "1e999", fmt_e(r["best_e"]) if r["best_e"] is not None else "no hit", r["spark"]))
         if r["gname"]:
             gcell = '<td data-v="%d"><span class="mono">%s</span> %s</td>' % (
