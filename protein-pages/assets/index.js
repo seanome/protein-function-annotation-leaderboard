@@ -15,6 +15,10 @@
   rows.forEach((r, i) => { r._pairs = S.rows[i] || []; r._id = r.cells[0].querySelector("a").textContent.toLowerCase(); });
   const box = document.getElementById("q");
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  // s escaped, with every Pfam (PF00069) and InterPro (IPR000719) accession in it a link that opens
+  // in a new tab; accessions are letters and digits, so escaping leaves them as they were.
+  const accHtml = (s) => esc(s).replace(/\b(PF\d{5}|IPR\d{6})(\.\d+)?\b/g, (m, a) =>
+    `<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/${a.startsWith("PF") ? "pfam" : "InterPro"}/${a}/" target="_blank" rel="noopener">${m}</a>`);
   // Address: #<filter>&q=<search words>&e=<log10 of the E-value limit>, each part optional.
   function state() {
     const h = location.hash.slice(1), i = h.indexOf("&");
@@ -68,7 +72,7 @@
       if (k && words.length) {
         const m = matches(r, words);
         if (m === null) k = false;
-        else cell.innerHTML = m.length ? m.slice(0, 4).map(([t, mask]) => `<b>${esc(S.text[t])}</b> (${mask ? esc(progs(mask)) : "the protein's name"})`).join("<br>") +
+        else cell.innerHTML = m.length ? m.slice(0, 4).map(([t, mask]) => `<b>${accHtml(S.text[t])}</b> (${mask ? esc(progs(mask)) : "the protein's name"})`).join("<br>") +
           (m.length > 4 ? `<br>and ${m.length - 4}${m.length >= 40 ? "+" : ""} more` : "") : "the protein id";
       }
       r.hidden = !k; if (k) n++;

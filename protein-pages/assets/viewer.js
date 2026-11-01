@@ -41,7 +41,17 @@
     document.title = id + (r[3] || r[2] ? " " + (r[3] || r[2]) : "") + " · Botryllus protein";
     load(shardOf(id), function () { render(id, r, window.FULL_SHARD[id]); window.scrollTo(0, 0); });
   }
-  function uni(acc) { return "<a class=\"mono\" href=\"https://www.uniprot.org/uniprotkb/" + encodeURIComponent(acc) + "\">" + esc(acc) + "</a>"; }
+  // Links to other sites open in a new tab. uni: a UniProt accession (P12345, P12345-2). pfam: a
+  // Pfam accession, with or without its version (PF00179.32 links to PF00179). accHtml: s escaped,
+  // with every Pfam (PF00069) and InterPro (IPR000719) accession in it made a link; accessions
+  // are letters and digits, so escaping leaves them as they were.
+  function ext(url, text) { return "<a class=\"mono\" href=\"" + esc(url) + "\" target=\"_blank\" rel=\"noopener\">" + esc(text) + "</a>"; }
+  function uni(acc) { return ext("https://www.uniprot.org/uniprotkb/" + encodeURIComponent(acc) + "/entry", acc); }
+  function pfam(acc) { return ext("https://www.ebi.ac.uk/interpro/entry/pfam/" + encodeURIComponent(acc.split(".")[0]) + "/", acc); }
+  function ipr(acc) { return ext("https://www.ebi.ac.uk/interpro/entry/InterPro/" + encodeURIComponent(acc) + "/", acc); }
+  function accHtml(s) {
+    return esc(s).replace(/\b(PF\d{5}|IPR\d{6})(\.\d+)?\b/g, function (m, a) { return a.indexOf("PF") === 0 ? pfam(m) : ipr(m); });
+  }
   // The top of every protein page, in the same order as a drawn page: name line, one sentence on
   // which programs report a hit, then one row per program with its best hit.
   function top(id, r, d) {
@@ -95,7 +105,7 @@
         var ent = {}; dom.forEach(function (x) { var k = x[7] || x[2] || x[1]; if (!ent[k]) ent[k] = [x[3], x[4]]; });
         var dbs = {}; d.ips.forEach(function (x) { dbs[x[0]] = 1; });
         var ek = Object.keys(ent);
-        row("InterProScan", d.ips.length > 0, ek.length ? ek.slice(0, 4).map(esc).join(", ") + (ek.length > 4 ? " and " + (ek.length - 4) + " more" : "") :
+        row("InterProScan", d.ips.length > 0, ek.length ? ek.slice(0, 4).map(accHtml).join(", ") + (ek.length > 4 ? " and " + (ek.length - 4) + " more" : "") :
           "only " + Object.keys(dbs).map(esc).join(", ") + " (disorder, coils or membrane)",
           d.ips.length + " matches from " + Object.keys(dbs).length + " member databases",
           ek.length ? ek.slice(0, 4).map(function (k) { return ent[k][0] + "-" + ent[k][1]; }).join(", ") :
@@ -141,9 +151,9 @@
     if (d.card) {
       var c = d.card, v = c.name_verdict;
       h.push("<h2>Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
-        "check it against the tables below.</p><p>" + esc(c.summary) + "</p><p><b>Confidence: " + esc(c.confidence) + ".</b> " + esc(c.confidence_reason) + "</p>");
+        "check it against the tables below.</p><p>" + accHtml(c.summary) + "</p><p><b>Confidence: " + esc(c.confidence) + ".</b> " + accHtml(c.confidence_reason) + "</p>");
       if (v && v.choice !== "not_applicable") h.push("<p><b>Header name " + esc(r[2]) + " or proposed name " + esc(r[3]) + "?</b> " +
-        esc((F.verdicts[v.choice] || v.choice).replace(/^./, function (x) { return x.toUpperCase(); })) + "; suggested name <b>" + esc(v.recommended_name) + "</b>. " + esc(v.reason) + "</p>");
+        esc((F.verdicts[v.choice] || v.choice).replace(/^./, function (x) { return x.toUpperCase(); })) + "; suggested name <b>" + esc(v.recommended_name) + "</b>. " + accHtml(v.reason) + "</p>");
     }
     return h;
   }
@@ -161,7 +171,7 @@
     h.push("<h2>Best Swiss-Prot match (DIAMOND)</h2>");
     if (r[6]) {
       h.push(table([["Accession"], ["Protein"], ["Identity (%)", 1], ["Coverage of your protein (%)", 1], ["E-value", 1]],
-        [["<a class=\"mono\" href=\"https://www.uniprot.org/uniprotkb/" + encodeURIComponent(r[6]) + "\">" + esc(r[6]) + "</a>",
+        [[uni(r[6]),
           esc(r[5]), r[7] === null ? "" : r[7].toFixed(1), r[8] === null ? "" : Math.round(r[8]), esc(d.sp_e)]]));
       h.push("<p class=\"note\">Where on your protein the match lies is not in the table this page was built from.</p>");
       if (d.go.length) h.push("<h3>GO terms of the matched Swiss-Prot entry (not measured on your protein)</h3><p class=\"chips\">" + d.go.map(function (g) {
@@ -174,7 +184,7 @@
       var seen = {}, rows = [];
       d.pfam.forEach(function (p) { seen[p[0]] = seen[p[0]] || { n: p[1], c: 0 }; seen[p[0]].c++; });
       Object.keys(seen).forEach(function (a) {
-        rows.push(["<a class=\"mono\" href=\"https://www.ebi.ac.uk/interpro/entry/pfam/" + encodeURIComponent(a.split(".")[0]) + "\">" + esc(a) + "</a>",
+        rows.push([pfam(a),
           esc(seen[a].n), seen[a].c]);
       });
       h.push(table([["Accession"], ["Name"], ["Times listed", 1]], rows));
@@ -183,7 +193,7 @@
     // Immune
     var cats = []; for (var i = 0; i < CATS.length; i++) if (r[11] >> i & 1) cats.push(CATS[i]);
     h.push("<h2>Immune-gene candidate</h2>");
-    if (cats.length) h.push(table([["Category"], ["Evidence"]], d.ev.map(function (e) { return [esc(e[0]), esc(e[1])]; })));
+    if (cats.length) h.push(table([["Category"], ["Evidence"]], d.ev.map(function (e) { return [esc(e[0]), accHtml(e[1])]; })));
     else h.push("<p>Not in the immune-gene table.</p>");
     // jackhmmer
     h.push("<h2>jackhmmer hits from immune seed proteins</h2>");
@@ -197,8 +207,8 @@
       else if (!d.ips.length) h.push("<p>No match.</p>");
       else h.push(table([["Member database"], ["Signature"], ["Description"], ["Residues", 1], ["Score or E-value", 1], ["InterPro entry"]],
         d.ips.map(function (x) {
-          return [esc(x[0]), "<span class=\"mono\">" + esc(x[1]) + "</span>", esc(x[2]), x[3] + "-" + x[4], esc(x[5]),
-            x[6] ? "<a class=\"mono\" href=\"https://www.ebi.ac.uk/interpro/entry/InterPro/" + encodeURIComponent(x[6]) + "\">" + esc(x[6]) + "</a> " + esc(x[7]) : ""];
+          return [esc(x[0]), x[0] === "Pfam" ? pfam(x[1]) : "<span class=\"mono\">" + esc(x[1]) + "</span>", accHtml(x[2]), x[3] + "-" + x[4], esc(x[5]),
+            x[6] ? ipr(x[6]) + " " + esc(x[7]) : ""];
         })) + "<p class=\"note\">InterProScan 5.59, all member databases, run on the whole proteome; in order along your protein.</p>");
     }
     // UniFIRE
