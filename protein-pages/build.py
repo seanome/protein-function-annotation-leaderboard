@@ -28,6 +28,7 @@ E_MAX = 10.0  # a hit is drawn when its E-value is at most this, the -E 10 the s
 COUNT_E = 10.0  # a hit counts (sentence as built, index, summary.json) when its E-value is at most this; --count-at
 SHOW_E = 10.0  # the E-value slider on a protein page starts here, so every drawn hit shows at first; --show-at
 TARGET_PFAM_E = 1e-3  # a Swiss-Prot protein's Pfam families: its hmmscan or InterProScan domains at or below this
+TARGET_PFAM_FILE = "target_pfam_interpro.tsv"  # Pfam domains of the other targets, from InterPro's REST API
 HH_PROB_MIN = 50.0  # hhsearch hits also need Prob of at least this
 OVERLAP = 0.5  # two intervals overlap when they share at least half of the shorter one
 TOP_N = 5  # hits drawn per track before "show all"
@@ -544,6 +545,7 @@ def parse_kmerseek(path):
             h = hit("kmerseek", int(d[cqs]) + 1, int(d[cqe]), accession(d[ct]), int(d[cts]) + 1,
                     int(d[cte]), e, sc, e is not None and e <= E_MAX)
             h["moltype"] = d.get("moltype")
+            h["ksize"] = int(d["ksize"]) if (d.get("ksize") or "").isdigit() else None
             if h["passes"]:  # only hits at the threshold are drawn
                 out.setdefault(d[cq], []).append(h)
                 USED_TARGETS.add(h["target"])
@@ -575,7 +577,55 @@ def parse_alphabets(path):
         if st in tables:
             out[mt] = tables[st]
     out["protein20"] = {r: r.lower() for r in "ACDEFGHIKLMNPQRSTVWY"}
+    # dayhoff6's table is in sourmash, not in alphabets.rs: sourmash src/core/src/encodings.rs,
+    # Dayhoff's six groups C, AGPST, DENQ, HKR, ILMV, FWY, written as a-f.
+    out.setdefault("dayhoff6", {r: c for c, g in zip("abcdef", ["C", "AGPST", "DENQ", "HKR", "ILMV", "FWY"]) for r in g})
     return out
+
+
+def seed_runs(qseg, tseg, table, k):
+    """Where kmerseek's search could have started on an ungapped hit: every window of k columns
+    in which the two segments are in the same class of the hit's alphabet at all k positions.
+    Returns (runs, n): runs are the 0-based, end-inclusive column ranges covered by such windows
+    (overlapping windows merged), and n is the number of windows. A residue outside the
+    alphabet (X, U) matches nothing."""
+    n_col = min(len(qseg), len(tseg))
+    cq = [table.get(c.upper()) for c in qseg[:n_col]]
+    ct = [table.get(c.upper()) for c in tseg[:n_col]]
+    same = [a is not None and a == b for a, b in zip(cq, ct)]
+    runs, n, i = [], 0, 0
+    while i < n_col:
+        if not same[i]:
+            i += 1
+            continue
+        j = i
+        while j + 1 < n_col and same[j + 1]:
+            j += 1
+        if j - i + 1 >= k:
+            runs.append((i, j))
+            n += j - i + 2 - k
+        i = j + 1
+    return runs, n
+
+
+def read_target_pfam(path):
+    """target_pfam_interpro.tsv (made by test_inputs/fetch_target_pfam.py): Pfam domains of
+    Swiss-Prot targets from the InterPro REST API. Returns ({accession: [(start, end, {Pfam id}),
+    ...]}, {Pfam id: name}). An accession listed with Pfam id '-' gets an empty list: InterPro
+    was asked and lists no Pfam match, which is not the same as not knowing."""
+    doms, names = {}, {}
+    with opentext(path) as fh:
+        rows = [line.rstrip("\n").split("\t") for line in fh if line.strip() and not line.startswith("#")]
+    col = {c: i for i, c in enumerate(rows[0])}
+    for f in rows[1:]:
+        acc, pf = f[col["accession"]], f[col["pfam"]]
+        lst = doms.setdefault(acc, [])
+        if pf == "-":
+            continue
+        lst.append((int(f[col["start"]]), int(f[col["end"]]), {pf}))
+        if f[col["pfam_name"]]:
+            names.setdefault(pf, f[col["pfam_name"]])
+    return doms, names
 
 
 def read_tsv_table(path):
@@ -1310,10 +1360,20 @@ def build_protein(task):
                 doms = ctx["target_ann"].get(h["target"])
                 if doms:
                     d["td"] = non_overlapping(doms, lambda nm: family_label(sorted(nm)[0], ctx["names"]) if nm else "")
+                if doms is not None:  # where the target's Pfam domains come from
+                    d["ds"] = ctx["target_src"].get(h["target"])
                 if t["key"] == "hhsearch":
                     a = dict(h["aln"], src="the alignment hhsearch wrote (the .hhr file)") if h.get("aln") else None
                 elif t["key"] == "kmerseek":
                     d["m"] = h.get("moltype")
+                    d["kk"] = h.get("ksize")
+                    tab = ctx["alphabets"].get(d["m"])
+                    if tab and tseq and d["kk"]:
+                        # the seed: k columns in the same class of the hit's alphabet in both
+                        # (kmerseek's hits are ungapped, so column i is residue q0 + i and t0 + i)
+                        runs, n = seed_runs(seq[h["q0"] - 1:h["q1"]], tseq[h["t0"] - 1:h["t1"]], tab, d["kk"])
+                        d["sd"] = [[h["q0"] + i, h["q0"] + j] for i, j in runs]
+                        d["sn"] = n
                 elif h.get("aln"):
                     a = h["aln"]
                 elif h.get("raw_aln"):
@@ -1413,7 +1473,8 @@ def build_protein(task):
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
     out.append('</main>%s' % ctx["footer"])
     page_data = dict(
-        id=pid, q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], sent=steps, hits=data, names=score_names, alpha=ctx["alphabets"],
+        id=pid, pn=pname or "", q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], sent=steps, hits=data, names=score_names,
+        alpha={m: ctx["alphabets"][m] for m in sorted({d["m"] for d in data if d.get("m")}) if m in ctx["alphabets"]},
         tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], shape=PROGRAMS[t["program"]]["shape"],
                                cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},
         pfam_color=CATEGORIES["pfam"]["color"],
@@ -1633,7 +1694,8 @@ def main():
         return (p.name, st.st_size, datetime.datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M"))
 
     names_read = ["proteins.fasta", "swissprot.fasta"] + [t["file"] for t in TRACKS] + [
-        "phmmer.out", "jackhmmer.out", "hmmscan.out", "protein_names.tsv", "plddt.tsv", "expression.tsv", "leaderboard.tsv", "run_settings.tsv", "kmerseek_alphabets.rs"]
+        "phmmer.out", "jackhmmer.out", "hmmscan.out", "protein_names.tsv", "plddt.tsv", "expression.tsv", "leaderboard.tsv", "run_settings.tsv", "kmerseek_alphabets.rs",
+        TARGET_PFAM_FILE]
     inputs = [stamp(n) for n in names_read]
 
     prots = {}
@@ -1699,9 +1761,22 @@ def main():
             if q in prots:
                 hits.setdefault(q, []).extend(hs)
         print("  %s: %d hits on %d proteins (%.0f s)" % (t["file"], sum(len(v) for v in got.values()), len(got), time.time() - t_start), flush=True)
-    # Pfam families of targets: InterProScan's output on that target if there is one, else hmmscan's
+    # Pfam families of targets: InterProScan's output on that target if there is one, else hmmscan's,
+    # else InterPro's Pfam matches read from its REST API (target_pfam_interpro.tsv)
+    target_src = {acc: "interproscan" for acc in target_ann}
     for acc, doms in hmmscan_target.items():
-        target_ann.setdefault(acc, doms)
+        if acc not in target_ann:
+            target_ann[acc] = doms
+            target_src[acc] = "hmmscan"
+    if inp(TARGET_PFAM_FILE).exists():
+        api_doms, api_names = read_target_pfam(inp(TARGET_PFAM_FILE))
+        for acc, doms in api_doms.items():
+            if acc not in target_ann:
+                target_ann[acc] = doms
+                target_src[acc] = "interpro"
+        for pf, nm in api_names.items():
+            names.setdefault(pf, nm)
+        print("  %s: Pfam domains of %d more Swiss-Prot proteins" % (TARGET_PFAM_FILE, sum(v == "interpro" for v in target_src.values())), flush=True)
 
     settings = {t["key"]: t["setting"] for t in TRACKS}
     databases = {t["key"]: t["database"] for t in TRACKS}
@@ -1750,7 +1825,7 @@ def main():
     program_run = {f: any(run_status[t["key"]] == "run" for t in TRACKS if t["program"] == f) for f in PROGRAM_ORDER}
     n_run = sum(program_run.values())  # M in "N of the M programs run"
     built = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    CTX.update(dict(proteins=prots, prot_names=prot_names, hits=hits, target_ann=target_ann, names=names, entry_names=entry_names,
+    CTX.update(dict(proteins=prots, prot_names=prot_names, hits=hits, target_ann=target_ann, target_src=target_src, names=names, entry_names=entry_names,
                     target_info=target_info,
                     targets=targets, run_status=run_status, settings=settings, databases=databases,
                     leaderboard=leaderboard, plddt=plddt, expression=expression, alphabets=alphabets,
