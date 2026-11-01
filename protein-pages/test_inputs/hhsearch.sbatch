@@ -25,7 +25,8 @@
 # Sizes: the 51 proteins are 54-2,160 aa (18,295 in all). hhblits holds the UniRef30 column-state
 # file (UniRef30_2023_02_cs219.ffdata; hhsuite_install.sbatch prints its size) for the prefilter,
 # plus dynamic-programming matrices that grow with query length x template length per thread,
-# which -maxmem caps at 20 GB. 32 GB per task covers both. On 8 CPUs, 3 rounds against UniRef30
+# which -maxmem caps at 20 GB. Measured on the 51 (job 50673585, 2026-11-01): 8-29 min per task,
+# peak memory up to 31.9 GB, so 48 GB per task (32 GB was nearly used up by task 30). On 8 CPUs, 3 rounds against UniRef30
 # usually take minutes for a protein of a few hundred residues and up to about an hour for one of
 # ~2,000 aa with a deep alignment; hhsearch against PDB70 adds a few minutes. These are estimates,
 # not measured here (no HH-suite run on Sherlock yet): 4 h per task leaves room. If a task runs
@@ -35,7 +36,7 @@
 #SBATCH -J protein-pages-hhsearch
 #SBATCH --array=1-51
 #SBATCH -c 8
-#SBATCH --mem 32G
+#SBATCH --mem 48G
 #SBATCH -t 4:00:00
 #SBATCH -o hhsearch-%A_%a.out
 set -euo pipefail
