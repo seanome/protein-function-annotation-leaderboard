@@ -468,11 +468,15 @@ def parse_hhr(path):
                 no = int(m.group(1))
                 hits[no] = dict(name=m.group(2).split()[0], prob=float(m.group(3)),
                                 evalue=fnum(m.group(4)), q0=int(m.group(9)), q1=int(m.group(10)),
-                                t0=int(m.group(11)), t1=int(m.group(12)))
+                                t0=int(m.group(11)), t1=int(m.group(12)), tlen=int(m.group(13)))
             continue
         if line.startswith("No "):
             cur = int(line.split()[1])
-            alns[cur] = {"q": [], "t": [], "qs": None, "ts": None}
+            alns[cur] = {"q": [], "t": [], "qs": None, "ts": None, "desc": ""}
+        elif cur is not None and line.startswith(">"):
+            # the template's full description: a PDB70 line is ">6XYZ_A Protein name; ..."
+            parts = line[1:].split(None, 1)
+            alns[cur]["desc"] = parts[1].strip() if len(parts) > 1 else ""
         elif cur is not None and (line.startswith("Q ") or line.startswith("T ")):
             parts = line.split()
             if len(parts) >= 5 and parts[1] not in ("Consensus",) and not parts[1].startswith("ss_"):
@@ -496,6 +500,10 @@ def parse_hhr(path):
         passes = e is not None and e <= E_MAX and h["prob"] >= HH_PROB_MIN
         out.append(hit("hhsearch", h["q0"], h["q1"], accession(h["name"]), h["t0"], h["t1"], e,
                        sc, passes, aln=aln))
+        # Not every template is in swissprot.fasta (PDB70 chains never are): keep its length and
+        # description from the .hhr so the page can still name it and place the match on it
+        out[-1]["tlen"] = h["tlen"]
+        out[-1]["desc"] = (a or {}).get("desc", "")
     return query, out
 
 
@@ -1272,6 +1280,8 @@ def build_protein(task):
                 info = ctx["target_info"].get(h["target"])
                 if info:
                     d["n"], d["g"], d["o"] = info
+                elif h.get("desc"):
+                    d["n"] = h["desc"]
             d["f"] = None if h["_names"] is None else [family_full(n, ctx["names"]) for n in sorted(h["_names"])]
             bit = 1 << PROGRAM_ORDER.index(t["program"])
             for txt in [name, h["target"], d.get("n"), d.get("g"), d.get("o")] + (d["f"] or []):
@@ -1295,6 +1305,8 @@ def build_protein(task):
                 tseq = ctx["targets"].get(h["target"])
                 if tseq:
                     d["tl"] = len(tseq)
+                elif h.get("tlen"):
+                    d["tl"] = h["tlen"]
                 doms = ctx["target_ann"].get(h["target"])
                 if doms:
                     d["td"] = non_overlapping(doms, lambda nm: family_label(sorted(nm)[0], ctx["names"]) if nm else "")

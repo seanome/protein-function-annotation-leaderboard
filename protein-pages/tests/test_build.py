@@ -54,6 +54,19 @@ def test_hhr(tmp_path):
     assert a["aln"]["q"] == "MAHAGRTGYDNREIVMKYIHYKLSQRGYEWDAGDVGAAPP"
     assert a["aln"]["qs"] == 11 and a["aln"]["ts"] == 91
     assert b["aln"]["q"] == "MSQSNRELVV-DFLSYKLSQK"
+    # template length and description, for templates not in swissprot.fasta (PDB70 chains)
+    assert (a["tlen"], b["tlen"]) == (239, 233)
+    assert a["desc"] == "Apoptosis regulator Bcl-2" and b["desc"] == "Bcl-2-like protein 1"
+
+
+def test_hhr_pdb70_template(tmp_path):
+    """A PDB70 template keeps its chain name, description and length from the .hhr."""
+    p = tmp_path / "q.hhr"
+    p.write_text(HHR.replace("sp|P10415|BCL2_HUMAN Apoptosis regulator Bcl-2", "6XYZ_A Apoptosis regulator Bcl-2; BH3 domain")
+                 .replace("sp|P10415|BCL2_HUMAN Apoptosis ", "6XYZ_A Apoptosis regulator "))
+    q, hits = build.parse_hhr(p)
+    assert hits[0]["target"] == "6XYZ_A" and hits[0]["tlen"] == 239
+    assert hits[0]["desc"] == "Apoptosis regulator Bcl-2; BH3 domain"
 
 
 def row(target, query, full_e, i_e, hmm=(1, 50), ali=(1, 50)):
