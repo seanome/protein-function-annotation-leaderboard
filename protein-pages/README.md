@@ -84,8 +84,8 @@ From top to bottom:
    - a ruler of residue positions, in aa;
    - one row per tool. A row says "not run" when that tool's file is not in the input
      folder. The row "Foldseek, 3-D structures" is Foldseek on predicted 3-D structures;
-     when only ProstT5 + Foldseek was run, it says so and points to that next row. The best
-     5 hits per tool are drawn; "Show all hits" draws the rest;
+     when only ProstT5 + Foldseek was run, it says so and points to that next row. Every hit
+     up to the slider's E-value is drawn;
    - if `plddt.tsv` is given, a strip coloured by AlphaFold's confidence scale;
    - "Programs with a hit": at each residue, how many of the programs run (0 to M) have a
      counted hit over it.
@@ -94,20 +94,22 @@ From top to bottom:
    name, gene and species, the Pfam families on the matched part of it, and the tool's
    scores. Clicking a box, or its label, shows the aligned residues.
 
-   Under each tool's name are two links (Enter or Space work on them too). "Show all N hits"
-   draws every hit of that tool, not only the best 5; "Show the best 5 only" goes back.
-   "Fold into one row" turns the row into one strip: at each residue, the strip is darker the
-   more of that tool's hits cover it, in the tool's colour, with the highest count written at
-   the right end ("up to 12 hits on one residue"). It counts every hit the slider shows, not
-   only the best 5. "Show each hit" undoes it. Double-clicking a tool's name or its folded strip unfolds
-   it and draws every hit. The browser remembers which tools are folded,
-   for every protein page.
+   Every hit up to the slider's E-value is drawn; the line under a tool's name gives the count.
+   Clicking a tool's name or its triangle (or Enter or Space on it) folds its row into one
+   strip: at each residue, the strip is darker the more of that tool's hits cover it, in the
+   tool's colour, with the highest count written at the right end ("up to 12 hits on one
+   residue"). Clicking the name or the strip again shows each hit. The browser remembers which
+   tools are folded, for every protein page.
+
+   Under the drawing, "Every hit, in a table" lists the same hits with their E-value, score
+   (bits, or hhsearch's Prob), identity where the program gives it, and position. Clicking a
+   column name sorts by it; clicking a row shows the residues.
 
    The search box above the drawing looks through the same text as the tooltip: the matched
    protein's entry name, accession, full name, gene and species, the Pfam families on it, and
    GO terms when `kmerseek.tsv` has a GO column. Every word typed must appear (case does not
-   matter). Hits that do not match are drawn faint; the best 5 matching hits of each tool
-   are drawn even when they are not among its best 5. Each tool's row says "N of M hits
+   matter). Hits that do not match are drawn faint, and the table under the drawing
+   lists only the matching hits. Each tool's row says "N of M hits
    match", the line beside the box gives the total, and a folded row counts only matching
    hits. A Swiss-Prot target with no hmmscan or InterProScan rows has no Pfam families to
    search, so only its names are searched.

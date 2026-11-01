@@ -221,11 +221,17 @@ h3{font-size:16px;margin:16px 0 4px}
 .hsearch .note:last-child{flex-basis:100%}
 #hqn{font-weight:600;color:var(--ink)}
 #foldnote{margin:4px 0 0;font-size:12px}
-.act{fill:var(--link);cursor:pointer;outline:none}
 .names .tn{user-select:none}
 .dens{cursor:zoom-in}
-.act:hover{text-decoration:underline}
-.act:focus-visible{outline:2px dotted #5a5a5a}
+.fold{cursor:pointer;outline:none}
+.fold:hover .tn{text-decoration:underline}
+.fold:focus-visible{outline:2px dotted #5a5a5a}
+.fold .tri{fill:var(--muted)}
+table.hits th[data-c]{cursor:pointer;user-select:none;white-space:nowrap}
+table.hits th.up::after{content:" \25B2";font-size:10px}
+table.hits th.down::after{content:" \25BC";font-size:10px}
+table.hits tbody tr{cursor:pointer}
+table.hits tbody tr:hover{background:var(--hover,#f3f3f3)}
 .hit.dim{opacity:.18}
 
 .how{color:var(--muted);font-size:13px;font-weight:400}
