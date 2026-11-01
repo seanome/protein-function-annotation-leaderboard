@@ -23,17 +23,17 @@ LEGEND = {c.lower() for c in [f["color"] for f in build.PROGRAMS.values()]
 NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "transparent", "#c3c2b7"}  # #c3c2b7: outline of a residue in neither class; transparent: a dashed box's click area
 
 
-STATUS_WORDS = {"none": "", "one": "", "agree": "They agree on",
+STATUS_WORDS = {"none": "", "one": "", "agree": "Their hits along the protein agree on",
                 "disagree": "name different Pfam families",
                 "overlap_unknown": "no Pfam family is known on the matched part",
                 "apart": "different parts of the protein"}
 
 
-def SENT_LEAD(n, m):
-    """How the sentence starts for n programs with a hit, of m run (build.header_sentence)."""
+def SENT_LEAD(n, m, full=8):
+    """How the sentence starts for n programs with a hit, of m run, of full programs (build.header_sentence)."""
     if n == 0:
-        return "No tool reports a hit." if m == 8 else "None of the %d programs run" % m
-    return "%d %s" % (n, build.of_programs(m))
+        return "No tool reports a hit." if m == full else "None of the %d programs run" % m
+    return "%d %s" % (n, build.of_programs(m, full))
 
 
 def main():
@@ -68,14 +68,15 @@ def main():
         s = (site / "proteins" / (pid + ".html")).read_text()
         sent = re.search(r'<p class="summary"[^>]*>(.*?)</p>', s).group(1)
         n = int(n)
-        lead = SENT_LEAD(n, summary["programs_run"])
+        # how many programs were run differs by protein (FANTASIA ran on some only), so read M off the sentence
+        mm = re.match(r"\d+ of (?:the )?(\d+) programs", sent) or re.match(r"None of the (\d+) programs", sent)
+        lead = SENT_LEAD(n, int(mm.group(1)) if mm else summary.get("programs_total", 8), summary.get("programs_total", 8))
         if n == 0:
             ok = sent.startswith(lead) and status == "none"
         else:
-            ok = sent.startswith(lead) and (status == "one") == (n == 1)
-            ok = ok and STATUS_WORDS[status] in sent
-            if n == 1:  # with one program the sentence stops after the count
-                ok = ok and sent == lead + " reports a hit."
+            ok = sent.startswith(lead) and STATUS_WORDS[status] in sent
+            if status in ("none", "one"):  # no two programs' hits along the protein: the sentence stops after the count
+                ok = ok and sent == lead + (" reports a hit." if n == 1 else " report a hit.")
         if not ok:
             mism.append((pid, status, n, sent))
     print("3. pages whose sentence disagrees with the index (%d rows read):" % len(rows), mism or "none")

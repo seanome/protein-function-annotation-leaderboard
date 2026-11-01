@@ -965,7 +965,76 @@ def box_svg(h, idx, x0, x1, y, track, side="in", lx=None):
     return '<g class="hit" tabindex="0" data-i="%d">%s%s</g>' % (idx, rect, lab)
 
 
-def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
+# Programs from the Biomni whole-proteome run that give no position on the protein
+# (test_inputs/make_biomni_best.py writes biomni_best.json). Each gets a row in the drawing that
+# names its best hit, and counts in the sentence at the top; their cutoffs are their own, so the
+# E-value slider does not change them. (key, name, how it was run, what counts as a hit); the name
+# and how-line are short to fit the names column.
+WHOLE = [
+    ("diamond", "DIAMOND", "against Swiss-Prot", "E-value 0.001 or below"),
+    ("jackhmmer", "jackhmmer, immune", "from 24 immune seeds", "E-value 0.001 or below"),
+    ("fantasia", "FANTASIA", "protein language model", "distance below 0.15"),
+    ("unifire", "UniFIRE", "UniProt's rules", "any prediction"),
+]
+# FANTASIA always names its most similar protein. Below this distance its pick shares a GO term
+# with DIAMOND's best hit for about 70% of proteins with both, above it for 30-40%
+# (figures/fantasia_vs_diamond.png, full_inputs/plot_fantasia_vs_diamond.py); only then it counts.
+FANTASIA_MAX_DIST = 0.15
+
+
+def svg_trunc(s, width, px=12):
+    """s cut to fit width pixels of 12 px text (0.55 of the font size per character), with "…"."""
+    n = int(width / (px * 0.55))
+    return s if len(s) <= n else s[:max(1, n - 1)] + "…"
+
+
+def whole_rows(b, W):
+    """The rows of the programs in WHOLE for one protein: [(key, name, how, found, run, right svg)]."""
+    if not b:
+        return []
+    out = []
+    uni = lambda acc: ('<a href="https://www.uniprot.org/uniprotkb/%s/entry" target="_blank" rel="noopener">'
+                       '<tspan class="lk">%s</tspan></a>' % (esc(acc), esc(acc)))
+    def hit_text(acc, rest, y):
+        return '<text x="4" y="%d" class="wt">%s %s</text>' % (y, uni(acc), esc(svg_trunc(rest, W - 12 * 0.55 * (len(acc) + 2))))
+    for key, name, how, cutoff in WHOLE:
+        v = b.get(key)
+        y1, y2 = ROW_PAD + 11, ROW_PAD + 27
+        if v is None:
+            continue
+        found, run, g = bool(v), v != "not run", []
+        if v == "not run":
+            found = False
+            g.append('<text x="4" y="%d" class="nr">%s</text>' % (y1, esc(
+                "not run: FANTASIA was run only on proteins with no Swiss-Prot match or in the immune-gene table"
+                if key == "fantasia" else "not run: proteins over 5,000 amino acids were skipped")))
+        elif not v:
+            g.append('<text x="4" y="%d" class="wn">no hit (%s)</text>' % (y1, cutoff))
+        elif key == "diamond":
+            acc, nm, gene, org, pid_, qcov, e = v
+            g.append(hit_text(acc, "%s%s, %s" % (nm, " (%s)" % gene if gene else "", org), y1))
+            g.append('<text x="4" y="%d" class="wn">E-value %s%s · whole protein, no position</text>' % (
+                y2, esc(e), "" if pid_ is None else ", %.0f%% identity over %.0f%% of your protein" % (pid_, qcov or 0)))
+        elif key == "jackhmmer":
+            fam, seed, rnd, e = v
+            g.append('<text x="4" y="%d" class="wt">%s</text>' % (y1, esc(svg_trunc("found from the seed %s (%s)" % (seed, fam), W))))
+            g.append('<text x="4" y="%d" class="wn">E-value %s, round %s · whole protein, no position</text>' % (y2, esc(e), rnd))
+        elif key == "fantasia":
+            acc, nm, gene, org, dist = v
+            found = dist < FANTASIA_MAX_DIST
+            g.append(hit_text(acc, "%s%s, %s" % (nm, " (%s)" % gene if gene else "", org), y1))
+            g.append('<text x="4" y="%d" class="wn">%s · whole protein, no position</text>' % (y2, esc(
+                "distance %.2f, close enough to count (below %.2f)" % (dist, FANTASIA_MAX_DIST) if found else
+                "distance %.2f: not close enough to count (below %.2f counts); FANTASIA always names one protein" % (dist, FANTASIA_MAX_DIST))))
+        elif key == "unifire":
+            what, n = v
+            g.append('<text x="4" y="%d" class="wt">%s</text>' % (y1, esc(svg_trunc(what, W))))
+            g.append('<text x="4" y="%d" class="wn">%d prediction%s, listed under the drawing · whole protein, no position</text>' % (y2, n, "" if n == 1 else "s"))
+        out.append((key, name, how, found, run, "".join(g)))
+    return out
+
+
+def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
     """The track area as two SVGs (names on the left, the drawing on the right), with the best
     TOP_N hits of each tool. Each row is a <g class="row"> in its own coordinates, so the
     page's script can redraw a tool's row with all of its hits ("Show all")."""
@@ -1015,6 +1084,9 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
         left = ('<g transform="translate(4,%d)">%s</g><text x="26" y="%d" class="tn">%s</text>%s'
                 % (ROW_PAD, legend_mark(t), ROW_PAD + 11, esc(t["name"]), extra))
         rows.append((k, h_row, left, "".join(g)))
+    for key, name, how, found, run, right in whole:
+        rows.append(("w_" + key, ROW_PAD + 34, '<text x="26" y="%d" class="tn">%s</text><text x="26" y="%d" class="tm">%s</text>'
+                     % (ROW_PAD + 11, esc(name), ROW_PAD + 27, esc(how)), right))
     if plddt is not None:
         g = []
         for i, v in enumerate(plddt[:L]):
@@ -1164,20 +1236,23 @@ def legend_html(ctx, has_plddt, has_expr):
             'and what makes a hit.</p><ul>%s</ul></aside>' % (kind_key(), "".join(items)))
 
 
-def of_programs(m):
-    """'of 8 programs' when every program was run, else 'of the 5 programs run'."""
-    return "of 8 programs" if m == 8 else "of the %d programs run" % m
+def of_programs(m, full=8):
+    """'of 8 programs' when every program was run, else 'of the 5 programs run'. full: how many
+    programs there are (8 with positions, plus the WHOLE programs when biomni_best.json is read)."""
+    return "of %d programs" % full if m == full else "of the %d programs run" % m
 
 
-def header_sentence(n, status, agreed, names, m=8):
-    """The sentence at the top of a protein page. m: programs with at least one input file."""
+def header_sentence(n, status, agreed, names, m=8, full=8):
+    """The sentence at the top of a protein page. n: programs with a hit, counting the WHOLE
+    programs; status and agreed: from the hits along the protein only. m: programs with at least
+    one input file."""
     if n == 0:
-        return "No tool reports a hit." if m == 8 else "None of the %d programs run reports a hit." % m
-    s = "%d %s report%s a hit." % (n, of_programs(m), "s" if n == 1 else "")
-    if n == 1:
+        return "No tool reports a hit." if m == full else "None of the %d programs run reports a hit." % m
+    s = "%d %s report%s a hit." % (n, of_programs(m, full), "s" if n == 1 else "")
+    if status in ("none", "one"):
         return s
     if status == "agree":
-        return s + " They agree on %s." % family_label(agreed, names)
+        return s + " Their hits along the protein agree on %s." % family_label(agreed, names)
     if status == "overlap_unknown":
         return s + (" Their hits overlap, but for one of them no Pfam family is known on the matched part of the "
                     "Swiss-Prot protein.")
@@ -1207,7 +1282,7 @@ def other_families_note(others, names):
                                              " and %d more" % (len(others) - 8) if len(others) > 8 else ""))
 
 
-def sentence_steps(hits, ctx, lo):
+def sentence_steps(hits, ctx, lo, n_whole=0, m_whole=None):
     """The sentence at the top and its note at each E-value slider step from 10**lo to 10, so the
     page can change them with the slider. Both are HTML, with Pfam and InterPro accessions as
     links. The hits that count change only at a step equal to some hit's E-value rounded up to a
@@ -1222,7 +1297,8 @@ def sentence_steps(hits, ctx, lo):
         for pos in sorted(cuts):
             COUNT_E = 10.0 ** pos
             progs, status, agreed = agreement(hits, ctx["target_ann"])
-            cur = (acc_html(header_sentence(len(progs), status, agreed, ctx["names"], ctx["n_run"])),
+            cur = (acc_html(header_sentence(len(progs) + n_whole, status, agreed, ctx["names"], ctx["n_run"] + (ctx.get("n_whole", 0) if m_whole is None else m_whole),
+                                            8 + ctx.get("n_whole", 0))),
                    other_families_note(AGREE_OTHERS[0], ctx["names"]))
             if cur != prev:
                 out.append([pos, cur[0], cur[1]])
@@ -1414,7 +1490,10 @@ def build_protein(task):
     W = int(max(640, min(L * 2.0, 3200)))
     px = W / L
     counted_by_track = {k: [h for h in v if counts(h) or h.get("feature")] for k, v in by_track.items()}
-    hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"], ctx["n_run"])
+    whole = whole_rows(ctx["biomni"].get(pid), W)
+    n_whole = sum(1 for w in whole if w[3])
+    m_whole = sum(1 for w in whole if w[4])  # WHOLE programs run on this protein
+    hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"], ctx["n_run"], whole)
     blocks = ['<div class="tracks" id="tracks"><div class="names">%s</div><div class="scroll">%s</div></div>'
               % (svg_inline(left, "100%", hgt), svg_inline(right, W, hgt, "trk"))]
     n_more = sum(max(0, sum(not h.get("feature") for h in v) - TOP_N) for v in counted_by_track.values())
@@ -1432,7 +1511,7 @@ def build_protein(task):
                              % (esc(s), wpct, "missing" if v is None else "%g" % v))
             expr = '<section><h2>Expression</h2><p class="note">Values as in expression.tsv (count or TPM, whichever the file holds); bar length is relative to this protein\'s highest sample.</p>%s</section>' % "".join(items)
 
-    sentence = header_sentence(len(progs), status, agreed, ctx["names"], ctx["n_run"])
+    sentence = header_sentence(len(progs) + n_whole, status, agreed, ctx["names"], ctx["n_run"] + m_whole, 8 + ctx["n_whole"])
     other_note = other_families_note(AGREE_OTHERS[0], ctx["names"])
     gnote = ""
     if gname:
@@ -1451,7 +1530,7 @@ def build_protein(task):
     c_pos = int(round(math.log10(COUNT_E)))
     s_pos = int(round(math.log10(SHOW_E)))
     lo = min(c_pos, s_pos, max(-300, math.floor(math.log10(min(pos_e))))) if pos_e else min(c_pos, s_pos)
-    steps = sentence_steps(hits, ctx, lo)
+    steps = sentence_steps(hits, ctx, lo, n_whole, m_whole)
     slider = ('<div class="eslider"><label for="emax">Show hits with E-value at most <output id="ev">%s</output></label>'
               '<input id="emax" type="range" min="%d" max="1" step="1" value="%d" data-start="%d">'
               '<span class="note">The sentence at the top counts the hits the slider shows. Move the slider down to '
@@ -1482,9 +1561,12 @@ def build_protein(task):
     out.append('<section><h2>What each tool found</h2><p class="lead">Each box is one hit, at the position the tool '
                'reported on your protein.</p>%s%s%s<p class="note">A box is drawn for each hit with '
                'E-value at most the slider\'s value; a Swiss-Prot protein matched in two places gives two boxes. Up to %d hits per tool are drawn, best '
-               'E-value first (ties: the leftmost first); "+N more" under a tool\'s name counts the rest. Hover or '
+               'E-value first (ties: the leftmost first); "Show all" under a tool\'s name draws the rest. Hover or '
                'tap a box for the protein\'s full name, gene, species and Pfam families, and the scores; click it '
-               'to see the residues. A long protein\'s drawing scrolls sideways.</p></section>'
+               'to see the residues. A long protein\'s drawing scrolls sideways. The last rows (DIAMOND, jackhmmer from '
+               'immune seeds, FANTASIA, UniFIRE) come from Biomni\'s run on the whole proteome, which kept only each '
+               'protein\'s best hit and not where it lies, so they name the hit with no box; each counts in the sentence '
+               'at the top by its own cutoff, which the slider does not change.</p></section>'
                % (slider, "".join(blocks), toggle, TOP_N))
     out.append(legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
     out.append('</div>')
@@ -1503,7 +1585,7 @@ def build_protein(task):
     (ctx["out"] / "proteins" / (safe(pid) + ".html")).write_text("".join(out))
     (ctx["out"] / "proteins" / (safe(pid) + ".aln.js")).write_text(
         "window.ALN=%s;" % json.dumps({str(k): v for k, v in alns.items()}, separators=(",", ":")))
-    return dict(id=pid, length=L, n=len(progs), progs=progs, status=status,
+    return dict(id=pid, length=L, n=len(progs) + n_whole, progs=progs, status=status,
                 agreed=family_label(agreed, ctx["names"]) if agreed else None,
                 best_e=best_e, spark=sparkline(cov, L, ctx["n_run"]), terms=terms, name=pname,
                 gname=gname, gprogs=[PROGRAMS[f]["name"] for b, f in enumerate(PROGRAM_ORDER) if gmask & (1 << b)],
@@ -1714,7 +1796,7 @@ def main():
 
     names_read = ["proteins.fasta", "swissprot.fasta"] + [t["file"] for t in TRACKS] + [
         "phmmer.out", "jackhmmer.out", "hmmscan.out", "protein_names.tsv", "plddt.tsv", "expression.tsv", "leaderboard.tsv", "run_settings.tsv", "kmerseek_alphabets.rs",
-        TARGET_PFAM_FILE]
+        TARGET_PFAM_FILE, "biomni_best.json"]
     inputs = [stamp(n) for n in names_read]
 
     prots = {}
@@ -1843,12 +1925,17 @@ def main():
 
     program_run = {f: any(run_status[t["key"]] == "run" for t in TRACKS if t["program"] == f) for f in PROGRAM_ORDER}
     n_run = sum(program_run.values())  # M in "N of the M programs run"
+    # Biomni's results with no position (test_inputs/make_biomni_best.py); optional
+    bfile = D / "biomni_best.json"
+    biomni = json.loads(bfile.read_text()) if bfile.exists() else {}
+    n_whole = len(WHOLE) if biomni else 0
     built = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     CTX.update(dict(proteins=prots, prot_names=prot_names, hits=hits, target_ann=target_ann, target_src=target_src, names=names, entry_names=entry_names,
                     target_info=target_info,
                     targets=targets, run_status=run_status, settings=settings, databases=databases,
                     leaderboard=leaderboard, plddt=plddt, expression=expression, alphabets=alphabets,
-                    out=out, footer="", program_run=program_run, n_run=n_run))
+                    out=out, footer="", program_run=program_run, n_run=n_run,
+                    biomni=biomni, n_whole=n_whole))
     CTX["footer"] = footer(inputs, built)
     CTX["n_shards"], n_used = write_target_shards(out, hits, targets)
     print("wrote %d Swiss-Prot sequences into %d files (%.0f s)" % (n_used, CTX["n_shards"], time.time() - t_start), flush=True)
@@ -1863,7 +1950,8 @@ def main():
     secs = time.time() - t_start
     CTX["footer"] = footer(inputs, built, secs)
     cats, only = index_page(rows, CTX)
-    summary = dict(count_at=COUNT_E, drawn_up_to=E_MAX, programs_run=n_run, total=len(rows),
+    summary = dict(count_at=COUNT_E, drawn_up_to=E_MAX, programs_run=n_run, programs_total=8 + n_whole,
+                   total=len(rows),
  **cats, only_program=only,
                    run_status=run_status, seconds=round(time.time() - t_start, 1))
 

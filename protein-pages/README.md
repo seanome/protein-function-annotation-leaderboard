@@ -41,19 +41,31 @@ them.
 From top to bottom:
 
 1. The protein ID, its length, and one sentence made by a fixed rule, for example
-   "4 of the 5 programs run report a hit. They agree on Rep_fac_C (PF08542)."
-   The number of programs run is the number with at least one input file; when all 8 were
-   run the sentence says "of 8 programs". There are 10 rows but 8 programs: MMseqs2 run once
+   "10 of the 11 programs run report a hit. Their hits along the protein agree on Kinesin motor
+   domain (PF00225)."
+   There are 12 programs: the 8 drawn with positions, and 4 from Biomni's whole-proteome run
+   that kept only each protein's best hit and not where it lies (DIAMOND against Swiss-Prot,
+   jackhmmer from 24 immune seed proteins, FANTASIA, UniFIRE; read from `biomni_best.json`,
+   which `test_inputs/make_biomni_best.py` makes). The 4 are the last rows of the drawing, with
+   the hit named and "whole protein, no position"; each counts by its own cutoff, which the
+   slider does not change. FANTASIA always names its most similar protein, so it counts only
+   below distance 0.15: below that, its pick shares a GO term with DIAMOND's best hit for about
+   70% of proteins that have both, above it for 30-40% (`figures/fantasia_vs_diamond.png`).
+   The number of programs run is the number with an input file for this protein (FANTASIA was
+   run only on proteins with no Swiss-Prot match or in the immune-gene table); when all were
+   run the sentence says "of 12 programs". There are 14 rows but 12 programs: MMseqs2 run once
    and run for three rounds is one program, and Foldseek on predicted structures and ProstT5 +
    Foldseek is another. Two runs of one program are not two opinions, so they count once.
+   Whether the hits agree is decided from the drawn hits only.
    ("Family" on these pages means a Pfam protein family, or an InterPro entry where
    InterProScan gives one.)
    Hits of two programs **overlap** when they share at least half of the shorter hit. For a
    search hit, the family is the Pfam domain on the matched part of the Swiss-Prot protein,
    read from InterProScan's output on that protein, or hmmscan's if InterProScan has none, or
    else InterPro's own Pfam matches for that protein (`target_pfam_interpro.tsv`).
-   With two or more programs, the sentence ends in one of four ways:
-   - **agree**: "They agree on MHC_I (PF00129)." Overlapping hits name the same family.
+   With two or more programs' hits along the protein, the sentence ends in one of four ways:
+   - **agree**: "Their hits along the protein agree on MHC_I (PF00129)." Overlapping hits
+     name the same family.
    - **disagree**: "Their hits overlap but name different Pfam families: A (phmmer),
      B (hmmscan with Pfam)." Overlapping hits both name a family, and none is shared.
    - **overlap, but no family known**: "Their hits overlap, but for one of them no Pfam

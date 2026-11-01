@@ -175,7 +175,7 @@ def test_sentence_follows_the_slider():
     steps = build.sentence_steps(hits, ctx, -6)
     at = lambda v: [x for x in steps if x[0] <= v][-1][1]
     assert at(-3).startswith("1 of the 5 programs run reports a hit")
-    assert at(0).startswith("2 of the 5 programs run report a hit. They agree on Pkinase")
+    assert at(0).startswith("2 of the 5 programs run report a hit. Their hits along the protein agree on Pkinase")
     assert build.COUNT_E == 10.0  # put back afterwards
 
 
@@ -219,6 +219,17 @@ def test_site_from_test_data(tmp_path):
     page = json.loads(re.search(r"const PAGE=(.*?);</script>", html).group(1).replace("<\\/", "</"))
     rrp36 = [h for h in page["hits"] if "rrp36" in " ".join(str(h.get(f) or "") for f in "ltngo").lower()]
     assert len(rrp36) == 5 and {h["k"] for h in rrp36} == {"prostt5"}
+    # Biomni's programs with no position are rows of the drawing and count in the one sentence:
+    # BHF's only one is FANTASIA, at distance 0.22, above the 0.15 that counts, so 5 of 12.
+    for k in ("diamond", "jackhmmer", "fantasia", "unifire"):
+        assert 'data-k="w_%s"' % k in html
+    assert "not close enough to count" in html and "P32845" in html
+    assert '<p class="summary" id="sent">5 of 12 programs report a hit.' in html
+    assert "What the whole-proteome annotation found" not in html
+    # KIF11 has a Swiss-Prot hit, so FANTASIA was not run on it: 11 programs run
+    kif = (out / "proteins" / "FUN016555_KIF11.html").read_text()
+    assert '<p class="summary" id="sent">10 of the 11 programs run report a hit.' in kif
+    assert "P52732" in kif and "not run: FANTASIA was run only on proteins" in kif
     # The BHF sentence and the note under it link each Pfam accession to its InterPro page, as
     # built and in the slider's copies the page swaps in (PAGE.sent).
     vpr = ('VPR (<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF00522/" '
