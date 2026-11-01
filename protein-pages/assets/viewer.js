@@ -47,31 +47,37 @@
   function top(id, r, d) {
     var cats = []; for (var i = 0; i < CATS.length; i++) if (r[11] >> i & 1) cats.push(CATS[i]);
     var progs = [], rows = [];
-    function row(name, found, hit, score, where) {
+    // how: one short grey line under the program's name saying how it was run
+    function row(name, found, hit, score, where, how) {
       if (found) progs.push(name);
-      rows.push(["<b>" + esc(name) + "</b>", found ? hit : "<i>no hit</i>", found ? score : "", found ? where : ""]);
+      rows.push(["<b>" + esc(name) + "</b>" + (how ? "<br><span class=\"how\">" + esc(how) + "</span>" : ""),
+        found ? hit : "<i>no hit</i>", found ? score : "", found ? where : ""]);
     }
     var nowhere = "not in the table";
     row("DIAMOND against Swiss-Prot", !!r[6], r[6] ? uni(r[6]) + " " + esc(r[5]) + (d.sp_gene ? " (" + esc(d.sp_gene) + ")" : "") + (d.sp_org ? ", <i>" + esc(d.sp_org) + "</i>" : "") : "",
-      r[6] ? (r[7] === null ? "" : r[7].toFixed(1) + "% identity over " + Math.round(r[8]) + "% of your protein, ") + "E-value " + esc(d.sp_e) : "", nowhere);
+      r[6] ? (r[7] === null ? "" : r[7].toFixed(1) + "% identity over " + Math.round(r[8]) + "% of your protein, ") + "E-value " + esc(d.sp_e) : "", nowhere,
+      "run by Biomni; E-value 0.001 or below");
     var pf = {}; d.pfam.forEach(function (p) { pf[p[1]] = (pf[p[1]] || 0) + 1; });
     row("hmmsearch with Pfam", d.pfam.length > 0, Object.keys(pf).map(function (n) { return esc(n) + (pf[n] > 1 ? " ×" + pf[n] : ""); }).join(", "),
-      "gathering threshold", nowhere);
+      "gathering threshold", nowhere, "run by Biomni; Pfam's own cutoffs");
     var j = d.jh[0];
     row("jackhmmer from immune seed proteins", d.jh.length > 0, j ? esc(j[0]) + " (seed " + esc(j[1]) + ")" + (d.jh.length > 1 ? " and " + (d.jh.length - 1) + " more" : "") : "",
-      j ? "E-value " + esc(j[3]) + ", round " + j[2] : "", nowhere);
+      j ? "E-value " + esc(j[3]) + ", round " + j[2] : "", nowhere, "run by Biomni from 24 immune seed proteins");
     var f = d.fa;
     row("FANTASIA (nearest protein by embedding)", !!f, f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "",
-      f ? "cosine distance " + f[4].toFixed(2) + ", reliability " + f[5].toFixed(2) : "", f ? "whole protein, no alignment" : "");
+      f ? "cosine distance " + f[4].toFixed(2) + ", reliability " + f[5].toFixed(2) : "", f ? "whole protein, no alignment" : "",
+      "run by Biomni; nearest of 124,397 well-studied UniProt proteins");
     if (d.mm !== undefined && d.mm !== null) {
       var m = d.mm;
       row("MMseqs2 against Swiss-Prot", !!m, m ? uni(m[0]) + " " + esc(m[6] || "") + (m[7] ? ", <i>" + esc(m[7]) + "</i>" : "") : "",
-        m ? (100 * m[1]).toFixed(1) + "% identity, E-value " + esc(m[4]) : "", m ? "residues " + m[2] + "-" + m[3] : "");
+        m ? (100 * m[1]).toFixed(1) + "% identity, E-value " + esc(m[4]) : "", m ? "residues " + m[2] + "-" + m[3] : "",
+        "E-value 0.001 or below");
     }
     if (d.fs !== undefined && d.fs !== null) {
       var g = d.fs;
       row("ProstT5 + Foldseek against AlphaFold Swiss-Prot", !!g, g ? uni(g[0]) + " " + esc(g[6] || "") + (g[7] ? ", <i>" + esc(g[7]) + "</i>" : "") : "",
-        g ? (100 * g[1]).toFixed(1) + "% identity, E-value " + esc(g[4]) : "", g ? "residues " + g[2] + "-" + g[3] : "");
+        g ? (100 * g[1]).toFixed(1) + "% identity, E-value " + esc(g[4]) : "", g ? "residues " + g[2] + "-" + g[3] : "",
+        "run by Biomni; shape letters predicted from the sequence; E-value 0.001 or below");
     }
     if (d.ips !== undefined && d.ips !== null) {
       var IPS_FEAT = { Coils: 1, MobiDBLite: 1, Phobius: 1, TMHMM: 1, AntiFam: 1 };
@@ -85,13 +91,15 @@
           "only " + Object.keys(dbs).map(esc).join(", ") + " (disorder, coils or membrane)",
           d.ips.length + " matches from " + Object.keys(dbs).length + " member databases",
           ek.length ? ek.slice(0, 4).map(function (k) { return ent[k][0] + "-" + ent[k][1]; }).join(", ") :
-          feat.map(function (x) { return x[3] + "-" + x[4]; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(", "));
+          feat.map(function (x) { return x[3] + "-" + x[4]; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(", "),
+          "version 5.59, all member databases");
       }
     }
     if (d.km !== undefined && d.km !== null) {
       var k = d.km;
       row("kmerseek against Swiss-Prot", !!k, k ? uni(k[2]) + " " + esc(k[3]) + (k[4] ? ", <i>" + esc(k[4]) + "</i>" : "") : "",
-        k ? "E-value " + k[1].toPrecision(3) + ", best of " + k[5] + " settings (" + esc(k[0]) + ")" : "", k ? (box ? "drawn above" : "not in this table") : "");
+        k ? "E-value " + k[1].toPrecision(3) + ", best of " + k[5] + " settings (" + esc(k[0]) + ")" : "", k ? (box ? "drawn above" : "not in this table") : "",
+        "best of its alphabet and k-mer size settings; E-value 10 or below");
     }
     if (d.uf === "not run") rows.push(["<b>UniFIRE (UniProt's annotation rules)</b>", "<i>not run (over 5,000 aa)</i>", "", ""]);
     else if (d.uf) {
@@ -102,7 +110,8 @@
       var feats = u.filter(function (x) { return x[4] !== null; });
       row("UniFIRE (UniProt's annotation rules)", u.length > 0, esc(nm),
         u.length + " predictions from " + Object.keys(src).map(function (k) { var n = Object.keys(src[k]).length; return n + " " + k + " rule" + (n > 1 ? "s" : ""); }).join(", "),
-        feats.length ? feats.length + " sites or regions; see below" : "whole protein");
+        feats.length ? feats.length + " sites or regions; see below" : "whole protein",
+        "UniProt's rules (ARBA, UniRule, PIRSR) applied to InterProScan's matches");
     }
     var N = rows.length;
     var name = (d.card && d.card.card_name) || r[3] || r[2] || "";
@@ -111,13 +120,8 @@
     var n = progs.length, sentence = n === 0 ? "None of the " + N + " programs reports a hit." :
       n + " of the " + N + " programs report" + (n === 1 ? "s" : "") + " a hit: " + progs.join(", ") + ".";
     var h = box ? ["<h2>What the whole-proteome annotation found</h2><p class=\"lead\">" + esc(sentence) + "</p>",
-      "<p class=\"note\">Programs run on the whole proteome (" + esc(id) + "), each protein's best hit: four by Biomni, kept at E-value 0.001 or below" +
-      (d.mm !== undefined ? "; MMseqs2 against Swiss-Prot, kept at 0.001 or below" : "") +
-      (d.fs !== undefined ? "; Foldseek on shape letters (3Di) predicted from the sequence by ProstT5, against AlphaFold models of Swiss-Prot, kept at 0.001 or below" : "") +
-      (d.ips !== undefined ? "; InterProScan 5.59 with all member databases" : "") +
-      (d.km !== undefined ? "; kmerseek against all of Swiss-Prot, best of its settings, at E-value 10 or below" : "") +
-      (d.uf ? "; and UniFIRE, which applies UniProt's annotation rules (ARBA, UniRule, PIRSR) to InterProScan's matches" : "") +
-      ". The slider above does not change this table.</p>"] :
+      "<p class=\"note\">Each program's best hit for this protein, from runs on the whole proteome. " +
+      "Weaker hits are left out. The slider above does not change this table.</p>"] :
       ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
       "<p class=\"note\">The best hit of each program. Nothing is drawn along the protein on this page; the last column gives the residues where a program reports them" +
       (d.uf ? "; UniFIRE gives positions only for the sites it predicts, listed in its table below." : ".") + "</p>"];
