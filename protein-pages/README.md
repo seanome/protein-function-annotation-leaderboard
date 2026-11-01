@@ -31,8 +31,8 @@ move the slider down to see which programs still report a hit.
 
 In the site made by `build_full.py`, a protein that has a drawn page opens on that page. The
 drawing comes first, under the title. Under it is a table of what the whole-proteome programs
-found (Biomni's DIAMOND against Swiss-Prot, hmmsearch with Pfam, jackhmmer from immune seeds,
-DIAMOND against Fester and BHF and FANTASIA, and UniFIRE), then the gene card and the rest of
+found (Biomni's DIAMOND against Swiss-Prot, hmmsearch with Pfam, jackhmmer from immune seeds
+and FANTASIA, and UniFIRE), then the gene card and the rest of
 those tables. Biomni kept its hits at E-value 0.001 or below, so the slider does not change
 them.
 
@@ -274,8 +274,10 @@ Alignments are stored next to each page (`proteins/<ID>.aln.js`) and read on the
 annotation tables a Biomni agent made (see `full_inputs/README.md` for what each table holds and
 how it was made). These tables give no positions, so these pages list each protein's best
 Swiss-Prot hit, the GO terms and UniProt keywords of that entry, its Pfam domains, its immune
-categories and their evidence, jackhmmer hits from immune seed proteins, DIAMOND hits to
-Fester and BHF, and the other proteins in its MMseqs2 cluster. Nothing is drawn along the protein.
+categories and their evidence, jackhmmer hits from immune seed proteins, and the other proteins
+in its MMseqs2 cluster. Biomni's DIAMOND search against Fester and BHF is not shown: those
+reference proteins are from *Botryllus* itself, and the pages show only matches to other species
+(`full_inputs/README.md`). Nothing is drawn along the protein.
 
 ```
 python build.py test_inputs/data --out site

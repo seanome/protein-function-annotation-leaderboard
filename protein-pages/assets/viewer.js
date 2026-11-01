@@ -60,9 +60,6 @@
     var j = d.jh[0];
     row("jackhmmer from immune seed proteins", d.jh.length > 0, j ? esc(j[0]) + " (seed " + esc(j[1]) + ")" + (d.jh.length > 1 ? " and " + (d.jh.length - 1) + " more" : "") : "",
       j ? "E-value " + esc(j[3]) + ", round " + j[2] : "", nowhere);
-    var a = d.al[0];
-    row("DIAMOND against Fester and BHF", d.al.length > 0, a ? esc(a[1] || a[0]) + " <a class=\"mono\" href=\"https://www.ncbi.nlm.nih.gov/protein/" + encodeURIComponent(a[0]) + "\">" + esc(a[0]) + "</a>" : "",
-      a ? a[2].toFixed(1) + "% identity over " + fmt(a[3]) + " columns, E-value " + esc(a[4]) : "", nowhere);
     var f = d.fa;
     row("FANTASIA (nearest protein by embedding)", !!f, f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "",
       f ? "cosine distance " + f[4].toFixed(2) + ", reliability " + f[5].toFixed(2) : "", f ? "whole protein, no alignment" : "");
@@ -114,7 +111,7 @@
     var n = progs.length, sentence = n === 0 ? "None of the " + N + " programs reports a hit." :
       n + " of the " + N + " programs report" + (n === 1 ? "s" : "") + " a hit: " + progs.join(", ") + ".";
     var h = box ? ["<h2>What the whole-proteome annotation found</h2><p class=\"lead\">" + esc(sentence) + "</p>",
-      "<p class=\"note\">Programs run on the whole proteome (" + esc(id) + "), each protein's best hit: five by Biomni, kept at E-value 0.001 or below" +
+      "<p class=\"note\">Programs run on the whole proteome (" + esc(id) + "), each protein's best hit: four by Biomni, kept at E-value 0.001 or below" +
       (d.mm !== undefined ? "; MMseqs2 against Swiss-Prot, kept at 0.001 or below" : "") +
       (d.fs !== undefined ? "; Foldseek on shape letters (3Di) predicted from the sequence by ProstT5, against AlphaFold models of Swiss-Prot, kept at 0.001 or below" : "") +
       (d.ips !== undefined ? "; InterProScan 5.59 with all member databases" : "") +
@@ -180,15 +177,6 @@
     h.push("<h2>jackhmmer hits from immune seed proteins</h2>");
     if (d.jh.length) h.push(table([["Seed family"], ["Seed protein"], ["Round", 1], ["E-value", 1], ["Score (bits)", 1]],
       d.jh.map(function (j) { return [esc(j[0]), esc(j[1]), j[2], esc(j[3]), esc(j[4])]; })));
-    else h.push("<p>None.</p>");
-    // Allorecognition
-    h.push("<h2>Matches to Fester and BHF (DIAMOND)</h2>");
-    if (d.al.length) h.push(table([["Reference protein"], ["NCBI accession"], ["Identity (%)", 1], ["Aligned columns", 1],
-      ["E-value", 1], ["Bit score", 1], ["Reference length (aa)", 1]],
-      d.al.map(function (a) {
-        return [esc(a[1] || "name not found at NCBI"), "<a class=\"mono\" href=\"https://www.ncbi.nlm.nih.gov/protein/" + encodeURIComponent(a[0]) + "\">" + esc(a[0]) + "</a>",
-          a[2].toFixed(1), fmt(a[3]), esc(a[4]), a[5].toFixed(0), fmt(a[7])];
-      })));
     else h.push("<p>None.</p>");
     // InterProScan
     if (d.ips) {
