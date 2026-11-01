@@ -10,7 +10,8 @@
    Residue panel (its own legend above the residues):
      #f9dfd0 fill, #eb6834 edge, #6b2a10 letter: a hydrophobic residue in the kmerseek alphabet
      #d9e7f8 fill, #2a78d6 edge, #123b6b letter: a polar residue
-     #c3c2b7  outline of a residue in neither class
+     #c3c2b7  outline of a residue in neither class, or in a class of a kmerseek alphabet other than hp_
+     #b8860b  kmerseek's seed: the bar above and below the columns where k residues in a row share a class
    Text and page (not data):
      #1a1a1a  text ink; also the outline of an expression bar, whose shape marks it, the
               sample boxes of the legend's E-value key, whose fading is the point, and the
@@ -145,7 +146,10 @@ header.wide,main.wide{max-width:1380px}
 #panel .stats{font-size:14px;margin:6px 0}
 .pgrid{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:18px;align-items:start}
 .map svg text{font:11px "Source Sans 3",system-ui,sans-serif;fill:var(--secondary)}
-.mapkey{font-size:12px;color:var(--secondary);max-width:300px;margin:0 0 4px}
+.map svg{display:block;max-width:100%;height:auto}
+.map svg text.dl{font-size:10px;fill:#1a1a1a}
+.map svg text.dl.on{fill:#ffffff}
+.mapkey{font-size:12px;line-height:1.35;color:var(--secondary);margin:0 0 4px}
 .mapkey.tools{display:flex;flex-wrap:wrap;gap:2px 10px}
 .mapkey.tools i{display:inline-block;width:12px;height:4px;margin-right:4px;vertical-align:middle;border-radius:2px}
 .alegend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--secondary);margin-bottom:6px}
@@ -169,8 +173,12 @@ header.wide,main.wide{max-width:1380px}
 .cells.marks i{background:none;border-color:transparent;color:var(--secondary)}
 .cells.under i{box-shadow:0 2px 0 0 #1a1a1a}
 .cells.under i.flank,.cells.under i.gap{box-shadow:none}
+.cells.seedrow{line-height:5px}
+.cells.seedrow i{height:5px;vertical-align:top}
+.cells.seedrow i.sd,.alegend i.sd{background:#b8860b;border-color:#b8860b}
+.alegend i.sd{display:inline-block;width:18px;height:6px;padding:0;vertical-align:middle}
 .cells i[data-c]:hover{outline:2px solid #1a1a1a;outline-offset:-1px}
-@media (max-width:760px){.pgrid{grid-template-columns:1fr}}
+@media (max-width:760px){.pgrid{grid-template-columns:minmax(0,1fr)}#panel{padding:10px 12px 20px}}
 .bl.halo{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
 .side.legend .kind{font-size:12px;margin:0 0 4px;color:var(--ink)}
 .side.legend .kk{display:inline-flex;align-items:center;gap:3px;margin-right:8px;white-space:nowrap}

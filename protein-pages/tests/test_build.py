@@ -260,3 +260,64 @@ def test_out_folder_that_is_not_a_site_is_kept(tmp_path):
     r = subprocess.run([sys.executable, str(Path(build.__file__)), str(tmp_path), "--out", str(out)],
                        capture_output=True, text=True)
     assert r.returncode == 2 and (out / "notes.txt").exists()
+
+
+def test_seed_runs_finds_k_columns_in_one_class():
+    """BHF (FUN008084) against PG03_MYCTO (P9WIG2), kmerseek gbmr4 k = 19: residues 63-119 of
+    BHF against 882-938 of P9WIG2. The first 25 columns are in the same gbmr4 class in both, so
+    seven 19-column windows start there; nowhere else is there a run of 19."""
+    al = build.parse_alphabets(DATA / "kmerseek_alphabets.rs")
+    prots = {h.split()[0]: s for h, s in build.read_fasta(DATA / "proteins.fasta").items()}
+    sp = {build.accession(h.split()[0]): s for h, s in build.read_fasta(DATA / "swissprot.fasta").items()}
+    q, t = prots["FUN008084_FUN008084"][62:119], sp["P9WIG2"][881:938]
+    assert build.seed_runs(q, t, al["gbmr4"], 19) == ([(0, 24)], 7)
+    assert build.seed_runs(q, t, al["gbmr4"], 26) == ([], 0)
+
+
+def test_seed_runs_small_cases():
+    tab = {"A": "a", "D": "a", "L": "l", "I": "l", "G": "g"}
+    # one break in the middle: two runs of 3, each one 3-mer
+    assert build.seed_runs("AALGAAL", "DDIADDI", tab, 3) == ([(0, 2), (4, 6)], 2)
+    # a residue outside the alphabet matches nothing, not even itself
+    assert build.seed_runs("AXA", "AXA", tab, 2) == ([], 0)
+    assert build.seed_runs("ALA", "DID", tab, 3) == ([(0, 2)], 1)
+
+
+def test_dayhoff6_is_sourmash_groups():
+    d = build.parse_alphabets(DATA / "kmerseek_alphabets.rs")["dayhoff6"]
+    assert len(set(d.values())) == 6 and len(d) == 20
+    assert d["A"] == d["G"] == d["P"] == d["S"] == d["T"] and d["H"] == d["K"] == d["R"] and d["C"] != d["A"]
+
+
+def test_read_target_pfam(tmp_path):
+    p = tmp_path / "t.tsv"
+    p.write_text("# made by hand\naccession\tpfam\tpfam_name\tstart\tend\tsource\n"
+                 "P9WIG2\tPF00934\tPE family\t4\t94\tInterPro API\n"
+                 "Q00001\t-\t\t\t\tInterPro API: no Pfam match\n")
+    doms, names = build.read_target_pfam(p)
+    assert doms == {"P9WIG2": [(4, 94, {"PF00934"})], "Q00001": []}
+    assert names == {"PF00934": "PE family"}
+    # asked, and InterPro has no Pfam match: known to have none (an empty set), not unknown (None)
+    assert build.target_names(dict(target="Q00001", t0=1, t1=50), doms) == set()
+    assert build.target_names(dict(target="Q99999", t0=1, t1=50), doms) is None
+    assert build.target_names(dict(target="P9WIG2", t0=880, t1=940), doms) == set()
+    assert build.target_names(dict(target="P9WIG2", t0=50, t1=60), doms) == {"PF00934"}
+
+
+def test_kmerseek_hits_carry_alphabet_ksize_and_seed(tmp_path):
+    """Each kmerseek hit keeps its own alphabet and k-mer size, a page lists the classes of
+    exactly the alphabets its kmerseek hits use, and the BHF / PG03_MYCTO hit has its seed."""
+    import json
+    import re
+    import subprocess
+    here = Path(build.__file__).resolve().parent
+    out = tmp_path / "site"
+    r = subprocess.run([sys.executable, str(here / "build.py"), str(DATA), "--out", str(out), "--jobs", "2"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    page = (out / "proteins" / "FUN008084_FUN008084.html").read_text()
+    P = json.loads(re.search(r"const PAGE=(\{.*?\});</script>", page).group(1))
+    km = [h for h in P["hits"] if h["k"] == "kmerseek"]
+    assert set(P["alpha"]) == {h["m"] for h in km}
+    pg = [h for h in km if h.get("t") == "P9WIG2" and h["m"] == "gbmr4" and h["kk"] == 19]
+    assert pg and pg[0]["sd"] == [[63, 87]] and pg[0]["sn"] == 7

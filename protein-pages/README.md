@@ -50,7 +50,8 @@ From top to bottom:
    InterProScan gives one.)
    Hits of two programs **overlap** when they share at least half of the shorter hit. For a
    search hit, the family is the Pfam domain on the matched part of the Swiss-Prot protein,
-   read from InterProScan's output on that protein, or hmmscan's if InterProScan has none.
+   read from InterProScan's output on that protein, or hmmscan's if InterProScan has none, or
+   else InterPro's own Pfam matches for that protein (`target_pfam_interpro.tsv`).
    With two or more programs, the sentence ends in one of four ways:
    - **agree**: "They agree on MHC_I (PF00129)." Overlapping hits name the same family.
    - **disagree**: "Their hits overlap but name different Pfam families: A (phmmer),
@@ -157,6 +158,7 @@ not there.
 | `hmmscan.domtblout` | hmmscan `--domtblout` against Pfam. Rows for Swiss-Prot proteins (not in `proteins.fasta`) give the Pfam families of search targets: their domains with i-Evalue at most 0.001. |
 | `hmmscan.out` | Optional: hmmscan's main output on your proteins, for the alignment of each Pfam model to your protein. |
 | `interproscan.tsv` | InterProScan TSV (15 columns). Rows for Swiss-Prot proteins are used the same way. |
+| `target_pfam_interpro.tsv` | Optional: Pfam domains of Swiss-Prot proteins that neither of the two files above covers, from the InterPro REST API, made by `test_inputs/fetch_target_pfam.py`. Columns `accession`, `pfam`, `pfam_name`, `start`, `end`, `source`; `pfam` is `-` when InterPro lists no Pfam match, and the page then says "none" instead of "not known". |
 | `protein_names.tsv` | Optional: protein ID, then a name (for example the Botryllus histocompatibility factor). Shown on the page and searched. |
 | `plddt.tsv` | Protein ID, then comma-separated pLDDT per residue |
 | `expression.tsv` | Protein ID, then one column per sample |
@@ -229,16 +231,35 @@ Clicking a box opens a panel with:
 - the tool's scores (E-value, score or bits) and the ranges on both proteins with how much of
   each they cover;
 - the matched Swiss-Prot protein's full name, gene, species and Pfam families;
-- a small map: your protein across, the matched protein down, both axes named with the
-  protein and "aa"; every hit on that protein is a line in the colour of its kind of program
-  (the one shown drawn thick), with Pfam domains along both edges;
+- a small map: your protein across, the matched protein down. The x axis is always 220 pixels
+  wide; the y axis is 220 pixels times the ratio of the two lengths, kept between 110 and 320,
+  so each axis has its own residues per pixel. Every hit on that protein is a line in the
+  colour of its kind of program (the one shown drawn thick). Its key, above the plot, says what
+  is drawn on the edges:
+  - along the top, what hmmscan and InterProScan found on your protein, in the marks of the
+    drawing: solid boxes for Pfam families and other signatures (at the slider's E-value; where
+    two overlap, the better E-value), dashed boxes for InterProScan's disorder, coil,
+    membrane-span and signal-peptide predictions. Each box is named inside when the name fits,
+    and on hover;
+  - along the right, open boxes for the Pfam domains of the matched protein, with where they
+    come from (InterProScan or hmmscan run on it, or InterPro's Pfam matches for it);
+  - a short line instead when an edge has nothing to draw;
 - one summary line above the residues, counted from the alignment shown: "226 of 312 aligned
   columns identical (72%), 43 more similar (BLOSUM62 score above 0), 0 gap columns" (for
-  kmerseek, "more in the same class"); and directly under it, where the alignment comes from;
-- the residues, 60 columns a line, with both coordinates, coloured by the residue classes of
-  the kmerseek alphabet in `kmerseek_alphabets.rs` (orange: hydrophobic, blue: polar in
-  hp_lehninger2), identical residues in bold, and a match line (| the same residue,
-  + similar). Pointing at a residue gives its position and class.
+  kmerseek, "more in the same gbmr4 class", in the hit's own alphabet); and directly under it,
+  where the alignment comes from;
+- for kmerseek, the seed line: the runs of k columns (k the hit's k-mer size) in which both
+  proteins are in the same class of the hit's alphabet at every position, where kmerseek's
+  search started. "Seed: 7 overlapping windows of 19 residues in the same gbmr4 class in both,
+  at your protein aa 63-87, PG03_MYCTO aa 882-906." A dark yellow bar (`#b8860b`) marks those
+  columns above and below the residues. build.py finds them (`seed_runs`). A hit with no such
+  run says so: its coordinates or its alphabet do not match what kmerseek used;
+- the residues, 30 to 60 columns a line (as many tens as fit beside the map), with both
+  coordinates, identical residues in bold, and a match line (| the same residue, + similar).
+  For kmerseek the class letters of both proteins in the hit's own alphabet and k-mer size
+  ("gbmr4, k = 19") are shown, and in the two-class hp_ alphabets residues are coloured
+  (orange: hydrophobic, blue: polar). Other programs compare residues, not classes, so their
+  panels show no classes. Pointing at a residue gives its position (and class, for kmerseek).
 
 Which alignment is shown:
 
