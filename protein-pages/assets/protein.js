@@ -10,6 +10,8 @@
   const SVGNS = "http://www.w3.org/2000/svg";
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const H = PAGE.hits;
+  // A target's Pfam domains are stored once per page (PAGE.td); give each hit its own reference
+  if (PAGE.td) for (const h of H) if (h.t && PAGE.td[h.t]) h.td = PAGE.td[h.t];
 
   function tipHtml(h) {
     let rows = `<tr><td>this protein</td><td>${h.q[0]}-${h.q[1]}</td></tr>`;
