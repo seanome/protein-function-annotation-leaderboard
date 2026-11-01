@@ -99,7 +99,8 @@ From top to bottom:
    "Fold into one row" turns the row into one strip: at each residue, the strip is darker the
    more of that tool's hits cover it, in the tool's colour, with the highest count written at
    the right end ("up to 12 hits on one residue"). It counts every hit the slider shows, not
-   only the best 5. "Show each hit" undoes it. The browser remembers which tools are folded,
+   only the best 5. "Show each hit" undoes it. Double-clicking a tool's name or its folded strip unfolds
+   it and draws every hit. The browser remembers which tools are folded,
    for every protein page.
 
    The search box above the drawing looks through the same text as the tooltip: the matched
