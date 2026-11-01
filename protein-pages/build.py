@@ -973,7 +973,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
     left = '<text x="4" y="%d" class="tn">programs with a hit</text>' % (top + 12) + "".join(
         '<text x="100%%" dx="-4" y="%.1f" class="rl" text-anchor="end">%s</text>' % (top + ah - v * step_h + 3, lab)
         for v, lab in ((0, "0"), (m, "%d programs" % m)))
-    rows.append(("agree", top + ah + 8, left, right))
+    rows.insert(1, ("agree", top + ah + 8, left, right))  # under the ruler, above the programs' rows
     y, L_out, R_out = 0, [], []
     for k, hgt, left, right in rows:
         sep_l = '<line x1="0" y1="0" x2="100%" y2="0" class="sep"/>' if y else ""
