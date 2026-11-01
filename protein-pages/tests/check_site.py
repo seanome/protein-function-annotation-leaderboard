@@ -20,7 +20,7 @@ import build  # noqa: E402
 
 LEGEND = {c.lower() for c in [f["color"] for f in build.PROGRAMS.values()]
           + [build.PROTEIN_LINE, build.AGREEMENT, build.EXPRESSION] + [p[2] for p in build.PLDDT]}
-NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "#c3c2b7"}  # #c3c2b7: outline of a residue in neither class
+NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "transparent", "#c3c2b7"}  # #c3c2b7: outline of a residue in neither class; transparent: a dashed box's click area
 
 
 STATUS_WORDS = {"none": "", "one": "", "agree": "They agree on",

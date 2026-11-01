@@ -217,10 +217,9 @@ h3{font-size:16px;margin:16px 0 4px}
 .hsearch .note:last-child{flex-basis:100%}
 #hqn{font-weight:600;color:var(--ink)}
 #foldnote{margin:4px 0 0;font-size:12px}
-.fold{cursor:pointer;outline:none}
-.fold:hover .tn{text-decoration:underline}
-.fold:focus-visible{outline:2px dotted #5a5a5a}
-.fold .tri{fill:var(--muted)}
+.act{fill:var(--link);cursor:pointer;outline:none}
+.act:hover{text-decoration:underline}
+.act:focus-visible{outline:2px dotted #5a5a5a}
 .hit.dim{opacity:.18}
 
 .how{color:var(--muted);font-size:13px;font-weight:400}
