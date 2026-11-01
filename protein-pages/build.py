@@ -1302,6 +1302,7 @@ def build_protein(task):
     by_track = {}
     data = []
     tdom = {}  # target -> its Pfam domains, once per page, not once per hit (TTN has 10,000+ hits)
+    tsrc = {}  # target -> where its Pfam domains come from (interproscan, hmmscan or interpro)
     score_names = {}
     terms = {}  # text the index page's search box looks through -> bit mask of the programs whose hits carry it
     pname = ctx["prot_names"].get(pid)
@@ -1361,8 +1362,8 @@ def build_protein(task):
                 doms = ctx["target_ann"].get(h["target"])
                 if doms and h["target"] not in tdom:
                     tdom[h["target"]] = non_overlapping(doms, lambda nm: family_label(sorted(nm)[0], ctx["names"]) if nm else "")
-                if doms is not None:  # where the target's Pfam domains come from
-                    d["ds"] = ctx["target_src"].get(h["target"])
+                if doms is not None:  # where the target's Pfam domains come from, also once per page
+                    tsrc[h["target"]] = ctx["target_src"].get(h["target"])
                 if t["key"] == "hhsearch":
                     a = dict(h["aln"], src="the alignment hhsearch wrote (the .hhr file)") if h.get("aln") else None
                 elif t["key"] == "kmerseek":
@@ -1474,7 +1475,7 @@ def build_protein(task):
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
     out.append('</main>%s' % ctx["footer"])
     page_data = dict(
-        id=pid, pn=pname or "", q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], sent=steps, hits=data, td=tdom, names=score_names,
+        id=pid, pn=pname or "", q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], sent=steps, hits=data, td=tdom, ds=tsrc, names=score_names,
         alpha={m: ctx["alphabets"][m] for m in sorted({d["m"] for d in data if d.get("m")}) if m in ctx["alphabets"]},
         tracks={t["key"]: dict(name=t["name"], color=PROGRAMS[t["program"]]["color"], shape=PROGRAMS[t["program"]]["shape"],
                                cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},

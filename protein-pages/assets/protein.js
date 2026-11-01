@@ -12,6 +12,8 @@
   const H = PAGE.hits;
   // A target's Pfam domains are stored once per page (PAGE.td); give each hit its own reference
   if (PAGE.td) for (const h of H) if (h.t && PAGE.td[h.t]) h.td = PAGE.td[h.t];
+  // and where they come from (interproscan, hmmscan or interpro), also once per page
+  if (PAGE.ds) for (const h of H) if (h.t && PAGE.ds[h.t]) h.ds = PAGE.ds[h.t];
 
   function tipHtml(h) {
     let rows = `<tr><td>this protein</td><td>${h.q[0]}-${h.q[1]}</td></tr>`;

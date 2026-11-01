@@ -321,3 +321,5 @@ def test_kmerseek_hits_carry_alphabet_ksize_and_seed(tmp_path):
     assert set(P["alpha"]) == {h["m"] for h in km}
     pg = [h for h in km if h.get("t") == "P9WIG2" and h["m"] == "gbmr4" and h["kk"] == 19]
     assert pg and pg[0]["sd"] == [[63, 87]] and pg[0]["sn"] == 7
+    # P9WIG2's Pfam domains come from target_pfam_interpro.tsv: PE family at residues 4-94
+    assert P["td"]["P9WIG2"] == [[4, 94, "PE family (PF00934)"]] and P["ds"]["P9WIG2"] == "interpro"
