@@ -214,3 +214,5 @@ h3{font-size:16px;margin:16px 0 4px}
 .fold:focus-visible{outline:2px dotted #5a5a5a}
 .fold .tri{fill:var(--muted)}
 .hit.dim{opacity:.18}
+
+.how{color:var(--muted);font-size:13px;font-weight:400}
