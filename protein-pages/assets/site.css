@@ -68,6 +68,10 @@ svg text{font-family:"Source Sans 3",system-ui,sans-serif}
 .bl{font-size:11px;font-family:"Fantasque Sans Mono",ui-monospace,monospace!important;pointer-events:none}
 .nr{font-size:12px;font-style:italic;fill:var(--muted)}
 .nh{font-size:12px;fill:var(--ink)}
+.wt{font-size:12px;fill:var(--ink)}
+.wn{font-size:12px;fill:var(--muted)}
+.wt .lk{fill:var(--link);font-family:"Fantasque Sans Mono",ui-monospace,monospace}
+.wt a:hover .lk{text-decoration:underline}
 .sep{stroke:var(--line)}
 .hit{cursor:pointer;outline:none}
 .hit:focus-visible{outline:2px dotted #5a5a5a}

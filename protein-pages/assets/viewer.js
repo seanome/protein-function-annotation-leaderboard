@@ -64,14 +64,6 @@
         found ? hit : "<i>no hit</i>", found ? score : "", found ? where : ""]);
     }
     var nowhere = "not in the table";
-    // From full_inputs/fantasia_vs_diamond.tsv: of proteins with both answers, the share whose
-    // FANTASIA protein has the same gene as the DIAMOND hit, for each range of cosine distance.
-    function fantasiaAgree(dist) {
-      var bins = [[0.1, 18], [0.15, 12], [0.2, 6], [0.25, 3], [0.3, 2], [Infinity, 2]];
-      for (var i = 0; i < bins.length; i++) if (dist < bins[i][0]) {
-        return "at this similarity, its pick names the same gene as DIAMOND's best hit for " + bins[i][1] + "% of proteins that have both (distance " + dist.toFixed(2) + "; 0 is identical)";
-      }
-    }
     row("DIAMOND against Swiss-Prot", !!r[6], r[6] ? uni(r[6]) + " " + esc(r[5]) + (d.sp_gene ? " (" + esc(d.sp_gene) + ")" : "") + (d.sp_org ? ", <i>" + esc(d.sp_org) + "</i>" : "") : "",
       r[6] ? (r[7] === null ? "" : r[7].toFixed(1) + "% identity over " + Math.round(r[8]) + "% of your protein, ") + "E-value " + esc(d.sp_e) : "", nowhere,
       "run by Biomni; E-value 0.001 or below");
@@ -82,9 +74,16 @@
     row("jackhmmer from immune seed proteins", d.jh.length > 0, j ? esc(j[0]) + " (seed " + esc(j[1]) + ")" + (d.jh.length > 1 ? " and " + (d.jh.length - 1) + " more" : "") : "",
       j ? "E-value " + esc(j[3]) + ", round " + j[2] : "", nowhere, "run by Biomni from 24 immune seed proteins");
     var f = d.fa;
-    row("FANTASIA (most similar protein by a protein language model)", !!f, f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "",
-      f ? "no E-value; " + fantasiaAgree(f[4]) : "", f ? "whole protein, no alignment" : "",
-      "run by Biomni; picks the most similar of 124,397 well-studied UniProt proteins, so it always names one");
+    // FANTASIA always names its most similar protein; it counts as a hit below FANTASIA_MAX_DIST
+    // (build.py; figures/fantasia_vs_diamond.png)
+    var FANTASIA_MAX_DIST = 0.15, fName = "FANTASIA (most similar protein by a protein language model)",
+      fHow = "run by Biomni; picks the most similar of 124,397 well-studied UniProt proteins, so it always names one";
+    var fHit = f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "";
+    if (f && f[4] >= FANTASIA_MAX_DIST) rows.push(["<b>" + esc(fName) + "</b><br><span class=\"how\">" + esc(fHow) + "</span>",
+      "<i>not close enough to count</i>; most similar: " + fHit,
+      "distance " + f[4].toFixed(2) + " (it counts below " + FANTASIA_MAX_DIST.toFixed(2) + "; 0 is identical)", "whole protein, no position"]);
+    else row(fName, !!f, fHit, f ? "distance " + f[4].toFixed(2) + ", close enough to count (below " + FANTASIA_MAX_DIST.toFixed(2) + ")" : "",
+      f ? "whole protein, no position" : "", fHow);
     if (d.mm !== undefined && d.mm !== null) {
       var m = d.mm;
       row("MMseqs2 against Swiss-Prot", !!m, m ? uni(m[0]) + " " + esc(m[6] || "") + (m[7] ? ", <i>" + esc(m[7]) + "</i>" : "") : "",
@@ -159,28 +158,28 @@
   }
   function render(id, r, d) {
     var h = top(id, r, d);
-    if (box) {  // on a drawn page, under the drawing: the table, then the gene card and the rest
-      box.innerHTML = h.join("");
+    if (box) {  // on a drawn page each program is a row of the drawing; under it, only what the rows do not show
+      box.innerHTML = "";
       main = document.getElementById("biomni-more");
-      h = card(r, d).concat(["<h2>More from the Biomni annotation</h2>"]);
+      h = card(r, d).concat(["<h2>More about this protein</h2>"]);
     }
     // Names
     h.push("<h2>Name</h2>" + table([["Existing name (FASTA header)"], ["Proposed name"], ["Comparison"]],
       [[esc(r[2]) || "none", esc(r[3]) || "none", esc(F.check[r[4]])]]));
-    // Best Swiss-Prot match
-    h.push("<h2>Best Swiss-Prot match (DIAMOND)</h2>");
+    // Best Swiss-Prot match (on a drawn page its row in the drawing has the hit; only its GO terms here)
+    h.push(box ? (r[6] ? "<h2>GO terms and keywords of DIAMOND's best hit, " + uni(r[6]) + "</h2>" : "") : "<h2>Best Swiss-Prot match (DIAMOND)</h2>");
     if (r[6]) {
-      h.push(table([["Accession"], ["Protein"], ["Identity (%)", 1], ["Coverage of your protein (%)", 1], ["E-value", 1]],
+      if (!box) h.push(table([["Accession"], ["Protein"], ["Identity (%)", 1], ["Coverage of your protein (%)", 1], ["E-value", 1]],
         [[uni(r[6]),
           esc(r[5]), r[7] === null ? "" : r[7].toFixed(1), r[8] === null ? "" : Math.round(r[8]), esc(d.sp_e)]]));
-      h.push("<p class=\"note\">Where on your protein the match lies is not in the table this page was built from.</p>");
+      if (!box) h.push("<p class=\"note\">Where on your protein the match lies is not in the table this page was built from.</p>");
       if (d.go.length) h.push("<h3>GO terms of the matched Swiss-Prot entry (not measured on your protein)</h3><p class=\"chips\">" + d.go.map(function (g) {
         return "<a href=\"https://www.ebi.ac.uk/QuickGO/term/" + encodeURIComponent(g[0]) + "\">" + esc(g[1] || g[0]) + "</a>"; }).join(" · ") + "</p>");
       if (d.kw.length) h.push("<h3>UniProt keywords of that entry</h3><p>" + d.kw.map(esc).join(", ") + "</p>");
-    } else h.push("<p>No Swiss-Prot match at E-value 0.001 or below.</p>");
-    // Pfam
-    h.push("<h2>Pfam domains (hmmsearch, gathering thresholds)</h2>");
-    if (d.pfam.length) {
+    } else if (!box) h.push("<p>No Swiss-Prot match at E-value 0.001 or below.</p>");
+    // Pfam (a drawn page has hmmscan's Pfam domains along the protein)
+    if (!box) h.push("<h2>Pfam domains (hmmsearch, gathering thresholds)</h2>");
+    if (box) { /* drawn: see the hmmscan row */ } else if (d.pfam.length) {
       var seen = {}, rows = [];
       d.pfam.forEach(function (p) { seen[p[0]] = seen[p[0]] || { n: p[1], c: 0 }; seen[p[0]].c++; });
       Object.keys(seen).forEach(function (a) {
@@ -195,13 +194,14 @@
     h.push("<h2>Immune-gene candidate</h2>");
     if (cats.length) h.push(table([["Category"], ["Evidence"]], d.ev.map(function (e) { return [esc(e[0]), accHtml(e[1])]; })));
     else h.push("<p>Not in the immune-gene table.</p>");
-    // jackhmmer
+    // jackhmmer (a drawn page lists its best hit in a row of the drawing; every hit here)
     h.push("<h2>jackhmmer hits from immune seed proteins</h2>");
-    if (d.jh.length) h.push(table([["Seed family"], ["Seed protein"], ["Round", 1], ["E-value", 1], ["Score (bits)", 1]],
+    if (box && d.jh.length <= 1) h.pop();
+    else if (d.jh.length) h.push(table([["Seed family"], ["Seed protein"], ["Round", 1], ["E-value", 1], ["Score (bits)", 1]],
       d.jh.map(function (j) { return [esc(j[0]), esc(j[1]), j[2], esc(j[3]), esc(j[4])]; })));
     else h.push("<p>None.</p>");
-    // InterProScan
-    if (d.ips) {
+    // InterProScan (a drawn page has every match along the protein)
+    if (d.ips && !box) {
       h.push("<h2>InterProScan matches</h2>");
       if (d.ips === "not run") h.push("<p>Not run: InterProScan was not run on proteins over 5,000 amino acids.</p>");
       else if (!d.ips.length) h.push("<p>No match.</p>");
