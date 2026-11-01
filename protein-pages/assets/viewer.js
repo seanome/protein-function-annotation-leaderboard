@@ -54,6 +54,14 @@
         found ? hit : "<i>no hit</i>", found ? score : "", found ? where : ""]);
     }
     var nowhere = "not in the table";
+    // From full_inputs/fantasia_vs_diamond.tsv: of proteins with both answers, the share whose
+    // FANTASIA protein has the same gene as the DIAMOND hit, for each range of cosine distance.
+    function fantasiaAgree(dist) {
+      var bins = [[0.1, 18], [0.15, 12], [0.2, 6], [0.25, 3], [0.3, 2], [Infinity, 2]];
+      for (var i = 0; i < bins.length; i++) if (dist < bins[i][0]) {
+        return "at this similarity, its pick names the same gene as DIAMOND's best hit for " + bins[i][1] + "% of proteins that have both (distance " + dist.toFixed(2) + "; 0 is identical)";
+      }
+    }
     row("DIAMOND against Swiss-Prot", !!r[6], r[6] ? uni(r[6]) + " " + esc(r[5]) + (d.sp_gene ? " (" + esc(d.sp_gene) + ")" : "") + (d.sp_org ? ", <i>" + esc(d.sp_org) + "</i>" : "") : "",
       r[6] ? (r[7] === null ? "" : r[7].toFixed(1) + "% identity over " + Math.round(r[8]) + "% of your protein, ") + "E-value " + esc(d.sp_e) : "", nowhere,
       "run by Biomni; E-value 0.001 or below");
@@ -64,9 +72,9 @@
     row("jackhmmer from immune seed proteins", d.jh.length > 0, j ? esc(j[0]) + " (seed " + esc(j[1]) + ")" + (d.jh.length > 1 ? " and " + (d.jh.length - 1) + " more" : "") : "",
       j ? "E-value " + esc(j[3]) + ", round " + j[2] : "", nowhere, "run by Biomni from 24 immune seed proteins");
     var f = d.fa;
-    row("FANTASIA (nearest protein by embedding)", !!f, f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "",
-      f ? "cosine distance " + f[4].toFixed(2) + ", reliability " + f[5].toFixed(2) : "", f ? "whole protein, no alignment" : "",
-      "run by Biomni; nearest of 124,397 well-studied UniProt proteins");
+    row("FANTASIA (most similar protein by a protein language model)", !!f, f ? uni(f[0]) + " " + esc(f[1] || "") + (f[2] ? " (" + esc(f[2]) + ")" : "") + (f[3] ? ", <i>" + esc(f[3]) + "</i>" : "") : "",
+      f ? "no E-value; " + fantasiaAgree(f[4]) : "", f ? "whole protein, no alignment" : "",
+      "run by Biomni; picks the most similar of 124,397 well-studied UniProt proteins, so it always names one");
     if (d.mm !== undefined && d.mm !== null) {
       var m = d.mm;
       row("MMseqs2 against Swiss-Prot", !!m, m ? uni(m[0]) + " " + esc(m[6] || "") + (m[7] ? ", <i>" + esc(m[7]) + "</i>" : "") : "",

@@ -82,11 +82,13 @@ From top to bottom:
    name, gene and species, the Pfam families on the matched part of it, and the tool's
    scores. Clicking a box, or its label, shows the aligned residues.
 
-   Clicking a tool's name (or Enter or Space on it) folds its row into one strip: at each
-   residue, the strip is darker the more of that tool's hits cover it, in the tool's colour,
-   with the highest count written at the right end ("up to 12 hits on one residue"). It
-   counts every hit the slider shows, not only the best 5. Clicking again shows each hit.
-   The browser remembers which tools are folded, for every protein page.
+   Under each tool's name are two links (Enter or Space work on them too). "Show all N hits"
+   draws every hit of that tool, not only the best 5; "Show the best 5 only" goes back.
+   "Fold into one row" turns the row into one strip: at each residue, the strip is darker the
+   more of that tool's hits cover it, in the tool's colour, with the highest count written at
+   the right end ("up to 12 hits on one residue"). It counts every hit the slider shows, not
+   only the best 5. "Show each hit" undoes it. The browser remembers which tools are folded,
+   for every protein page.
 
    The search box above the drawing looks through the same text as the tooltip: the matched
    protein's entry name, accession, full name, gene and species, the Pfam families on it, and

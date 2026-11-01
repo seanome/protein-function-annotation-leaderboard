@@ -922,8 +922,8 @@ def hatch_defs():
 
 
 def feature_svg(x, y, w, h, col):
-    """An InterProScan feature prediction: a dashed box in InterProScan's colour, no fill."""
-    return ('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="none" stroke="%s" stroke-width="1.5" '
+    """An InterProScan feature prediction: a dashed box in InterProScan's colour, no fill (transparent, so the whole box takes a click, not only its dashed edge)."""
+    return ('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="transparent" stroke="%s" stroke-width="1.5" '
             'stroke-dasharray="3 2"/>' % (x + 1, y + 1, max(1.0, w - 2), h - 2, col))
 
 
@@ -1451,8 +1451,8 @@ def build_protein(task):
                    'families and GO terms. Every word typed must appear. Hits that do not match are drawn faint, '
                    'and the best %d matching hits of each tool are drawn even when they are not among its best %d.</span></div>'
                    % (TOP_N, TOP_N) +
-                   '<p class="note" id="foldnote">Click a program\'s name to fold its hits into one row shaded by '
-                   'how many hits cover each residue.</p>')
+                   '<p class="note" id="foldnote">Under each program\'s name, "Show all" draws every hit, and "Fold into '
+                   'one row" draws one row shaded by how many hits cover each residue.</p>')
     toggle = ""
     if n_more:
         toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
