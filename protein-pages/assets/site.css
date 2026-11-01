@@ -201,3 +201,16 @@ table.full th[aria-sort=descending]::after{content:" \2193"}
 #more{font:inherit;padding:4px 12px;border:1px solid #999;border-radius:6px;background:#fff;cursor:pointer}
 h3{font-size:16px;margin:16px 0 4px}
 .chips a{margin-right:6px;font-size:14px}
+/* drawn page: search box over the hits, and program names that fold a row (assets/protein.js) */
+.hsearch{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:8px 0}
+.hsearch label{font-weight:600}
+.hsearch input{flex:0 1 360px;min-width:0;font:inherit;padding:6px 10px;border:1px solid #999;border-radius:6px}
+.hsearch .note{margin:0;font-size:12px}
+.hsearch .note:last-child{flex-basis:100%}
+#hqn{font-weight:600;color:var(--ink)}
+#foldnote{margin:4px 0 0;font-size:12px}
+.fold{cursor:pointer;outline:none}
+.fold:hover .tn{text-decoration:underline}
+.fold:focus-visible{outline:2px dotted #5a5a5a}
+.fold .tri{fill:var(--muted)}
+.hit.dim{opacity:.18}

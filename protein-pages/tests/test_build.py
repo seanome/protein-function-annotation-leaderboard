@@ -197,6 +197,15 @@ def test_site_from_test_data(tmp_path):
     assert summary["total"] == 51 and summary["programs_run"] == 7  # hhsearch not run; Foldseek only as ProstT5 + Foldseek
     r = subprocess.run([sys.executable, str(here / "tests" / "check_site.py"), str(out)], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
+    # The BHF page has the hit search box and the folding note, and its page data carry what the
+    # search looks through: 5 ProstT5 + Foldseek hits are on RRP36 proteins (entry name RRP36_...).
+    import re
+    html = (out / "proteins" / "FUN008084_FUN008084.html").read_text()
+    assert '<input id="hq" type="search"' in html and 'id="hqn"' in html
+    assert "Click a program's name to fold its hits into one row shaded by how many hits cover each residue." in html
+    page = json.loads(re.search(r"const PAGE=(.*?);</script>", html).group(1).replace("<\\/", "</"))
+    rrp36 = [h for h in page["hits"] if "rrp36" in " ".join(str(h.get(f) or "") for f in "ltngo").lower()]
+    assert len(rrp36) == 5 and {h["k"] for h in rrp36} == {"prostt5"}
 
 
 def test_accession_keeps_isoform_number():
