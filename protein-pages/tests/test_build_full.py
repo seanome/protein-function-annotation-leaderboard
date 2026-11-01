@@ -14,6 +14,7 @@ import pytest
 
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
+import build  # noqa: E402
 import build_full  # noqa: E402
 
 FULL = HERE / "full_inputs"
@@ -156,4 +157,4 @@ def test_foldseek_on_the_pages(site):
     assert fs["FUN008084"] == 0
     raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
     pid = next(p for p, v in fs.items() if v)
-    assert raw[pid]["target"].split("-")[1] == fs[pid][0] and int(raw[pid]["qstart"]) == fs[pid][2]
+    assert build.af_accession(raw[pid]["target"]) == fs[pid][0] and int(raw[pid]["qstart"]) == fs[pid][2]

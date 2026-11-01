@@ -199,6 +199,20 @@ def test_site_from_test_data(tmp_path):
     assert r.returncode == 0, r.stdout + r.stderr
 
 
+def test_accession_keeps_isoform_number():
+    """An AlphaFold model of an isoform names the isoform: C3VPR6-2, not the canonical C3VPR6."""
+    assert build.af_accession("AF-P12345-F1-model_v6") == "P12345"
+    assert build.af_accession("AF-C3VPR6-2-F1-model_v6") == "C3VPR6-2"
+    assert build.af_accession("AF-A0A024R1R8-F1-model_v6") == "A0A024R1R8"
+    assert build.accession("AF-C3VPR6-2-F1-model_v6") == "C3VPR6-2"
+    assert build.accession("sp|C3VPR6-2|NLRC5_MOUSE") == "C3VPR6-2"
+    # the committed ProstT5 + Foldseek table: its last column is the accession of the target name
+    import gzip
+    rows = [line.rstrip("\n").split("\t") for line in gzip.open(DATA / "prostt5_foldseek.m8.gz", "rt")]
+    assert all(f[-1] == build.af_accession(f[1]) for f in rows)
+    assert sum("-" in f[-1] for f in rows) > 0
+
+
 def test_agreement_with_tied_hits_and_unknown_targets():
     # Two programs with a hit at the same range and the same E-value, targets with no known
     # family: the pair search must not fail on the tie (it did on the full Botryllus run).

@@ -80,7 +80,7 @@ TRACKS = [
          database="Swiss-Prot", score="evalue", kind="m8"),
     dict(key="kmerseek", file="kmerseek.tsv", program="kmerseek", second=False, name="kmerseek",
          setting="", database="Swiss-Prot", score="region_evalue", kind="kmerseek"),
-    dict(key="foldseek", file="foldseek.m8", program="foldseek", second=False, name="Foldseek",
+    dict(key="foldseek", file="foldseek.m8", program="foldseek", second=False, name="Foldseek, 3-D structures",
          setting="3Di shape letters and amino acids together",
          database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8"),
     dict(key="prostt5", file="prostt5_foldseek.m8", program="foldseek", second=True,
@@ -155,10 +155,20 @@ def read_fasta(path):
     return seqs
 
 
+AF_NAME = re.compile(r"AF-([A-Z0-9]+(?:-\d+)?)-F\d+")
+
+
+def af_accession(t):
+    """UniProt accession from an AlphaFold model name, keeping the isoform number:
+    AF-P12345-F1-model_v6 gives P12345, AF-C3VPR6-2-F1-model_v6 gives C3VPR6-2."""
+    m = AF_NAME.match(t)
+    return m.group(1) if m else t.split("-")[1]
+
+
 def accession(t):
     """Swiss-Prot accession from a target name: sp|P12345|NAME, AF-P12345-F1-model_v4, P12345."""
     if t.startswith("AF-"):
-        return t.split("-")[1]
+        return af_accession(t)
     if t.startswith(("sp|", "tr|")):
         parts = t.split("|")
         return parts[1] if len(parts) > 1 else t
@@ -903,7 +913,11 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8):
         shown = real[:TOP_N] + [h for h in hs if h.get("feature")]
         place, n_l = place_labels(shown, px, W)
         h_row = ROW_PAD + n_l * LANE_H + 4
-        if run_status[k] == "not run":
+        if run_status[k] == "not run" and k == "foldseek" and run_status.get("prostt5") != "not run":
+            # Readers looked here for Foldseek and missed the next row
+            g = ['<text x="4" y="%d" class="nr">not run on 3-D structures. Foldseek on shape letters '
+                 'predicted from the sequence is the next row, ProstT5 + Foldseek.</text>' % (ROW_PAD + 11)]
+        elif run_status[k] == "not run":
             g = ['<text x="4" y="%d" class="nr">not run: no %s in the input folder</text>'
                  % (ROW_PAD + 11, esc(t["file"]))]
         elif not hs:
