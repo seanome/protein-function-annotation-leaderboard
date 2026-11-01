@@ -80,6 +80,21 @@ From top to bottom:
    Hovering over or tapping a box shows the matched Swiss-Prot protein's entry name, full
    name, gene and species, the Pfam families on the matched part of it, and the tool's
    scores. Clicking a box, or its label, shows the aligned residues.
+
+   Clicking a tool's name (or Enter or Space on it) folds its row into one strip: at each
+   residue, the strip is darker the more of that tool's hits cover it, in the tool's colour,
+   with the highest count written at the right end ("up to 12 hits on one residue"). It
+   counts every hit the slider shows, not only the best 5. Clicking again shows each hit.
+   The browser remembers which tools are folded, for every protein page.
+
+   The search box above the drawing looks through the same text as the tooltip: the matched
+   protein's entry name, accession, full name, gene and species, the Pfam families on it, and
+   GO terms when `kmerseek.tsv` has a GO column. Every word typed must appear (case does not
+   matter). Hits that do not match are drawn faint; the best 5 matching hits of each tool
+   are drawn even when they are not among its best 5. Each tool's row says "N of M hits
+   match", the line beside the box gives the total, and a folded row counts only matching
+   hits. A Swiss-Prot target with no hmmscan or InterProScan rows has no Pfam families to
+   search, so only its names are searched.
 4. If `expression.tsv` is given, one outlined bar per sample.
 5. A footer listing every input file read, with its size and date.
 

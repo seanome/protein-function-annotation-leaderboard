@@ -1366,6 +1366,19 @@ def build_protein(task):
               '<span class="note">The sentence at the top counts the hits the slider shows. Move the slider down to '
               'see fewer, stronger hits. The index counts hits at E-value at most %s.</span></div>'
               % (fmt_thr(SHOW_E), lo, s_pos, c_pos, fmt_thr(COUNT_E))) if by_track else ""
+    # Search box and folding note (assets/protein.js does both). The search looks through what the
+    # tooltip shows for each hit: the matched protein's entry name, accession, full name, gene,
+    # species, Pfam families and GO terms when the input gives them.
+    if data:
+        slider += ('<div class="hsearch"><label for="hq">Search the hits</label>'
+                   '<input id="hq" type="search" autocomplete="off" placeholder="for example: zinc finger, RRP36, kinase">'
+                   '<span id="hqn" class="note" aria-live="polite"></span>'
+                   '<span class="note">Looks through the matched protein\'s name, gene, accession, species, Pfam '
+                   'families and GO terms. Every word typed must appear. Hits that do not match are drawn faint, '
+                   'and the best %d matching hits of each tool are drawn even when they are not among its best %d.</span></div>'
+                   % (TOP_N, TOP_N) +
+                   '<p class="note" id="foldnote">Click a program\'s name to fold its hits into one row shaded by '
+                   'how many hits cover each residue.</p>')
     toggle = ""
     if n_more:
         toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
