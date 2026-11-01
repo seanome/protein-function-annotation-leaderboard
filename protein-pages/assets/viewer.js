@@ -71,6 +71,11 @@
       row("MMseqs2 against Swiss-Prot", !!m, m ? uni(m[0]) + " " + esc(m[6] || "") + (m[7] ? ", <i>" + esc(m[7]) + "</i>" : "") : "",
         m ? (100 * m[1]).toFixed(1) + "% identity, E-value " + esc(m[4]) : "", m ? "residues " + m[2] + "-" + m[3] : "");
     }
+    if (d.fs !== undefined && d.fs !== null) {
+      var g = d.fs;
+      row("ProstT5 + Foldseek against AlphaFold Swiss-Prot", !!g, g ? uni(g[0]) + " " + esc(g[6] || "") + (g[7] ? ", <i>" + esc(g[7]) + "</i>" : "") : "",
+        g ? (100 * g[1]).toFixed(1) + "% identity, E-value " + esc(g[4]) : "", g ? "residues " + g[2] + "-" + g[3] : "");
+    }
     if (d.ips !== undefined && d.ips !== null) {
       var IPS_FEAT = { Coils: 1, MobiDBLite: 1, Phobius: 1, TMHMM: 1, AntiFam: 1 };
       if (d.ips === "not run") rows.push(["<b>InterProScan</b>", "<i>not run (over 5,000 aa)</i>", "", ""]);
@@ -111,12 +116,13 @@
     var h = box ? ["<h2>What the whole-proteome annotation found</h2><p class=\"lead\">" + esc(sentence) + "</p>",
       "<p class=\"note\">Programs run on the whole proteome (" + esc(id) + "), each protein's best hit: five by Biomni, kept at E-value 0.001 or below" +
       (d.mm !== undefined ? "; MMseqs2 against Swiss-Prot, kept at 0.001 or below" : "") +
+      (d.fs !== undefined ? "; Foldseek on shape letters (3Di) predicted from the sequence by ProstT5, against AlphaFold models of Swiss-Prot, kept at 0.001 or below" : "") +
       (d.ips !== undefined ? "; InterProScan 5.59 with all member databases" : "") +
       (d.km !== undefined ? "; kmerseek against all of Swiss-Prot, best of its settings, at E-value 10 or below" : "") +
       (d.uf ? "; and UniFIRE, which applies UniProt's annotation rules (ARBA, UniRule, PIRSR) to InterProScan's matches" : "") +
       ". The slider above does not change this table.</p>"] :
       ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
-      "<p class=\"note\">The best hit of each program. The Biomni tables do not say where on the protein a hit lies, so nothing is drawn along it" +
+      "<p class=\"note\">The best hit of each program. Nothing is drawn along the protein on this page; the last column gives the residues where a program reports them" +
       (d.uf ? "; UniFIRE gives positions only for the sites it predicts, listed in its table below." : ".") + "</p>"];
     h.push(table([["Program"], ["Best hit"], ["Score"], ["Where on your protein"]], rows));
     return box ? h : h.concat(card(r, d));
