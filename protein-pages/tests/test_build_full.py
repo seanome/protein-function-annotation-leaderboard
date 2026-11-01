@@ -85,11 +85,14 @@ def test_counts_match_the_tables(site):
     ann = tsv("botryllus_protein_annotations.tsv")
     assert s["swissprot_hit"] == sum(1 for r in ann if r["sp_acc"])
     assert s["pfam_domain"] == sum(1 for r in ann if r["pfam_domains"])
-    assert s["immune_candidates"] == len(tsv("botryllus_immune_genes.tsv"))
-    assert s["allorecognition_hit"] == len({f[0] for f in csv.reader(open(FULL / "botryllus_allorecognition_hits.tsv"), delimiter="\t")})
+    # The category set by a Fester or BHF hit is dropped (a search within Botryllus); its 53 proteins
+    # are in no other category, so they are no longer candidates
+    kept = [[c for c in build_full.split_list(r["categories"]) if c != "allorecognition"] for r in tsv("botryllus_immune_genes.tsv")]
+    assert s["immune_candidates"] == sum(1 for c in kept if c) == 2835 - 53
+    assert "allorecognition" not in s["immune_categories"] and "allorecognition_hit" not in s
     assert s["clusters"] == len({f[0] for f in csv.reader(open(FULL / "botryllus_mmseqs_clusters.tsv"), delimiter="\t")})
     assert sum(s["name_check"].values()) == s["total"]
-    want = Counter(c for r in tsv("botryllus_immune_genes.tsv") for c in build_full.split_list(r["categories"]))
+    want = Counter(c for cats in kept for c in cats)
     assert s["immune_categories"] == dict(want)
 
 

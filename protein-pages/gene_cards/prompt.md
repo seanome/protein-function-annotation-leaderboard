@@ -4,7 +4,7 @@ protein probably does and how far to trust that.
 
 For each protein you get an evidence sheet: its name from the genome's FASTA header, a name
 proposed by a new annotation, its best Swiss-Prot match, Pfam domains, immune-gene evidence,
-jackhmmer and Fester/BHF hits, a FANTASIA embedding prediction, MMseqs2's and kmerseek's best
+jackhmmer hits, a FANTASIA embedding prediction, MMseqs2's and kmerseek's best
 Swiss-Prot hits, InterProScan matches, UniFIRE's predictions, and its MMseqs2 cluster. Use
 only that sheet, plus what is generally known about the named proteins and domains. Do not
 invent experiments, positions, partners or numbers that are not on the sheet.

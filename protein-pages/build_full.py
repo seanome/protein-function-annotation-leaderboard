@@ -7,8 +7,6 @@ Reads, from the input folder (see full_inputs/README.md for where each file came
     botryllus_protein_annotations.tsv[.gz]   one row per protein: names, best Swiss-Prot hit, GO, Pfam
     botryllus_immune_genes.tsv                immune-gene candidates, their categories and evidence
     botryllus_jackhmmer_immune.tsv            jackhmmer hits of 20 immune seed proteins
-    botryllus_allorecognition_hits.tsv        DIAMOND hits to Fester and BHF reference proteins
-    allorecognition_references.tsv            NCBI titles of those reference proteins
     botryllus_mmseqs_clusters.tsv             MMseqs2 clusters (representative, member)
     proteome_lengths.tsv[.gz]                 each protein's length and the MD5 of its sequence
 
@@ -32,7 +30,6 @@ import csv
 import gzip
 import hashlib
 import json
-import re
 import shutil
 import sys
 import time
@@ -120,6 +117,26 @@ FOLDSEEK_MAX_E = 1e-3  # a Foldseek best hit is shown when its E-value is at mos
 UNIFIRE_MAX_AA = 5000  # longer proteins were not run through InterProScan and UniFIRE (botryllus-mhc PR 13)
 
 
+# Biomni also searched every protein against 95 Fester and 1 BHF protein, all from Botryllus itself
+# (botryllus_allorecognition_hits.tsv, allorecognition_references.tsv). Matches within the same
+# species are not shown, so those two files are not read, and the immune category those hits set
+# is dropped from the immune table.
+NOT_READ = {"botryllus_allorecognition_hits.tsv", "allorecognition_references.tsv"}
+DROPPED_CATEGORIES = {"allorecognition"}
+
+
+def without_dropped_categories(immune):
+    """The immune table without DROPPED_CATEGORIES and their evidence; a protein left with no
+    category is no longer an immune-gene candidate."""
+    out = {}
+    for pid, r in immune.items():
+        cats = [c for c in split_list(r["categories"]) if c not in DROPPED_CATEGORIES]
+        if cats:
+            ev = [e for e in r["evidence"].split(" | ") if e.partition(":")[0].strip() not in DROPPED_CATEGORIES]
+            out[pid] = dict(r, categories=";".join(cats), evidence=" | ".join(ev))
+    return out
+
+
 def load(folder):
     tsv = lambda name: list(csv.DictReader(opentext(inp(folder, name)), delimiter="\t"))
     v2 = inp(folder, "botryllus_protein_annotations_v2.tsv").exists()  # v2 adds the FANTASIA columns
@@ -130,17 +147,10 @@ def load(folder):
         sys.exit("botryllus_protein_annotations.tsv names a protein twice")
     if set(ids) != set(lengths):
         sys.exit("proteome_lengths.tsv and the annotation table name different proteins")
-    immune = {r["protein_id"]: r for r in tsv("botryllus_immune_genes_v2.tsv" if v2 else "botryllus_immune_genes.tsv")}
+    immune = without_dropped_categories({r["protein_id"]: r for r in tsv("botryllus_immune_genes_v2.tsv" if v2 else "botryllus_immune_genes.tsv")})
     jh = defaultdict(list)
     for r in tsv("botryllus_jackhmmer_immune.tsv"):
         jh[r["target"]].append([r["seed_family"], r["seed"], int(r["iteration"]), r["e_value"], r["score"]])
-    titles = {r["accession"]: re.sub(r"\s*\[Botryllus schlosseri\]$", "", r["title"])
-              for r in tsv("allorecognition_references.tsv")}
-    allo = defaultdict(list)
-    # No header; DIAMOND's qseqid sseqid pident length evalue bitscore qlen slen (the qlen column
-    # equals the FASTA length on every row, tests/test_build_full.py)
-    for f in csv.reader(opentext(inp(folder, "botryllus_allorecognition_hits.tsv")), delimiter="\t"):
-        allo[f[0]].append([f[1], titles.get(f[1], ""), float(f[2]), int(f[3]), f[4], float(f[5]), int(f[6]), int(f[7])])
     rep_of, members = {}, defaultdict(list)
     for f in csv.reader(opentext(inp(folder, "botryllus_mmseqs_clusters.tsv")), delimiter="\t"):
         rep_of[f[1]] = f[0]
@@ -148,7 +158,7 @@ def load(folder):
     missing = set(lengths) - set(rep_of)
     if missing:
         sys.exit("%d proteins have no row in botryllus_mmseqs_clusters.tsv, e.g. %s" % (len(missing), sorted(missing)[0]))
-    for k in (set(immune) | set(jh) | set(allo) | set(rep_of)) - set(lengths):
+    for k in (set(immune) | set(jh) | set(rep_of)) - set(lengths):
         sys.exit("%s is in a table but not in the proteome" % k)
     # Names fetched by gene_cards/fetch_names.py; optional, the pages show bare IDs without them
     uni = {r["accession"]: r for r in tsv("uniprot_names.tsv")} if inp(folder, "uniprot_names.tsv").exists() else {}
@@ -199,7 +209,7 @@ def load(folder):
                 acc = build.af_accession(r["target"])  # AF-P12345-F1-model_v6, AF-C3VPR6-2-F1-model_v6
                 fs[r["protein_id"]] = [acc, float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
                                        uni.get(acc, {}).get("protein_name", ""), uni.get(acc, {}).get("organism", "")]
-    return ann, lengths, immune, jh, allo, rep_of, members, uni, go, uf, km, ips, mm, fs
+    return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs
 
 
 def read_cards(paths):
@@ -224,7 +234,7 @@ def evidence_list(s):
 
 def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     t0 = time.time()
-    ann, lengths, immune, jh, allo, rep_of, members, uni, go, uf, km, ips, mm, fs = load(folder)
+    ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs = load(folder)
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -253,14 +263,13 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         mask = 0
         for c in split_list(im["categories"]) if im else []:
             mask |= 1 << cats.index(c)
-        al = sorted(allo.get(pid, []), key=lambda a: -a[5])
         rep = rep_of[pid]
         size = len(members[rep])
         pf = pfam_list(r["pfam_domains"])
         rows.append([pid, lengths[pid][0], r["existing_name"], r["proposed_name"], status_code[r["name_status"]],
                      r["sp_name"], r["sp_acc"], num(r["sp_pident"]), num(r["sp_qcov"]), r["sp_evalue"],
                      ", ".join(dict.fromkeys(n for _, n in pf)), mask,
-                     "%s, %.1f%%" % (al[0][1] or al[0][0], al[0][2]) if al else "", size, drawn_page.get(pid, "")])
+                     "", size, drawn_page.get(pid, "")])  # 12 is empty: it held the Fester or BHF match
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
         fa = None
@@ -281,7 +290,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
             uf=None if uf is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not uf.get(pid) else uf.get(pid, [])),
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
             sp_e=r["sp_evalue"], ev=evidence_list(im["evidence"]) if im else [],
-            jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), al=al, rep=rep,
+            jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), rep=rep,
             mem=[[m, name[m]] for m in mem[:MEMBERS_MAX]], more=max(0, len(mem) - MEMBERS_MAX))
 
     (out / "full").mkdir(parents=True, exist_ok=True)
@@ -319,7 +328,6 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         immune_candidates=sum(1 for r in rows if r[11]),
         jackhmmer_hit=sum(1 for pid in jh if pid in lengths),
         jackhmmer_not_immune=sum(1 for pid in jh if pid not in immune),
-        allorecognition_hit=sum(1 for r in rows if r[12]),
         in_cluster_of_2_or_more=sum(1 for r in rows if r[13] > 1),
         clusters=len(members),
         foldseek_hit=None if fs is None else len(fs),
@@ -329,7 +337,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
-    inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz"))
+    inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
     (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver))
     (out / "protein.html").write_text(protein_html(asset_ver))
     print("%d proteins, %d drawn, %d data files, %.1f s" % (n, summ["drawn"], N_SHARDS, time.time() - t0))
@@ -357,7 +365,6 @@ def index_html(s, cats, inputs, ver):
     nums = [("all", s["total"], "proteins"), ("sp", s["swissprot_hit"], "with a Swiss-Prot hit"),
             ("pfam", s["pfam_domain"], "with a Pfam domain"), ("none", s["neither"], "with neither"),
             ("immune", s["immune_candidates"], "immune-gene candidates"),
-            ("allo", s["allorecognition_hit"], "with a Fester or BHF hit"),
             ("drawn", s["drawn"], "with every program's hits drawn")]
     tiles = "".join('<button class="num" data-t="%s"><span class="big">%s</span><span>%s</span></button>' % (k, f(v), build.esc(t))
                     for k, v, t in nums)
@@ -366,7 +373,7 @@ def index_html(s, cats, inputs, ver):
     return head("Botryllus proteome annotations", ver) + """
 <header class="wide"><h1>Every <i>Botryllus schlosseri</i> protein, and what is known about it</h1>
 <p class="summary">%s proteins of the new genome's predicted proteome. For each: its best Swiss-Prot match, its Pfam domains,
-whether it looks like an immune gene, and its matches to the allorecognition proteins Fester and BHF.</p></header>
+and whether it looks like an immune gene.</p></header>
 <main class="wide">
 <section class="nums">%s</section>
 <p class="note">Click a number to list those proteins. %s pages draw every annotation program's hits along the protein
@@ -374,7 +381,7 @@ whether it looks like an immune gene, and its matches to the allorecognition pro
 <div class="twocol">
 <section><h2>Immune-gene candidates, by category</h2>
 <p class="note">%s proteins; one protein can be in several categories. A category comes from a Pfam domain, the gene
-name, an immune keyword or GO term of the best Swiss-Prot match, or a Fester or BHF hit; each protein page says which.
+name, or an immune keyword or GO term of the best Swiss-Prot match; each protein page says which.
 jackhmmer hits from immune seed proteins do not set a category: %s proteins have one and are in no category.
 Click a bar to list its proteins.</p>%s</section>
 <section><h2>Proposed name compared with the existing name</h2>
@@ -383,15 +390,15 @@ or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (
 </div>
 <h2>Proteins</h2>
 <div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off"
- placeholder="an ID, gene, protein name, Pfam domain or category, e.g. NLRC5, lectin, TIR, Fester"></div>
+ placeholder="an ID, gene, protein name, Pfam domain or category, e.g. NLRC5, lectin, TIR"></div>
 <p class="note">The search reads the ID, the existing and proposed names, the best Swiss-Prot match's name and accession,
-the Pfam domain names, the immune categories and the Fester or BHF match. Every word typed must appear.</p>
+the Pfam domain names and the immune categories. Every word typed must appear.</p>
 <p id="count" class="note"></p>
 <div class="tablewrap"><table id="t" class="full"><thead><tr>
 <th data-k="0" data-t="s">Protein</th><th data-k="1">Length (aa)</th><th data-k="2" data-t="s">Existing name</th>
 <th data-k="3" data-t="s">Proposed name</th><th data-k="5" data-t="s">Best Swiss-Prot match</th>
 <th data-k="7">Identity (%%)</th><th data-k="8">Coverage of your protein (%%)</th>
-<th data-k="10" data-t="s">Pfam domains</th><th>Immune categories</th><th data-k="12" data-t="s">Fester or BHF match (identity)</th>
+<th data-k="10" data-t="s">Pfam domains</th><th>Immune categories</th>
 <th data-k="13">Proteins in its MMseqs2 cluster</th><th>Drawn</th></tr></thead><tbody></tbody></table></div>
 <p><button id="more" hidden>Show 100 more</button></p>
 </main>

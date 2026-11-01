@@ -19,7 +19,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
-from build_full import inp, opentext, split_list  # noqa: E402
+from build_full import inp, opentext, split_list, without_dropped_categories  # noqa: E402
 
 # Proteins named in the PR discussions, always in the pilot so the answers can be checked by eye
 FIXED = ["FUN008084", "FUN009411", "FUN000002", "FUN035341", "FUN006619", "FUN040347"]
@@ -51,17 +51,14 @@ def kind(r, immune):
 
 def load(folder):
     ann = tsv(folder, "botryllus_protein_annotations_v2.tsv")
-    immune = {r["protein_id"]: r for r in tsv(folder, "botryllus_immune_genes_v2.tsv")}
+    # Without the Fester or BHF category: matches within Botryllus are not shown (build_full.NOT_READ)
+    immune = without_dropped_categories({r["protein_id"]: r for r in tsv(folder, "botryllus_immune_genes_v2.tsv")})
     uni = {r["accession"]: r for r in tsv(folder, "uniprot_names.tsv")}
     go = {r["go_id"]: r for r in tsv(folder, "go_names.tsv")}
     lengths = {r["protein_id"]: int(r["length"]) for r in tsv(folder, "proteome_lengths.tsv")}
-    refs = {r["accession"]: r["title"] for r in tsv(folder, "allorecognition_references.tsv")}
     jh = collections.defaultdict(list)
     for r in tsv(folder, "botryllus_jackhmmer_immune.tsv"):
         jh[r["target"]].append(r)
-    allo = collections.defaultdict(list)
-    for f in csv.reader(open(inp(folder, "botryllus_allorecognition_hits.tsv")), delimiter="\t"):
-        allo[f[0]].append(f)
     members = collections.defaultdict(list)
     rep_of = {}
     for f in csv.reader(open(inp(folder, "botryllus_mmseqs_clusters.tsv")), delimiter="\t"):
@@ -81,7 +78,7 @@ def load(folder):
         for f in csv.reader(opentext(inp(folder, "interproscan.tsv")), delimiter="\t"):
             ips[f[0]].append(f)
     return dict(ann=ann, by_id={r["protein_id"]: r for r in ann}, immune=immune, uni=uni, go=go,
-                lengths=lengths, refs=refs, jh=jh, allo=allo, members=members, rep_of=rep_of, km=km, uf=uf, mm=mm, ips=ips)
+                lengths=lengths, jh=jh, members=members, rep_of=rep_of, km=km, uf=uf, mm=mm, ips=ips)
 
 
 UF_TYPES = [("protein.recommendedName.fullName", "name"), ("comment.similarity", "family"),
@@ -163,10 +160,6 @@ def evidence(d, pid):
                 best[j["seed_family"]] = j
         out.append("jackhmmer hits from immune seed proteins (best per seed family): " + "; ".join(
             "%s (seed %s, round %s, E-value %s)" % (j["seed_family"], j["seed"], j["iteration"], j["e_value"]) for j in best.values()))
-    if d["allo"].get(pid):
-        top = sorted(d["allo"][pid], key=lambda f: -float(f[5]))[:3]
-        out.append("DIAMOND matches to Botryllus allorecognition reference proteins (Fester family and BHF): " + "; ".join(
-            "%s %s, %s%% identity over %s columns, E-value %s, reference %s aa" % (f[1], d["refs"].get(f[1], "?"), f[2], f[3], f[4], f[7]) for f in top))
     if r["fantasia_uniprot"]:
         gos = [g.split("|", 1)[1] for g in split_list(r["fantasia_go_terms"]) if "|" in g]
         out.append("FANTASIA (protein-language-model embedding, nearest experimentally annotated UniProt protein, no sequence alignment): "
