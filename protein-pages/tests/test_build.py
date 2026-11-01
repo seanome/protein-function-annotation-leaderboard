@@ -207,7 +207,7 @@ def test_site_from_test_data(tmp_path):
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
     summary = json.loads((out / "summary.json").read_text())
-    assert summary["total"] == 51 and summary["programs_run"] == 7  # hhsearch not run; Foldseek only as ProstT5 + Foldseek
+    assert summary["total"] == 51 and summary["programs_run"] == 8  # Foldseek only as ProstT5 + Foldseek
     r = subprocess.run([sys.executable, str(here / "tests" / "check_site.py"), str(out)], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
     # The BHF page has the hit search box and the folding note, and its page data carry what the

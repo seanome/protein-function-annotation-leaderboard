@@ -1688,7 +1688,7 @@ def main():
         if not p.exists():
             return (name, None, None)
         if p.is_dir():
-            files = sorted(p.glob("*.hhr"))
+            files = sorted(p.glob("*.hhr")) + sorted(p.glob("*.hhr.gz"))
             size = sum(f.stat().st_size for f in files)
             mt = max((f.stat().st_mtime for f in files), default=p.stat().st_mtime)
             return (name + "/ (%d .hhr files)" % len(files), size, datetime.datetime.fromtimestamp(mt).strftime("%Y-%m-%d %H:%M"))
@@ -1752,7 +1752,7 @@ def main():
             got, kmer_meta = parse_kmerseek(p)
         elif t["kind"] == "hhr":
             got = {}
-            for f in sorted(p.glob("*.hhr")):
+            for f in sorted(p.glob("*.hhr")) + sorted(p.glob("*.hhr.gz")):  # gzipped in the test set
                 q, hs = parse_hhr(f)
                 USED_TARGETS.update(h["target"] for h in hs if h["passes"])
                 got.setdefault(q or f.stem, []).extend(hs)
