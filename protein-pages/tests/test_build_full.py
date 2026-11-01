@@ -142,3 +142,18 @@ def test_unifire_on_the_pages(site):
     raw = [r for r in csv.DictReader(gzip.open(FULL / "unifire_predictions.tsv.gz", "rt"), delimiter="\t")
            if r["protein_id"] == "FUN000051.2"]
     assert raw and len(uf["FUN000051.2"]) == len(raw)
+
+
+def test_foldseek_on_the_pages(site):
+    """The best ProstT5 + Foldseek hit reaches its protein, kept at FOLDSEEK_MAX_E or below:
+    25,804 proteins, as in the Biomni report (v3); BHF (FUN008084, best E-value 0.06) has none."""
+    out, summ = site
+    fs = {}
+    for s in range(build_full.N_SHARDS):
+        for pid, d in read_js(out / "full" / ("%03d.js" % s), "window.FULL_SHARD=").items():
+            fs[pid] = d["fs"]
+    assert summ["foldseek_hit"] == sum(1 for v in fs.values() if v) == 25804
+    assert fs["FUN008084"] == 0
+    raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
+    pid = next(p for p, v in fs.items() if v)
+    assert raw[pid]["target"].split("-")[1] == fs[pid][0] and int(raw[pid]["qstart"]) == fs[pid][2]

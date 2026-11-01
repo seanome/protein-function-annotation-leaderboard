@@ -1,6 +1,7 @@
 """Fetch the names the gene cards need and the annotation tables leave out:
 the UniProt protein name, gene and organism of every Swiss-Prot match and every FANTASIA
-reference protein and best MMseqs2 hit, and the name of every GO term. Writes two files into full_inputs/:
+reference protein, best MMseqs2 hit and best Foldseek hit (its
+AlphaFold model's accession), and the name of every GO term. Writes two files into full_inputs/:
 
   uniprot_names.tsv.gz  accession, protein_name, gene, organism
   go_names.tsv.gz       go_id, name, namespace
@@ -35,7 +36,8 @@ def main(folder):
     folder = Path(folder)
     rows = list(csv.DictReader(gzip.open(folder / "botryllus_protein_annotations_v2.tsv.gz", "rt"), delimiter="\t"))
     accs = sorted({r["sp_acc"] for r in rows if r["sp_acc"]} | {r["fantasia_uniprot"] for r in rows if r["fantasia_uniprot"]}
-                  | {r["target"] for r in csv.DictReader(gzip.open(folder / "mmseqs2_best_per_protein.tsv.gz", "rt"), delimiter="\t")})
+                  | {r["target"] for r in csv.DictReader(gzip.open(folder / "mmseqs2_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
+                  | {r["target"].split("-")[1] for r in csv.DictReader(gzip.open(folder / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")})
     go = sorted({t for r in rows for t in r["go_terms"].split(";") if t}
                 | {t.split("|")[0] for r in rows for t in r["fantasia_go_terms"].split(";") if t}
                 | {r["value"] for r in csv.DictReader(gzip.open(folder / "unifire_predictions.tsv.gz", "rt"), delimiter="\t")
