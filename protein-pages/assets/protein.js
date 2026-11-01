@@ -152,7 +152,9 @@
     const cnt = new Int32Array(L + 1);
     for (let p = 1; p <= L; p++) { c += diff[p]; cnt[p] = c; if (c > max) max = c; }
     const op = (n) => (max <= 1 ? 1 : 0.15 + (0.85 * (n - 1)) / (max - 1));
-    let g = `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
+    // a see-through area over the whole row first, so a double-click anywhere on it unfolds the row
+    let g = `<rect class="dens" x="0" y="0" width="${PAGE.w}" height="${ROW_PAD + BOX_H + 18}" fill="transparent"><title>Double-click to draw every hit</title></rect>` +
+      `<line x1="0" y1="${ROW_PAD + BOX_H / 2}" x2="${PAGE.w}" y2="${ROW_PAD + BOX_H / 2}" stroke="#C8C8C8" stroke-width="1.5"/>`;
     for (let a = 1; a <= L;) {
       let b = a;
       while (b < L && cnt[b + 1] === cnt[a]) b++;
@@ -311,6 +313,17 @@
     if (f) f.focus();
   }
   tracksDiv.addEventListener("click", (e) => { const f = e.target.closest(".act"); if (f) act(f); });
+  // Double-click a program's name or its folded strip: unfold it and draw every hit.
+  tracksDiv.addEventListener("dblclick", (e) => {
+    if (e.target.closest(".act, .hit")) return;
+    const row = e.target.closest("g.row"), k = row && row.dataset.k;
+    if (!k || !FOLDABLE[k] || !PAGE.tracks[k]) return;
+    e.preventDefault();
+    const sel = window.getSelection && window.getSelection();
+    if (sel) sel.removeAllRanges();  // the double-click selected the name's text
+    expanded[k] = true;
+    if (folded[k]) toggleFold(k); else redraw();
+  });
   tracksDiv.addEventListener("keydown", (e) => {
     const f = e.target.closest(".act");
     if (f && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); act(f); }

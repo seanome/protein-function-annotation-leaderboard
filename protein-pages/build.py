@@ -1548,7 +1548,8 @@ def build_protein(task):
                    'and the best %d matching hits of each tool are drawn even when they are not among its best %d.</span></div>'
                    % (TOP_N, TOP_N) +
                    '<p class="note" id="foldnote">Under each program\'s name, "Show all" draws every hit, and "Fold into '
-                   'one row" draws one row shaded by how many hits cover each residue.</p>')
+                   'one row" draws one row shaded by how many hits cover each residue. Double-click a program\'s name or its '
+                   'folded row to draw every hit.</p>')
     toggle = ""
     if n_more:
         toggle = ('<button id="toggle" type="button">Show all %d hits (%d more)</button>'
