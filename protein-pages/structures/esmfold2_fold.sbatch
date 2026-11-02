@@ -19,10 +19,11 @@
 #SBATCH -t 1:00:00
 #SBATCH -o %x-%j.out
 set -euo pipefail
-ml purge
-ml python/3.12.1
-ENV=$GROUP_HOME/olgabot/envs/esmfold2-esm3.4.2
+D=$GROUP_HOME/olgabot/envs/esmfold2  # the container and venv esmfold2_install.sbatch made
+SIF=$D/pytorch-2.11.0-cuda12.8-cudnn9-runtime.sif
+ENV=$D/venv-esm3.4.2
 export HF_HOME=$SCRATCH/cache/hf HF_HUB_OFFLINE=1
-nvidia-smi --query-gpu=name,memory.total --format=csv
-"$ENV/bin/python" -c "import esm, torch; print('esm', esm.__version__, 'torch', torch.__version__)"
-"$ENV/bin/python" "$SLURM_SUBMIT_DIR/esmfold2_fold.py" "$@"  # Slurm runs a copy of this file, so not $0
+run() { apptainer exec --nv -B /home/groups,/scratch "$SIF" "$@"; }  # --nv passes the GPU in
+nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
+run "$ENV/bin/python" -c "import esm, torch; print('esm', esm.__version__, 'torch', torch.__version__, 'GPU', torch.cuda.is_available())"
+run "$ENV/bin/python" "$SLURM_SUBMIT_DIR/esmfold2_fold.py" "$@"  # Slurm runs a copy of this file, so not $0
