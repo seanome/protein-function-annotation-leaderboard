@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import build  # noqa: E402
 
 LEGEND = {c.lower() for c in [f["color"] for f in build.PROGRAMS.values()]
-          + [build.PROTEIN_LINE, build.AGREEMENT, build.EXPRESSION] + [p[2] for p in build.PLDDT]}
+          + [build.PROTEIN_LINE, build.AGREEMENT, build.EXPRESSION, build.HIGHLIGHT] + [p[2] for p in build.PLDDT]}
 NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "transparent", "#c3c2b7"}  # #c3c2b7: outline of a residue in neither class; transparent: a dashed box's click area
 
 
