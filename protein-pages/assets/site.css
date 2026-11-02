@@ -127,6 +127,8 @@ header.wide,main.wide{max-width:1380px}
    comes first, above the drawing */
 .withside:has(.legend){grid-template-columns:200px minmax(0,1fr)}
 .withside>.legend{order:-1}
+.withside:has(.legend)>section{grid-column:2}
+.withside:has(.legend)>.legend{grid-column:1;grid-row:1/span 9}
 .side.legend li{align-items:flex-start;margin:0 0 4px}
 .side.legend li>svg,.side.legend summary>svg{flex:0 0 12px;margin-top:3px}
 .side.legend details{width:100%}
@@ -235,3 +237,5 @@ table.hits tbody tr:hover{background:var(--hover,#f3f3f3)}
 .hit.dim{opacity:.18}
 
 .how{color:var(--muted);font-size:13px;font-weight:400}
+#mol{position:relative;width:100%;height:440px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.warn{border-left:3px solid #D55E00;padding:4px 10px;margin:8px 0;color:var(--ink)}

@@ -61,9 +61,9 @@
   function wire(root) {
     root.querySelectorAll(".hit").forEach((g) => {
       const h = H[+g.dataset.i];
-      g.addEventListener("mouseenter", (e) => { tip.innerHTML = tipHtml(h); tip.hidden = false; place(e); });
+      g.addEventListener("mouseenter", (e) => { tip.innerHTML = tipHtml(h); tip.hidden = false; place(e); if (window.STRUCT) STRUCT.show(h.q[0], h.q[1]); });
       g.addEventListener("mousemove", place);
-      g.addEventListener("mouseleave", () => { tip.hidden = true; });
+      g.addEventListener("mouseleave", () => { tip.hidden = true; if (window.STRUCT) STRUCT.show(null); });
       g.addEventListener("focus", () => {
         const b = g.getBoundingClientRect();
         tip.innerHTML = tipHtml(h); tip.hidden = false; place({ clientX: b.left, clientY: b.bottom });
@@ -352,6 +352,12 @@
     const tr = e.target.closest("tr[data-i]");
     if (tr) open(H[+tr.dataset.i]);
   });
+  // hovering a row shows that hit's residues on the 3-D structure, when the page has one
+  if (htDiv) htDiv.addEventListener("mouseover", (e) => {
+    const tr = e.target.closest("tr[data-i]");
+    if (window.STRUCT) STRUCT.show(tr ? H[+tr.dataset.i].q[0] : null, tr ? H[+tr.dataset.i].q[1] : null);
+  });
+  if (htDiv) htDiv.addEventListener("mouseleave", () => { if (window.STRUCT) STRUCT.show(null); });
   const currentMaxE = () => Math.pow(10, slider ? +slider.value : START);
   // Each program's name (mark, name and a small triangle) becomes a button that folds its row.
   function decorate() {

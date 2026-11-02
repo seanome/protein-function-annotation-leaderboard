@@ -86,7 +86,12 @@ From top to bottom:
      folder. The row "Foldseek, 3-D structures" is Foldseek on predicted 3-D structures;
      when only ProstT5 + Foldseek was run, it says so and points to that next row. Every hit
      up to the slider's E-value is drawn;
-   - if `plddt.tsv` is given, a strip coloured by AlphaFold's confidence scale;
+   - if `plddt.tsv` is given, a strip coloured by AlphaFold's confidence scale; a predicted
+     structure in `structures/<protein ID>.pdb` (or the ID's first part, `FUN008084.pdb`) fills
+     it from its B-factor column when `plddt.tsv` has none, and adds a "3-D structure" section:
+     ribbons drawn with 3Dmol.js 2.4.0 (loaded from cdnjs), coloured by that confidence;
+     hovering a hit box or table row shows the hit's residues in black. A model whose
+     neighbouring CA atoms are not about 3.8 angstrom apart gets a warning;
    - "Programs with a hit": at each residue, how many of the programs run (0 to M) have a
      counted hit over it.
 

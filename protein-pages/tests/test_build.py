@@ -227,6 +227,14 @@ def test_site_from_test_data(tmp_path):
     assert "not close enough to count" in html and "P32845" in html
     assert '<p class="summary" id="sent">5 of 12 programs report a hit.' in html
     assert "What the whole-proteome annotation found" not in html
+    # BHF has a predicted structure (structures/FUN008084.pdb): a viewer section, its text in its own
+    # file, a pLDDT strip from its B-factors (0 to 1 in the file, so times 100), and the warning that
+    # its coordinates are not a protein chain (neighbouring CA atoms a median 7.5 angstrom apart)
+    assert '<section id="structure">' in html and 'data-scale="100"' in html
+    assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists() and 'data-k="plddt"' in html
+    assert "not a physical protein chain" in html and "median 7.5" in html
+    st = build.read_structure(DATA / "structures" / "FUN008084.pdb")
+    assert st["n"] == 252 and st["scale"] == 100 and round(st["ca_ca"], 1) == 7.5
     # KIF11 has a Swiss-Prot hit, so FANTASIA was not run on it: 11 programs run
     kif = (out / "proteins" / "FUN016555_KIF11.html").read_text()
     assert '<p class="summary" id="sent">10 of the 11 programs run report a hit.' in kif

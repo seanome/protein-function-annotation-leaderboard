@@ -1034,6 +1034,40 @@ def whole_rows(b, W):
     return out
 
 
+def read_structure(path):
+    """A predicted structure (PDB format): its text, the per-residue confidence from the B-factor
+    column of each CA atom on a 0 to 100 scale (a file with values of at most 1, as ESMFold writes,
+    is multiplied by 100), and the median distance between neighbouring CA atoms, which is about
+    3.8 angstrom in any real protein chain."""
+    text = Path(path).read_text()
+    ca = {}
+    for line in text.splitlines():
+        if line.startswith("ATOM") and line[12:16].strip() == "CA":
+            ca[int(line[22:26])] = (float(line[30:38]), float(line[38:46]), float(line[46:54]), float(line[60:66]))
+    res = sorted(ca)
+    bs = [ca[r][3] for r in res]
+    scale = 100.0 if bs and max(bs) <= 1.0 else 1.0
+    gaps = sorted(math.dist(ca[a][:3], ca[b][:3]) for a, b in zip(res, res[1:]) if b == a + 1)
+    return dict(text=text, file=Path(path).name, plddt=[b * scale for b in bs], scale=scale, n=len(res),
+                ca_ca=gaps[len(gaps) // 2] if gaps else None)
+
+
+def structure_html(pid, st):
+    """The 3-D structure section of a drawn page (assets/structure.js draws it with 3Dmol.js)."""
+    mean = sum(st["plddt"]) / max(1, len(st["plddt"]))
+    warn = ""
+    if st["ca_ca"] is not None and not 3.6 <= st["ca_ca"] <= 4.0:
+        warn = ('<p class="warn">These coordinates are not a physical protein chain: neighbouring residues\' '
+                'central carbon atoms (CA) are a median %.1f &#8491; apart, where every real protein has 3.8 &#8491;. '
+                'The ribbons follow the file, so their shape cannot be trusted.</p>' % st["ca_ca"])
+    return ('<section id="structure"><h2>3-D structure (predicted)</h2>'
+            '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by the predictor\'s '
+            'confidence in each residue (pLDDT, 0 to 100; mean %.0f here), in the colours of the pLDDT strip in the drawing. '
+            'Hover a box in the drawing or a row of the table to show that hit\'s residues in black. Drag to turn the '
+            'structure; scroll to zoom.</p>%s<div id="mol" data-scale="%g"></div></section>'
+            % (esc(st["file"]), st["n"], mean, warn, st["scale"]))
+
+
 def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
     """The track area as two SVGs (names on the left, the drawing on the right), with the best
     TOP_N hits of each tool. Each row is a <g class="row"> in its own coordinates, so the
@@ -1225,7 +1259,7 @@ def legend_html(ctx, has_plddt, has_expr):
                      'prediction; drawn, never counted as a hit</span></li>' % dash)
     if has_plddt:
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
-        items.append('<li><span></span><span><b>pLDDT</b>, AlphaFold\'s confidence in each residue, 0 to 100: %s</span></li>' % sw)
+        items.append('<li><span></span><span><b>pLDDT</b>, the structure predictor\'s confidence in each residue, 0 to 100: %s</span></li>' % sw)
     step = svg_inline('<path d="M0,9 L4,9 L4,2 L8,2 L8,6 L12,6" fill="none" stroke="%s" stroke-width="1.4"/>' % AGREEMENT, 12, 10)
     items.append('<li>%s<span>programs with a hit at each residue, 0 to %d (the programs run), each program counted once</span></li>'
                  % (step, ctx["n_run"]))
@@ -1487,6 +1521,8 @@ def build_protein(task):
         by_track[t["key"]] = hs
 
     plddt = ctx["plddt"].get(pid)
+    st = ctx["structures"].get(pid)
+    struct = structure_html(pid, st) if st else ""
     W = int(max(640, min(L * 2.0, 3200)))
     px = W / L
     counted_by_track = {k: [h for h in v if counts(h) or h.get("feature")] for k, v in by_track.items()}
@@ -1563,11 +1599,11 @@ def build_protein(task):
                'immune seeds, FANTASIA, UniFIRE) come from Biomni\'s run on the whole proteome, which kept only each '
                'protein\'s best hit and not where it lies, so they name the hit with no box; each counts in the sentence '
                'at the top by its own cutoff, which the slider does not change.</p></section>'
-               '<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
+               '%s<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
                'and matching the search. Each program computes its own E-value and score, so compare them within one '
                'program. Score is in bits, except hhsearch\'s Prob (the chance, out of 100, that the hit is a true '
                'relative); identity is given by MMseqs2 and Foldseek only.</p><div id="ht"></div></section>'
-               % (slider, "".join(blocks), toggle))
+               % (slider, "".join(blocks), toggle, struct))
     out.append(legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
     out.append('</div>')
     out.append(expr)
@@ -1580,8 +1616,13 @@ def build_protein(task):
                                cat=PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in TRACKS},
         pfam_color=CATEGORIES["pfam"]["color"],
         tseq_files=ctx["n_shards"])
-    out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script></body></html>'
-               % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), ASSET_VER[0]))
+    mol = ""
+    if st:  # the structure's text in its own file, read by assets/structure.js after 3Dmol.js
+        (ctx["out"] / "proteins" / (safe(pid) + ".pdb.js")).write_text("window.PDB=%s;" % json.dumps(st["text"]))
+        mol = ('<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.0/3Dmol-min.js"></script>'
+               '<script src="%s.pdb.js"></script><script src="../assets/structure.js%s"></script>' % (safe(pid), ASSET_VER[0]))
+    out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script>%s</body></html>'
+               % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), ASSET_VER[0], mol))
     (ctx["out"] / "proteins" / (safe(pid) + ".html")).write_text("".join(out))
     (ctx["out"] / "proteins" / (safe(pid) + ".aln.js")).write_text(
         "window.ALN=%s;" % json.dumps({str(k): v for k, v in alns.items()}, separators=(",", ":")))
@@ -1911,6 +1952,18 @@ def main():
                 f = line.rstrip("\n").split("\t")
                 if len(f) >= 2 and f[0] in prots:
                     plddt[f[0]] = [float(x) for x in f[1].split(",") if x]
+    # Predicted structures, structures/<protein ID>.pdb (or the ID's first part, FUN008084.pdb);
+    # optional. Their confidence fills the pLDDT strip when plddt.tsv has none for that protein.
+    structures = {}
+    if (D / "structures").is_dir():
+        for pid in prots:
+            for name in dict.fromkeys([pid, pid.split("_")[0]]):
+                f = D / "structures" / (name + ".pdb")
+                if f.exists():
+                    structures[pid] = read_structure(f)
+                    if pid not in plddt:
+                        plddt[pid] = structures[pid]["plddt"]
+                    break
     expression = None
     if inp("expression.tsv").exists():
         head, rws = read_tsv_table(inp("expression.tsv"))
@@ -1933,7 +1986,7 @@ def main():
     CTX.update(dict(proteins=prots, prot_names=prot_names, hits=hits, target_ann=target_ann, target_src=target_src, names=names, entry_names=entry_names,
                     target_info=target_info,
                     targets=targets, run_status=run_status, settings=settings, databases=databases,
-                    leaderboard=leaderboard, plddt=plddt, expression=expression, alphabets=alphabets,
+                    leaderboard=leaderboard, plddt=plddt, structures=structures, expression=expression, alphabets=alphabets,
                     out=out, footer="", program_run=program_run, n_run=n_run,
                     biomni=biomni, n_whole=n_whole))
     CTX["footer"] = footer(inputs, built)
