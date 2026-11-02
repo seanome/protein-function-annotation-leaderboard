@@ -28,9 +28,10 @@ export APPTAINER_CACHEDIR=$SCRATCH/cache/apptainer APPTAINER_TMPDIR=$SCRATCH/cac
 mkdir -p "$D" "$APPTAINER_TMPDIR" "$PIP_CACHE_DIR" "$HF_HOME"
 [ -s "$SIF" ] || apptainer pull "$SIF" docker://pytorch/pytorch:2.11.0-cuda12.8-cudnn9-runtime
 run() { apptainer exec -B /home/groups,/scratch "$SIF" "$@"; }
-[ -x "$ENV/bin/python" ] || run python3 -m venv --system-site-packages "$ENV"
-run "$ENV/bin/pip" install --upgrade pip
-run "$ENV/bin/pip" install "esm==3.4.2"
+# The image has no ensurepip (job 50726351 failed on it), so the venv is made without pip and uses
+# the image's own pip, which installs into the venv it is run from.
+[ -f "$ENV/pyvenv.cfg" ] || run python3 -m venv --without-pip --system-site-packages "$ENV"
+run "$ENV/bin/python" -m pip install "esm==3.4.2"
 run "$ENV/bin/python" - <<'PY'
 import esm, torch, huggingface_hub
 from esm.models.esmfold2 import ESMFold2InputBuilder, EsmFold2Model  # the names esmfold2_fold.py uses
