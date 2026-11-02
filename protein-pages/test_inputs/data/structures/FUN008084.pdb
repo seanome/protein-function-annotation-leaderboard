@@ -1,4 +1,4 @@
-REMARK   1 ESMFOLD2 (ESM 3.4.2, BIOHUB/ESMFOLD2), SEED 0, 2026-11-02; PTM 0.25  
+REMARK   1 ESMFold2 (esm 3.4.2, biohub/ESMFold2), seed 0, 2026-11-02; pTM 0.25  
 ATOM      1  N   MET A   1     -25.568  45.858  -4.646  1.00 68.75           N  
 ATOM      2  CA  MET A   1     -26.244  45.029  -3.649  1.00 68.75           C  
 ATOM      3  C   MET A   1     -25.601  43.652  -3.652  1.00 68.75           C  

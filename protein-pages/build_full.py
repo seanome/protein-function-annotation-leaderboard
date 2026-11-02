@@ -391,12 +391,13 @@ or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (
 <h2>Proteins</h2>
 <div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off"
  placeholder="an ID, gene, protein name, Pfam domain or category, e.g. NLRC5, lectin, TIR"></div>
+<p class="note">"Swiss-Prot" on this page means the copy Biomni's DIAMOND searched: 533,805 proteins, release not recorded (release 2026_03 has 575,748, so not that one). The protein pages say which copy each other program searched.</p>
 <p class="note">The search reads the ID, the existing and proposed names, the best Swiss-Prot match's name and accession,
 the Pfam domain names and the immune categories. Every word typed must appear.</p>
 <p id="count" class="note"></p>
 <div class="tablewrap"><table id="t" class="full"><thead><tr>
 <th data-k="0" data-t="s">Protein</th><th data-k="1">Length (aa)</th><th data-k="2" data-t="s">Existing name</th>
-<th data-k="3" data-t="s">Proposed name</th><th data-k="5" data-t="s">Best Swiss-Prot match</th>
+<th data-k="3" data-t="s">Proposed name</th><th data-k="5" data-t="s">Best Swiss-Prot match (DIAMOND)</th>
 <th data-k="7">Identity (%%)</th><th data-k="8">Coverage of your protein (%%)</th>
 <th data-k="10" data-t="s">Pfam domains</th><th>Immune categories</th>
 <th data-k="13">Proteins in its MMseqs2 cluster</th><th>Drawn</th></tr></thead><tbody></tbody></table></div>

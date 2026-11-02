@@ -78,3 +78,16 @@ removed).
 
 No output exists on the FUN proteome for Foldseek on predicted 3-D structures, and the proteome has no predicted structures (`plddt.tsv`) or expression table.
 Those tracks read "not run". ProstT5 + Foldseek was run (`prostt5_foldseek.m8.gz` above).
+
+## Which Swiss-Prot each search used
+
+Checked on Sherlock, 2026-11-02, from the `reldate.txt` beside each database and by counting
+proteins. The pages show this in a table under each drawing (`SWISSPROT_USED` in `build.py`).
+
+| Programs | Database | Proteins | How it was checked |
+|---|---|---|---|
+| kmerseek; the sequences in `swissprot.fasta` | Swiss-Prot release 2026_03 (2 September 2026) | 575,748 | `botryllus-mhc-swissprot/db/swissprot/reldate.txt`; headers of `uniprot_sprot_2026_03.fasta.gz` counted |
+| MMseqs2 three rounds, phmmer, jackhmmer | `invertebrate-dark-set/reference/minus_Ascidiacea/reference.fasta`: Swiss-Prot without its 120 sea-squirt (Ascidiacea) proteins, built 2026-09-08 | 572,850 | 49 of its accessions are not in 2026_03, so it is an earlier release; the flat file it was built from has since been replaced by 2026_03, so which release is not recorded |
+| MMseqs2 one round | Swiss-Prot | not recorded | `botryllus_mmseqs2_sp.m8` came with no settings |
+| DIAMOND (Biomni) | Swiss-Prot | 533,805 | `full_inputs/biomni_report_v3.md`; release not recorded |
+| ProstT5 + Foldseek (Biomni) | AlphaFold models of Swiss-Prot | 570,421 | `full_inputs/biomni_report_v3.md` |
