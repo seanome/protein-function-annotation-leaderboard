@@ -1092,7 +1092,7 @@ def structure_html(pid, st):
             'strip, to colour those residues %s on the structure and the strip; the rest turns grey. Clicking a box or '
             'a row, or dragging across the strip, keeps the selection until you click the strip again. Point at the structure to see a residue\'s number and mark it on the strip. '
             'The viewer is Mol* (PDBe\'s build, the one the PDB and AlphaFold DB use): drag to turn, scroll to zoom, '
-            'and its panels (the icons at its top right) change the drawing style, colours and selections.%s</p>%s</section>'
+            'and the sliders button on its right edge opens the sequence and the Structure Tools panels (drawing style, colours, selections, measurements).%s</p>%s</section>'
             % (key, strip, st["scale"], n, HIGHLIGHT, esc(st["file"]), st["n"], mean, "magenta", made, warn))
 
 
