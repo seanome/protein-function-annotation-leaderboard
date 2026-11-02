@@ -30,7 +30,9 @@ mkdir -p "$D" "$APPTAINER_TMPDIR" "$PIP_CACHE_DIR" "$HF_HOME"
 run() { apptainer exec -B /home/groups,/scratch "$SIF" "$@"; }
 # The image has no ensurepip (job 50726351 failed on it), so the venv is made without pip and uses
 # the image's own pip, which installs into the venv it is run from.
-[ -f "$ENV/pyvenv.cfg" ] || run python3 -m venv --without-pip --system-site-packages "$ENV"
+# A venv that cannot see the image's packages (the failed one) is made again.
+grep -qs "include-system-site-packages = true" "$ENV/pyvenv.cfg" ||
+  run python3 -m venv --clear --without-pip --system-site-packages "$ENV"
 run "$ENV/bin/python" -m pip install "esm==3.4.2"
 run "$ENV/bin/python" - <<'PY'
 import esm, torch, huggingface_hub
