@@ -31,7 +31,7 @@
   let ready = false, want = null;
   viewer.render(el, {
     customData: { url, format: "pdb", binary: false },
-    bgColor: "white", sequencePanel: true, pdbeLink: false, reactive: true, hideStructure: ["water"],
+    bgColor: "white", sequencePanel: true, hideControls: true, pdbeLink: false, reactive: true, hideStructure: ["water"],
   });
   viewer.events.loadComplete.subscribe(() => { ready = true; paint(want); });
 
