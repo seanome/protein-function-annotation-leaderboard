@@ -232,10 +232,14 @@ def test_site_from_test_data(tmp_path):
     # file's REMARK line, and no warning, since neighbouring CA atoms are a median 3.8 angstrom apart
     assert '<section id="structure">' in html and 'data-scale="1"' in html
     assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists() and 'data-k="plddt"' in html
-    assert "ESMFOLD2 (ESM 3.4.2" in html and "not a physical protein chain" not in html
+    assert "ESMFold2 (esm 3.4.2" in html and "not a physical protein chain" not in html
     st = build.read_structure(DATA / "structures" / "FUN008084.pdb")
     assert st["n"] == 252 and st["scale"] == 1 and round(st["ca_ca"], 2) == 3.84
     assert round(sum(st["plddt"]) / 252, 1) == 76.7
+    # The table of which Swiss-Prot each program searched: kmerseek 2026_03, phmmer and jackhmmer an
+    # earlier release without sea squirts, DIAMOND's copy of 533,805
+    assert '<section id="swissprot">' in html and 'href="#swissprot"' in html
+    assert "Swiss-Prot release 2026_03" in html and "572,850" in html and "533,805" in html
     # A file whose CA atoms are twice as far apart, on a 0 to 1 confidence scale, gets the warning
     lines = []
     for l in st["text"].splitlines():

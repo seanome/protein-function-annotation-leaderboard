@@ -1227,6 +1227,41 @@ def page_head(title, depth):
             % (esc(title), CSS_LINKS, pre, ASSET_VER[0], hatch_defs()))
 
 
+# Which Swiss-Prot each search used: not the same release for every program, so each drawn page
+# shows this table under the drawing. Releases from the reldate.txt beside each database file and
+# protein counts from the files, both read on Sherlock 2026-11-02 (test_inputs/PROVENANCE.md).
+SWISSPROT_USED = [
+    (("kmerseek",), "Swiss-Prot release 2026_03", "all of it", "575,748"),
+    (("mmseqs2_3rounds", "phmmer", "jackhmmer"), "an earlier Swiss-Prot release: which one was not recorded "
+     "(49 of its proteins are not in 2026_03)", "without its 120 sea-squirt (Ascidiacea) proteins", "572,850"),
+    (("mmseqs2",), "Swiss-Prot, release not recorded with the hit table", "not recorded", "not recorded"),
+    (("diamond",), "Swiss-Prot, release not recorded by Biomni (release 2026_03 has 575,748 proteins, so "
+     "not that one)", "", "533,805"),
+    (("foldseek", "prostt5"), "AlphaFold's models of Swiss-Prot proteins (not a sequence release)",
+     "sea-squirt proteins kept", "570,421"),
+]
+
+
+def swissprot_html(ctx, whole):
+    """The table of which Swiss-Prot each program run on this page searched."""
+    names = {t["key"]: t["name"] for t in TRACKS if ctx["run_status"][t["key"]] != "not run"}
+    names.update({w[0]: w[1] for w in whole if w[4] and w[0] == "diamond"})
+    rows = []
+    for keys, what, part, n in SWISSPROT_USED:
+        progs = [names[k] for k in keys if k in names]
+        if progs:
+            rows.append("<tr><td>%s</td><td>%s</td><td>%s</td><td class=\"num\">%s</td></tr>"
+                        % (esc(", ".join(progs)), esc(what), esc(part or "all of it"), esc(n)))
+    if not rows:
+        return ""
+    return ('<section id="swissprot"><h2>Which Swiss-Prot each program searched</h2><p class="note">The programs did '
+            'not all search the same copy of Swiss-Prot, so a protein can be missing from one program\'s hits only '
+            'because it was not in that copy. Protein names, genes and species in the boxes and the table come from '
+            'Swiss-Prot 2026_03, or from UniProt\'s website on 2026-11-01 for proteins not in it, whatever copy was searched.</p><div class="tablewrap"><table><thead><tr>'
+            '<th>Program</th><th>Database searched</th><th>Part searched</th><th>Proteins</th></tr></thead><tbody>%s'
+            '</tbody></table></div></section>' % "".join(rows))
+
+
 def legend_html(ctx, has_plddt, has_expr):
     """The legend, in a narrow column left of the drawing (above it on a phone), so the reader
     meets the key before the marks: one line per tool, its mark then its name. The rule for a
@@ -1272,7 +1307,8 @@ def legend_html(ctx, has_plddt, has_expr):
         bar = svg_inline('<rect x="0.5" y="2.5" width="11" height="5" fill="none" stroke="%s"/>' % EXPRESSION, 12, 10)
         items.append('<li>%s<span>expression of this protein\'s gene in each sample, from expression.tsv</span></li>' % bar)
     return ('<aside class="side legend"><h2>Legend</h2>%s<p class="note">Click a tool for its setting, database '
-            'and what makes a hit.</p><ul>%s</ul></aside>' % (kind_key(), "".join(items)))
+            'and what makes a hit. The programs searched different copies of Swiss-Prot: '
+            '<a href="#swissprot">which one each searched</a>.</p><ul>%s</ul></aside>' % (kind_key(), "".join(items)))
 
 
 def of_programs(m, full=8):
@@ -1604,11 +1640,11 @@ def build_protein(task):
                'immune seeds, FANTASIA, UniFIRE) come from Biomni\'s run on the whole proteome, which kept only each '
                'protein\'s best hit and not where it lies, so they name the hit with no box; each counts in the sentence '
                'at the top by its own cutoff, which the slider does not change.</p></section>'
-               '%s<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
+               '%s%s<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
                'and matching the search. Each program computes its own E-value and score, so compare them within one '
                'program. Score is in bits, except hhsearch\'s Prob (the chance, out of 100, that the hit is a true '
                'relative); identity is given by MMseqs2 and Foldseek only.</p><div id="ht"></div></section>'
-               % (slider, "".join(blocks), toggle, struct))
+               % (slider, "".join(blocks), toggle, swissprot_html(ctx, whole), struct))
     out.append(legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
     out.append('</div>')
     out.append(expr)
