@@ -136,9 +136,10 @@
   let words = [];
   const matches = (i) => words.every((w) => hay[i].includes(w));
   // Folded programs: one row shaded by how many hits cover each residue. Remembered per program.
-  const folded = {};
-  const FOLD_KEY = "protein-pages-folded";
-  try { Object.assign(folded, JSON.parse(localStorage.getItem(FOLD_KEY) || "{}")); } catch (e) { /* no storage: start unfolded */ }
+  // A row with more than FOLD_OVER hits at the slider's E-value starts folded; a click on its name
+  // folds or unfolds it for the rest of this visit (folded[k] true or false). foldNow: as drawn now.
+  const FOLD_OVER = 100;
+  const folded = {}, foldNow = {};
   // A program can be folded when it has at least one hit (feature predictions do not count).
   const FOLDABLE = {};
   H.forEach((h) => { if (!h.x) FOLDABLE[h.k] = true; });
@@ -202,10 +203,10 @@
         if (!all.length) {
           rg.innerHTML = (sep ? sep.outerHTML : "") + `<text x="4" y="${ROW_PAD + 11}" class="nh">no hit with E-value at most ${fmtE(Math.round(Math.log10(maxE)))}</text>`;
           hgt = ROW_PAD + 22;
-        } else if (folded[k] && kept.length) {
+        } else if ((foldNow[k] = k in folded ? folded[k] : kept.length > FOLD_OVER) && kept.length) {
           rg.innerHTML = (sep ? sep.outerHTML : "") + densitySvg(words.length ? kept.filter(matches) : kept, PAGE.tracks[k]);
           hgt = ROW_PAD + BOX_H + 22;
-          leftLines.push([`${hits(kept.length)}, folded into one row`, ""]);
+          leftLines.push([`${hits(kept.length)}, folded`, ""]);
         } else {
           const [place, nLanes] = placeLabels(shown.map((i) => H[i]));
           const parts = shown.map((i, n) => boxSvg(H[i], i, ...place[n], words.length > 0 && !matches(i)));
@@ -360,11 +361,11 @@
       const g = document.createElementNS(SVGNS, "g");
       g.setAttribute("class", "fold"); g.setAttribute("role", "button"); g.setAttribute("tabindex", "0");
       g.dataset.k = k;
-      g.setAttribute("aria-expanded", folded[k] ? "false" : "true");
+      g.setAttribute("aria-expanded", foldNow[k] ? "false" : "true");
       const name = PAGE.tracks[k].name;
-      g.setAttribute("aria-label", folded[k] ? `${name}: show each hit again` : `${name}: fold its hits into one row`);
+      g.setAttribute("aria-label", foldNow[k] ? `${name}: show each hit again` : `${name}: fold its hits into one row`);
       const tt = document.createElementNS(SVGNS, "title");
-      tt.textContent = folded[k] ? "Click to show each hit again" : "Click to fold these hits into one row";
+      tt.textContent = foldNow[k] ? "Click to show each hit again" : "Click to fold these hits into one row";
       const mark = t.previousElementSibling;
       g.appendChild(tt);
       if (mark && mark.tagName === "g") g.appendChild(mark);
@@ -374,7 +375,7 @@
       const x = +t.getAttribute("x") + t.getComputedTextLength() + 6, y = +t.getAttribute("y") - 5;
       const tri = document.createElementNS(SVGNS, "path");
       tri.setAttribute("class", "tri");
-      tri.setAttribute("d", folded[k] ? `M${x},${y - 5}l7,5l-7,5z` : `M${x},${y - 3}l9,0l-4.5,7z`);
+      tri.setAttribute("d", foldNow[k] ? `M${x},${y - 5}l7,5l-7,5z` : `M${x},${y - 3}l9,0l-4.5,7z`);
       g.appendChild(tri);
       const area = document.createElementNS(SVGNS, "rect");  // one click target over mark, name and triangle
       area.setAttribute("x", 0); area.setAttribute("y", y - 9); area.setAttribute("width", x + 12); area.setAttribute("height", 18);
@@ -383,9 +384,7 @@
     });
   }
   function toggleFold(k) {
-    folded[k] = !folded[k];
-    if (!folded[k]) delete folded[k];
-    try { localStorage.setItem(FOLD_KEY, JSON.stringify(folded)); } catch (e) { /* no storage: fold for this visit only */ }
+    folded[k] = !foldNow[k];
     redraw();
   }
   // Click a program's name (or its triangle) to fold or unfold its row; click a folded row to unfold it.
@@ -393,7 +392,7 @@
     const f = e.target.closest(".fold");
     if (f) { toggleFold(f.dataset.k); const g = tracksDiv.querySelector(`.fold[data-k="${f.dataset.k}"]`); if (g) g.focus(); return; }
     const d = e.target.closest(".dens"), row = d && d.closest("g.row");
-    if (row && folded[row.dataset.k]) toggleFold(row.dataset.k);
+    if (row && foldNow[row.dataset.k]) toggleFold(row.dataset.k);
   });
   tracksDiv.addEventListener("keydown", (e) => {
     const f = e.target.closest(".fold");
