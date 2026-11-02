@@ -195,6 +195,13 @@ def fnum(x):
         return None
 
 
+def fmt_e_kmerseek(e, raw):
+    """kmerseek writes E-values with 16 digits; two significant figures, as hmmscan prints."""
+    if e is None or e == 0 or e == float("inf"):
+        return raw
+    return "%.2g" % e
+
+
 def hit(track, q0, q1, target, t0, t1, evalue, scores, passes, aln=None):
     return dict(track=track, q0=int(q0), q1=int(q1), target=target, t0=t0, t1=t1,
                 evalue=evalue, scores=scores, passes=passes, aln=aln)
@@ -526,6 +533,7 @@ def parse_kmerseek(path):
         cqs, cqe = pick("query_start", "region_start"), pick("query_end", "region_end")
         cts, cte = pick("target_start"), pick("target_end")
         ce = pick("region_evalue")
+        cb = "region_ka_bits" if "region_ka_bits" in col else None
         go_cols = [c for c in head if re.search(r"(^|_)go($|_)|pfam2go", c, re.I)]
         meta["go_cols"] = go_cols
         meta["moltype"] = set()
@@ -533,7 +541,10 @@ def parse_kmerseek(path):
         for f in rd:
             d = dict(zip(head, f))
             e = fnum(d[ce])
-            sc = [(ce, d[ce])]
+            sc = [(ce, fmt_e_kmerseek(e, d[ce]))]
+            if cb:  # 0 bits means no extension, so no Karlin-Altschul score: left blank
+                b = fnum(d[cb])
+                sc.append((cb, "%.1f" % b if b else ""))
             for g in go_cols:
                 sc.append((g, d[g] or "none"))
             if not go_cols:

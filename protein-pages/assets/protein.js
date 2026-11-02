@@ -297,6 +297,10 @@
     if (k === "mmseqs2" || k === "mmseqs2_3rounds" || k === "prostt5") return [num(h.s[2]), h.s[2] + " bits"];
     if (k === "phmmer" || k === "jackhmmer" || k === "hmmscan") return [num(h.s[1]), h.s[1] + " bits"];
     if (k === "hhsearch") return [num(h.s[0]), "Prob " + h.s[0]];
+    if (k === "kmerseek") {  // Karlin-Altschul bits; blank when the search ran without extension
+      const n = (PAGE.names[k] || []).indexOf("region_ka_bits"), v = n < 0 ? "" : h.s[n];
+      return v ? [num(v), v + " bits"] : [null, ""];
+    }
     return [null, ""];
   }
   function identOf(h) {
