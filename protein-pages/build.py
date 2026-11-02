@@ -1038,8 +1038,10 @@ def read_structure(path):
     """A predicted structure (PDB format): its text, the per-residue confidence from the B-factor
     column of each CA atom on a 0 to 100 scale (a file with values of at most 1, as ESMFold writes,
     is multiplied by 100), and the median distance between neighbouring CA atoms, which is about
-    3.8 angstrom in any real protein chain."""
+    3.8 angstrom in any real protein chain. A first `REMARK   1` line names the predictor; it is
+    shown on the page."""
     text = Path(path).read_text()
+    made = next((l[11:].strip() for l in text.splitlines() if l.startswith("REMARK   1 ")), "")
     ca = {}
     for line in text.splitlines():
         if line.startswith("ATOM") and line[12:16].strip() == "CA":
@@ -1048,7 +1050,7 @@ def read_structure(path):
     bs = [ca[r][3] for r in res]
     scale = 100.0 if bs and max(bs) <= 1.0 else 1.0
     gaps = sorted(math.dist(ca[a][:3], ca[b][:3]) for a, b in zip(res, res[1:]) if b == a + 1)
-    return dict(text=text, file=Path(path).name, plddt=[b * scale for b in bs], scale=scale, n=len(res),
+    return dict(text=text, file=Path(path).name, made=made, plddt=[b * scale for b in bs], scale=scale, n=len(res),
                 ca_ca=gaps[len(gaps) // 2] if gaps else None)
 
 
@@ -1060,12 +1062,15 @@ def structure_html(pid, st):
         warn = ('<p class="warn">These coordinates are not a physical protein chain: neighbouring residues\' '
                 'central carbon atoms (CA) are a median %.1f &#8491; apart, where every real protein has 3.8 &#8491;. '
                 'The ribbons follow the file, so their shape cannot be trusted.</p>' % st["ca_ca"])
+    made = (' The file says how it was made: <span class="mono">%s</span>. pTM, where given, is the predictor\'s '
+            'confidence in the overall fold, 0 to 1; below 0.5 the arrangement of the parts is a guess even where each '
+            'part is confident.' % esc(st["made"])) if st.get("made") else ""
     return ('<section id="structure"><h2>3-D structure (predicted)</h2>'
             '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by the predictor\'s '
             'confidence in each residue (pLDDT, 0 to 100; mean %.0f here), in the colours of the pLDDT strip in the drawing. '
             'Hover a box in the drawing or a row of the table to show that hit\'s residues in black. Drag to turn the '
-            'structure; scroll to zoom.</p>%s<div id="mol" data-scale="%g"></div></section>'
-            % (esc(st["file"]), st["n"], mean, warn, st["scale"]))
+            'structure; scroll to zoom.%s</p>%s<div id="mol" data-scale="%g"></div></section>'
+            % (esc(st["file"]), st["n"], mean, made, warn, st["scale"]))
 
 
 def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
