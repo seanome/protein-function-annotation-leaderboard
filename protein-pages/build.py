@@ -1688,7 +1688,7 @@ def build_protein(task):
     mol = ""
     if st:  # the structure's text in its own file, read by assets/structure.js after Mol* (PDBe's pdbe-molstar)
         (ctx["out"] / "proteins" / (safe(pid) + ".pdb.js")).write_text("window.PDB=%s;" % json.dumps(st["text"]))
-        mol = ('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.12.0/build/pdbe-molstar-light.css">'
+        mol = ('<link rel="stylesheet" href="../assets/pdbe-molstar-light-3.12.0.css">'  # a copy: published pages take stylesheets only from their own files
                '<script src="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.12.0/build/pdbe-molstar-plugin.js"></script>'
                '<script src="%s.pdb.js"></script><script src="../assets/structure.js%s"></script>' % (safe(pid), ASSET_VER[0]))
     out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script>%s</body></html>'

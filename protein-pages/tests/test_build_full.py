@@ -161,3 +161,10 @@ def test_foldseek_on_the_pages(site):
     raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
     pid = next(p for p, v in fs.items() if v)
     assert build.af_accession(raw[pid]["target"]) == fs[pid][0] and int(raw[pid]["qstart"]) == fs[pid][2]
+
+
+def test_known_proteins_link_only_when_drawn():
+    page = {"FUN008084": "proteins/FUN008084_FUN008084.html"}
+    html = build_full.known_html(page)
+    assert 'href="proteins/FUN008084_FUN008084.html"' in html and "BHF" in html
+    assert build_full.known_html({}) == ""

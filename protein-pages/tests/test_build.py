@@ -239,6 +239,9 @@ def test_site_from_test_data(tmp_path):
     assert html.index('id="pstrip"') < html.index('id="mol"') < html.index('<div id="ht">')
     assert html.index('<section id="structure">') < html.index("Every hit, in a table") < html.index('<section id="swissprot">')
     assert "ESMFold2 (esm 3.4.2" in html and "not a physical protein chain" not in html
+    # Published pages take stylesheets only from their own files (and Google Fonts): Mol*'s is a copy
+    assert not re.search(r'<link rel="stylesheet" href="https?://(?!fonts\.googleapis)', html)
+    assert (out / "assets" / "pdbe-molstar-light-3.12.0.css").exists()
     st = build.read_structure(DATA / "structures" / "FUN008084.pdb")
     assert st["n"] == 252 and st["scale"] == 1 and round(st["ca_ca"], 2) == 3.84
     assert round(sum(st["plddt"]) / 252, 1) == 76.7
