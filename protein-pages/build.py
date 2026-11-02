@@ -1546,8 +1546,8 @@ def build_protein(task):
                    '<span class="note">Looks through the matched protein\'s name, gene, accession, species, Pfam '
                    'families and GO terms. Every word typed must appear. Hits that do not match are drawn faint, '
                    'and the table under the drawing lists only the matching ones.</span></div>' +
-                   '<p class="note" id="foldnote">Click a program\'s name to fold its hits into one row shaded by how many '
-                   'hits cover each residue; click the name or the folded row again to see each hit.</p>')
+                   '<p class="note" id="foldnote">A program with more than 100 hits starts folded into one row, shaded by '
+                   'how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold any row.</p>')
     toggle = ""
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.

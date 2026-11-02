@@ -98,8 +98,8 @@ From top to bottom:
    Clicking a tool's name or its triangle (or Enter or Space on it) folds its row into one
    strip: at each residue, the strip is darker the more of that tool's hits cover it, in the
    tool's colour, with the highest count written at the right end ("up to 12 hits on one
-   residue"). Clicking the name or the strip again shows each hit. The browser remembers which
-   tools are folded, for every protein page.
+   residue"). Clicking the name or the strip again shows each hit. A tool with more than 100 hits
+   at the slider's E-value starts folded; a click keeps its choice until the page is left.
 
    Under the drawing, "Every hit, in a table" lists the same hits with their E-value, score
    (bits, or hhsearch's Prob), identity where the program gives it, and position. Clicking a
