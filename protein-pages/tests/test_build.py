@@ -216,7 +216,7 @@ def test_site_from_test_data(tmp_path):
     import re
     html = (out / "proteins" / "FUN008084_FUN008084.html").read_text()
     assert '<input id="hq" type="search"' in html and 'id="hqn"' in html
-    assert "A program with more than 100 hits starts folded into one row, shaded by how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold any row." in html
+    assert "Every program starts folded into one row, shaded by how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold it again." in html
     assert '<div id="ht"></div>' in html
     page = json.loads(re.search(r"const PAGE=(.*?);</script>", html).group(1).replace("<\\/", "</"))
     rrp36 = [h for h in page["hits"] if "rrp36" in " ".join(str(h.get(f) or "") for f in "ltngo").lower()]
