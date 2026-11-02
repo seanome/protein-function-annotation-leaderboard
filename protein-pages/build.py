@@ -1058,7 +1058,7 @@ HIGHLIGHT = "#E6007E"  # residues pointed at or dragged across: drawing, pLDDT s
 
 
 def structure_html(pid, st):
-    """The 3-D structure section of a drawn page (assets/structure.js draws it with 3Dmol.js): a key,
+    """The 3-D structure section of a drawn page (assets/structure.js draws it in Mol*, PDBe's build, with Mol*'s own controls): a key,
     the pLDDT strip along the protein right above the structure, the structure, then the text.
     Pointing at a hit, or dragging across the strip, colours those residues on the structure."""
     mean = sum(st["plddt"]) / max(1, len(st["plddt"]))
@@ -1074,7 +1074,8 @@ def structure_html(pid, st):
     sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
     key = ('<p class="note skey"><b>pLDDT</b>, the predictor\'s confidence in each residue: %s'
            '<span class="sw" style="background:%s"></span>residues you point at or select. The strip runs from residue 1 '
-           '(left) to %d (right); drag across it, or click a box in the drawing, to select residues.</p>' % (sw, HIGHLIGHT, n))
+           '(left) to %d (right); drag across it, or click a box in the drawing, to select residues. '
+           '<b id="molsel" aria-live="polite"></b></p>' % (sw, HIGHLIGHT, n))
     rects = []
     for i, v in enumerate(st["plddt"]):
         c = next((col for lo, hi, col, _ in PLDDT if lo <= v < hi), PLDDT[-1][2])
@@ -1085,12 +1086,13 @@ def structure_html(pid, st):
              '<rect id="pbrush" x="0" y="0" width="0" height="10" fill="none" stroke="%s" stroke-width="2.5" '
              'vector-effect="non-scaling-stroke"/></svg>' % (n, n, "".join(rects), HIGHLIGHT))
     return ('<section id="structure"><h2>3-D structure (predicted)</h2>%s%s<div id="mol" data-scale="%g" data-n="%d" '
-            'data-hl="%s"><div id="molsel" hidden></div></div>'
+            'data-hl="%s"></div>'
             '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by pLDDT as in the '
             'strip above them (mean %.0f here). Point at a box in the drawing or a row of the table, or drag across the '
             'strip, to colour those residues %s on the structure and the strip; the rest turns grey. Clicking a box or '
-            'a row, or dragging across the strip, keeps the selection until you click the strip again. Point at the structure to see a residue\'s number. Drag '
-            'to turn the structure; scroll to zoom.%s</p>%s</section>'
+            'a row, or dragging across the strip, keeps the selection until you click the strip again. Point at the structure to see a residue\'s number and mark it on the strip. '
+            'The viewer is Mol* (PDBe\'s build, the one the PDB and AlphaFold DB use): drag to turn, scroll to zoom, '
+            'and its panels (the icons at its top right) change the drawing style, colours and selections.%s</p>%s</section>'
             % (key, strip, st["scale"], n, HIGHLIGHT, esc(st["file"]), st["n"], mean, "magenta", made, warn))
 
 
@@ -1649,8 +1651,8 @@ def build_protein(task):
                    '<span class="note">Looks through the matched protein\'s name, gene, accession, species, Pfam '
                    'families and GO terms. Every word typed must appear. Hits that do not match are drawn faint, '
                    'and the table under the drawing lists only the matching ones.</span></div>' +
-                   '<p class="note" id="foldnote">A program with more than 100 hits starts folded into one row, shaded by '
-                   'how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold any row.</p>')
+                   '<p class="note" id="foldnote">Every program starts folded into one row, shaded by how many hits cover each '
+                   'residue. Click its name or the folded row to see each hit; click a name to fold it again.</p>')
     toggle = ""
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
@@ -1684,9 +1686,10 @@ def build_protein(task):
         pfam_color=CATEGORIES["pfam"]["color"],
         tseq_files=ctx["n_shards"])
     mol = ""
-    if st:  # the structure's text in its own file, read by assets/structure.js after 3Dmol.js
+    if st:  # the structure's text in its own file, read by assets/structure.js after Mol* (PDBe's pdbe-molstar)
         (ctx["out"] / "proteins" / (safe(pid) + ".pdb.js")).write_text("window.PDB=%s;" % json.dumps(st["text"]))
-        mol = ('<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.0/3Dmol-min.js"></script>'
+        mol = ('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.12.0/build/pdbe-molstar-light.css">'
+               '<script src="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.12.0/build/pdbe-molstar-plugin.js"></script>'
                '<script src="%s.pdb.js"></script><script src="../assets/structure.js%s"></script>' % (safe(pid), ASSET_VER[0]))
     out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script>%s</body></html>'
                % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), ASSET_VER[0], mol))

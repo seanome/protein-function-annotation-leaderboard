@@ -136,9 +136,10 @@
   let words = [];
   const matches = (i) => words.every((w) => hay[i].includes(w));
   // Folded programs: one row shaded by how many hits cover each residue. Remembered per program.
-  // A row with more than FOLD_OVER hits at the slider's E-value starts folded; a click on its name
-  // folds or unfolds it for the rest of this visit (folded[k] true or false). foldNow: as drawn now.
-  const FOLD_OVER = 100;
+  // Every row with a hit at the slider's E-value starts folded (more than FOLD_OVER hits; 0 folds
+  // them all); a click on its name folds or unfolds it for the rest of this visit (folded[k] true or
+  // false). foldNow: as drawn now.
+  const FOLD_OVER = 0;
   const folded = {}, foldNow = {};
   // A program can be folded when it has at least one hit (feature predictions do not count).
   const FOLDABLE = {};
