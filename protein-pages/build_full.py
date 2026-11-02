@@ -338,7 +338,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
     inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
-    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver))
+    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver, known_html(drawn_page)))
     (out / "protein.html").write_text(protein_html(asset_ver))
     print("%d proteins, %d drawn, %d data files, %.1f s" % (n, summ["drawn"], N_SHARDS, time.time() - t0))
     return summ
@@ -360,7 +360,19 @@ def bars(items, total, key):
     return '<div class="bars">%s</div>' % rows
 
 
-def index_html(s, cats, inputs, ver):
+# Proteins the lab already knows, linked at the top of the index when they have a drawn page:
+# (protein ID, short name, full name)
+KNOWN = [("FUN008084", "BHF", "Botryllus histocompatibility factor")]
+
+
+def known_html(drawn_page):
+    links = ['<a class="known" href="%s"><b>%s</b> %s <span class="mono">%s</span></a>'
+             % (build.esc(drawn_page[pid]), build.esc(short), build.esc(full), build.esc(pid))
+             for pid, short, full in KNOWN if pid in drawn_page]
+    return '<p class="knownrow">Go straight to: %s</p>' % " ".join(links) if links else ""
+
+
+def index_html(s, cats, inputs, ver, known=""):
     f = "{:,}".format
     nums = [("all", s["total"], "proteins"), ("sp", s["swissprot_hit"], "with a Swiss-Prot hit"),
             ("pfam", s["pfam_domain"], "with a Pfam domain"), ("none", s["neither"], "with neither"),
@@ -373,7 +385,7 @@ def index_html(s, cats, inputs, ver):
     return head("Botryllus proteome annotations", ver) + """
 <header class="wide"><h1>Every <i>Botryllus schlosseri</i> protein, and what is known about it</h1>
 <p class="summary">%s proteins of the new genome's predicted proteome. For each: its best Swiss-Prot match, its Pfam domains,
-and whether it looks like an immune gene.</p></header>
+and whether it looks like an immune gene.</p>%s</header>
 <main class="wide">
 <section class="nums">%s</section>
 <p class="note">Click a number to list those proteins. %s pages draw every annotation program's hits along the protein
@@ -407,7 +419,7 @@ the Pfam domain names and the immune categories. Every word typed must appear.</
 (full_inputs/README.md in the repository says how each was made). Identity and coverage are DIAMOND's, against
 Swiss-Prot. No tool was run to make these pages.</p></footer>
 <script src="full/rows.js%s"></script><script src="assets/full.js%s"></script></body></html>
-""" % (f(s["total"]), tiles, f(s["drawn_pages"]), f(s["drawn"]), f(s["immune_candidates"]), f(s["jackhmmer_not_immune"]), cat_bars, chk_bars,
+""" % (f(s["total"]), known, tiles, f(s["drawn_pages"]), f(s["drawn"]), f(s["immune_candidates"]), f(s["jackhmmer_not_immune"]), cat_bars, chk_bars,
        build.esc(", ".join(inputs)), ver, ver)
 
 
