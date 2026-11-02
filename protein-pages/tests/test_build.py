@@ -3,6 +3,7 @@
 The test set has no hhsearch or InterProScan output, so their parsers are checked here on
 files written by hand in each tool's documented layout. Run with: python -m pytest tests/
 """
+import re
 import sys
 from pathlib import Path
 
@@ -231,7 +232,12 @@ def test_site_from_test_data(tmp_path):
     # its own file, a pLDDT strip from its B-factors (already 0 to 100), the predictor named from the
     # file's REMARK line, and no warning, since neighbouring CA atoms are a median 3.8 angstrom apart
     assert '<section id="structure">' in html and 'data-scale="1"' in html
-    assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists() and 'data-k="plddt"' in html
+    assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists()
+    # The pLDDT strip sits right above the structure, with nothing between them, and not in the
+    # drawing; the structure comes right after the drawing, before the hit table
+    assert 'data-k="plddt"' not in html and re.search(r'</svg><div id="mol"', html)
+    assert html.index('id="pstrip"') < html.index('id="mol"') < html.index('<div id="ht">')
+    assert html.index('<section id="structure">') < html.index("Every hit, in a table") < html.index('<section id="swissprot">')
     assert "ESMFold2 (esm 3.4.2" in html and "not a physical protein chain" not in html
     st = build.read_structure(DATA / "structures" / "FUN008084.pdb")
     assert st["n"] == 252 and st["scale"] == 1 and round(st["ca_ca"], 2) == 3.84

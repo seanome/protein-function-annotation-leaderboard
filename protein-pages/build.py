@@ -1054,9 +1054,15 @@ def read_structure(path):
                 ca_ca=gaps[len(gaps) // 2] if gaps else None)
 
 
+HIGHLIGHT = "#E6007E"  # residues pointed at or dragged across: drawing, pLDDT strip and structure
+
+
 def structure_html(pid, st):
-    """The 3-D structure section of a drawn page (assets/structure.js draws it with 3Dmol.js)."""
+    """The 3-D structure section of a drawn page (assets/structure.js draws it with 3Dmol.js): a key,
+    the pLDDT strip along the protein right above the structure, the structure, then the text.
+    Pointing at a hit, or dragging across the strip, colours those residues on the structure."""
     mean = sum(st["plddt"]) / max(1, len(st["plddt"]))
+    n = len(st["plddt"])
     warn = ""
     if st["ca_ca"] is not None and not 3.6 <= st["ca_ca"] <= 4.0:
         warn = ('<p class="warn">These coordinates are not a physical protein chain: neighbouring residues\' '
@@ -1065,12 +1071,27 @@ def structure_html(pid, st):
     made = (' The file says how it was made: <span class="mono">%s</span>. pTM, where given, is the predictor\'s '
             'confidence in the overall fold, 0 to 1; below 0.5 the arrangement of the parts is a guess even where each '
             'part is confident.' % esc(st["made"])) if st.get("made") else ""
-    return ('<section id="structure"><h2>3-D structure (predicted)</h2>'
-            '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by the predictor\'s '
-            'confidence in each residue (pLDDT, 0 to 100; mean %.0f here), in the colours of the pLDDT strip in the drawing. '
-            'Hover a box in the drawing or a row of the table to show that hit\'s residues in black. Drag to turn the '
-            'structure; scroll to zoom.%s</p>%s<div id="mol" data-scale="%g"></div></section>'
-            % (esc(st["file"]), st["n"], mean, made, warn, st["scale"]))
+    sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
+    key = ('<p class="note skey"><b>pLDDT</b>, the predictor\'s confidence in each residue: %s'
+           '<span class="sw" style="background:%s"></span>residues you point at or select. The strip runs from residue 1 '
+           '(left) to %d (right); drag across it, or click a box in the drawing, to select residues.</p>' % (sw, HIGHLIGHT, n))
+    rects = []
+    for i, v in enumerate(st["plddt"]):
+        c = next((col for lo, hi, col, _ in PLDDT if lo <= v < hi), PLDDT[-1][2])
+        rects.append('<rect x="%d" y="0" width="1.05" height="10" fill="%s"/>' % (i, c))
+    strip = ('<svg id="pstrip" viewBox="0 0 %d 10" preserveAspectRatio="none" role="img" '
+             'aria-label="pLDDT of each residue, residue 1 to %d">%s<rect id="pmask1" x="0" y="0" width="0" height="10" '
+             'fill="#fff" opacity="0.7"/><rect id="pmask2" x="0" y="0" width="0" height="10" fill="#fff" opacity="0.7"/>'
+             '<rect id="pbrush" x="0" y="0" width="0" height="10" fill="none" stroke="%s" stroke-width="2.5" '
+             'vector-effect="non-scaling-stroke"/></svg>' % (n, n, "".join(rects), HIGHLIGHT))
+    return ('<section id="structure"><h2>3-D structure (predicted)</h2>%s%s<div id="mol" data-scale="%g" data-n="%d" '
+            'data-hl="%s"><div id="molsel" hidden></div></div>'
+            '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by pLDDT as in the '
+            'strip above them (mean %.0f here). Point at a box in the drawing or a row of the table, or drag across the '
+            'strip, to colour those residues %s on the structure and the strip; the rest turns grey. Clicking a box or '
+            'a row, or dragging across the strip, keeps the selection until you click the strip again. Point at the structure to see a residue\'s number. Drag '
+            'to turn the structure; scroll to zoom.%s</p>%s</section>'
+            % (key, strip, st["scale"], n, HIGHLIGHT, esc(st["file"]), st["n"], mean, "magenta", made, warn))
 
 
 def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
@@ -1262,7 +1283,7 @@ def swissprot_html(ctx, whole):
             '</tbody></table></div></section>' % "".join(rows))
 
 
-def legend_html(ctx, has_plddt, has_expr):
+def legend_html(ctx, has_plddt, has_expr, has_struct=False):
     """The legend, in a narrow column left of the drawing (above it on a phone), so the reader
     meets the key before the marks: one line per tool, its mark then its name. The rule for a
     hit, the setting, the database and the columns that give the box open on a click."""
@@ -1300,6 +1321,10 @@ def legend_html(ctx, has_plddt, has_expr):
     if has_plddt:
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
         items.append('<li><span></span><span><b>pLDDT</b>, the structure predictor\'s confidence in each residue, 0 to 100: %s</span></li>' % sw)
+    if has_struct:
+        hl = svg_inline('<rect x="0.5" y="1.5" width="11" height="7" fill="%s"/>' % HIGHLIGHT, 12, 10)
+        items.append('<li>%s<span>on the pLDDT strip and the 3-D structure: the residues of the hit you point at or click, '
+                     'or the ones you drag across on the strip</span></li>' % hl)
     step = svg_inline('<path d="M0,9 L4,9 L4,2 L8,2 L8,6 L12,6" fill="none" stroke="%s" stroke-width="1.4"/>' % AGREEMENT, 12, 10)
     items.append('<li>%s<span>programs with a hit at each residue, 0 to %d (the programs run), each program counted once</span></li>'
                  % (step, ctx["n_run"]))
@@ -1570,7 +1595,8 @@ def build_protein(task):
     whole = whole_rows(ctx["biomni"].get(pid), W)
     n_whole = sum(1 for w in whole if w[3])
     m_whole = sum(1 for w in whole if w[4])  # WHOLE programs run on this protein
-    hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"], ctx["n_run"], whole)
+    row_plddt = None if st else plddt  # with a structure, the strip sits right above it instead
+    hgt, left, right = page_svg(p, counted_by_track, cov, row_plddt, W, px, ctx["run_status"], ctx["n_run"], whole)
     blocks = ['<div class="tracks" id="tracks"><div class="names">%s</div><div class="scroll">%s</div></div>'
               % (svg_inline(left, "100%", hgt), svg_inline(right, W, hgt, "trk"))]
     n_more = sum(max(0, sum(not h.get("feature") for h in v) - TOP_N) for v in counted_by_track.values())
@@ -1640,12 +1666,12 @@ def build_protein(task):
                'immune seeds, FANTASIA, UniFIRE) come from Biomni\'s run on the whole proteome, which kept only each '
                'protein\'s best hit and not where it lies, so they name the hit with no box; each counts in the sentence '
                'at the top by its own cutoff, which the slider does not change.</p></section>'
-               '%s%s<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
+               '%s<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
                'and matching the search. Each program computes its own E-value and score, so compare them within one '
                'program. Score is in bits, except hhsearch\'s Prob (the chance, out of 100, that the hit is a true '
-               'relative); identity is given by MMseqs2 and Foldseek only.</p><div id="ht"></div></section>'
-               % (slider, "".join(blocks), toggle, swissprot_html(ctx, whole), struct))
-    out.append(legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
+               'relative); identity is given by MMseqs2 and Foldseek only.</p><div id="ht"></div></section>%s'
+               % (slider, "".join(blocks), toggle, struct, swissprot_html(ctx, whole)))
+    out.append(legend_html(ctx, row_plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid)), bool(st)))
     out.append('</div>')
     out.append(expr)
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
