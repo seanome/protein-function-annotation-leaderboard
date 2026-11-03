@@ -1251,17 +1251,16 @@ def page_head(title, depth):
 
 
 # Which Swiss-Prot each search used: not the same release for every program, so each drawn page
-# shows this table under the drawing. Releases from the reldate.txt beside each database file and
-# protein counts from the files, both read on Sherlock 2026-11-02 (test_inputs/PROVENANCE.md).
+# shows this table under the drawing. Releases and protein counts as test_inputs/PROVENANCE.md
+# says how each was checked (2025_01 by comparing accessions, 2026-11-03).
 SWISSPROT_USED = [
     (("kmerseek",), "Swiss-Prot release 2026_03", "all of it", "575,748"),
-    (("mmseqs2_3rounds", "phmmer", "jackhmmer"), "an earlier Swiss-Prot release: which one was not recorded "
-     "(49 of its proteins are not in 2026_03)", "without its 120 sea-squirt (Ascidiacea) proteins", "572,850"),
-    (("mmseqs2",), "Swiss-Prot, release not recorded with the hit table", "not recorded", "not recorded"),
-    (("diamond",), "Swiss-Prot, release not recorded by Biomni (release 2026_03 has 575,748 proteins, so "
-     "not that one)", "", "533,805"),
-    (("foldseek", "prostt5"), "AlphaFold's models of Swiss-Prot proteins (not a sequence release)",
-     "sea-squirt proteins kept", "570,421"),
+    (("mmseqs2_3rounds", "phmmer", "jackhmmer"), "Swiss-Prot release 2025_01 (5 February 2025)",
+     "without its 120 sea-squirt (Ascidiacea) proteins", "572,850"),
+    (("mmseqs2",), "Swiss-Prot release 2026_03 (Biomni's run)", "all of it", "575,748"),
+    (("diamond",), "Swiss-Prot release 2026_03 (Biomni's run)", "all of it", "575,748"),
+    (("foldseek", "prostt5"), "AlphaFold's models of Swiss-Prot proteins, Foldseek's prebuilt database "
+     "(not a sequence release; it keeps models of retired accessions)", "sea-squirt proteins kept", "590,183"),
 ]
 
 
