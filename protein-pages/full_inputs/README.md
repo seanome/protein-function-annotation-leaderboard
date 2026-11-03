@@ -1,7 +1,8 @@
 # Inputs of build_full.py: annotation tables for all 45,339 Botryllus proteins
 
 These tables were made by a Biomni agent on its machine `worker-0`, not in this repository, and
-downloaded by Olga on 2026-10-28. `biomni_PLAN.md` is the plan the agent followed and
+downloaded by Olga on 2026-10-28. The kmerseek table is the exception: that search ran on Sherlock
+under Olga's account on 2026-10-28 to 30 (`$SCRATCH/botryllus-kmerseek-swissprot`), not with Biomni. `biomni_PLAN.md` is the plan the agent followed and
 `biomni_worker-0.ipynb` is the notebook from that machine, both as downloaded. The notebook
 holds only tool lookups and an ESMCFold test run; the commands that made the tables below are
 not in it, so the settings given here come from the plan and are not checked against a log.
@@ -27,7 +28,7 @@ The proteome is `botryllus_new_genome_protein.fasta` (45,339 proteins; on the la
 | `fantasia_vs_diamond.tsv` | For proteins with both a FANTASIA answer and a DIAMOND Swiss-Prot hit (1,773 with a gene name for both), how often the two name the same gene, by cosine distance: 18% below 0.1, 3% at 0.2-0.25, 2% above 0.25. FANTASIA's reliability index is 1 minus the distance in all 26,676 rows, so the pages show only the distance | `fantasia_vs_diamond.py .`, 2026-11-01 |
 | `biomni_report_v3.md` | Biomni's third report, which adds the FANTASIA and Foldseek sections | as downloaded, 2026-11-01 |
 | `foldseek_struct_best_per_protein.tsv.gz` | Best Foldseek hit per protein on the 3-D structures Biomni predicted with ESMFold2's fast model for proteins of 200 aa or less (lowest E-value, then highest bit score), with its positions on both proteins and the alignment's TM-score and LDDT: 13,946 proteins. The pages show it at 0.001 or below, and "not run" for longer proteins | `make_foldseek_tables.py ... struct` from `botryllus_foldseek_struct.m8` (Biomni, given by Olga 2026-11-03; 2,582,805 rows) |
-| `kmerseek_best_per_protein.tsv.gz` | Best kmerseek hit against all of Swiss-Prot 2026_03 per protein, over the 35 settings whose E-value fit worked: 45,317 proteins have one | `make_kmerseek_table.py` from `$SCRATCH/botryllus-kmerseek-swissprot/results/summary/kmerseek_botryllus_swissprot.per_protein.tsv.gz` on Sherlock |
+| `kmerseek_best_per_protein.tsv.gz` | Not from Biomni: best kmerseek hit against all of Swiss-Prot 2026_03 per protein, over the 35 settings whose E-value fit worked: 45,317 proteins have one | `make_kmerseek_table.py` from `$SCRATCH/botryllus-kmerseek-swissprot/results/summary/kmerseek_botryllus_swissprot.per_protein.tsv.gz` on Sherlock |
 | `unifire_predictions.tsv.gz` | UniFIRE 2026.3 predictions (ARBA, UniRule and PIRSR rules on InterProScan 5.59 matches) under the Biomni protein IDs: 231,595 rows on 19,001 proteins (ARBA 16,372, UniRule 11,575, PIRSR 1,069). The 50 proteins over 5,000 aa were not run. | `make_unifire_table.py`, from olgabot/botryllus-mhc PR 13, commit 257832d, `nextflow_runs/timing-pilot/unifire_whole_proteome` |
 
 The Fester and BHF search is not shown on the pages (since 2026-11-01). All 96 reference
@@ -51,3 +52,5 @@ None of the tables gives where on the protein a hit or domain lies, so the pages
 draw nothing along the protein. The plan says the Pfam step kept domain positions; asking for
 that file, and for DIAMOND's `qstart qend`, would let the pages draw them. The request is
 drafted in `biomni_request_positions.md`.
+
+Gene cards are read only when given: pass `--cards ../gene_cards/out/cards.claude-haiku-5-5.jsonl ../gene_cards/out/cards.claude-opus-5-5.jsonl` to `build_full.py`. Haiku wrote all 100; Opus rewrote the 41 name conflicts, and the later file wins.

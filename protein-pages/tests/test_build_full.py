@@ -262,3 +262,11 @@ def test_read_proteome_names_isoforms_and_checks_md5(tmp_path):
     assert build_full.read_proteome(fa, lengths) == {"FUN1": "MKV", "FUN1.2": "MKVL", "FUN2": "MA"}
     with pytest.raises(SystemExit):
         build_full.read_proteome(fa, dict(lengths, FUN2=(2, md5("MG"))))
+
+
+def test_names_conflict():
+    assert not build_full.names_conflict("NLRC5", "Nlrc5-like")
+    assert not build_full.names_conflict("LET70", "let-70")
+    assert build_full.names_conflict("ISM2", "adt-2")
+    assert build_full.names_conflict("LRP2", "Cd320")
+    assert not build_full.names_conflict("", "Cd320")

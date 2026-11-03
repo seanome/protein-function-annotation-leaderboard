@@ -162,14 +162,27 @@
     var h = [];
     if (d.card) {
       var c = d.card, v = c.name_verdict;
-      h.push("<h2>Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
+      h.push("<h2 id=\"gene-card\">Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
         "check it against the tables below.</p><p>" + accHtml(c.summary) + "</p><p><b>Confidence: " + esc(c.confidence) + ".</b> " + accHtml(c.confidence_reason) + "</p>");
       if (v && v.choice !== "not_applicable") h.push("<p><b>Header name " + esc(r[2]) + " or proposed name " + esc(r[3]) + "?</b> " +
         esc((F.verdicts[v.choice] || v.choice).replace(/^./, function (x) { return x.toUpperCase(); })) + "; suggested name <b>" + esc(v.recommended_name) + "</b>. " + accHtml(v.reason) + "</p>");
     }
     return h;
   }
+  // Under the page's sentence: where the FASTA name and the proposed name differ, both names and any gene card's verdict
+  function nameLine(r, d) {
+    var at = document.querySelector(".sentence"), v = d.card && d.card.name_verdict;
+    if (!at || r[4] !== F.check_differs) return;
+    var h = (r[18] === 1 ? "Names conflict" : "Names differ only in spelling") + ": FASTA header <b>" + esc(r[2]) + "</b>, proposed <b>" + esc(r[3]) +
+      "</b> (from the best Swiss-Prot match or the Pfam domains).";
+    if (v && v.choice !== "not_applicable") h += " <a href=\"#gene-card\">Gene card</a> (" + esc(d.card.model) + "): " + esc(F.verdicts[v.choice] || v.choice) + "; suggested name <b>" + esc(v.recommended_name) + "</b>.";
+    else h += " No gene card checked this protein.";
+    var p = document.createElement("p");
+    p.className = "nameline"; p.innerHTML = h;
+    at.appendChild(p);
+  }
   function render(id, r, d) {
+    nameLine(r, d);
     var h = top(id, r, d);
     if (box) {  // on a drawn page each program is a row of the drawing; under it, only what the rows do not show
       box.innerHTML = "";

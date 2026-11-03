@@ -38,7 +38,7 @@
   function build(d) {
     var L = r[1], name = r[3] || r[2] || "";
     document.title = id + (name ? " " + name : "") + ": what every annotation program found";
-    if (name) document.querySelector(".titlebar .pn").textContent = name + (r[2] && r[3] && r[2].toLowerCase() !== r[3].toLowerCase() ? " (FASTA header: " + r[2] + ")" : "");
+    if (name) document.querySelector(".titlebar .pn").textContent = name;
     document.querySelector(".titlebar .len").textContent = L.toLocaleString("en-US") + " amino acids";
     var hits = [], tracksRun = {};
     function best(k, x, extra) {  // a best-hit table row: [accession, identity 0-1, start, end, E-value, bits, name, species, ..., target start, target end]
@@ -72,7 +72,7 @@
 
     // the programs that name a hit with no position: [key, name, how, text, flag, second line]
     var W = [];
-    if (d.km !== null && d.km !== undefined) W.push(["w_kmerseek", "kmerseek, best hit", "Biomni's table keeps kmerseek's best hit against Swiss-Prot 2026_03 (35 alphabet+k settings) and not where it lies",
+    if (d.km !== null && d.km !== undefined) W.push(["w_kmerseek", "kmerseek, best hit", "run on Sherlock, not by Biomni: best hit against Swiss-Prot 2026_03 over 35 alphabet+k settings; this site keeps only that best hit, so no position",
       d.km ? uni(d.km[2]) + " " + esc(d.km[3]) + (d.km[4] ? ", <i>" + esc(d.km[4]) + "</i>" : "") : "no hit (E-value " + C.kmerseek_max_e + " or below)", d.km ? 1 : 0,
       d.km ? "E-value " + esc(String(+d.km[1].toPrecision(2))) + " with " + esc(d.km[0]) + ", the best of the " + d.km[5] + " settings whose E-value fit worked · whole protein, no position" : undefined]);
     W.push(["w_diamond", "DIAMOND against Swiss-Prot", "run by Biomni; E-value 0.001 or below",
@@ -108,7 +108,7 @@
     var ran = Object.keys(tracksRun).map(function (k) { return C.tracks[k].p; }).filter(function (p, i, a) { return a.indexOf(p) === i; });
     var wholeRan = W;
     var M = ran.length + wholeRan.length;
-    var note = "<p class=\"note\">This protein has no drawn page, so only each program's best hit is known (Biomni's tables of the whole proteome); " +
+    var note = "<p class=\"note\">This protein has no drawn page, so only each program's best hit is known (tables of the whole proteome, from Biomni's runs and our kmerseek run on Sherlock); " +
       "whether two programs agree on a Pfam family is not judged here. " + (d.q ? "Click a hit for the residues: the two proteins aligned in your browser " +
       "(BLOSUM62, gap open -11, extend -1), since the tables keep no alignment. " : "This protein's sequence is not on this site, so a hit opens no alignment. ") +
       "phmmer, jackhmmer against Swiss-Prot, hmmscan, hhsearch and MMseqs2 three rounds were run only on the 51 drawn proteins.</p>";
