@@ -234,7 +234,7 @@ def test_site_from_test_data(tmp_path):
     # that named VPR (most hits: 6 against 2 and 2), and the hover listing the twelve programs
     assert sum(1 for h in page["hits"] if h.get("id")) == 101
     assert [(a["name"], a["hits"], a["n"]) for a in page["agree"]] == [("VPR", 6, 2), ("GrpE", 2, 2), ("Methyltransf_5", 2, 2)]
-    assert "VPR is named because it has the most hits (6, against 2 and 2)" in page["sent"][-1][2]
+    assert "VPR is named because it has the most hits (6, against 2 and 2 for GrpE and Methyltransf_5" in page["sent"][-1][2]
     assert page["twelve"].startswith("the 8 programs that place hits along the protein")
     # BHF has a predicted structure (structures/FUN008084.pdb, ESMFold2): the viewer at the right, its
     # text in its own file, pLDDT per residue and pTM from the file's REMARK line, no warning
@@ -245,7 +245,7 @@ def test_site_from_test_data(tmp_path):
     # Foldseek on Biomni's predicted structures ran only on proteins of 200 aa or less: BHF (252 aa)
     # has it as not run, with the reason; RNF4 (195 aa) has hits and its structure, which names its predictor
     notrun = json.loads(re.search(r"window\.NOTRUN=(.*?);window\.HOW=", html).group(1))
-    assert notrun == {"foldseek": "not run: structures were predicted only for proteins of 200 aa or less"}
+    assert notrun == {"foldseek": "not run: Biomni predicted structures only for proteins of 200 aa or less; the structure at the right is a separate prediction"}
     rnf4 = (out / "proteins" / "FUN005158_RNF4.html").read_text()
     rpage = json.loads(re.search(r"const PAGE=(.*?);window\.WHOLE=", rnf4).group(1).replace("<\\/", "</"))
     assert any(h["k"] == "foldseek" for h in rpage["hits"]) and '"foldseek": "not run' not in rnf4
@@ -282,7 +282,7 @@ def test_site_from_test_data(tmp_path):
     kif = (out / "proteins" / "FUN016555_KIF11.html").read_text()
     kpage = json.loads(re.search(r"const PAGE=(.*?);window\.WHOLE=", kif).group(1).replace("<\\/", "</"))
     assert kpage["sent"][-1][1].startswith("10 of the 11 programs run report a hit.")
-    assert "P52732" in kif and "not run: FANTASIA was run only on proteins" in kif
+    assert "P52732" in kif and "w_fantasia" not in kif  # FANTASIA was not run on KIF11: not on its no-hit line
     # The sentence and the note under it link each Pfam accession to its InterPro page (PAGE.sent)
     vpr = ('VPR (<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF00522/" '
            'target="_blank" rel="noopener">PF00522</a>)')
