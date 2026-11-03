@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=cards-v4
 #SBATCH --partition=hns,gpu
+#SBATCH -N 1
 #SBATCH -G 4
 #SBATCH -C GPU_SKU:H100_SXM5
 #SBATCH --cpus-per-task=16
@@ -8,7 +9,8 @@
 #SBATCH --time=04:00:00
 #SBATCH --output=%x-%j.out
 # Gene cards from DeepSeek-V4-Flash, served by vLLM 0.31.0 (its container image, under
-# Apptainer) on four H100 GPUs on this node,
+# Apptainer) on four H100 GPUs on one node (-N 1: without it Slurm may split them over two nodes,
+# and vLLM needs all four on one),
 # so the evidence sheets of the unpublished proteome never leave Sherlock. vLLM listens on
 # 127.0.0.1 only and stops when the cards are written. Needs gene_cards/deepseek_v4_install.sbatch
 # first (the container image and the 160 GB of weights).
