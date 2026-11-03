@@ -6,7 +6,8 @@
   // row: 0 id, 1 length, 2 existing, 3 proposed, 4 name check, 5 Swiss-Prot name, 6 accession,
   // 7 identity, 8 coverage, 9 E-value, 10 Pfam names, 11 category bits, 12 empty, 13 cluster size,
   // 14 drawn page, 15 InterProScan's Pfam matches [start, end, index into PFAM], 16 MMseqs2's best
-  // hit [start, end, identity %, accession] or null, 17 the other programs with a hit, as bits of F.other
+  // hit [start, end, identity %, accession] or null, 17 the other programs with a hit, as bits of F.other,
+  // 18 1 when the two names conflict (not only their spelling; build_full.names_conflict)
   var grid = document.getElementById("grid"), AX = +grid.dataset.ax, SEQ = grid.dataset.seq, DOM = grid.dataset.dom;
   function catNames(m) { var o = []; for (var i = 0; i < CATS.length; i++) if (m >> i & 1) o.push(CATS[i]); return o; }
   var text = R.map(function (r) {
@@ -18,12 +19,12 @@
   var TILES = {
     all: function () { return true; }, sp: isMatch, pfam: function (r) { return !!r[10]; },
     none: function (r) { return !isMatch(r) && !r[10]; }, immune: function (r) { return r[11] > 0; },
-    drawn: function (r) { return !!r[14]; }
+    drawn: function (r) { return !!r[14]; }, names: function (r) { return r[18] === 1; }
   };
   function others(b) { var o = []; for (var i = 0; i < OTHER.length; i++) if (b >> i & 1) o.push(OTHER[i][0]); return o; }
   function nbits(b) { var n = 0; while (b) { n += b & 1; b >>= 1; } return n; }
   var TILE_WORDS = { all: "", sp: "with a Swiss-Prot match", pfam: "with a Pfam domain", none: "with neither a Swiss-Prot match nor a Pfam domain",
-    immune: "that are immune-gene candidates", drawn: "with every program's hits drawn" };
+    immune: "that are immune-gene candidates", drawn: "with every program's hits drawn", names: "whose FASTA name and proposed name conflict" };
   var st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
   var count = document.getElementById("count"), more = document.getElementById("more"), lbl = document.querySelector(".ix .ruler .lbl");
   var catSel = document.getElementById("cat"), chkSel = document.getElementById("chk"), q = document.getElementById("q");

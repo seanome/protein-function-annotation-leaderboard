@@ -271,3 +271,6 @@ body:has(.withviewer.noviewer) header.top .colhead{margin-right:0}
 #biomni-more h3{font:600 12.5px/1.3 "Source Sans 3",system-ui,sans-serif;margin:10px 0 2px}
 #biomni-more p,#biomni-more table{font-size:12.5px}
 #biomni-more .chips a{font-size:12px}
+.sentence .nameline{font-size:12.5px;color:var(--secondary);margin:3px 0 0}
+.sentence .nameline b{color:var(--ink);font-weight:600}
+.sentence .nameline a{color:var(--ink)}

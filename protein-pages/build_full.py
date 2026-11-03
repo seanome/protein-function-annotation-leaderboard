@@ -30,6 +30,7 @@ import csv
 import gzip
 import hashlib
 import json
+import re
 import shutil
 import sys
 import time
@@ -44,6 +45,12 @@ MEMBERS_MAX = 200  # cluster members listed on a protein page; the rest are coun
 # The Biomni table's name_status, checked against existing_name and proposed_name on every row
 # (tests/test_build_full.py): same name ignoring case, different name, an existing name and no
 # proposal, a proposal and no existing name.
+def names_conflict(existing, proposed):
+    """True when two names differ by more than capitals, punctuation and a trailing -like."""
+    key = lambda s: re.sub(r"[^a-z0-9]", "", re.sub(r"[- ]?like$", "", s.strip().lower()))
+    return bool(existing and proposed) and key(existing) != key(proposed)
+
+
 NAME_CHECK = [
     ("", "no name, existing or proposed"),
     ("agree", "proposed name is the existing name"),
@@ -389,7 +396,8 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                      [[x[3], x[4], pfam_ix.setdefault(x[1], len(pfam_ix))] for x in sorted(ips.get(pid, []), key=lambda x: x[3]) if x[0] == "Pfam"] if ips else [],
                      [mm[pid][2], mm[pid][3], round(100 * mm[pid][1], 1), mm[pid][0]] if mm and mm.get(pid) else None,
                      # 17: the other whole-proteome programs with a hit, as bits (OTHER_HITS)
-                     sum(1 << i for i, d in enumerate((mm, fs, fst, km, jh)) if d and d.get(pid))])
+                     sum(1 << i for i, d in enumerate((mm, fs, fst, km, jh)) if d and d.get(pid)),
+                     1 if r["name_status"] == "conflict" and names_conflict(r["existing_name"], r["proposed_name"]) else 0])  # 18
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
         fa = None
@@ -446,7 +454,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         (out / "full" / ("%03d.js" % s)).write_text(
             "window.FULL_SHARD=Object.assign(window.FULL_SHARD||{},FULL_X(%s));" % json.dumps(shards.get(s, {}), separators=(",", ":")))
     (out / "full" / "rows.js").write_text("window.FULL=%s;" % json.dumps(
-        dict(cats=cats, check=[t for _, t in NAME_CHECK], verdicts=VERDICT_TEXT, rows=rows, other=OTHER_HITS,
+        dict(cats=cats, check=[t for _, t in NAME_CHECK], check_differs=status_code["conflict"], verdicts=VERDICT_TEXT, rows=rows, other=OTHER_HITS,
              pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)]), separators=(",", ":")))
 
     n = len(rows)
@@ -464,6 +472,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         foldseek_struct_hit=None if fst is None else len(fst),
         drawn=sum(1 for r in rows if r[14]),
         drawn_pages=len({r[14] for r in rows if r[14]}),
+        names_conflict=sum(1 for r in rows if r[18]),
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
     )
@@ -522,10 +531,11 @@ def index_html(s, cats, inputs, ver, known=""):
     pc = lambda v: "%d%%" % round(100 * v / n)
     chips = [("all", n, "all"), ("sp", s["swissprot_hit"], "Swiss-Prot match"), ("pfam", s["pfam_domain"], "Pfam domain"),
              ("none", s["neither"], "neither"), ("immune", s["immune_candidates"], "immune-gene candidate"),
-             ("drawn", s["drawn"], "every program drawn")]
+             ("drawn", s["drawn"], "every program drawn"), ("names", s["names_conflict"], "names conflict")]
     tips = {"all": "every protein", "sp": "DIAMOND found a Swiss-Prot match at the cutoff", "pfam": "hmmsearch found a Pfam domain",
             "none": "neither a Swiss-Prot match at the cutoff nor a Pfam domain; another program may still have a hit",
-            "immune": "in at least one immune-gene category", "drawn": "has a page that draws every program's hits along the protein"}
+            "immune": "in at least one immune-gene category", "drawn": "has a page that draws every program's hits along the protein",
+            "names": "the FASTA header name and the proposed name are different names; capitals, punctuation and a trailing -like are ignored"}
     chip_html = "".join('<button class="chip%s" data-t="%s" title="%s">%s <b class="mono">%s</b></button>' % (" on" if k == "all" else "", k, tips[k], build.esc(w), f(v))
                         for k, v, w in chips)
     cat_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(c), f(s["immune_categories"][c])) for i, c in enumerate(cats))
@@ -545,7 +555,7 @@ def index_html(s, cats, inputs, ver, known=""):
  <div class="sentence"><p id="sent">%(sp)s of %(n)s proteins (%(spp)s) match a Swiss-Prot protein, %(pf)s (%(pfp)s) carry a Pfam domain, and %(ne)s (%(nep)s) have neither.</p>
  <div id="sentnote"><p class="note">Swiss-Prot match = the best hit of DIAMOND (a fast BLAST-like sequence search) at E-value 0.001 or below,
  in Swiss-Prot release 2026_03 (575,748 proteins). Pfam domain = a Pfam family model that pyhmmer's hmmsearch finds above the score Pfam sets
- for that family. Biomni, the agent that ran every whole-proteome program here, made both tables. A protein with neither can still have a hit
+ for that family. Biomni, the agent that ran the whole-proteome programs except kmerseek, made both tables. A protein with neither can still have a hit
  from another program: the "other programs" column says which. %(dp)s proteins have a page that draws every program's hits along the protein
  (<a href="drawn.html">their own index</a>).</p></div></div>
  <details class="overview-fold"><summary>Counts by immune-gene category and by how the proposed name compares with the existing one</summary>
@@ -618,7 +628,7 @@ def index_html(s, cats, inputs, ver, known=""):
 <section class="below"><h2>Which Swiss-Prot</h2><p class="note">"Swiss-Prot" on this page is release 2026_03 (575,748 proteins), the copy
 DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (at most 25 per protein). Each protein's page says which copy each other
 program searched.</p></section>
-<footer><h2>Input files read</h2><p class="note">Built by build_full.py from %(inputs)s. These tables come from Biomni's runs
+<footer><h2>Input files read</h2><p class="note">Built by build_full.py from %(inputs)s. These tables come from Biomni's runs and our kmerseek run on Sherlock
 (full_inputs/README.md in the repository says how each was made). This page only reads those tables; building it ran no search.</p></footer>
 <script src="full/rows.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
 """ % dict(n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
@@ -643,7 +653,7 @@ def protein_html(ver, n_tseq=0):
     head = build.page_head("Botryllus protein: what every annotation program found", 0).replace(
         "</head>", '<link rel="stylesheet" href="assets/dense-bhf.css%s"></head>' % ver, 1)
     help_ = ('<aside class="help" id="help"><h2>What this page is</h2><p>Every program\'s best hit on this protein, from Biomni\'s runs on '
-             'the whole proteome (Biomni is the agent that ran the whole-proteome programs). MMseqs2, ProstT5 + Foldseek and Foldseek on the '
+             'the whole proteome (Biomni is the agent that ran them, except kmerseek, which ran on Sherlock). MMseqs2, ProstT5 + Foldseek and Foldseek on the '
              'predicted structure are drawn where they lie; InterProScan draws every match; kmerseek, DIAMOND, jackhmmer with immune seeds, '
              'FANTASIA and UniFIRE name a hit with no position. The 51 proteins with a drawn page also have phmmer, jackhmmer against '
              'Swiss-Prot, hmmscan, hhsearch and MMseqs2 three rounds, every hit, and the residues of each.</p><h2>Rows</h2><p>A <b>program '
@@ -658,7 +668,7 @@ def protein_html(ver, n_tseq=0):
 <header class="top">%s%s%s</header>
 <main><div class="withviewer noviewer"><div id="grid"></div></div>
 <section class="below" id="biomni" data-base="" data-undrawn="1"></section><section class="below" id="biomni-more"></section>%s</main>
-<footer><h2>Input files read</h2><p class="note">Built by build_full.py from Biomni's tables of the whole proteome (full_inputs/README.md in the
+<footer><h2>Input files read</h2><p class="note">Built by build_full.py from tables of the whole proteome, Biomni's and our kmerseek run's (full_inputs/README.md in the
 repository says how each was made). This page only reads them; building it ran no search.</p></footer>
 <div id="tip" role="tooltip" hidden></div>%s
 <script>window.DENSE_CONST=%s;</script><script src="full/rows.js%s"></script><script src="full/str.js%s"></script><script src="assets/protein-dense.js%s"></script></body></html>
