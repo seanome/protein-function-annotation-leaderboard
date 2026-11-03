@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=cards-deepseek
 #SBATCH --partition=hns,gpu
+#SBATCH -N 1
 #SBATCH -G 2
 #SBATCH -C GPU_MEM:48GB|GPU_MEM:80GB
 #SBATCH --cpus-per-task=8
