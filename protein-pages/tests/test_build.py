@@ -211,57 +211,61 @@ def test_site_from_test_data(tmp_path):
     assert summary["total"] == 51 and summary["programs_run"] == 8  # Foldseek only as ProstT5 + Foldseek
     r = subprocess.run([sys.executable, str(here / "tests" / "check_site.py"), str(out)], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
-    # The BHF page has the hit search box and the folding note, and its page data carry what the
-    # search looks through: 5 ProstT5 + Foldseek hits are on RRP36 proteins (entry name RRP36_...).
+    # The BHF page is the dense page (the dense-results-page skill; assets/dense-bhf.js draws its grid):
+    # title block, sticky header with the ladder, search and buttons, the grid, the 3-D model at the
+    # right. Its page data carry what the search looks through: 5 ProstT5 + Foldseek hits are on
+    # RRP36 proteins (entry name RRP36_...).
     import re
     html = (out / "proteins" / "FUN008084_FUN008084.html").read_text()
-    assert '<input id="hq" type="search"' in html and 'id="hqn"' in html
-    assert "Every program starts folded into one row, shaded by how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold it again." in html
-    assert '<div id="ht"></div>' in html
-    page = json.loads(re.search(r"const PAGE=(.*?);</script>", html).group(1).replace("<\\/", "</"))
+    for el in ('<div class="titleblock">', '<header class="top">', 'id="ladder"', '<input id="hq" type="search"',
+               'id="expand-all"', 'id="collapse-all"', 'id="dl"', 'id="help-btn"', '<div id="grid"></div>',
+               '<aside class="viewer" id="structure">', '<aside class="help" id="help">', "dense-bhf.js"):
+        assert el in html, el
+    page = json.loads(re.search(r"const PAGE=(.*?);window\.WHOLE=", html).group(1).replace("<\\/", "</"))
     rrp36 = [h for h in page["hits"] if "rrp36" in " ".join(str(h.get(f) or "") for f in "ltngo").lower()]
     assert len(rrp36) == 5 and {h["k"] for h in rrp36} == {"prostt5"}
-    # Biomni's programs with no position are rows of the drawing and count in the one sentence:
-    # BHF's only one is FANTASIA, at distance 0.22, above the 0.15 that counts, so 5 of 12.
-    for k in ("diamond", "jackhmmer", "fantasia", "unifire"):
-        assert 'data-k="w_%s"' % k in html
-    assert "not close enough to count" in html and "P32845" in html
-    assert '<p class="summary" id="sent">5 of 12 programs report a hit.' in html
-    assert "What the whole-proteome annotation found" not in html
-    # BHF has a predicted structure (structures/FUN008084.pdb, ESMFold2): a viewer section, its text in
-    # its own file, a pLDDT strip from its B-factors (already 0 to 100), the predictor named from the
-    # file's REMARK line, and no warning, since neighbouring CA atoms are a median 3.8 angstrom apart
-    assert '<section id="structure">' in html and 'data-scale="1"' in html
-    assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists()
+    # Biomni's programs with no position are in window.WHOLE and count in the one sentence: BHF's
+    # only named one is FANTASIA, at distance 0.22, above the 0.15 that counts (flag 2), so 5 of 12.
+    whole = json.loads(re.search(r"window\.WHOLE=(.*?);window\.NOTRUN=", html).group(1))
+    assert [w[0] for w in whole] == ["w_diamond", "w_jackhmmer", "w_fantasia", "w_unifire"]
+    assert [w[4] for w in whole] == [0, 0, 2, 0] and "P32845" in whole[2][3]
+    assert page["sent"][-1][1].startswith("5 of 12 programs report a hit.")
+    # Identity of every non-prediction hit (101 of 104), the families behind "agree", the tie-break
+    # that named VPR (most hits: 6 against 2 and 2), and the hover listing the twelve programs
+    assert sum(1 for h in page["hits"] if h.get("id")) == 101
+    assert [(a["name"], a["hits"], a["n"]) for a in page["agree"]] == [("VPR", 6, 2), ("GrpE", 2, 2), ("Methyltransf_5", 2, 2)]
+    assert "VPR is named because it has the most hits (6, against 2 and 2)" in page["sent"][-1][2]
+    assert page["twelve"].startswith("the 8 programs that place hits along the protein")
+    # BHF has a predicted structure (structures/FUN008084.pdb, ESMFold2): the viewer at the right, its
+    # text in its own file, pLDDT per residue and pTM from the file's REMARK line, no warning
+    assert 'data-scale="1"' in html and (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists()
+    assert len(page["plddt"]) == 252 and page["ptm"] == "0.25"
+    assert html.index('id="pstrip"') < html.index('id="mol"')
+    assert "ESMFold2 (esm 3.4.2" in html and "not a physical protein chain" not in html
     # Foldseek on Biomni's predicted structures ran only on proteins of 200 aa or less: BHF (252 aa)
-    # says so on its row and in the legend; RNF4 (195 aa) has hits on the row and its structure,
-    # with the line saying where it came from
-    assert "not run: structures were predicted only for proteins of 200 aa or less" in html
-    assert "Foldseek, 3-D structures: not run on proteins over 200 aa" in html
+    # has it as not run, with the reason; RNF4 (195 aa) has hits and its structure, which names its predictor
+    notrun = json.loads(re.search(r"window\.NOTRUN=(.*?);window\.HOW=", html).group(1))
+    assert notrun == {"foldseek": "not run: structures were predicted only for proteins of 200 aa or less"}
     rnf4 = (out / "proteins" / "FUN005158_RNF4.html").read_text()
-    rpage = json.loads(re.search(r"const PAGE=(.*?);</script>", rnf4).group(1).replace("<\\/", "</"))
-    assert any(h["k"] == "foldseek" for h in rpage["hits"]) and "not run: structures" not in rnf4
-    assert '<section id="structure">' in rnf4 and "ESMFold2, fast model (esmcfold2-fast" in rnf4
+    rpage = json.loads(re.search(r"const PAGE=(.*?);window\.WHOLE=", rnf4).group(1).replace("<\\/", "</"))
+    assert any(h["k"] == "foldseek" for h in rpage["hits"]) and '"foldseek": "not run' not in rnf4
+    assert '<aside class="viewer" id="structure">' in rnf4 and "ESMFold2, fast model (esmcfold2-fast" in rnf4
     fold = [h for h in rpage["hits"] if h["k"] == "foldseek"]
     assert rpage["names"]["foldseek"] == ["evalue", "fident", "bits", "alntmscore", "lddt"]
     assert all(0 < float(h["s"][3]) < 1.1 and 0 < float(h["s"][4]) <= 1 for h in fold)
-    # The pLDDT strip sits right above the structure, with nothing between them, and not in the
-    # drawing; the structure comes right after the drawing, before the hit table
-    assert 'data-k="plddt"' not in html and re.search(r'</svg><div id="mol"', html)
-    assert html.index('id="pstrip"') < html.index('id="mol"') < html.index('<div id="ht">')
-    assert html.index('<section id="structure">') < html.index("Every hit, in a table") < html.index('<section id="swissprot">')
-    assert "ESMFold2 (esm 3.4.2" in html and "not a physical protein chain" not in html
-    # Published pages take stylesheets only from their own files (and Google Fonts): Mol*'s is a copy
+    # Published pages take stylesheets and scripts only from their own files (and Google Fonts): Mol* is bundled
     assert not re.search(r'<link rel="stylesheet" href="https?://(?!fonts\.googleapis)', html)
-    assert (out / "assets" / "pdbe-molstar-light-3.12.0.css").exists()
+    assert not re.search(r'<script src="https?://', html)
+    assert (out / "assets" / "molstar" / "pdbe-molstar-plugin.js").exists()
     st = build.read_structure(DATA / "structures" / "FUN008084.pdb")
     assert st["n"] == 252 and st["scale"] == 1 and round(st["ca_ca"], 2) == 3.84
     assert round(sum(st["plddt"]) / 252, 1) == 76.7
-    # The table of which Swiss-Prot each program searched: kmerseek 2026_03, phmmer and jackhmmer
-    # 2025_01 without sea squirts, ProstT5 + Foldseek AlphaFold's 590,183 models
-    assert '<section id="swissprot">' in html and 'href="#swissprot"' in html
-    assert "Swiss-Prot release 2026_03" in html and "Swiss-Prot release 2025_01" in html and "572,850" in html
-    assert "590,183" in html and "570,421" not in html and "not recorded" not in html.split('<section id="swissprot">')[1]
+    # The table of which Swiss-Prot each program searched, from Biomni's note: 2025_01 for MMseqs2 three
+    # rounds, phmmer and jackhmmer; 2026_03 for the rest; 590,183 AlphaFold models; jackhmmer from immune
+    # seeds the reverse way
+    sp = html.split('<section class="below" id="swissprot">')[1]
+    assert "Swiss-Prot release 2026_03" in sp and "Swiss-Prot release 2025_01" in sp and "572,850" in sp
+    assert "590,183" in sp and "the reverse of every other row" in sp
     # A file whose CA atoms are twice as far apart, on a 0 to 1 confidence scale, gets the warning
     lines = []
     for l in st["text"].splitlines():
@@ -276,16 +280,14 @@ def test_site_from_test_data(tmp_path):
     assert "not a physical protein chain" in build.structure_html("X", sb) and "median 7.7" in build.structure_html("X", sb)
     # KIF11 has a Swiss-Prot hit, so FANTASIA was not run on it: 11 programs run
     kif = (out / "proteins" / "FUN016555_KIF11.html").read_text()
-    assert '<p class="summary" id="sent">10 of the 11 programs run report a hit.' in kif
+    kpage = json.loads(re.search(r"const PAGE=(.*?);window\.WHOLE=", kif).group(1).replace("<\\/", "</"))
+    assert kpage["sent"][-1][1].startswith("10 of the 11 programs run report a hit.")
     assert "P52732" in kif and "not run: FANTASIA was run only on proteins" in kif
-    # The BHF sentence and the note under it link each Pfam accession to its InterPro page, as
-    # built and in the slider's copies the page swaps in (PAGE.sent).
+    # The sentence and the note under it link each Pfam accession to its InterPro page (PAGE.sent)
     vpr = ('VPR (<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF00522/" '
            'target="_blank" rel="noopener">PF00522</a>)')
-    assert vpr in re.search(r'<p class="summary" id="sent">(.*?)</p>', html).group(1)
-    note = re.search(r'<div id="sentnote">(.*?)</div>', html).group(1)
-    assert 'GrpE (<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF01025/"' in note
-    assert any(vpr in s[1] for s in page["sent"])
+    assert vpr in page["sent"][-1][1]
+    assert 'GrpE (<a class="mono" href="https://www.ebi.ac.uk/interpro/entry/pfam/PF01025/"' in page["sent"][-1][2]
     assert not [s for s in page["sent"] if re.search(r"\(PF\d{5}\)", s[1] + s[2])]
 
 
@@ -392,7 +394,7 @@ def test_kmerseek_hits_carry_alphabet_ksize_and_seed(tmp_path):
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
     page = (out / "proteins" / "FUN008084_FUN008084.html").read_text()
-    P = json.loads(re.search(r"const PAGE=(\{.*?\});</script>", page).group(1))
+    P = json.loads(re.search(r"const PAGE=(\{.*?\});window\.WHOLE=", page).group(1))
     km = [h for h in P["hits"] if h["k"] == "kmerseek"]
     assert set(P["alpha"]) == {h["m"] for h in km}
     pg = [h for h in km if h.get("t") == "P9WIG2" and h["m"] == "gbmr4" and h["kk"] == 19]

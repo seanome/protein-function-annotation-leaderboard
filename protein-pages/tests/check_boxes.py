@@ -27,7 +27,7 @@ def main():
     sp = {build.accession(h.split()[0]): s for h, s in build.read_fasta(inp / "swissprot.fasta").items()}
     boxes = []
     for page in sorted((site / "proteins").glob("*.html")):
-        m = re.search(r"const PAGE=(\{.*?\});</script>", page.read_text())
+        m = re.search(r"const PAGE=(\{.*?\});window\.WHOLE=", page.read_text())
         data = json.loads(m.group(1).replace("<\\/", "</"))
         aln_file = page.with_name(page.stem + ".aln.js")
         alns = json.loads(aln_file.read_text()[len("window.ALN="):-1]) if aln_file.exists() else {}

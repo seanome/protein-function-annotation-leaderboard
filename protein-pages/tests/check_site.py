@@ -21,6 +21,13 @@ import build  # noqa: E402
 LEGEND = {c.lower() for c in [f["color"] for f in build.PROGRAMS.values()]
           + [build.PROTEIN_LINE, build.AGREEMENT, build.EXPRESSION, build.HIGHLIGHT] + [p[2] for p in build.PLDDT]}
 NEUTRAL = {"#fff", "#ffffff", "#1a1a1a", "none", "transparent", "#c3c2b7"}  # #c3c2b7: outline of a residue in neither class; transparent: a dashed box's click area
+# The dense page's key and controls (assets/dense-bhf.css names them): #b8860b the kmerseek seed, which the
+# key shows; #d6d5cf, #8a8a8a and #52514e the other protein's line, its domain boxes and its matched part,
+# which the key's "under a hit" entry shows; #898781 the search box's magnifier (not data)
+NEUTRAL |= {"#b8860b", "#d6d5cf", "#8a8a8a", "#52514e", "#898781"}
+# and dense-bhf.js's greys: #0b0b0b ink (the brackets of the families the sentence rests on, named by their
+# labels), #e1e0d9 the row rule, #efeee9 the fill of a Pfam box on the domain lane (outlined in #3D3D3D)
+NEUTRAL |= {"#0b0b0b", "#e1e0d9", "#efeee9"}
 
 
 STATUS_WORDS = {"none": "", "one": "", "agree": "Their hits along the protein agree on",
@@ -32,7 +39,7 @@ STATUS_WORDS = {"none": "", "one": "", "agree": "Their hits along the protein ag
 def SENT_LEAD(n, m, full=8):
     """How the sentence starts for n programs with a hit, of m run, of full programs (build.header_sentence)."""
     if n == 0:
-        return "No tool reports a hit." if m == full else "None of the %d programs run" % m
+        return "No program reports a hit." if m == full else "None of the %d programs run" % m
     return "%d %s" % (n, build.of_programs(m, full))
 
 
@@ -42,7 +49,7 @@ def main():
     for page in sorted((site / "proteins").glob("*.html")):
         s = page.read_text()
         used = {c.lower() for c in re.findall(r'(?:fill|stroke)="([^"]+)"', s)}
-        js = (site / "assets" / "protein.js").read_text()
+        js = (site / "assets" / "dense-bhf.js").read_text()
         used |= {c.lower() for c in re.findall(r'(?:fill|stroke)="(#[0-9A-Fa-f]{3,6})"', js)}
         extra = {c for c in used - LEGEND - NEUTRAL if not c.startswith("url(#hatch-")}  # hatch: a kind's colour
         if extra:
@@ -66,7 +73,9 @@ def main():
     mism = []
     for status, progs, pid, n in rows:
         s = (site / "proteins" / (pid + ".html")).read_text()
-        sent = re.search(r'<p class="summary"[^>]*>(.*?)</p>', s).group(1)
+        # the sentence at the counting cutoff: the last of PAGE.sent's steps at or below it (dense-bhf.js shows it)
+        steps = json.loads(re.search(r"const PAGE=(.*?);window\.WHOLE=", s).group(1).replace("<\\/", "</"))["sent"]
+        sent = [x for x in steps if x[0] <= round(__import__("math").log10(summary["count_at"]))][-1][1]
         n = int(n)
         # how many programs were run differs by protein (FANTASIA ran on some only), so read M off the sentence
         mm = re.match(r"\d+ of (?:the )?(\d+) programs", sent) or re.match(r"None of the (\d+) programs", sent)

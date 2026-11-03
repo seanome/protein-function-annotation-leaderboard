@@ -260,3 +260,8 @@ header.top .colhead{margin-right:340px}
 :root{--cols:210px 100px 78px 76px 56px minmax(120px,170px) minmax(200px,1fr)}
 @media (min-width:1700px){.withviewer{grid-template-columns:minmax(0,1fr) 420px}header.top .colhead{margin-right:420px}.viewer #mol{height:400px}}
 .key i.ramp{width:auto;height:auto;display:inline-flex;gap:1px;margin-right:4px}
+
+/* added for this site (not in the BHF page): a protein with no predicted structure has no viewer
+   column, so the grid and the column names take the full width */
+.withviewer.noviewer{grid-template-columns:minmax(0,1fr)}
+body:has(.withviewer.noviewer) header.top .colhead{margin-right:0}
