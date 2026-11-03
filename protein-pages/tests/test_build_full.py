@@ -187,3 +187,28 @@ def test_known_proteins_link_only_when_drawn():
     html = build_full.known_html(page)
     assert 'href="proteins/FUN008084_FUN008084.html"' in html and "BHF" in html
     assert build_full.known_html({}) == ""
+
+
+def test_index_position_track(site):
+    """The first page's track: each row carries InterProScan's Pfam matches and MMseqs2's best hit,
+    read from the same tables the protein pages use, and the headline counts match the summary."""
+    out, summ = site
+    data = read_js(out / "full" / "rows.js", "window.FULL=")
+    rows = {r[0]: r for r in data["rows"]}
+    ips = {}
+    for f in csv.reader(gzip.open(FULL / "interproscan.tsv.gz", "rt"), delimiter="\t"):
+        if f[3] == "Pfam":
+            ips.setdefault(f[0], []).append((int(f[6]), int(f[7]), f[4]))
+    assert sum(1 for r in rows.values() if r[15]) == len(ips)
+    for pid in list(ips)[:200]:
+        got = sorted((s, e, data["pfam"][i][0]) for s, e, i in rows[pid][15])
+        assert got == sorted(ips[pid])
+    mm = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "mmseqs2_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
+    assert sum(1 for r in rows.values() if r[16]) == len(mm)
+    pid = next(iter(mm))
+    assert rows[pid][16] == [int(mm[pid]["qstart"]), int(mm[pid]["qend"]), round(100 * float(mm[pid]["fident"]), 1), mm[pid]["target"]]
+    html = (out / "index.html").read_text()
+    n = summ["total"]
+    assert ("%s of %s proteins (%d%%) match a Swiss-Prot protein" % ("{:,}".format(summ["swissprot_hit"]), "{:,}".format(n),
+                                                                     round(100 * summ["swissprot_hit"] / n))) in html
+    assert 'href="assets/dense.css' in html and (out / "assets" / "index.css").exists()

@@ -267,6 +267,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
 
     name = {r["protein_id"]: r["proposed_name"] or r["existing_name"] for r in ann}
     rows, shards = [], defaultdict(dict)
+    pfam_ix = {}  # Pfam accession -> its index in the data file's pfam list: [accession, InterProScan's description]
     for r in ann:
         pid = r["protein_id"]
         im = immune.get(pid)
@@ -279,7 +280,11 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         rows.append([pid, lengths[pid][0], r["existing_name"], r["proposed_name"], status_code[r["name_status"]],
                      r["sp_name"], r["sp_acc"], num(r["sp_pident"]), num(r["sp_qcov"]), r["sp_evalue"],
                      ", ".join(dict.fromkeys(n for _, n in pf)), mask,
-                     "", size, drawn_page.get(pid, "")])  # 12 is empty: it held the Fester or BHF match
+                     "", size, drawn_page.get(pid, ""),  # 12 is empty: it held the Fester or BHF match
+                     # 15: InterProScan's Pfam matches, [start, end, index into pfam]; 16: MMseqs2's best
+                     # hit, [start, end, identity %, accession], for the index page's position track
+                     [[x[3], x[4], pfam_ix.setdefault(x[1], len(pfam_ix))] for x in sorted(ips.get(pid, []), key=lambda x: x[3]) if x[0] == "Pfam"] if ips else [],
+                     [mm[pid][2], mm[pid][3], round(100 * mm[pid][1], 1), mm[pid][0]] if mm and mm.get(pid) else None])
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
         fa = None
@@ -304,6 +309,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), rep=rep,
             mem=[[m, name[m]] for m in mem[:MEMBERS_MAX]], more=max(0, len(mem) - MEMBERS_MAX))
 
+    pfam_desc = {x[1]: x[2] for v in (ips or {}).values() for x in v if x[0] == "Pfam"}
     (out / "full").mkdir(parents=True, exist_ok=True)
     asset_ver = "?v=" + hashlib.md5(b"".join(p.read_bytes() for p in sorted((Path(__file__).parent / "assets").glob("*.*")))).hexdigest()[:8]
     if drawn:
@@ -328,7 +334,8 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         (out / "full" / ("%03d.js" % s)).write_text(
             "window.FULL_SHARD=Object.assign(window.FULL_SHARD||{},%s);" % json.dumps(shards.get(s, {}), separators=(",", ":")))
     (out / "full" / "rows.js").write_text("window.FULL=%s;" % json.dumps(
-        dict(cats=cats, check=[t for _, t in NAME_CHECK], verdicts=VERDICT_TEXT, rows=rows), separators=(",", ":")))
+        dict(cats=cats, check=[t for _, t in NAME_CHECK], verdicts=VERDICT_TEXT, rows=rows,
+             pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)]), separators=(",", ":")))
 
     n = len(rows)
     summ = dict(
@@ -356,10 +363,12 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     return summ
 
 
-def head(title, ver):
+def head(title, ver, dense=False):
+    """The page head; dense: the first page's stylesheets (dense.css from the BHF page, index.css) after site.css."""
+    more = '<link rel="stylesheet" href="assets/dense.css%s"><link rel="stylesheet" href="assets/index.css%s">' % (ver, ver) if dense else ""
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1"><title>%s</title>%s'
-            '<link rel="stylesheet" href="assets/site.css%s"></head><body>' % (build.esc(title), build.CSS_LINKS, ver))
+            '<link rel="stylesheet" href="assets/site.css%s">%s</head><body>' % (build.esc(title), build.CSS_LINKS, ver, more))
 
 
 def bars(items, total, key):
@@ -381,58 +390,104 @@ def known_html(drawn_page):
     links = ['<a class="known" href="%s"><b>%s</b> %s <span class="mono">%s</span></a>'
              % (build.esc(drawn_page[pid]), build.esc(short), build.esc(full), build.esc(pid))
              for pid, short, full in KNOWN if pid in drawn_page]
-    return '<p class="knownrow">Go straight to: %s</p>' % " ".join(links) if links else ""
+    return '<span class="knownrow">go straight to %s</span>' % " ".join(links) if links else ""
+
+
+AXIS_AA = 2000  # the index page's position track runs from residue 1 to this; 99% of proteins are shorter
 
 
 def index_html(s, cats, inputs, ver, known=""):
+    """The first page, after the dense-results-page skill: the answer in one sentence, then a sticky
+    header (filters, search, a three-line key, column names, the residue ruler) over one grid row per
+    protein, each with its Pfam matches and MMseqs2's best hit drawn along the protein."""
     f = "{:,}".format
-    nums = [("all", s["total"], "proteins"), ("sp", s["swissprot_hit"], "with a Swiss-Prot hit"),
-            ("pfam", s["pfam_domain"], "with a Pfam domain"), ("none", s["neither"], "with neither"),
-            ("immune", s["immune_candidates"], "immune-gene candidates"),
-            ("drawn", s["drawn"], "with every program's hits drawn")]
-    tiles = "".join('<button class="num" data-t="%s"><span class="big">%s</span><span>%s</span></button>' % (k, f(v), build.esc(t))
-                    for k, v, t in nums)
-    cat_bars = bars([(i, s["immune_categories"][c], c) for i, c in enumerate(cats)], s["total"], "cat")
-    chk_bars = bars([(i, s["name_check"][t], t) for i, (_, t) in enumerate(NAME_CHECK)], s["total"], "chk")
-    return head("Botryllus proteome annotations", ver) + """
-<header class="wide"><h1>Every <i>Botryllus schlosseri</i> protein, and what is known about it</h1>
-<p class="summary">%s proteins of the new genome's predicted proteome. For each: its best Swiss-Prot match, its Pfam domains,
-and whether it looks like an immune gene.</p>%s</header>
-<main class="wide">
-<section class="nums">%s</section>
-<p class="note">Click a number to list those proteins. %s pages draw every annotation program's hits along the protein
-(<a href="drawn.html">their own index</a>); %s proteins link to one, since some proteins have the same sequence.</p>
-<div class="twocol">
-<section><h2>Immune-gene candidates, by category</h2>
-<p class="note">%s proteins; one protein can be in several categories. A category comes from a Pfam domain, the gene
-name, or an immune keyword or GO term of the best Swiss-Prot match; each protein page says which.
-jackhmmer hits from immune seed proteins do not set a category: %s proteins have one and are in no category.
-Click a bar to list its proteins.</p>%s</section>
-<section><h2>Proposed name compared with the existing name</h2>
-<p class="note">The existing name is the one in the FASTA header. The proposed name comes from the best Swiss-Prot match
-or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (NLRC5 and Nlrc5-like).</p>%s</section>
+    n = s["total"]
+    pc = lambda v: "%d%%" % round(100 * v / n)
+    chips = [("all", n, "all"), ("sp", s["swissprot_hit"], "Swiss-Prot match"), ("pfam", s["pfam_domain"], "Pfam domain"),
+             ("none", s["neither"], "neither"), ("immune", s["immune_candidates"], "immune-gene candidate"),
+             ("drawn", s["drawn"], "every program drawn")]
+    chip_html = "".join('<button class="chip%s" data-t="%s">%s %s</button>' % (" on" if k == "all" else "", k, build.esc(w), f(v))
+                        for k, v, w in chips)
+    cat_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(c), f(s["immune_categories"][c])) for i, c in enumerate(cats))
+    chk_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(t), f(s["name_check"][t])) for i, (_, t) in enumerate(NAME_CHECK))
+    cat_bars = bars([(i, s["immune_categories"][c], c) for i, c in enumerate(cats)], n, "cat")
+    chk_bars = bars([(i, s["name_check"][t], t) for i, (_, t) in enumerate(NAME_CHECK)], n, "chk")
+    seq, dom = build.CATEGORIES["seq"]["color"], build.CATEGORIES["pfam"]["color"]
+    ramp = "".join('<i style="opacity:%s;background:%s"></i>' % (o, seq) for o in (".3", ".5", ".75", "1"))
+    ticks = "".join('<text x="%.2f%%" y="10" class="ax" text-anchor="%s">%s</text><line x1="%.2f%%" x2="%.2f%%" y1="12" y2="16" stroke="#c3c2b7"/>'
+                    % (100 * (v - 1) / (AXIS_AA - 1), "start" if v == 1 else "end" if v == AXIS_AA else "middle", f(v), 100 * (v - 1) / (AXIS_AA - 1), 100 * (v - 1) / (AXIS_AA - 1))
+                    for v in (1, 500, 1000, 1500, AXIS_AA))
+    return head("Botryllus proteome annotations", ver, dense=True) + """
+<div class="titleblock">
+ <div class="titlebar"><h1><i>Botryllus schlosseri</i> proteome</h1><span class="pn">%(n)s proteins predicted from the new genome: what each one matches</span>%(known)s</div>
+ <div class="sentence"><p id="sent">%(sp)s of %(n)s proteins (%(spp)s) match a Swiss-Prot protein, %(pf)s (%(pfp)s) carry a Pfam domain, and %(ne)s (%(nep)s) have neither.</p>
+ <div id="sentnote"><p class="note">Swiss-Prot match = DIAMOND's best hit at E-value 0.001 or below, against Swiss-Prot release 2026_03 (575,748 proteins).
+ Pfam domain = a Pfam model found by pyhmmer's hmmsearch at Pfam's own gathering thresholds. Both were run by Biomni, the agent that ran
+ every whole-proteome program here (full_inputs/README.md says how). %(dp)s proteins have a page that draws every program's hits along the
+ protein (<a href="drawn.html">their own index</a>); %(dr)s proteins link to one, since some share a sequence.</p></div></div>
+ <div class="overview">
+ <section><h2>Immune-gene candidates, by category</h2><p class="note">%(im)s proteins; one protein can be in several categories. A category
+ comes from a Pfam domain, the gene name, or an immune keyword or GO term of the best Swiss-Prot match; each protein page says which.
+ jackhmmer hits from immune seed proteins set no category: %(jn)s proteins have one and are in no category. Click a bar to list its proteins.</p>%(cb)s</section>
+ <section><h2>Proposed name compared with the existing name</h2><p class="note">Existing = the name in the FASTA header. Proposed = from
+ the best Swiss-Prot match or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (NLRC5 and Nlrc5-like).</p>%(kb)s</section>
+ </div>
 </div>
-<h2>Proteins</h2>
-<div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off"
- placeholder="an ID, gene, protein name, Pfam domain or category, e.g. NLRC5, lectin, TIR"></div>
-<p class="note">"Swiss-Prot" on this page means release 2026_03 (575,748 proteins), the copy Biomni's DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (E-value 0.001 or below, at most 25 per protein). The protein pages say which copy each other program searched.</p>
-<p class="note">The search reads the ID, the existing and proposed names, the best Swiss-Prot match's name and accession,
-the Pfam domain names and the immune categories. Every word typed must appear.</p>
-<p id="count" class="note"></p>
-<div class="tablewrap"><table id="t" class="full"><thead><tr>
-<th data-k="0" data-t="s">Protein</th><th data-k="1">Length (aa)</th><th data-k="2" data-t="s">Existing name</th>
-<th data-k="3" data-t="s">Proposed name</th><th data-k="5" data-t="s">Best Swiss-Prot match (DIAMOND)</th>
-<th data-k="7">Identity (%%)</th><th data-k="8">Coverage of your protein (%%)</th>
-<th data-k="10" data-t="s">Pfam domains</th><th>Immune categories</th>
-<th data-k="13">Proteins in its MMseqs2 cluster</th><th>Drawn</th></tr></thead><tbody></tbody></table></div>
-<p><button id="more" hidden>Show 100 more</button></p>
-</main>
-<footer><h2>Input files read</h2><p class="note">Built by build_full.py from %s. These tables come from a Biomni run
-(full_inputs/README.md in the repository says how each was made). Identity and coverage are DIAMOND's, against
-Swiss-Prot. No tool was run to make these pages.</p></footer>
-<script src="full/rows.js%s"></script><script src="assets/full.js%s"></script></body></html>
-""" % (f(s["total"]), known, tiles, f(s["drawn_pages"]), f(s["drawn"]), f(s["immune_candidates"]), f(s["jackhmmer_not_immune"]), cat_bars, chk_bars,
-       build.esc(", ".join(inputs)), ver, ver)
+<header class="top ix">
+ <div class="filters">
+  <span class="lead2">Show:</span><span class="ladder" id="tiles">%(chips)s</span>
+  <label>immune category <select id="cat"><option value="-1">any</option>%(cat_opts)s</select></label>
+  <label>names <select id="chk"><option value="-1">any</option>%(chk_opts)s</select></label>
+  <span class="search"><input id="q" type="search" placeholder="ID, gene, name, Pfam domain, category" autocomplete="off" spellcheck="false" aria-label="Search: every word must match"></span>
+  <button class="btn" id="dl" title="Every protein the filters keep, not only the rows drawn, one line each, as a tab-separated file">&#8595; TSV</button>
+  <button class="btn" id="help-btn" aria-expanded="false" title="What the columns and marks mean; keys">? Help</button>
+  <button class="btn" id="clear" title="Show all proteins again, clear the search and the sort">&#215; clear all</button>
+  <span class="count" id="count" aria-live="polite"></span>
+ </div>
+ <div class="key"><span class="lead">along each protein:</span>
+  <span><svg width="26" height="10"><line x1="0" x2="26" y1="5" y2="5" stroke="#c8c8c8" stroke-width="2"/></svg>the protein, to its own length (a cut at %(ax)s aa is marked &#8250;)</span>
+  <span><svg width="16" height="10"><rect x="1" y="1" width="14" height="8" fill="#fff" stroke="%(dom)s" stroke-width="1.2"/></svg>Pfam match by InterProScan</span>
+  <span class="kind"><b>MMseqs2's best Swiss-Prot hit</b> (DIAMOND's table has no positions): fainter = fewer identical residues <i class="ramp">%(ramp)s</i> &lt;20%% · 20–40 · 40–60 · 60+</span>
+ </div>
+ <div class="g ixg colhead">
+  <div><button data-k="0" data-t="s">protein · existing name &#8594; proposed <i></i></button></div>
+  <div class="num"><button data-k="1">length (aa) <i></i></button></div>
+  <div><button data-k="5" data-t="s">best Swiss-Prot match (DIAMOND) <i></i></button></div>
+  <div class="num"><button data-k="7" title="identity: identical residues in DIAMOND's alignment; coverage: the share of your protein it spans">identity · coverage <i></i></button></div>
+  <div class="num"><button data-k="9" data-t="e">E-value <i></i></button></div>
+  <div><button data-k="10" data-t="s" title="Pfam models found by pyhmmer's hmmsearch (Biomni)">Pfam domains <i></i></button></div>
+  <div>immune categories</div>
+  <div class="num"><button data-k="13" title="proteins in its MMseqs2 cluster, itself included">cluster <i></i></button></div>
+  <div class="track">where: residue 1 to %(ax)s</div>
+ </div>
+ <div class="g ixg ruler"><div class="lbl">%(cnt)s</div><div class="track"><svg width="100%%" height="16">%(ticks)s</svg></div></div>
+</header>
+<main><div id="grid" role="list" data-ax="%(axn)d" data-seq="%(seq)s" data-dom="%(dom)s"></div><p class="morebar"><button class="btn" id="more" hidden>Show 100 more</button></p></main>
+<div class="help" id="help" role="dialog" aria-label="Help">
+ <h2>Rows</h2><p>One row per protein, 100 at a time. Click a row, or press Enter on it, to open its page.</p>
+ <h2>Columns</h2><dl>
+ <dt>protein</dt><dd>the ID in the proteome FASTA (gene ID, underscore, transcript ID; a second isoform of the same gene gets .2), then the
+ name in the FASTA header and the proposed name</dd>
+ <dt>best Swiss-Prot match</dt><dd>DIAMOND's best hit (E-value 0.001 or below) in Swiss-Prot 2026_03, with its accession</dd>
+ <dt>identity · coverage</dt><dd>identical residues in DIAMOND's alignment, and the share of your protein the alignment spans</dd>
+ <dt>Pfam domains</dt><dd>Pfam models found by pyhmmer's hmmsearch at Pfam's gathering thresholds (Biomni). The boxes in the track are
+ InterProScan's Pfam matches, which can differ</dd>
+ <dt>cluster</dt><dd>proteins in the same MMseqs2 cluster (Biomni's clustering of the proteome), itself included</dd>
+ <dt>where</dt><dd>the protein from residue 1 to %(ax)s on one scale for every row; a longer protein ends in &#8250; and its length is in the
+ length column</dd></dl>
+ <h2>Keys</h2><p><kbd>j</kbd>/<kbd>k</kbd> next / previous row · <kbd>Enter</kbd> open its page · <kbd>/</kbd> search · <kbd>Esc</kbd> close
+ this, or clear the search</p>
+</div>
+<section class="below"><h2>Which Swiss-Prot</h2><p class="note">"Swiss-Prot" on this page is release 2026_03 (575,748 proteins), the copy
+DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (at most 25 per protein). Each protein's page says which copy each other
+program searched.</p></section>
+<footer><h2>Input files read</h2><p class="note">Built by build_full.py from %(inputs)s. These tables come from Biomni's runs
+(full_inputs/README.md says how each was made). No program was run to make this page.</p></footer>
+<script src="full/rows.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
+""" % dict(n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
+           ne=f(s["neither"]), nep=pc(s["neither"]), dp=f(s["drawn_pages"]), dr=f(s["drawn"]), im=f(s["immune_candidates"]),
+           jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts,
+           ax=f(AXIS_AA), axn=AXIS_AA, seq=seq, dom=dom, ramp=ramp, ticks=ticks, cnt="", inputs=build.esc(", ".join(inputs)), ver=ver)
 
 
 def protein_html(ver):
