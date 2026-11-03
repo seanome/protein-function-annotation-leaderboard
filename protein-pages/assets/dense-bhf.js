@@ -185,7 +185,7 @@
     const n = shardOf(acc);
     if (!loading[n]) loading[n] = new Promise((res) => {
       const s = document.createElement("script");
-      s.src = `../targets/${String(n).padStart(3, "0")}.js`;
+      s.src = `${PAGE.tbase ?? "../"}targets/${String(n).padStart(3, "0")}.js`;  // protein.html sits at the site's root: tbase ""
       s.onload = res; s.onerror = res;
       document.head.appendChild(s);
     });

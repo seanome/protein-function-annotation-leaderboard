@@ -179,7 +179,8 @@ def test_foldseek_on_structures_on_the_pages(site):
     raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_struct_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
     pid = next(p for p, v in fst.items() if v and v != "not run")
     assert build.af_accession(raw[pid]["target"]) == fst[pid][0] and int(raw[pid]["qstart"]) == fst[pid][2]
-    assert fst[pid][8:] == [float(raw[pid]["alntmscore"]), float(raw[pid]["lddt"])]
+    assert fst[pid][8:10] == [float(raw[pid]["alntmscore"]), float(raw[pid]["lddt"])]
+    assert fst[pid][10:] == [int(raw[pid]["tstart"]), int(raw[pid]["tend"])]  # the range on the other protein
 
 
 def test_known_proteins_link_only_when_drawn():
@@ -232,3 +233,16 @@ def test_protein_html_is_the_dense_page(site):
     assert const["struct_max_aa"] == build_full.STRUCT_MAX_AA and const["fantasia_max"] == build.FANTASIA_MAX_DIST
     assert const["ips_drawn"]["MobiDBLite"] == {"*": "disorder"}
     assert (out / "assets" / "protein-dense.js").exists() and (out / "assets" / "dense-bhf.js").exists()
+
+
+def test_read_proteome_names_isoforms_and_checks_md5(tmp_path):
+    """--proteome-fasta: the second copy of a gene's header is FUN1.2, as make_proteome_lengths.py names
+    it, and a sequence whose length or MD5 differs from proteome_lengths.tsv stops the build."""
+    import hashlib
+    fa = tmp_path / "p.fasta"
+    fa.write_text(">FUN1_A\nMKV\n>FUN1_A\nMKVL*\n>FUN2_B\nMA\n")
+    md5 = lambda s: hashlib.md5(s.encode()).hexdigest()
+    lengths = {"FUN1": (3, md5("MKV")), "FUN1.2": (4, md5("MKVL")), "FUN2": (2, md5("MA"))}
+    assert build_full.read_proteome(fa, lengths) == {"FUN1": "MKV", "FUN1.2": "MKVL", "FUN2": "MA"}
+    with pytest.raises(SystemExit):
+        build_full.read_proteome(fa, dict(lengths, FUN2=(2, md5("MG"))))

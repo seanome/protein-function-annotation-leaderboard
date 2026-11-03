@@ -197,7 +197,8 @@ def load(folder):
     mm = None
     if inp(folder, "mmseqs2_best_per_protein.tsv").exists():
         mm = {r["protein_id"]: [r["target"], float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
-                                uni.get(r["target"], {}).get("protein_name", ""), uni.get(r["target"], {}).get("organism", "")]
+                                uni.get(r["target"], {}).get("protein_name", ""), uni.get(r["target"], {}).get("organism", ""),
+                                int(r["tstart"]), int(r["tend"])]  # last two: the range on the other protein
               for r in tsv("mmseqs2_best_per_protein.tsv")}
     # Best Foldseek hit per protein (make_foldseek_tables.py): ProstT5 + Foldseek on the whole
     # proteome, and Foldseek on predicted structures of proteins up to STRUCT_MAX_AA; optional
@@ -216,10 +217,41 @@ def load(folder):
                                         uni.get(acc, {}).get("protein_name", ""), uni.get(acc, {}).get("organism", "")]
                 if "lddt" in r:  # Foldseek on structures: TM-score and LDDT of the alignment
                     out[r["protein_id"]] += [float(r["alntmscore"]), float(r["lddt"])]
+                out[r["protein_id"]] += [int(r["tstart"]), int(r["tend"])]  # last two: the range on the other protein
         return out
     fs = foldseek("foldseek_best_per_protein.tsv")
     fst = foldseek("foldseek_struct_best_per_protein.tsv")
     return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst
+
+
+def add_targets(out, tseqs):
+    """Merge the best hits' Swiss-Prot sequences into the target files (targets/NNN.js, build.py's
+    write_target_shards), keeping build.py's file for each accession, so no file is added. Returns
+    the number of target files (0 if there are none)."""
+    files = sorted((out / "targets").glob("*.js")) if (out / "targets").is_dir() else []
+    if not files:
+        if tseqs:
+            (out / "targets").mkdir(exist_ok=True)
+            files = [out / "targets" / ("%03d.js" % i) for i in range(max(1, len(tseqs) // 300))]
+            for f in files:
+                f.write_text("(window.TSEQ=window.TSEQ||{}),Object.assign(TSEQ,{});")
+        else:
+            return 0
+    n = len(files)
+    pre, post = "(window.TSEQ=window.TSEQ||{}),Object.assign(TSEQ,", ");"
+    by = {}
+    for acc, s in tseqs.items():
+        by.setdefault(build.shard_of(acc, n), {})[acc] = s
+    for i, f in enumerate(files):
+        if i not in by:
+            continue
+        text = f.read_text()
+        if not (text.startswith(pre) and text.endswith(post)):
+            sys.exit("%s is not a target file build.py wrote" % f)
+        d = json.loads(text[len(pre):-len(post)])
+        d.update({k: v for k, v in by[i].items() if k not in d})
+        f.write_text(pre + json.dumps(d, separators=(",", ":"), sort_keys=True) + post)
+    return n
 
 
 def read_cards(paths):
@@ -242,9 +274,52 @@ def evidence_list(s):
     return out
 
 
-def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
+def read_proteome(path, lengths):
+    """The proteome FASTA's sequences under the Biomni IDs (make_proteome_lengths.py's naming: the
+    first copy of a gene's header is FUN015821, later ones FUN015821.2, ...), each checked against
+    proteome_lengths.tsv's length and MD5, so a sequence can only land on its own protein."""
+    seen, recs = Counter(), []
+    for line in opentext(path):
+        line = line.strip()
+        if line.startswith(">"):
+            gene = line[1:].split()[0].split("_")[0]
+            seen[gene] += 1
+            recs.append([gene if seen[gene] == 1 else "%s.%d" % (gene, seen[gene]), []])
+        elif line:
+            recs[-1][1].append(line)
+    out = {}
+    for pid, parts in recs:
+        s = "".join(parts).rstrip("*")
+        if pid not in lengths or lengths[pid] != (len(s), hashlib.md5(s.encode()).hexdigest()):
+            sys.exit("%s in %s does not match proteome_lengths.tsv (length and MD5)" % (pid, path))
+        out[pid] = s
+    if len(out) != len(lengths):
+        sys.exit("%s has %d proteins, proteome_lengths.tsv %d" % (path, len(out), len(lengths)))
+    return out
+
+
+def read_swissprot(path, want):
+    """Sequences of the accessions in want, from a UniProt FASTA (headers sp|P12345|NAME_SPECIES ...)."""
+    out, cur = {}, None
+    for line in opentext(path):
+        if line.startswith(">"):
+            acc = line[1:].split("|")[1] if "|" in line else line[1:].split()[0]
+            cur = acc if acc in want else None
+            if cur:
+                out[cur] = []
+        elif cur:
+            out[cur].append(line.strip())
+    return {k: "".join(v) for k, v in out.items()}
+
+
+def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=None, swissprot=None):
     t0 = time.time()
     ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst = load(folder)
+    seqs = read_proteome(proteome, lengths) if proteome else {}
+    # the Swiss-Prot proteins of the best hits with a position (MMseqs2, ProstT5 + Foldseek, Foldseek on
+    # structure), so protein.html can align the two proteins; isoforms (P12345-2) are not in uniprot_sprot.fasta
+    best_targets = {v[0] for d in (mm, fs, fst) if d for v in d.values() if v}
+    tseqs = read_swissprot(swissprot, best_targets) if swissprot else {}
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -304,6 +379,10 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
             mm=None if mm is None else mm.get(pid, 0),
             fs=None if fs is None else fs.get(pid, 0),  # 0: no hit at FOLDSEEK_MAX_E or below
             fst=None if fst is None else ("not run" if lengths[pid][0] > STRUCT_MAX_AA else fst.get(pid, 0)),
+            # the sequence (only for a protein without a drawn page; a drawn page carries its own), and the
+            # lengths of its best hits' Swiss-Prot proteins, for the line under each hit
+            q=seqs.get(pid) if not drawn_page.get(pid) else None,
+            tl={v[0]: len(tseqs[v[0]]) for v in (mm and mm.get(pid), fs and fs.get(pid), fst and fst.get(pid)) if v and v[0] in tseqs},
             ips=None if ips is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not ips.get(pid) else sorted(ips.get(pid, []), key=lambda x: (x[3], x[4]))),  # 0: searched, no hit at E-value KMERSEEK_MAX_E or below
             uf=None if uf is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not uf.get(pid) else uf.get(pid, [])),
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
@@ -332,6 +411,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
                 sys.exit("could not add the Biomni tables to %s" % page)
             f.write_text(html)
     shutil.copytree(Path(__file__).parent / "assets", out / "assets", dirs_exist_ok=True)
+    n_tseq = add_targets(out, tseqs)
     for s in range(N_SHARDS):
         (out / "full" / ("%03d.js" % s)).write_text(
             "window.FULL_SHARD=Object.assign(window.FULL_SHARD||{},%s);" % json.dumps(shards.get(s, {}), separators=(",", ":")))
@@ -360,7 +440,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
     inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
     (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver, known_html(drawn_page)))
-    (out / "protein.html").write_text(protein_html(asset_ver))
+    (out / "protein.html").write_text(protein_html(asset_ver, n_tseq))
     print("%d proteins, %d drawn, %d data files, %.1f s" % (n, summ["drawn"], N_SHARDS, time.time() - t0))
     return summ
 
@@ -517,7 +597,7 @@ program searched.</p></section>
            other="; ".join("%s: %s" % (a, c) for a, c in OTHER_HITS), ax=f(AXIS_AA), axn=AXIS_AA, tw=TRACK_PCT, seq=seq, dom=dom, ramp=ramp, ticks=ticks, cnt="", inputs=build.esc(", ".join(inputs)), ver=ver)
 
 
-def protein_html(ver):
+def protein_html(ver, n_tseq=0):
     """protein.html: the dense page (assets/dense-bhf.js, as on a drawn page) for any protein, from
     the whole-proteome tables; assets/protein-dense.js builds its data from full/NNN.js. The key lists
     the programs with positions in those tables; the Swiss-Prot table lists the programs run on every protein."""
@@ -529,7 +609,7 @@ def protein_html(ver):
                                cat=build.PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in build.TRACKS},
         program_names={k: v["name"] for k, v in build.PROGRAMS.items()}, ips_drawn=build.IPS_DRAWN, ips_evalue=sorted(build.IPS_EVALUE),
         fantasia_max=build.FANTASIA_MAX_DIST, kmerseek_max_e=KMERSEEK_MAX_E, struct_max_aa=STRUCT_MAX_AA,
-        pfam_color=build.CATEGORIES["pfam"]["color"], ver=ver)
+        pfam_color=build.CATEGORIES["pfam"]["color"], ver=ver, tseq_files=n_tseq)
     head = build.page_head("Botryllus protein: what every annotation program found", 0).replace(
         "</head>", '<link rel="stylesheet" href="assets/dense-bhf.css%s"></head>' % ver, 1)
     help_ = ('<aside class="help" id="help"><h2>What this page is</h2><p>Every program\'s best hit on this protein, from Biomni\'s runs on '
@@ -564,6 +644,10 @@ def main():
     ap.add_argument("--drawn", type=Path, help="a site made by build.py, to link to and copy in")
     ap.add_argument("--drawn-fasta", type=Path, help="the proteins.fasta that site was built from")
     ap.add_argument("--cards", type=Path, nargs="*", help="gene cards from gene_cards/run_cards.py (.jsonl)")
+    ap.add_argument("--proteome-fasta", type=Path, help="the proteome FASTA (not in the repository: the proteome is unpublished); "
+                    "each protein's sequence goes into its data file, so protein.html can show its residues")
+    ap.add_argument("--swissprot-fasta", type=Path, help="uniprot_sprot.fasta(.gz) of the release the best hits searched (2026_03); "
+                    "their Swiss-Prot proteins go into the target files, so protein.html can align the two")
     a = ap.parse_args()
     if bool(a.drawn) != bool(a.drawn_fasta):
         sys.exit("--drawn and --drawn-fasta go together")
@@ -574,7 +658,7 @@ def main():
         shutil.rmtree(a.out)
     a.out.mkdir(parents=True)
     (a.out / "full_summary.json").write_text('{"finished": false}\n')
-    build_site(a.inputs, a.out, a.drawn, a.drawn_fasta, a.cards)
+    build_site(a.inputs, a.out, a.drawn, a.drawn_fasta, a.cards, a.proteome_fasta, a.swissprot_fasta)
 
 
 if __name__ == "__main__":
