@@ -366,8 +366,8 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
 
 
 def head(title, ver, dense=False):
-    """The page head; dense: the first page's stylesheets (dense.css from the BHF page, index.css) after site.css."""
-    more = '<link rel="stylesheet" href="assets/dense.css%s"><link rel="stylesheet" href="assets/index.css%s">' % (ver, ver) if dense else ""
+    """The page head; dense: the first page's stylesheets (dense-bhf.css, a copy of the BHF page's dense.css; index.css) after site.css."""
+    more = '<link rel="stylesheet" href="assets/dense-bhf.css%s"><link rel="stylesheet" href="assets/index.css%s">' % (ver, ver) if dense else ""
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1"><title>%s</title>%s'
             '<link rel="stylesheet" href="assets/site.css%s">%s</head><body>' % (build.esc(title), build.CSS_LINKS, ver, more))

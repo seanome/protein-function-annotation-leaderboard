@@ -211,7 +211,7 @@ def test_index_position_track(site):
     n = summ["total"]
     assert ("%s of %s proteins (%d%%) match a Swiss-Prot protein" % ("{:,}".format(summ["swissprot_hit"]), "{:,}".format(n),
                                                                      round(100 * summ["swissprot_hit"] / n))) in html
-    assert 'href="assets/dense.css' in html and (out / "assets" / "index.css").exists()
+    assert 'href="assets/dense-bhf.css' in html and (out / "assets" / "index.css").exists()
     # 17: the other programs with a hit, as bits in the order of data["other"]; bit 0 is MMseqs2
     assert [o[0] for o in data["other"]][0] == "MMseqs2"
     assert all(bool(r[17] & 1) == (r[16] is not None) for r in data["rows"])
