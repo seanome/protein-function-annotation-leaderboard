@@ -245,10 +245,11 @@ def test_site_from_test_data(tmp_path):
     st = build.read_structure(DATA / "structures" / "FUN008084.pdb")
     assert st["n"] == 252 and st["scale"] == 1 and round(st["ca_ca"], 2) == 3.84
     assert round(sum(st["plddt"]) / 252, 1) == 76.7
-    # The table of which Swiss-Prot each program searched: kmerseek 2026_03, phmmer and jackhmmer an
-    # earlier release without sea squirts, DIAMOND's copy of 533,805
+    # The table of which Swiss-Prot each program searched: kmerseek 2026_03, phmmer and jackhmmer
+    # 2025_01 without sea squirts, ProstT5 + Foldseek AlphaFold's 590,183 models
     assert '<section id="swissprot">' in html and 'href="#swissprot"' in html
-    assert "Swiss-Prot release 2026_03" in html and "572,850" in html and "533,805" in html
+    assert "Swiss-Prot release 2026_03" in html and "Swiss-Prot release 2025_01" in html and "572,850" in html
+    assert "590,183" in html and "570,421" not in html and "not recorded" not in html.split('<section id="swissprot">')[1]
     # A file whose CA atoms are twice as far apart, on a 0 to 1 confidence scale, gets the warning
     lines = []
     for l in st["text"].splitlines():

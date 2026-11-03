@@ -64,7 +64,7 @@
         found ? hit : "<i>no hit</i>", found ? score : "", found ? where : ""]);
     }
     var nowhere = "not in the table";
-    row("DIAMOND against Swiss-Prot (533,805 proteins, release not recorded)", !!r[6], r[6] ? uni(r[6]) + " " + esc(r[5]) + (d.sp_gene ? " (" + esc(d.sp_gene) + ")" : "") + (d.sp_org ? ", <i>" + esc(d.sp_org) + "</i>" : "") : "",
+    row("DIAMOND against Swiss-Prot 2026_03", !!r[6], r[6] ? uni(r[6]) + " " + esc(r[5]) + (d.sp_gene ? " (" + esc(d.sp_gene) + ")" : "") + (d.sp_org ? ", <i>" + esc(d.sp_org) + "</i>" : "") : "",
       r[6] ? (r[7] === null ? "" : r[7].toFixed(1) + "% identity over " + Math.round(r[8]) + "% of your protein, ") + "E-value " + esc(d.sp_e) : "", nowhere,
       "run by Biomni; E-value 0.001 or below");
     var pf = {}; d.pfam.forEach(function (p) { pf[p[1]] = (pf[p[1]] || 0) + 1; });
@@ -86,13 +86,13 @@
       f ? "whole protein, no position" : "", fHow);
     if (d.mm !== undefined && d.mm !== null) {
       var m = d.mm;
-      row("MMseqs2 against Swiss-Prot (release not recorded)", !!m, m ? uni(m[0]) + " " + esc(m[6] || "") + (m[7] ? ", <i>" + esc(m[7]) + "</i>" : "") : "",
+      row("MMseqs2 against Swiss-Prot 2026_03", !!m, m ? uni(m[0]) + " " + esc(m[6] || "") + (m[7] ? ", <i>" + esc(m[7]) + "</i>" : "") : "",
         m ? (100 * m[1]).toFixed(1) + "% identity, E-value " + esc(m[4]) : "", m ? "residues " + m[2] + "-" + m[3] : "",
         "E-value 0.001 or below");
     }
     if (d.fs !== undefined && d.fs !== null) {
       var g = d.fs;
-      row("ProstT5 + Foldseek against AlphaFold models of Swiss-Prot (570,421)", !!g, g ? uni(g[0]) + " " + esc(g[6] || "") + (g[7] ? ", <i>" + esc(g[7]) + "</i>" : "") : "",
+      row("ProstT5 + Foldseek against AlphaFold models of Swiss-Prot (590,183)", !!g, g ? uni(g[0]) + " " + esc(g[6] || "") + (g[7] ? ", <i>" + esc(g[7]) + "</i>" : "") : "",
         g ? (100 * g[1]).toFixed(1) + "% identity, E-value " + esc(g[4]) : "", g ? "residues " + g[2] + "-" + g[3] : "",
         "run by Biomni; shape letters predicted from the sequence; E-value 0.001 or below");
     }
@@ -167,7 +167,7 @@
     h.push("<h2>Name</h2>" + table([["Existing name (FASTA header)"], ["Proposed name"], ["Comparison"]],
       [[esc(r[2]) || "none", esc(r[3]) || "none", esc(F.check[r[4]])]]));
     // Best Swiss-Prot match (on a drawn page its row in the drawing has the hit; only its GO terms here)
-    h.push(box ? (r[6] ? "<h2>GO terms and keywords of DIAMOND's best hit, " + uni(r[6]) + "</h2>" : "") : "<h2>Best Swiss-Prot match (DIAMOND; 533,805 proteins, release not recorded)</h2>");
+    h.push(box ? (r[6] ? "<h2>GO terms and keywords of DIAMOND's best hit, " + uni(r[6]) + "</h2>" : "") : "<h2>Best Swiss-Prot match (DIAMOND, Swiss-Prot 2026_03)</h2>");
     if (r[6]) {
       if (!box) h.push(table([["Accession"], ["Protein"], ["Identity (%)", 1], ["Coverage of your protein (%)", 1], ["E-value", 1]],
         [[uni(r[6]),

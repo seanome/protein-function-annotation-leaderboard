@@ -403,7 +403,7 @@ or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (
 <h2>Proteins</h2>
 <div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off"
  placeholder="an ID, gene, protein name, Pfam domain or category, e.g. NLRC5, lectin, TIR"></div>
-<p class="note">"Swiss-Prot" on this page means the copy Biomni's DIAMOND searched: 533,805 proteins, release not recorded (release 2026_03 has 575,748, so not that one). The protein pages say which copy each other program searched.</p>
+<p class="note">"Swiss-Prot" on this page means release 2026_03 (575,748 proteins), the copy Biomni's DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (E-value 0.001 or below, at most 25 per protein). The protein pages say which copy each other program searched.</p>
 <p class="note">The search reads the ID, the existing and proposed names, the best Swiss-Prot match's name and accession,
 the Pfam domain names and the immune categories. Every word typed must appear.</p>
 <p id="count" class="note"></p>
