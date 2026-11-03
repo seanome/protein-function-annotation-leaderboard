@@ -518,12 +518,43 @@ program searched.</p></section>
 
 
 def protein_html(ver):
-    return head("Botryllus protein", ver) + """
-<header class="wide"><a class="back" href="index.html">All proteins</a><h1 class="mono" id="pid"></h1>
-<p class="len" id="sub"></p></header>
-<main class="wide" id="main"><p class="note">Loading…</p></main>
-<script src="full/rows.js%s"></script><script src="assets/viewer.js%s"></script></body></html>
-""" % (ver, ver)
+    """protein.html: the dense page (assets/dense-bhf.js, as on a drawn page) for any protein, from
+    the whole-proteome tables; assets/protein-dense.js builds its data from full/NNN.js. The key lists
+    the programs with positions in those tables; the Swiss-Prot table lists the programs run on every protein."""
+    run = {t["key"]: ("run" if t["key"] in ("mmseqs2", "prostt5", "foldseek", "interproscan") else "not run") for t in build.TRACKS}
+    ctx = dict(run_status=run)
+    whole = [["w_diamond"], ["w_jackhmmer"]]
+    const = dict(
+        tracks={t["key"]: dict(name=t["name"], color=build.PROGRAMS[t["program"]]["color"], shape=build.PROGRAMS[t["program"]]["shape"],
+                               cat=build.PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in build.TRACKS},
+        program_names={k: v["name"] for k, v in build.PROGRAMS.items()}, ips_drawn=build.IPS_DRAWN, ips_evalue=sorted(build.IPS_EVALUE),
+        fantasia_max=build.FANTASIA_MAX_DIST, kmerseek_max_e=KMERSEEK_MAX_E, struct_max_aa=STRUCT_MAX_AA,
+        pfam_color=build.CATEGORIES["pfam"]["color"], ver=ver)
+    head = build.page_head("Botryllus protein: what every annotation program found", 0).replace(
+        "</head>", '<link rel="stylesheet" href="assets/dense-bhf.css%s"></head>' % ver, 1)
+    help_ = ('<aside class="help" id="help"><h2>What this page is</h2><p>Every program\'s best hit on this protein, from Biomni\'s runs on '
+             'the whole proteome (Biomni is the agent that ran the whole-proteome programs). MMseqs2, ProstT5 + Foldseek and Foldseek on the '
+             'predicted structure are drawn where they lie; InterProScan draws every match; kmerseek, DIAMOND, jackhmmer with immune seeds, '
+             'FANTASIA and UniFIRE name a hit with no position. The 51 proteins with a drawn page also have phmmer, jackhmmer against '
+             'Swiss-Prot, hmmscan, hhsearch and MMseqs2 three rounds, every hit, and the residues of each.</p><h2>Rows</h2><p>A <b>program '
+             'row</b> folds its hits into one row; click it for one row per hit. A hit row gives the residues of your protein it covers, its '
+             'E-value and score, the identity where the program gives one, and the matched protein; click it for its numbers.</p>'
+             '<h2>Controls</h2><p>The <b>E-value cutoff</b> chips keep the hits at or below that value; the sentence and every count follow '
+             'it. The best hits of MMseqs2 and the Foldseek runs are all at 0.001 or below, since the tables keep only those. <b>Search</b> '
+             'looks through the matched protein\'s name, accession and species; every word typed must appear.</p><h2>Keyboard</h2><dl>'
+             '<dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>next and previous row</dd><dt><kbd>Enter</kbd> <kbd>Space</kbd></dt><dd>unfold a program, '
+             'or open a hit</dd><dt><kbd>Esc</kbd></dt><dd>close every open hit and this help</dd><dt><kbd>?</kbd></dt><dd>this help</dd></dl></aside>')
+    return head + """<div class="titleblock"><div class="titlebar"><h1 title="the ID as written in the proteome FASTA">loading…</h1><span class="pn"></span><span class="len"></span><a class="back" href="index.html">All proteins</a></div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>
+<header class="top">%s%s%s</header>
+<main><div class="withviewer noviewer"><div id="grid"></div></div>
+<section class="below" id="biomni" data-base="" data-undrawn="1"></section><section class="below" id="biomni-more"></section>%s</main>
+<footer><h2>Input files read</h2><p class="note">Built by build_full.py from Biomni's tables of the whole proteome (full_inputs/README.md in the
+repository says how each was made). This page only reads them; building it ran no search.</p></footer>
+<div id="tip" role="tooltip" hidden></div>%s
+<script>window.DENSE_CONST=%s;</script><script src="full/rows.js%s"></script><script src="assets/protein-dense.js%s"></script></body></html>
+""" % (build.DENSE_FILTERS % (round(build.math.log10(build.SHOW_E)), round(build.math.log10(build.COUNT_E))),
+       build.dense_key(ctx, False, False), build.DENSE_COLHEAD, build.dense_swissprot(ctx, whole), help_,
+       json.dumps(const, separators=(",", ":")), ver, ver)
 
 
 def main():

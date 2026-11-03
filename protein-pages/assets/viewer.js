@@ -4,7 +4,10 @@
 // #biomni to that page, and this script fills it with the same tables.
 (function () {
   var F = window.FULL, CATS = F.cats, N_SHARDS = 96;
-  var box = document.getElementById("biomni"), BASE = box ? "../" : "";
+  // box: a dense page's #biomni (a drawn page's, in proteins/, or protein.html's, which says data-base="" and
+  // data-undrawn: there the Pfam table stays, since no hmmscan row draws the domains)
+  var box = document.getElementById("biomni"), BASE = box ? (box.dataset.base !== undefined ? box.dataset.base : "../") : "";
+  var undrawn = !!(box && box.dataset.undrawn);
   var byId = {};
   F.rows.forEach(function (r) { byId[r[0]] = r; });
   function shardOf(id) {
@@ -188,8 +191,8 @@
       if (d.kw.length) h.push("<h3>UniProt keywords of that entry</h3><p>" + d.kw.map(esc).join(", ") + "</p>");
     } else if (!box) h.push("<p>No Swiss-Prot match at E-value 0.001 or below.</p>");
     // Pfam (a drawn page has hmmscan's Pfam domains along the protein)
-    if (!box) h.push("<h2>Pfam domains (hmmsearch, gathering thresholds)</h2>");
-    if (box) { /* drawn: see the hmmscan row */ } else if (d.pfam.length) {
+    if (!box || undrawn) h.push("<h2>Pfam domains (hmmsearch, gathering thresholds)</h2>");
+    if (box && !undrawn) { /* drawn: see the hmmscan row */ } else if (d.pfam.length) {
       var seen = {}, rows = [];
       d.pfam.forEach(function (p) { seen[p[0]] = seen[p[0]] || { n: p[1], c: 0 }; seen[p[0]].c++; });
       Object.keys(seen).forEach(function (a) {

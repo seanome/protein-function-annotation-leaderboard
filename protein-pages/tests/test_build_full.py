@@ -215,3 +215,20 @@ def test_index_position_track(site):
     # 17: the other programs with a hit, as bits in the order of data["other"]; bit 0 is MMseqs2
     assert [o[0] for o in data["other"]][0] == "MMseqs2"
     assert all(bool(r[17] & 1) == (r[16] is not None) for r in data["rows"])
+
+
+def test_protein_html_is_the_dense_page(site):
+    """protein.html, the page of every protein without a drawn page, is the dense page: the same
+    header, grid and Swiss-Prot table as a drawn page, with the constants protein-dense.js builds
+    the page data from (the tracks in build.py's order, the InterProScan predictions, the cutoffs)."""
+    out, _ = site
+    import re
+    html = (out / "protein.html").read_text()
+    for el in ('<header class="top">', 'id="ladder"', '<div id="grid"></div>', 'id="biomni" data-base="" data-undrawn="1"',
+               "assets/protein-dense.js", '<section class="below" id="swissprot">', '<aside class="help" id="help">'):
+        assert el in html, el
+    const = json.loads(re.search(r"window\.DENSE_CONST=(.*?);</script>", html).group(1))
+    assert list(const["tracks"]) == [t["key"] for t in build.TRACKS]
+    assert const["struct_max_aa"] == build_full.STRUCT_MAX_AA and const["fantasia_max"] == build.FANTASIA_MAX_DIST
+    assert const["ips_drawn"]["MobiDBLite"] == {"*": "disorder"}
+    assert (out / "assets" / "protein-dense.js").exists() and (out / "assets" / "dense-bhf.js").exists()

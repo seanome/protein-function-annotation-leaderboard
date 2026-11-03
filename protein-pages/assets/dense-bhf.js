@@ -6,7 +6,8 @@
 // kmerseek's class tables (alpha) and the number of Swiss-Prot sequence files (tseq_files).
 // This is the BHF page's dense.js (claude.ai artifact JgFXM7JTxrdpgiw9B5dEXF, 2026-11-03), shipped as
 // dense-bhf.js; changed here: the "not run" line gives each program's own reason (window.NOTRUN), and a
-// ruler tick is left out where its label would touch the end label.
+// ruler tick is left out where its label would touch the end label; PAGE.noseq (protein.html, no sequence on
+// the site) gives hit rows without composition and opens no residues.
 (function () {
   const tip = document.getElementById("tip");
   const panel = document.getElementById("panel");
@@ -178,6 +179,7 @@
   }
   const loading = {};
   function targetSeq(acc) {
+    if (PAGE.noseq) return Promise.resolve(null);  // protein.html: no sequences on the site for this protein
     window.TSEQ = window.TSEQ || {};
     if (acc in TSEQ) return Promise.resolve(TSEQ[acc]);
     const n = shardOf(acc);
@@ -434,6 +436,11 @@
   }
 
   function open(h, box) {
+    if (PAGE.noseq) {  // protein.html: the hit's numbers only; its residues are on the 51 drawn pages
+      box.innerHTML = `<h3>${esc(PAGE.tracks[h.k].name)}: ${esc(h.l)}</h3><p class="note">${(PAGE.names[h.k] || []).map((n, j) => `${esc(n)} ${esc(h.s[j] ?? "")}`).join(" · ")}. ` +
+        "This protein's sequence is not on the site, so its residues cannot be shown; the 51 proteins with a drawn page show them.</p>";
+      return;
+    }
     Promise.all([alignments(), h.t ? targetSeq(h.t) : Promise.resolve(null)]).then(([alns, tseq]) => show(h, alns[H.indexOf(h)], tseq, box));
   }
 
@@ -646,6 +653,7 @@
       if (p) { p.a = Math.min(p.a, h.q[0]); p.b = Math.max(p.b, h.q[1]); } else pred.push({ a: h.q[0], b: h.q[1], l: h.l });
     });
     const agree = (PAGE.agree || []).slice().sort((a, b) => a.a - b.a);
+    if (!kept.length && !pred.length && !agree.length) return "";  // nothing to draw (protein.html: no hmmscan row)
     const lanes = [];  // brackets that overlap go on separate lines
     const laneOf = agree.map((a) => { let li = lanes.findIndex((end) => a.a > end + 2); if (li < 0) { lanes.push(a.b); li = lanes.length - 1; } else lanes[li] = a.b; return li; });
     const hh = 16 + (pred.length ? 14 : 0) + lanes.length * 15;
@@ -843,7 +851,8 @@
     const re = h.k === "prostt5";  // the count below is from a realignment, not from ProstT5's own alignment
     const idc = h.id ? `<span title="${esc(idFrom(h))}">${idText(h)}</span><div class="s" title="${esc(idSource(h))}">${h.id[0]} of ${h.id[1]}${re ? `<br><span class='re'>= ${Math.round((100 * h.id[0]) / h.id[1])}% realigned</span>` : ""}</div>` : idText(h);
     const tt = topTwo(h.q[0], h.q[1]);
-    const cells = `<div class="num">${h.q[0]}–${h.q[1]}<div class="s${tt.pct >= 40 ? " bias" : ""}" title="${h.q[1] - h.q[0] + 1} residues; the two most common, ${esc(tt.res)}, make up ${tt.pct}% of them${tt.pct >= 40 ? ": a composition-biased stretch" : ""}">${h.q[1] - h.q[0] + 1} aa · ${esc(tt.res)} ${tt.pct}%</div></div><div class="num">${esc(eText(h))}</div><div class="num">${setting}</div><div class="num">${idc}</div>` +
+    const cells = `<div class="num">${h.q[0]}–${h.q[1]}` + (PAGE.noseq ? `<div class="s">${h.q[1] - h.q[0] + 1} aa</div></div>` :
+      `<div class="s${tt.pct >= 40 ? " bias" : ""}" title="${h.q[1] - h.q[0] + 1} residues; the two most common, ${esc(tt.res)}, make up ${tt.pct}% of them${tt.pct >= 40 ? ": a composition-biased stretch" : ""}">${h.q[1] - h.q[0] + 1} aa · ${esc(tt.res)} ${tt.pct}%</div></div>`) + `<div class="num">${esc(eText(h))}</div><div class="num">${setting}</div><div class="num">${idc}</div>` +
       `<div class="txt">${h.r ? `<span class="s">${esc(h.k === "hmmscan" ? "model" : h.t || "")} ${Math.min(...h.r)}–${Math.max(...h.r)}${h.tl ? ` of ${h.tl}` : ""}</span>` : ""}${PAGE.plddt ? `<div class="s">pLDDT here ${Math.round(meanPl(h.q[0], h.q[1]))}</div>` : ""}</div>`;
     let out = `<div class="g row hit${isOpen ? " open" : ""}" data-i="${i}" role="button" tabindex="0" aria-expanded="${isOpen}" style="--c:${tr.color}">${name}${cells}<div class="track">${boxTrack(i)}</div></div>`;
     if (isOpen) out += `<div class="panel" data-i="${i}"><p class="note">Loading the residues...</p></div>`;
