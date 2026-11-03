@@ -6,20 +6,25 @@
   // row: 0 id, 1 length, 2 existing, 3 proposed, 4 name check, 5 Swiss-Prot name, 6 accession,
   // 7 identity, 8 coverage, 9 E-value, 10 Pfam names, 11 category bits, 12 empty, 13 cluster size,
   // 14 drawn page, 15 InterProScan's Pfam matches [start, end, index into PFAM], 16 MMseqs2's best
-  // hit [start, end, identity %, accession] or null
+  // hit [start, end, identity %, accession] or null, 17 the other programs with a hit, as bits of F.other
   var grid = document.getElementById("grid"), AX = +grid.dataset.ax, SEQ = grid.dataset.seq, DOM = grid.dataset.dom;
   function catNames(m) { var o = []; for (var i = 0; i < CATS.length; i++) if (m >> i & 1) o.push(CATS[i]); return o; }
   var text = R.map(function (r) {
     return [r[0], r[2], r[3], r[5], r[6], r[10], catNames(r[11]).join(" ")].join(" ").toLowerCase();
   });
+  var OTHER = F.other || [], CUTS = [1e-3, 1e-10, 1e-50, 1e-100];
+  // a Swiss-Prot match counts when DIAMOND's E-value is at or below the cutoff on the ladder
+  function isMatch(r) { var e = ev(r[9]); return !!r[6] && e !== null && e <= st.e; }
   var TILES = {
-    all: function () { return true; }, sp: function (r) { return !!r[6]; }, pfam: function (r) { return !!r[10]; },
-    none: function (r) { return !r[6] && !r[10]; }, immune: function (r) { return r[11] > 0; },
+    all: function () { return true; }, sp: isMatch, pfam: function (r) { return !!r[10]; },
+    none: function (r) { return !isMatch(r) && !r[10]; }, immune: function (r) { return r[11] > 0; },
     drawn: function (r) { return !!r[14]; }
   };
+  function others(b) { var o = []; for (var i = 0; i < OTHER.length; i++) if (b >> i & 1) o.push(OTHER[i][0]); return o; }
+  function nbits(b) { var n = 0; while (b) { n += b & 1; b >>= 1; } return n; }
   var TILE_WORDS = { all: "", sp: "with a Swiss-Prot match", pfam: "with a Pfam domain", none: "with neither a Swiss-Prot match nor a Pfam domain",
     immune: "that are immune-gene candidates", drawn: "with every program's hits drawn" };
-  var st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1 };
+  var st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
   var count = document.getElementById("count"), more = document.getElementById("more"), lbl = document.querySelector(".ix .ruler .lbl");
   var catSel = document.getElementById("cat"), chkSel = document.getElementById("chk"), q = document.getElementById("q");
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -30,6 +35,7 @@
   // the value a column sorts by; null sorts last whichever the direction
   function val(r, k) {
     if (k === 9) return r[9] === "" ? null : ev(r[9]);
+    if (k === 17) return nbits(r[17]);
     var v = r[k];
     return v === null || v === "" ? null : v;
   }
@@ -59,36 +65,44 @@
     draw();
   }
   function bin(p) { return p >= 60 ? 1 : p >= 40 ? 0.75 : p >= 20 ? 0.5 : 0.3; }
-  function px(res) { return (100 * (Math.min(res, AX) - 1) / (AX - 1)).toFixed(2) + "%"; }
+  var TW = +grid.dataset.tw;  // the protein scale takes this % of the track (build_full.py TRACK_PCT); the rest holds "› 16,045 aa"
+  function px(res) { return (TW * (Math.min(res, AX) - 1) / (AX - 1)).toFixed(2) + "%"; }
   function track(r) {
     var L = r[1], g = ['<line x1="0" x2="' + px(L) + '" y1="7" y2="7" stroke="#c8c8c8" stroke-width="2"/>'];
     (r[15] || []).forEach(function (d) {
       if (d[0] > AX) return;
-      var p = PFAM[d[2]] || ["", ""], w = (100 * (Math.min(d[1], AX) - d[0]) / (AX - 1));
+      var p = PFAM[d[2]] || ["", ""], w = (TW * (Math.min(d[1], AX) - d[0]) / (AX - 1));
       g.push('<rect x="' + px(d[0]) + '" y="2" width="' + Math.max(w, 0.25).toFixed(2) + '%" height="10" rx="1.5" fill="#fff" stroke="' + DOM +
         '" stroke-width="1.2"><title>Pfam ' + esc(p[0]) + " " + esc(p[1]) + ", residues " + d[0] + "–" + d[1] + " (InterProScan)</title></rect>");
     });
     var m = r[16];
     if (m && m[0] <= AX) {
-      var w2 = (100 * (Math.min(m[1], AX) - m[0]) / (AX - 1));
+      var w2 = (TW * (Math.min(m[1], AX) - m[0]) / (AX - 1));
       g.push('<rect x="' + px(m[0]) + '" y="14" width="' + Math.max(w2, 0.25).toFixed(2) + '%" height="4" fill="' + SEQ + '" fill-opacity="' + bin(m[2]) +
-        '"><title>MMseqs2\'s best Swiss-Prot hit ' + esc(m[3]) + ", residues " + m[0] + "–" + m[1] + ", " + m[2] + "% identical</title></rect>");
+        '"><title>MMseqs2\'s best Swiss-Prot hit ' + esc(m[3]) + (m[3] !== r[6] ? (r[6] ? " (DIAMOND\'s best is " + esc(r[6]) + ")" : " (DIAMOND found no match)") : " (DIAMOND\'s best too)") +
+        ", residues " + m[0] + "–" + m[1] + ", " + m[2] + "% identical</title></rect>");
     }
-    if (L > AX) g.push('<text x="100%" y="11" dx="4" class="ax">&#8250; ' + fmt(L) + "</text>");
+    if (L > AX) g.push('<text x="' + TW + '%" y="11" dx="3" class="ax">&#8250; ' + fmt(L) + " aa</text>");
     return '<svg role="img" aria-label="' + esc(r[0]) + ' along its length">' + g.join("") + "</svg>";
   }
   function rowHtml(r, j) {
-    var names = r[2] && r[3] && r[2] !== r[3] ? esc(r[2]) + " &#8594; " + esc(r[3]) : esc(r[3] || r[2] || "no name");
+    var same = r[2] && r[3] && r[2].toLowerCase() === r[3].toLowerCase();
+    var names = same ? esc(r[3]) + " (both)" : r[2] || r[3] ? esc(r[2] || "—") + " &#8594; " + esc(r[3] || "—") : '<span class="dim">no name</span>';
+    var ips = (r[15] || []).length, mmo = r[16] && r[16][3] !== r[6];
     return '<div class="row g ixg' + (j === st.cur ? " cur" : "") + '" role="listitem" data-j="' + j + '" tabindex="-1">' +
       '<div><a class="id mono" href="' + esc(href(r)) + '">' + esc(r[0]) + "</a>" +
       '<span class="s">' + names + (r[14] ? '<span class="dr">· every program drawn</span>' : "") + "</span></div>" +
       '<div class="num">' + fmt(r[1]) + "</div>" +
-      '<div class="txt">' + (r[6] ? esc(r[5]) + '<span class="s mono">' + esc(r[6]) + "</span>" : '<span class="dim">no match</span>') + "</div>" +
+      '<div class="txt" title="' + esc(r[5]) + '">' + (r[6] ? (isMatch(r) ? esc(r[5]) : '<span class="dim">above the cutoff: ' + esc(r[5]) + "</span>") : '<span class="dim">no match</span>') +
+        '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : "") +
+        (mmo ? (r[6] ? " · " : "") + "MMseqs2's best: " + '<span class="mono">' + esc(r[16][3]) + "</span>" : "") + "</span></div>" +
       '<div class="num">' + (r[7] === null ? "" : r[7].toFixed(1) + "%") + (r[8] === null ? "" : '<span class="s">covers ' + Math.round(r[8]) + "%</span>") + "</div>" +
-      '<div class="num">' + esc(r[9] || "") + "</div>" +
-      '<div class="txt" title="' + esc(r[10]) + '">' + (r[10] ? esc(r[10]) : '<span class="dim">none</span>') + "</div>" +
+      '<div class="num"' + (r[9] && ev(r[9]) === 0 ? ' title="DIAMOND writes 0 when the E-value is smaller than the smallest number it stores">0' : ">" + esc(r[9] || "")) + "</div>" +
+      '<div class="txt" title="' + esc(r[10]) + '">' + (r[10] ? esc(r[10]) : '<span class="dim">none</span>') +
+        '<span class="s">InterProScan: ' + (ips ? ips + " Pfam match" + (ips > 1 ? "es" : "") : "none") + "</span></div>" +
       '<div class="txt" title="' + esc(catNames(r[11]).join(", ")) + '">' + esc(catNames(r[11]).join(", ")) + "</div>" +
-      '<div class="num">' + fmt(r[13]) + "</div>" +
+      '<div class="txt" title="' + esc(others(r[17]).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">none</span>') + "</div>" +
+      '<div class="num">' + fmt(r[13]) + (r[13] === 1 ? '<span class="s">alone</span>' : "") + "</div>" +
       '<div class="track">' + track(r) + "</div></div>";
   }
   function draw() {
@@ -101,10 +115,26 @@
     if (st.q) what.push("matching “" + st.q + "”");
     what = what.filter(Boolean);
     count.innerHTML = "<b>" + fmt(list.length) + "</b> of " + fmt(R.length) + " proteins" + (what.length ? " " + esc(what.join(", ")) : "");
-    lbl.textContent = list.length ? "rows 1–" + fmt(n) + " of " + fmt(list.length) + " drawn" + (n < list.length ? "; more at the bottom" : "") : "no protein matches";
+    lbl.textContent = list.length ? "rows 1–" + fmt(n) + " of " + fmt(list.length) + " shown" + (n < list.length ? "; more at the bottom" : "") : "no protein matches";
     more.hidden = n >= list.length;
-    more.textContent = "Show " + fmt(Math.min(100, list.length - n)) + " more (of " + fmt(list.length - n) + " not drawn yet)";
+    more.textContent = "Show " + fmt(Math.min(100, list.length - n)) + " more (of " + fmt(list.length - n) + " not shown yet)";
     mark();
+  }
+  // the ladder: what counts as a Swiss-Prot match at each DIAMOND cutoff; the chips' counts follow it
+  var ladder = document.getElementById("eladder");
+  function fmtE(e) { return e >= 1e-3 ? String(e) : "1e" + Math.round(Math.log10(e)); }
+  function drawLadder() {
+    ladder.innerHTML = CUTS.map(function (c) {
+      var n = 0; for (var i = 0; i < R.length; i++) { var e = ev(R[i][9]); if (R[i][6] && e !== null && e <= c) n++; }
+      return '<button class="chip' + (c === st.e ? " on" : "") + '" data-e="' + c + '" title="' + fmt(n) + " proteins have a DIAMOND match at E-value " + fmtE(c) +
+        ' or below">≤ ' + fmtE(c) + ': <b class="mono">' + fmt(n) + "</b></button>";
+    }).join("");
+    ladder.querySelectorAll(".chip").forEach(function (b) {
+      b.addEventListener("click", function () { st.e = +b.dataset.e; drawLadder(); filter(); });
+    });
+    var c = { sp: 0, none: 0 };
+    for (var i = 0; i < R.length; i++) { if (TILES.sp(R[i])) c.sp++; if (TILES.none(R[i])) c.none++; }
+    ["sp", "none"].forEach(function (k) { document.querySelector('#tiles .chip[data-t="' + k + '"] b').textContent = fmt(c[k]); });
   }
   function mark() {
     document.querySelectorAll("#tiles .chip").forEach(function (b) { b.classList.toggle("on", b.dataset.t === st.tile); });
@@ -114,7 +144,7 @@
     document.querySelectorAll(".colhead button[data-k]").forEach(function (b) {
       var on = +b.dataset.k === st.key;
       b.classList.toggle("on", on);
-      b.querySelector("i").textContent = on ? (st.dir > 0 ? "▲" : "▼") : "";
+      b.querySelector("i").textContent = on ? (st.dir > 0 ? "▲" : "▼") : "↕";
     });
   }
   function top() { var g = grid.getBoundingClientRect().top + window.scrollY - hh(); if (window.scrollY > g) window.scrollTo(0, g); }
@@ -145,15 +175,15 @@
   });
   more.addEventListener("click", function () { st.shown += 100; draw(); });
   document.getElementById("clear").addEventListener("click", function () {
-    st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1 }; q.value = ""; filter();
+    st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 }; q.value = ""; drawLadder(); filter();
   });
   document.getElementById("dl").addEventListener("click", function () {
     var head = ["protein", "length_aa", "existing_name", "proposed_name", "swissprot_name", "swissprot_accession", "identity_pct",
-      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "cluster_size"];
+      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size"];
     var lines = [head.join("\t")].concat(list.map(function (i) {
       var r = R[i];
       return [r[0], r[1], r[2], r[3], r[5], r[6], r[7] === null ? "" : r[7], r[8] === null ? "" : r[8], r[9], r[10],
-        catNames(r[11]).join(", "), r[13]].join("\t");
+        catNames(r[11]).join(", "), others(r[17]).join(", "), r[13]].join("\t");
     }));
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], { type: "text/tab-separated-values" }));
@@ -184,19 +214,21 @@
     if (e.key === "Escape") {
       if (help.classList.contains("open")) showHelp(false);
       else if (st.q) { q.value = ""; st.q = ""; filter(); }
+      else if (st.cur >= 0) { grid.querySelectorAll(".row.cur").forEach(function (x) { x.classList.remove("cur"); }); st.cur = -1; }
       return;
     }
     if (t === "INPUT" || t === "SELECT" || t === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === "/") { e.preventDefault(); q.focus(); }
     else if (e.key === "j") go(st.cur + 1);
     else if (e.key === "k") go(st.cur - 1);
-    else if (e.key === "Enter" && st.cur >= 0) location.href = href(R[list[st.cur]]);
+    else if ((e.key === "Enter" || e.key === " ") && st.cur >= 0) { e.preventDefault(); location.href = href(R[list[st.cur]]); }
   });
   // A phone: the grid scrolls sideways inside main; the column names and the ruler move with it
   var main = document.querySelector("main"), heads = document.querySelectorAll(".ix .colhead, .ix .ruler");
   main.addEventListener("scroll", function () {
     heads.forEach(function (h) { h.style.transform = main.scrollLeft ? "translateX(" + -main.scrollLeft + "px)" : ""; });
   }, { passive: true });
+  drawLadder();
   filter();
   setHH();
 })();
