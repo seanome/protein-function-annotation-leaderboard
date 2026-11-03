@@ -325,6 +325,8 @@ reference proteins are from *Botryllus* itself, and the pages show only matches 
 ```
 python build.py test_inputs/data --out site
 python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/proteins.fasta --out site_full
+# with the residues on protein.html (the proteome FASTA is unpublished and not in the repository):
+#   --proteome-fasta botryllus_new_genome_protein.fasta --swissprot-fasta uniprot_sprot.2026_03.fasta.gz
 ```
 
 - `index.html` lists every protein: counts that filter the table when clicked, bars of the

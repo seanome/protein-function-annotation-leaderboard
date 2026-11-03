@@ -3,8 +3,9 @@
 // straight to it. The others have each program's best hit only: MMseqs2, ProstT5 + Foldseek and
 // Foldseek on the predicted structure with their positions, InterProScan's matches, and the
 // programs that name a hit with no position (kmerseek's best hit, DIAMOND, jackhmmer from immune
-// seeds, FANTASIA, UniFIRE). The proteome's sequences are not on the site, so a hit row gives no
-// residue composition and opens no alignment (PAGE.noseq). This file builds PAGE and the globals
+// seeds, FANTASIA, UniFIRE). With the protein's sequence in its data file (build_full.py
+// --proteome-fasta) a hit row gives its residue composition and opens the two proteins aligned in the
+// browser; without it, neither (PAGE.noseq). This file builds PAGE and the globals
 // dense-bhf.js reads (WHOLE, NOTRUN, HOW, ALN), then loads dense-bhf.js and viewer.js.
 (function () {
   var F = window.FULL, C = window.DENSE_CONST, N_SHARDS = 96;
@@ -40,16 +41,19 @@
     if (name) document.querySelector(".titlebar .pn").textContent = name + (r[2] && r[3] && r[2].toLowerCase() !== r[3].toLowerCase() ? " (FASTA header: " + r[2] + ")" : "");
     document.querySelector(".titlebar .len").textContent = L.toLocaleString("en-US") + " amino acids";
     var hits = [], tracksRun = {};
-    function best(k, x, extra) {  // a best-hit table row: [accession, identity 0-1, start, end, E-value, bits, name, species, ...]
+    function best(k, x, extra) {  // a best-hit table row: [accession, identity 0-1, start, end, E-value, bits, name, species, ..., target start, target end]
       tracksRun[k] = true;
       if (!x) return;
-      hits.push({ k: k, l: x[0], t: x[0], q: [x[2], x[3]], s: [x[4], String(x[1]), x[5]].concat(extra || []), e: parseFloat(x[4]),
-                  n: x[6] || undefined, o: x[7] || undefined, f: null });
+      var h = { k: k, l: x[0], t: x[0], q: [x[2], x[3]], s: [x[4], String(x[1]), x[5]].concat(extra || []), e: parseFloat(x[4]),
+                n: x[6] || undefined, o: x[7] || undefined, f: null };
+      if (x.length >= 10 && isFinite(x[x.length - 2])) h.r = [x[x.length - 2], x[x.length - 1]];  // the range on the other protein
+      if (d.tl && d.tl[x[0]]) h.tl = d.tl[x[0]];
+      hits.push(h);
     }
     best("mmseqs2", d.mm);
     best("prostt5", d.fs, ["not in the file"]);
     var shortEnough = L <= C.struct_max_aa;
-    if (shortEnough) best("foldseek", d.fst, d.fst && d.fst.length > 9 ? [String(d.fst[8]), String(d.fst[9])] : ["", ""]);
+    if (shortEnough) best("foldseek", d.fst, d.fst && d.fst.length > 11 ? [String(d.fst[8]), String(d.fst[9])] : ["", ""]);
     var ipsRun = d.ips !== "not run" && d.ips !== null && d.ips !== undefined;
     if (ipsRun) {
       tracksRun.interproscan = true;
@@ -105,7 +109,8 @@
     var wholeRan = W;
     var M = ran.length + wholeRan.length;
     var note = "<p class=\"note\">This protein has no drawn page, so only each program's best hit is known (Biomni's tables of the whole proteome); " +
-      "whether two programs agree on a Pfam family is not judged here. The proteome's sequences are not on this site, so a hit opens no alignment. " +
+      "whether two programs agree on a Pfam family is not judged here. " + (d.q ? "Click a hit for the residues: the two proteins aligned in your browser " +
+      "(BLOSUM62, gap open -11, extend -1), since the tables keep no alignment. " : "This protein's sequence is not on this site, so a hit opens no alignment. ") +
       "phmmer, jackhmmer against Swiss-Prot, hmmscan, hhsearch and MMseqs2 three rounds were run only on the 51 drawn proteins.</p>";
     var sent = [1, 0, -1, -2, -3].reverse().map(function (v) {
       var progs = {};
@@ -118,8 +123,8 @@
     var names = { mmseqs2: ["evalue", "fident", "bits"], prostt5: ["evalue", "fident", "bits", "alntmscore"],
                   foldseek: ["evalue", "fident", "bits", "alntmscore", "lddt"], interproscan: ["member database", "signature", "its score or E-value", "InterPro entry"] };
     window.PAGE = {
-      id: id, pn: name, q: new Array(L + 1).join("X"), noseq: 1, px: 640 / L, w: 640, top: 10, m: ran.length, sent: sent, hits: hits, td: {}, ds: {},
-      names: names, alpha: {}, tracks: tracks, pfam_color: C.pfam_color, tseq_files: 1, agree: [],
+      id: id, pn: name, q: d.q || new Array(L + 1).join("X"), noseq: d.q ? 0 : 1, px: 640 / L, w: 640, top: 10, m: ran.length, sent: sent, hits: hits, td: {}, ds: {},
+      names: names, alpha: {}, tracks: tracks, pfam_color: C.pfam_color, tseq_files: C.tseq_files || 1, tbase: "", agree: [],
       twelve: "the " + ran.length + " programs with positions run here (" + ran.map(function (p) { return C.program_names[p]; }).join(", ") +
         ") plus " + wholeRan.length + " that name a hit with no position: " + wholeRan.map(function (w) { return w[1]; }).join(", ")
     };
