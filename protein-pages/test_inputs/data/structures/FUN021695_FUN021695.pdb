@@ -1,4 +1,4 @@
-REMARK   1 predicted by Biomni for proteins of 200 aa or less (botryllus_structures_le200aa.zip, 2026-11-03); the file does not name the program
+REMARK   1 ESMFold2, fast model (esmcfold2-fast: folding head on ESMC 6B, esmc fold --model fast, default settings, no templates or MSA), run by Biomni for proteins of 200 aa or less (botryllus_structures_le200aa.zip, 2026-11-03)
 PARENT N/A
 ATOM      1  N   MET A   1     -38.233 -40.244 -14.751  1.00  0.93           N  
 ATOM      2  CA  MET A   1     -37.236 -39.740 -13.692  1.00  0.93           C  

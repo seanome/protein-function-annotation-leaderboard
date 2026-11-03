@@ -179,6 +179,7 @@ def test_foldseek_on_structures_on_the_pages(site):
     raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_struct_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
     pid = next(p for p, v in fst.items() if v and v != "not run")
     assert build.af_accession(raw[pid]["target"]) == fst[pid][0] and int(raw[pid]["qstart"]) == fst[pid][2]
+    assert fst[pid][8:] == [float(raw[pid]["alntmscore"]), float(raw[pid]["lddt"])]
 
 
 def test_known_proteins_link_only_when_drawn():

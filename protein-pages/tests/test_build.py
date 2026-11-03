@@ -241,7 +241,10 @@ def test_site_from_test_data(tmp_path):
     rnf4 = (out / "proteins" / "FUN005158_RNF4.html").read_text()
     rpage = json.loads(re.search(r"const PAGE=(.*?);</script>", rnf4).group(1).replace("<\\/", "</"))
     assert any(h["k"] == "foldseek" for h in rpage["hits"]) and "not run: structures" not in rnf4
-    assert '<section id="structure">' in rnf4 and "predicted by Biomni for proteins of 200 aa or less" in rnf4
+    assert '<section id="structure">' in rnf4 and "ESMFold2, fast model (esmcfold2-fast" in rnf4
+    fold = [h for h in rpage["hits"] if h["k"] == "foldseek"]
+    assert rpage["names"]["foldseek"] == ["evalue", "fident", "bits", "alntmscore", "lddt"]
+    assert all(0 < float(h["s"][3]) < 1.1 and 0 < float(h["s"][4]) <= 1 for h in fold)
     # The pLDDT strip sits right above the structure, with nothing between them, and not in the
     # drawing; the structure comes right after the drawing, before the hit table
     assert 'data-k="plddt"' not in html and re.search(r'</svg><div id="mol"', html)

@@ -31,3 +31,15 @@ statements are Biomni's.
 Sources Biomni gave: the `relnotes.txt` of each release under
 https://ftp.uniprot.org/pub/databases/uniprot/previous_releases/ and
 https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/reldate.txt
+
+## The predicted structures and the Foldseek search on them: Biomni's second note, 2026-11-03
+
+- **Predictor:** ESMFold2, the `esmcfold2-fast` tool: the folding head on the ESM Cambrian (ESMC)
+  6B language model, run as `esmc fold --model fast` with default settings, one structure per
+  protein, no templates or MSA. The pLDDT in the B-factor column is on a 0 to 1 scale.
+- **`botryllus_foldseek_struct.m8`:** columns 1 to 10 are query, target, fident, alnlen, qstart,
+  qend, tstart, tend, evalue, bits. Column 11 is `alntmscore`, the TM-score over the aligned
+  region (0.5 or more usually means the same fold); column 12 is `lddt`, the LDDT of the
+  alignment. Biomni gives both as 0 to 1; a sample of 51,656 rows had alntmscore up to 1.013.
+- `botryllus_mmseqs2_sp.m8` and `botryllus_prostt5_foldseek.m8` are the standard 12-column m8,
+  ending in evalue and bits; the ProstT5 run gives no TM-score or LDDT.

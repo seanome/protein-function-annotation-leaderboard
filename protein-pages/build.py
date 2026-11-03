@@ -84,7 +84,7 @@ TRACKS = [
     # max_aa: Biomni predicted structures only for proteins of at most 200 aa, so on a longer
     # protein this row says "not run" whatever the input folder holds
     dict(key="foldseek", file="foldseek.m8", program="foldseek", second=False, name="Foldseek, 3-D structures",
-         setting="Foldseek on 3-D structures Biomni predicted, for proteins of 200 aa or less",
+         setting="Foldseek on 3-D structures predicted by ESMFold2 (fast model), for proteins of 200 aa or less",
          database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8", max_aa=200),
     dict(key="prostt5", file="prostt5_foldseek.m8", program="foldseek", second=True,
          name="ProstT5 + Foldseek", setting="3Di letters predicted from sequence by ProstT5",
@@ -220,13 +220,14 @@ HMMER_ALN = {}
 
 def m8_hit(line, key):
     """One MMseqs2 or Foldseek row. Two optional last columns, qaln and taln (the aligned
-    sequences, from --format-output ...,qaln,taln), give the tool's own alignment."""
-    cols = M8_COLS + (["alntmscore", "theader"] if key in ("foldseek", "prostt5") else ["theader"]) + ["qaln", "taln"]
+    sequences, from --format-output ...,qaln,taln), give the tool's own alignment. Foldseek on
+    structures also has lddt after alntmscore."""
+    extra = {"foldseek": ["alntmscore", "lddt"], "prostt5": ["alntmscore"]}.get(key, [])
+    cols = M8_COLS + extra + ["theader", "qaln", "taln"]
     d = dict(zip(cols, line.rstrip("\n").split("\t")))
     e = fnum(d["evalue"])
     sc = [("evalue", d["evalue"]), ("fident", d.get("fident", "")), ("bits", d.get("bits", ""))]
-    if key in ("foldseek", "prostt5"):
-        sc.append(("alntmscore", d.get("alntmscore", "")))
+    sc += [(k, d.get(k, "")) for k in extra]
     sc = [(k, v if v not in ("", None) else "not in the file") for k, v in sc]
     aln = None
     if d.get("qaln") and d.get("taln"):
