@@ -17,9 +17,13 @@ import sys
 import zipfile
 from pathlib import Path
 
-# The first line the pages show as how the structure was made. Biomni's files do not name the
-# program that predicted them (they start "PARENT N/A", with confidence on a 0 to 1 scale)
-REMARK = "REMARK   1 predicted by Biomni for proteins of 200 aa or less (botryllus_structures_le200aa.zip, 2026-11-03); the file does not name the program"
+# The first line, which the pages show as how the structure was made. Biomni's files do not name
+# the program; Biomni said on 2026-11-03 that it was ESMFold2's fast model (esmcfold2-fast, the
+# folding head on the ESMC 6B language model, `esmc fold --model fast`, default settings), one
+# structure per protein, no templates or MSA. Its pLDDT is on a 0 to 1 scale; build.py rescales it.
+REMARK = ("REMARK   1 ESMFold2, fast model (esmcfold2-fast: folding head on ESMC 6B, esmc fold --model fast, "
+          "default settings, no templates or MSA), run by Biomni for proteins of 200 aa or less "
+          "(botryllus_structures_le200aa.zip, 2026-11-03)")
 THREE = dict(ALA="A", ARG="R", ASN="N", ASP="D", CYS="C", GLN="Q", GLU="E", GLY="G", HIS="H", ILE="I",
              LEU="L", LYS="K", MET="M", PHE="F", PRO="P", SER="S", THR="T", TRP="W", TYR="Y", VAL="V")
 

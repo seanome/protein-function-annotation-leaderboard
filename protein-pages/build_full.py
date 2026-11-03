@@ -214,6 +214,8 @@ def load(folder):
                 acc = build.af_accession(r["target"])  # AF-P12345-F1-model_v6, AF-C3VPR6-2-F1-model_v6
                 out[r["protein_id"]] = [acc, float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
                                         uni.get(acc, {}).get("protein_name", ""), uni.get(acc, {}).get("organism", "")]
+                if "lddt" in r:  # Foldseek on structures: TM-score and LDDT of the alignment
+                    out[r["protein_id"]] += [float(r["alntmscore"]), float(r["lddt"])]
         return out
     fs = foldseek("foldseek_best_per_protein.tsv")
     fst = foldseek("foldseek_struct_best_per_protein.tsv")

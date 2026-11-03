@@ -102,8 +102,9 @@
       var s = d.fst;
       row("Foldseek on the predicted 3-D structure, against AlphaFold models of Swiss-Prot (590,183)", !!s,
         s ? uni(s[0]) + " " + esc(s[6] || "") + (s[7] ? ", <i>" + esc(s[7]) + "</i>" : "") : "",
-        s ? (100 * s[1]).toFixed(1) + "% identity, E-value " + esc(s[4]) : "", s ? "residues " + s[2] + "-" + s[3] : "",
-        "run by Biomni on structures it predicted for proteins of 200 aa or less; E-value 0.001 or below");
+        s ? (100 * s[1]).toFixed(1) + "% identity, E-value " + esc(s[4]) + (s.length > 9 ? ", TM-score " + s[8].toFixed(2) + ", LDDT " + s[9].toFixed(2) : "") : "",
+        s ? "residues " + s[2] + "-" + s[3] : "",
+        "run by Biomni on structures ESMFold2 predicted for proteins of 200 aa or less; E-value 0.001 or below; a TM-score of 0.5 or more usually means the same fold");
     }
     if (d.ips !== undefined && d.ips !== null) {
       var IPS_FEAT = { Coils: 1, MobiDBLite: 1, Phobius: 1, TMHMM: 1, AntiFam: 1 };

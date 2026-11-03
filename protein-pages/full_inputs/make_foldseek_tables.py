@@ -9,8 +9,8 @@ build_full.py) and every hit of the drawn test proteins (for build.py).
 The second is Foldseek on predicted 3-D structures of the 17,990 proteins of 200 aa or less
 (botryllus_foldseek_struct.m8 and botryllus_structures_le200aa.zip from Biomni, given by Olga on
 2026-11-03), against the same AlphaFold models. Its columns are query, target, fident, alnlen,
-qstart, qend, tstart, tend, evalue, bits and two more that Biomni has not yet named, so those two
-are left out.
+qstart, qend, tstart, tend, evalue, bits, alntmscore (the TM-score over the aligned residues, 0 to
+1) and lddt (the LDDT of the alignment, 0 to 1), as Biomni said on 2026-11-03.
 
 The input is botryllus_prostt5_foldseek.m8 from Biomni (report_botryllus_immune_annotation_v3.md):
 3Di letters predicted from each sequence by ProstT5, searched with Foldseek 10 against the
@@ -49,7 +49,7 @@ def fasta_md5(path):
 # Column of each field in each of Biomni's layouts
 LAYOUT = {
     "prostt5": dict(fident=2, qstart=6, qend=7, tstart=8, tend=9, evalue=10, bits=11),
-    "struct": dict(fident=2, qstart=4, qend=5, tstart=6, tend=7, evalue=8, bits=9),
+    "struct": dict(fident=2, qstart=4, qend=5, tstart=6, tend=7, evalue=8, bits=9, alntmscore=10, lddt=11),
 }
 
 
@@ -74,14 +74,17 @@ def main(m8, lengths, drawn_fasta, best_out, drawn_out, layout="prostt5"):
                 best[q] = f
             if q in drawn:
                 acc = af_accession(f[1]) if f[1].startswith("AF-") else f[1]
+                # build.py's columns: ProstT5 mode gives no alntmscore (empty); the structure search adds lddt
+                tm = [f[c["alntmscore"]], f[c["lddt"]]] if "lddt" in c else [""]
                 dw.write("\t".join([drawn[q], f[1], f[2], f[3]] + [f[c[k]] for k in ("qstart", "qend", "tstart", "tend", "evalue", "bits")]
-                                    + ["", acc]) + "\n")
+                                    + tm + [acc]) + "\n")
     with gzip.open(best_out, "wt") as bw:
         w = csv.writer(bw, delimiter="\t", lineterminator="\n")
-        w.writerow(["protein_id", "target", "fident", "qstart", "qend", "tstart", "tend", "evalue", "bits"])
+        cols = ["fident", "qstart", "qend", "tstart", "tend", "evalue", "bits"] + (["alntmscore", "lddt"] if "lddt" in c else [])
+        w.writerow(["protein_id", "target"] + cols)
         for q in sorted(best):
             f = best[q]
-            w.writerow([q, f[1]] + [f[c[k]] for k in ("fident", "qstart", "qend", "tstart", "tend", "evalue", "bits")])
+            w.writerow([q, f[1]] + [f[c[k]] for k in cols])
     print("%d rows; best hit for %d proteins; %d of %d drawn proteins matched" % (n, len(best), len(drawn), len(fasta_md5(drawn_fasta))),
           file=sys.stderr)
 
