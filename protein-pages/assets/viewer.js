@@ -96,6 +96,15 @@
         g ? (100 * g[1]).toFixed(1) + "% identity, E-value " + esc(g[4]) : "", g ? "residues " + g[2] + "-" + g[3] : "",
         "run by Biomni; shape letters predicted from the sequence; E-value 0.001 or below");
     }
+    if (d.fst === "not run") {
+      rows.push(["<b>Foldseek on the predicted 3-D structure</b>", "<i>not run</i>: structures were predicted only for proteins of 200 aa or less", "", ""]);
+    } else if (d.fst !== undefined && d.fst !== null) {
+      var s = d.fst;
+      row("Foldseek on the predicted 3-D structure, against AlphaFold models of Swiss-Prot (590,183)", !!s,
+        s ? uni(s[0]) + " " + esc(s[6] || "") + (s[7] ? ", <i>" + esc(s[7]) + "</i>" : "") : "",
+        s ? (100 * s[1]).toFixed(1) + "% identity, E-value " + esc(s[4]) : "", s ? "residues " + s[2] + "-" + s[3] : "",
+        "run by Biomni on structures it predicted for proteins of 200 aa or less; E-value 0.001 or below");
+    }
     if (d.ips !== undefined && d.ips !== null) {
       var IPS_FEAT = { Coils: 1, MobiDBLite: 1, Phobius: 1, TMHMM: 1, AntiFam: 1 };
       if (d.ips === "not run") rows.push(["<b>InterProScan</b>", "<i>not run (over 5,000 aa)</i>", "", ""]);

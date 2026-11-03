@@ -233,6 +233,15 @@ def test_site_from_test_data(tmp_path):
     # file's REMARK line, and no warning, since neighbouring CA atoms are a median 3.8 angstrom apart
     assert '<section id="structure">' in html and 'data-scale="1"' in html
     assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists()
+    # Foldseek on Biomni's predicted structures ran only on proteins of 200 aa or less: BHF (252 aa)
+    # says so on its row and in the legend; RNF4 (195 aa) has hits on the row and its structure,
+    # with the line saying where it came from
+    assert "not run: structures were predicted only for proteins of 200 aa or less" in html
+    assert "Foldseek, 3-D structures: not run on proteins over 200 aa" in html
+    rnf4 = (out / "proteins" / "FUN005158_RNF4.html").read_text()
+    rpage = json.loads(re.search(r"const PAGE=(.*?);</script>", rnf4).group(1).replace("<\\/", "</"))
+    assert any(h["k"] == "foldseek" for h in rpage["hits"]) and "not run: structures" not in rnf4
+    assert '<section id="structure">' in rnf4 and "predicted by Biomni for proteins of 200 aa or less" in rnf4
     # The pLDDT strip sits right above the structure, with nothing between them, and not in the
     # drawing; the structure comes right after the drawing, before the hit table
     assert 'data-k="plddt"' not in html and re.search(r'</svg><div id="mol"', html)

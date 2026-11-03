@@ -81,9 +81,11 @@ TRACKS = [
          database="Swiss-Prot", score="evalue", kind="m8"),
     dict(key="kmerseek", file="kmerseek.tsv", program="kmerseek", second=False, name="kmerseek",
          setting="", database="Swiss-Prot", score="region_evalue", kind="kmerseek"),
+    # max_aa: Biomni predicted structures only for proteins of at most 200 aa, so on a longer
+    # protein this row says "not run" whatever the input folder holds
     dict(key="foldseek", file="foldseek.m8", program="foldseek", second=False, name="Foldseek, 3-D structures",
-         setting="3Di shape letters and amino acids together",
-         database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8"),
+         setting="Foldseek on 3-D structures Biomni predicted, for proteins of 200 aa or less",
+         database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8", max_aa=200),
     dict(key="prostt5", file="prostt5_foldseek.m8", program="foldseek", second=True,
          name="ProstT5 + Foldseek", setting="3Di letters predicted from sequence by ProstT5",
          database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8"),
@@ -1118,7 +1120,10 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
         shown = real[:TOP_N] + [h for h in hs if h.get("feature")]
         place, n_l = place_labels(shown, px, W)
         h_row = ROW_PAD + n_l * LANE_H + 4
-        if run_status[k] == "not run" and k == "foldseek" and run_status.get("prostt5") != "not run":
+        if run_status[k] == "too long":
+            g = ['<text x="4" y="%d" class="nr">not run: structures were predicted only for proteins of %d aa or less</text>'
+                 % (ROW_PAD + 11, t["max_aa"])]
+        elif run_status[k] == "not run" and k == "foldseek" and run_status.get("prostt5") != "not run":
             # Readers looked here for Foldseek and missed the next row
             g = ['<text x="4" y="%d" class="nr">not run on 3-D structures. Foldseek on shape letters '
                  'predicted from the sequence is the next row, ProstT5 + Foldseek.</text>' % (ROW_PAD + 11)]
@@ -1266,7 +1271,7 @@ SWISSPROT_USED = [
 
 def swissprot_html(ctx, whole):
     """The table of which Swiss-Prot each program run on this page searched."""
-    names = {t["key"]: t["name"] for t in TRACKS if ctx["run_status"][t["key"]] != "not run"}
+    names = {t["key"]: t["name"] for t in TRACKS if ctx["run_status"][t["key"]] not in ("not run", "too long")}
     names.update({w[0]: w[1] for w in whole if w[4] and w[0] == "diamond"})
     rows = []
     for keys, what, part, n in SWISSPROT_USED:
@@ -1293,8 +1298,9 @@ def legend_html(ctx, has_plddt, has_expr, has_struct=False):
         k = t["key"]
         prog = PROGRAMS[t["program"]]
         mark = svg_inline(legend_mark(t, 12, 10), 12, 10)
-        if ctx["run_status"][k] == "not run":
-            items.append('<li class="off">%s<span>%s: not run</span></li>' % (mark, esc(t["name"])))
+        if ctx["run_status"][k] in ("not run", "too long"):
+            why = " on proteins over %d aa" % t["max_aa"] if ctx["run_status"][k] == "too long" else ""
+            items.append('<li class="off">%s<span>%s: not run%s</span></li>' % (mark, esc(t["name"]), why))
             continue
         c, d = fmt_thr(COUNT_E), fmt_thr(E_MAX)
         if k == "hhsearch":
@@ -1484,6 +1490,10 @@ def build_protein(task):
     p = ctx["proteins"][pid]
     hits = [materialize(x) for x in ctx["hits"].get(pid, [])]
     L = p["length"]
+    long_for = {t["key"]: "too long" for t in TRACKS
+                if t.get("max_aa") and L > t["max_aa"] and ctx["run_status"][t["key"]] == "run"}
+    if long_for:  # tracks run only on shorter proteins: "not run" on this page
+        ctx = dict(ctx, run_status={**ctx["run_status"], **long_for})
     seq = p["seq"]
     for h in hits:
         h["_names"] = target_names(h, ctx["target_ann"])
