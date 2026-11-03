@@ -431,7 +431,7 @@ def parse_interproscan(path, proteins):
                 nm.add(ipr)
                 names[ipr] = ipr_desc or ipr
             if prot in proteins:
-                sc = [("member database", analysis), ("signature", sig), ("score", score),
+                sc = [("member database", analysis), ("signature", sig), ("its score or E-value", score),
                       ("InterPro entry", (ipr + " " + ipr_desc) if ipr else "none")]
                 # the score is kept as an E-value only where it is one
                 h = hit("interproscan", f[6], f[7], desc or sig, None, None,
@@ -1401,7 +1401,10 @@ def header_sentence(n, status, agreed, names, m=8, full=8):
 def prog_label(p):
     """A program as its rows with a counted hit are named on the page ("ProstT5 + Foldseek", not
     "Foldseek"); the program's own name when none is known."""
-    return ", ".join(PROG_TRACKS[0].get(p) or [PROGRAMS[p]["name"]])
+    names = PROG_TRACKS[0].get(p) or [PROGRAMS[p]["name"]]
+    if len(names) > 1:
+        return "%s (both runs)" % PROGRAMS[p]["name"]
+    return names[0].replace(", ", " (", 1) + ")" if ", " in names[0] else names[0]
 
 
 def and_list(xs):
@@ -1422,8 +1425,9 @@ def agree_note(names, progs):
          'the hits overlap on your protein. Here that is %s' % and_list([prog_label(p) for p in ps]))
     lists = [top["lists"].get(p, set()) for p in ps]
     if len(ps) == 2 and lists[0] == lists[1]:
-        s += (", and %s's %d hit%s %s the same as %s's %d, so one hit list stands behind the headline"
-              % (prog_label(ps[1]), len(lists[1]), "" if len(lists[1]) == 1 else "s", "is" if len(lists[1]) == 1 else "are", prog_label(ps[0]), len(lists[0])))
+        s += (", and the %d %s hit%s on proteins carrying %s %s the same as %s's, so one hit list stands behind the headline"
+              % (len(lists[1]), prog_label(ps[1]), "" if len(lists[1]) == 1 else "s", names.get(top["acc"]) or top["acc"],
+                 "is" if len(lists[1]) == 1 else "are", prog_label(ps[0])))
     elif len(ps) > 2 and all(x == lists[0] for x in lists[1:]):
         s += ", and their hit lists are the same, so one hit list stands behind the headline"
     rest = [p for p in progs if p not in ps]
@@ -1442,8 +1446,9 @@ def agree_note(names, progs):
         if d == "programs":
             why = "it is carried by the most programs (%d, against %d)" % (top["n"], others[0]["n"])
         elif d == "hits":
-            why = "it has the most hits (%d, against %s); each candidate is carried by %d programs" % (
-                top["hits"], and_list([str(o["hits"]) for o in rivals]), top["n"])
+            why = "it has the most hits (%d, against %s for %s, also carried by %d programs)" % (
+                top["hits"], and_list([str(o["hits"]) for o in rivals[:3]]),
+                and_list([names.get(o["acc"]) or o["acc"] for o in rivals[:3]]) + (" and %d more" % (len(rivals) - 3) if len(rivals) > 3 else ""), top["n"])
         elif d == "evalue":
             why = "the programs and hits tie, and it has the best E-value of an agreeing pair (%s)" % fmt_e(top["e"])
         else:
@@ -1578,9 +1583,7 @@ def dense_whole(b):
             continue
         nm, hw = WHOLE_DENSE[key]
         if v == "not run":
-            out.append(["w_" + key, nm, hw, "not run: " + (
-                "FANTASIA was run only on proteins with no Swiss-Prot match or in the immune-gene table" if key == "fantasia"
-                else "proteins over 5,000 amino acids were skipped"), 0])
+            continue  # not on the no-hit line; twelve_text names the programs run
         elif not v:
             out.append(["w_" + key, nm, hw, "no prediction" if key == "unifire" else "no hit (%s)" % cutoff, 0])
         elif key == "diamond":
@@ -1597,20 +1600,21 @@ def dense_whole(b):
             counts_ = dist < FANTASIA_MAX_DIST
             out.append(["w_" + key, nm, hw, "%s %s%s, <i>%s</i> · its most similar protein" % (
                 uni_link(acc), esc(pn), " (%s)" % esc(gene) if gene else "", esc(org)), 1 if counts_ else 2,
-                "embedding distance %.2f; this site counts it below %.2f · whole protein, no position" % (dist, FANTASIA_MAX_DIST)])
+                "embedding distance %.2f; this site counts FANTASIA's pick only below %.2f · whole protein, no position" % (dist, FANTASIA_MAX_DIST)])
         elif key == "unifire":
             what, n = v
             out.append(["w_" + key, nm, hw, esc(what), 1, "%d prediction%s · whole protein, no position" % (n, "" if n == 1 else "s")])
     return out
 
 
-def dense_notrun(run_status):
+def dense_notrun(run_status, has_struct=False):
     """window.NOTRUN: track -> why it was not run on this protein."""
     out = {}
     for t in TRACKS:
         s = run_status[t["key"]]
         if s == "too long":
-            out[t["key"]] = "not run: structures were predicted only for proteins of %d aa or less" % t["max_aa"]
+            out[t["key"]] = "not run: Biomni predicted structures only for proteins of %d aa or less%s" % (
+                t["max_aa"], "; the structure at the right is a separate prediction" if has_struct else "")
         elif s == "not run":
             out[t["key"]] = ("not run on 3-D structures; Foldseek on shape letters predicted from the sequence is the next row"
                              if t["key"] == "foldseek" and run_status.get("prostt5") != "not run" else "not run: no %s in the input folder" % t["file"])
@@ -1636,7 +1640,7 @@ def dense_key(ctx, has_plddt, has_struct):
             nm = PROGRAMS[prog]["name"]
             if len(ts) > 1:
                 nm = "%s (%s)" % (nm, " and ".join(t["name"].replace(PROGRAMS[prog]["name"], "").strip(", ") or "one round" for t in ts)) \
-                    if prog == "mmseqs2" else ", ".join(t["name"] for t in ts)
+                    if prog == "mmseqs2" else "Foldseek (on 3-D structures, and ProstT5 + Foldseek)"
             else:
                 nm = ts[0]["name"]
             items.append("%s%s" % (svg_inline(legend_mark(ts[0], 12, 10), 12, 10), esc(nm)))
@@ -1789,8 +1793,8 @@ DENSE_COLHEAD = (
     'this cutoff, distinct proteins, settings, peak coverage; hit row: residues of your protein, their count, and the two most common residues '
     'with their share. Click to sort hits by start">hits · residues <i></i></button></div><div class="num"><button data-sort="e" '
     'title="program row: best E-value, and one tick per hit on a log axis from 0.001 to 10; hit row: its E-value. Click to sort">E-value '
-    '<i></i></button></div><div class="num"><button data-sort="score" title="score in bits (hhsearch: Prob). On a kmerseek hit row: the '
-    'alphabet and k it was found with. Click to sort">score (bits) · setting <i></i></button></div><div class="num"><button data-sort="id" '
+    '<i></i></button></div><div class="num"><button data-sort="score" title="score in bits; on hhsearch\'s rows its Prob, the chance out of 100 that the hit is a true relative. On a kmerseek hit row: the '
+    'alphabet and k it was found with. Click to sort">score (bits or Prob) · setting <i></i></button></div><div class="num"><button data-sort="id" '
     'title="identical residues: the program\'s own figure (ProstT5, MMseqs2) or counted on its alignment. Click to sort">identical <i></i>'
     '</button></div><div><button data-sort="tl" title="program row: its best hit; hit row: the matched part of the other protein. Click to '
     'sort by the other protein\'s length">best hit · matched part <i></i></button></div><div class="track" title="Boxes sit at the residues '
@@ -1816,7 +1820,7 @@ def dense_page(pid, pname, L, ctx, st, whole, page_data):
            dense_swissprot(ctx, whole), '</main>', ctx["footer"],
            '<div id="tip" role="tooltip" hidden></div>', dense_help(ctx)]
     glob = "window.WHOLE=%s;window.NOTRUN=%s;window.HOW=%s;" % (
-        json.dumps(dense_whole(ctx["biomni"].get(pid))), json.dumps(dense_notrun(ctx["run_status"])),
+        json.dumps(dense_whole(ctx["biomni"].get(pid))), json.dumps(dense_notrun(ctx["run_status"], bool(st))),
         json.dumps({t["key"]: (ctx["settings"][t["key"]] if ctx["run_status"][t["key"]] == "run" else "not run") for t in TRACKS}))
     out.append('<script>const PAGE=%s;%s</script><script src="%sdense-bhf.js%s"></script>'
                % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), glob.replace("</", "<\\/"), pre, ASSET_VER[0]))
@@ -1860,7 +1864,7 @@ def twelve_text(ctx, whole):
             if t not in run:
                 notes.append("%s was not run%s" % (t["name"], " on this protein, which is over %d aa" % t["max_aa"]
                                                     if ctx["run_status"][t["key"]] == "too long" else ""))
-    ran = [w for w in whole if not w[3].startswith("not run")]  # every whole-protein program run here counts, hit or not
+    ran = whole  # every whole-protein program run here counts, hit or not (dense_whole leaves out the ones not run)
     s = "the %d programs that place hits along the protein%s" % (ctx["n_run"], " (%s)" % "; ".join(notes) if notes else "")
     if ran:
         s += " plus the %d whole-protein program%s from Biomni's run: %s" % (len(ran), "" if len(ran) == 1 else "s",
@@ -2000,7 +2004,7 @@ def build_protein(task):
     steps = sentence_steps(hits, ctx, lo, n_whole, m_whole)
     agreement(hits, ctx["target_ann"])  # AGREE_INFO at the counting cutoff, for the brackets under the ruler
     agree = [dict(acc=a["acc"], name=ctx["names"].get(a["acc"]) or a["acc"], a=a["a"], b=a["b"],
-                  programs=sorted(PROGRAMS[p]["name"] for p in a["programs"]), n=a["n"], hits=a["hits"]) for a in AGREE_INFO[0]]
+                  programs=sorted(PROGRAMS[p]["name"] for p in a["programs"]), n=a["n"], hits=a["hits"]) for a in AGREE_INFO[0][:3]]  # the bracket lane: the named family and the next two
     ptm = re.search(r"pTM ([0-9.]+)", st["made"]) if st and st.get("made") else None
     page_data = dict(
         id=pid, pn=pname or "", q=seq, px=px, w=W, top=TOP_N, m=ctx["n_run"], sent=steps, hits=data, td=tdom, ds=tsrc, names=score_names,

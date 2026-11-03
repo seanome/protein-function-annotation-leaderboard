@@ -31,7 +31,7 @@
 
   // the programs' own column names, in plain words
   const GLOSS = { "i-Evalue": "E-value of this domain match alone (hmmer's i-Evalue)", "score": "score (bits)", "target env from-to": "envelope: hmmer's wider bound on the matched part of the other protein",
-    "region_evalue": "E-value of this matched stretch (kmerseek's region_evalue)", "evalue": "E-value", "fident": "identical fraction", "bits": "score (bits)", "alntmscore": "TM-score of the alignment",
+    "region_evalue": "E-value of this matched stretch (kmerseek's region_evalue)", "evalue": "E-value", "fident": "identical fraction", "its score or E-value": "its score or E-value (the member database's own figure)", "bits": "score (bits)", "alntmscore": "TM-score of the alignment",
     "Pfam": "Pfam accession", "member database": "member database", "signature": "signature", "InterPro entry": "InterPro entry", "GO terms": "GO terms" };
   function tipHtml(h) {
     let rows = `<tr><td>this protein</td><td>${h.q[0]}-${h.q[1]}</td></tr>`;
@@ -156,14 +156,14 @@
   const num = (v) => { const x = parseFloat(v); return isNaN(x) ? null : x; };
   function scoreOf(h) {  // [value for sorting, text]: bits, or hhsearch's Prob, or InterProScan's score
     const k = h.k;
-    if (k === "mmseqs2" || k === "mmseqs2_3rounds" || k === "prostt5") return [num(h.s[2]), h.s[2] + " bits"];
+    if (k === "mmseqs2" || k === "mmseqs2_3rounds" || k === "prostt5" || k === "foldseek") return [num(h.s[2]), h.s[2] + " bits"];
     if (k === "phmmer" || k === "jackhmmer" || k === "hmmscan") return [num(h.s[1]), h.s[1] + " bits"];
     if (k === "hhsearch") return [num(h.s[0]), "Prob " + h.s[0]];
     return [null, ""];
   }
   function identOf(h) {
     const k = h.k;
-    if (k === "mmseqs2" || k === "mmseqs2_3rounds" || k === "prostt5") { const f = num(h.s[1]); return f === null ? null : 100 * f; }
+    if (k === "mmseqs2" || k === "mmseqs2_3rounds" || k === "prostt5" || k === "foldseek") { const f = num(h.s[1]); return f === null ? null : 100 * f; }
     return null;
   }
   function k_e(h) {
@@ -437,7 +437,7 @@
 
   function open(h, box) {
     if (PAGE.noseq) {  // protein.html: the hit's numbers only; its residues are on the 51 drawn pages
-      box.innerHTML = `<h3>${esc(PAGE.tracks[h.k].name)}: ${esc(h.l)}</h3><p class="note">${(PAGE.names[h.k] || []).map((n, j) => `${esc(n)} ${esc(h.s[j] ?? "")}`).join(" · ")}. ` +
+      box.innerHTML = `<h3>${esc(PAGE.tracks[h.k].name)}: ${esc(h.l)}</h3><p class="note">${(PAGE.names[h.k] || []).map((n, j) => `${esc(GLOSS[n] || n)} ${esc(h.s[j] ?? "")}`).join(" · ")}. ` +
         "This protein's sequence is not on the site, so its residues cannot be shown; the 51 proteins with a drawn page show them.</p>";
       return;
     }
@@ -571,7 +571,7 @@
   const idText = (h) => { const p = idPct(h); return p === null ? "" : Math.round(p) + "%"; };
   // where a hit's identical count comes from: the program's own alignment, kmerseek's gapless pair, or a
   // realignment made when the site was built (ProstT5 beyond its own fident figure)
-  const idSource = (h) => (h.k === "kmerseek" ? "kmerseek's gapless pair" : h.k === "prostt5" ? "realigned (BLOSUM62, local, gap open -11, extend -1); the program's own figure is the percentage" : "the alignment the program wrote");
+  const idSource = (h) => (h.k === "kmerseek" ? "kmerseek's gapless pair" : h.k === "prostt5" || h.k === "foldseek" ? "realigned (BLOSUM62, local, gap open -11, extend -1); the program's own figure is the percentage" : "the alignment the program wrote");
   const idFrom = (h) => (identOf(h) !== null ? "the program's own figure" : h.id ? idSource(h).split(";")[0] : "");
   // fainter = fewer identical residues: under 20%, 20-40, 40-60, 60 and over (the hits page's four steps)
   const idOpacity = (h) => { const p = idPct(h); return p === null ? 0.55 : p < 20 ? 0.3 : p < 40 ? 0.5 : p < 60 ? 0.75 : 1; };
@@ -848,7 +848,7 @@
     const name = `<div class="name"><span class="rank">${n}</span><span class="nm"><span class="mono">${esc(h.l)}</span>${h.t && h.t !== h.l ? ` ${uniHtml(h.t)}` : ""}</span>` +
       `<div class="s" title="${esc([h.n, h.o, fams].filter(Boolean).join(" · "))}">${sub}</div></div>`;
     const setting = h.k === "kmerseek" && h.m ? `<span class="chip" title="the alphabet and k-mer size kmerseek compared the two proteins in; ${h.sn || 0} seed window${h.sn === 1 ? "" : "s"}">${esc(h.m)} k${h.kk}</span>` : esc(sc[1].replace(" bits", "").replace("Prob ", ""));
-    const re = h.k === "prostt5";  // the count below is from a realignment, not from ProstT5's own alignment
+    const re = h.k === "prostt5" || h.k === "foldseek";  // the count below is from a realignment, not from Foldseek's own alignment
     const idc = h.id ? `<span title="${esc(idFrom(h))}">${idText(h)}</span><div class="s" title="${esc(idSource(h))}">${h.id[0]} of ${h.id[1]}${re ? `<br><span class='re'>= ${Math.round((100 * h.id[0]) / h.id[1])}% realigned</span>` : ""}</div>` : idText(h);
     const tt = topTwo(h.q[0], h.q[1]);
     const cells = `<div class="num">${h.q[0]}–${h.q[1]}` + (PAGE.noseq ? `<div class="s">${h.q[1] - h.q[0] + 1} aa</div></div>` :
@@ -891,7 +891,7 @@
     sentEl.title = PAGE.twelve ? "The programs counted: " + PAGE.twelve : ""; sentEl.innerHTML = st[1]; sentNote.innerHTML = (st[2] || "") + (region ? `<p class="note filt">Rows are filtered to ${esc(region[2])} ${region[0]}–${region[1]}; the sentence and the ladder count all hits.</p>` : "");
     const all = H.map((h, i) => i).filter((i) => !H[i].x), shown = all.filter((i) => shownE(H[i])), m = shown.filter(passes);
     const nProt = new Set(m.map((i) => H[i].t || H[i].l)).size;
-    countEl.innerHTML = `<b>${m.length}</b> of ${all.length} hits · ${nProt} proteins` + (region ? ` · in <b>${esc(region[2])}</b> ${region[0]}–${region[1]} <button class="btn x" id="unregion" title="Show hits anywhere on the protein">×</button>` : "");
+    countEl.innerHTML = `<b>${m.length}</b> of ${all.length} hits · ${nProt} protein${nProt === 1 ? "" : "s"}` + (region ? ` · in <b>${esc(region[2])}</b> ${region[0]}–${region[1]} <button class="btn x" id="unregion" title="Show hits anywhere on the protein">×</button>` : "");
     document.querySelectorAll(".colhead [data-sort]").forEach((b) => { b.classList.toggle("on", b.dataset.sort === sortKey); b.querySelector("i").textContent = b.dataset.sort === sortKey ? (sortUp ? "▲" : "▼") : ""; });
     gridEl.querySelectorAll(".panel[data-i]").forEach((p) => open(H[+p.dataset.i], p));
     const un = document.getElementById("unregion"); if (un) un.addEventListener("click", () => { region = null; render(); });
