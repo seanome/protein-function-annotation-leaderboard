@@ -7,7 +7,8 @@
 // This is the BHF page's dense.js (claude.ai artifact JgFXM7JTxrdpgiw9B5dEXF, 2026-11-03), shipped as
 // dense-bhf.js; changed here: the "not run" line gives each program's own reason (window.NOTRUN), and a
 // ruler tick is left out where its label would touch the end label; PAGE.noseq (protein.html, no sequence on
-// the site) gives hit rows without composition and opens no residues.
+// the site) gives hit rows without composition and opens no residues; the domain lane draws InterProScan's
+// Pfam matches where hmmscan did not run.
 (function () {
   const tip = document.getElementById("tip");
   const panel = document.getElementById("panel");
@@ -645,7 +646,10 @@
   // the domain lane: hmmscan's Pfam domains, InterProScan's predictions (dashed) and the families the
   // headline sentence rests on (brackets with the count of programs). Click one to keep only hits in it.
   function laneRow() {
-    const fam = H.map((h, i) => i).filter((i) => H[i].k === "hmmscan" && shownE(H[i])).sort((a, b) => (H[a].e ?? 0) - (H[b].e ?? 0));
+    // Pfam domains: hmmscan's; where hmmscan did not run (protein.html), InterProScan's Pfam matches, as on the first page
+    let famSrc = "hmmscan", fam = H.map((h, i) => i).filter((i) => H[i].k === "hmmscan" && shownE(H[i]));
+    if (!fam.length && !H.some((h) => h.k === "hmmscan")) { famSrc = "InterProScan"; fam = H.map((h, i) => i).filter((i) => H[i].k === "interproscan" && H[i].s[0] === "Pfam" && shownE(H[i])); }
+    fam.sort((a, b) => (H[a].e ?? 0) - (H[b].e ?? 0));
     const kept = []; for (const i of fam) if (kept.every((j) => H[i].q[0] > H[j].q[1] || H[i].q[1] < H[j].q[0])) kept.push(i);
     const pred = [];
     H.filter((h) => h.x).sort((a, b) => a.q[0] - b.q[0]).forEach((h) => {
@@ -661,7 +665,7 @@
     const on = (a, b) => (region && region[0] === a && region[1] === b ? " on" : "");
     for (const i of kept) {
       const h = H[i], x0 = sx(h.q[0]), w = wx(h.q[0], h.q[1]);
-      g += `<g class="dom${on(h.q[0], h.q[1])}" data-a="${h.q[0]}" data-b="${h.q[1]}" data-l="${esc(h.l)}"><title>${esc(h.l)} (${esc((h.f || [])[0] || "Pfam")}), hmmscan, residues ${h.q[0]}-${h.q[1]}, E-value ${eText(h)}. Click to keep only hits in it.</title>` +
+      g += `<g class="dom${on(h.q[0], h.q[1])}" data-a="${h.q[0]}" data-b="${h.q[1]}" data-l="${esc(h.l)}"><title>${esc(h.l)} (${esc((h.f || [])[0] || "Pfam")}), ${famSrc}, residues ${h.q[0]}-${h.q[1]}, E-value ${eText(h)}. Click to keep only hits in it.</title>` +
         `<rect x="${x0.toFixed(1)}" y="3" width="${w.toFixed(1)}" height="12" rx="2" fill="#efeee9" stroke="#3D3D3D" stroke-width=".8"/>` +
         (h.l.length * 6.4 + 4 <= w ? `<text x="${(x0 + w / 2).toFixed(1)}" y="12" class="dl" text-anchor="middle">${esc(h.l)}</text>` : "") + `</g>`;
     }
@@ -685,7 +689,7 @@
     });
     g += "</svg>";
     const note = agree.length ? `Brackets: the Pfam families of the matched proteins that the sentence at the top rests on, with how many programs' hits carry them.` : "";
-    return `<div class="g row lane"><div class="name"><b>domains on your protein</b><div class="s" title="Pfam domains from hmmscan (grey boxes); InterProScan predictions (dashed, never counted). ${note} Click any to keep only the hits landing in it.">Pfam (hmmscan), predictions (dashed), and the families the sentence rests on (brackets). Click one to filter.</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt"></div><div class="track">${g}</div></div>`;
+    return `<div class="g row lane"><div class="name"><b>domains on your protein</b><div class="s" title="Pfam domains from ${famSrc === "hmmscan" ? "hmmscan" : "InterProScan's Pfam matches (hmmscan was run only on the 51 drawn proteins)"} (grey boxes); InterProScan predictions (dashed, never counted). ${note} Click any to keep only the hits landing in it.">Pfam (${famSrc}), predictions (dashed)${agree.length ? ", and the families the sentence rests on (brackets)" : ""}. Click one to filter.</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt"></div><div class="track">${g}</div></div>`;
   }
   // programs with a hit at each residue, each program once (the same steps build.py draws)
   function agreeRow() {
