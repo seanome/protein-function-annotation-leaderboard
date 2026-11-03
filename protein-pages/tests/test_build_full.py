@@ -61,9 +61,25 @@ def site(tmp_path_factory):
 
 
 def read_js(path, prefix):
+    """A data file's JSON; a shard (full/NNN.js) with its strings put back from full/str.js, as FULL_X does."""
     s = path.read_text()
     assert s.startswith(prefix)
-    return json.loads(s[len(prefix):-1]) if prefix == "window.FULL=" else json.loads(s[s.index(",", s.index("||{}")) + 1:-2])
+    if prefix == "window.FULL=":
+        return json.loads(s[len(prefix):-1])
+    d = json.loads(s[s.index("FULL_X(") + len("FULL_X("):-3])
+    st = path.parent / "str.js"
+    S = json.loads(st.read_text().split(";window.FULL_X=")[0][len("window.FULL_STR="):])
+    x = lambda i: S[i] if isinstance(i, int) else i
+    for e in d.values():
+        e["go"] = [[x(a), x(b)] for a, b in e["go"]]
+        e["kw"] = [x(k) for k in e["kw"]]
+        if isinstance(e.get("ips"), list):
+            e["ips"] = [[x(m[0]), x(m[1]), x(m[2]), m[3], m[4], m[5], x(m[6]), x(m[7])] for m in e["ips"]]
+        if isinstance(e.get("uf"), list):
+            e["uf"] = [[x(u[0]), x(u[1]), x(u[2]), x(u[3]), u[4], u[5]] for u in e["uf"]]
+        if e.get("fa"):
+            e["fa"][6] = [[x(a), x(b)] for a, b in e["fa"][6]]
+    return d
 
 
 def test_every_protein_in_its_one_data_file(site):

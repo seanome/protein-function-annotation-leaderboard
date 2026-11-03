@@ -224,6 +224,34 @@ def load(folder):
     return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst
 
 
+# The text that repeats across the data files (GO term names and IDs, UniProt keywords, InterProScan's
+# member databases, signatures and descriptions, UniFIRE's rules and predictions) is stored once, in
+# full/str.js, and the data files hold its number: this keeps the site under the host's 256 MiB. A
+# data file calls FULL_X (defined in full/str.js) to turn the numbers back into text as it loads.
+STR_X_JS = """window.FULL_X=function(d){var S=window.FULL_STR,s=function(i){return typeof i==="number"?S[i]:i;},p=function(g){return [s(g[0]),s(g[1])];};
+for(var id in d){var e=d[id];if(e.go)e.go=e.go.map(p);if(e.kw)e.kw=e.kw.map(s);
+if(Array.isArray(e.ips))e.ips=e.ips.map(function(m){return [s(m[0]),s(m[1]),s(m[2]),m[3],m[4],m[5],s(m[6]),s(m[7])];});
+if(Array.isArray(e.uf))e.uf=e.uf.map(function(u){return [s(u[0]),s(u[1]),s(u[2]),s(u[3]),u[4],u[5]];});
+if(e.fa&&e.fa[6])e.fa[6]=e.fa[6].map(p);}return d;};"""
+
+
+def encode_strings(shards):
+    """Replace the repeated strings of every shard entry by their number in one table (FULL_X undoes it)."""
+    table = {}
+    S = lambda x: table.setdefault(x, len(table)) if isinstance(x, str) else x
+    for entries in shards.values():
+        for e in entries.values():
+            e["go"] = [[S(a), S(b)] for a, b in e["go"]]
+            e["kw"] = [S(k) for k in e["kw"]]
+            if isinstance(e.get("ips"), list):
+                e["ips"] = [[S(m[0]), S(m[1]), S(m[2]), m[3], m[4], m[5], S(m[6]), S(m[7])] for m in e["ips"]]
+            if isinstance(e.get("uf"), list):
+                e["uf"] = [[S(u[0]), S(u[1]), S(u[2]), S(u[3]), u[4], u[5]] for u in e["uf"]]
+            if e.get("fa"):
+                e["fa"][6] = [[S(a), S(b)] for a, b in e["fa"][6]]
+    return sorted(table, key=table.get)
+
+
 def add_targets(out, tseqs):
     """Merge the best hits' Swiss-Prot sequences into the target files (targets/NNN.js, build.py's
     write_target_shards), keeping build.py's file for each accession, so no file is added. Returns
@@ -405,16 +433,18 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
             f = out / page
             html = f.read_text()
             html = html.replace("</main>", '<section id="biomni" data-id="%s"></section><section id="biomni-more"></section></main>' % pid, 1)
-            html = html.replace("</body>", '<script src="../full/rows.js%s"></script><script src="../assets/viewer.js%s"></script></body>'
-                                % (asset_ver, asset_ver), 1)
+            html = html.replace("</body>", '<script src="../full/rows.js%s"></script><script src="../full/str.js%s"></script>'
+                                '<script src="../assets/viewer.js%s"></script></body>' % (asset_ver, asset_ver, asset_ver), 1)
             if html.count('id="biomni') != 2:
                 sys.exit("could not add the Biomni tables to %s" % page)
             f.write_text(html)
     shutil.copytree(Path(__file__).parent / "assets", out / "assets", dirs_exist_ok=True)
     n_tseq = add_targets(out, tseqs)
+    strings = encode_strings(shards)
+    (out / "full" / "str.js").write_text("window.FULL_STR=%s;%s" % (json.dumps(strings, separators=(",", ":")), STR_X_JS))
     for s in range(N_SHARDS):
         (out / "full" / ("%03d.js" % s)).write_text(
-            "window.FULL_SHARD=Object.assign(window.FULL_SHARD||{},%s);" % json.dumps(shards.get(s, {}), separators=(",", ":")))
+            "window.FULL_SHARD=Object.assign(window.FULL_SHARD||{},FULL_X(%s));" % json.dumps(shards.get(s, {}), separators=(",", ":")))
     (out / "full" / "rows.js").write_text("window.FULL=%s;" % json.dumps(
         dict(cats=cats, check=[t for _, t in NAME_CHECK], verdicts=VERDICT_TEXT, rows=rows, other=OTHER_HITS,
              pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)]), separators=(",", ":")))
@@ -631,10 +661,10 @@ def protein_html(ver, n_tseq=0):
 <footer><h2>Input files read</h2><p class="note">Built by build_full.py from Biomni's tables of the whole proteome (full_inputs/README.md in the
 repository says how each was made). This page only reads them; building it ran no search.</p></footer>
 <div id="tip" role="tooltip" hidden></div>%s
-<script>window.DENSE_CONST=%s;</script><script src="full/rows.js%s"></script><script src="assets/protein-dense.js%s"></script></body></html>
+<script>window.DENSE_CONST=%s;</script><script src="full/rows.js%s"></script><script src="full/str.js%s"></script><script src="assets/protein-dense.js%s"></script></body></html>
 """ % (build.DENSE_FILTERS % (round(build.math.log10(build.SHOW_E)), round(build.math.log10(build.COUNT_E))),
        build.dense_key(ctx, False, False), build.DENSE_COLHEAD, build.dense_swissprot(ctx, whole), help_,
-       json.dumps(const, separators=(",", ":")), ver, ver)
+       json.dumps(const, separators=(",", ":")), ver, ver, ver)
 
 
 def main():
