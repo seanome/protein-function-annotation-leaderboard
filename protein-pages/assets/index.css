@@ -1,5 +1,5 @@
 /* The first page (build_full.py index_html), in the BHF page's dense design: loaded after site.css and
-   dense.css. Colours are dense.css's greys; the only data colours are the track's, named in the key:
+   dense-bhf.css (a copy of the BHF page's dense.css). Colours are its greys; the only data colours are the track's, named in the key:
    #c8c8c8 the protein line, #3D3D3D a Pfam match (open box), #008B7A MMseqs2's best hit (sequence
    search), its fill fainter for fewer identical residues. */
 
