@@ -51,6 +51,66 @@ def names_conflict(existing, proposed):
     return bool(existing and proposed) and key(existing) != key(proposed)
 
 
+ONLY_KMERSEEK_E = 1e-3  # the "only kmerseek" filters keep this E-value or below; rows.js holds the hit for those
+
+
+def other_program_found(r, pid, mm, fs, fst, jh, ips, uf):
+    """True when any program but kmerseek found something on this protein, each at the cutoff the pages
+    use. InterProScan's predictions (disorder, coiled coil, membrane, signal) are not findings."""
+    sp = r["sp_acc"] and r["sp_evalue"] and float(r["sp_evalue"]) <= 1e-3
+    fa = r.get("fantasia_distance") and float(r["fantasia_distance"]) < build.FANTASIA_MAX_DIST
+    return bool(sp or r["pfam_domains"] or fa or any(d and d.get(pid) for d in (mm, fs, fst, jh, uf)) or
+                any(x[0] not in build.IPS_DRAWN for x in (ips or {}).get(pid, [])))
+
+
+def read_rules(folder):
+    """{rule: ({signature: [(set, condition), ...]}, [conditions in each set])} from
+    unifire_rule_conditions.tsv. A set holds when each of its conditions has one of its signatures."""
+    sets = defaultdict(dict)
+    if inp(folder, "unifire_rule_conditions.tsv").exists():
+        with opentext(inp(folder, "unifire_rule_conditions.tsv")) as fh:
+            for r in csv.DictReader(fh, delimiter="\t"):
+                sets[r["rule"]].setdefault(r["set"], []).append(r["signatures"].split(","))
+    rules = {}
+    for rule, by_set in sets.items():
+        where, sizes = defaultdict(list), []
+        for s, conds in enumerate(by_set.values()):
+            sizes.append(len(conds))
+            for c, sigs in enumerate(conds):
+                for g in sigs:
+                    where[g].append((s, c))
+        rules[rule] = (where, sizes)
+    return rules
+
+
+def rule_places(preds, matches, rules):
+    """UniFIRE's rows with a seventh field: which of this protein's InterProScan matches (their index in
+    the sorted list) are signatures of a condition set that holds here. Rows with their own position keep it."""
+    sig = defaultdict(set)  # each name a signature goes by -> its matches; G3DSA:3.40.50.300, PTHR1:SF5
+    for i, m in enumerate(matches):
+        for g in (m[1], m[1].split(":")[0], m[1].replace("G3DSA:", ""), m[6]):
+            if g:
+                sig[g].add(i)
+    out, memo = [], {}
+    for u in preds:
+        if u[4] is not None:
+            out.append(list(u[:6]))
+            continue
+        if u[1] not in memo:
+            where, sizes = rules.get(u[1], ({}, []))
+            seen = defaultdict(lambda: defaultdict(set))  # set -> condition -> matches
+            for g, idx in sig.items():
+                for s, c in where.get(g, ()):
+                    seen[s][c] |= idx
+            full = [s for s, conds in seen.items() if len(conds) == sizes[s]]
+            # UniFIRE ran an earlier release of the rules than UniProt's API serves, so a set may no longer hold in
+            # full: then the set that comes closest says where the rule points
+            near = full or sorted(seen, key=lambda s: (-len(seen[s]) / sizes[s], s))[:1]
+            memo[u[1]] = sorted({i for s in near for v in seen[s].values() for i in v})
+        out.append(list(u[:6]) + [memo[u[1]]])
+    return out
+
+
 NAME_CHECK = [
     ("", "no name, existing or proposed"),
     ("agree", "proposed name is the existing name"),
@@ -193,6 +253,8 @@ def load(folder):
             if r["evalue"] and float(r["evalue"]) <= KMERSEEK_MAX_E:
                 km[r["protein_id"]] = ["%s, k = %s" % (r["alphabet"], r["ksize"]), float(r["evalue"]), r["target"],
                                        r["target_name"], r["target_organism"], int(r["n_settings"])]
+                if r.get("qstart"):  # where it lies, and the Swiss-Prot residues (make_kmerseek_table.py)
+                    km[r["protein_id"]] += [r["alphabet"], int(r["ksize"]), int(r["qstart"]), int(r["qend"]), int(r["tstart"]), int(r["tend"]), r["target_subseq"]]
     # Whole-proteome InterProScan matches and best MMseqs2 hit per protein (make_interproscan_table.py,
     # mmseqs2_best_per_protein.tsv); optional
     ips = None
@@ -218,7 +280,7 @@ def load(folder):
                 sys.exit("%s is in %s but not in the proteome" % (r["protein_id"], name))
             if name.startswith("foldseek_struct") and lengths[r["protein_id"]][0] > STRUCT_MAX_AA:
                 sys.exit("%s is in %s but longer than %d aa" % (r["protein_id"], name, STRUCT_MAX_AA))
-            if float(r["evalue"]) <= FOLDSEEK_MAX_E:
+            if float(r["evalue"]) <= 10:
                 acc = build.af_accession(r["target"])  # AF-P12345-F1-model_v6, AF-C3VPR6-2-F1-model_v6
                 out[r["protein_id"]] = [acc, float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
                                         uni.get(acc, {}).get("protein_name", ""), uni.get(acc, {}).get("organism", "")]
@@ -228,7 +290,12 @@ def load(folder):
         return out
     fs = foldseek("foldseek_best_per_protein.tsv")
     fst = foldseek("foldseek_struct_best_per_protein.tsv")
-    return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst
+    # DIAMOND's best hit realigned, for its position (make_diamond_positions.py): skipped pairs have no entry
+    dm = {}
+    if inp(folder, "diamond_positions.tsv").exists():
+        dm = {r["protein_id"]: [int(r[c]) for c in ("qstart", "qend", "tstart", "tend", "identical", "columns")]
+              for r in tsv("diamond_positions.tsv") if r["qstart"]}
+    return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst, dm
 
 
 # The text that repeats across the data files (GO term names and IDs, UniProt keywords, InterProScan's
@@ -253,7 +320,7 @@ def encode_strings(shards):
             if isinstance(e.get("ips"), list):
                 e["ips"] = [[S(m[0]), S(m[1]), S(m[2]), m[3], m[4], m[5], S(m[6]), S(m[7])] for m in e["ips"]]
             if isinstance(e.get("uf"), list):
-                e["uf"] = [[S(u[0]), S(u[1]), S(u[2]), S(u[3]), u[4], u[5]] for u in e["uf"]]
+                e["uf"] = [[S(u[0]), S(u[1]), S(u[2]), S(u[3])] + u[4:] for u in e["uf"]]
             if e.get("fa"):
                 e["fa"][6] = [[S(a), S(b)] for a, b in e["fa"][6]]
     return sorted(table, key=table.get)
@@ -349,12 +416,15 @@ def read_swissprot(path, want):
 
 def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=None, swissprot=None):
     t0 = time.time()
-    ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst = load(folder)
+    ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst, dm = load(folder)
     seqs = read_proteome(proteome, lengths) if proteome else {}
     # the Swiss-Prot proteins of the best hits with a position (MMseqs2, ProstT5 + Foldseek, Foldseek on
     # structure), so protein.html can align the two proteins; isoforms (P12345-2) are not in uniprot_sprot.fasta
-    best_targets = {v[0] for d in (mm, fs, fst) if d for v in d.values() if v}
-    tseqs = read_swissprot(swissprot, best_targets) if swissprot else {}
+    best_targets = {r["sp_acc"] for r in ann if r["sp_acc"] and r["protein_id"] in dm} | {v[0] for d in (mm, fs, fst) if d for v in d.values() if v and float(v[4]) <= FOLDSEEK_MAX_E}
+    tseqs = read_swissprot(swissprot, best_targets | {v[2] for v in (km or {}).values()}) if swissprot else {}
+    tlen = {a: len(s) for a, s in tseqs.items()}  # a kmerseek hit keeps only its region's residues, so the sequence is left out
+    tseqs = {a: s for a, s in tseqs.items() if a in best_targets}
+    rules = read_rules(folder)
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -376,7 +446,16 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                 drawn_page[pid] = page
 
     name = {r["protein_id"]: r["proposed_name"] or r["existing_name"] for r in ann}
-    rows, shards = [], defaultdict(dict)
+    rows, shards, n_no_other = [], defaultdict(dict), 0
+    cache = {}
+
+    def strong(d):  # the Foldseek hits the counts use: E-value FOLDSEEK_MAX_E or below; the pages show every best hit
+        if d is None:
+            return None
+        if id(d) not in cache:
+            cache[id(d)] = {k: v for k, v in d.items() if float(v[4]) <= FOLDSEEK_MAX_E}
+        return cache[id(d)]
+
     pfam_ix = {}  # Pfam accession -> its index in the data file's pfam list: [accession, InterProScan's description]
     for r in ann:
         pid = r["protein_id"]
@@ -387,6 +466,8 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         rep = rep_of[pid]
         size = len(members[rep])
         pf = pfam_list(r["pfam_domains"])
+        found = other_program_found(r, pid, mm, strong(fs), strong(fst), jh, ips, uf)
+        k = None if found or not km else km.get(pid)
         rows.append([pid, lengths[pid][0], r["existing_name"], r["proposed_name"], status_code[r["name_status"]],
                      r["sp_name"], r["sp_acc"], num(r["sp_pident"]), num(r["sp_qcov"]), r["sp_evalue"],
                      ", ".join(dict.fromkeys(n for _, n in pf)), mask,
@@ -396,8 +477,11 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                      [[x[3], x[4], pfam_ix.setdefault(x[1], len(pfam_ix))] for x in sorted(ips.get(pid, []), key=lambda x: x[3]) if x[0] == "Pfam"] if ips else [],
                      [mm[pid][2], mm[pid][3], round(100 * mm[pid][1], 1), mm[pid][0]] if mm and mm.get(pid) else None,
                      # 17: the other whole-proteome programs with a hit, as bits (OTHER_HITS)
-                     sum(1 << i for i, d in enumerate((mm, fs, fst, km, jh)) if d and d.get(pid)),
-                     1 if r["name_status"] == "conflict" and names_conflict(r["existing_name"], r["proposed_name"]) else 0])  # 18
+                     sum(1 << i for i, d in enumerate((mm, strong(fs), strong(fst), km, jh)) if d and d.get(pid)),
+                     1 if r["name_status"] == "conflict" and names_conflict(r["existing_name"], r["proposed_name"]) else 0,  # 18
+                     # 19: kmerseek's best hit when no other program found anything: [E-value, setting, accession, name], or 0
+                     [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0])
+        n_no_other += not found
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
         fa = None
@@ -412,15 +496,16 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
             sp_gene=u.get("gene", ""), sp_org=u.get("organism", ""), fa=fa,
             # UniFIRE: its predictions; "not run" for proteins over UNIFIRE_MAX_AA, which it skipped
             km=None if km is None else km.get(pid, 0),
+            dm=dm.get(pid),
             mm=None if mm is None else mm.get(pid, 0),
             fs=None if fs is None else fs.get(pid, 0),  # 0: no hit at FOLDSEEK_MAX_E or below
             fst=None if fst is None else ("not run" if lengths[pid][0] > STRUCT_MAX_AA else fst.get(pid, 0)),
             # the sequence (only for a protein without a drawn page; a drawn page carries its own), and the
             # lengths of its best hits' Swiss-Prot proteins, for the line under each hit
             q=seqs.get(pid) if not drawn_page.get(pid) else None,
-            tl={v[0]: len(tseqs[v[0]]) for v in (mm and mm.get(pid), fs and fs.get(pid), fst and fst.get(pid)) if v and v[0] in tseqs},
+            tl={a: tlen[a] for a in (*(v[0] for v in (mm and mm.get(pid), fs and fs.get(pid), fst and fst.get(pid)) if v), km and km.get(pid) and km[pid][2], r["sp_acc"]) if a in tlen},
             ips=None if ips is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not ips.get(pid) else sorted(ips.get(pid, []), key=lambda x: (x[3], x[4]))),  # 0: searched, no hit at E-value KMERSEEK_MAX_E or below
-            uf=None if uf is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not uf.get(pid) else uf.get(pid, [])),
+            uf=None if uf is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not uf.get(pid) else rule_places(uf.get(pid, []), sorted(ips.get(pid, []), key=lambda x: (x[3], x[4])) if ips else [], rules)),
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
             sp_e=r["sp_evalue"], ev=evidence_list(im["evidence"]) if im else [],
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), rep=rep,
@@ -468,11 +553,14 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         jackhmmer_not_immune=sum(1 for pid in jh if pid not in immune),
         in_cluster_of_2_or_more=sum(1 for r in rows if r[13] > 1),
         clusters=len(members),
-        foldseek_hit=None if fs is None else len(fs),
-        foldseek_struct_hit=None if fst is None else len(fst),
+        foldseek_hit=None if fs is None else len(strong(fs)),
+        foldseek_struct_hit=None if fst is None else len(strong(fst)),
         drawn=sum(1 for r in rows if r[14]),
         drawn_pages=len({r[14] for r in rows if r[14]}),
         names_conflict=sum(1 for r in rows if r[18]),
+        no_other_program=n_no_other,
+        only_kmerseek_3=sum(1 for r in rows if r[19]),
+        only_kmerseek_5=sum(1 for r in rows if r[19] and r[19][0] <= 1e-5),
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
     )
@@ -531,11 +619,17 @@ def index_html(s, cats, inputs, ver, known=""):
     pc = lambda v: "%d%%" % round(100 * v / n)
     chips = [("all", n, "all"), ("sp", s["swissprot_hit"], "Swiss-Prot match"), ("pfam", s["pfam_domain"], "Pfam domain"),
              ("none", s["neither"], "neither"), ("immune", s["immune_candidates"], "immune-gene candidate"),
-             ("drawn", s["drawn"], "every program drawn"), ("names", s["names_conflict"], "names conflict")]
+             ("drawn", s["drawn"], "every program drawn"), ("names", s["names_conflict"], "names conflict"),
+             ("km3", s["only_kmerseek_3"], "only kmerseek, E ≤ 0.001"), ("km5", s["only_kmerseek_5"], "only kmerseek, E ≤ 0.00001")]
+    only_tip = ("no other program found anything on this protein (DIAMOND, Pfam, InterProScan apart from its disorder, coil, membrane and signal "
+                "predictions, MMseqs2, Foldseek, jackhmmer, FANTASIA, UniFIRE), and kmerseek's best hit over 35 settings passes this E-value. "
+                "Of the %s proteins nothing else found, about %s would pass by chance if the E-values are right and the settings are independent")
     tips = {"all": "every protein", "sp": "DIAMOND found a Swiss-Prot match at the cutoff", "pfam": "hmmsearch found a Pfam domain",
             "none": "neither a Swiss-Prot match at the cutoff nor a Pfam domain; another program may still have a hit",
             "immune": "in at least one immune-gene category", "drawn": "has a page that draws every program's hits along the protein",
-            "names": "the FASTA header name and the proposed name are different names; capitals, punctuation and a trailing -like are ignored"}
+            "names": "the FASTA header name and the proposed name are different names; capitals, punctuation and a trailing -like are ignored",
+            "km3": only_tip % (f(s["no_other_program"]), f(round(s["no_other_program"] * 35 * 1e-3))),
+            "km5": only_tip % (f(s["no_other_program"]), f(round(s["no_other_program"] * 35 * 1e-5)))}
     chip_html = "".join('<button class="chip%s" data-t="%s" title="%s">%s <b class="mono">%s</b></button>' % (" on" if k == "all" else "", k, tips[k], build.esc(w), f(v))
                         for k, v, w in chips)
     cat_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(c), f(s["immune_categories"][c])) for i, c in enumerate(cats))
@@ -641,7 +735,7 @@ def protein_html(ver, n_tseq=0):
     """protein.html: the dense page (assets/dense-bhf.js, as on a drawn page) for any protein, from
     the whole-proteome tables; assets/protein-dense.js builds its data from full/NNN.js. The key lists
     the programs with positions in those tables; the Swiss-Prot table lists the programs run on every protein."""
-    run = {t["key"]: ("run" if t["key"] in ("mmseqs2", "prostt5", "foldseek", "interproscan") else "not run") for t in build.TRACKS}
+    run = {t["key"]: ("run" if t["key"] in ("mmseqs2", "kmerseek", "prostt5", "foldseek", "interproscan") else "not run") for t in build.TRACKS}
     ctx = dict(run_status=run)
     whole = [["w_diamond"], ["w_jackhmmer"]]
     const = dict(
@@ -649,7 +743,11 @@ def protein_html(ver, n_tseq=0):
                                cat=build.PROGRAMS[t["program"]]["cat"], p=t["program"]) for t in build.TRACKS},
         program_names={k: v["name"] for k, v in build.PROGRAMS.items()}, ips_drawn=build.IPS_DRAWN, ips_evalue=sorted(build.IPS_EVALUE),
         fantasia_max=build.FANTASIA_MAX_DIST, kmerseek_max_e=KMERSEEK_MAX_E, struct_max_aa=STRUCT_MAX_AA,
-        pfam_color=build.CATEGORIES["pfam"]["color"], ver=ver, tseq_files=n_tseq)
+        pfam_color=build.CATEGORIES["pfam"]["color"], ver=ver, tseq_files=n_tseq, alpha=build.parse_alphabets(Path(__file__).parent / "test_inputs" / "data" / "kmerseek_alphabets.rs"))
+    for k, t in (("diamond", "DIAMOND, best hit"), ("unifire", "UniFIRE (UniProt's rules)")):
+        const["tracks"][k] = dict(name=t, color=build.WHOLE_TRACKS[k]["color"], shape=build.WHOLE_TRACKS[k]["shape"], cat=build.WHOLE_TRACKS[k]["cat"], p=k)
+    const["program_names"].update(diamond="DIAMOND", unifire="UniFIRE")
+    const["tracks"]["kmerseek"]["name"] = "kmerseek, best hit"
     head = build.page_head("Botryllus protein: what every annotation program found", 0).replace(
         "</head>", '<link rel="stylesheet" href="assets/dense-bhf.css%s"></head>' % ver, 1)
     help_ = ('<aside class="help" id="help"><h2>What this page is</h2><p>Every program\'s best hit on this protein, from Biomni\'s runs on '
@@ -673,7 +771,7 @@ repository says how each was made). This page only reads them; building it ran n
 <div id="tip" role="tooltip" hidden></div>%s
 <script>window.DENSE_CONST=%s;</script><script src="full/rows.js%s"></script><script src="full/str.js%s"></script><script src="assets/protein-dense.js%s"></script></body></html>
 """ % (build.DENSE_FILTERS % (round(build.math.log10(build.SHOW_E)), round(build.math.log10(build.COUNT_E))),
-       build.dense_key(ctx, False, False), build.DENSE_COLHEAD, build.dense_swissprot(ctx, whole), help_,
+       build.dense_key(ctx, False, False, (("diamond", "DIAMOND"), ("unifire", "UniFIRE"))), build.DENSE_COLHEAD, build.dense_swissprot(ctx, whole), help_,
        json.dumps(const, separators=(",", ":")), ver, ver, ver)
 
 

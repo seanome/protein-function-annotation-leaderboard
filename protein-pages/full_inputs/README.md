@@ -53,4 +53,10 @@ draw nothing along the protein. The plan says the Pfam step kept domain position
 that file, and for DIAMOND's `qstart qend`, would let the pages draw them. The request is
 drafted in `biomni_request_positions.md`.
 
+Three tables give positions to hits that had none. None of them holds a residue of the unpublished proteome:
+
+- `kmerseek_best_per_protein.tsv.gz`: the best region of each best hit, with the Swiss-Prot residues, from `extract_kmerseek_best.sbatch` (job 50972892). 45,312 of 45,317 agree with the run's summary; the 5 others are ties. The residues match Swiss-Prot in 45,310 of 45,312; the other 2 differ at a selenocysteine (U).
+- `diamond_positions.tsv.gz`: DIAMOND's best hit aligned again by `make_diamond_positions.py`, because Biomni's table kept no positions. 21,132 of 21,150 pairs; the 18 others are too long to align on a laptop. Identity differs from DIAMOND's by a median of 0.24 points.
+- `unifire_rule_conditions.tsv.gz`: the signatures that trigger each of the 15,821 rules UniFIRE fired, from UniProt's REST API, read 2026-11-03 by `make_unifire_rule_conditions.py`. That is UniProt's current release of the rules, not necessarily the one UniFIRE 2026.3 ran. 226,258 of 231,595 predictions get a place; 5,337 name no signature InterProScan found on that protein.
+
 Gene cards are read only when given: pass `--cards ../gene_cards/out/cards.claude-haiku-5-5.jsonl ../gene_cards/out/cards.claude-opus-5-5.jsonl` to `build_full.py`. Haiku wrote all 100; Opus rewrote the 41 name conflicts, and the later file wins.

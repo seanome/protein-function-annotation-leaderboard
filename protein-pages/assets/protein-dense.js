@@ -66,16 +66,47 @@
         hits.push(h);
       });
     }
+    if (d.km) {  // [setting, E-value, accession, name, species, settings, moltype, k, start, end, target start, target end, target residues]
+      tracksRun.kmerseek = true;
+      if (d.km.length > 6) {
+        var kq = d.q ? d.q.slice(d.km[8] - 1, d.km[9]) : "", same = 0, kt = d.km[12];
+        for (var ki = 0; ki < kq.length; ki++) if (kq[ki] === kt[ki]) same++;
+        var kh = { k: "kmerseek", l: d.km[2], t: d.km[2], q: [d.km[8], d.km[9]], r: [d.km[10], d.km[11]], tsub: kt, e: d.km[1], s: [String(d.km[1]), d.km[0], d.km[5] + " settings"],
+                   n: d.km[3] || undefined, o: d.km[4] || undefined, f: null, m: d.km[6], kk: d.km[7] };
+        if (kq.length === kt.length && kq.length) kh.id = [same, kq.length];
+        if (d.tl && d.tl[d.km[2]]) kh.tl = d.tl[d.km[2]];
+        hits.push(kh);
+      }
+    }
+    if (d.dm) {  // [start, end, target start, target end, identical, columns]: DIAMOND's best hit, realigned
+      tracksRun.diamond = true;
+      hits.push({ k: "diamond", l: r[6], t: r[6], q: [d.dm[0], d.dm[1]], r: [d.dm[2], d.dm[3]], id: [d.dm[4], d.dm[5]], e: parseFloat(d.sp_e),
+                  s: [d.sp_e, r[7] === null ? "" : String(r[7]), r[8] === null ? "" : String(r[8])], n: r[5] || undefined, o: d.sp_org || undefined, f: null, tl: d.tl && d.tl[r[6]] });
+    } else if (r[6] === "" || r[6] === undefined) tracksRun.diamond = true;
+    var ufNo = 0;
+    if (d.uf && d.uf !== "not run") {  // one hit for each rule and place: a site's own position, else where the rule's signatures lie
+      tracksRun.unifire = true;
+      var byRule = {};
+      d.uf.forEach(function (u) {
+        var at = u[4] ? [[u[4], u[5] || u[4], "the rule's own position"]] : (u[6] || []).map(function (i) { var m = d.ips[i]; return [m[3], m[4], m[1] + (m[6] ? " / " + m[6] : "")]; });
+        if (!at.length) { ufNo++; at = [[1, L, "whole protein: UniProt's current version of this rule names no signature that InterProScan found here"]]; }
+        at.forEach(function (p) {
+          var key = u[1] + ":" + p[0] + "-" + p[1], o = byRule[key] || (byRule[key] = { k: "unifire", l: u[3], q: [p[0], p[1]], s: [u[0], u[1], u[2], p[2]], e: null, f: [], v: [] });
+          if (o.v.indexOf(u[3]) < 0) o.v.push(u[3]);
+        });
+      });
+      Object.keys(byRule).forEach(function (key) { var o = byRule[key]; o.l = o.v[0] + (o.v.length > 1 ? " +" + (o.v.length - 1) : ""); o.n = o.v.join("; "); hits.push(o); });
+    }
     // the order dense-bhf.js expects: by track, best E-value first
     var order = Object.keys(C.tracks);
     hits.sort(function (a, b) { return order.indexOf(a.k) - order.indexOf(b.k) || ((a.e === null ? 1e300 : a.e) - (b.e === null ? 1e300 : b.e)) || a.q[0] - b.q[0]; });
 
     // the programs that name a hit with no position: [key, name, how, text, flag, second line]
     var W = [];
-    if (d.km !== null && d.km !== undefined) W.push(["w_kmerseek", "kmerseek, best hit", "run on Sherlock, not by Biomni: best hit against Swiss-Prot 2026_03 over 35 alphabet+k settings; this site keeps only that best hit, so no position",
+    if (d.km !== null && d.km !== undefined && !(d.km && d.km.length > 6)) W.push(["w_kmerseek", "kmerseek, best hit", "run on Sherlock, not by Biomni: best hit against Swiss-Prot 2026_03 over 35 alphabet+k settings; this site keeps only that best hit, so no position",
       d.km ? uni(d.km[2]) + " " + esc(d.km[3]) + (d.km[4] ? ", <i>" + esc(d.km[4]) + "</i>" : "") : "no hit (E-value " + C.kmerseek_max_e + " or below)", d.km ? 1 : 0,
       d.km ? "E-value " + esc(String(+d.km[1].toPrecision(2))) + " with " + esc(d.km[0]) + ", the best of the " + d.km[5] + " settings whose E-value fit worked · whole protein, no position" : undefined]);
-    W.push(["w_diamond", "DIAMOND against Swiss-Prot", "run by Biomni; E-value 0.001 or below",
+    if (!d.dm && r[6]) W.push(["w_diamond", "DIAMOND against Swiss-Prot", "run by Biomni; E-value 0.001 or below",
       r[6] ? uni(r[6]) + " " + esc(r[5]) + (d.sp_gene ? " (" + esc(d.sp_gene) + ")" : "") + (d.sp_org ? ", <i>" + esc(d.sp_org) + "</i>" : "") : "no hit (E-value 0.001 or below)",
       r[6] ? 1 : 0, r[6] ? "E-value " + esc(d.sp_e) + (r[7] === null ? "" : ", " + Math.round(r[7]) + "% identity over " + Math.round(r[8] || 0) + "% of your protein") + " · whole protein, no position" : undefined]);
     var jh = d.jh || [];
@@ -84,22 +115,20 @@
       jh.length ? "E-value " + esc(jh[0][3]) + ", round " + jh[0][2] + " · whole protein, no position" : undefined]);
     if (d.fa !== null && d.fa !== undefined) {  // FANTASIA ran only on proteins with no Swiss-Prot match or in the immune-gene table
       var fa = d.fa, counts = fa[4] < C.fantasia_max;
-      W.push(["w_fantasia", "FANTASIA (language model)", "run by Biomni; always names its most similar protein",
+      W.push(["w_fantasia", "FANTASIA (language model)", "run by Biomni; names its most similar protein at any distance",
         uni(fa[0]) + " " + esc(fa[1]) + (fa[2] ? " (" + esc(fa[2]) + ")" : "") + (fa[3] ? ", <i>" + esc(fa[3]) + "</i>" : "") + " · its most similar protein", counts ? 1 : 2,
-        "embedding distance " + fa[4].toFixed(2) + "; this site counts FANTASIA's pick only below " + C.fantasia_max.toFixed(2) + " · whole protein, no position"]);
+        "embedding distance " + fa[4].toFixed(2) + (counts ? "" : ", weak: above " + C.fantasia_max.toFixed(2)) + " · an embedding match, so it has no position or alignment"]);
     }
     // UniFIRE skipped proteins over 5,000 aa
-    if (d.uf !== null && d.uf !== undefined && d.uf !== "not run") W.push(["w_unifire", "UniFIRE (UniProt's rules)", "run by Biomni on InterProScan's matches",
-      d.uf.length ? esc(d.uf.length + " prediction" + (d.uf.length === 1 ? "" : "s") + ", listed below the grid") : "no prediction", d.uf.length ? 1 : 0,
-      d.uf.length ? d.uf.length + " prediction" + (d.uf.length === 1 ? "" : "s") + " · whole protein, sites listed below" : undefined]);
 
     // why each other row has nothing
     var NR = {};
-    var tracks = {}; Object.keys(C.tracks).forEach(function (k) { if (k !== "kmerseek") tracks[k] = C.tracks[k]; });
+    var tracks = C.tracks;
     Object.keys(tracks).forEach(function (k) {
       if (tracksRun[k]) return;
       NR[k] = k === "foldseek" && !shortEnough ? "not run: structures were predicted only for proteins of " + C.struct_max_aa + " aa or less" :
-        k === "interproscan" ? "not run: proteins over 5,000 amino acids were skipped" :
+        k === "interproscan" || k === "unifire" ? "not run: proteins over 5,000 amino acids were skipped" :
+        k === "kmerseek" ? "no position kept for this hit" :
         k === "hmmscan" ? "run only on the 51 drawn proteins; Pfam domains here: InterProScan's Pfam matches on its row, and hmmsearch's names under the grid" :
         "run only on the 51 drawn proteins";
     });
@@ -116,22 +145,25 @@
       var progs = {};
       hits.forEach(function (h) { if (!h.x && (h.e === null || h.e <= Math.pow(10, v))) progs[C.tracks[h.k].p] = 1; });
       // kmerseek's best hit counts at the cutoff like the drawn rows; the other whole-protein programs by their own cutoffs
-      var n = Object.keys(progs).length + W.filter(function (w) { return w[4] === 1 && (w[0] !== "w_kmerseek" || d.km[1] <= Math.pow(10, v)); }).length;
+      var n = Object.keys(progs).length + W.filter(function (w) { return w[4] >= 1 && (w[0] !== "w_kmerseek" || d.km[1] <= Math.pow(10, v)); }).length;
       return [v, n === 0 ? "None of the " + M + " programs run reports a hit (best hits only)." :
         n + " of the " + M + " programs run report" + (n === 1 ? "s" : "") + " a hit (best hits only).", note];
     });
-    var names = { mmseqs2: ["evalue", "fident", "bits"], prostt5: ["evalue", "fident", "bits", "alntmscore"],
+    var names = { kmerseek: ["region_evalue", "alphabet+k", "best of"], diamond: ["evalue", "% identity (DIAMOND's own)", "% of your protein (DIAMOND's own)"],
+                  unifire: ["source", "rule", "what it predicts", "where it points"], mmseqs2: ["evalue", "fident", "bits"], prostt5: ["evalue", "fident", "bits", "alntmscore"],
                   foldseek: ["evalue", "fident", "bits", "alntmscore", "lddt"], interproscan: ["member database", "signature", "its score or E-value", "InterPro entry"] };
     window.PAGE = {
       id: id, pn: name, q: d.q || new Array(L + 1).join("X"), noseq: d.q ? 0 : 1, px: 640 / L, w: 640, top: 10, m: ran.length, sent: sent, hits: hits, td: {}, ds: {},
-      names: names, alpha: {}, tracks: tracks, pfam_color: C.pfam_color, tseq_files: C.tseq_files || 1, tbase: "", agree: [],
+      names: names, alpha: C.alpha || {}, nohit: { mmseqs2: "E ≤ 0.001: its table keeps nothing weaker", diamond: "E ≤ 0.001: its table keeps nothing weaker", kmerseek: "E ≤ " + C.kmerseek_max_e, prostt5: "E ≤ 10", foldseek: "E ≤ 10", unifire: "no rule fired" }, tracks: tracks, pfam_color: C.pfam_color, tseq_files: C.tseq_files || 1, tbase: "", agree: [],
       twelve: "the " + ran.length + " programs with positions run here (" + ran.map(function (p) { return C.program_names[p]; }).join(", ") +
         ") plus " + wholeRan.length + " that name a hit with no position: " + wholeRan.map(function (w) { return w[1]; }).join(", ")
     };
     window.WHOLE = W; window.NOTRUN = NR; window.ALN = {};
-    window.HOW = { mmseqs2: "best hit only: Biomni's run against all of Swiss-Prot 2026_03 keeps one hit per protein here, at E-value 0.001 or below",
-                   prostt5: "best hit only: ProstT5 3Di letters, Foldseek version 10; one hit per protein, at E-value 0.001 or below",
-                   foldseek: "best hit only: Foldseek on the structure ESMFold2 predicted (proteins of " + C.struct_max_aa + " aa or less); at E-value 0.001 or below",
+    window.HOW = { kmerseek: "best hit only: run on Sherlock, not by Biomni, against Swiss-Prot 2026_03 over 35 alphabet+k settings", diamond: "best hit only: run by Biomni; its table has no positions, so this pair was aligned again (BLOSUM62, local, gap open -11, extend -1)",
+                   unifire: "run by Biomni on InterProScan's matches. Rules work on signatures, so each prediction is drawn where the rule's signatures lie on this protein; a site uses the rule's own position",
+                   mmseqs2: "best hit only: Biomni's run against all of Swiss-Prot 2026_03 keeps one hit per protein here, at E-value 0.001 or below",
+                   prostt5: "best hit only: ProstT5 3Di letters, Foldseek version 10; one hit per protein, E-value 10 or below",
+                   foldseek: "best hit only: Foldseek on the structure ESMFold2 predicted (proteins of " + C.struct_max_aa + " aa or less); E-value 10 or below",
                    interproscan: "InterProScan 5.59, all member databases; every match" };
     var b = document.getElementById("biomni");
     b.dataset.id = id;
