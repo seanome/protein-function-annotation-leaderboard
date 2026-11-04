@@ -284,3 +284,13 @@ def test_unifire_rule_points_at_its_signatures():
     assert build_full.rule_places([["ARBA", "R1", "keyword", "x", None, None]], m[2:], rules)[0][6] == []
     # no set holds in full: the nearest one still says where the rule points
     assert build_full.rule_places([["ARBA", "R1", "keyword", "x", None, None]], m[:1], rules)[0][6] == [0]
+
+
+def test_unifire_hits_one_per_rule_and_place():
+    m = [["Pfam", "PF1", "", 5, 9, "", "IPR1", ""]]
+    p = [["ARBA", "R1", "keyword", "x", None, None, [0]], ["ARBA", "R1", "go", "y", None, None, [0]],
+         ["UniRule", "R2", "site", "z", 4, None], ["ARBA", "R3", "keyword", "w", None, None, []]]
+    h = {tuple(x["q"]): x for x in build_full.unifire_hits(p, m, 50)}
+    assert set(h) == {(5, 9), (4, 4), (1, 50)}
+    assert h[(5, 9)]["l"] == "x +1" and h[(5, 9)]["n"] == "x; y" and h[(5, 9)]["s"][3] == "PF1 / IPR1"
+    assert h[(1, 50)]["s"][3].startswith("whole protein")

@@ -1762,10 +1762,12 @@ def dense_help(ctx):
             'Click the row to unfold one row per hit, best E-value first.</p><p>A <b>hit row</b> gives the residues of your protein it '
             'covers, its E-value and score, the identity, and the matched part of the other protein. Click it to see the residues: a map of '
             'every hit between the two proteins, and the alignment with the same residues in bold. For a kmerseek hit the alignment also '
-            'shows each residue\'s class in the alphabet kmerseek used and the seed where its search started.</p><p>The DIAMOND, jackhmmer '
-            'with immune seeds, FANTASIA and UniFIRE rows come from Biomni\'s run on the whole proteome (Biomni is the agent that ran the '
-            'whole-proteome programs). That run kept each protein\'s best hit and not where it lies, so they name the hit with no box, and '
-            'each counts in the sentence by its own cutoff, which the E-value chips do not change.</p>'
+            'shows each residue\'s class in the alphabet kmerseek used and the seed where its search started.</p><p>The jackhmmer '
+            'with immune seeds and FANTASIA rows come from Biomni\'s run on the whole proteome (Biomni is the agent that ran the '
+            'whole-proteome programs except kmerseek). That run kept each protein\'s best hit and not where it lies, so they name the hit with '
+            'no box, and each counts in the sentence by its own cutoff, which the E-value chips do not change. DIAMOND\'s table kept no positions '
+            'either, so its best hit is aligned again and drawn, marked realigned. UniFIRE\'s rules work on signatures, so each prediction is '
+            'drawn where the rule\'s signatures lie on this protein; a site uses the rule\'s own position.</p>'
             '<h2>Controls</h2><p>The <b>E-value cutoff</b> chips keep the hits at or below that value; the sentence at the top and every '
             'count follow it. <b>Search</b> looks through the matched protein\'s name, gene, accession, species, Pfam families and GO terms; '
             'every word typed must appear. The 3-D structure, where there is one, colours the residues of the hit you point at; a click '
@@ -1823,7 +1825,7 @@ def dense_page(pid, pname, L, ctx, st, whole, page_data):
            '<a class="back" href="../index.html">All proteins</a></div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>'
            % (esc(title), esc(pid), '<span class="pn">%s</span>' % esc(pname) if pname else "", "{:,}".format(L)),
            '<header class="top">', DENSE_FILTERS % (round(math.log10(SHOW_E)), round(math.log10(COUNT_E))),
-           dense_key(ctx, bool(page_data.get("plddt")), bool(st)), DENSE_COLHEAD, '</header>',
+           dense_key(ctx, bool(page_data.get("plddt")), bool(st), (("diamond", "DIAMOND"), ("unifire", "UniFIRE")) if ctx["biomni"] else ()), DENSE_COLHEAD, '</header>',
            '<main><div class="withviewer%s"><div id="grid"></div>%s</div>' % ("" if st else " noviewer", viewer_html(pid, st) if st else ""),
            dense_swissprot(ctx, whole), '</main>', ctx["footer"],
            '<div id="tip" role="tooltip" hidden></div>', dense_help(ctx)]
