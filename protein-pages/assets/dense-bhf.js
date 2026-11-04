@@ -428,8 +428,8 @@
     if (pred.length) top.push(`dashed boxes: ${[...new Set(pred.map((p) => p.l))].join(", ")}, predicted by InterProScan`);
     const topLine = top.length ? `Along the top, ${top.join("; ")}.` : "Along the top: nothing; hmmscan and InterProScan found no family or prediction on your protein.";
     let rightLine;
-    if (h.k === "hmmscan") rightLine = "The y axis is the Pfam model itself, so nothing is drawn on its edge.";
-    else if (h.td && h.td.length) rightLine = `Along the right, open boxes: Pfam domains of ${uniHtml(h.t)}, ${esc((SRC[h.ds] || (() => "source not recorded"))(h.t))}; where two overlap, only the first is drawn.`;
+    if (h.k === "hmmscan") rightLine = "The y axis is the Pfam model itself, so nothing is shown on its edge.";
+    else if (h.td && h.td.length) rightLine = `Along the right, open boxes: Pfam domains of ${uniHtml(h.t)}, ${esc((SRC[h.ds] || (() => "source not recorded"))(h.t))}; where two overlap, only the first is shown.`;
     else if (h.ds) rightLine = `Along the right: nothing; no Pfam domain is known on ${uniHtml(h.t)} (${esc(SRC[h.ds](h.t))}).`;
     else rightLine = `Along the right: nothing; the Pfam domains of ${uniHtml(h.t)} are not known (no Pfam search output for it).`;
     return `<div class="map" style="max-width:${W}px"><p class="mapkey">Across: your protein; down: ${esc(tname)}. Each line is one hit between the two (${same.length} here), the thick one is this hit. Top edge: hmmscan and InterProScan on your protein; right edge: the other protein's Pfam domains.</p>` +
@@ -440,7 +440,7 @@
   function open(h, box) {
     if (PAGE.noseq) {  // protein.html: the hit's numbers only; its residues are on the 51 drawn pages
       box.innerHTML = `<h3>${esc(PAGE.tracks[h.k].name)}: ${esc(h.l)}</h3><p class="note">${(PAGE.names[h.k] || []).map((n, j) => `${esc(GLOSS[n] || n)} ${esc(h.s[j] ?? "")}`).join(" · ")}. ` +
-        "This protein's sequence is not on the site, so its residues cannot be shown; the 51 proteins with a drawn page show them.</p>";
+        "This protein's sequence is not on the site, so its residues cannot be shown; the 51 test proteins show them.</p>";
       return;
     }
     Promise.all([alignments(), h.t ? targetSeq(h.t) : Promise.resolve(null)]).then(([alns, tseq]) => show(h, alns[H.indexOf(h)], tseq, box));
@@ -694,7 +694,7 @@
     });
     g += "</svg>";
     const note = agree.length ? `Brackets: the Pfam families of the matched proteins that the sentence at the top rests on, with how many programs' hits carry them.` : "";
-    return `<div class="g row lane"><div class="name"><b>domains on your protein</b><div class="s" title="Pfam domains from ${famSrc === "hmmscan" ? "hmmscan" : "InterProScan's Pfam matches (hmmscan was run only on the 51 drawn proteins)"} (grey boxes); InterProScan predictions (dashed, never counted). ${note} Click any to keep only the hits landing in it.">Pfam (${famSrc}), predictions (dashed)${agree.length ? ", and the families the sentence rests on (brackets)" : ""}. Click one to filter.</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt"></div><div class="track">${g}</div></div>`;
+    return `<div class="g row lane"><div class="name"><b>domains on your protein</b><div class="s" title="Pfam domains from ${famSrc === "hmmscan" ? "hmmscan" : "InterProScan's Pfam matches (hmmscan was run only on the 51 test proteins)"} (grey boxes); InterProScan predictions (dashed, never counted). ${note} Click any to keep only the hits landing in it.">Pfam (${famSrc}), predictions (dashed)${agree.length ? ", and the families the sentence rests on (brackets)" : ""}. Click one to filter.</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt"></div><div class="track">${g}</div></div>`;
   }
   // programs with a hit at each residue, each program once (the same steps build.py draws)
   function agreeRow() {
@@ -762,7 +762,7 @@
     if (h.r && h.tl) {
       const tl = h.tl, ty = 21, lo = Math.min(...h.r), hi = Math.max(...h.r), tsx = (p) => ((p - 1) / tl) * TW, twx = (a, b) => Math.max(2, ((b - a + 1) / tl) * TW);
       const who = h.k === "hmmscan" ? `${h.l} model` : h.l;
-      g += `<g class="tline"><title>${esc(who)}, ${tl} aa, drawn to its own length; dark: the matched part ${lo}-${hi}${(h.td || []).length ? "; ticks: its Pfam domains" : ""}</title>` +
+      g += `<g class="tline"><title>${esc(who)}, ${tl} aa, shown at its own length; dark: the matched part ${lo}-${hi}${(h.td || []).length ? "; ticks: its Pfam domains" : ""}</title>` +
         `<line x1="0" x2="${TW}" y1="${ty}" y2="${ty}" stroke="#d6d5cf" stroke-width="2"/>`;
       for (const [a, b, l] of h.td || []) g += `<rect x="${tsx(a).toFixed(1)}" y="${ty - 3}" width="${twx(a, b).toFixed(1)}" height="6" fill="none" stroke="#8a8a8a" stroke-width=".8"><title>${esc(l)}, ${a}-${b} of ${esc(who)}</title></rect>`;
       g += `<line x1="${tsx(lo).toFixed(1)}" x2="${(tsx(lo) + twx(lo, hi)).toFixed(1)}" y1="${ty}" y2="${ty}" stroke="${tr.color}" stroke-width="3"/>` +
@@ -814,7 +814,7 @@
     } else if (!kept.length) {
       const names = [...new Set(feats.map((i) => H[i].l))].join(", ");
       cells = feats.length
-        ? `<div class="num"><span class="dim">0</span><div class="s">${feats.length} prediction${feats.length === 1 ? "" : "s"}</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt">${esc(names)}: predicted, drawn dashed, never counted as a hit<div class="s">no signature with an E-value at most ${fmtE(+emax.value)}</div></div>`
+        ? `<div class="num"><span class="dim">0</span><div class="s">${feats.length} prediction${feats.length === 1 ? "" : "s"}</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt">${esc(names)}: predicted, shown dashed, never counted as a hit<div class="s">no signature with an E-value at most ${fmtE(+emax.value)}</div></div>`
         : `<div class="num dim">0</div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt dim">no hit with E-value at most ${fmtE(+emax.value)}</div>`;
       track = `<div class="track">${feats.length ? featTrack(feats, tr) : ""}</div>`;
     } else if (!match.length) {

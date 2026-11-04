@@ -108,7 +108,7 @@
     if (d.km !== undefined && d.km !== null) {
       var k = d.km;
       row("kmerseek against Swiss-Prot 2026_03", !!k, k ? uni(k[2]) + " " + esc(k[3]) + (k[4] ? ", <i>" + esc(k[4]) + "</i>" : "") : "",
-        k ? "E-value " + k[1].toPrecision(3) + ", best of " + k[5] + " settings (" + esc(k[0]) + ")" : "", k ? (box ? "drawn above" : "not in this table") : "",
+        k ? "E-value " + k[1].toPrecision(3) + ", best of " + k[5] + " settings (" + esc(k[0]) + ")" : "", k ? (box ? "shown above" : "not in this table") : "",
         "best of its alphabet and k-mer size settings; E-value 10 or below");
     }
     if (d.uf === "not run") rows.push(["<b>UniFIRE (UniProt's annotation rules)</b>", "<i>not run (over 5,000 aa)</i>", "", ""]);
@@ -133,7 +133,7 @@
       "<p class=\"note\">Each program's best hit for this protein, from runs on the whole proteome. " +
       "Weaker hits are left out. The slider above does not change this table.</p>"] :
       ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
-      "<p class=\"note\">The best hit of each program. Nothing is drawn along the protein on this page; the last column gives the residues where a program reports them" +
+      "<p class=\"note\">The best hit of each program. Nothing is placed along the protein on this page; the last column gives the residues where a program reports them" +
       (d.uf ? "; UniFIRE gives positions only for the sites it predicts, listed in its table below." : ".") + "</p>"];
     h.push(table([["Program"], ["Best hit"], ["Score"], ["Where on your protein"]], rows));
     return box ? h : h.concat(card(r, d));
