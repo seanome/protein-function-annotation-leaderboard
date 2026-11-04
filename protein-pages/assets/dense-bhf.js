@@ -557,7 +557,7 @@
   const countEl = document.getElementById("count"), sentEl = document.getElementById("sent"), sentNote = document.getElementById("sentnote");
   const maxE = () => Math.pow(10, +emax.value);
   const shownE = (h) => h.e === null || h.e === undefined || h.e <= maxE();
-  const openProg = {}, openHit = {};
+  const openProg = {}, openHit = {}, shownHits = {}, FIRST_HITS = 200, MORE_HITS = 500;
   let region = null;                     // [a, b, label] from a click on the domain lane: keep hits overlapping it
   let sortKey = "e", sortUp = true;      // order of the hit rows inside an unfolded program
   let TW = 400; const TH = 34, BH = 10, BY = 3;   // track width (measured), row height, box height and top
@@ -840,7 +840,11 @@
     }
     const cls = `g row prog${open ? " open" : ""}${match.length ? "" : " nohit"}`;
     let out = `<div class="${cls}" data-k="${k}" role="button" tabindex="0" aria-expanded="${open}">${name}${cells}${track}</div>`;
-    if (open) match.forEach((i, n) => { out += hitRow(i, n + 1); });
+    if (open) {  // a program with thousands of hits opens its best ones first; drawing them all at once takes seconds
+      const lim = shownHits[k] || FIRST_HITS, left = match.length - lim;
+      match.slice(0, lim).forEach((i, n) => { out += hitRow(i, n + 1); });
+      if (left > 0) out += `<div class="g row morehits"><button type="button" data-more="${k}">Show ${Math.min(MORE_HITS, left).toLocaleString("en-US")} more of the ${left.toLocaleString("en-US")} not shown</button></div>`;
+    }
     return out;
   }
   // the two most common residues of a stretch of your protein and their share; over 40% is a biased stretch
@@ -907,6 +911,8 @@
   }
   // one click: a program row folds or unfolds; a hit row shows or hides its residues; a domain filters
   gridEl.addEventListener("click", (e) => {
+    const more = e.target.closest("[data-more]");
+    if (more) { const k = more.dataset.more; shownHits[k] = (shownHits[k] || FIRST_HITS) + MORE_HITS; render(); return; }
     if (e.target.closest("a") || e.target.closest("button")) return;
     const d = e.target.closest(".dom[data-a]");
     if (d) { const a = +d.dataset.a, b = +d.dataset.b; region = region && region[0] === a && region[1] === b ? null : [a, b, d.dataset.l]; render(); return; }

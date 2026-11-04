@@ -1266,7 +1266,8 @@ def sparkline(cov, length, m=8, w=90, h=16):
 CSS_LINKS = (
     '<link rel="preconnect" href="https://fonts.googleapis.com">'
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600'
+    # media="print" keeps this request from holding up the first paint; the page shows in system fonts until it arrives
+    '<link rel="stylesheet" media="print" onload="this.media=\'all\'" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600'
     '&family=Source+Sans+3:wght@400;600;700&display=swap">'
 )
 
