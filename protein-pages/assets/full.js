@@ -6,7 +6,8 @@
   // row: 0 id, 1 length, 2 existing, 3 proposed, 4 name check, 5 Swiss-Prot name, 6 accession,
   // 7 identity, 8 coverage, 9 E-value, 10 Pfam names, 11 category bits, 12 empty, 13 cluster size,
   // 14 drawn page, 15 InterProScan's Pfam matches [start, end, index into PFAM], 16 MMseqs2's best
-  // hit [start, end, identity %, accession] or null, 17 the other programs with a hit, as bits of F.other,
+  // hit [start, end, identity %, accession] or null, 17 the other programs with a hit, as bits of F.other, 19 kmerseek's best hit
+  // [E-value, setting, accession, name] when no other program found anything and E is at most 0.001, else 0,
   // 18 1 when the two names conflict (not only their spelling; build_full.names_conflict)
   var grid = document.getElementById("grid"), AX = +grid.dataset.ax, SEQ = grid.dataset.seq, DOM = grid.dataset.dom;
   function catNames(m) { var o = []; for (var i = 0; i < CATS.length; i++) if (m >> i & 1) o.push(CATS[i]); return o; }
@@ -19,12 +20,14 @@
   var TILES = {
     all: function () { return true; }, sp: isMatch, pfam: function (r) { return !!r[10]; },
     none: function (r) { return !isMatch(r) && !r[10]; }, immune: function (r) { return r[11] > 0; },
-    drawn: function (r) { return !!r[14]; }, names: function (r) { return r[18] === 1; }
+    drawn: function (r) { return !!r[14]; }, names: function (r) { return r[18] === 1; },
+    km3: function (r) { return !!r[19]; }, km5: function (r) { return r[19] && r[19][0] <= 1e-5; }
   };
   function others(b) { var o = []; for (var i = 0; i < OTHER.length; i++) if (b >> i & 1) o.push(OTHER[i][0]); return o; }
   function nbits(b) { var n = 0; while (b) { n += b & 1; b >>= 1; } return n; }
   var TILE_WORDS = { all: "", sp: "with a Swiss-Prot match", pfam: "with a Pfam domain", none: "with neither a Swiss-Prot match nor a Pfam domain",
-    immune: "that are immune-gene candidates", drawn: "with every program's hits drawn", names: "whose FASTA name and proposed name conflict" };
+    immune: "that are immune-gene candidates", drawn: "with every program's hits drawn", names: "whose FASTA name and proposed name conflict",
+    km3: "that only kmerseek found, E-value 0.001 or below", km5: "that only kmerseek found, E-value 0.00001 or below" };
   var st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
   var count = document.getElementById("count"), more = document.getElementById("more"), lbl = document.querySelector(".ix .ruler .lbl");
   var catSel = document.getElementById("cat"), chkSel = document.getElementById("chk"), q = document.getElementById("q");
@@ -62,6 +65,7 @@
         return d * c || R[a][0].localeCompare(R[b][0]);
       });
     }
+    else if (st.tile === "km3" || st.tile === "km5") list.sort(function (a, b) { return R[a][19][0] - R[b][19][0]; });  // best first
     st.shown = 100; st.cur = -1;
     draw();
   }
@@ -102,7 +106,8 @@
       '<div class="txt" title="' + esc(r[10]) + '">' + (r[10] ? esc(r[10]) : '<span class="dim">none</span>') +
         '<span class="s">InterProScan: ' + (ips ? ips + " Pfam match" + (ips > 1 ? "es" : "") : "none") + "</span></div>" +
       '<div class="txt" title="' + esc(catNames(r[11]).join(", ")) + '">' + esc(catNames(r[11]).join(", ")) + "</div>" +
-      '<div class="txt" title="' + esc(others(r[17]).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">none</span>') + "</div>" +
+      (r[19] && (st.tile === "km3" || st.tile === "km5") ? '<div class="txt" title="' + esc(r[19][3] + " (" + r[19][2] + "), " + r[19][1]) + '">kmerseek ' + r[19][0].toExponential(1) + " · " + esc(r[19][3]) + "</div>" :
+      '<div class="txt" title="' + esc(others(r[17]).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">none</span>') + "</div>") +
       '<div class="num">' + fmt(r[13]) + (r[13] === 1 ? '<span class="s">alone</span>' : "") + "</div>" +
       '<div class="track">' + track(r) + "</div></div>";
   }
@@ -180,11 +185,11 @@
   });
   document.getElementById("dl").addEventListener("click", function () {
     var head = ["protein", "length_aa", "existing_name", "proposed_name", "swissprot_name", "swissprot_accession", "identity_pct",
-      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size"];
+      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size", "only_kmerseek_evalue", "only_kmerseek_setting", "only_kmerseek_hit"];
     var lines = [head.join("\t")].concat(list.map(function (i) {
       var r = R[i];
       return [r[0], r[1], r[2], r[3], r[5], r[6], r[7] === null ? "" : r[7], r[8] === null ? "" : r[8], r[9], r[10],
-        catNames(r[11]).join(", "), others(r[17]).join(", "), r[13]].join("\t");
+        catNames(r[11]).join(", "), others(r[17]).join(", "), r[13]].concat(r[19] ? [r[19][0], r[19][1], r[19][2] + " " + r[19][3]] : ["", "", ""]).join("\t");
     }));
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], { type: "text/tab-separated-values" }));

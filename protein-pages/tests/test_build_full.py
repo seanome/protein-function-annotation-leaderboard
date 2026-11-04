@@ -165,23 +165,25 @@ def test_unifire_on_the_pages(site):
 
 
 def test_foldseek_on_the_pages(site):
-    """The best ProstT5 + Foldseek hit reaches its protein, kept at FOLDSEEK_MAX_E or below:
-    25,804 proteins, as in the Biomni report (v3); BHF (FUN008084, best E-value 0.06) has none."""
+    """The best ProstT5 + Foldseek hit reaches its protein at any E-value in the table (42,035 proteins);
+    25,804 are at FOLDSEEK_MAX_E or below, as in the Biomni report (v3), and only those are counted.
+    BHF's best is at E-value 0.06, so the pages show it and the counts leave it out."""
     out, summ = site
     fs = {}
     for s in range(build_full.N_SHARDS):
         for pid, d in read_js(out / "full" / ("%03d.js" % s), "window.FULL_SHARD=").items():
             fs[pid] = d["fs"]
-    assert summ["foldseek_hit"] == sum(1 for v in fs.values() if v) == 25804
-    assert fs["FUN008084"] == 0
+    assert sum(1 for v in fs.values() if v) == 42035
+    assert summ["foldseek_hit"] == sum(1 for v in fs.values() if v and float(v[4]) <= build_full.FOLDSEEK_MAX_E) == 25804
+    assert float(fs["FUN008084"][4]) > build_full.FOLDSEEK_MAX_E
     raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
     pid = next(p for p, v in fs.items() if v)
     assert build.af_accession(raw[pid]["target"]) == fs[pid][0] and int(raw[pid]["qstart"]) == fs[pid][2]
 
 
 def test_foldseek_on_structures_on_the_pages(site):
-    """The best hit of Foldseek on Biomni's predicted structures: 3,729 proteins at FOLDSEEK_MAX_E
-    or below, all 200 aa or less; every longer protein says "not run", BHF (252 aa) among them."""
+    """The best hit of Foldseek on Biomni's predicted structures: 13,946 proteins, 3,729 of them at
+    FOLDSEEK_MAX_E or below, all 200 aa or less; every longer protein says "not run", BHF (252 aa) among them."""
     out, summ = site
     fst, length = {}, {}
     for s in range(build_full.N_SHARDS):
@@ -189,7 +191,8 @@ def test_foldseek_on_structures_on_the_pages(site):
             fst[pid] = d["fst"]
     for r in csv.DictReader(gzip.open(FULL / "proteome_lengths.tsv.gz", "rt"), delimiter="\t"):
         length[r["protein_id"]] = int(r["length"])
-    assert summ["foldseek_struct_hit"] == sum(1 for v in fst.values() if v and v != "not run") == 3729
+    assert sum(1 for v in fst.values() if v and v != "not run") == 13946
+    assert summ["foldseek_struct_hit"] == sum(1 for v in fst.values() if v and v != "not run" and float(v[4]) <= build_full.FOLDSEEK_MAX_E) == 3729
     assert {p for p, v in fst.items() if v == "not run"} == {p for p, n in length.items() if n > build_full.STRUCT_MAX_AA}
     assert fst["FUN008084"] == "not run"
     raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_struct_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
@@ -245,7 +248,7 @@ def test_protein_html_is_the_dense_page(site):
                "assets/protein-dense.js", '<section class="below" id="swissprot">', '<aside class="help" id="help">'):
         assert el in html, el
     const = json.loads(re.search(r"window\.DENSE_CONST=(.*?);</script>", html).group(1))
-    assert list(const["tracks"]) == [t["key"] for t in build.TRACKS]
+    assert list(const["tracks"]) == [t["key"] for t in build.TRACKS] + ["diamond", "unifire"]
     assert const["struct_max_aa"] == build_full.STRUCT_MAX_AA and const["fantasia_max"] == build.FANTASIA_MAX_DIST
     assert const["ips_drawn"]["MobiDBLite"] == {"*": "disorder"}
     assert (out / "assets" / "protein-dense.js").exists() and (out / "assets" / "dense-bhf.js").exists()
@@ -270,3 +273,14 @@ def test_names_conflict():
     assert build_full.names_conflict("ISM2", "adt-2")
     assert build_full.names_conflict("LRP2", "Cd320")
     assert not build_full.names_conflict("", "Cd320")
+
+
+def test_unifire_rule_points_at_its_signatures():
+    rules = {"R1": ({"IPR1": [(0, 0)], "PF1": [(0, 1)], "IPR9": [(1, 0)]}, [2, 1])}
+    m = [["Pfam", "PF1", "", 5, 9, "", "", ""], ["CDD", "cd1", "", 1, 3, "", "IPR1", ""], ["CDD", "cd2", "", 7, 8, "", "IPR2", ""]]
+    # set 0 needs both conditions and has them; set 1 does not hold; a row with a position keeps it
+    assert build_full.rule_places([["ARBA", "R1", "keyword", "x", None, None], ["UniRule", "R1", "site", "y", 4, 4]], m, rules) == [
+        ["ARBA", "R1", "keyword", "x", None, None, [0, 1]], ["UniRule", "R1", "site", "y", 4, 4]]
+    assert build_full.rule_places([["ARBA", "R1", "keyword", "x", None, None]], m[2:], rules)[0][6] == []
+    # no set holds in full: the nearest one still says where the rule points
+    assert build_full.rule_places([["ARBA", "R1", "keyword", "x", None, None]], m[:1], rules)[0][6] == [0]

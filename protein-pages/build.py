@@ -59,6 +59,9 @@ PROGRAMS = {
 }
 for _p in PROGRAMS.values():
     _p["color"] = CATEGORIES[_p["cat"]]["color"]
+# Programs drawn only on protein.html, from the whole-proteome tables: never TRACKS, which build.py parses
+WHOLE_TRACKS = {"diamond": {"name": "DIAMOND", "cat": "seq", "shape": "half", "color": CATEGORIES["seq"]["color"]},
+                "unifire": {"name": "UniFIRE", "cat": "pfam", "shape": "hatched", "color": CATEGORIES["pfam"]["color"]}}
 PROTEIN_LINE = "#C8C8C8"  # the protein's backbone line, and only that
 AGREEMENT = "#000000"
 EXPRESSION = "#1a1a1a"  # expression bars are thin outlines in text ink; their shape, not a grey, marks them
@@ -940,6 +943,9 @@ def shape_svg(x, y, w, h, prog, extra=""):
     if shape == "hatched":
         return ('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="url(#hatch-%s)" stroke="%s" '
                 'stroke-width="1"%s/>' % (x + 0.5, y + 0.5, max(1.0, w - 1), h - 1, prog["cat"], col, extra))
+    if shape == "half":  # an outline with its lower half filled
+        return ('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="#fff" stroke="%s"%s/><rect x="%.1f" y="%.1f" width="%.1f" '
+                'height="%.1f" fill="%s"%s/>' % (x + 0.5, y + 0.5, max(1.0, w - 1), h - 1, col, extra, x, y + h / 2, w, h / 2, col, extra))
     rx = h / 2 if shape == "rounded" else 2
     return '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="%.1f" fill="%s"%s/>' % (x, y, w, h, rx, col, extra)
 
@@ -1211,7 +1217,7 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
 
 
 def legend_mark(t, w=16, h=BOX_H):
-    return shape_svg(0, 0, w, h, PROGRAMS[t["program"]])
+    return shape_svg(0, 0, w, h, PROGRAMS.get(t["program"]) or WHOLE_TRACKS[t["program"]])
 
 
 def evalue_key():
@@ -1621,7 +1627,7 @@ def dense_notrun(run_status, has_struct=False):
     return out
 
 
-def dense_key(ctx, has_plddt, has_struct):
+def dense_key(ctx, has_plddt, has_struct, extra=()):
     """The three-line key: colour = kind, mark = program, only the programs run on this protein; then
     identity, predictions, the seed, the line under a hit, and pLDDT when there is a structure."""
     kinds = {}
@@ -1631,13 +1637,15 @@ def dense_key(ctx, has_plddt, has_struct):
         prog = PROGRAMS[t["program"]]
         names = kinds.setdefault(prog["cat"], {})
         names.setdefault(t["program"], []).append(t)
+    for k, name in extra:  # protein.html's programs drawn from the whole-proteome tables
+        kinds.setdefault(WHOLE_TRACKS[k]["cat"], {})[k] = [dict(program=k, name=name)]
     parts = ['<span class="lead">colour = kind, mark = program:</span>']
     for cat in ("seq", "struct", "kmer", "pfam"):
         if cat not in kinds:
             continue
         items = []
         for prog, ts in kinds[cat].items():
-            nm = PROGRAMS[prog]["name"]
+            nm = (PROGRAMS.get(prog) or WHOLE_TRACKS[prog])["name"]
             if len(ts) > 1:
                 nm = "%s (%s)" % (nm, " and ".join(t["name"].replace(PROGRAMS[prog]["name"], "").strip(", ") or "one round" for t in ts)) \
                     if prog == "mmseqs2" else "Foldseek (on 3-D structures, and ProstT5 + Foldseek)"

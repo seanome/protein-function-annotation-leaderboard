@@ -103,6 +103,7 @@
     const f = (v) => v.toFixed(1), o = op < 1 ? ` opacity="${op.toFixed(2)}"` : "";
     if (tr.shape === "open") return `<rect x="${f(x + 1)}" y="${f(y + 1)}" width="${f(Math.max(1, w - 2))}" height="${f(hh - 2)}" rx="2" fill="#fff" stroke="${tr.color}" stroke-width="2"${o}/>`;
     if (tr.shape === "hatched") return `<rect x="${f(x + 0.5)}" y="${f(y + 0.5)}" width="${f(Math.max(1, w - 1))}" height="${f(hh - 1)}" rx="2" fill="url(#hatch-${tr.cat})" stroke="${tr.color}" stroke-width="1"${o}/>`;
+    if (tr.shape === "half") return `<rect x="${f(x + 0.5)}" y="${f(y + 0.5)}" width="${f(Math.max(1, w - 1))}" height="${f(hh - 1)}" rx="2" fill="#fff" stroke="${tr.color}"${o}/><rect x="${f(x)}" y="${f(y + hh / 2)}" width="${f(w)}" height="${f(hh / 2)}" fill="${tr.color}"${o}/>`;
     return `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(hh)}" rx="${f(tr.shape === "rounded" ? hh / 2 : 2)}" fill="${tr.color}"${o}/>`;
   }
   // Label placing, as build.py's place_labels: inside the box when it fits, else beside it
@@ -462,6 +463,10 @@
       a = { q: q.slice(h.q[0] - 1 - lf, h.q[1] + rf), t: tseq.slice(h.r[0] - 1 - lf, h.r[1] + rf), qs: h.q[0] - lf, ts: h.r[0] - lf };
       flank = [lf, rf];
       src = `kmerseek matches the two segments side by side without gaps; ${lf} residues before and ${rf} after the match are shown faded.`;
+    } else if (h.k === "kmerseek" && h.tsub) {  // protein.html: the Swiss-Prot residues of the region, kept with the hit
+      kmer = true; flank = [0, 0];
+      a = { q: q.slice(h.q[0] - 1, h.q[1]), t: h.tsub, qs: h.q[0], ts: h.r[0] };
+      src = "kmerseek matches the two segments side by side without gaps.";
     } else if (!a && h.r && tseq && h.k !== "hhsearch") {
       const lo = Math.min(h.r[0], h.r[1]), hi = Math.max(h.r[0], h.r[1]);
       a = localAlign(q.slice(h.q[0] - 1, h.q[1]), tseq.slice(lo - 1, hi));
@@ -475,7 +480,7 @@
     statLine += ` · your protein ${h.q[0]}-${h.q[1]} of ${q.length} aa (${pct(h.q[1] - h.q[0] + 1, q.length)}%)`;
     if (h.r) statLine += ` · ${esc(tname)} ${Math.min(...h.r)}-${Math.max(...h.r)}` + (tlen ? ` of ${tlen} aa (${pct(Math.abs(h.r[1] - h.r[0]) + 1, tlen)}%)` : "");
     html += statLine + "</p>";
-    if (h.k !== "hhsearch" && h.t && !tseq) html += `<p class="note">${uniHtml(h.t)} is not in swissprot.fasta, so its residues cannot be shown.</p>`;
+    if (h.k !== "hhsearch" && h.t && !tseq && !(a && a.q)) html += `<p class="note">${uniHtml(h.t)} is not in swissprot.fasta, so its residues cannot be shown.</p>`;
     let right = "";
     if (a && a.q) {
       const leg = [], kk = h.kk ? `, k = ${h.kk}` : "";
@@ -522,7 +527,7 @@
     } else if (h.k === "hmmscan") {
       right += `<p class="note">hmmscan's alignment of ${esc(h.l)} to your protein was not given (hmmscan.out is not in the input folder). Your protein's residues ${h.q[0]}-${h.q[1]}:</p><div class="seqs"><div class="chunk"><div class="lab">your protein aa ${h.q[0]}</div><div class="cells">${Array.from(q.slice(h.q[0] - 1, h.q[1]), (c, i) => `<i class="${cssClass(c)}" data-c="${c}" data-p="${h.q[0] + i}" data-w="your protein">${c}</i>`).join("")}</div><div class="lab r">${h.q[1]}</div></div></div>`;
     } else {
-      right += "<p>No alignment could be made from these residues.</p>";
+      if (h.k !== "unifire" && h.k !== "interproscan") right += "<p>No alignment could be made from these residues.</p>";  // a rule or a signature has no other protein to align
     }
     const linkedN = H.filter((x) => (h.t ? x.t === h.t : x.k === h.k && x.l === h.l) && x.r).length;
     const map = tlen && h.r && linkedN > 1 ? dotPlot(h, tlen, tname) : "";
@@ -572,7 +577,7 @@
   const idText = (h) => { const p = idPct(h); return p === null ? "" : Math.round(p) + "%"; };
   // where a hit's identical count comes from: the program's own alignment, kmerseek's gapless pair, or a
   // realignment made when the site was built (ProstT5 beyond its own fident figure)
-  const idSource = (h) => (h.k === "kmerseek" ? "kmerseek's gapless pair" : h.k === "prostt5" || h.k === "foldseek" ? "realigned (BLOSUM62, local, gap open -11, extend -1); the program's own figure is the percentage" : "the alignment the program wrote");
+  const idSource = (h) => (h.k === "kmerseek" ? "kmerseek's gapless pair" : h.k === "diamond" ? "realigned (BLOSUM62, local, gap open -11, extend -1); DIAMOND's table kept no positions, and its own identity is in the row's numbers" : h.k === "prostt5" || h.k === "foldseek" ? "realigned (BLOSUM62, local, gap open -11, extend -1); the program's own figure is the percentage" : "the alignment the program wrote");
   const idFrom = (h) => (identOf(h) !== null ? "the program's own figure" : h.id ? idSource(h).split(";")[0] : "");
   // fainter = fewer identical residues: under 20%, 20-40, 40-60, 60 and over (the hits page's four steps)
   const idOpacity = (h) => { const p = idPct(h); return p === null ? 0.55 : p < 20 ? 0.3 : p < 40 ? 0.5 : p < 60 ? 0.75 : 1; };
@@ -589,7 +594,7 @@
   function cmp(a, b) { const f = SORT[sortKey] || SORT.e; const d = f(H[a]) - f(H[b]); return (sortUp ? d : -d) || (H[a].e ?? 0) - (H[b].e ?? 0) || H[a].q[0] - H[b].q[0]; }
   const svgOpen = (hh, cls) => `<svg width="${TW}" height="${hh}" viewBox="0 0 ${TW} ${hh}" aria-hidden="true"${cls ? ` class="${cls}"` : ""}>`;
   const base = (y) => `<line x1="0" x2="${TW}" y1="${y}" y2="${y}" stroke="#C8C8C8" stroke-width="1.5"/>`;
-  const markSvg = (tr) => `<svg width="12" height="10" viewBox="0 0 12 10" class="mk">${tr.shape === "open" ? `<rect x="1" y="1" width="10" height="8" rx="2" fill="#fff" stroke="${tr.color}" stroke-width="2"/>` : tr.shape === "hatched" ? `<rect x=".5" y=".5" width="11" height="9" rx="2" fill="url(#hatch-${tr.cat})" stroke="${tr.color}"/>` : `<rect width="12" height="10" rx="${tr.shape === "rounded" ? 5 : 2}" fill="${tr.color}"/>`}</svg>`;
+  const markSvg = (tr) => `<svg width="12" height="10" viewBox="0 0 12 10" class="mk">${tr.shape === "half" ? `<rect x=".5" y=".5" width="11" height="9" rx="2" fill="#fff" stroke="${tr.color}"/><rect y="5" width="12" height="5" fill="${tr.color}"/>` : tr.shape === "open" ? `<rect x="1" y="1" width="10" height="8" rx="2" fill="#fff" stroke="${tr.color}" stroke-width="2"/>` : tr.shape === "hatched" ? `<rect x=".5" y=".5" width="11" height="9" rx="2" fill="url(#hatch-${tr.cat})" stroke="${tr.color}"/>` : `<rect width="12" height="10" rx="${tr.shape === "rounded" ? 5 : 2}" fill="${tr.color}"/>`}</svg>`;
   // the alphabet lane: the query rewritten in the alphabet of the kmerseek hit under the pointer
   // (default: the best kmerseek hit's). Class colours are used for nothing else on the page.
   const CLASS_COLS = ["#9b8bb4", "#9aa15c", "#c08a9e", "#7d8ea3", "#a07f5f", "#6fa39a", "#b59a3f", "#8f8f8f"];  // alphabet classes only
@@ -852,7 +857,7 @@
     const name = `<div class="name"><span class="rank">${n}</span><span class="nm"><span class="mono">${esc(h.l)}</span>${h.t && h.t !== h.l ? ` ${uniHtml(h.t)}` : ""}</span>` +
       `<div class="s" title="${esc([h.n, h.o, fams].filter(Boolean).join(" · "))}">${sub}</div></div>`;
     const setting = h.k === "kmerseek" && h.m ? `<span class="chip" title="the alphabet and k-mer size kmerseek compared the two proteins in; ${h.sn || 0} seed window${h.sn === 1 ? "" : "s"}">${esc(h.m)} k${h.kk}</span>` : esc(sc[1].replace(" bits", "").replace("Prob ", ""));
-    const re = h.k === "prostt5" || h.k === "foldseek";  // the count below is from a realignment, not from Foldseek's own alignment
+    const re = h.k === "prostt5" || h.k === "foldseek" || h.k === "diamond";  // the count below is from a realignment, not from Foldseek's own alignment
     const idc = h.id ? `<span title="${esc(idFrom(h))}">${idText(h)}</span><div class="s" title="${esc(idSource(h))}">${h.id[0]} of ${h.id[1]}${re ? `<br><span class='re'>= ${Math.round((100 * h.id[0]) / h.id[1])}% realigned</span>` : ""}</div>` : idText(h);
     const tt = topTwo(h.q[0], h.q[1]);
     const cells = `<div class="num">${h.q[0]}–${h.q[1]}` + (PAGE.noseq ? `<div class="s">${h.q[1] - h.q[0] + 1} aa</div></div>` :
@@ -865,7 +870,7 @@
   // every program with nothing to show, on one line, so absence costs one row and not seven
   function silentRow(silent, notRun, wholes) {
     const chip = (tr, text, cut) => `<span class="sil" title="${esc(text)}">${esc(tr.name)}<span class="dim"> (${esc(cut)})</span></span>`;
-    const cutOf = (k) => (k === "hhsearch" ? "Prob ≥ 50" : `E ≤ ${fmtE(+emax.value)}`);
+    const cutOf = (k) => (PAGE.nohit && PAGE.nohit[k]) || (k === "hhsearch" ? "Prob ≥ 50" : `E ≤ ${fmtE(+emax.value)}`);
     const parts = [];
     const none = silent.map((k) => chip(PAGE.tracks[k], howOf(k), cutOf(k))).concat(wholes.map((w) => `<span class="sil" title="${esc(w[2])}">${esc(w[1])}<span class="dim"> (${esc(w[3].replace(/^no (hit|prediction) ?/, "").replace(/[()]/g, "") || "no prediction")})</span></span>`));
     if (none.length) parts.push(`<b>no hit:</b> ` + none.join(", "));
@@ -875,7 +880,7 @@
   function wholeRow(w) {
     const [k, name, how, text, hit, trackText] = w;
     return `<div class="g row whole" data-k="${k}"><div class="name"><span class="tri"></span>${markSvg(PAGE.tracks[k.replace(/^w_/, "")] || { shape: "open", color: "#8a8a8a", cat: "seq" })}<b>${esc(name)}</b><div class="s" title="${esc(how)}">${esc(how)}</div></div>` +
-      `<div class="num">${hit === 1 ? "1" : '<span class="dim">0</span>'}${hit === 2 ? '<div class="s">1 named, not counted</div>' : ""}</div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt${hit ? "" : " dim"}" title="${esc(text.replace(/<[^>]+>/g, ""))}">${text}</div><div class="track"><span class="s${hit === 2 ? " bias" : ""}">${trackText || (hit ? "whole protein, no position" : "")}</span></div></div>`;
+      `<div class="num">${hit ? "1" : '<span class="dim">0</span>'}${hit === 2 ? '<div class="s">weak: see the distance</div>' : ""}</div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt${hit ? "" : " dim"}" title="${esc(text.replace(/<[^>]+>/g, ""))}">${text}</div><div class="track"><span class="s${hit === 2 ? " bias" : ""}">${trackText || (hit ? "whole protein, no position" : "")}</span></div></div>`;
   }
   function render() {
     placeColhead();
@@ -963,7 +968,7 @@
       let what = /agree on (.+?)(?: \(|\.$)/.exec(txt) ? "agree on " + /agree on (.+?)(?: \(|\.$)/.exec(txt)[1] : /different Pfam families/.test(txt) ? "hits name different families" : /different parts/.test(txt) ? "hits on different parts" : "";  // no hit: "0 hits, 0 programs" says it
       const n = m ? m[1] : "0";
       const all = H.filter((h) => !h.x && (h.e === null || h.e === undefined || h.e <= Math.pow(10, v))).length;
-      return `<button class="chip${+emax.value === v ? " on" : ""}" data-v="${v}" title="${esc(txt)}">E ≤ ${fmtE(v)}: ${fmtNum(all)} hits, ${n} program${n === "1" ? "" : "s"}${what ? ", " + what : ""}</button>`;
+      return `<button class="chip${+emax.value === v ? " on" : ""}" data-v="${v}" title="${esc(txt)}">E ≤ ${fmtE(v)}: ${fmtNum(all)} hit${all === 1 ? "" : "s"}, ${n} program${n === "1" ? "" : "s"}${what ? ", " + what : ""}</button>`;
     }).join("");
   }
   if (ladder) {
