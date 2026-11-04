@@ -111,6 +111,58 @@ def rule_places(preds, matches, rules):
     return out
 
 
+def unifire_hits(preds, matches, length):
+    """One hit for each rule and place, for the grid: a site's own position, else where the rule's
+    signatures lie (assets/protein-dense.js does the same on protein.html)."""
+    hits = {}
+    for u in preds:
+        at = [(u[4], u[5] or u[4], "the rule's own position")] if u[4] else [
+            (matches[i][3], matches[i][4], matches[i][1] + (" / " + matches[i][6] if matches[i][6] else "")) for i in (u[6] if len(u) > 6 else [])]
+        for a, b, why in at or [(1, length, "whole protein: UniProt's current version of this rule names no signature that InterProScan found here")]:
+            h = hits.setdefault((u[1], a, b), dict(k="unifire", q=[a, b], s=[u[0], u[1], u[2], why], e=None, f=[], v=[]))
+            if u[3] not in h["v"]:
+                h["v"].append(u[3])
+    for h in hits.values():
+        v = h.pop("v")
+        h.update(l=v[0] + (" +%d" % (len(v) - 1) if len(v) > 1 else ""), n="; ".join(v))
+    return list(hits.values())
+
+
+def drawn_additions(r, d, length):
+    """The script that adds DIAMOND's realigned best hit and UniFIRE's predictions to a drawn page's
+    data, before assets/dense-bhf.js reads it. A DIAMOND hit too long to realign keeps its row with no position."""
+    hits = []
+    move = []
+    if d.get("dm") or not r[6]:
+        move.append("w_diamond")
+    if d.get("dm"):
+        a = d["dm"]
+        hits.append(dict(k="diamond", l=r[6], t=r[6], q=a[:2], r=a[2:4], id=a[4:6], e=float(d["sp_e"]), f=None, n=r[5], o=d["sp_org"],
+                         s=[d["sp_e"], "" if r[7] is None else str(r[7]), "" if r[8] is None else str(r[8])], tl=d["tl"].get(r[6])))
+    if isinstance(d.get("uf"), list):
+        move.append("w_unifire")
+        hits += unifire_hits(d["uf"], d["ips"] if isinstance(d["ips"], list) else [], length)
+    tracks = {k: dict(name=DRAWN_NAMES[k], color=build.WHOLE_TRACKS[k]["color"], shape=build.WHOLE_TRACKS[k]["shape"],
+                      cat=build.WHOLE_TRACKS[k]["cat"], p=k) for k in ("diamond", "unifire") if "w_" + k in move}
+    return (
+        "Object.assign(PAGE.tracks,%s);PAGE.m+=%d;PAGE.hits.push(...%s);PAGE.names=Object.assign(PAGE.names||{},%s);"
+        "PAGE.nohit=%s;PAGE.twelve+=\"; DIAMOND's hit is realigned, and UniFIRE is drawn where its rules' signatures lie\";"
+        "window.WHOLE=window.WHOLE.filter(function(w){return %s.indexOf(w[0])<0;});Object.assign(window.HOW,%s);") % (
+        dumps(tracks), len(tracks), dumps(hits), dumps(DRAWN_SCORE_NAMES), dumps(DRAWN_NOHIT), dumps(move), dumps(DRAWN_HOW))
+
+
+def dumps(x):
+    return json.dumps(x, separators=(",", ":")).replace("</", "<\\/")
+
+
+DRAWN_NAMES = {"diamond": "DIAMOND, best hit", "unifire": "UniFIRE (UniProt's rules)"}
+DRAWN_SCORE_NAMES = {"diamond": ["evalue", "% identity (DIAMOND's own)", "% of your protein (DIAMOND's own)"],
+                     "unifire": ["source", "rule", "what it predicts", "where it points"]}
+DRAWN_NOHIT = {"diamond": "E ≤ 0.001: its table keeps nothing weaker", "unifire": "no rule fired"}
+DRAWN_HOW = {"diamond": "best hit only: run by Biomni; its table has no positions, so this pair was aligned again (BLOSUM62, local, gap open -11, extend -1)",
+             "unifire": "run by Biomni on InterProScan's matches. Rules work on signatures, so each prediction is drawn where the rule's signatures lie on this protein; a site uses the rule's own position"}
+
+
 NAME_CHECK = [
     ("", "no name, existing or proposed"),
     ("agree", "proposed name is the existing name"),
@@ -522,9 +574,14 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         first = {}
         for pid, page in drawn_page.items():
             first.setdefault(page, pid)
+        row_of = {r[0]: r for r in rows}
         for page, pid in first.items():
             f = out / page
             html = f.read_text()
+            add = drawn_additions(row_of[pid], shards[shard_of(pid)][pid], lengths[pid][0])
+            if html.count('<script src="../assets/dense-bhf.js') != 1:
+                sys.exit("could not add DIAMOND and UniFIRE to %s" % page)
+            html = html.replace('<script src="../assets/dense-bhf.js', '<script>%s</script><script src="../assets/dense-bhf.js' % add, 1)
             html = html.replace("</main>", '<section id="biomni" data-id="%s"></section><section id="biomni-more"></section></main>' % pid, 1)
             html = html.replace("</body>", '<script src="../full/rows.js%s"></script><script src="../full/str.js%s"></script>'
                                 '<script src="../assets/viewer.js%s"></script></body>' % (asset_ver, asset_ver, asset_ver), 1)
