@@ -1,4 +1,4 @@
-# Build the protein pages from the 51-protein test set, run the tests and the site checks, and
+# Build the protein pages from the 51-protein test set and the pages for all 45,339 proteins, run the tests and the site checks, and
 # keep the built site as a downloadable artifact of the run. The repository's GitHub Pages
 # site is served from a branch, not from a workflow, so nothing here deploys.
 name: protein pages
@@ -23,7 +23,12 @@ jobs:
       - run: python build.py test_inputs/data --out site --jobs 2
       - run: python tests/check_site.py site
       - run: python tests/check_boxes.py site test_inputs/data 9 1
+      - run: python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/proteins.fasta --out site_full
       - uses: actions/upload-artifact@v4
         with:
           name: protein-pages-site
           path: protein-pages/site/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: protein-pages-full-site
+          path: protein-pages/site_full/
