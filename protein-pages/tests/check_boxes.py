@@ -42,7 +42,8 @@ def main():
         print(pid, h["k"], h["l"], "page: query %s target %s %s scores %s" % (h["q"], h["t"], h["r"], h["s"]))
         f = {"mmseqs2_3rounds": "mmseqs2_3rounds.m8", "phmmer": "phmmer.domtblout",
              "jackhmmer": "jackhmmer.domtblout", "kmerseek": "kmerseek.tsv"}[h["k"]]
-        for line in build.opentext(inp / f):
+        src = inp / f if (inp / f).exists() else inp / (f + ".gz")
+        for line in build.opentext(src):
             if pid not in line or h["t"] not in line:
                 continue
             c = line.split("\t") if f.endswith((".m8", ".tsv")) else line.split()
@@ -75,17 +76,19 @@ def main():
         elif h["k"] == "kmerseek":
             q = prots[pid][h["q"][0] - 1:h["q"][1]]
             t = sp[h["t"]][h["r"][0] - 1:h["r"][1]]
-            for line in open(inp / f):
+            head = build.opentext(src).readline().rstrip("\n").split("\t")
+            found = False  # one line per alphabet and k; the box passes if any line has its residues
+            for line in build.opentext(src):
                 if line.startswith(pid + "\t") and "\t" + h["t"] + "\t" in line:
-                    head = open(inp / f).readline().rstrip("\n").split("\t")
                     d = dict(zip(head, line.rstrip("\n").split("\t")))
                     print("input line: region %s-%s target %s-%s (0-based, end excluded); region_subseq "
                           "equals the page's query residues: %s; target_subseq equals: %s; identical %d of %d" % (
                               d["region_start"], d["region_end"], d["target_start"], d["target_end"],
                               d["region_subseq"] == q, d["target_subseq"] == t,
                               sum(x == y for x, y in zip(q, t)), len(q)))
-                    if not (d["region_subseq"] == q and d["target_subseq"] == t):
-                        fails.append((pid, h["l"], "kmerseek residues"))
+                    found = found or (d["region_subseq"] == q and d["target_subseq"] == t)
+            if not found:
+                fails.append((pid, h["l"], "kmerseek residues"))
         else:
             print("no alignment stored (beyond the best 5; the page aligns it in the browser)")
     print("=" * 70)

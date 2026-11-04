@@ -14,6 +14,7 @@ import pytest
 
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
+import build  # noqa: E402
 import build_full  # noqa: E402
 
 FULL = HERE / "full_inputs"
@@ -84,11 +85,14 @@ def test_counts_match_the_tables(site):
     ann = tsv("botryllus_protein_annotations.tsv")
     assert s["swissprot_hit"] == sum(1 for r in ann if r["sp_acc"])
     assert s["pfam_domain"] == sum(1 for r in ann if r["pfam_domains"])
-    assert s["immune_candidates"] == len(tsv("botryllus_immune_genes.tsv"))
-    assert s["allorecognition_hit"] == len({f[0] for f in csv.reader(open(FULL / "botryllus_allorecognition_hits.tsv"), delimiter="\t")})
+    # The category set by a Fester or BHF hit is dropped (a search within Botryllus); its 53 proteins
+    # are in no other category, so they are no longer candidates
+    kept = [[c for c in build_full.split_list(r["categories"]) if c != "allorecognition"] for r in tsv("botryllus_immune_genes.tsv")]
+    assert s["immune_candidates"] == sum(1 for c in kept if c) == 2835 - 53
+    assert "allorecognition" not in s["immune_categories"] and "allorecognition_hit" not in s
     assert s["clusters"] == len({f[0] for f in csv.reader(open(FULL / "botryllus_mmseqs_clusters.tsv"), delimiter="\t")})
     assert sum(s["name_check"].values()) == s["total"]
-    want = Counter(c for r in tsv("botryllus_immune_genes.tsv") for c in build_full.split_list(r["categories"]))
+    want = Counter(c for cats in kept for c in cats)
     assert s["immune_categories"] == dict(want)
 
 
@@ -127,3 +131,59 @@ def test_protein_missing_from_clusters_is_a_clear_error(tmp_path):
     with pytest.raises(SystemExit) as e:
         build_full.load(d)
     assert "no row in botryllus_mmseqs_clusters.tsv" in str(e.value)
+
+
+def test_unifire_on_the_pages(site):
+    """UniFIRE predictions reach the right protein: a later copy of a repeated header
+    (FUN000051.2 is UniFIRE's FUN000051_GALNT6.2), and proteins over 5,000 aa read "not run"."""
+    out, summ = site
+    uf = {}
+    for s in range(build_full.N_SHARDS):
+        for pid, d in read_js(out / "full" / ("%03d.js" % s), "window.FULL_SHARD=").items():
+            uf[pid] = d["uf"]
+    assert sum(1 for v in uf.values() if v and v != "not run") == 19001
+    assert sum(1 for v in uf.values() if v == "not run") == 50
+    raw = [r for r in csv.DictReader(gzip.open(FULL / "unifire_predictions.tsv.gz", "rt"), delimiter="\t")
+           if r["protein_id"] == "FUN000051.2"]
+    assert raw and len(uf["FUN000051.2"]) == len(raw)
+
+
+def test_foldseek_on_the_pages(site):
+    """The best ProstT5 + Foldseek hit reaches its protein, kept at FOLDSEEK_MAX_E or below:
+    25,804 proteins, as in the Biomni report (v3); BHF (FUN008084, best E-value 0.06) has none."""
+    out, summ = site
+    fs = {}
+    for s in range(build_full.N_SHARDS):
+        for pid, d in read_js(out / "full" / ("%03d.js" % s), "window.FULL_SHARD=").items():
+            fs[pid] = d["fs"]
+    assert summ["foldseek_hit"] == sum(1 for v in fs.values() if v) == 25804
+    assert fs["FUN008084"] == 0
+    raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
+    pid = next(p for p, v in fs.items() if v)
+    assert build.af_accession(raw[pid]["target"]) == fs[pid][0] and int(raw[pid]["qstart"]) == fs[pid][2]
+
+
+def test_foldseek_on_structures_on_the_pages(site):
+    """The best hit of Foldseek on Biomni's predicted structures: 3,729 proteins at FOLDSEEK_MAX_E
+    or below, all 200 aa or less; every longer protein says "not run", BHF (252 aa) among them."""
+    out, summ = site
+    fst, length = {}, {}
+    for s in range(build_full.N_SHARDS):
+        for pid, d in read_js(out / "full" / ("%03d.js" % s), "window.FULL_SHARD=").items():
+            fst[pid] = d["fst"]
+    for r in csv.DictReader(gzip.open(FULL / "proteome_lengths.tsv.gz", "rt"), delimiter="\t"):
+        length[r["protein_id"]] = int(r["length"])
+    assert summ["foldseek_struct_hit"] == sum(1 for v in fst.values() if v and v != "not run") == 3729
+    assert {p for p, v in fst.items() if v == "not run"} == {p for p, n in length.items() if n > build_full.STRUCT_MAX_AA}
+    assert fst["FUN008084"] == "not run"
+    raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_struct_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
+    pid = next(p for p, v in fst.items() if v and v != "not run")
+    assert build.af_accession(raw[pid]["target"]) == fst[pid][0] and int(raw[pid]["qstart"]) == fst[pid][2]
+    assert fst[pid][8:] == [float(raw[pid]["alntmscore"]), float(raw[pid]["lddt"])]
+
+
+def test_known_proteins_link_only_when_drawn():
+    page = {"FUN008084": "proteins/FUN008084_FUN008084.html"}
+    html = build_full.known_html(page)
+    assert 'href="proteins/FUN008084_FUN008084.html"' in html and "BHF" in html
+    assert build_full.known_html({}) == ""
