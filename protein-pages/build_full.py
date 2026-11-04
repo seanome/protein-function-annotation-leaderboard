@@ -147,7 +147,7 @@ def drawn_additions(r, d, length):
     tracks = {k: dict(name=DRAWN_NAMES[k], color=build.WHOLE_TRACKS[k]["color"], shape=build.WHOLE_TRACKS[k]["shape"],
                       cat=build.WHOLE_TRACKS[k]["cat"], p=k) for k in ("diamond", "unifire") if "w_" + k in move}
     return dict(tracks=tracks, hits=hits, names=DRAWN_SCORE_NAMES, nohit=DRAWN_NOHIT, move=move, how=DRAWN_HOW,
-                twelve="; DIAMOND's hit is realigned, and UniFIRE is drawn where its rules' signatures lie")
+                twelve="; DIAMOND's hit is realigned, and UniFIRE is placed where its rules' signatures lie")
 
 
 def pack_drawn(html, add, ver):
@@ -175,7 +175,7 @@ DRAWN_SCORE_NAMES = {"diamond": ["evalue", "% identity (DIAMOND's own)", "% of y
                      "unifire": ["source", "rule", "what it predicts", "where it points"]}
 DRAWN_NOHIT = {"diamond": "E ≤ 0.001: its table keeps nothing weaker", "unifire": "no rule fired"}
 DRAWN_HOW = {"diamond": "best hit only: run by Biomni; its table has no positions, so this pair was aligned again (BLOSUM62, local, gap open -11, extend -1)",
-             "unifire": "run by Biomni on InterProScan's matches. Rules work on signatures, so each prediction is drawn where the rule's signatures lie on this protein; a site uses the rule's own position"}
+             "unifire": "run by Biomni on InterProScan's matches. Rules work on signatures, so each prediction is placed where the rule's signatures lie on this protein; a site uses the rule's own position"}
 
 
 NAME_CHECK = [
@@ -670,14 +670,14 @@ def index_html(s, cats, inputs, ver, known="", first=None):
     pc = lambda v: "%d%%" % round(100 * v / n)
     chips = [("all", n, "all"), ("sp", s["swissprot_hit"], "Swiss-Prot match"), ("pfam", s["pfam_domain"], "Pfam domain"),
              ("none", s["neither"], "neither"), ("immune", s["immune_candidates"], "immune-gene candidate"),
-             ("drawn", s["drawn"], "every program drawn"), ("names", s["names_conflict"], "names conflict"),
+             ("drawn", s["drawn"], "hits along the protein"), ("names", s["names_conflict"], "names conflict"),
              ("km3", s["only_kmerseek_3"], "only kmerseek, E ≤ 0.001"), ("km5", s["only_kmerseek_5"], "only kmerseek, E ≤ 0.00001")]
     only_tip = ("no other program found anything on this protein (DIAMOND, Pfam, InterProScan apart from its disorder, coil, membrane and signal "
                 "predictions, MMseqs2, Foldseek, jackhmmer, FANTASIA, UniFIRE), and kmerseek's best hit over 35 settings passes this E-value. "
                 "Of the %s proteins nothing else found, about %s would pass by chance if the E-values are right and the settings are independent")
     tips = {"all": "every protein", "sp": "DIAMOND found a Swiss-Prot match at the cutoff", "pfam": "hmmsearch found a Pfam domain",
             "none": "neither a Swiss-Prot match at the cutoff nor a Pfam domain; another program may still have a hit",
-            "immune": "in at least one immune-gene category", "drawn": "has a page that draws every program's hits along the protein",
+            "immune": "in at least one immune-gene category", "drawn": "has a page that shows every program's hits along the protein, as one of our test proteins",
             "names": "the FASTA header name and the proposed name are different names; capitals, punctuation and a trailing -like are ignored",
             "km3": only_tip % (f(s["no_other_program"]), f(round(s["no_other_program"] * 35 * 1e-3))),
             "km5": only_tip % (f(s["no_other_program"]), f(round(s["no_other_program"] * 35 * 1e-5)))}
@@ -701,7 +701,7 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  <div id="sentnote"><p class="note">Swiss-Prot match = the best hit of DIAMOND (a fast BLAST-like sequence search) at E-value 0.001 or below,
  in Swiss-Prot release 2026_03 (575,748 proteins). Pfam domain = a Pfam family model that pyhmmer's hmmsearch finds above the score Pfam sets
  for that family. Biomni, the agent that ran the whole-proteome programs except kmerseek, made both tables. A protein with neither can still have a hit
- from another program: the "other programs" column says which. %(dp)s proteins have a page that draws every program's hits along the protein
+ from another program: the "other programs" column says which. %(dp)s test proteins have a page that shows every program's hits along the protein
  (<a href="drawn.html">their own index</a>).</p></div></div>
  <details class="overview-fold"><summary>Counts by immune-gene category and by how the proposed name compares with the existing one</summary>
  <div class="overview">
@@ -803,8 +803,8 @@ def protein_html(ver, n_tseq=0):
         "</head>", '<link rel="stylesheet" href="assets/dense-bhf.css%s"></head>' % ver, 1)
     help_ = ('<aside class="help" id="help"><h2>What this page is</h2><p>Every program\'s best hit on this protein, from Biomni\'s runs on '
              'the whole proteome (Biomni is the agent that ran them, except kmerseek, which ran on Sherlock). MMseqs2, ProstT5 + Foldseek and Foldseek on the '
-             'predicted structure are drawn where they lie; InterProScan draws every match; kmerseek, DIAMOND, jackhmmer with immune seeds, '
-             'FANTASIA and UniFIRE name a hit with no position. The 51 proteins with a drawn page also have phmmer, jackhmmer against '
+             'predicted structure are placed where they lie; InterProScan places every match; kmerseek, DIAMOND, jackhmmer with immune seeds, '
+             'FANTASIA and UniFIRE name a hit with no position. The 51 test proteins also have phmmer, jackhmmer against '
              'Swiss-Prot, hmmscan, hhsearch and MMseqs2 three rounds, every hit, and the residues of each.</p><h2>Rows</h2><p>A <b>program '
              'row</b> folds its hits into one row; click it for one row per hit. A hit row gives the residues of your protein it covers, its '
              'E-value and score, the identity where the program gives one, and the matched protein; click it for its numbers.</p>'

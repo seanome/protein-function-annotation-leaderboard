@@ -96,7 +96,7 @@ TRACKS = [
          setting="phmmer's default options, E-value cutoff 10", database="Swiss-Prot",
          score="i-Evalue", kind="domtbl_seq"),
     dict(key="jackhmmer", file="jackhmmer.domtblout", program="jackhmmer", second=False,
-         name="jackhmmer", setting="three rounds of search (-N 3); the last round is drawn",
+         name="jackhmmer", setting="three rounds of search (-N 3); the last round is shown",
          database="Swiss-Prot", score="i-Evalue", kind="domtbl_seq"),
     dict(key="hhsearch", file="hhsearch", program="hhsearch", second=False,
          name="HH-suite (hhsearch)", setting="one .hhr file per protein",
@@ -1058,7 +1058,7 @@ def whole_rows(b, W):
         elif key == "unifire":
             what, n = v
             g.append('<text x="4" y="%d" class="wt">%s</text>' % (y1, esc(svg_trunc(what, W))))
-            g.append('<text x="4" y="%d" class="wn">%d prediction%s, listed under the drawing · whole protein, no position</text>' % (y2, n, "" if n == 1 else "s"))
+            g.append('<text x="4" y="%d" class="wn">%d prediction%s, listed under the rows · whole protein, no position</text>' % (y2, n, "" if n == 1 else "s"))
         out.append((key, name, how, found, run, "".join(g)))
     return out
 
@@ -1103,7 +1103,7 @@ def structure_html(pid, st):
     sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
     key = ('<p class="note skey"><b>pLDDT</b>, the predictor\'s confidence in each residue: %s'
            '<span class="sw" style="background:%s"></span>residues you point at or select. The strip runs from residue 1 '
-           '(left) to %d (right); drag across it, or click a box in the drawing, to select residues. '
+           '(left) to %d (right); drag across it, or click a box in the rows, to select residues. '
            '<b id="molsel" aria-live="polite"></b></p>' % (sw, HIGHLIGHT, n))
     rects = []
     for i, v in enumerate(st["plddt"]):
@@ -1116,12 +1116,12 @@ def structure_html(pid, st):
              'vector-effect="non-scaling-stroke"/></svg>' % (n, n, "".join(rects), HIGHLIGHT))
     return ('<section id="structure"><h2>3-D structure (predicted)</h2>%s%s<div id="mol" data-scale="%g" data-n="%d" '
             'data-hl="%s"></div>'
-            '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by pLDDT as in the '
-            'strip above them (mean %.0f here). Point at a box in the drawing or a row of the table, or drag across the '
+            '<p class="note">Ribbons made from <span class="mono">%s</span> (%d residues), coloured by pLDDT as in the '
+            'strip above them (mean %.0f here). Point at a box in the rows or a row of the table, or drag across the '
             'strip, to colour those residues %s on the structure and the strip; the rest turns grey. Clicking a box or '
             'a row, or dragging across the strip, keeps the selection until you click the strip again. Point at the structure to see a residue\'s number and mark it on the strip. '
             'The viewer is Mol* (PDBe\'s build, the one the PDB and AlphaFold DB use): drag to turn, scroll to zoom, '
-            'and the sliders button on its right edge opens the sequence and the Structure Tools panels (drawing style, colours, selections, measurements).%s</p>%s</section>'
+            'and the sliders button on its right edge opens the sequence and the Structure Tools panels (display style, colours, selections, measurements).%s</p>%s</section>'
             % (key, strip, st["scale"], n, HIGHLIGHT, esc(st["file"]), st["n"], mean, "magenta", made, warn))
 
 
@@ -1332,12 +1332,12 @@ def legend_html(ctx, has_plddt, has_expr, has_struct=False):
             continue
         c, d = fmt_thr(COUNT_E), fmt_thr(E_MAX)
         if k == "hhsearch":
-            thr = "counts at Prob ≥ 50 and E-value at most %s; drawn up to E-value %s" % (c, d)
+            thr = "counts at Prob ≥ 50 and E-value at most %s; shown up to E-value %s" % (c, d)
         elif k == "interproscan":
-            thr = ("counts at E-value at most %s where there is one, drawn up to %s; disorder, coiled-coil, "
-                   "membrane-span and signal-peptide predictions are drawn as dashed boxes and do not count" % (c, d))
+            thr = ("counts at E-value at most %s where there is one, shown up to %s; disorder, coiled-coil, "
+                   "membrane-span and signal-peptide predictions are shown as dashed boxes and do not count" % (c, d))
         else:
-            thr = "counts at %s at most %s; drawn up to %s" % (t["score"], c, d)
+            thr = "counts at %s at most %s; shown up to %s" % (t["score"], c, d)
         coords = {"domtbl_seq": "hmm from-to (positions on your protein)",
                   "domtbl_pfam": "env from-to, the domain's envelope: the stretch of your protein hmmscan assigns "
                                  "to the domain, a little wider than the aligned part",
@@ -1352,7 +1352,7 @@ def legend_html(ctx, has_plddt, has_expr, has_struct=False):
     if ctx["run_status"].get("interproscan") != "not run":
         dash = svg_inline(feature_svg(0, 0, 12, 10, PROGRAMS["interproscan"]["color"]), 12, 10)
         items.append('<li>%s<span>on the InterProScan row: a disorder, coiled-coil, membrane-span or signal-peptide '
-                     'prediction; drawn, never counted as a hit</span></li>' % dash)
+                     'prediction; shown, never counted as a hit</span></li>' % dash)
     if has_plddt:
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
         items.append('<li><span></span><span><b>pLDDT</b>, the structure predictor\'s confidence in each residue, 0 to 100: %s</span></li>' % sw)
@@ -1659,7 +1659,7 @@ def dense_key(ctx, has_plddt, has_struct, extra=()):
                  '<i style="opacity:.75"></i><i style="opacity:1"></i></i> &lt;20% · 20–40% · 40–60% · 60%+</span>')
     if ctx["run_status"].get("interproscan") == "run":
         parts.append('<span><svg width="12" height="10"><rect x="1" y="1" width="10" height="8" rx="2" fill="none" stroke="#3D3D3D" '
-                     'stroke-width="1.5" stroke-dasharray="3 2"/></svg> prediction (disorder, coil, membrane, signal): drawn, not counted</span>')
+                     'stroke-width="1.5" stroke-dasharray="3 2"/></svg> prediction (disorder, coil, membrane, signal): shown, not counted</span>')
     if ctx["run_status"].get("kmerseek") == "run":
         parts.append('<span><svg width="18" height="10"><rect width="18" height="10" rx="2" fill="#C0392B" opacity=".3"/>'
                      '<rect x="4" y="3" width="10" height="4" fill="#b8860b"/></svg> seed inside a kmerseek box: where its search started</span>')
@@ -1697,12 +1697,12 @@ def viewer_html(pid, st):
             '<p class="note skey">Colours as in the key\'s pLDDT entry. Drag across the strip, or click a hit, to colour residues magenta on '
             'the model; the icons at the model\'s top right open Mol*\'s own panels. <b id="molsel" aria-live="polite"></b></p>%s%s'
             '<div id="mol" data-scale="1" data-n="%d" data-hl="%s"></div>'
-            '<details class="more"><summary>How the structure was made and how to use the viewer</summary><p class="note">Ribbons drawn '
+            '<details class="more"><summary>How the structure was made and how to use the viewer</summary><p class="note">Ribbons made '
             'from <span class="mono">%s</span> (%d residues), coloured by pLDDT as in the strip above them (mean %.0f here). Point at a hit '
             'row, or drag across the strip, to colour those residues magenta on the structure and the strip; the rest turns grey. Clicking '
             'a row, or dragging across the strip, keeps the selection until you click the strip again. Point at the structure to see a '
             'residue\'s number and mark it on the strip. The viewer is Mol* (PDBe\'s build, the one the PDB and AlphaFold DB use): drag to '
-            'turn, scroll to zoom, and its panels (the icons at its top right) change the drawing style, colours and selections.%s</p>'
+            'turn, scroll to zoom, and its panels (the icons at its top right) change the display style, colours and selections.%s</p>'
             '</details></aside>' % (warn, strip, n, HIGHLIGHT, esc(st["file"]), n, mean, made))
 
 
@@ -1748,17 +1748,17 @@ def dense_help(ctx):
         if ctx["run_status"][k] != "run":
             continue
         c, d = fmt_thr(COUNT_E), fmt_thr(E_MAX)
-        thr = ("counts at Prob ≥ 50 and E-value at most %s; drawn up to E-value %s" % (c, d) if k == "hhsearch" else
-               "counts at E-value at most %s where there is one, drawn up to %s; disorder, coiled-coil, membrane-span and signal-peptide "
-               "predictions are drawn dashed and do not count" % (c, d) if k == "interproscan" else
-               "counts at %s at most %s; drawn up to %s" % (t["score"], c, d))
+        thr = ("counts at Prob ≥ 50 and E-value at most %s; shown up to E-value %s" % (c, d) if k == "hhsearch" else
+               "counts at E-value at most %s where there is one, shown up to %s; disorder, coiled-coil, membrane-span and signal-peptide "
+               "predictions are shown dashed and do not count" % (c, d) if k == "interproscan" else
+               "counts at %s at most %s; shown up to %s" % (t["score"], c, d))
         coords = {"domtbl_seq": "hmm from-to (positions on your protein)",
                   "domtbl_pfam": "env from-to, the domain's envelope: the stretch hmmscan assigns to the domain, a little wider than the aligned part",
                   "m8": "qstart-qend", "kmerseek": "region_start-region_end, plus 1 at the start", "hhr": "Query HMM range",
                   "interproscan": "start-stop"}[t["kind"]]
         progs.append("<dt>%s</dt><dd>%s</dd>" % (esc(t["name"]), "<br>".join(esc(x) for x in (thr, ctx["settings"][k], ctx["databases"][k], "box: " + coords))))
     return ('<aside class="help" id="help"><h2>What one row is</h2><p>A <b>program row</b> is folded: its track is a histogram of how many '
-            'of its hits cover each residue, with its best hit drawn as a box on top. The columns give the count of hits at the E-value '
+            'of its hits cover each residue, with its best hit shown as a box on top. The columns give the count of hits at the E-value '
             'chosen, the best E-value, that hit\'s score (bits, or hhsearch\'s Prob) and identity where known, and the best hit\'s name. '
             'Click the row to unfold one row per hit, best E-value first.</p><p>A <b>hit row</b> gives the residues of your protein it '
             'covers, its E-value and score, the identity, and the matched part of the other protein. Click it to see the residues: a map of '
@@ -1767,8 +1767,8 @@ def dense_help(ctx):
             'with immune seeds and FANTASIA rows come from Biomni\'s run on the whole proteome (Biomni is the agent that ran the '
             'whole-proteome programs except kmerseek). That run kept each protein\'s best hit and not where it lies, so they name the hit with '
             'no box, and each counts in the sentence by its own cutoff, which the E-value chips do not change. DIAMOND\'s table kept no positions '
-            'either, so its best hit is aligned again and drawn, marked realigned. UniFIRE\'s rules work on signatures, so each prediction is '
-            'drawn where the rule\'s signatures lie on this protein; a site uses the rule\'s own position.</p>'
+            'either, so its best hit is aligned again and shown, marked realigned. UniFIRE\'s rules work on signatures, so each prediction is '
+            'placed where the rule\'s signatures lie on this protein; a site uses the rule\'s own position.</p>'
             '<h2>Controls</h2><p>The <b>E-value cutoff</b> chips keep the hits at or below that value; the sentence at the top and every '
             'count follow it. <b>Search</b> looks through the matched protein\'s name, gene, accession, species, Pfam families and GO terms; '
             'every word typed must appear. The 3-D structure, where there is one, colours the residues of the hit you point at; a click '
@@ -1809,7 +1809,7 @@ DENSE_COLHEAD = (
     'title="identical residues: the program\'s own figure (ProstT5, MMseqs2) or counted on its alignment. Click to sort">identical <i></i>'
     '</button></div><div><button data-sort="tl" title="program row: its best hit; hit row: the matched part of the other protein. Click to '
     'sort by the other protein\'s length">best hit · matched part <i></i></button></div><div class="track" title="Boxes sit at the residues '
-    'of your protein the program reported. Under each hit, the other protein is drawn to its own length with the matched part dark and its '
+    'of your protein the program reported. Under each hit, the other protein is shown at its own length with the matched part dark and its '
     'Pfam domains as ticks. Click a row for the residues.">where on your protein · under each hit, the other protein to its own length</div></div>')
 
 
@@ -2113,10 +2113,10 @@ def index_page(rows, ctx):
              'program, and no other, reports a hit. Click one to list them.</p><ul>%s</ul></aside>' % "".join(side))
     filt = ['<button data-f="all">All</button>'] + ['<button data-f="%s">%s</button>' % (s, esc(STATUSES[s][1])) for s in STATUSES]
     out.append('<div class="withside"><section><h2>Proteins</h2><p class="note">One page per protein of your proteome. On each page, every '
-               'tool\'s hits are drawn on the same ruler of residue positions. Each program counts once, even when it was '
+               'tool\'s hits are shown on the same ruler of residue positions. Each program counts once, even when it was '
                'run twice (MMseqs2 one round and three rounds; Foldseek on predicted structures and ProstT5 + Foldseek), '
                'so there are 8 programs for 10 rows; %d of the 8 were run on this proteome. A hit counts when its E-value is at most %s '
-               '(hhsearch: also Prob at least 50); the protein pages also draw weaker hits, up to E-value %s. "Agree" means two hits from different programs overlap by '
+               '(hhsearch: also Prob at least 50); the protein pages also show weaker hits, up to E-value %s. "Agree" means two hits from different programs overlap by '
                'at least half of the shorter one and name the same Pfam family or InterPro entry. The small '
                'picture is the "programs with a hit" line of each protein page: its height at each point is the '
                'number of programs (0 to %d) with a hit over that part of the protein, squeezed to the same 90-pixel width '
@@ -2124,7 +2124,7 @@ def index_page(rows, ctx):
                '(each tool computes its own, so they are not on one scale); 0 means the tool printed 0.</p>'
                '<div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off" '
                'placeholder="a gene, protein or Pfam family, e.g. HLA, immune, MHC, RING"></div>'
-               '<p class="note">The search looks at every hit drawn on the protein pages (E-value at most %s): the name, gene and species of '
+               '<p class="note">The search looks at every hit shown on the protein pages (E-value at most %s): the name, gene and species of '
                'each Swiss-Prot protein a tool matched, the Pfam families on the matched part of it, and the '
                'Pfam families hmmscan or InterProScan found on your protein. Every word typed must appear; the '
                'last column shows what matched and which programs\' hits carry it.</p>'

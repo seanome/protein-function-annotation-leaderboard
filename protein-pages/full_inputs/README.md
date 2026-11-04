@@ -43,7 +43,7 @@ Two things about the tables that build_full.py works around:
 - **Isoform IDs.** The FASTA repeats a header for each isoform of a gene. The tables call the
   first copy `FUN019272` and the second `FUN019272.2`, in file order. The 51-protein test set
   of `build.py` was named differently: its `FUN019272_TTN.1` is the tables' `FUN019272.2`. So
-  build_full.py links a protein to its drawn page by sequence (MD5), not by ID.
+  build_full.py links a protein to its page in the 51-protein test set by sequence (MD5), not by ID.
 - **The `mmseqs_cluster` column is wrong.** It is filled only on each cluster's representative,
   and for the 5,808 clusters of two or more proteins it names one other member instead of the
   representative. build_full.py takes clusters from `botryllus_mmseqs_clusters.tsv` only.

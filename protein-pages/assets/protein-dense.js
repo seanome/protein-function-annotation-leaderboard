@@ -132,18 +132,18 @@
       NR[k] = k === "foldseek" && !shortEnough ? "not run: structures were predicted only for proteins of " + C.struct_max_aa + " aa or less" :
         k === "interproscan" || k === "unifire" ? "not run: proteins over 5,000 amino acids were skipped" :
         k === "kmerseek" ? "no position kept for this hit" :
-        k === "hmmscan" ? "run only on the 51 drawn proteins; Pfam domains here: InterProScan's Pfam matches on its row, and hmmsearch's names under the grid" :
-        "run only on the 51 drawn proteins";
+        k === "hmmscan" ? "run only on the 51 test proteins; Pfam domains here: InterProScan's Pfam matches on its row, and hmmsearch's names under the grid" :
+        "run only on the 51 test proteins";
     });
 
     // the sentence at each E-value cutoff: programs with a hit at that cutoff, of the programs run here
     var ran = Object.keys(tracksRun).map(function (k) { return C.tracks[k].p; }).filter(function (p, i, a) { return a.indexOf(p) === i; });
     var wholeRan = W;
     var M = ran.length + wholeRan.length;
-    var note = "<p class=\"note\">This protein has no drawn page, so only each program's best hit is known (tables of the whole proteome, from Biomni's runs and our kmerseek run on Sherlock); " +
+    var note = "<p class=\"note\">This protein is not one of the 51 test proteins, so only each program's best hit is known (tables of the whole proteome, from Biomni's runs and our kmerseek run on Sherlock); " +
       "whether two programs agree on a Pfam family is not judged here. " + (d.q ? "Click a hit for the residues: the two proteins aligned in your browser " +
       "(BLOSUM62, gap open -11, extend -1), since the tables keep no alignment. " : "This protein's sequence is not on this site, so a hit opens no alignment. ") +
-      "phmmer, jackhmmer against Swiss-Prot, hmmscan, hhsearch and MMseqs2 three rounds were run only on the 51 drawn proteins.</p>";
+      "phmmer, jackhmmer against Swiss-Prot, hmmscan, hhsearch and MMseqs2 three rounds were run only on those 51.</p>";
     var sent = [1, 0, -1, -2, -3].reverse().map(function (v) {
       var progs = {};
       hits.forEach(function (h) { if (!h.x && (h.e === null || h.e <= Math.pow(10, v))) progs[C.tracks[h.k].p] = 1; });
@@ -163,7 +163,7 @@
     };
     window.WHOLE = W; window.NOTRUN = NR; window.ALN = {};
     window.HOW = { kmerseek: "best hit only: run on Sherlock, not by Biomni, against Swiss-Prot 2026_03 over 35 alphabet+k settings", diamond: "best hit only: run by Biomni; its table has no positions, so this pair was aligned again (BLOSUM62, local, gap open -11, extend -1)",
-                   unifire: "run by Biomni on InterProScan's matches. Rules work on signatures, so each prediction is drawn where the rule's signatures lie on this protein; a site uses the rule's own position",
+                   unifire: "run by Biomni on InterProScan's matches. Rules work on signatures, so each prediction is placed where the rule's signatures lie on this protein; a site uses the rule's own position",
                    mmseqs2: "best hit only: Biomni's run against all of Swiss-Prot 2026_03 keeps one hit per protein here, at E-value 0.001 or below",
                    prostt5: "best hit only: ProstT5 3Di letters, Foldseek version 10; one hit per protein, E-value 10 or below",
                    foldseek: "best hit only: Foldseek on the structure ESMFold2 predicted (proteins of " + C.struct_max_aa + " aa or less); E-value 10 or below",

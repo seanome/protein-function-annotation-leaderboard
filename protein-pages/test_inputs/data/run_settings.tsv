@@ -2,8 +2,8 @@ track	setting	database
 mmseqs2_3rounds	sensitivity 7 (-s 7), three rounds, E-value cutoff 10	Swiss-Prot release 2025_01 (5 February 2025) without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
 kmerseek	kmerseek 0.4, 35 alphabet and k-mer size settings (those whose E-value fit worked), regions at E-value 10 or below	all of Swiss-Prot release 2026_03 (2 September 2026), 575,748 proteins
 phmmer	phmmer -E 10	Swiss-Prot release 2025_01 (5 February 2025) without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
-jackhmmer	jackhmmer -N 3 -E 10; the last round is drawn	Swiss-Prot release 2025_01 (5 February 2025) without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
+jackhmmer	jackhmmer -N 3 -E 10; the last round is shown	Swiss-Prot release 2025_01 (5 February 2025) without its 120 sea-squirt (Ascidiacea) entries, 572,850 proteins
 hmmscan	hmmscan -E 10 --domE 10	Pfam-A 38.2 (30,134 models)
 foldseek	Foldseek on 3-D structures predicted by ESMFold2's fast model (esmcfold2-fast: folding head on ESMC 6B, default settings, no templates or MSA), only for proteins of 200 aa or less; Foldseek's search settings were not recorded; run by Biomni	AlphaFold models of all Swiss-Prot proteins, Foldseek's prebuilt database: 590,183 models (sea-squirt entries not removed)
 prostt5	ProstT5 3Di letters, Foldseek version 10, E-value cutoff 10, at most 1,000 hits per protein (Foldseek's default); run by Biomni on the whole proteome	AlphaFold models of all Swiss-Prot proteins, Foldseek's prebuilt database: 590,183 models (sea-squirt entries not removed)
-hhsearch	hhblits on UniRef30 2023_02 (3 rounds, E-value 0.001) builds each protein's alignment; hhsearch then searches it against PDB70; drawn when Prob is at least 50	PDB70, 2022-03-13 build
+hhsearch	hhblits on UniRef30 2023_02 (3 rounds, E-value 0.001) builds each protein's alignment; hhsearch then searches it against PDB70; shown when Prob is at least 50	PDB70, 2022-03-13 build

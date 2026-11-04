@@ -26,7 +26,7 @@
   function others(b) { var o = []; for (var i = 0; i < OTHER.length; i++) if (b >> i & 1) o.push(OTHER[i][0]); return o; }
   function nbits(b) { var n = 0; while (b) { n += b & 1; b >>= 1; } return n; }
   var TILE_WORDS = { all: "", sp: "with a Swiss-Prot match", pfam: "with a Pfam domain", none: "with neither a Swiss-Prot match nor a Pfam domain",
-    immune: "that are immune-gene candidates", drawn: "with every program's hits drawn", names: "whose FASTA name and proposed name conflict",
+    immune: "that are immune-gene candidates", drawn: "with every program's hits along the protein", names: "whose FASTA name and proposed name conflict",
     km3: "that only kmerseek found, E-value 0.001 or below", km5: "that only kmerseek found, E-value 0.00001 or below" };
   var st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
   var count = document.getElementById("count"), more = document.getElementById("more"), lbl = document.querySelector(".ix .ruler .lbl");
@@ -100,7 +100,7 @@
     var ips = (r[15] || []).length, mmo = r[16] && r[16][3] !== r[6];
     return '<div class="row g ixg' + (j === st.cur ? " cur" : "") + '" role="listitem" data-j="' + j + '" tabindex="-1">' +
       '<div><a class="id mono" href="' + esc(href(r)) + '">' + esc(r[0]) + "</a>" +
-      '<span class="s">' + names + (r[14] ? '<span class="dr">· every program drawn</span>' : "") + "</span></div>" +
+      '<span class="s">' + names + (r[14] ? '<span class="dr">· hits along the protein</span>' : "") + "</span></div>" +
       '<div class="num">' + fmt(r[1]) + "</div>" +
       '<div class="txt" title="' + esc(r[5]) + '">' + (r[6] ? (isMatch(r) ? esc(r[5]) : '<span class="dim">above the cutoff: ' + esc(r[5]) + "</span>") : '<span class="dim">no match</span>') +
         '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : "") +
