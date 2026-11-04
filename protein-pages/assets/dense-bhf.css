@@ -274,3 +274,7 @@ body:has(.withviewer.noviewer) header.top .colhead{margin-right:0}
 .sentence .nameline{font-size:12.5px;color:var(--secondary);margin:3px 0 0}
 .sentence .nameline b{color:var(--ink);font-weight:600}
 .sentence .nameline a{color:var(--ink)}
+/* a long program's hit rows: the browser lays out only the ones near the screen */
+.g.row.hit{content-visibility:auto;contain-intrinsic-size:auto 34px}
+.row.morehits{display:block;padding:6px 14px}
+.row.morehits button{font:inherit;color:var(--ink);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}

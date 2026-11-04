@@ -18,7 +18,8 @@ they are matched by sequence (--drawn-fasta), since the two FASTA files number i
 Writes into --out:
     index.html          every protein: search, filters, counts
     protein.html        one page that shows any protein, named after "#" in its address
-    full/rows.js        what the index shows for each protein
+    full/rows.js        what the index shows for each protein, packed (assets/gz.js reads it)
+    full/meta.js        the names protein pages need: immune categories, name checks, verdicts
     full/NNN.js         the rest of each protein's data, in 96 files; a protein's file number is a
                         hash of its ID (shard_of), so protein.html loads one file
     full_summary.json   the counts on the index
@@ -26,6 +27,7 @@ Writes into --out:
                         build.py's index of the proteins drawn there
 """
 import argparse
+import base64
 import csv
 import gzip
 import hashlib
@@ -144,11 +146,24 @@ def drawn_additions(r, d, length):
         hits += unifire_hits(d["uf"], d["ips"] if isinstance(d["ips"], list) else [], length)
     tracks = {k: dict(name=DRAWN_NAMES[k], color=build.WHOLE_TRACKS[k]["color"], shape=build.WHOLE_TRACKS[k]["shape"],
                       cat=build.WHOLE_TRACKS[k]["cat"], p=k) for k in ("diamond", "unifire") if "w_" + k in move}
-    return (
-        "Object.assign(PAGE.tracks,%s);PAGE.m+=%d;PAGE.hits.push(...%s);PAGE.names=Object.assign(PAGE.names||{},%s);"
-        "PAGE.nohit=%s;PAGE.twelve+=\"; DIAMOND's hit is realigned, and UniFIRE is drawn where its rules' signatures lie\";"
-        "window.WHOLE=window.WHOLE.filter(function(w){return %s.indexOf(w[0])<0;});Object.assign(window.HOW,%s);") % (
-        dumps(tracks), len(tracks), dumps(hits), dumps(DRAWN_SCORE_NAMES), dumps(DRAWN_NOHIT), dumps(move), dumps(DRAWN_HOW))
+    return dict(tracks=tracks, hits=hits, names=DRAWN_SCORE_NAMES, nohit=DRAWN_NOHIT, move=move, how=DRAWN_HOW,
+                twelve="; DIAMOND's hit is realigned, and UniFIRE is drawn where its rules' signatures lie")
+
+
+def pack_drawn(html, add, ver):
+    """A drawn page with its data packed and its scripts started by assets/gz.js: the rows first, Mol* after."""
+    i = html.index("<script>const PAGE=")
+    j = html.index("</body>")
+    m = re.match(r"<script>const PAGE=(.*?);window\.WHOLE=(.*?);window\.NOTRUN=(.*?);window\.HOW=(.*?);</script>", html[i:j], re.S)
+    if not m:
+        sys.exit("could not read the data of a drawn page")
+    data = dict(zip(("page", "whole", "notrun", "how"), (json.loads(g) for g in m.groups())), add=add)
+    srcs = re.findall(r'<script src="([^"]+)"></script>', html[i + m.end():j])
+    mol = [x for x in srcs if "molstar" in x or x.endswith(".pdb.js") or "structure.js" in x]
+    css = re.search(r'<link rel="stylesheet" href="([^"]*molstar[^"]*)">', html)
+    head = html[:i].replace(css.group(0), "") if css else html[:i]
+    cfg = dict(z=packed(data), base="../", dense="../assets/dense-bhf.js", molstar=[css.group(1)] + mol if css else None)
+    return '%s<script src="../assets/gz.js%s"></script><script>bootPage(%s)</script>%s' % (head, ver, dumps(cfg), html[j:])
 
 
 def dumps(x):
@@ -350,32 +365,10 @@ def load(folder):
     return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst, dm
 
 
-# The text that repeats across the data files (GO term names and IDs, UniProt keywords, InterProScan's
-# member databases, signatures and descriptions, UniFIRE's rules and predictions) is stored once, in
-# full/str.js, and the data files hold its number: this keeps the site under the host's 256 MiB. A
-# data file calls FULL_X (defined in full/str.js) to turn the numbers back into text as it loads.
-STR_X_JS = """window.FULL_X=function(d){var S=window.FULL_STR,s=function(i){return typeof i==="number"?S[i]:i;},p=function(g){return [s(g[0]),s(g[1])];};
-for(var id in d){var e=d[id];if(e.go)e.go=e.go.map(p);if(e.kw)e.kw=e.kw.map(s);
-if(Array.isArray(e.ips))e.ips=e.ips.map(function(m){return [s(m[0]),s(m[1]),s(m[2]),m[3],m[4],m[5],s(m[6]),s(m[7])];});
-if(Array.isArray(e.uf))e.uf=e.uf.map(function(u){return [s(u[0]),s(u[1]),s(u[2]),s(u[3]),u[4],u[5]];});
-if(e.fa&&e.fa[6])e.fa[6]=e.fa[6].map(p);}return d;};"""
-
-
-def encode_strings(shards):
-    """Replace the repeated strings of every shard entry by their number in one table (FULL_X undoes it)."""
-    table = {}
-    S = lambda x: table.setdefault(x, len(table)) if isinstance(x, str) else x
-    for entries in shards.values():
-        for e in entries.values():
-            e["go"] = [[S(a), S(b)] for a, b in e["go"]]
-            e["kw"] = [S(k) for k in e["kw"]]
-            if isinstance(e.get("ips"), list):
-                e["ips"] = [[S(m[0]), S(m[1]), S(m[2]), m[3], m[4], m[5], S(m[6]), S(m[7])] for m in e["ips"]]
-            if isinstance(e.get("uf"), list):
-                e["uf"] = [[S(u[0]), S(u[1]), S(u[2]), S(u[3])] + u[4:] for u in e["uf"]]
-            if e.get("fa"):
-                e["fa"][6] = [[S(a), S(b)] for a, b in e["fa"][6]]
-    return sorted(table, key=table.get)
+def packed(obj):
+    """obj as gzip-compressed JSON in base64, for a data file or a drawn page; assets/gz.js reads it.
+    A protein page then downloads a few hundred KB rather than every protein's table."""
+    return base64.b64encode(gzip.compress(json.dumps(obj, separators=(",", ":")).encode(), 9, mtime=0)).decode()
 
 
 def add_targets(out, tseqs):
@@ -558,6 +551,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
             tl={a: tlen[a] for a in (*(v[0] for v in (mm and mm.get(pid), fs and fs.get(pid), fst and fst.get(pid)) if v), km and km.get(pid) and km[pid][2], r["sp_acc"]) if a in tlen},
             ips=None if ips is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not ips.get(pid) else sorted(ips.get(pid, []), key=lambda x: (x[3], x[4]))),  # 0: searched, no hit at E-value KMERSEEK_MAX_E or below
             uf=None if uf is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not uf.get(pid) else rule_places(uf.get(pid, []), sorted(ips.get(pid, []), key=lambda x: (x[3], x[4])) if ips else [], rules)),
+            r=rows[-1][:15] + [0, 0, 0, rows[-1][18]],  # what the protein's pages need from its row in full/rows.js
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
             sp_e=r["sp_evalue"], ev=evidence_list(im["evidence"]) if im else [],
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), rep=rep,
@@ -578,26 +572,26 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         for page, pid in first.items():
             f = out / page
             html = f.read_text()
-            add = drawn_additions(row_of[pid], shards[shard_of(pid)][pid], lengths[pid][0])
-            if html.count('<script src="../assets/dense-bhf.js') != 1:
-                sys.exit("could not add DIAMOND and UniFIRE to %s" % page)
-            html = html.replace('<script src="../assets/dense-bhf.js', '<script>%s</script><script src="../assets/dense-bhf.js' % add, 1)
             html = html.replace("</main>", '<section id="biomni" data-id="%s"></section><section id="biomni-more"></section></main>' % pid, 1)
-            html = html.replace("</body>", '<script src="../full/rows.js%s"></script><script src="../full/str.js%s"></script>'
-                                '<script src="../assets/viewer.js%s"></script></body>' % (asset_ver, asset_ver, asset_ver), 1)
             if html.count('id="biomni') != 2:
                 sys.exit("could not add the Biomni tables to %s" % page)
-            f.write_text(html)
+            f.write_text(pack_drawn(html, drawn_additions(row_of[pid], shards[shard_of(pid)][pid], lengths[pid][0]), asset_ver))
     shutil.copytree(Path(__file__).parent / "assets", out / "assets", dirs_exist_ok=True)
     n_tseq = add_targets(out, tseqs)
-    strings = encode_strings(shards)
-    (out / "full" / "str.js").write_text("window.FULL_STR=%s;%s" % (json.dumps(strings, separators=(",", ":")), STR_X_JS))
-    for s in range(N_SHARDS):
-        (out / "full" / ("%03d.js" % s)).write_text(
-            "window.FULL_SHARD=Object.assign(window.FULL_SHARD||{},FULL_X(%s));" % json.dumps(shards.get(s, {}), separators=(",", ":")))
-    (out / "full" / "rows.js").write_text("window.FULL=%s;" % json.dumps(
-        dict(cats=cats, check=[t for _, t in NAME_CHECK], check_differs=status_code["conflict"], verdicts=VERDICT_TEXT, rows=rows, other=OTHER_HITS,
-             pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)]), separators=(",", ":")))
+    for k, entries in shards.items():
+        (out / "full" / ("%03d.js" % k)).write_text('(window.FULL_GZ=window.FULL_GZ||{})[%d]="%s";' % (k, packed(entries)))
+    for k in range(N_SHARDS):
+        if k not in shards:
+            (out / "full" / ("%03d.js" % k)).write_text('(window.FULL_GZ=window.FULL_GZ||{})[%d]="%s";' % (k, packed({})))
+    full = dict(cats=cats, check=[t for _, t in NAME_CHECK], other=OTHER_HITS, total=len(rows), rows=rows,
+                pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)])
+    (out / "full" / "rows.js").write_text('window.FULL_Z="%s";' % packed(full))
+    (out / "full" / "meta.js").write_text("window.FULL_META=%s;" % json.dumps(
+        dict(cats=cats, check=full["check"], check_differs=status_code["conflict"], verdicts=VERDICT_TEXT), separators=(",", ":")))
+    # What index.html needs to show its first screen before full/rows.js arrives
+    used = {x[2] for r in rows[:100] for x in r[15]}
+    first = dict(full, rows=rows[:100], pfam={i: full["pfam"][i] for i in used},
+                 ladder=[sum(1 for r in rows if r[6] and r[9] and float(r[9]) <= c) for c in (1e-3, 1e-10, 1e-50, 1e-100)])
 
     n = len(rows)
     summ = dict(
@@ -623,7 +617,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
     inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
-    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver, known_html(drawn_page)))
+    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver, known_html(drawn_page), first))
     (out / "protein.html").write_text(protein_html(asset_ver, n_tseq))
     print("%d proteins, %d drawn, %d data files, %.1f s" % (n, summ["drawn"], N_SHARDS, time.time() - t0))
     return summ
@@ -667,7 +661,7 @@ OTHER_HITS = [["MMseqs2", "E-value 0.001 or below"], ["ProstT5 + Foldseek", "E-v
               ["kmerseek", "region E-value %g or below" % KMERSEEK_MAX_E], ["jackhmmer, immune seeds", "any hit in Biomni's table"]]
 
 
-def index_html(s, cats, inputs, ver, known=""):
+def index_html(s, cats, inputs, ver, known="", first=None):
     """The first page, after the dense-results-page skill: the answer in one sentence, then a sticky
     header (filters, search, a three-line key, column names, the residue ruler) over one grid row per
     protein, each with its Pfam matches and MMseqs2's best hit drawn along the protein."""
@@ -781,8 +775,8 @@ DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (at most 25 p
 program searched.</p></section>
 <footer><h2>Input files read</h2><p class="note">Built by build_full.py from %(inputs)s. These tables come from Biomni's runs and our kmerseek run on Sherlock
 (full_inputs/README.md in the repository says how each was made). This page only reads those tables; building it ran no search.</p></footer>
-<script src="full/rows.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
-""" % dict(n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
+<script>window.FULL_FIRST=%(first)s;</script><script src="assets/gz.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
+""" % dict(first=dumps(first), n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
            ne=f(s["neither"]), nep=pc(s["neither"]), dp=f(s["drawn_pages"]), dr=f(s["drawn"]), im=f(s["immune_candidates"]),
            jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts,
            other="; ".join("%s: %s" % (a, c) for a, c in OTHER_HITS), ax=f(AXIS_AA), axn=AXIS_AA, tw=TRACK_PCT, seq=seq, dom=dom, ramp=ramp, ticks=ticks, cnt="", inputs=build.esc(", ".join(inputs)), ver=ver)
@@ -826,7 +820,7 @@ def protein_html(ver, n_tseq=0):
 <footer><h2>Input files read</h2><p class="note">Built by build_full.py from tables of the whole proteome, Biomni's and our kmerseek run's (full_inputs/README.md in the
 repository says how each was made). This page only reads them; building it ran no search.</p></footer>
 <div id="tip" role="tooltip" hidden></div>%s
-<script>window.DENSE_CONST=%s;</script><script src="full/rows.js%s"></script><script src="full/str.js%s"></script><script src="assets/protein-dense.js%s"></script></body></html>
+<script>window.DENSE_CONST=%s;</script><script src="assets/gz.js%s"></script><script src="full/meta.js%s"></script><script src="assets/protein-dense.js%s"></script></body></html>
 """ % (build.DENSE_FILTERS % (round(build.math.log10(build.SHOW_E)), round(build.math.log10(build.COUNT_E))),
        build.dense_key(ctx, False, False, (("diamond", "DIAMOND"), ("unifire", "UniFIRE"))), build.DENSE_COLHEAD, build.dense_swissprot(ctx, whole), help_,
        json.dumps(const, separators=(",", ":")), ver, ver, ver)

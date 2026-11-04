@@ -2,7 +2,8 @@
 // Filters (the chips, the two lists and the overview bars), search, sorting by column, a TSV of
 // every protein the filters keep, Help, and keys (j/k rows, Enter opens, / search, Esc).
 (function () {
-  var F = window.FULL, R = F.rows, CATS = F.cats, PFAM = F.pfam || [];
+  // The first 100 rows are in index.html, so they show at once; full/rows.js, all of them, follows
+  var F = window.FULL_FIRST, R = F.rows, CATS = F.cats, PFAM = F.pfam || [], ready = false, shownFirst = false;
   // row: 0 id, 1 length, 2 existing, 3 proposed, 4 name check, 5 Swiss-Prot name, 6 accession,
   // 7 identity, 8 coverage, 9 E-value, 10 Pfam names, 11 category bits, 12 empty, 13 cluster size,
   // 14 drawn page, 15 InterProScan's Pfam matches [start, end, index into PFAM], 16 MMseqs2's best
@@ -11,9 +12,8 @@
   // 18 1 when the two names conflict (not only their spelling; build_full.names_conflict)
   var grid = document.getElementById("grid"), AX = +grid.dataset.ax, SEQ = grid.dataset.seq, DOM = grid.dataset.dom;
   function catNames(m) { var o = []; for (var i = 0; i < CATS.length; i++) if (m >> i & 1) o.push(CATS[i]); return o; }
-  var text = R.map(function (r) {
-    return [r[0], r[2], r[3], r[5], r[6], r[10], catNames(r[11]).join(" ")].join(" ").toLowerCase();
-  });
+  function rowText(r) { return [r[0], r[2], r[3], r[5], r[6], r[10], catNames(r[11]).join(" ")].join(" ").toLowerCase(); }
+  var text = [];
   var OTHER = F.other || [], CUTS = [1e-3, 1e-10, 1e-50, 1e-100];
   // a Swiss-Prot match counts when DIAMOND's E-value is at or below the cutoff on the ladder
   function isMatch(r) { var e = ev(r[9]); return !!r[6] && e !== null && e <= st.e; }
@@ -44,6 +44,10 @@
     return v === null || v === "" ? null : v;
   }
   function filter() {
+    if (!ready) {
+      if (shownFirst) { count.textContent = "Loading all " + fmt(F.total) + " proteins…"; return; }
+      shownFirst = true; list = R.map(function (r, i) { return i; }); draw(); return;
+    }
     var words = st.q.toLowerCase().split(/\s+/).filter(Boolean), tf = TILES[st.tile];
     list = [];
     for (var i = 0; i < R.length; i++) {
@@ -112,7 +116,7 @@
       '<div class="track">' + track(r) + "</div></div>";
   }
   function draw() {
-    var h = [], n = Math.min(st.shown, list.length);
+    var h = [], n = Math.min(st.shown, list.length), all = ready ? R.length : F.total, found = ready ? list.length : F.total;
     for (var j = 0; j < n; j++) h.push(rowHtml(R[list[j]], j));
     grid.innerHTML = h.join("");
     var what = [TILE_WORDS[st.tile]];
@@ -120,8 +124,8 @@
     if (st.chk >= 0) what.push("where " + F.check[st.chk]);
     if (st.q) what.push("matching “" + st.q + "”");
     what = what.filter(Boolean);
-    count.innerHTML = "<b>" + fmt(list.length) + "</b> of " + fmt(R.length) + " proteins" + (what.length ? " " + esc(what.join(", ")) : "");
-    lbl.textContent = list.length ? "rows 1–" + fmt(n) + " of " + fmt(list.length) + " shown" + (n < list.length ? "; more at the bottom" : "") : "no protein matches";
+    count.innerHTML = "<b>" + fmt(found) + "</b> of " + fmt(all) + " proteins" + (what.length ? " " + esc(what.join(", ")) : "");
+    lbl.textContent = list.length ? "rows 1–" + fmt(n) + " of " + fmt(found) + " shown" + (n < found ? "; more at the bottom" : "") : "no protein matches";
     more.hidden = n >= list.length;
     more.textContent = "Show " + fmt(Math.min(100, list.length - n)) + " more (of " + fmt(list.length - n) + " not shown yet)";
     mark();
@@ -131,13 +135,16 @@
   function fmtE(e) { return e >= 1e-3 ? String(e) : "1e" + Math.round(Math.log10(e)); }
   function drawLadder() {
     ladder.innerHTML = CUTS.map(function (c) {
-      var n = 0; for (var i = 0; i < R.length; i++) { var e = ev(R[i][9]); if (R[i][6] && e !== null && e <= c) n++; }
+      var n = 0;
+      if (!ready) n = F.ladder[CUTS.indexOf(c)];
+      else for (var i = 0; i < R.length; i++) { var e = ev(R[i][9]); if (R[i][6] && e !== null && e <= c) n++; }
       return '<button class="chip' + (c === st.e ? " on" : "") + '" data-e="' + c + '" title="' + fmt(n) + " proteins have a DIAMOND match at E-value " + fmtE(c) +
         ' or below">≤ ' + fmtE(c) + ': <b class="mono">' + fmt(n) + "</b></button>";
     }).join("");
     ladder.querySelectorAll(".chip").forEach(function (b) {
       b.addEventListener("click", function () { st.e = +b.dataset.e; drawLadder(); filter(); });
     });
+    if (!ready) return;
     var c = { sp: 0, none: 0 };
     for (var i = 0; i < R.length; i++) { if (TILES.sp(R[i])) c.sp++; if (TILES.none(R[i])) c.none++; }
     ["sp", "none"].forEach(function (k) { document.querySelector('#tiles .chip[data-t="' + k + '"] b').textContent = fmt(c[k]); });
@@ -184,6 +191,7 @@
     st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 }; q.value = ""; drawLadder(); filter();
   });
   document.getElementById("dl").addEventListener("click", function () {
+    if (!ready) return;
     var head = ["protein", "length_aa", "existing_name", "proposed_name", "swissprot_name", "swissprot_accession", "identity_pct",
       "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size", "only_kmerseek_evalue", "only_kmerseek_setting", "only_kmerseek_hit"];
     var lines = [head.join("\t")].concat(list.map(function (i) {
@@ -237,4 +245,13 @@
   drawLadder();
   filter();
   setHH();
+  loadScript(document.currentScript.src.replace("assets/full.js", "full/rows.js")).then(function () {
+    return gunzipB64(window.FULL_Z);
+  }).then(function (d) {
+    window.FULL_Z = null;
+    F = d; R = d.rows; CATS = d.cats; PFAM = d.pfam; ready = true;
+    text = R.map(rowText);
+    drawLadder();
+    filter();
+  });
 })();

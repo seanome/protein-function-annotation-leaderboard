@@ -3,13 +3,11 @@
 // A protein with a drawn page (build.py) goes straight to it: build_full.py adds an element
 // #biomni to that page, and this script fills it with the same tables.
 (function () {
-  var F = window.FULL, CATS = F.cats, N_SHARDS = 96;
+  var F = window.FULL_META, CATS = F.cats, N_SHARDS = 96;
   // box: a dense page's #biomni (a drawn page's, in proteins/, or protein.html's, which says data-base="" and
   // data-undrawn: there the Pfam table stays, since no hmmscan row draws the domains)
   var box = document.getElementById("biomni"), BASE = box ? (box.dataset.base !== undefined ? box.dataset.base : "../") : "";
   var undrawn = !!(box && box.dataset.undrawn);
-  var byId = {};
-  F.rows.forEach(function (r) { byId[r[0]] = r; });
   function shardOf(id) {
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
@@ -18,14 +16,6 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function fmt(n) { return n.toLocaleString("en-US"); }
   var main = box || document.getElementById("main"), loaded = {};
-  function load(s, then) {
-    if (loaded[s]) return then();
-    var el = document.createElement("script");
-    el.src = BASE + "full/" + ("00" + s).slice(-3) + ".js";
-    el.onload = function () { loaded[s] = true; then(); };
-    el.onerror = function () { main.innerHTML = "<p>Could not load " + esc(el.src) + ".</p>"; };
-    document.head.appendChild(el);
-  }
   function table(head, rows) {
     return "<div class=\"tablewrap\"><table class=\"small\"><thead><tr>" + head.map(function (h) {
       return "<th" + (h[1] ? " class=\"r\"" : "") + ">" + esc(h[0]) + "</th>";
@@ -34,16 +24,6 @@
     }).join("") + "</tbody></table></div>";
   }
   function link(id) { return "<a class=\"mono\" href=\"" + BASE + "protein.html#" + encodeURIComponent(id) + "\">" + esc(id) + "</a>"; }
-  function show() {
-    var id = location.hash.slice(1), r;
-    try { id = decodeURIComponent(id); } catch (e) { /* malformed escape: keep the raw text */ }
-    r = byId[id];
-    document.getElementById("pid").textContent = id || "No protein named";
-    if (!r) { main.innerHTML = "<p>No protein " + esc(id) + " in this proteome. <a href=\"index.html\">Search all proteins</a>.</p>"; return; }
-    if (r[14]) { location.replace(r[14]); return; }  // the drawn page is this protein's page
-    document.title = id + (r[3] || r[2] ? " " + (r[3] || r[2]) : "") + " · Botryllus protein";
-    load(shardOf(id), function () { render(id, r, window.FULL_SHARD[id]); window.scrollTo(0, 0); });
-  }
   // Links to other sites open in a new tab. uni: a UniProt accession (P12345, P12345-2). pfam: a
   // Pfam accession, with or without its version (PF00179.32 links to PF00179). accHtml: s escaped,
   // with every Pfam (PF00069) and InterPro (IPR000719) accession in it made a link; accessions
@@ -281,10 +261,7 @@
     main.innerHTML = h.join("");
   }
   if (box) {
-    var id = box.dataset.id;
-    load(shardOf(id), function () { render(id, byId[id], window.FULL_SHARD[id]); });
-  } else {
-    window.addEventListener("hashchange", show);
-    show();
+    var id = box.dataset.id || decodeURIComponent(location.hash.slice(1));
+    loadShard(shardOf(id), BASE).then(function () { var d = window.FULL_SHARD[id]; render(id, d.r, d); });
   }
 })();

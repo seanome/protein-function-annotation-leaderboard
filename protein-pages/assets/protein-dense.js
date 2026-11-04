@@ -8,9 +8,7 @@
 // browser; without it, neither (PAGE.noseq). This file builds PAGE and the globals
 // dense-bhf.js reads (WHOLE, NOTRUN, HOW, ALN), then loads dense-bhf.js and viewer.js.
 (function () {
-  var F = window.FULL, C = window.DENSE_CONST, N_SHARDS = 96;
-  var byId = {};
-  F.rows.forEach(function (r) { byId[r[0]] = r; });
+  var C = window.DENSE_CONST, N_SHARDS = 96, r;
   function shardOf(id) {
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
@@ -28,12 +26,17 @@
   }
   var id = location.hash.slice(1);
   try { id = decodeURIComponent(id); } catch (e) { /* malformed escape: keep the raw text */ }
-  var r = byId[id];
   window.addEventListener("hashchange", function () { location.reload(); });
   document.querySelector(".titlebar h1").textContent = id || "No protein named";
-  if (!r) { document.getElementById("grid").innerHTML = "<p class=\"note\">No protein " + esc(id) + " in this proteome. <a href=\"index.html\">Search all proteins</a>.</p>"; return; }
-  if (r[14]) { location.replace(r[14]); return; }  // the drawn page is this protein's page
-  script("full/" + ("00" + shardOf(id)).slice(-3) + ".js", function () { build(window.FULL_SHARD[id]); });
+  function nothing() { document.getElementById("grid").innerHTML = "<p class=\"note\">No protein " + esc(id) + " in this proteome. <a href=\"index.html\">Search all proteins</a>.</p>"; }
+  if (!id) return nothing();
+  loadShard(shardOf(id), "").then(function () {
+    var d = window.FULL_SHARD[id];
+    if (!d) return nothing();
+    r = d.r;
+    if (r[14]) location.replace(r[14]);  // the drawn page is this protein's page
+    else build(d);
+  }).catch(function (e) { document.getElementById("grid").innerHTML = "<p class=\"note\">" + esc(e.message) + "</p>"; });
 
   function build(d) {
     var L = r[1], name = r[3] || r[2] || "";
