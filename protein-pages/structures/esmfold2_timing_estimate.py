@@ -22,11 +22,28 @@ BIOMNI_MAX_AA = 200
 LOAD_S = 360  # about 6 minutes to load the model, once per job
 
 
-def main(summary, lengths_tsv, out):
+def read_timing(summary):
+    """The test proteins that folded as an array of (length, seconds, GB), and those that ran out of memory."""
     done, oom = [], []
     for r in csv.DictReader(open(summary), delimiter="\t"):
         (oom if r["ca_ca_median"] == "out of memory" else done).append((int(r["length"]), float(r["seconds"]), float(r["gpu_gb"])))
-    done = np.array(sorted(done[1:]))  # the first protein warms the model up
+    return np.array(sorted(done[1:])), oom  # the first protein warms the model up
+
+
+def predict_seconds(n, secs, lengths):
+    """Seconds for each of lengths, and the fitted slope, read off the test proteins of lengths n."""
+    # one point per length, for the interpolation
+    un, idx = np.unique(n, return_inverse=True)
+    us = np.exp(np.bincount(idx, np.log(secs)) / np.bincount(idx))
+    est = np.exp(np.interp(np.log(lengths), np.log(un), np.log(us), left=np.log(us[0])))
+    slope = np.polyfit(np.log(un[-8:]), np.log(us[-8:]), 1)
+    over = lengths > un[-1]  # past the longest protein timed: follow the line of the last 8
+    est[over] = np.exp(np.polyval(slope, np.log(lengths[over])))
+    return est, slope
+
+
+def main(summary, lengths_tsv, out):
+    done, oom = read_timing(summary)
     n, secs, gb = done.T
     first = {}
     with gzip.open(lengths_tsv, "rt") as fh:
@@ -35,18 +52,12 @@ def main(summary, lengths_tsv, out):
             pid, length, md5 = line.rstrip("\n").split("\t")
             first.setdefault(md5, int(length))
     lengths = np.array(sorted(first.values()))
-    # one point per length, for the interpolation
-    un, idx = np.unique(n, return_inverse=True)
-    us = np.exp(np.bincount(idx, np.log(secs)) / np.bincount(idx))
     # quadratic through memory, and the length where it reaches the GPU's memory
     q = np.polyfit(n, gb, 2)
     grid = np.arange(1, 6001)
     max_aa = int(grid[np.polyval(q, grid) <= GPU_GB].max())
     max_seen = int(n.max())
-    est = np.exp(np.interp(np.log(lengths), np.log(un), np.log(us), left=np.log(us[0])))
-    slope = np.polyfit(np.log(un[-8:]), np.log(us[-8:]), 1)
-    over = lengths > un[-1]  # past the longest protein timed: follow the line of the last 8
-    est[over] = np.exp(np.polyval(slope, np.log(lengths[over])))
+    est, slope = predict_seconds(n, secs, lengths)
 
     print("sequences %d (of %d protein IDs)" % (len(lengths), sum(1 for _ in gzip.open(lengths_tsv, "rt")) - 1))
     print("test proteins folded %d, out of memory %d (%s aa)" % (len(n) + 1, len(oom), ", ".join(str(o[0]) for o in oom)))
