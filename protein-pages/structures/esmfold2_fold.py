@@ -13,7 +13,8 @@ folds only what is missing. Files are written under a .part name and then rename
 
 Settings are the package's own defaults for a fold (esm 3.4.2, ESMFold2InputBuilder.fold):
 20 loops, 200 diffusion steps, one sample, language-model dropout 0.3, the ESMC backbone in fp8
-(which needs an H100); seed 0, so a rerun gives the same structure.
+(fp8 instructions need compute capability 8.9 or newer, so H100 or L40S; other GPUs run it slower
+in another format); seed 0, so a rerun gives the same structure.
 
 --kernels fused switches on the package's Triton kernels (EsmFold2Model.set_kernel_backend), which
 its documentation says give the same numbers as the default code. Without it the default code runs.
