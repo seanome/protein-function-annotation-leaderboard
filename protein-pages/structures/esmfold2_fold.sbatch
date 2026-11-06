@@ -3,8 +3,8 @@
 #
 #   sbatch esmfold2_fold.sbatch <proteins.fasta> <out folder> [protein ID ...]
 #
-# Needs esmfold2_install.sbatch to have finished. The ESMC backbone runs in fp8, which needs an
-# H100, hence the constraint. Loading reads ESMC's fp32 copy into CPU memory before casting it
+# Needs esmfold2_install.sbatch to have finished. The ESMC backbone runs in fp8. Speed and memory
+# were measured on the H100, hence the constraint. Loading reads ESMC's fp32 copy into CPU memory before casting it
 # (esm 3.4.2, EsmFold2Model.from_pretrained), about 24 GB for 6 billion parameters, plus the
 # folding trunk: 96 GB leaves room. The time is for a start on one protein (BHF, 252 aa): loading
 # and one fold are not measured yet; the first run's log and esmfold2_summary.tsv will give the
