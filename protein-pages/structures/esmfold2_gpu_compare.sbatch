@@ -13,7 +13,7 @@
 # was at most 24 GB up to 983 aa, the RTX 3090's limit, so this stops at 950 aa. CPU memory as in
 # esmfold2_proteome.sbatch. This GPU has no fp8 instructions, so the package runs that step in
 # another number format, which is why speed and structures need testing.
-#SBATCH -p gpu
+#SBATCH -p hns,gpu
 #SBATCH -A ayeletv
 #SBATCH -J esmfold2-rtx3090
 #SBATCH -G 1
