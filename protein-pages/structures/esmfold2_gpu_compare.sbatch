@@ -12,8 +12,9 @@
 # for a GPU 10 times slower. Shortest first, so a time-out loses the longest. GPU memory on the H100
 # was at most 24 GB up to 983 aa, the RTX 3090's limit, so this stops at 950 aa. CPU memory as in
 # esmfold2_proteome.sbatch. This GPU has no fp8 instructions, so the package runs that step in
-# another number format, which is why speed and structures need testing.
-#SBATCH -p hns,gpu
+# another number format, which is why speed and structures need testing. Only the gpu partition has
+# this GPU: listing hns too gives a false start estimate and the pending reason BadConstraints.
+#SBATCH -p gpu
 #SBATCH -A ayeletv
 #SBATCH -J esmfold2-rtx3090
 #SBATCH -G 1
