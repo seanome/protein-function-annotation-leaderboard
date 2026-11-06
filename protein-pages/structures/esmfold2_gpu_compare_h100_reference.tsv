@@ -1,0 +1,35 @@
+id	length	compared_with	rmsd_all	rmsd_confident	n_confident	plddt_change	ptm_change	seconds	seconds_h100	status
+FUN008084	252	H100 default (reference)	0.093	0.090	185	0.00	0.000	18.8	21.0	ok
+FUN025409.2	547	H100 default (reference)	0.298	0.026	510	0.00	0.000	52.7	16.7	ok
+FUN014733	701	H100 default (reference)	0.039	0.012	620	0.00	0.000	109.2	24.3	ok
+FUN038411	881	H100 default (reference)	0.519	0.479	714	0.00	0.000	299.0	46.4	ok
+FUN016428	212	H100 default (reference)	0.085	0.078	201	0.00	0.000	7.4	5.5	ok
+FUN043721.2	489	H100 default (reference)	0.062	0.059	472	0.00	0.000	37.2	12.2	ok
+FUN023209	307	H100 default (reference)	0.067	0.068	281	0.00	0.000	13.2	7.0	ok
+FUN033284	216	H100 default (reference)	0.043	0.019	137	0.00	0.000	7.6	5.5	ok
+FUN040981	622	H100 default (reference)	4.937	3.365	291	-2.40	-0.001	71.2	17.1	ok
+FUN005898	245	H100 default (reference)	0.776	0.096	110	-0.10	0.000	9.2	5.2	ok
+FUN024883	324	H100 default (reference)	0.059	0.057	278	-0.10	-0.001	14.9	6.4	ok
+FUN007463	329	H100 default (reference)	0.105	0.105	298	0.10	0.000	16.0	6.9	ok
+FUN026635	410	H100 default (reference)	0.088	0.082	385	0.00	0.000	23.6	8.5	ok
+FUN035928	382	H100 default (reference)	0.026	0.011	365	-0.10	0.000	19.4	7.5	ok
+FUN025733	862	H100 default (reference)	0.163	0.157	766	0.00	0.000	241.4	38.6	ok
+FUN014718	902	H100 default (reference)	0.209	0.204	811	-0.10	-0.001	314.9	45.5	ok
+FUN029234	226	H100 default (reference)	0.270	0.312	127	0.00	-0.001	8.0	4.7	ok
+FUN012719	279	H100 default (reference)	4.111	2.519	17	0.20	0.007	11.6	5.8	ok
+FUN005406	931	H100 default (reference)	5.172	1.134	130	-0.90	-0.015	353.5	52.3	ok
+FUN008408	261	H100 default (reference)	0.297	0.294	255	0.10	0.002	10.5	5.6	ok
+FUN028236	566	H100 default (reference)	0.098	0.095	499	0.00	0.000	52.7	14.5	ok
+FUN041272	357	H100 default (reference)	0.294	0.123	239	-0.10	-0.001	17.9	7.5	ok
+FUN005570	372	H100 default (reference)	0.352	0.024	241	0.00	0.000	17.9	6.4	ok
+FUN044869	859	H100 default (reference)	0.201	0.194	794	0.00	0.000	256.3	41.9	ok
+FUN007657	427	H100 default (reference)	0.042	0.042	427	0.00	0.000	26.3	9.6	ok
+FUN025950	761	H100 default (reference)	0.900	0.734	518	0.00	0.005	180.6	30.9	ok
+FUN031257	720	H100 default (reference)	1.166	1.116	556	0.00	0.000	119.6	22.3	ok
+FUN011624	722	H100 default (reference)	0.223	0.219	478	0.00	0.000	148.1	25.8	ok
+FUN011147	404	H100 default (reference)	0.798	0.258	297	0.10	0.001	22.1	7.5	ok
+FUN035368	222	H100 default (reference)	0.181	0.180	196	0.00	0.000	7.9	4.8	ok
+FUN033676	616	H100 default (reference)	0.021	0.021	614	0.10	0.000	78.2	16.3	ok
+FUN014610	218	H100 default (reference)	1.949		0	0.30	-0.001	6.9	3.9	ok
+FUN017925	773	H100 default (reference)	0.957	0.906	448	-0.10	-0.001	206.6	34.6	ok
+FUN038421.2	552	H100 default (reference)	0.077	0.078	520	0.00	0.000	51.4	12.9	ok

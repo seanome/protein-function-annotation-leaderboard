@@ -9,7 +9,8 @@ change in mean pLDDT and pTM, and the seconds on each GPU. The H100 default-code
 comparison, which shows how far two H100 folds of one protein are apart.
 
 Writes <test folder>/esmfold2_gpu_compare.tsv (no residues) and prints whether the rules below pass.
-These rules were set before the test ran. A chunk is at most 3.1 predicted H100 hours and the job
+These rules were set before the test ran, after the reference comparison
+(esmfold2_gpu_compare_h100_reference.tsv) showed two H100 folds with one seed can differ. A chunk is at most 3.1 predicted H100 hours and the job
 limit is 5 hours including 5 minutes of loading, so the other GPU may take at most 1.5 times as long.
 """
 
@@ -22,7 +23,7 @@ import numpy as np
 CONFIDENT = 70  # pLDDT
 MAX_TIME_RATIO = 1.5
 MAX_MEDIAN_RMSD = 0.5  # angstrom, over the residues with pLDDT of at least CONFIDENT
-MAX_WORST_RMSD = 2.0
+MAX_WORST_RMSD = 3.4  # the largest gap between two H100 folds of one protein, default and fused code
 MAX_PLDDT_CHANGE = 5  # pLDDT points, for any one protein
 COLUMNS = (
     "id",
