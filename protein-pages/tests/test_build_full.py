@@ -310,3 +310,25 @@ def test_gene_group_counts_are_in_the_summary_and_the_page(site):
     assert list(s["gene_groups"]) == [g for g, _ in build_full.GENE_GROUPS]
     html = (out / "index.html").read_text()
     assert 'id="grp"' in html and all(build_full.build.esc(g) in html for g in s["gene_groups"])
+
+
+def test_allorecognition_group_is_the_best_hit_of_each_of_the_53():
+    allo = build_full.read_allorecognition(FULL)
+    assert len(allo) == 53 == len({f[0] for f in csv.reader(open(FULL / "botryllus_allorecognition_hits.tsv"), delimiter="\t")})
+    assert allo["FUN006619"] == [2.27e-232, "XTL10616.1", allo["FUN006619"][2]] and "Fester" in allo["FUN006619"][2]
+    names = [g for g, _ in build_full.GENE_GROUPS]
+    r = dict(sp_acc="", sp_evalue="", sp_name="")
+    got = build_full.gene_groups(r, "FUN006619", {}, set(), None, None, None, None, allo)
+    assert [(names[g], prog, acc) for g, prog, _, acc, _ in got] == [("allorecognition (Fester, Fester co-receptor, BHF)", "DIAMOND against Botryllus proteins", "XTL10616.1")]
+    assert build_full.gene_groups(r, "FUN000001", {}, set(), None, None, None, None, allo) == []
+
+
+def test_isoform_counts_on_the_index(site):
+    out, s = site
+    ids = [r["protein_id"] for r in tsv("proteome_lengths.tsv")]
+    per_gene = Counter(i.split(".")[0] for i in ids)
+    assert s["genes"] == len(per_gene) and s["genes_with_isoforms"] == sum(1 for k in per_gene.values() if k > 1)
+    assert s["most_isoforms"] == max(per_gene.values())
+    # every isoform after the first is named gene.N, so the counts and the IDs agree
+    assert sum(k - 1 for k in per_gene.values()) == sum(1 for i in ids if "." in i)
+    assert "have 2 to %d isoforms" % s["most_isoforms"] in (out / "index.html").read_text()

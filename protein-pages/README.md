@@ -338,7 +338,9 @@ python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/pro
   so weak hits from one program are kept and the row names the program and its E-value. MHC
   class I and class II are also listed on their own. The aging group keeps a protein when the
   gene symbol of such a hit is one of the 307 human genes of GenAge build 21
-  (`full_inputs/genage_human.tsv`).
+  (`full_inputs/genage_human.tsv`). The allorecognition group is the one group that is not a
+  match to another species: the 53 proteins that DIAMOND matched to a Fester, Fester co-receptor
+  or BHF protein of *Botryllus schlosseri* itself.
 - `protein.html#FUN000002` shows one protein. There is one such page, not 45,339: the ID after
   `#` picks the protein, and its data come from one of 96 files in `full/`, picked by a hash
   of the ID. This keeps the site to about 340 files and 133 MB, small enough to publish as one

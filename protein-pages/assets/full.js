@@ -15,7 +15,7 @@
   function catNames(m) { var o = []; for (var i = 0; i < CATS.length; i++) if (m >> i & 1) o.push(CATS[i]); return o; }
   function rowText(r) { return [r[0], r[2], r[3], r[5], r[6], r[10], catNames(r[11]).join(" ")].join(" ").toLowerCase(); }
   var text = [];
-  var OTHER = F.other || [], GROUPS = F.groups || [], CUTS = [1e-3, 1e-10, 1e-50, 1e-100];
+  var OTHER = F.other || [], GROUPS = F.groups || [], ISO = F.iso || {}, CUTS = [1e-3, 1e-10, 1e-50, 1e-100];
   // a Swiss-Prot match counts when DIAMOND's E-value is at or below the cutoff on the ladder
   function isMatch(r) { var e = ev(r[9]); return !!r[6] && e !== null && e <= st.e; }
   var TILES = {
@@ -37,6 +37,8 @@
   function href(r) { return r[14] ? r[14] : "protein.html#" + encodeURIComponent(r[0]); }
   function ev(x) { var v = parseFloat(x); return isNaN(v) ? null : v; }
   var list = [];
+  // [which isoform, how many the gene has], or null for a gene with one protein; FUN1 is the first, FUN1.2 the second
+  function iso(id) { var p = id.split("."), n = ISO[p[0]]; return n ? [p[1] ? +p[1] : 1, n] : null; }
   // a protein's hits in the gene group the filter is on, best first
   function grpHits(r) { return (r[20] || []).filter(function (x) { return x[0] === st.grp; }); }
   function grpText(x) { return x[1] + " " + (x[2] === 0 ? "0" : x[2] >= 0.001 ? +x[2].toPrecision(2) : x[2].toExponential(1)) + " · " + x[4] + " (" + x[3] + ")"; }
@@ -106,7 +108,8 @@
     var ips = (r[15] || []).length, mmo = r[16] && r[16][3] !== r[6];
     return '<div class="row g ixg' + (j === st.cur ? " cur" : "") + '" role="listitem" data-j="' + j + '" tabindex="-1">' +
       '<div><a class="id mono" href="' + esc(href(r)) + '">' + esc(r[0]) + "</a>" +
-      '<span class="s">' + names + (r[14] ? '<span class="dr">· hits along the protein</span>' : "") + "</span></div>" +
+      '<span class="s">' + names + (iso(r[0]) ? '<span class="dr">· isoform ' + iso(r[0])[0] + " of " + iso(r[0])[1] + "</span>" : "") +
+      (r[14] ? '<span class="dr">· hits along the protein</span>' : "") + "</span></div>" +
       '<div class="num">' + fmt(r[1]) + "</div>" +
       '<div class="txt" title="' + esc(r[5]) + '">' + (r[6] ? (isMatch(r) ? esc(r[5]) : '<span class="dim">above the cutoff: ' + esc(r[5]) + "</span>") : '<span class="dim">no match</span>') +
         '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : "") +
@@ -203,12 +206,13 @@
   document.getElementById("dl").addEventListener("click", function () {
     if (!ready) return;
     var head = ["protein", "length_aa", "existing_name", "proposed_name", "swissprot_name", "swissprot_accession", "identity_pct",
-      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size", "only_kmerseek_evalue", "only_kmerseek_setting", "only_kmerseek_hit", "gene_groups"];
+      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size", "only_kmerseek_evalue", "only_kmerseek_setting", "only_kmerseek_hit", "gene_groups", "isoform", "isoforms_of_gene"];
     var lines = [head.join("\t")].concat(list.map(function (i) {
       var r = R[i];
       return [r[0], r[1], r[2], r[3], r[5], r[6], r[7] === null ? "" : r[7], r[8] === null ? "" : r[8], r[9], r[10],
         catNames(r[11]).join(", "), others(r[17]).join(", "), r[13]].concat(r[19] ? [r[19][0], r[19][1], r[19][2] + " " + r[19][3]] : ["", "", ""])
-        .concat([(r[20] || []).map(function (x) { return GROUPS[x[0]] + ": " + x[1] + " E " + x[2] + " " + x[3] + " " + x[4]; }).join(" | ")]).join("\t");
+        .concat([(r[20] || []).map(function (x) { return GROUPS[x[0]] + ": " + x[1] + " E " + x[2] + " " + x[3] + " " + x[4]; }).join(" | ")])
+        .concat(iso(r[0]) || [1, 1]).join("\t");
     }));
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], { type: "text/tab-separated-values" }));
@@ -260,7 +264,7 @@
     return gunzipB64(window.FULL_Z);
   }).then(function (d) {
     window.FULL_Z = null;
-    F = d; R = d.rows; CATS = d.cats; PFAM = d.pfam; GROUPS = d.groups || []; ready = true;
+    F = d; R = d.rows; CATS = d.cats; PFAM = d.pfam; GROUPS = d.groups || []; ISO = d.iso || {}; ready = true;
     text = R.map(rowText);
     drawLadder();
     filter();

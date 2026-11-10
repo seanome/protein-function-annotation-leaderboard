@@ -32,11 +32,12 @@ The proteome is `botryllus_new_genome_protein.fasta` (45,339 proteins; on the la
 | `kmerseek_best_per_protein.tsv.gz` | Not from Biomni: best kmerseek hit against all of Swiss-Prot 2026_03 per protein, over the 35 settings whose E-value fit worked: 45,317 proteins have one | `make_kmerseek_table.py` from `$SCRATCH/botryllus-kmerseek-swissprot/results/summary/kmerseek_botryllus_swissprot.per_protein.tsv.gz` on Sherlock |
 | `unifire_predictions.tsv.gz` | UniFIRE 2026.3 predictions (ARBA, UniRule and PIRSR rules on InterProScan 5.59 matches) under the Biomni protein IDs: 231,595 rows on 19,001 proteins (ARBA 16,372, UniRule 11,575, PIRSR 1,069). The 50 proteins over 5,000 aa were not run. | `make_unifire_table.py`, from olgabot/botryllus-mhc PR 13, commit 257832d, `nextflow_runs/timing-pilot/unifire_whole_proteome` |
 
-The Fester and BHF search is not shown on the pages (since 2026-11-01). All 96 reference
+The Fester and BHF search is not shown on the protein pages (since 2026-11-01); since 2026-11-10 the
+index page's "allorecognition" gene group lists its 53 proteins, each with its best hit. All 96 reference
 proteins come from *Botryllus schlosseri* itself, so its hits are matches within the same
-species, and the pages show only matches to other species. `build_full.py` does not read
-`botryllus_allorecognition_hits.tsv` or `allorecognition_references.tsv`, does not show the
-`allorecog_hit` column, and drops the immune category `allorecognition`. The files stay here as
+species, and the protein pages show only matches to other species. `build_full.py` reads
+`botryllus_allorecognition_hits.tsv` and `allorecognition_references.tsv` for that gene group only,
+does not show the `allorecog_hit` column, and drops the immune category `allorecognition`. The files stay here as
 Biomni's record of what it ran.
 
 Two things about the tables that build_full.py works around:

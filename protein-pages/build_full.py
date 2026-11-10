@@ -64,6 +64,10 @@ ONLY_KMERSEEK_E = 1e-3  # the "only kmerseek" filters keep this E-value or below
 # MHC class I and class II are also listed on their own; "HLA and other MHC" holds both.
 # The aging group is read another way: the best hit's gene symbol is one of the 307 human genes of
 # GenAge build 21 (full_inputs/genage_human.tsv), capitals ignored, in whichever species the hit is.
+# The allorecognition group is the one group that is not a match to another species: Biomni's DIAMOND
+# search of the proteome against 96 Botryllus schlosseri proteins from NCBI (Fester family, Fester
+# co-receptor and one partial BHF), so a hit can be the protein itself.
+GENAGE, ALLO = "genage", "allorecognition"  # groups read from a table, not from a name pattern
 GENE_GROUPS = [
     ("Period", r"^Period (circadian|clock) protein"),
     ("Cry and photolyases", r"^Cryptochrome|photo-?lyase"),
@@ -77,8 +81,24 @@ GENE_GROUPS = [
     ("MHC class I", r"^(?!Minor ).*[Cc]lass I histocompatibility|^Beta-2-microglobulin|^MHC class I polypeptide-related"),
     # the gamma chain is the invariant chain (CD74), which escorts class II molecules
     ("MHC class II", r"^(?!Minor ).*[Cc]lass II histocompatibility"),
-    ("aging (GenAge human genes)", None),
+    ("allorecognition (Fester, Fester co-receptor, BHF)", ALLO),
+    ("aging (GenAge human genes)", GENAGE),
 ]
+
+
+def read_allorecognition(folder):
+    """protein -> [E-value, reference accession, its NCBI title] of its best hit (lowest E-value, then
+    highest bit score) in botryllus_allorecognition_hits.tsv; empty when the table is not there."""
+    hits, titles = inp(folder, "botryllus_allorecognition_hits.tsv"), inp(folder, "allorecognition_references.tsv")
+    if not hits.exists():
+        return {}
+    title = {r["accession"]: r["title"].replace(" [Botryllus schlosseri]", "") for r in csv.DictReader(opentext(titles), delimiter="\t")} if titles.exists() else {}
+    best = {}
+    for f in csv.reader(opentext(hits), delimiter="\t"):  # no header: query, reference, % identity, columns, E-value, bit score, ...
+        key = (float(f[4]), -float(f[5]))
+        if f[0] not in best or key < best[f[0]][0]:
+            best[f[0]] = (key, [float(f[4]), f[1], title.get(f[1], "")])
+    return {pid: v for pid, (_, v) in best.items()}
 
 
 def read_genage(folder):
@@ -87,9 +107,9 @@ def read_genage(folder):
     return {r["symbol"].lower() for r in csv.DictReader(opentext(p), delimiter="\t")} if p.exists() else set()
 
 
-def gene_groups(r, pid, uni, aging, mm, fs, fst, km):
+def gene_groups(r, pid, uni, aging, mm, fs, fst, km, allo=None):
     """[[group index, program, E-value, accession, name], ...] for one protein, best E-value first.
-    uni: accession -> names (uniprot_names.tsv); aging: read_genage()."""
+    uni: accession -> names (uniprot_names.tsv); aging: read_genage(); allo: read_allorecognition()."""
     hits = [("DIAMOND", r["sp_evalue"], r["sp_acc"], r["sp_name"])] if r["sp_acc"] else []
     for prog, d in (("MMseqs2", mm), ("ProstT5 + Foldseek", fs), ("Foldseek on structure", fst)):
         if d and d.get(pid):
@@ -98,7 +118,11 @@ def gene_groups(r, pid, uni, aging, mm, fs, fst, km):
         hits.append(("kmerseek", km[pid][1], km[pid][2], km[pid][3]))
     out = []
     for i, (_, pat) in enumerate(GENE_GROUPS):
-        if pat is None:
+        if pat == ALLO:
+            if allo and allo.get(pid):
+                out.append([i, "DIAMOND against Botryllus proteins", allo[pid][0], allo[pid][1], allo[pid][2] or "no title"])
+            continue
+        if pat == GENAGE:
             for prog, e, acc, name in hits:
                 gene = uni.get(acc, {}).get("gene", "")
                 if gene.lower() in aging:
@@ -308,9 +332,10 @@ UNIFIRE_MAX_AA = 5000  # longer proteins were not run through InterProScan and U
 
 # Biomni also searched every protein against 95 Fester and 1 BHF protein, all from Botryllus itself
 # (botryllus_allorecognition_hits.tsv, allorecognition_references.tsv). Matches within the same
-# species are not shown, so those two files are not read, and the immune category those hits set
-# is dropped from the immune table.
-NOT_READ = {"botryllus_allorecognition_hits.tsv", "allorecognition_references.tsv"}
+# species are not shown on the protein pages, and the immune category those hits set is dropped from
+# the immune table. The index page's allorecognition gene group (read_allorecognition) is the one
+# place the two files are read.
+NOT_READ = set()  # tables in the folder that the build does not read
 DROPPED_CATEGORIES = {"allorecognition"}
 
 
@@ -524,7 +549,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     tlen = {a: len(s) for a, s in tseqs.items()}  # a kmerseek hit keeps only its region's residues, so the sequence is left out
     tseqs = {a: s for a, s in tseqs.items() if a in best_targets}
     rules = read_rules(folder)
-    aging = read_genage(folder)
+    aging, allo = read_genage(folder), read_allorecognition(folder)
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -582,7 +607,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                      # 19: kmerseek's best hit when no other program found anything: [E-value, setting, accession, name], or 0
                      [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0,
                      # 20: the gene groups it is in (gene_groups), or 0
-                     gene_groups(r, pid, uni, aging, mm, fs, fst, km) or 0])
+                     gene_groups(r, pid, uni, aging, mm, fs, fst, km, allo) or 0])
         n_no_other += not found
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
@@ -640,14 +665,17 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     for k in range(N_SHARDS):
         if k not in shards:
             (out / "full" / ("%03d.js" % k)).write_text('(window.FULL_GZ=window.FULL_GZ||{})[%d]="%s";' % (k, packed({})))
-    full = dict(cats=cats, check=[t for _, t in NAME_CHECK], other=OTHER_HITS, total=len(rows), rows=rows, groups=[g for g, _ in GENE_GROUPS],
+    # isoforms: a gene's first protein has the bare ID, the others end in .2, .3, ... (make_proteome_lengths.py)
+    n_iso = Counter(r[0].split(".")[0] for r in rows)
+    iso = {g: k for g, k in n_iso.items() if k > 1}
+    full = dict(cats=cats, check=[t for _, t in NAME_CHECK], other=OTHER_HITS, total=len(rows), rows=rows, groups=[g for g, _ in GENE_GROUPS], iso=iso,
                 pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)])
     (out / "full" / "rows.js").write_text('window.FULL_Z="%s";' % packed(full))
     (out / "full" / "meta.js").write_text("window.FULL_META=%s;" % json.dumps(
         dict(cats=cats, check=full["check"], check_differs=status_code["conflict"], verdicts=VERDICT_TEXT), separators=(",", ":")))
     # What index.html needs to show its first screen before full/rows.js arrives
     used = {x[2] for r in rows[:100] for x in r[15]}
-    first = dict(full, rows=rows[:100], pfam={i: full["pfam"][i] for i in used},
+    first = dict(full, rows=rows[:100], pfam={i: full["pfam"][i] for i in used}, iso={g: k for g, k in iso.items() if g in {r[0].split(".")[0] for r in rows[:100]}},
                  ladder=[sum(1 for r in rows if r[6] and r[9] and float(r[9]) <= c) for c in (1e-3, 1e-10, 1e-50, 1e-100)])
 
     n = len(rows)
@@ -671,6 +699,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         only_kmerseek_5=sum(1 for r in rows if r[19] and r[19][0] <= 1e-5),
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
+        genes=len(n_iso), genes_with_isoforms=len(iso), most_isoforms=max(n_iso.values()),
         gene_groups={g: sum(1 for r in rows if r[20] and any(x[0] == i for x in r[20])) for i, (g, _) in enumerate(GENE_GROUPS)},
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
@@ -755,7 +784,8 @@ def index_html(s, cats, inputs, ver, known="", first=None):
                     for v in (1, AXIS_AA // 4, AXIS_AA // 2, 3 * AXIS_AA // 4, AXIS_AA))
     return head("Botryllus proteome annotations", ver, dense=True) + """
 <div class="titleblock">
- <div class="titlebar"><h1><i>Botryllus schlosseri</i> proteome</h1><span class="pn">%(n)s proteins predicted from the new genome: what each one matches</span>%(known)s</div>
+ <div class="titlebar"><h1><i>Botryllus schlosseri</i> proteome</h1><span class="pn">%(n)s proteins predicted from the new genome: what each one matches</span>
+ <span class="pn" title="A gene's first protein has the bare ID; its other isoforms end in .2, .3 and so on, in the order of the proteome FASTA. Each row says which isoform it is.">%(genes)s genes · %(gi)s have 2 to %(mi)s isoforms</span>%(known)s</div>
  <div class="sentence"><p id="sent">%(sp)s of %(n)s proteins (%(spp)s) match a Swiss-Prot protein, %(pf)s (%(pfp)s) carry a Pfam domain, and %(ne)s (%(nep)s) have neither.</p>
  <div id="sentnote"><p class="note">Swiss-Prot match = the best hit of DIAMOND (a fast BLAST-like sequence search) at E-value 0.001 or below,
  in Swiss-Prot release 2026_03 (575,748 proteins). Pfam domain = a Pfam family model that pyhmmer's hmmsearch finds above the score Pfam sets
@@ -810,7 +840,8 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  <h2>Rows</h2><p>One row per protein, 100 at a time. Click a row, or press Enter on it, to open its page.</p>
  <h2>Columns</h2><dl>
  <dt>protein</dt><dd>the ID in the proteome FASTA (gene ID, underscore, transcript ID; a second isoform of the same gene gets .2), then the
- name in the FASTA header and the proposed name</dd>
+ name in the FASTA header and the proposed name. "isoform 2 of 3" = the gene has three proteins and this is the second in the FASTA; a
+ protein that is its gene's only one says nothing</dd>
  <dt>best Swiss-Prot match</dt><dd>DIAMOND's best hit (E-value 0.001 or below) in Swiss-Prot 2026_03, with its accession</dd>
  <dt>identity · coverage</dt><dd>identical residues in DIAMOND's alignment, and the share of your protein the alignment spans</dd>
  <dt>Pfam domains</dt><dd>Pfam models found by pyhmmer's hmmsearch at Pfam's gathering thresholds (Biomni). The boxes in the track are
@@ -822,7 +853,9 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  "other programs" column names the program, its E-value and the hit, best first. MHC class I and class II are the two halves of
  "HLA and other MHC". Aging keeps a protein when the gene symbol of such a hit is one of the 307 human genes of GenAge build 21
  (genomics.senescence.info/genes, Tacutu et al. 2018, CC BY 3.0), capitals ignored, in whichever species the hit is; a hit with no gene
- symbol in our names table cannot count</dd>
+ symbol in our names table cannot count. Allorecognition is the one group that is not a match to another species: it keeps the %(allo_n)s
+ proteins that DIAMOND matched to one of 96 <i>Botryllus schlosseri</i> proteins from NCBI (Fester family, Fester co-receptor and one partial
+ BHF), so a hit can be the protein itself; the column names the best of those</dd>
  <dt>position along the protein</dt><dd>the protein from residue 1 to %(ax)s on one scale for every row; a longer protein ends in &#8250; and
  its length</dd></dl>
  <h2>Programs</h2><dl><dt>DIAMOND, MMseqs2</dt><dd>fast sequence searches, like BLAST, against Swiss-Prot</dd>
@@ -845,7 +878,9 @@ program searched.</p></section>
 """ % dict(first=dumps(first), n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
            ne=f(s["neither"]), nep=pc(s["neither"]), dp=f(s["drawn_pages"]), dr=f(s["drawn"]), im=f(s["immune_candidates"]),
            jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts, grp_opts=grp_opts,
-           grp=build.esc("; ".join(g for g, p in GENE_GROUPS if p)),
+           genes=f(s["genes"]), gi=f(s["genes_with_isoforms"]), mi=s["most_isoforms"],
+           allo_n=f(next(v for g, v in s["gene_groups"].items() if g.startswith(ALLO))),
+           grp=build.esc("; ".join(g for g, p in GENE_GROUPS if p not in (GENAGE, ALLO))),
            other="; ".join("%s: %s" % (a, c) for a, c in OTHER_HITS), ax=f(AXIS_AA), axn=AXIS_AA, tw=TRACK_PCT, seq=seq, dom=dom, ramp=ramp, ticks=ticks, cnt="", inputs=build.esc(", ".join(inputs)), ver=ver)
 
 
