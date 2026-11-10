@@ -335,8 +335,10 @@ python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/pro
   The "gene group" list keeps the proteins whose best hit from DIAMOND, MMseqs2, either Foldseek
   search or kmerseek is a Period protein, a Cry or photolyase, another clock gene, or an HLA or
   other MHC protein (`GENE_GROUPS` in `build_full.py` holds the name patterns), at any E-value,
-  so weak hits from one program are kept and the row names the program and its E-value. The
-  aging group keeps a protein when a GO term of DIAMOND's best hit names lifespan or senescence.
+  so weak hits from one program are kept and the row names the program and its E-value. MHC
+  class I and class II are also listed on their own. The aging group keeps a protein when the
+  gene symbol of such a hit is one of the 307 human genes of GenAge build 21
+  (`full_inputs/genage_human.tsv`).
 - `protein.html#FUN000002` shows one protein. There is one such page, not 45,339: the ID after
   `#` picks the protein, and its data come from one of 96 files in `full/`, picked by a hash
   of the ID. This keeps the site to about 340 files and 133 MB, small enough to publish as one

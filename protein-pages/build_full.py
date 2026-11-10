@@ -61,7 +61,9 @@ ONLY_KMERSEEK_E = 1e-3  # the "only kmerseek" filters keep this E-value or below
 # group's pattern, at any E-value the pages show: the filter is for looking, so weak hits are kept and
 # each row says which program and E-value put it there. Only the protein's main name is matched: "Isoform 2 of "
 # and the other names in brackets are dropped first, or Calnexin would be an MHC protein for its other name.
-# The aging group is read another way: a GO term of DIAMOND's best hit names lifespan or senescence.
+# MHC class I and class II are also listed on their own; "HLA and other MHC" holds both.
+# The aging group is read another way: the best hit's gene symbol is one of the 307 human genes of
+# GenAge build 21 (full_inputs/genage_human.tsv), capitals ignored, in whichever species the hit is.
 GENE_GROUPS = [
     ("Period", r"^Period (circadian|clock) protein"),
     ("Cry and photolyases", r"^Cryptochrome|photo-?lyase"),
@@ -71,13 +73,23 @@ GENE_GROUPS = [
      r"Thyrotroph embryonic factor|Transcription factor VBP|Hepatic leukemia factor|D site-binding protein|"
      r"Circadian-associated transcriptional repressor|Protein cycle)"),
     ("HLA and other MHC", r"^(?!Minor ).*histocompatibility|^HLA class|^Beta-2-microglobulin|^MHC class I polypeptide-related"),
-    ("aging (GO: lifespan or senescence)", None),
+    # beta-2-microglobulin is the second chain of a class I molecule; MIC-A and MIC-B are class I relatives
+    ("MHC class I", r"^(?!Minor ).*[Cc]lass I histocompatibility|^Beta-2-microglobulin|^MHC class I polypeptide-related"),
+    # the gamma chain is the invariant chain (CD74), which escorts class II molecules
+    ("MHC class II", r"^(?!Minor ).*[Cc]lass II histocompatibility"),
+    ("aging (GenAge human genes)", None),
 ]
-AGING_GO = r"\blifespan\b|\bsenescence\b|\baging\b"
 
 
-def gene_groups(r, pid, go, mm, fs, fst, km):
-    """[[group index, program, E-value, accession, name], ...] for one protein, best E-value first."""
+def read_genage(folder):
+    """The GenAge human gene symbols, lower case; empty when the table is not there."""
+    p = inp(folder, "genage_human.tsv")
+    return {r["symbol"].lower() for r in csv.DictReader(opentext(p), delimiter="\t")} if p.exists() else set()
+
+
+def gene_groups(r, pid, uni, aging, mm, fs, fst, km):
+    """[[group index, program, E-value, accession, name], ...] for one protein, best E-value first.
+    uni: accession -> names (uniprot_names.tsv); aging: read_genage()."""
     hits = [("DIAMOND", r["sp_evalue"], r["sp_acc"], r["sp_name"])] if r["sp_acc"] else []
     for prog, d in (("MMseqs2", mm), ("ProstT5 + Foldseek", fs), ("Foldseek on structure", fst)):
         if d and d.get(pid):
@@ -87,10 +99,10 @@ def gene_groups(r, pid, go, mm, fs, fst, km):
     out = []
     for i, (_, pat) in enumerate(GENE_GROUPS):
         if pat is None:
-            terms = [go.get(g, "") for g in split_list(r["go_terms"])]
-            terms = [t for t in terms if re.search(AGING_GO, t)]
-            if terms and r["sp_acc"]:
-                out.append([i, "DIAMOND", float(r["sp_evalue"]), r["sp_acc"], "%s (GO: %s)" % (r["sp_name"], "; ".join(terms))])
+            for prog, e, acc, name in hits:
+                gene = uni.get(acc, {}).get("gene", "")
+                if gene.lower() in aging:
+                    out.append([i, prog, float(e), acc, "%s, gene %s" % (name or "no name", gene)])
             continue
         for prog, e, acc, name in hits:
             if name and re.search(pat, re.split(r" [(\[]", re.sub(r"^Isoform \S+ of ", "", name))[0]):
@@ -512,6 +524,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     tlen = {a: len(s) for a, s in tseqs.items()}  # a kmerseek hit keeps only its region's residues, so the sequence is left out
     tseqs = {a: s for a, s in tseqs.items() if a in best_targets}
     rules = read_rules(folder)
+    aging = read_genage(folder)
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -569,7 +582,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                      # 19: kmerseek's best hit when no other program found anything: [E-value, setting, accession, name], or 0
                      [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0,
                      # 20: the gene groups it is in (gene_groups), or 0
-                     gene_groups(r, pid, go, mm, fs, fst, km) or 0])
+                     gene_groups(r, pid, uni, aging, mm, fs, fst, km) or 0])
         n_no_other += not found
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
@@ -766,7 +779,7 @@ def index_html(s, cats, inputs, ver, known="", first=None):
   <span class="lead2">show:</span><span class="ladder" id="tiles">%(chips)s</span>
   <label>immune category <select id="cat"><option value="-1">any</option>%(cat_opts)s</select></label>
   <label>names <select id="chk"><option value="-1">any</option>%(chk_opts)s</select></label>
-  <label title="Proteins whose best hit from DIAMOND, MMseqs2, Foldseek or kmerseek is a Swiss-Prot protein of this group, at any E-value, weak hits included: the last column then names the program, its E-value and the hit. Aging: a GO term of DIAMOND's best hit names lifespan or senescence.">gene group <select id="grp"><option value="-1">any</option>%(grp_opts)s</select></label>
+  <label title="Proteins whose best hit from DIAMOND, MMseqs2, Foldseek or kmerseek is a Swiss-Prot protein of this group, at any E-value, weak hits included: the last column then names the program, its E-value and the hit. Aging: the hit's gene symbol is one of the 307 human genes of GenAge build 21.">gene group <select id="grp"><option value="-1">any</option>%(grp_opts)s</select></label>
   <span class="search"><input id="q" type="search" placeholder="search: every word must match" autocomplete="off" spellcheck="false" aria-label="Search the ID, names, Swiss-Prot match, Pfam domains and categories: every word must match"></span>
   <button class="btn" id="dl" title="Every protein the filters keep, not only the rows shown, one line each, as a tab-separated file">&#8595; TSV of these proteins</button>
   <button class="btn" id="help-btn" aria-expanded="false" title="What the columns and marks mean; keys">? Help</button>
@@ -806,8 +819,10 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  <dt>other programs with a hit</dt><dd>%(other)s</dd>
  <dt>gene group</dt><dd>a filter, not a finding: it keeps a protein when the best hit of DIAMOND, MMseqs2, either Foldseek search or kmerseek
  is a Swiss-Prot protein whose name is in the group (%(grp)s), at any E-value, so weak hits from one program are kept. While it is on, the
- "other programs" column names the program, its E-value and the hit, best first. Aging has no name list: it keeps a protein when a GO term
- of DIAMOND's best hit names lifespan or senescence</dd>
+ "other programs" column names the program, its E-value and the hit, best first. MHC class I and class II are the two halves of
+ "HLA and other MHC". Aging keeps a protein when the gene symbol of such a hit is one of the 307 human genes of GenAge build 21
+ (genomics.senescence.info/genes, Tacutu et al. 2018, CC BY 3.0), capitals ignored, in whichever species the hit is; a hit with no gene
+ symbol in our names table cannot count</dd>
  <dt>position along the protein</dt><dd>the protein from residue 1 to %(ax)s on one scale for every row; a longer protein ends in &#8250; and
  its length</dd></dl>
  <h2>Programs</h2><dl><dt>DIAMOND, MMseqs2</dt><dd>fast sequence searches, like BLAST, against Swiss-Prot</dd>
