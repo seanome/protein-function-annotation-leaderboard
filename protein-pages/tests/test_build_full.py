@@ -279,3 +279,25 @@ def test_unifire_hits_one_per_rule_and_place():
     assert set(h) == {(5, 9), (4, 4), (1, 50)}
     assert h[(5, 9)]["l"] == "x +1" and h[(5, 9)]["n"] == "x; y" and h[(5, 9)]["s"][3] == "PF1 / IPR1"
     assert h[(1, 50)]["s"][3].startswith("whole protein")
+
+
+def test_gene_groups_match_the_main_name_only():
+    r = dict(sp_acc="P1", sp_evalue="1e-30", sp_name="Calnexin", go_terms="GO:1;GO:2")
+    go = {"GO:1": "determination of adult lifespan", "GO:2": "protein folding"}
+    mm = {"x": ["P2", 0.3, 1, 9, "2e-5", "50", "Isoform 2 of Calnexin (Major histocompatibility complex class I antigen-binding protein p88)", ""]}
+    km = {"x": ["hp2, k = 20", 0.3, "Q9Z301", "Period circadian protein homolog 2", "Rattus norvegicus", 35]}
+    fs = {"x": ["P3", 0.2, 1, 9, "4.0", "30", "Isoform p41 of HLA class II histocompatibility antigen gamma chain (HLA-DR antigens-associated invariant chain)", ""]}
+    got = build_full.gene_groups(r, "x", go, mm, fs, None, km)
+    names = [g for g, _ in build_full.GENE_GROUPS]
+    # Calnexin's other name does not make it an MHC protein; a weak hit counts; best E-value first
+    assert [(names[g], prog, e) for g, prog, e, _, _ in got] == [
+        ("aging (GO: lifespan or senescence)", "DIAMOND", 1e-30), ("Period", "kmerseek", 0.3), ("HLA and other MHC", "ProstT5 + Foldseek", 4.0)]
+    assert "determination of adult lifespan" in got[0][4] and "protein folding" not in got[0][4]
+    assert build_full.gene_groups(dict(r, go_terms="GO:2"), "y", go, mm, fs, None, km) == []
+
+
+def test_gene_group_counts_are_in_the_summary_and_the_page(site):
+    out, s = site
+    assert list(s["gene_groups"]) == [g for g, _ in build_full.GENE_GROUPS]
+    html = (out / "index.html").read_text()
+    assert 'id="grp"' in html and all(build_full.build.esc(g) in html for g in s["gene_groups"])

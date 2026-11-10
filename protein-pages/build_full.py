@@ -56,6 +56,48 @@ def names_conflict(existing, proposed):
 ONLY_KMERSEEK_E = 1e-3  # the "only kmerseek" filters keep this E-value or below; rows.js holds the hit for those
 
 
+# Gene groups for the index page's "gene group" filter. A protein is in a group when the best hit of
+# DIAMOND, MMseqs2, either Foldseek search or kmerseek is a Swiss-Prot protein whose name matches the
+# group's pattern, at any E-value the pages show: the filter is for looking, so weak hits are kept and
+# each row says which program and E-value put it there. Only the protein's main name is matched: "Isoform 2 of "
+# and the other names in brackets are dropped first, or Calnexin would be an MHC protein for its other name.
+# The aging group is read another way: a GO term of DIAMOND's best hit names lifespan or senescence.
+GENE_GROUPS = [
+    ("Period", r"^Period (circadian|clock) protein"),
+    ("Cry and photolyases", r"^Cryptochrome|photo-?lyase"),
+    ("other clock genes", r"^(Circadian locomoter output cycles protein kaput|Basic helix-loop-helix ARNT-like protein|"
+     r"Neuronal PAS domain-containing protein 2|Nuclear receptor subfamily 1 group D|Nuclear receptor ROR-|Protein timeless|"
+     r"TIMELESS-interacting protein|Casein kinase I isoform (delta|epsilon)|Nuclear factor interleukin-3-regulated protein|"
+     r"Thyrotroph embryonic factor|Transcription factor VBP|Hepatic leukemia factor|D site-binding protein|"
+     r"Circadian-associated transcriptional repressor|Protein cycle)"),
+    ("HLA and other MHC", r"^(?!Minor ).*histocompatibility|^HLA class|^Beta-2-microglobulin|^MHC class I polypeptide-related"),
+    ("aging (GO: lifespan or senescence)", None),
+]
+AGING_GO = r"\blifespan\b|\bsenescence\b|\baging\b"
+
+
+def gene_groups(r, pid, go, mm, fs, fst, km):
+    """[[group index, program, E-value, accession, name], ...] for one protein, best E-value first."""
+    hits = [("DIAMOND", r["sp_evalue"], r["sp_acc"], r["sp_name"])] if r["sp_acc"] else []
+    for prog, d in (("MMseqs2", mm), ("ProstT5 + Foldseek", fs), ("Foldseek on structure", fst)):
+        if d and d.get(pid):
+            hits.append((prog, d[pid][4], d[pid][0], d[pid][6]))
+    if km and km.get(pid):
+        hits.append(("kmerseek", km[pid][1], km[pid][2], km[pid][3]))
+    out = []
+    for i, (_, pat) in enumerate(GENE_GROUPS):
+        if pat is None:
+            terms = [go.get(g, "") for g in split_list(r["go_terms"])]
+            terms = [t for t in terms if re.search(AGING_GO, t)]
+            if terms and r["sp_acc"]:
+                out.append([i, "DIAMOND", float(r["sp_evalue"]), r["sp_acc"], "%s (GO: %s)" % (r["sp_name"], "; ".join(terms))])
+            continue
+        for prog, e, acc, name in hits:
+            if name and re.search(pat, re.split(r" [(\[]", re.sub(r"^Isoform \S+ of ", "", name))[0]):
+                out.append([i, prog, float(e), acc, name])
+    return sorted(out, key=lambda x: (x[2], x[0]))
+
+
 def other_program_found(r, pid, mm, fs, fst, jh, ips, uf):
     """True when any program but kmerseek found something on this protein, each at the cutoff the pages
     use. InterProScan's predictions (disorder, coiled coil, membrane, signal) are not findings."""
@@ -525,7 +567,9 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                      sum(1 << i for i, d in enumerate((mm, strong(fs), strong(fst), km, jh)) if d and d.get(pid)),
                      1 if r["name_status"] == "conflict" and names_conflict(r["existing_name"], r["proposed_name"]) else 0,  # 18
                      # 19: kmerseek's best hit when no other program found anything: [E-value, setting, accession, name], or 0
-                     [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0])
+                     [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0,
+                     # 20: the gene groups it is in (gene_groups), or 0
+                     gene_groups(r, pid, go, mm, fs, fst, km) or 0])
         n_no_other += not found
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
@@ -583,7 +627,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     for k in range(N_SHARDS):
         if k not in shards:
             (out / "full" / ("%03d.js" % k)).write_text('(window.FULL_GZ=window.FULL_GZ||{})[%d]="%s";' % (k, packed({})))
-    full = dict(cats=cats, check=[t for _, t in NAME_CHECK], other=OTHER_HITS, total=len(rows), rows=rows,
+    full = dict(cats=cats, check=[t for _, t in NAME_CHECK], other=OTHER_HITS, total=len(rows), rows=rows, groups=[g for g, _ in GENE_GROUPS],
                 pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)])
     (out / "full" / "rows.js").write_text('window.FULL_Z="%s";' % packed(full))
     (out / "full" / "meta.js").write_text("window.FULL_META=%s;" % json.dumps(
@@ -614,6 +658,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         only_kmerseek_5=sum(1 for r in rows if r[19] and r[19][0] <= 1e-5),
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
+        gene_groups={g: sum(1 for r in rows if r[20] and any(x[0] == i for x in r[20])) for i, (g, _) in enumerate(GENE_GROUPS)},
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
     inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
@@ -685,6 +730,7 @@ def index_html(s, cats, inputs, ver, known="", first=None):
                         for k, v, w in chips)
     cat_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(c), f(s["immune_categories"][c])) for i, c in enumerate(cats))
     chk_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(t), f(s["name_check"][t])) for i, (_, t) in enumerate(NAME_CHECK))
+    grp_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(g), f(s["gene_groups"][g])) for i, (g, _) in enumerate(GENE_GROUPS))
     cat_bars = bars([(i, s["immune_categories"][c], c) for i, c in enumerate(cats)], n, "cat")
     chk_bars = bars([(i, s["name_check"][t], t) for i, (_, t) in enumerate(NAME_CHECK)], n, "chk")
     seq, dom = build.CATEGORIES["seq"]["color"], build.CATEGORIES["pfam"]["color"]
@@ -720,6 +766,7 @@ def index_html(s, cats, inputs, ver, known="", first=None):
   <span class="lead2">show:</span><span class="ladder" id="tiles">%(chips)s</span>
   <label>immune category <select id="cat"><option value="-1">any</option>%(cat_opts)s</select></label>
   <label>names <select id="chk"><option value="-1">any</option>%(chk_opts)s</select></label>
+  <label title="Proteins whose best hit from DIAMOND, MMseqs2, Foldseek or kmerseek is a Swiss-Prot protein of this group, at any E-value, weak hits included: the last column then names the program, its E-value and the hit. Aging: a GO term of DIAMOND's best hit names lifespan or senescence.">gene group <select id="grp"><option value="-1">any</option>%(grp_opts)s</select></label>
   <span class="search"><input id="q" type="search" placeholder="search: every word must match" autocomplete="off" spellcheck="false" aria-label="Search the ID, names, Swiss-Prot match, Pfam domains and categories: every word must match"></span>
   <button class="btn" id="dl" title="Every protein the filters keep, not only the rows shown, one line each, as a tab-separated file">&#8595; TSV of these proteins</button>
   <button class="btn" id="help-btn" aria-expanded="false" title="What the columns and marks mean; keys">? Help</button>
@@ -757,6 +804,10 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  InterProScan's Pfam matches, which can differ</dd>
  <dt>cluster</dt><dd>proteins in the same MMseqs2 cluster (Biomni's clustering of the proteome), itself included</dd>
  <dt>other programs with a hit</dt><dd>%(other)s</dd>
+ <dt>gene group</dt><dd>a filter, not a finding: it keeps a protein when the best hit of DIAMOND, MMseqs2, either Foldseek search or kmerseek
+ is a Swiss-Prot protein whose name is in the group (%(grp)s), at any E-value, so weak hits from one program are kept. While it is on, the
+ "other programs" column names the program, its E-value and the hit, best first. Aging has no name list: it keeps a protein when a GO term
+ of DIAMOND's best hit names lifespan or senescence</dd>
  <dt>position along the protein</dt><dd>the protein from residue 1 to %(ax)s on one scale for every row; a longer protein ends in &#8250; and
  its length</dd></dl>
  <h2>Programs</h2><dl><dt>DIAMOND, MMseqs2</dt><dd>fast sequence searches, like BLAST, against Swiss-Prot</dd>
@@ -778,7 +829,8 @@ program searched.</p></section>
 <script>window.FULL_FIRST=%(first)s;</script><script src="assets/gz.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
 """ % dict(first=dumps(first), n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
            ne=f(s["neither"]), nep=pc(s["neither"]), dp=f(s["drawn_pages"]), dr=f(s["drawn"]), im=f(s["immune_candidates"]),
-           jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts,
+           jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts, grp_opts=grp_opts,
+           grp=build.esc("; ".join(g for g, p in GENE_GROUPS if p)),
            other="; ".join("%s: %s" % (a, c) for a, c in OTHER_HITS), ax=f(AXIS_AA), axn=AXIS_AA, tw=TRACK_PCT, seq=seq, dom=dom, ramp=ramp, ticks=ticks, cnt="", inputs=build.esc(", ".join(inputs)), ver=ver)
 
 
