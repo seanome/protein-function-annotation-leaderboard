@@ -571,6 +571,10 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                 drawn_page[pid] = page
 
     name = {r["protein_id"]: r["proposed_name"] or r["existing_name"] for r in ann}
+    # a gene's proteins in FASTA order: FUN1, FUN1.2, FUN1.3 (make_proteome_lengths.py names them)
+    gene_proteins = defaultdict(list)
+    for r in ann:
+        gene_proteins[r["protein_id"].split(".")[0]].append(r["protein_id"])
     rows, shards, n_no_other = [], defaultdict(dict), 0
     cache = {}
 
@@ -637,6 +641,8 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
             sp_e=r["sp_evalue"], ev=evidence_list(im["evidence"]) if im else [],
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), rep=rep,
+            # every protein of its gene, itself included, when the gene has more than one: [ID, length, name]
+            iso=[[m, lengths[m][0], name[m]] for m in gene_proteins[pid.split(".")[0]]] if len(gene_proteins[pid.split(".")[0]]) > 1 else None,
             mem=[[m, name[m]] for m in mem[:MEMBERS_MAX]], more=max(0, len(mem) - MEMBERS_MAX))
 
     pfam_desc = {x[1]: x[2] for v in (ips or {}).values() for x in v if x[0] == "Pfam"}
@@ -700,6 +706,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
         genes=len(n_iso), genes_with_isoforms=len(iso), most_isoforms=max(n_iso.values()),
+        genes_by_isoforms=dict(sorted(Counter(n_iso.values()).items())),
         gene_groups={g: sum(1 for r in rows if r[20] and any(x[0] == i for x in r[20])) for i, (g, _) in enumerate(GENE_GROUPS)},
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
@@ -748,6 +755,62 @@ OTHER_HITS = [["MMseqs2", "E-value 0.001 or below"], ["ProstT5 + Foldseek", "E-v
               ["kmerseek", "region E-value %g or below" % KMERSEEK_MAX_E], ["jackhmmer, immune seeds", "any hit in Biomni's table"]]
 
 
+# The paper of each program and database the pages name, for the index page's reference list. Every
+# entry was read from its PubMed record on 2026-11-10 (authors, journal, volume, pages, DOI); none is
+# written from memory. (what it is on the pages, authors, title, journal, volume and issue, year, pages, DOI)
+CITATIONS = [
+    ("DIAMOND", "Buchfink, Benjamin, Klaus Reuter, and Hajk-Georg Drost", "Sensitive protein alignments at tree-of-life scale using DIAMOND",
+     "Nature Methods", "18, no. 4", 2021, "366–68", "10.1038/s41592-021-01101-x"),
+    ("MMseqs2", "Steinegger, Martin, and Johannes Söding", "MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets",
+     "Nature Biotechnology", "35, no. 11", 2017, "1026–28", "10.1038/nbt.3988"),
+    ("Foldseek", "van Kempen, Michel, et al.", "Fast and accurate protein structure search with Foldseek",
+     "Nature Biotechnology", "42, no. 2", 2024, "243–46", "10.1038/s41587-023-01773-0"),
+    ("ProstT5", "Heinzinger, Michael, et al.", "Bilingual language model for protein sequence and structure",
+     "NAR Genomics and Bioinformatics", "6, no. 4", 2024, "lqae150", "10.1093/nargab/lqae150"),
+    ("HMMER: hmmsearch, hmmscan, phmmer, jackhmmer", "Eddy, Sean R.", "Accelerated profile HMM searches",
+     "PLoS Computational Biology", "7, no. 10", 2011, "e1002195", "10.1371/journal.pcbi.1002195"),
+    ("pyhmmer", "Larralde, Martin, and Georg Zeller", "PyHMMER: a Python library binding to HMMER for efficient sequence analysis",
+     "Bioinformatics", "39, no. 5", 2023, "btad214", "10.1093/bioinformatics/btad214"),
+    ("HH-suite (hhsearch)", "Steinegger, Martin, et al.", "HH-suite3 for fast remote homology detection and deep protein annotation",
+     "BMC Bioinformatics", "20, no. 1", 2019, "473", "10.1186/s12859-019-3019-7"),
+    ("InterProScan", "Jones, Philip, et al.", "InterProScan 5: genome-scale protein function classification",
+     "Bioinformatics", "30, no. 9", 2014, "1236–40", "10.1093/bioinformatics/btu031"),
+    ("Pfam", "Paysan-Lafosse, Typhaine, et al.", "The Pfam protein families database: embracing AI/ML",
+     "Nucleic Acids Research", "53, no. D1", 2025, "D523–34", "10.1093/nar/gkae997"),
+    ("UniFIRE's UniRule rules", "MacDougall, Alistair, et al.", "UniRule: a unified rule resource for automatic annotation in the UniProt Knowledgebase",
+     "Bioinformatics", "36, no. 17", 2020, "4643–48", "10.1093/bioinformatics/btaa485"),
+    ("FANTASIA", "Martínez-Redondo, Gemma I., et al.", "FANTASIA leverages language models to decode the functional dark proteome across the animal tree of life",
+     "Communications Biology", "8, no. 1", 2025, "1227", "10.1038/s42003-025-08651-2"),
+    ("ESMFold, the model before ESMFold2", "Lin, Zeming, et al.", "Evolutionary-scale prediction of atomic-level protein structure with a language model",
+     "Science", "379, no. 6637", 2023, "1123–30", "10.1126/science.ade2574"),
+    ("Swiss-Prot (UniProt)", "The UniProt Consortium", "UniProt: the Universal Protein Knowledgebase in 2025",
+     "Nucleic Acids Research", "53, no. D1", 2025, "D609–17", "10.1093/nar/gkae1010"),
+    ("AlphaFold's models of Swiss-Prot, which Foldseek searched", "Bertoni, Damian, et al.", "AlphaFold Protein Structure Database 2025: a redesigned interface and updated structural coverage",
+     "Nucleic Acids Research", "54, no. D1", 2026, "D358–62", "10.1093/nar/gkaf1226"),
+    ("Mol*, the 3-D viewer", "Sehnal, David, et al.", "Mol* Viewer: modern web app for 3D visualization and analysis of large biomolecular structures",
+     "Nucleic Acids Research", "49, no. W1", 2021, "W431–37", "10.1093/nar/gkab314"),
+    ("GenAge, the aging gene group", "Tacutu, Robi, et al.", "Human Ageing Genomic Resources: new and updated databases",
+     "Nucleic Acids Research", "46, no. D1", 2018, "D1083–90", "10.1093/nar/gkx1042"),
+    ("Biomni, the agent that ran the whole-proteome programs", "Huang, Kexin, et al.", "Biomni: a general-purpose biomedical AI agent",
+     "bioRxiv", "preprint", 2025, "", "10.1101/2025.05.30.656746"),
+]
+# Named on the pages with no paper to cite
+NO_PAPER = [("kmerseek", 'no paper yet; the code is at <a href="https://github.com/seanome/kmerseek">github.com/seanome/kmerseek</a>'),
+            ("ESMFold2", "we found no PubMed record for this model; the paper of the first ESMFold is listed above"),
+            ("UniFIRE's ARBA rules", "we found no PubMed record for ARBA; UniProt describes it in its online help")]
+
+
+def citations_html():
+    """The reference list of the index page, Chicago style, one line per program or database."""
+    e = build.esc
+    items = "".join(
+        '<li><b>%s.</b> %s. "%s." <i>%s</i> %s (%d)%s. <a href="https://doi.org/%s">https://doi.org/%s</a></li>'
+        % (e(what), e(authors).rstrip("."), e(title), e(journal), e(vol), year, ": " + e(pages) if pages else "", doi, doi)
+        for what, authors, title, journal, vol, year, pages, doi in CITATIONS)
+    none = "".join("<li><b>%s.</b> %s.</li>" % (e(what), why[0].upper() + why[1:]) for what, why in NO_PAPER)
+    return '<ol class="refs">%s</ol><p class="note">No paper to cite:</p><ul class="refs">%s</ul>' % (items, none)
+
+
 def index_html(s, cats, inputs, ver, known="", first=None):
     """The first page, after the dense-results-page skill: the answer in one sentence, then a sticky
     header (filters, search, a three-line key, column names, the residue ruler) over one grid row per
@@ -775,6 +838,7 @@ def index_html(s, cats, inputs, ver, known="", first=None):
     grp_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(g), f(s["gene_groups"][g])) for i, (g, _) in enumerate(GENE_GROUPS))
     cat_bars = bars([(i, s["immune_categories"][c], c) for i, c in enumerate(cats)], n, "cat")
     chk_bars = bars([(i, s["name_check"][t], t) for i, (_, t) in enumerate(NAME_CHECK)], n, "chk")
+    iso_bars = bars([(k, v, "1 protein, bare ID" if int(k) == 1 else "%s proteins, up to .%s" % (k, k)) for k, v in s["genes_by_isoforms"].items()], n, "iso")
     seq, dom = build.CATEGORIES["seq"]["color"], build.CATEGORIES["pfam"]["color"]
     ramp = "".join('<i style="opacity:%s;background:%s"></i>' % (o, seq) for o in (".3", ".5", ".75", "1"))
     # the same scale as full.js's track: residue 1 to AXIS_AA over the first TRACK_PCT% of the width
@@ -792,7 +856,7 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  for that family. Biomni, the agent that ran the whole-proteome programs except kmerseek, made both tables. A protein with neither can still have a hit
  from another program: the "other programs" column says which. %(dp)s test proteins have a page that shows every program's hits along the protein
  (<a href="drawn.html">their own index</a>).</p></div></div>
- <details class="overview-fold"><summary>Counts by immune-gene category and by how the proposed name compares with the existing one</summary>
+ <details class="overview-fold"><summary>Counts by immune-gene category, by how the proposed name compares with the existing one, and by isoforms per gene</summary>
  <div class="overview">
  <section><h2>Immune-gene candidates, by category</h2><p class="note">%(im)s proteins; one protein can be in several categories. A category
  comes from a Pfam domain, the gene name, or an immune keyword or GO term of the best Swiss-Prot match; each protein page says which.
@@ -801,6 +865,9 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  <section><h2>Proposed name compared with the existing name</h2><p class="note">Existing = the name in the FASTA header. Proposed = from
  the best Swiss-Prot match or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (NLRC5 and Nlrc5-like). Bars: of all
  %(n)s proteins.</p>%(kb)s</section>
+ <section><h2>Genes by number of proteins (isoforms)</h2><p class="note">%(genes)s genes. A gene's first protein has the bare ID; its other
+ isoforms end in .2, .3 and so on, in the order of the proteome FASTA. %(gi)s genes have more than one protein, which adds %(extra)s proteins.
+ Bar length: number of genes; click a bar to list those genes' proteins.</p>%(ib)s</section>
  </div></details>
 </div>
 <header class="top ix">
@@ -872,13 +939,15 @@ def index_html(s, cats, inputs, ver, known="", first=None):
 <section class="below"><h2>Which Swiss-Prot</h2><p class="note">"Swiss-Prot" on this page is release 2026_03 (575,748 proteins), the copy
 DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (at most 25 per protein). Each protein's page says which copy each other
 program searched.</p></section>
+<section class="below"><h2>Papers of the programs and databases</h2><p class="note">One paper for each program and database these pages
+name. Each entry was read from its PubMed record on 2026-11-10.</p>%(refs)s</section>
 <footer><h2>Input files read</h2><p class="note">Built by build_full.py from %(inputs)s. These tables come from Biomni's runs and our kmerseek run on Sherlock
 (full_inputs/README.md in the repository says how each was made). This page only reads those tables; building it ran no search.</p></footer>
 <script>window.FULL_FIRST=%(first)s;</script><script src="assets/gz.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
 """ % dict(first=dumps(first), n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
            ne=f(s["neither"]), nep=pc(s["neither"]), dp=f(s["drawn_pages"]), dr=f(s["drawn"]), im=f(s["immune_candidates"]),
            jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts, grp_opts=grp_opts,
-           genes=f(s["genes"]), gi=f(s["genes_with_isoforms"]), mi=s["most_isoforms"],
+           refs=citations_html(), genes=f(s["genes"]), gi=f(s["genes_with_isoforms"]), mi=s["most_isoforms"], ib=iso_bars, extra=f(n - s["genes"]),
            allo_n=f(next(v for g, v in s["gene_groups"].items() if g.startswith(ALLO))),
            grp=build.esc("; ".join(g for g, p in GENE_GROUPS if p not in (GENAGE, ALLO))),
            other="; ".join("%s: %s" % (a, c) for a, c in OTHER_HITS), ax=f(AXIS_AA), axn=AXIS_AA, tw=TRACK_PCT, seq=seq, dom=dom, ramp=ramp, ticks=ticks, cnt="", inputs=build.esc(", ".join(inputs)), ver=ver)

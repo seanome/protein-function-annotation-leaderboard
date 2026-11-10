@@ -29,7 +29,7 @@
   var TILE_WORDS = { all: "", sp: "with a Swiss-Prot match", pfam: "with a Pfam domain", none: "with neither a Swiss-Prot match nor a Pfam domain",
     immune: "that are immune-gene candidates", drawn: "with every program's hits along the protein", names: "whose FASTA name and proposed name conflict",
     km3: "that only kmerseek found, E-value 0.001 or below", km5: "that only kmerseek found, E-value 0.00001 or below" };
-  var st = { q: "", tile: "all", cat: -1, chk: -1, grp: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
+  var st = { q: "", tile: "all", cat: -1, chk: -1, grp: -1, iso: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
   var count = document.getElementById("count"), more = document.getElementById("more"), lbl = document.querySelector(".ix .ruler .lbl");
   var catSel = document.getElementById("cat"), chkSel = document.getElementById("chk"), grpSel = document.getElementById("grp"), q = document.getElementById("q");
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -62,6 +62,7 @@
       if (st.cat >= 0 && !(r[11] >> st.cat & 1)) continue;
       if (st.chk >= 0 && r[4] !== st.chk) continue;
       if (st.grp >= 0 && !grpHits(r).length) continue;
+      if (st.iso >= 0 && (ISO[r[0].split(".")[0]] || 1) !== st.iso) continue;
       var t = text[i], ok = true;
       for (var w = 0; w < words.length; w++) if (t.indexOf(words[w]) < 0) { ok = false; break; }
       if (ok) list.push(i);
@@ -133,6 +134,7 @@
     var what = [TILE_WORDS[st.tile]];
     if (st.cat >= 0) what.push("in the immune category " + CATS[st.cat]);
     if (st.chk >= 0) what.push("where " + F.check[st.chk]);
+    if (st.iso >= 0) what.push("of genes with " + st.iso + (st.iso === 1 ? " protein" : " proteins"));
     if (st.grp >= 0) what.push("with a best hit in the gene group " + GROUPS[st.grp] + ", weak hits included");
     if (st.q) what.push("matching “" + st.q + "”");
     what = what.filter(Boolean);
@@ -165,6 +167,7 @@
     document.querySelectorAll("#tiles .chip").forEach(function (b) { b.classList.toggle("on", b.dataset.t === st.tile); });
     document.querySelectorAll(".bar[data-cat]").forEach(function (b) { b.classList.toggle("on", +b.dataset.cat === st.cat); });
     document.querySelectorAll(".bar[data-chk]").forEach(function (b) { b.classList.toggle("on", +b.dataset.chk === st.chk); });
+    document.querySelectorAll(".bar[data-iso]").forEach(function (b) { b.classList.toggle("on", +b.dataset.iso === st.iso); });
     catSel.value = String(st.cat); chkSel.value = String(st.chk); grpSel.value = String(st.grp);
     document.querySelectorAll(".colhead button[data-k]").forEach(function (b) {
       var on = +b.dataset.k === st.key;
@@ -185,6 +188,9 @@
   document.querySelectorAll(".bar[data-chk]").forEach(function (b) {
     b.addEventListener("click", function () { st.chk = st.chk === +b.dataset.chk ? -1 : +b.dataset.chk; filter(); grid.scrollIntoView(); });
   });
+  document.querySelectorAll(".bar[data-iso]").forEach(function (b) {
+    b.addEventListener("click", function () { st.iso = st.iso === +b.dataset.iso ? -1 : +b.dataset.iso; filter(); grid.scrollIntoView(); });
+  });
   var timer;
   q.addEventListener("input", function () {
     clearTimeout(timer);
@@ -201,7 +207,7 @@
   });
   more.addEventListener("click", function () { st.shown += 100; draw(); });
   document.getElementById("clear").addEventListener("click", function () {
-    st = { q: "", tile: "all", cat: -1, chk: -1, grp: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 }; q.value = ""; drawLadder(); filter();
+    st = { q: "", tile: "all", cat: -1, chk: -1, grp: -1, iso: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 }; q.value = ""; drawLadder(); filter();
   });
   document.getElementById("dl").addEventListener("click", function () {
     if (!ready) return;

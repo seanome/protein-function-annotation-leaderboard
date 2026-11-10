@@ -42,7 +42,8 @@
     var L = r[1], name = r[3] || r[2] || "";
     document.title = id + (name ? " " + name : "") + ": what every annotation program found";
     if (name) document.querySelector(".titlebar .pn").textContent = name;
-    document.querySelector(".titlebar .len").textContent = L.toLocaleString("en-US") + " amino acids";
+    document.querySelector(".titlebar .len").textContent = L.toLocaleString("en-US") + " amino acids" +
+      (d.iso ? " · isoform " + (d.iso.map(function (m) { return m[0]; }).indexOf(id) + 1) + " of " + d.iso.length + " (listed below)" : "");
     var hits = [], tracksRun = {};
     function best(k, x, extra) {  // a best-hit table row: [accession, identity 0-1, start, end, E-value, bits, name, species, ..., target start, target end]
       tracksRun[k] = true;

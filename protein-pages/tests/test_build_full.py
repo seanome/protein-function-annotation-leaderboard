@@ -332,3 +332,15 @@ def test_isoform_counts_on_the_index(site):
     # every isoform after the first is named gene.N, so the counts and the IDs agree
     assert sum(k - 1 for k in per_gene.values()) == sum(1 for i in ids if "." in i)
     assert "have 2 to %d isoforms" % s["most_isoforms"] in (out / "index.html").read_text()
+    assert s["genes_by_isoforms"] == dict(sorted(Counter(per_gene.values()).items()))
+    html = (out / "index.html").read_text()
+    assert html.count('data-iso="') == len(s["genes_by_isoforms"]) and "Genes by number of proteins (isoforms)" in html
+
+
+def test_every_citation_is_on_the_index_with_its_doi(site):
+    out, _ = site
+    html = (out / "index.html").read_text()
+    dois = [c[7] for c in build_full.CITATIONS]
+    assert len(set(dois)) == len(dois) == 17 and all(d.startswith("10.") for d in dois)
+    assert all('href="https://doi.org/%s"' % d in html for d in dois)
+    assert all(build_full.build.esc(what) in html for what, _ in build_full.NO_PAPER)
