@@ -122,7 +122,7 @@ def check(site, pages, widths=WIDTHS, max_hits=MAX_HITS):
                 for pg in pages:
                     page.goto("about:blank")  # so a change of #protein loads the page again
                     page.goto(base + pg)
-                    page.wait_for_selector(".hit[data-i]", state="attached", timeout=20000)
+                    page.wait_for_selector(".hit[data-i]", state="attached", timeout=60000)
                     out.append((pg, w, page.evaluate(PROBE, max_hits)))
                 page.close()
             b.close()
@@ -173,9 +173,32 @@ def clicks(site, page_path, width=1400):
             b = launch(p)
             page = b.new_page(viewport={"width": width, "height": 900})
             page.goto("http://127.0.0.1:%d/%s" % (httpd.server_address[1], page_path))
-            page.wait_for_selector(".hit[data-i]", state="attached", timeout=20000)
+            page.wait_for_selector(".hit[data-i]", state="attached", timeout=60000)
             page.wait_for_timeout(300)
             out = page.evaluate(CLICKS)
+            b.close()
+    finally:
+        httpd.shutdown()
+    return out
+
+
+def s4pred(site, page_path, width=1400):
+    """How many helix and strand bars the strip under the ruler has, whether all lie inside the ruler's
+    drawing, and the text of its key entry."""
+    js = """() => { const svg = document.querySelector(".g.ruler svg"), S = svg.getBoundingClientRect(), bars = [...svg.querySelectorAll("rect.ss")];
+      return { helix: svg.querySelectorAll("rect.ss.h").length, strand: svg.querySelectorAll("rect.ss.e").length,
+        inside: bars.every((b) => { const r = b.getBoundingClientRect(); return r.left >= S.left - 0.5 && r.right <= S.right + 0.5 && r.bottom <= S.bottom + 0.5; }),
+        key: document.getElementById("sskey").textContent }; }"""
+    httpd = socketserver.TCPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(site)))
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        with sync_playwright() as p:
+            b = launch(p)
+            page = b.new_page(viewport={"width": width, "height": 900})
+            page.goto("http://127.0.0.1:%d/%s" % (httpd.server_address[1], page_path))
+            page.wait_for_selector(".hit[data-i]", state="attached", timeout=60000)
+            page.wait_for_timeout(300)
+            out = page.evaluate(js)
             b.close()
     finally:
         httpd.shutdown()

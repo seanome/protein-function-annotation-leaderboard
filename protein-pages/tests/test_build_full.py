@@ -348,7 +348,7 @@ def test_every_citation_is_on_the_index_with_its_doi(site):
     out, _ = site
     html = (out / "index.html").read_text()
     dois = [c[7] for c in build_full.CITATIONS]
-    assert len(set(dois)) == len(dois) == 19 and all(d.startswith("10.") for d in dois)
+    assert len(set(dois)) == len(dois) == 20 and all(d.startswith("10.") for d in dois)
     assert all('href="https://doi.org/%s"' % d in html for d in dois)
     assert all(build_full.build.esc(what) in html for what, _ in build_full.NO_PAPER)
 
@@ -412,4 +412,41 @@ def test_a_protein_only_kmerseek_found_shows_kmerseek_e_value(site):
     only = [r for r in F["rows"] if r[19]]
     assert len(only) == site[1]["only_kmerseek_3"] > 0
     assert all(not r[9] and 0 <= r[19][0] <= build_full.ONLY_KMERSEEK_E for r in only)  # none has a DIAMOND E-value to hide
+
+
+def test_s4pred_table_has_every_protein_and_no_residues(site):
+    """s4pred_states.tsv.gz gives each of the 45,339 proteins its helix, strand and coil as runs that
+    add up to its length, and nothing else: no residue letter is in the file. The shares of all
+    residues are those of the run's own summary (olgabot/botryllus-mhc PR 13: 31.5, 11.4, 57.1)."""
+    import re
+    csv.field_size_limit(10 ** 9)
+    L = {r["protein_id"]: int(r["length"]) for r in tsv("proteome_lengths.tsv")}
+    rows = tsv("s4pred_states.tsv")
+    assert [r["protein_id"] for r in rows] == list(L) and len(rows) == 45339
+    for r in rows:
+        runs = re.findall(r"([HEC])(\d+)", r["states"])
+        assert "".join(c + n for c, n in runs) == r["states"], r["protein_id"]  # runs only, so no sequence
+        assert sum(int(n) for _, n in runs) == L[r["protein_id"]], r["protein_id"]
+        assert all(a[0] != b[0] for a, b in zip(runs, runs[1:])), r["protein_id"]  # neighbouring runs differ
+    s = site[1]["s4pred"]
+    assert (s["proteins"], s["helix_pct"], s["strand_pct"], s["coil_pct"]) == (45339, 31.5, 11.4, 57.1)
+    assert s["residues"] == sum(L.values())
+    # each protein's page data carries its own runs
+    by = {r["protein_id"]: r["states"] for r in rows}
+    for pid in ("FUN000001", "FUN005955.2", "FUN019272.2"):
+        d = read_js(site[0] / "full" / ("%03d.js" % build_full.shard_of(pid)), "")
+        assert d[pid]["ss"] == by[pid]
+
+
+def test_s4pred_strip_is_drawn_under_the_ruler(site):
+    """In a browser: protein.html draws one bar per helix and strand run of s4pred under the ruler,
+    and the key says what the two bars are with this protein's shares."""
+    import re
+    r = check_hover.s4pred(site[0], "protein.html#FUN005955.2")
+    rows = {x["protein_id"]: x["states"] for x in tsv("s4pred_states.tsv")}
+    runs = re.findall(r"([HEC])(\d+)", rows["FUN005955.2"])
+    assert r["helix"] == sum(1 for c, _ in runs if c == "H") > 0 and r["strand"] == sum(1 for c, _ in runs if c == "E") > 0
+    assert r["inside"] and "helix" in r["key"] and "strand" in r["key"] and "s4pred" in r["key"]
+    L = sum(int(n) for _, n in runs)
+    assert "helix %d%%" % round(100 * sum(int(n) for c, n in runs if c == "H") / L) in r["key"]
 

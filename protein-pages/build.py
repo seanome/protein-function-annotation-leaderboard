@@ -1672,6 +1672,7 @@ def dense_key(ctx, has_plddt, has_struct, extra=()):
         parts.append('<span class="kind" title="the predicted structure\'s confidence per residue, in the strip under the ruler%s"><b>pLDDT:</b> %s%s</span>'
                      % (" and on the 3-D model" if has_struct else "", sw,
                         ' <i class="pl" style="background:%s"></i>pointed-at hit on the model' % HIGHLIGHT if has_struct else ""))
+    parts.append('<span class="kind" id="sskey"></span>')  # filled by dense-bhf.js when the page has s4pred's prediction
     parts.append('<span class="kind" id="alphakey"></span>')
     return '<div class="key">%s</div>' % "".join(parts)
 
@@ -1775,7 +1776,9 @@ def dense_help(ctx):
             'keeps them until you click the pLDDT strip.</p><h2>Keyboard</h2><dl><dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>next and previous '
             'row</dd><dt><kbd>Enter</kbd> <kbd>Space</kbd></dt><dd>unfold a program, or open a hit\'s residues</dd><dt><kbd>Esc</kbd></dt>'
             '<dd>close every open hit and this help</dd><dt><kbd>s</kbd> <kbd>t</kbd></dt><dd>scroll the 3-D model into view; back to the '
-            'top</dd><dt><kbd>?</kbd></dt><dd>this help</dd></dl><h2>Lanes under the ruler</h2><p>pLDDT, where there is a structure: the '
+            'top</dd><dt><kbd>?</kbd></dt><dd>this help</dd></dl><h2>Lanes under the ruler</h2><p>Lowest, where s4pred was run: its prediction of helix (tall dark bar), strand (lower grey bar) '
+            'and coil (the thin line) for each residue, made from this protein\'s sequence alone; a prediction, not a measured structure. '
+            'pLDDT, where there is a structure: the '
             'predictor\'s confidence per residue. Then your protein rewritten in a kmerseek alphabet, one colour per class (the alphabet of '
             'the kmerseek hit under the pointer; by default its best hit\'s): a long run of one colour is a stretch kmerseek matches on '
             'composition alone. Inside a kmerseek hit\'s box, the dark bar is its seed: a run of at least k residues whose classes are the '

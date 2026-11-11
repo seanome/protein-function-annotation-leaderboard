@@ -30,7 +30,7 @@
       var a = d.add;
       if (a) {
         Object.assign(PAGE.tracks, a.tracks); PAGE.m += Object.keys(a.tracks).length; PAGE.hits.push.apply(PAGE.hits, a.hits);
-        PAGE.names = Object.assign(PAGE.names || {}, a.names); PAGE.nohit = a.nohit; PAGE.twelve += a.twelve;
+        PAGE.names = Object.assign(PAGE.names || {}, a.names); PAGE.nohit = a.nohit; PAGE.twelve += a.twelve; PAGE.ss = a.ss || null;
         WHOLE = window.WHOLE = WHOLE.filter(function (w) { return a.move.indexOf(w[0]) < 0; }); Object.assign(HOW, a.how);
       }
       return loadScript(c.dense + V);

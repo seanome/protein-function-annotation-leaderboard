@@ -208,6 +208,28 @@ def unifire_hits(preds, matches, length):
     return list(hits.values())
 
 
+def read_s4pred(folder, lengths):
+    """protein -> s4pred's predicted secondary structure as runs ('C16E5C1E2': 16 coil, 5 strand, ...), from
+    s4pred_states.tsv (full_inputs/make_s4pred_table.py); None when the table is not there. Each protein's runs
+    must add up to its length, and the summary's three shares are of all residues."""
+    if not inp(folder, "s4pred_states.tsv").exists():
+        return None, None
+    csv.field_size_limit(10 ** 9)  # the longest protein's runs are longer than csv's default limit
+    ss, tot = {}, Counter()
+    for r in csv.DictReader(opentext(inp(folder, "s4pred_states.tsv")), delimiter="\t"):
+        pid, runs = r["protein_id"], re.findall(r"([HEC])(\d+)", r["states"])
+        if pid not in lengths:
+            sys.exit("%s is in s4pred_states.tsv but not in the proteome" % pid)
+        if "".join(c + n for c, n in runs) != r["states"] or sum(int(n) for _, n in runs) != lengths[pid][0]:
+            sys.exit("s4pred_states.tsv: the runs of %s do not add up to its %d residues" % (pid, lengths[pid][0]))
+        ss[pid] = r["states"]
+        for c, n in runs:
+            tot[c] += int(n)
+    n = sum(tot.values())
+    return ss, dict(proteins=len(ss), residues=n, helix_pct=round(100 * tot["H"] / n, 1), strand_pct=round(100 * tot["E"] / n, 1),
+                    coil_pct=round(100 * tot["C"] / n, 1))
+
+
 def drawn_additions(r, d, length):
     """The script that adds DIAMOND's realigned best hit and UniFIRE's predictions to a drawn page's
     data, before assets/dense-bhf.js reads it. A DIAMOND hit too long to realign keeps its row with no position."""
@@ -224,7 +246,7 @@ def drawn_additions(r, d, length):
         hits += unifire_hits(d["uf"], d["ips"] if isinstance(d["ips"], list) else [], length)
     tracks = {k: dict(name=DRAWN_NAMES[k], color=build.WHOLE_TRACKS[k]["color"], shape=build.WHOLE_TRACKS[k]["shape"],
                       cat=build.WHOLE_TRACKS[k]["cat"], p=k) for k in ("diamond", "unifire") if "w_" + k in move}
-    return dict(tracks=tracks, hits=hits, names=DRAWN_SCORE_NAMES, nohit=DRAWN_NOHIT, move=move, how=DRAWN_HOW,
+    return dict(tracks=tracks, hits=hits, names=DRAWN_SCORE_NAMES, nohit=DRAWN_NOHIT, move=move, how=DRAWN_HOW, ss=d.get("ss"),
                 twelve="; DIAMOND's hit is realigned, and UniFIRE is placed where its rules' signatures lie")
 
 
@@ -542,6 +564,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     t0 = time.time()
     ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst, dm = load(folder)
     seqs = read_proteome(proteome, lengths) if proteome else {}
+    ss, ss_summary = read_s4pred(folder, lengths)
     # the Swiss-Prot proteins of the best hits with a position (MMseqs2, ProstT5 + Foldseek, Foldseek on
     # structure), so protein.html can align the two proteins; isoforms (P12345-2) are not in uniprot_sprot.fasta
     best_targets = {r["sp_acc"] for r in ann if r["sp_acc"] and r["protein_id"] in dm} | {v[0] for d in (mm, fs, fst) if d for v in d.values() if v and float(v[4]) <= FOLDSEEK_MAX_E}
@@ -628,6 +651,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
             # UniFIRE: its predictions; "not run" for proteins over UNIFIRE_MAX_AA, which it skipped
             km=None if km is None else km.get(pid, 0),
             dm=dm.get(pid),
+            ss=ss.get(pid) if ss else None,  # s4pred's helix, strand and coil as runs, drawn under the ruler
             mm=None if mm is None else mm.get(pid, 0),
             fs=None if fs is None else fs.get(pid, 0),  # 0: no hit at FOLDSEEK_MAX_E or below
             fst=None if fst is None else ("not run" if lengths[pid][0] > STRUCT_MAX_AA else fst.get(pid, 0)),
@@ -702,6 +726,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         names_conflict=sum(1 for r in rows if r[18]),
         no_other_program=n_no_other,
         only_kmerseek_3=sum(1 for r in rows if r[19]),
+        s4pred=ss_summary,  # None when s4pred_states.tsv is not there
         only_kmerseek_5=sum(1 for r in rows if r[19] and r[19][0] <= 1e-5),
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
@@ -797,6 +822,8 @@ CITATIONS = [
      "Nucleic Acids Research", "46, no. D1", 2018, "D1083–90", "10.1093/nar/gkx1042"),
     ("Biomni, the agent that ran the whole-proteome programs", "Huang, Kexin, et al.", "Biomni: a general-purpose biomedical AI agent",
      "bioRxiv", "preprint", 2025, "", "10.1101/2025.05.30.656746"),
+    ("s4pred, the helix and strand prediction", "Moffat, Lewis, and David T. Jones", "Increasing the accuracy of single sequence prediction methods using a deep semi-supervised learning framework",
+     "Bioinformatics", "37, no. 21", 2021, "3744–51", "10.1093/bioinformatics/btab491"),
 ]
 # Named on the pages with no paper to cite
 NO_PAPER = [("kmerseek", 'no paper yet; the code is at <a href="https://github.com/seanome/kmerseek">github.com/seanome/kmerseek</a>'),
