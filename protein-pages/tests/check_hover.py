@@ -76,6 +76,14 @@ PROBE = """async (maxHits) => {
       items.forEach((o, j) => { if (j !== i && hit(it.text, o.box)) bad.push(it.l + ": over the box of " + o.l); if (j > i && hit(it.text, o.text)) bad.push(it.l + ": over the label " + o.l); });
     });
   }
+  // labels under the dashed boxes of a row that holds predictions only (InterProScan with no signature hit)
+  for (const t of document.querySelectorAll(".row.prog .track svg")) {
+    const S = t.getBoundingClientRect(), tx = [...t.querySelectorAll("g.hit > text")].map((e) => [e.getBoundingClientRect(), e.textContent]);
+    tx.forEach(([r, l], i) => {
+      if (r.left < S.left - 0.5 || r.right > S.right + 0.5) bad.push(l + ": outside its row's drawing");
+      tx.forEach(([o, m], j) => { if (j > i && r.left < o.right - 0.5 && o.left < r.right - 0.5) bad.push(l + ": over the label " + m); });
+    });
+  }
   return { hits: hits.length, tried, moved, worst, example, labels, bad };
 }"""
 
@@ -117,6 +125,57 @@ def check(site, pages, widths=WIDTHS, max_hits=MAX_HITS):
                     page.wait_for_selector(".hit[data-i]", state="attached", timeout=20000)
                     out.append((pg, w, page.evaluate(PROBE, max_hits)))
                 page.close()
+            b.close()
+    finally:
+        httpd.shutdown()
+    return out
+
+
+CLICKS = """async () => {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const rows = () => [...document.querySelectorAll(".row.hit[data-i]")];
+  const ranges = () => rows().map((r) => { const m = r.children[1].textContent.match(/([0-9,]+)\u2013([0-9,]+)/); return m ? [+m[1].replace(/,/g, ""), +m[2].replace(/,/g, "")] : null; });
+  const open = () => [...document.querySelectorAll(".row.prog.open")].map((r) => r.dataset.k);
+  const count = () => document.getElementById("count").textContent;
+  const out = { before: rows().length };
+  // the way back: the first thing in the title bar, at the top left
+  const back = document.querySelector(".titlebar .back"), bb = back.getBoundingClientRect();
+  out.back = { text: back.textContent.trim(), href: back.getAttribute("href"), left: bb.left, top: bb.top, first: back === [...document.querySelector(".titlebar").children].sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left)[0] };
+  // a bar of a program's histogram
+  const bar = document.querySelector(".row.prog .bar[data-a]");
+  if (bar) {
+    const a = +bar.dataset.a, b = +bar.dataset.b, k = bar.closest(".row.prog").dataset.k;
+    bar.dispatchEvent(new MouseEvent("click", { bubbles: true })); await wait(300);
+    out.bar = { a, b, k, open: open(), rows: rows().length, ranges: ranges(), count: count() };
+    document.getElementById("unregion").click(); await wait(300);
+    out.barCleared = { rows: rows().length, open: open(), count: count() };
+  }
+  // a box of the domain lane
+  const dom = document.querySelector(".row.lane .dom[data-a]");
+  if (dom) {
+    const a = +dom.dataset.a, b = +dom.dataset.b;
+    dom.dispatchEvent(new MouseEvent("click", { bubbles: true })); await wait(300);
+    out.dom = { a, b, l: dom.dataset.l, open: open(), rows: rows().length, ranges: ranges(), count: count(), on: !!document.querySelector(".row.lane .dom.on") };
+    document.querySelector(".row.lane .dom.on").dispatchEvent(new MouseEvent("click", { bubbles: true })); await wait(300);
+    out.domCleared = { rows: rows().length, open: open(), count: count() };
+  }
+  return out;
+}"""
+
+
+def clicks(site, page_path, width=1400):
+    """What a click on the first histogram bar and on the first box of the domain lane does on one page,
+    each then cleared, and where the link back to all proteins is. See CLICKS for the keys."""
+    httpd = socketserver.TCPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(site)))
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        with sync_playwright() as p:
+            b = launch(p)
+            page = b.new_page(viewport={"width": width, "height": 900})
+            page.goto("http://127.0.0.1:%d/%s" % (httpd.server_address[1], page_path))
+            page.wait_for_selector(".hit[data-i]", state="attached", timeout=20000)
+            page.wait_for_timeout(300)
+            out = page.evaluate(CLICKS)
             b.close()
     finally:
         httpd.shutdown()

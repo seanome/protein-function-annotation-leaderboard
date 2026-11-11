@@ -116,13 +116,16 @@
         '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : "") +
         (mmo ? (r[6] ? " · " : "") + "MMseqs2's best: " + '<span class="mono">' + esc(r[16][3]) + "</span>" : "") + "</span></div>" +
       '<div class="num">' + (r[7] === null ? "" : r[7].toFixed(1) + "%") + (r[8] === null ? "" : '<span class="s">covers ' + Math.round(r[8]) + "%</span>") + "</div>" +
-      '<div class="num"' + (r[9] && ev(r[9]) === 0 ? ' title="DIAMOND writes 0 when the E-value is smaller than the smallest number it stores">0' : ">" + esc(r[9] || "")) + "</div>" +
+      // the column is DIAMOND's E-value; a protein that only kmerseek found has none, so kmerseek's is shown and labelled
+      (!r[9] && r[19] ? '<div class="num ekm" title="kmerseek\'s E-value for its best region over 35 alphabet and k settings; DIAMOND found no match, so this is not a DIAMOND E-value">' +
+        r[19][0].toExponential(1) + '<span class="s">kmerseek</span></div>' :
+      '<div class="num"' + (r[9] && ev(r[9]) === 0 ? ' title="DIAMOND writes 0 when the E-value is smaller than the smallest number it stores">0' : ">" + esc(r[9] || "")) + "</div>") +
       '<div class="txt" title="' + esc(r[10]) + '">' + (r[10] ? esc(r[10]) : '<span class="dim">none</span>') +
         '<span class="s">InterProScan: ' + (ips ? ips + " Pfam match" + (ips > 1 ? "es" : "") : "none") + "</span></div>" +
       '<div class="txt" title="' + esc(catNames(r[11]).join(", ")) + '">' + esc(catNames(r[11]).join(", ")) + "</div>" +
       (st.grp >= 0 && grpHits(r).length ? '<div class="txt" title="' + esc(grpHits(r).map(grpText).join("\n")) + '">' + esc(grpText(grpHits(r)[0])) +
         (grpHits(r).length > 1 ? '<span class="s">and ' + (grpHits(r).length - 1) + " more program" + (grpHits(r).length > 2 ? "s" : "") + " (hover)</span>" : "") + "</div>" :
-      r[19] && (st.tile === "km3" || st.tile === "km5") ? '<div class="txt" title="' + esc(r[19][3] + " (" + r[19][2] + "), " + r[19][1]) + '">kmerseek ' + r[19][0].toExponential(1) + " · " + esc(r[19][3]) + "</div>" :
+      r[19] && (st.tile === "km3" || st.tile === "km5") ? '<div class="txt" title="' + esc(r[19][3] + " (" + r[19][2] + "), " + r[19][1]) + '">' + esc(r[19][3]) + '<span class="s">kmerseek\'s best hit, ' + esc(r[19][2]) + " · " + esc(r[19][1]) + "</span></div>" :
       '<div class="txt" title="' + esc(others(r[17]).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">none</span>') + "</div>") +
       '<div class="num">' + fmt(r[13]) + (r[13] === 1 ? '<span class="s">alone</span>' : "") + "</div>" +
       '<div class="track">' + track(r) + "</div></div>";

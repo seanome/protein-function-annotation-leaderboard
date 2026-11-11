@@ -988,7 +988,7 @@ def protein_html(ver, n_tseq=0):
              'looks through the matched protein\'s name, accession and species; every word typed must appear.</p><h2>Keyboard</h2><dl>'
              '<dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>next and previous row</dd><dt><kbd>Enter</kbd> <kbd>Space</kbd></dt><dd>unfold a program, '
              'or open a hit</dd><dt><kbd>Esc</kbd></dt><dd>close every open hit and this help</dd><dt><kbd>?</kbd></dt><dd>this help</dd></dl></aside>')
-    return head + """<div class="titleblock"><div class="titlebar"><h1 title="the ID as written in the proteome FASTA">loading…</h1><span class="pn"></span><span class="len"></span><a class="back" href="index.html">All proteins</a></div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>
+    return head + """<div class="titleblock"><div class="titlebar"><a class="back" href="index.html" title="back to the table of all proteins"><span aria-hidden="true">←</span> All proteins</a><h1 title="the ID as written in the proteome FASTA">loading…</h1><span class="pn"></span><span class="len"></span></div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>
 <header class="top">%s%s%s</header>
 <main><div class="withviewer noviewer"><div id="grid"></div></div>
 <section class="below" id="biomni" data-base="" data-undrawn="1"></section><section class="below" id="biomni-more"></section>%s</main>

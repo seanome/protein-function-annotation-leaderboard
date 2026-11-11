@@ -374,10 +374,42 @@ def test_pointing_at_a_hit_moves_nothing_on_protein_html(site):
     FUN004057 has a narrow disorder box and a coiled coil at its last residues; FUN005955.2 has
     five predictions and kmerseek hits; FUN000001 has no prediction."""
     out, _ = site
-    pages = ["protein.html#FUN004057", "protein.html#FUN005955.2", "protein.html#FUN000001"]
+    pages = ["protein.html#FUN004057", "protein.html#FUN005955.2", "protein.html#FUN000001", "protein.html#FUN001586"]
     res = check_hover.check(out, pages)
     assert len(res) == len(pages) * len(check_hover.WIDTHS)
     by = {(pg, w): r for pg, w, r in res}
     assert all(r["tried"] == r["hits"] > 0 for r in by.values())  # under MAX_HITS, so every box was tried
     assert by[("protein.html#FUN004057", 1400)]["labels"] == 2 and by[("protein.html#FUN005955.2", 1400)]["labels"] == 5
     assert not check_hover.failures(res), check_hover.failures(res)
+
+
+def test_a_click_on_a_bar_or_a_domain_brings_up_its_hits(site):
+    """In a browser, on protein.html: a click on a bar of a program's histogram keeps only the hits
+    that reach the bar's residues and unfolds that program; a click on a box of the domain lane does
+    the same for the box and unfolds every program with such a hit. Clearing folds them again. The
+    link back to all proteins is the first thing in the title bar, at the top left."""
+    r = check_hover.clicks(site[0], "protein.html#FUN005955.2")
+    assert r["before"] == 0  # every program starts folded
+    assert r["back"]["text"].endswith("All proteins") and r["back"]["href"] == "index.html"
+    assert r["back"]["first"] and r["back"]["left"] < 40 and r["back"]["top"] < 40
+    for key in ("bar", "dom"):
+        c = r[key]
+        assert c["rows"] > 0 and len(c["ranges"]) == c["rows"] and all(c["ranges"])
+        assert all(lo <= c["b"] and hi >= c["a"] for lo, hi in c["ranges"]), key  # every hit shown reaches the residues clicked
+        assert "%d\u2013%d" % (c["a"], c["b"]) in c["count"]
+    assert r["bar"]["open"] == [r["bar"]["k"]]
+    assert len(r["dom"]["open"]) >= 1 and r["dom"]["on"] and r["dom"]["l"] in r["dom"]["count"]
+    for key in ("barCleared", "domCleared"):
+        assert r[key]["rows"] == 0 and r[key]["open"] == [] and "\u2013" not in r[key]["count"]
+
+
+def test_a_protein_only_kmerseek_found_shows_kmerseek_e_value(site):
+    """The first page's E-value column is DIAMOND's. A protein that only kmerseek found has no DIAMOND
+    match, so the page writes kmerseek's E-value there with the program's name under it."""
+    js = (HERE / "assets" / "full.js").read_text()
+    assert "!r[9] && r[19] ? '<div class=\"num ekm\"" in js and '<span class="s">kmerseek</span>' in js
+    F = read_js(site[0] / "full" / "rows.js", "window.FULL=")
+    only = [r for r in F["rows"] if r[19]]
+    assert len(only) == site[1]["only_kmerseek_3"] > 0
+    assert all(not r[9] and 0 <= r[19][0] <= build_full.ONLY_KMERSEEK_E for r in only)  # none has a DIAMOND E-value to hide
+

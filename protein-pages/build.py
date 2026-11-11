@@ -1822,8 +1822,9 @@ def dense_page(pid, pname, L, ctx, st, whole, page_data):
     head = head.replace("</head>", '<link rel="stylesheet" href="%sdense-bhf.css%s">%s</head>' % (
         pre, ASSET_VER[0], '<link rel="stylesheet" href="%smolstar/pdbe-molstar-light.css">' % pre if st else ""), 1)
     out = [head,
-           '<div class="titleblock"><div class="titlebar"><h1 title="%s">%s</h1>%s<span class="len">%s amino acids</span>'
-           '<a class="back" href="../index.html">All proteins</a></div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>'
+           '<div class="titleblock"><div class="titlebar"><a class="back" href="../index.html" title="back to the table of all proteins">'
+           '<span aria-hidden="true">←</span> All proteins</a><h1 title="%s">%s</h1>%s<span class="len">%s amino acids</span>'
+           '</div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>'
            % (esc(title), esc(pid), '<span class="pn">%s</span>' % esc(pname) if pname else "", "{:,}".format(L)),
            '<header class="top">', DENSE_FILTERS % (round(math.log10(SHOW_E)), round(math.log10(COUNT_E))),
            dense_key(ctx, bool(page_data.get("plddt")), bool(st), (("diamond", "DIAMOND"), ("unifire", "UniFIRE")) if ctx["biomni"] else ()), DENSE_COLHEAD, '</header>',
