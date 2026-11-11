@@ -341,6 +341,6 @@ def test_every_citation_is_on_the_index_with_its_doi(site):
     out, _ = site
     html = (out / "index.html").read_text()
     dois = [c[7] for c in build_full.CITATIONS]
-    assert len(set(dois)) == len(dois) == 17 and all(d.startswith("10.") for d in dois)
+    assert len(set(dois)) == len(dois) == 19 and all(d.startswith("10.") for d in dois)
     assert all('href="https://doi.org/%s"' % d in html for d in dois)
     assert all(build_full.build.esc(what) in html for what, _ in build_full.NO_PAPER)
