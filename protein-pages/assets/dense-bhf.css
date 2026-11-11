@@ -233,6 +233,10 @@ header.top .filters .btn:hover{background:var(--wash);color:var(--ink)}
 .filters #overlap,.sentence #overlap{display:block;height:17px;line-height:17px;min-height:17px;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* last in the filter row, so the button after it in the markup stays on the buttons' line */
 .filters #overlap{order:99;margin-top:-4px}
+/* the alphabet's classes get a line of their own in the key, one line high and never wrapping: their text changes with the
+   kmerseek hit under the pointer (2 classes or 20), and sharing a line with the other key entries made the key wrap differently */
+.key #alphakey{flex:0 0 100%;min-width:0;height:16px;flex-wrap:nowrap;overflow:hidden}
+.key #alphakey>*{flex:none}
 .track .tl{text-anchor:start}
 .key{padding:3px 14px 3px;gap:2px 12px;font-size:11.5px}
 .sentence #sentnote .note{max-width:none}

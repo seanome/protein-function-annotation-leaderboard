@@ -665,7 +665,21 @@
     if (!kept.length && !pred.length && !agree.length) return "";  // nothing to draw (protein.html: no hmmscan row)
     const lanes = [];  // brackets that overlap go on separate lines
     const laneOf = agree.map((a) => { let li = lanes.findIndex((end) => a.a > end + 2); if (li < 0) { lanes.push(a.b); li = lanes.length - 1; } else lanes[li] = a.b; return li; });
-    const hh = 16 + (pred.length ? 14 : 0) + lanes.length * 15;
+    // a prediction's label goes inside its dashed box when it fits, else beside it (to the right, or to the left when the
+    // right has no room), never over the box; a prediction whose box or label would touch one already placed goes a line lower
+    const predLines = [];
+    const predAt = pred.map((p) => {
+      const x0 = sx(p.a), w = wx(p.a, p.b), lab = `${p.l} ${p.a}–${p.b}`, tw = lab.length * 5.6;
+      let tx = x0 + w / 2, anchor = "middle", lo = x0, hi = x0 + w;
+      if (tw + 6 > w) {
+        if (x0 + w + 4 + tw <= TW || TW - (x0 + w) >= x0) { tx = x0 + w + 4; anchor = "start"; hi = tx + tw; }
+        else { tx = x0 - 4; anchor = "end"; lo = tx - tw; }
+      }
+      let li = predLines.findIndex((end) => lo > end + 6);
+      if (li < 0) { predLines.push(hi); li = predLines.length - 1; } else predLines[li] = hi;
+      return { x0, w, lab, tx, anchor, li };
+    });
+    const hh = 16 + predLines.length * 14 + lanes.length * 15;
     let g = svgOpen(hh, "lane") + base(9);
     const on = (a, b) => (region && region[0] === a && region[1] === b ? " on" : "");
     for (const i of kept) {
@@ -676,13 +690,13 @@
     }
     let y = 16;
     if (pred.length) {
-      for (const p of pred) {
-        const x0 = sx(p.a), w = wx(p.a, p.b);
+      pred.forEach((p, n) => {
+        const { x0, w, lab, tx, anchor, li } = predAt[n], yl = y + li * 14;
         g += `<g class="dom${on(p.a, p.b)}" data-a="${p.a}" data-b="${p.b}" data-l="${esc(p.l)}"><title>${esc(p.l)}, predicted by InterProScan, residues ${p.a}-${p.b}; not counted as a hit. Click to keep only hits in it.</title>` +
-          `<rect x="${(x0 + 1).toFixed(1)}" y="${y + 2}" width="${Math.max(1, w - 2).toFixed(1)}" height="10" rx="2" fill="transparent" stroke="#3D3D3D" stroke-width="1.2" stroke-dasharray="3 2"/>` +
-          `<text x="${(x0 + w / 2).toFixed(1)}" y="${y + 10}" class="dl" text-anchor="middle">${esc(p.l)} ${p.a}–${p.b}</text></g>`;
-      }
-      y += 14;
+          `<rect class="pred" x="${(x0 + 1).toFixed(1)}" y="${yl + 2}" width="${Math.max(1, w - 2).toFixed(1)}" height="10" rx="2" fill="transparent" stroke="#3D3D3D" stroke-width="1.2" stroke-dasharray="3 2"/>` +
+          `<text x="${tx.toFixed(1)}" y="${yl + 10}" class="dl pred" text-anchor="${anchor}">${esc(lab)}</text></g>`;
+      });
+      y += predLines.length * 14;
     }
     agree.forEach((a, n) => {
       const x0 = sx(a.a), x1 = sx(a.b) + wx(a.b, a.b), yy = y + laneOf[n] * 15;

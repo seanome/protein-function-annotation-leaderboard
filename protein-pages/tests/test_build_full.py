@@ -344,3 +344,17 @@ def test_every_citation_is_on_the_index_with_its_doi(site):
     assert len(set(dois)) == len(dois) == 19 and all(d.startswith("10.") for d in dois)
     assert all('href="https://doi.org/%s"' % d in html for d in dois)
     assert all(build_full.build.esc(what) in html for what, _ in build_full.NO_PAPER)
+
+
+def test_text_that_changes_on_hover_has_a_fixed_place_in_the_header():
+    """Pointing at a hit fills in the overlap note and, for a kmerseek hit, changes the alphabet's
+    classes in the key. Both sit in the fixed header, so each must keep one line whatever its text:
+    hidden-while-empty or free to wrap, it made the header taller and moved every row (2026-11-10).
+    tests/check_hover.py measures the same thing in a browser."""
+    css = (Path(build_full.__file__).parent / "assets" / "dense-bhf.css").read_text()
+    assert "#overlap:empty" not in css
+    rule = lambda sel: next(l for l in css.split("\n") if l.startswith(sel + "{"))
+    note = rule(".filters #overlap,.sentence #overlap")
+    assert all(w in note for w in ("height:17px", "white-space:nowrap", "overflow:hidden"))
+    key = rule(".key #alphakey")
+    assert all(w in key for w in ("flex:0 0 100%", "height:16px", "flex-wrap:nowrap", "overflow:hidden"))
