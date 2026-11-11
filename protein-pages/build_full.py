@@ -634,7 +634,10 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                      # 19: kmerseek's best hit when no other program found anything: [E-value, setting, accession, name], or 0
                      [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0,
                      # 20: the gene groups it is in (gene_groups), or 0
-                     gene_groups(r, pid, uni, aging, mm, fs, fst, km, allo) or 0])
+                     gene_groups(r, pid, uni, aging, mm, fs, fst, km, allo) or 0,
+                     # 21: Foldseek best hits weaker than FOLDSEEK_MAX_E, which field 17 leaves out but the protein's page
+                     # shows: [[index into OTHER_HITS, E-value], ...], or 0
+                     [[i, float(d[pid][4])] for i, d in ((1, fs), (2, fst)) if d and d.get(pid) and float(d[pid][4]) > FOLDSEEK_MAX_E] or 0])
         n_no_other += not found
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})

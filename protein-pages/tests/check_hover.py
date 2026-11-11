@@ -183,12 +183,13 @@ def clicks(site, page_path, width=1400):
 
 
 def s4pred(site, page_path, width=1400):
-    """How many helix and strand bars the strip under the ruler has, whether all lie inside the ruler's
-    drawing, and the text of its key entry."""
-    js = """() => { const svg = document.querySelector(".g.ruler svg"), S = svg.getBoundingClientRect(), bars = [...svg.querySelectorAll("rect.ss")];
+    """How many helix and strand bars the s4pred row has, whether all lie inside its drawing, the text of
+    its key entry and of its name at the left, and whether the row comes right after the ruler."""
+    js = """() => { const row = document.querySelector(".row.ssrow"), svg = row.querySelector("svg"), S = svg.getBoundingClientRect(), bars = [...svg.querySelectorAll("rect.ss")];
       return { helix: svg.querySelectorAll("rect.ss.h").length, strand: svg.querySelectorAll("rect.ss.e").length,
         inside: bars.every((b) => { const r = b.getBoundingClientRect(); return r.left >= S.left - 0.5 && r.right <= S.right + 0.5 && r.bottom <= S.bottom + 0.5; }),
-        key: document.getElementById("sskey").textContent }; }"""
+        key: document.getElementById("sskey").textContent, name: row.querySelector(".name").textContent,
+        afterRuler: row.previousElementSibling.classList.contains("ruler") }; }"""
     httpd = socketserver.TCPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(site)))
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     try:

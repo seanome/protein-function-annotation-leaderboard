@@ -219,6 +219,8 @@ header.top .filters .btn:hover{background:var(--wash);color:var(--ink)}
 .key #alphakey:empty{display:none}
 .key #sskey:empty{display:none}
 .key #sskey svg{vertical-align:middle;margin:0 1px 0 4px}
+.row.ssrow{min-height:30px;align-items:center}
+.row.ssrow .name{align-self:center}
 .colhead button,.colhead>div{font-family:"Source Sans 3",system-ui,sans-serif}
 .num .same{color:var(--secondary)}
 .num .s .re{color:var(--secondary);font-style:italic}

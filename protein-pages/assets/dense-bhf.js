@@ -619,9 +619,7 @@
   // the ruler, with the pLDDT strip under it (same x), so structure confidence sits with the hits
   function rulerRow() {
     const step = L <= 400 ? 50 : L <= 1000 ? 100 : L <= 2500 ? 250 : 500;
-    // s4pred's predicted secondary structure, when the page has it, is the lowest strip: runs of helix, strand and coil
-    const ssRuns = PAGE.ss ? [...PAGE.ss.matchAll(/([HEC])(\d+)/g)].map((m) => [m[1], +m[2]]) : null;
-    let g = svgOpen(ssRuns ? 43 : 34) + `<line x1="0" x2="${TW}" y1="14" y2="14" stroke="#c3c2b7"/>`;
+    let g = svgOpen(34) + `<line x1="0" x2="${TW}" y1="14" y2="14" stroke="#c3c2b7"/>`;
     // a tick label is drawn only where it clears the "1" at the start and the "L aa" at the end (about 6 px a character)
     const endX = TW - (String(L).length + 3) * 6.2 - 6;
     for (let p = step; p < L; p += step) if (sx(p + 1) + String(p).length * 3.2 < endX && sx(p + 1) - String(p).length * 3.2 > 12) g += `<line x1="${sx(p + 1).toFixed(1)}" x2="${sx(p + 1).toFixed(1)}" y1="10" y2="14" stroke="#c3c2b7"/><text x="${sx(p + 1).toFixed(1)}" y="9" class="ax" text-anchor="middle">${p}</text>`;
@@ -647,34 +645,38 @@
       const ak = document.getElementById("alphakey");
       if (ak) ak.innerHTML = `<b class="mono">${esc(an)}</b> classes: ` + names.map((c) => `<i class="pl" style="background:${col[c]}"></i><span class="mono">${esc(groups[c].sort().join(""))}</span>`).join(" ") + ` <span class="dim">(the alphabet of the kmerseek hit under the pointer)</span>`;
     }
-    if (ssRuns) {
-      // one grey, two shapes, so helix and strand differ without a new colour: helix a tall dark bar, strand a
-      // lower lighter one, coil the thin line both sit on
-      const SSN = { H: "helix", E: "strand", C: "coil" };
-      g += `<line x1="0" x2="${TW}" y1="38.5" y2="38.5" stroke="#c3c2b7" stroke-width="1"/>`;
-      let a = 1;
-      for (const [c, n] of ssRuns) {
-        const b = a + n - 1, x0 = sx(a).toFixed(1), w = Math.max(0.6, (n / L) * TW).toFixed(1), t = `<title>s4pred: ${SSN[c]}, residues ${a}-${b} (${n})</title>`;
-        if (c === "H") g += `<rect class="ss h" x="${x0}" y="35" width="${w}" height="7" fill="#3D3D3D">${t}</rect>`;
-        else if (c === "E") g += `<rect class="ss e" x="${x0}" y="37" width="${w}" height="3" fill="#8a8a8a">${t}</rect>`;
-        a = b + 1;
-      }
-      const sk = document.getElementById("sskey");
-      if (sk && !sk.firstChild) {
-        const tot = { H: 0, E: 0, C: 0 }; for (const [c, n] of ssRuns) tot[c] += n;
-        const pc = (c) => Math.round((100 * tot[c]) / L);
-        sk.title = "s4pred 1.2.1 predicts helix, strand or coil for each residue from this protein's sequence alone; a prediction, not a measured structure. The shares are of this protein's residues.";
-        sk.innerHTML = `<b>s4pred, predicted from the sequence:</b> <svg width="14" height="9"><rect y="1" width="14" height="7" fill="#3D3D3D"/></svg> helix ${pc("H")}% ` +
-          `<svg width="14" height="9"><rect y="3" width="14" height="3" fill="#8a8a8a"/></svg> strand ${pc("E")}% <svg width="14" height="9"><line x1="0" x2="14" y1="4.5" y2="4.5" stroke="#c3c2b7"/></svg> coil ${pc("C")}%`;
-      }
-    }
     g += "</svg>";
-    const under = [PAGE.plddt && "pLDDT", an && "your protein in a kmerseek alphabet", ssRuns && "s4pred's helix and strand"].filter(Boolean);
+    const under = [PAGE.plddt && "pLDDT", an && "your protein in a kmerseek alphabet"].filter(Boolean);
     const pl = under.length ? ` Under it: ${under.join(", then ")} (key above).` : "";
     return `<div class="g ruler"><div class="lbl">residue 1 to ${L} of your protein, the same axis in every row.${pl}</div><div class="track">${g}</div></div>`;
   }
   // the domain lane: hmmscan's Pfam domains, InterProScan's predictions (dashed) and the families the
   // headline sentence rests on (brackets with the count of programs). Click one to keep only hits in it.
+  // s4pred's predicted secondary structure, a row of its own right under the ruler, named at the left like the domain
+  // row (as a third unnamed strip under the ruler it was not found). One grey, two shapes, so helix and strand differ
+  // without a new colour: helix a tall dark bar, strand a lower lighter one, coil the thin line both sit on.
+  function ssRow() {
+    if (!PAGE.ss) return "";
+    const runs = [...PAGE.ss.matchAll(/([HEC])(\d+)/g)].map((m) => [m[1], +m[2]]), SSN = { H: "helix", E: "strand", C: "coil" };
+    const tot = { H: 0, E: 0, C: 0 }; for (const [c, n] of runs) tot[c] += n;
+    const pc = (c) => Math.round((100 * tot[c]) / L);
+    let g = svgOpen(22, "ss") + `<line x1="0" x2="${TW}" y1="11" y2="11" stroke="#c3c2b7" stroke-width="1"/>`, a = 1;
+    for (const [c, n] of runs) {
+      const b = a + n - 1, x0 = sx(a).toFixed(1), w = Math.max(0.6, (n / L) * TW).toFixed(1), t = `<title>s4pred: ${SSN[c]}, residues ${a}-${b} (${n})</title>`;
+      if (c === "H") g += `<rect class="ss h" x="${x0}" y="4" width="${w}" height="14" fill="#3D3D3D">${t}</rect>`;
+      else if (c === "E") g += `<rect class="ss e" x="${x0}" y="8" width="${w}" height="6" fill="#8a8a8a">${t}</rect>`;
+      a = b + 1;
+    }
+    g += "</svg>";
+    const sk = document.getElementById("sskey");
+    if (sk && !sk.firstChild) {
+      sk.title = "s4pred 1.2.1 predicts helix, strand or coil for each residue from this protein's sequence alone; a prediction, not a measured structure.";
+      sk.innerHTML = `<b>helix and strand (s4pred):</b> <svg width="14" height="12"><rect y="0" width="14" height="12" fill="#3D3D3D"/></svg> helix ` +
+        `<svg width="14" height="12"><rect y="3" width="14" height="6" fill="#8a8a8a"/></svg> strand <svg width="14" height="12"><line x1="0" x2="14" y1="6" y2="6" stroke="#c3c2b7"/></svg> coil`;
+    }
+    const why = "s4pred 1.2.1 predicts helix, strand or coil for each residue from this protein's sequence alone; a prediction, not a measured structure. The shares are of this protein's residues.";
+    return `<div class="g row ssrow"><div class="name"><b>helix and strand, predicted</b><div class="s" title="${why}">s4pred, from the sequence alone: helix ${pc("H")}%, strand ${pc("E")}%, coil ${pc("C")}%</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt"></div><div class="track">${g}</div></div>`;
+  }
   function laneRow() {
     // Pfam domains: hmmscan's; where hmmscan did not run (protein.html), InterProScan's Pfam matches, as on the first page
     let famSrc = "hmmscan", fam = H.map((h, i) => i).filter((i) => H[i].k === "hmmscan" && shownE(H[i]));
@@ -942,7 +944,7 @@
     document.documentElement.style.setProperty("--hh", headerEl.offsetHeight + "px");
     measure();
     YMAX = Math.max(1, ...PROG.map((k) => coverMax(matchOf(k))));
-    let html = rulerRow() + laneRow() + agreeRow();
+    let html = rulerRow() + ssRow() + laneRow() + agreeRow();
     const silent = [], notRun = [];
     for (const k of PROG) {
       if (NOTRUN[k]) notRun.push(k); else if (!keptOf(k).length && !featsOf(k).length) silent.push(k); else html += progRow(k);

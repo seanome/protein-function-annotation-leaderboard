@@ -439,14 +439,33 @@ def test_s4pred_table_has_every_protein_and_no_residues(site):
 
 
 def test_s4pred_strip_is_drawn_under_the_ruler(site):
-    """In a browser: protein.html draws one bar per helix and strand run of s4pred under the ruler,
-    and the key says what the two bars are with this protein's shares."""
+    """In a browser: protein.html has a row right under the ruler, named "helix and strand, predicted"
+    with s4pred and this protein's shares at the left, with one bar per helix and strand run; the
+    key says what the two bars are."""
     import re
     r = check_hover.s4pred(site[0], "protein.html#FUN005955.2")
     rows = {x["protein_id"]: x["states"] for x in tsv("s4pred_states.tsv")}
     runs = re.findall(r"([HEC])(\d+)", rows["FUN005955.2"])
     assert r["helix"] == sum(1 for c, _ in runs if c == "H") > 0 and r["strand"] == sum(1 for c, _ in runs if c == "E") > 0
-    assert r["inside"] and "helix" in r["key"] and "strand" in r["key"] and "s4pred" in r["key"]
+    assert r["inside"] and r["afterRuler"] and "helix" in r["key"] and "strand" in r["key"] and "s4pred" in r["key"]
     L = sum(int(n) for _, n in runs)
-    assert "helix %d%%" % round(100 * sum(int(n) for c, n in runs if c == "H") / L) in r["key"]
+    assert "helix and strand, predicted" in r["name"] and "s4pred" in r["name"]
+    assert "helix %d%%" % round(100 * sum(int(n) for c, n in runs if c == "H") / L) in r["name"]
+
+
+def test_a_row_with_no_diamond_match_still_says_what_else_was_found(site):
+    """The first page's Swiss-Prot column is DIAMOND's, so its empty state says "no DIAMOND match",
+    not "no match", and the row carries the Foldseek best hits weaker than E-value 0.001 that the
+    protein's own page shows (FUN000001: ProstT5 + Foldseek 0.69 and Foldseek on structure 5.1)."""
+    js = (HERE / "assets" / "full.js").read_text()
+    assert "no DIAMOND match</span>" in js and ">no match<" not in js
+    F = read_js(site[0] / "full" / "rows.js", "window.FULL=")
+    names = [o[0] for o in F["other"]]
+    r = next(r for r in F["rows"] if r[0] == "FUN000001")
+    assert not r[6] and r[17] >> names.index("kmerseek") & 1  # no DIAMOND match, kmerseek has a hit
+    assert [(names[i], e) for i, e in r[21]] == [("ProstT5 + Foldseek", 0.6941), ("Foldseek on structure", 5.123)]
+    # field 21 holds only hits weaker than the cutoff, and never a program that field 17 already counts
+    for r in F["rows"]:
+        for i, e in r[21] or []:
+            assert e > build_full.FOLDSEEK_MAX_E and not r[17] >> i & 1, r[0]
 

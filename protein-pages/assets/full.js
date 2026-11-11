@@ -24,6 +24,13 @@
     drawn: function (r) { return !!r[14]; }, names: function (r) { return r[18] === 1; },
     km3: function (r) { return !!r[19]; }, km5: function (r) { return r[19] && r[19][0] <= 1e-5; }
   };
+  // Foldseek best hits weaker than E-value 0.001 (row field 21): "ProstT5 + Foldseek E 0.69"
+  function weak(r) { return (r[21] || []).map(function (x) { return OTHER[x[0]][0] + " E " + (+x[1].toPrecision(2)); }); }
+  // under "no DIAMOND match": how many other programs have a hit, counted or weaker, so the row does not read as nothing found
+  function anyOther(r) {
+    var n = others(r[17]).length, w = (r[21] || []).length;
+    return n + w === 0 ? "" : n ? n + " other program" + (n > 1 ? "s have" : " has") + " a hit" : w + " weaker hit" + (w > 1 ? "s" : "") + " from other programs";
+  }
   function others(b) { var o = []; for (var i = 0; i < OTHER.length; i++) if (b >> i & 1) o.push(OTHER[i][0]); return o; }
   function nbits(b) { var n = 0; while (b) { n += b & 1; b >>= 1; } return n; }
   var TILE_WORDS = { all: "", sp: "with a Swiss-Prot match", pfam: "with a Pfam domain", none: "with neither a Swiss-Prot match nor a Pfam domain",
@@ -112,8 +119,8 @@
       '<span class="s">' + names + (iso(r[0]) ? '<span class="dr">· isoform ' + iso(r[0])[0] + " of " + iso(r[0])[1] + "</span>" : "") +
       (r[14] ? '<span class="dr">· hits along the protein</span>' : "") + "</span></div>" +
       '<div class="num">' + fmt(r[1]) + "</div>" +
-      '<div class="txt" title="' + esc(r[5]) + '">' + (r[6] ? (isMatch(r) ? esc(r[5]) : '<span class="dim">above the cutoff: ' + esc(r[5]) + "</span>") : '<span class="dim">no match</span>') +
-        '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : "") +
+      '<div class="txt" title="' + esc(r[5]) + '">' + (r[6] ? (isMatch(r) ? esc(r[5]) : '<span class="dim">above the cutoff: ' + esc(r[5]) + "</span>") : '<span class="dim" title="DIAMOND found no Swiss-Prot protein at E-value 0.001 or below. Other programs can still have a hit: see the column of other programs.">no DIAMOND match</span>') +
+        '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : anyOther(r) ? anyOther(r) + (mmo ? " · " : "") : "") +
         (mmo ? (r[6] ? " · " : "") + "MMseqs2's best: " + '<span class="mono">' + esc(r[16][3]) + "</span>" : "") + "</span></div>" +
       '<div class="num">' + (r[7] === null ? "" : r[7].toFixed(1) + "%") + (r[8] === null ? "" : '<span class="s">covers ' + Math.round(r[8]) + "%</span>") + "</div>" +
       // the column is DIAMOND's E-value; a protein that only kmerseek found has none, so kmerseek's is shown and labelled
@@ -126,7 +133,8 @@
       (st.grp >= 0 && grpHits(r).length ? '<div class="txt" title="' + esc(grpHits(r).map(grpText).join("\n")) + '">' + esc(grpText(grpHits(r)[0])) +
         (grpHits(r).length > 1 ? '<span class="s">and ' + (grpHits(r).length - 1) + " more program" + (grpHits(r).length > 2 ? "s" : "") + " (hover)</span>" : "") + "</div>" :
       r[19] && (st.tile === "km3" || st.tile === "km5") ? '<div class="txt" title="' + esc(r[19][3] + " (" + r[19][2] + "), " + r[19][1]) + '">' + esc(r[19][3]) + '<span class="s">kmerseek\'s best hit, ' + esc(r[19][2]) + " · " + esc(r[19][1]) + "</span></div>" :
-      '<div class="txt" title="' + esc(others(r[17]).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">none</span>') + "</div>") +
+      '<div class="txt" title="' + esc(others(r[17]).concat(weak(r)).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">' + (r[21] ? "none at E ≤ 0.001" : "none") + "</span>") +
+        (r[21] ? '<span class="s" title="best hits weaker than E-value 0.001: not counted here, shown on the protein\'s page">weaker: ' + esc(weak(r).join(", ")) + "</span>" : "") + "</div>") +
       '<div class="num">' + fmt(r[13]) + (r[13] === 1 ? '<span class="s">alone</span>' : "") + "</div>" +
       '<div class="track">' + track(r) + "</div></div>";
   }
