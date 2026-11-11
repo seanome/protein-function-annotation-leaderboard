@@ -18,6 +18,9 @@ sys.path.insert(0, str(HERE))
 import build  # noqa: E402
 import build_full  # noqa: E402
 
+sys.path.insert(0, str(HERE / "tests"))
+import check_hover  # noqa: E402  (needs Playwright: pip install -r requirements-test.txt)
+
 FULL = HERE / "full_inputs"
 
 
@@ -113,6 +116,10 @@ def test_drawn_proteins_matched_by_sequence(tmp_path):
     assert page["FUN019272.2"] == "proteins/FUN019272_TTN.1.html" and page["FUN019272"] == ""
     assert page["FUN008084"] == "proteins/%s.html" % build.safe("FUN008084_FUN008084")
     assert (out / "drawn.html").exists() and (out / "proteins" / "FUN019272_TTN.1.html").exists()
+    # in a browser: pointing at a hit on a test protein's page moves nothing, and no prediction label is misplaced
+    res = check_hover.check(out, ["proteins/FUN036660_MYO10.2.html", "proteins/FUN019272_TTN.1.html"], max_hits=60)
+    assert len(res) == 2 * len(check_hover.WIDTHS) and all(r["tried"] >= 50 for _, _, r in res)
+    assert not check_hover.failures(res), check_hover.failures(res)
 
 
 def test_out_guard(tmp_path):
@@ -358,3 +365,19 @@ def test_text_that_changes_on_hover_has_a_fixed_place_in_the_header():
     assert all(w in note for w in ("height:17px", "white-space:nowrap", "overflow:hidden"))
     key = rule(".key #alphakey")
     assert all(w in key for w in ("flex:0 0 100%", "height:16px", "flex-wrap:nowrap", "overflow:hidden"))
+
+
+def test_pointing_at_a_hit_moves_nothing_on_protein_html(site):
+    """In a browser, at three window widths: on protein.html, the page of every protein without a
+    drawn page, pointing at any hit box leaves the fixed header and every row where they were, and
+    the labels of the dashed prediction boxes lie over no box, no other label and not off the edge.
+    FUN004057 has a narrow disorder box and a coiled coil at its last residues; FUN005955.2 has
+    five predictions and kmerseek hits; FUN000001 has no prediction."""
+    out, _ = site
+    pages = ["protein.html#FUN004057", "protein.html#FUN005955.2", "protein.html#FUN000001"]
+    res = check_hover.check(out, pages)
+    assert len(res) == len(pages) * len(check_hover.WIDTHS)
+    by = {(pg, w): r for pg, w, r in res}
+    assert all(r["tried"] == r["hits"] > 0 for r in by.values())  # under MAX_HITS, so every box was tried
+    assert by[("protein.html#FUN004057", 1400)]["labels"] == 2 and by[("protein.html#FUN005955.2", 1400)]["labels"] == 5
+    assert not check_hover.failures(res), check_hover.failures(res)

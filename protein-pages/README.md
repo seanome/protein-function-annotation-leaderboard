@@ -379,6 +379,10 @@ equal counts taken from the tables, and that each of the 51 test-set pages is li
 drawn `FUN019272_TTN.1` is the tables' `FUN019272.2`, 2,160 aa).
 
 ```bash
+pip install -r requirements-test.txt
+```
+
+```bash
 python -m pytest tests/
 ```
 
@@ -396,5 +400,8 @@ explains, that the six class numbers add up to the total on the index and in `su
 and that each page's sentence matches its index row ("N of the M programs run", and the
 status). `check_boxes.py` picks boxes at random and checks them against the line of the
 tool's file they came from, and the alignment's residues against the FASTA files; it exits 1
-if any fails. `tests/screenshots.py` takes full-page screenshots with Playwright
+if any fails. `tests/check_hover.py` opens pages in a browser at three window widths, points at each
+hit box and fails if the fixed header or any row moves, or if the label of a dashed prediction box lies
+over a box, another label or the edge; pytest runs it on five pages, so the tests need Playwright and
+Google Chrome (or `python -m playwright install chromium`). `tests/screenshots.py` takes full-page screenshots with Playwright
 (`PROTEIN_ID:kmerseek` opens that protein's first kmerseek box).

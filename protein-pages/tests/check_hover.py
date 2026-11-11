@@ -17,7 +17,8 @@ than its own (inside its own is allowed when all of it fits), must not touch ano
 must stay inside the drawing. Until 2026-11-10 a label was centred on its box whatever its width.
 
 Prints one line per page and width, and exits 1 if any box moved anything or any label fails.
-Needs Playwright and Google Chrome.
+Needs Playwright, and Google Chrome or Playwright's own Chromium (python -m playwright install chromium).
+pytest runs it too: tests/test_build_full.py calls check() on pages of the sites it builds.
 """
 import functools
 import http.server
@@ -79,6 +80,21 @@ PROBE = """async (maxHits) => {
 }"""
 
 
+def launch(p):
+    """Google Chrome when it is installed, else the Chromium that `playwright install chromium` fetches."""
+    try:
+        return p.chromium.launch(channel="chrome", headless=True)
+    except Exception:
+        return p.chromium.launch(headless=True)
+
+
+def failures(results):
+    """One line for each page and width where a hit box moved the page or a label is misplaced."""
+    return ["%s at %d px: %d of %d hit boxes moved the page (most %.0f px, %s); labels: %s" % (
+        pg, w, r["moved"], r["tried"], r["worst"], r["example"], "; ".join(r["bad"]) or "fine")
+        for pg, w, r in results if r["tried"] == 0 or r["moved"] or r["bad"]]
+
+
 class Quiet(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -92,7 +108,7 @@ def check(site, pages, widths=WIDTHS, max_hits=MAX_HITS):
     out = []
     try:
         with sync_playwright() as p:
-            b = p.chromium.launch(channel="chrome", headless=True)
+            b = launch(p)
             for w in widths:
                 page = b.new_page(viewport={"width": w, "height": 900})
                 for pg in pages:

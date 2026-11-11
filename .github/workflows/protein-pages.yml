@@ -18,7 +18,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install biopython pytest
+      - run: pip install -r requirements-test.txt
+      # the browser that tests/check_hover.py drives from pytest
+      - run: python -m playwright install --with-deps chromium
       - run: python -m pytest -q tests/
       - run: python build.py test_inputs/data --out site --jobs 2
       - run: python tests/check_site.py site
