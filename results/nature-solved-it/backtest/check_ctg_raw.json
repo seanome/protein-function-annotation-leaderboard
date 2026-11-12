@@ -1,0 +1,268 @@
+{
+ "B101": {
+  "nct": "NCT02446340",
+  "title": "Multiple Ascending Dose Safety Study of ShK-186 (Dalazatide) in Healthy Volunteers",
+  "start": "2013-11",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE1"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "dalazatide"
+   ],
+   [
+    "DRUG",
+    "placebo"
+   ]
+  ]
+ },
+ "B102": {
+  "nct": "NCT00040573",
+  "title": "Safety and Tolerability Study of 131I-TM-601 to Treat Adult Patients With Recurrent Glioma.",
+  "start": "2002-06",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE1",
+   "PHASE2"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "131I-TM-601"
+   ]
+  ]
+ },
+ "B103": {
+  "nct": "NCT00141011",
+  "title": "Ancrod (Viprinex\u2122) for the Treatment of Acute, Ischemic Stroke",
+  "start": "2005-09",
+  "status": "TERMINATED",
+  "phase": [
+   "PHASE3"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "Ancrod (Viprinex)"
+   ],
+   [
+    "DRUG",
+    "Placebo"
+   ]
+  ]
+ },
+ "B104": {
+  "nct": "NCT00073554",
+  "title": "Alfimeprase for Thrombolysis in Acute Peripheral Arterial Occlusion",
+  "start": "2003-06",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE2"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "Alfimeprase"
+   ]
+  ]
+ },
+ "B105": {
+  "nct": "NCT00638781",
+  "title": "Desmoteplase in Acute Ischemic Stroke (DIAS)",
+  "start": "2001-03",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE2"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "Desmoteplase"
+   ],
+   [
+    "DRUG",
+    "Desmoteplase"
+   ],
+   [
+    "DRUG",
+    "Desmoteplase"
+   ],
+   [
+    "DRUG",
+    "Placebo"
+   ]
+  ]
+ },
+ "B106": {
+  "nct": "NCT00116012",
+  "title": "Anticoagulation With rNAPc2 to Eliminate MACE/TIMI 32",
+  "start": "2005-06",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE2"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "rNAPc2"
+   ]
+  ]
+ },
+ "B107": {
+  "nct": "NCT00563394",
+  "title": "MSI-78 Topical Cream vs. Oral Ofloxacin in the Treatment of Infected Diabetic Ulcers",
+  "start": "1994-08",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE3"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "ofloxacin"
+   ],
+   [
+    "DRUG",
+    "MSI-78"
+   ]
+  ]
+ },
+ "B108": {
+  "nct": "NCT01481532",
+  "title": "Open Label Clinical Trial of Intravenous Crotoxin Part 3",
+  "start": "2026-10",
+  "status": "NOT_YET_RECRUITING",
+  "phase": [
+   "PHASE1"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "Crotoxin"
+   ]
+  ]
+ },
+ "B109": {
+  "nct": "NCT01578564",
+  "title": "Safety and Tolerability Study of SOR-C13 in Subjects With Advanced Cancers Commonly Known to Express the TRPV6 Channel",
+  "start": "2012-07",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE1"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "SOR-C13"
+   ]
+  ]
+ },
+ "B110": {
+  "nct": "NCT00482937",
+  "title": "Safety and Pharmacodynamic Study of CD-NP",
+  "start": "2007-01",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE1"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "CD-NP"
+   ]
+  ]
+ },
+ "B111": {
+  "nct": "NCT04269954",
+  "title": "The Efficacy and Safety of Batroxobin Combined With Anticoagulation in Cerebral Venous Sinus Thrombosis",
+  "start": "2020-03-01",
+  "status": "UNKNOWN",
+  "phase": [
+   "PHASE4"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "Batroxobin combined with low molecular weight heparin"
+   ]
+  ]
+ },
+ "B112": {
+  "nct": "NCT00027248",
+  "title": "Safety and Efficacy of MBI 226 for the Prevention of Central Venous Catheter-Related Bloodstream Infections",
+  "start": "2000-09",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE3"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "MBI 226"
+   ]
+  ]
+ },
+ "B113": {
+  "nct": "NCT00022373",
+  "title": "Iseganan Hydrochloride in Preventing Oral Mucositis in Patients Who Are Undergoing Radiation Therapy for Head and Neck Cancer",
+  "start": "2000-12",
+  "status": "UNKNOWN",
+  "phase": [
+   "PHASE3"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "iseganan HCl oral solution"
+   ],
+   [
+    "PROCEDURE",
+    "management of therapy complications"
+   ]
+  ]
+ },
+ "B114": {
+  "nct": "NCT00317512",
+  "title": "Pilot Study of Hemoglobin Based Oxygen Therapeutics in Elective Coronary Revascularization",
+  "start": "2003-12",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE2"
+  ],
+  "ivs": [
+   [
+    "PROCEDURE",
+    "Percutaneous Coronary Revascularization"
+   ],
+   [
+    "DRUG",
+    "Hemoglobin-Based Oxygen Carrier-201 (HBOC-201)"
+   ],
+   [
+    "DRUG",
+    "Voluven"
+   ]
+  ]
+ },
+ "B115": {
+  "nct": "NCT00980083",
+  "title": "GLP-1 - Regulatory Mechanism of Postprandial Glycemia",
+  "start": "2004-10",
+  "status": "COMPLETED",
+  "phase": [
+   "PHASE1"
+  ],
+  "ivs": [
+   [
+    "DRUG",
+    "Saline"
+   ],
+   [
+    "DRUG",
+    "Exendin(9-39)amide"
+   ]
+  ]
+ }
+}
