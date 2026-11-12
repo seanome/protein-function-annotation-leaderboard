@@ -242,6 +242,34 @@ Alignments are stored next to each page (`proteins/<ID>.aln.js`) and read on the
    its kind (`CATEGORIES`) and a shape no other program of that kind uses, and change "8
    programs" in the text.
 
+## Pages for every protein (build_full.py)
+
+`build_full.py` makes pages for all 45,339 proteins of the *Botryllus schlosseri* proteome from
+annotation tables a Biomni agent made (see `full_inputs/README.md` for what each table holds and
+how it was made). These tables give no positions, so these pages list each protein's best
+Swiss-Prot hit, the GO terms and UniProt keywords of that entry, its Pfam domains, its immune
+categories and their evidence, jackhmmer hits from immune seed proteins, DIAMOND hits to
+Fester and BHF, and the other proteins in its MMseqs2 cluster. Nothing is drawn along the protein.
+
+```
+python build.py test_inputs/data --out site
+python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/proteins.fasta --out site_full
+```
+
+- `index.html` lists every protein: counts that filter the table when clicked, bars of the
+  immune categories and of how the proposed name compares with the existing one, a search, and
+  the table, shown 100 rows at a time and sorted by clicking a column heading.
+- `protein.html#FUN000002` shows one protein. There is one such page, not 45,339: the ID after
+  `#` picks the protein, and its data come from one of 96 files in `full/`, picked by a hash
+  of the ID. This keeps the site to about 340 files and 133 MB, small enough to publish as one
+  Artifact (at most 511 files).
+- With `--drawn`, the site made by `build.py` is copied in, its index becomes `drawn.html`, and
+  each protein with the same sequence as a drawn one links to its drawing: 54 proteins reach the
+  51 drawn pages, since four proteins share one 123-residue sequence. Matching is by sequence,
+  because the two FASTA files name isoforms differently.
+- `--out` follows the same rule as build.py's: an empty folder, or one holding
+  `full_summary.json`, else the script exits with status 2.
+
 ## Test set
 
 `test_inputs/data/` holds the 51-protein test set: 50 *Botryllus schlosseri* proteins drawn at
@@ -251,6 +279,13 @@ Sherlock, and `cut_test_data.py`, which cut the files small enough to commit. Se
 `test_inputs/PROVENANCE.md`.
 
 ## Checks
+
+`tests/test_build_full.py` checks, on the committed tables, that `name_status` is the comparison
+the index says it is on every row, that the isoform naming agrees with DIAMOND's query lengths on
+all 832 allorecognition rows, that every protein is in the one data file its hash names (the
+hash is run in both Python and, when node is installed, JavaScript), that the counts on the index
+equal counts taken from the tables, and that each of the 51 drawn pages is linked by sequence (the
+drawn `FUN019272_TTN.1` is the tables' `FUN019272.2`, 2,160 aa).
 
 ```bash
 python -m pytest tests/
