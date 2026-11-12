@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 2,
+   "complete_single": 596,
+   "completeness_pct": 88.99,
+   "fragmented": 63,
+   "lineage": "metazoa_odb12",
+   "missing": 11,
+   "short_summary_c_pct": 89.0
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 0,
+   "complete_single": 112,
+   "completeness_pct": 86.82,
+   "fragmented": 15,
+   "lineage": "eukaryota_odb12",
+   "missing": 2,
+   "short_summary_c_pct": 86.8
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "atlas species",
+ "n_interpro_match": 14289,
+ "n_proteins": 14619,
+ "n_sprot_hit": 14294,
+ "n_uncharacterized_name": 146,
+ "n_unlabelled": 234,
+ "proteome_taxid": "8932",
+ "species": "Columba livia",
+ "uncharacterized_name_pct": 1.0,
+ "unlabelled_pct": 1.6,
+ "upid": "UP000053872"
+}

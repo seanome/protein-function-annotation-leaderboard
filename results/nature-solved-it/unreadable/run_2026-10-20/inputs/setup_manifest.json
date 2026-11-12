@@ -1,0 +1,19 @@
+{
+ "relnotes": {
+  "bytes": 1146,
+  "fetched_utc": "2026-10-20T19:47:28Z",
+  "file": "relnotes.txt",
+  "release": "2026_03",
+  "sha256": "48cc0ef635a5c7c3e3f26628fecd3d2a88f6c9c40a23bda522e41938f96d0422",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/relnotes.txt"
+ },
+ "swissprot_fasta": {
+  "bytes": 93801562,
+  "fetched_utc": "2026-10-20T19:47:34Z",
+  "file": "uniprot_sprot.fasta.gz",
+  "proteins": 575748,
+  "release": "2026_03",
+  "sha256": "a9c3496aa727e61d25d9e1291c9ba28d2c2ad19c0e26569dc083d53ec4169536",
+  "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz"
+ }
+}

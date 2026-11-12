@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 9,
+   "complete_single": 630,
+   "completeness_pct": 95.09,
+   "fragmented": 12,
+   "lineage": "metazoa_odb12",
+   "missing": 21,
+   "short_summary_c_pct": 95.1
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 127,
+   "completeness_pct": 99.22,
+   "fragmented": 0,
+   "lineage": "eukaryota_odb12",
+   "missing": 1,
+   "short_summary_c_pct": 99.2
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "model organism",
+ "n_interpro_match": 11894,
+ "n_proteins": 13814,
+ "n_sprot_hit": 9835,
+ "n_uncharacterized_name": 2414,
+ "n_unlabelled": 1831,
+ "proteome_taxid": "7227",
+ "species": "Drosophila melanogaster",
+ "uncharacterized_name_pct": 17.48,
+ "unlabelled_pct": 13.25,
+ "upid": "UP000000803"
+}

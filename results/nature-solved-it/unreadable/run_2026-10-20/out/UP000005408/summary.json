@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 17,
+   "complete_single": 626,
+   "completeness_pct": 95.68,
+   "fragmented": 17,
+   "lineage": "metazoa_odb12",
+   "missing": 12,
+   "short_summary_c_pct": 95.7
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 4,
+   "complete_single": 119,
+   "completeness_pct": 95.35,
+   "fragmented": 2,
+   "lineage": "eukaryota_odb12",
+   "missing": 4,
+   "short_summary_c_pct": 95.3
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "leaderboard reference",
+ "n_interpro_match": 24219,
+ "n_proteins": 30272,
+ "n_sprot_hit": 18368,
+ "n_uncharacterized_name": 8054,
+ "n_unlabelled": 5877,
+ "proteome_taxid": "29159",
+ "species": "Magallana gigas",
+ "uncharacterized_name_pct": 26.61,
+ "unlabelled_pct": 19.41,
+ "upid": "UP000005408"
+}
