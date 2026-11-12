@@ -1,0 +1,80 @@
+{
+ "page": "tools/index.html",
+ "title": "Tool cards",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit_date": "2026-10-15T12:40:15Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T12:40:50Z",
+  "sha256": {
+   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
+   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
+   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d"
+  }
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 548ec5b8 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "Tool cards"
+  },
+  {
+   "tag": "p",
+   "text": "One card per tool: what it compares, what it needs, how to read its score, where it is strong and weak in the table, what it costs, and the exact command that was run."
+  },
+  {
+   "tag": "li",
+   "text": "phmmeraligns amino-acid letters"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2aligns amino-acid letters"
+  },
+  {
+   "tag": "li",
+   "text": "jackhmmerbuilds a profile of a protein family"
+  },
+  {
+   "tag": "li",
+   "text": "MMseqs2, three roundsbuilds a profile of a protein family"
+  },
+  {
+   "tag": "li",
+   "text": "HH-suite (hhsearch)builds a profile of a protein family"
+  },
+  {
+   "tag": "li",
+   "text": "Foldseekcompares 3-D shape letters (3Di)"
+  },
+  {
+   "tag": "li",
+   "text": "ProstT5 + Foldseekcompares 3-D shape letters (3Di)"
+  },
+  {
+   "tag": "li",
+   "text": "kmerseekcounts shared k-mers in a reduced alphabet"
+  },
+  {
+   "tag": "li",
+   "text": "hmmscan with Pfamscans curated Pfam family models"
+  }
+ ],
+ "data": {
+  "cards": [
+   "foldseek.json",
+   "hhblits.json",
+   "hmmer3_jackhmmer.json",
+   "hmmer3_phmmer.json",
+   "hmmscan.json",
+   "kmerseek.json",
+   "mmseqs2_iterative.json",
+   "mmseqs2_seqseq.json",
+   "prostt5.json"
+  ]
+ }
+}
