@@ -13,37 +13,59 @@ plus InterProScan.
 ## Two E-value thresholds
 
 - A hit is **drawn** when its E-value is at most 10, the `-E 10` the searches were run with.
-- A hit **counts** when its E-value is at most 0.001 (`--count-at`, a power of 10). Counted
-  hits make the sentence at the top of a protein page, the "programs with a hit" line, the
-  index page's seven numbers, the table's program count, Pfam family, small line and gene
-  column, and `summary.json`.
-- Two things use every drawn hit instead: the table's "Best E-value, any tool" column, with
-  the index slider that filters on it, and the search box. So a protein with no counted hit
-  can still show a best E-value, such as BHF's 1.2e-03.
+- A hit **counts** when its E-value is at most 10 (`--count-at`, a power of 10), the same
+  as drawn. Counted hits make the sentence at the top of a protein page as built, the
+  "programs with a hit" line, the index page's seven numbers, the table's program count, Pfam
+  family, small line and gene column, and `summary.json`.
+- Two things use every drawn hit: the table's "Best E-value, any tool" column, with the index
+  slider that filters on it, and the search box.
 - hhsearch hits with Prob below 50 are not drawn at all. An InterProScan match from a member
   database whose score is not an E-value (PRINTS, PROSITE and others) is drawn and counts at
   any threshold, unless it is a coil, disorder, membrane or signal-peptide prediction.
 
-Each protein page has an E-value slider that starts at 0.001. Moving it up draws weaker hits,
-up to 10; moving it down draws fewer. The sentence and the index do not move with it.
+Each protein page has an E-value slider that starts at 10 (`--show-at`). Moving it down draws
+fewer hits, and the sentence at the top changes with it: build.py works out the sentence at
+every step of the slider (`sentence_steps`) and the page swaps it in. At E-value 10 weak hits
+count, so two programs can "agree" on a Pfam family from hits that would not count at 0.001;
+move the slider down to see which programs still report a hit.
+
+In the site made by `build_full.py`, a protein that has a drawn page opens on that page. The
+drawing comes first, under the title. Under it is a table of what the whole-proteome programs
+found (Biomni's DIAMOND against Swiss-Prot, hmmsearch with Pfam, jackhmmer from immune seeds
+and FANTASIA, and UniFIRE), then the gene card and the rest of
+those tables. Biomni kept its hits at E-value 0.001 or below, so the slider does not change
+them.
 
 ## What a protein page shows
 
 From top to bottom:
 
 1. The protein ID, its length, and one sentence made by a fixed rule, for example
-   "4 of the 5 programs run report a hit. They agree on Rep_fac_C (PF08542)."
-   The number of programs run is the number with at least one input file; when all 8 were
-   run the sentence says "of 8 programs". There are 10 rows but 8 programs: MMseqs2 run once
+   "10 of the 11 programs run report a hit. Their hits along the protein agree on Kinesin motor
+   domain (PF00225)."
+   There are 12 programs: the 8 drawn with positions, and 4 from Biomni's whole-proteome run
+   that kept only each protein's best hit and not where it lies (DIAMOND against Swiss-Prot,
+   jackhmmer from 24 immune seed proteins, FANTASIA, UniFIRE; read from `biomni_best.json`,
+   which `test_inputs/make_biomni_best.py` makes). The 4 are the last rows of the drawing, with
+   the hit named and "whole protein, no position"; each counts by its own cutoff, which the
+   slider does not change. FANTASIA always names its most similar protein, so it counts only
+   below distance 0.15: below that, its pick shares a GO term with DIAMOND's best hit for about
+   70% of proteins that have both, above it for 30-40% (`figures/fantasia_vs_diamond.png`).
+   The number of programs run is the number with an input file for this protein (FANTASIA was
+   run only on proteins with no Swiss-Prot match or in the immune-gene table); when all were
+   run the sentence says "of 12 programs". There are 14 rows but 12 programs: MMseqs2 run once
    and run for three rounds is one program, and Foldseek on predicted structures and ProstT5 +
    Foldseek is another. Two runs of one program are not two opinions, so they count once.
+   Whether the hits agree is decided from the drawn hits only.
    ("Family" on these pages means a Pfam protein family, or an InterPro entry where
    InterProScan gives one.)
    Hits of two programs **overlap** when they share at least half of the shorter hit. For a
    search hit, the family is the Pfam domain on the matched part of the Swiss-Prot protein,
-   read from InterProScan's output on that protein, or hmmscan's if InterProScan has none.
-   With two or more programs, the sentence ends in one of four ways:
-   - **agree**: "They agree on MHC_I (PF00129)." Overlapping hits name the same family.
+   read from InterProScan's output on that protein, or hmmscan's if InterProScan has none, or
+   else InterPro's own Pfam matches for that protein (`target_pfam_interpro.tsv`).
+   With two or more programs' hits along the protein, the sentence ends in one of four ways:
+   - **agree**: "Their hits along the protein agree on MHC_I (PF00129)." Overlapping hits
+     name the same family.
    - **disagree**: "Their hits overlap but name different Pfam families: A (phmmer),
      B (hmmscan with Pfam)." Overlapping hits both name a family, and none is shared.
    - **overlap, but no family known**: "Their hits overlap, but for one of them no Pfam
@@ -61,14 +83,41 @@ From top to bottom:
 3. The drawing. Each box is one hit, at the position the tool reported on your protein.
    - a ruler of residue positions, in aa;
    - one row per tool. A row says "not run" when that tool's file is not in the input
-     folder. The best 5 hits per tool are drawn; "Show all hits" draws the rest;
-   - if `plddt.tsv` is given, a strip coloured by AlphaFold's confidence scale;
+     folder. The row "Foldseek, 3-D structures" is Foldseek on predicted 3-D structures;
+     when only ProstT5 + Foldseek was run, it says so and points to that next row. Every hit
+     up to the slider's E-value is drawn;
+   - if `plddt.tsv` is given, a strip coloured by AlphaFold's confidence scale; a predicted
+     structure in `structures/<protein ID>.pdb` (or the ID's first part, `FUN008084.pdb`) fills
+     it from its B-factor column when `plddt.tsv` has none, and adds a "3-D structure" section:
+     ribbons drawn in Mol* (PDBe's pdbe-molstar 3.12.0, script loaded from jsDelivr, its stylesheet copied into assets/, with Mol*'s control panels), coloured by that confidence;
+     hovering a hit box or table row shows the hit's residues in black. A model whose
+     neighbouring CA atoms are not about 3.8 angstrom apart gets a warning;
    - "Programs with a hit": at each residue, how many of the programs run (0 to M) have a
      counted hit over it.
 
    Hovering over or tapping a box shows the matched Swiss-Prot protein's entry name, full
    name, gene and species, the Pfam families on the matched part of it, and the tool's
    scores. Clicking a box, or its label, shows the aligned residues.
+
+   Every hit up to the slider's E-value is drawn; the line under a tool's name gives the count.
+   Clicking a tool's name or its triangle (or Enter or Space on it) folds its row into one
+   strip: at each residue, the strip is darker the more of that tool's hits cover it, in the
+   tool's colour, with the highest count written at the right end ("up to 12 hits on one
+   residue"). Clicking the name or the strip again shows each hit. A tool with more than 100 hits
+   at the slider's E-value starts folded; a click keeps its choice until the page is left.
+
+   Under the drawing, "Every hit, in a table" lists the same hits with their E-value, score
+   (bits, or hhsearch's Prob), identity where the program gives it, and position. Clicking a
+   column name sorts by it; clicking a row shows the residues.
+
+   The search box above the drawing looks through the same text as the tooltip: the matched
+   protein's entry name, accession, full name, gene and species, the Pfam families on it, and
+   GO terms when `kmerseek.tsv` has a GO column. Every word typed must appear (case does not
+   matter). Hits that do not match are drawn faint, and the table under the drawing
+   lists only the matching hits. Each tool's row says "N of M hits
+   match", the line beside the box gives the total, and a folded row counts only matching
+   hits. A Swiss-Prot target with no hmmscan or InterProScan rows has no Pfam families to
+   search, so only its names are searched.
 4. If `expression.tsv` is given, one outlined bar per sample.
 5. A footer listing every input file read, with its size and date.
 
@@ -131,6 +180,7 @@ not there.
 | `hmmscan.domtblout` | hmmscan `--domtblout` against Pfam. Rows for Swiss-Prot proteins (not in `proteins.fasta`) give the Pfam families of search targets: their domains with i-Evalue at most 0.001. |
 | `hmmscan.out` | Optional: hmmscan's main output on your proteins, for the alignment of each Pfam model to your protein. |
 | `interproscan.tsv` | InterProScan TSV (15 columns). Rows for Swiss-Prot proteins are used the same way. |
+| `target_pfam_interpro.tsv` | Optional: Pfam domains of Swiss-Prot proteins that neither of the two files above covers, from the InterPro REST API, made by `test_inputs/fetch_target_pfam.py`. Columns `accession`, `pfam`, `pfam_name`, `start`, `end`, `source`; `pfam` is `-` when InterPro lists no Pfam match, and the page then says "none" instead of "not known". |
 | `protein_names.tsv` | Optional: protein ID, then a name (for example the Botryllus histocompatibility factor). Shown on the page and searched. |
 | `plddt.tsv` | Protein ID, then comma-separated pLDDT per residue |
 | `expression.tsv` | Protein ID, then one column per sample |
@@ -203,16 +253,35 @@ Clicking a box opens a panel with:
 - the tool's scores (E-value, score or bits) and the ranges on both proteins with how much of
   each they cover;
 - the matched Swiss-Prot protein's full name, gene, species and Pfam families;
-- a small map: your protein across, the matched protein down, both axes named with the
-  protein and "aa"; every hit on that protein is a line in the colour of its kind of program
-  (the one shown drawn thick), with Pfam domains along both edges;
+- a small map: your protein across, the matched protein down. The x axis is always 220 pixels
+  wide; the y axis is 220 pixels times the ratio of the two lengths, kept between 110 and 320,
+  so each axis has its own residues per pixel. Every hit on that protein is a line in the
+  colour of its kind of program (the one shown drawn thick). Its key, above the plot, says what
+  is drawn on the edges:
+  - along the top, what hmmscan and InterProScan found on your protein, in the marks of the
+    drawing: solid boxes for Pfam families and other signatures (at the slider's E-value; where
+    two overlap, the better E-value), dashed boxes for InterProScan's disorder, coil,
+    membrane-span and signal-peptide predictions. Each box is named inside when the name fits,
+    and on hover;
+  - along the right, open boxes for the Pfam domains of the matched protein, with where they
+    come from (InterProScan or hmmscan run on it, or InterPro's Pfam matches for it);
+  - a short line instead when an edge has nothing to draw;
 - one summary line above the residues, counted from the alignment shown: "226 of 312 aligned
   columns identical (72%), 43 more similar (BLOSUM62 score above 0), 0 gap columns" (for
-  kmerseek, "more in the same class"); and directly under it, where the alignment comes from;
-- the residues, 60 columns a line, with both coordinates, coloured by the residue classes of
-  the kmerseek alphabet in `kmerseek_alphabets.rs` (orange: hydrophobic, blue: polar in
-  hp_lehninger2), identical residues in bold, and a match line (| the same residue,
-  + similar). Pointing at a residue gives its position and class.
+  kmerseek, "more in the same gbmr4 class", in the hit's own alphabet); and directly under it,
+  where the alignment comes from;
+- for kmerseek, the seed line: the runs of k columns (k the hit's k-mer size) in which both
+  proteins are in the same class of the hit's alphabet at every position, where kmerseek's
+  search started. "Seed: 7 overlapping windows of 19 residues in the same gbmr4 class in both,
+  at your protein aa 63-87, PG03_MYCTO aa 882-906." A dark yellow bar (`#b8860b`) marks those
+  columns above and below the residues. build.py finds them (`seed_runs`). A hit with no such
+  run says so: its coordinates or its alphabet do not match what kmerseek used;
+- the residues, 30 to 60 columns a line (as many tens as fit beside the map), with both
+  coordinates, identical residues in bold, and a match line (| the same residue, + similar).
+  For kmerseek the class letters of both proteins in the hit's own alphabet and k-mer size
+  ("gbmr4, k = 19") are shown, and in the two-class hp_ alphabets residues are coloured
+  (orange: hydrophobic, blue: polar). Other programs compare residues, not classes, so their
+  panels show no classes. Pointing at a residue gives its position (and class, for kmerseek).
 
 Which alignment is shown:
 
@@ -248,8 +317,10 @@ Alignments are stored next to each page (`proteins/<ID>.aln.js`) and read on the
 annotation tables a Biomni agent made (see `full_inputs/README.md` for what each table holds and
 how it was made). These tables give no positions, so these pages list each protein's best
 Swiss-Prot hit, the GO terms and UniProt keywords of that entry, its Pfam domains, its immune
-categories and their evidence, jackhmmer hits from immune seed proteins, DIAMOND hits to
-Fester and BHF, and the other proteins in its MMseqs2 cluster. Nothing is drawn along the protein.
+categories and their evidence, jackhmmer hits from immune seed proteins, and the other proteins
+in its MMseqs2 cluster. Biomni's DIAMOND search against Fester and BHF is not shown: those
+reference proteins are from *Botryllus* itself, and the pages show only matches to other species
+(`full_inputs/README.md`). Nothing is drawn along the protein.
 
 ```
 python build.py test_inputs/data --out site
@@ -269,6 +340,15 @@ python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/pro
   because the two FASTA files name isoforms differently.
 - `--out` follows the same rule as build.py's: an empty folder, or one holding
   `full_summary.json`, else the script exits with status 2.
+
+## Hosting at Stanford
+
+`deploy_stanford.sh <site folder>` copies a built site to Stanford personal web space
+(`~/WWW` on AFS, served at `https://web.stanford.edu/~<SUNet ID>/botryllus-proteins/`). It
+writes an `.htaccess` file that lets in only people with a Stanford affiliation, after
+Stanford's web login, because the pages hold unpublished data. The upload goes through
+`rice.stanford.edu` and asks for the SUNet password and Duo. The site is about 240 MB;
+the default AFS quota is 5 GB.
 
 ## Test set
 

@@ -19,6 +19,7 @@ import glob
 import gzip
 import os
 import random
+import re
 import sys
 
 S = os.environ["SCRATCH"]
@@ -180,8 +181,9 @@ targets, strong = set(), set()
 
 
 def acc(t):
-    if t.startswith("AF-"):
-        return t.split("-")[1]
+    if t.startswith("AF-"):  # AF-P12345-F1-model_v6; an isoform AF-C3VPR6-2-F1-model_v6 keeps its -2
+        m = re.match(r"AF-([A-Z0-9]+(?:-\d+)?)-F\d+", t)
+        return m.group(1) if m else t.split("-")[1]
     if t.startswith("sp|") or t.startswith("tr|"):
         return t.split("|")[1]
     return t

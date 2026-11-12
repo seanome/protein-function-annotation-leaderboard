@@ -1,0 +1,807 @@
+{
+"FUN000798_RFC5": {
+"diamond": [
+"Q9D0F6",
+"Replication factor C subunit 5",
+"Rfc5",
+"Mus musculus (Mouse)",
+71.8,
+95.0,
+"6.19e-165"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN000798",
+"unifire": [
+"Belongs to the activator 1 small subunits family",
+7
+]
+},
+"FUN001913_FUN001913": {
+"diamond": 0,
+"fantasia": [
+"Q389D9",
+"T. brucei spp.-specific protein",
+"",
+"Trypanosoma brucei brucei (strain 927/4 GUTat10.1)",
+0.221
+],
+"jackhmmer": 0,
+"proteome_id": "FUN001913",
+"unifire": 0
+},
+"FUN002113_FUN002113": {
+"diamond": 0,
+"fantasia": [
+"Q388Y2",
+"Uncharacterized protein",
+"",
+"Trypanosoma brucei brucei (strain 927/4 GUTat10.1)",
+0.097
+],
+"jackhmmer": 0,
+"proteome_id": "FUN002113",
+"unifire": 0
+},
+"FUN003153_FUN003153": {
+"diamond": 0,
+"fantasia": [
+"A7LJB0",
+"Meloidogyne-induced cotton 15",
+"MIC-15",
+"Gossypium hirsutum (Upland cotton) (Gossypium mexicanum)",
+0.246
+],
+"jackhmmer": 0,
+"proteome_id": "FUN003153",
+"unifire": 0
+},
+"FUN004023_FUN004023": {
+"diamond": 0,
+"fantasia": [
+"Q03345",
+"Protein lin-3 (Abnormal cell lineage protein 3) (Lethal protein 94)",
+"lin-3",
+"Caenorhabditis elegans",
+0.2
+],
+"jackhmmer": 0,
+"proteome_id": "FUN004023",
+"unifire": 0
+},
+"FUN005158_RNF4": {
+"diamond": [
+"P78317",
+"E3 ubiquitin-protein ligase RNF4",
+"RNF4",
+"Homo sapiens (Human)",
+41.9,
+33.0,
+"1.87e-15"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN005158",
+"unifire": [
+"Metal-binding, Zinc, Zinc-finger",
+4
+]
+},
+"FUN005458_CNFNB": {
+"diamond": [
+"Q6DK99",
+"Cornifelin homolog B",
+"cnfn-b",
+"Xenopus laevis (African clawed frog)",
+36.1,
+82.0,
+"3.37e-16"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN005458",
+"unifire": [
+"Belongs to the cornifelin family",
+1
+]
+},
+"FUN007023_FUN007023": {
+"diamond": 0,
+"fantasia": [
+"Q9VYX8",
+"MARVEL domain-containing protein",
+"Dmel\\CG1572",
+"Drosophila melanogaster (Fruit fly)",
+0.17
+],
+"jackhmmer": 0,
+"proteome_id": "FUN007023",
+"unifire": [
+"Membrane, Transmembrane, Transmembrane helix",
+8
+]
+},
+"FUN007690_FUN007690": {
+"diamond": 0,
+"fantasia": [
+"P83056",
+"Kininogen-1 (BVK-1) [Cleaved into: [Ala3,Thr6]-bradykinin; Kininogen-1-associated peptide]",
+"",
+"Bombina variegata (Yellow-bellied toad)",
+0.211
+],
+"jackhmmer": 0,
+"proteome_id": "FUN007690",
+"unifire": 0
+},
+"FUN007709_BIRC2": {
+"diamond": 0,
+"fantasia": [
+"Q24306",
+"Death-associated inhibitor of apoptosis 1 (EC 2.3.2.27) (Apoptosis 1 inhibitor) (E3 ubiquitin-protein ligase th) (Inhibitor of apoptosis 1) (Protein thread) (RING-type E3 ubiquitin transferase Diap1)",
+"Diap1",
+"Drosophila melanogaster (Fruit fly)",
+0.275
+],
+"jackhmmer": 0,
+"proteome_id": "FUN007709",
+"unifire": 0
+},
+"FUN007917_FUN007917": {
+"diamond": 0,
+"fantasia": [
+"Q6V6S1",
+"",
+"",
+"",
+0.209
+],
+"jackhmmer": [
+"MBL",
+"MBL2_HUMAN",
+5,
+"7.64e-15"
+],
+"proteome_id": "FUN007917",
+"unifire": 0
+},
+"FUN008084_FUN008084": {
+"diamond": 0,
+"fantasia": [
+"P32845",
+"Protein nullo",
+"nullo",
+"Drosophila melanogaster (Fruit fly)",
+0.223
+],
+"jackhmmer": 0,
+"proteome_id": "FUN008084",
+"unifire": 0
+},
+"FUN009331_NSMCE1": {
+"diamond": [
+"Q3T0X7",
+"Non-structural maintenance of chromosomes element 1 homolog",
+"NSMCE1",
+"Bos taurus (Bovine)",
+31.0,
+89.0,
+"9.84e-46"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN009331",
+"unifire": [
+"Non-structural maintenance of chromosomes element 1 homolog",
+53
+]
+},
+"FUN009606_FUN009606": {
+"diamond": 0,
+"fantasia": [
+"Q2MGE7",
+"C-type lectin domain-containing protein",
+"clec-172",
+"Caenorhabditis elegans",
+0.222
+],
+"jackhmmer": [
+"MBL",
+"MBL2_HUMAN",
+5,
+"8.22e-26"
+],
+"proteome_id": "FUN009606",
+"unifire": 0
+},
+"FUN009960_FUN009960": {
+"diamond": 0,
+"fantasia": [
+"Q5SF96",
+"Appendage-associated protein",
+"aaaP",
+"Anaplasma marginale (strain St. Maries)",
+0.269
+],
+"jackhmmer": 0,
+"proteome_id": "FUN009960",
+"unifire": 0
+},
+"FUN010636_FUN010636": {
+"diamond": 0,
+"fantasia": [
+"Q9SF12",
+"Inactive serine/threonine-protein kinase/endoribonuclease IRE1-like (Endoplasmic reticulum-to-nucleus signaling 1-like) (Inositol-requiring protein 1-like)",
+"",
+"Arabidopsis thaliana (Mouse-ear cress)",
+0.29
+],
+"jackhmmer": 0,
+"proteome_id": "FUN010636",
+"unifire": 0
+},
+"FUN011537_FUN011537": {
+"diamond": 0,
+"fantasia": [
+"P02817",
+"Amelogenin, X isoform (Class I amelogenin)",
+"AMELX",
+"Bos taurus (Bovine)",
+0.202
+],
+"jackhmmer": 0,
+"proteome_id": "FUN011537",
+"unifire": 0
+},
+"FUN011612_MRC1": {
+"diamond": [
+"P22897",
+"Macrophage mannose receptor 1",
+"MRC1",
+"Homo sapiens (Human)",
+29.6,
+91.0,
+"4.56e-204"
+],
+"fantasia": [
+"Q61830",
+"Macrophage mannose receptor 1 (MMR) (CD antigen CD206)",
+"Mrc1",
+"Mus musculus (Mouse)",
+0.168
+],
+"jackhmmer": [
+"MBL",
+"MBL2_HUMAN",
+5,
+"1.01e-205"
+],
+"proteome_id": "FUN011612",
+"unifire": [
+"Disulfide bond, Kringle, Repeat, Lectin",
+13
+]
+},
+"FUN012923_FUN012923": {
+"diamond": 0,
+"fantasia": [
+"Q9W221",
+"LITAF domain-containing protein",
+"Dmel\\CG13510",
+"Drosophila melanogaster (Fruit fly)",
+0.174
+],
+"jackhmmer": 0,
+"proteome_id": "FUN012923",
+"unifire": [
+"Membrane protein BRI3",
+18
+]
+},
+"FUN013397_MAP2K3": {
+"diamond": [
+"P46734",
+"Dual specificity mitogen-activated protein kinase kinase 3",
+"MAP2K3",
+"Homo sapiens (Human)",
+64.3,
+90.0,
+"2.81e-141"
+],
+"fantasia": "not run",
+"jackhmmer": [
+"IRAK",
+"IRAK4_HUMAN",
+5,
+"8.19e-50"
+],
+"proteome_id": "FUN013397",
+"unifire": [
+"Belongs to the protein kinase superfamily. STE Ser/Thr protein kinase family. MAP kinase kinase subfamily",
+30
+]
+},
+"FUN014187_FUN014187": {
+"diamond": 0,
+"fantasia": [
+"F5HI32",
+"Protein IRL10 (TRL10)",
+"RL10",
+"Human cytomegalovirus (strain Merlin) (HHV-5) (Human herpesvirus 5)",
+0.243
+],
+"jackhmmer": 0,
+"proteome_id": "FUN014187",
+"unifire": 0
+},
+"FUN014295_MSANTD3": {
+"diamond": 0,
+"fantasia": [
+"Q9VEP0",
+"Regulatory protein zeste",
+"bdwf",
+"Drosophila melanogaster (Fruit fly)",
+0.232
+],
+"jackhmmer": 0,
+"proteome_id": "FUN014295",
+"unifire": 0
+},
+"FUN015821_FUN015821.2": {
+"diamond": 0,
+"fantasia": [
+"Q7M3K2",
+"Transposable element P transposase (P-element transposase) (EC 2.7.7.-) (THAP domain-containing protein) (DmTHAP)",
+"T",
+"Drosophila melanogaster (Fruit fly)",
+0.3
+],
+"jackhmmer": 0,
+"proteome_id": "FUN015821.2",
+"unifire": [
+"Metal-binding, Zinc, Zinc-finger",
+4
+]
+},
+"FUN016443_FUN016443.2": {
+"diamond": 0,
+"fantasia": [
+"Q7K0L8",
+"LD48056p",
+"FLASH",
+"Drosophila melanogaster (Fruit fly)",
+0.17
+],
+"jackhmmer": 0,
+"proteome_id": "FUN016443.2",
+"unifire": 0
+},
+"FUN016555_KIF11": {
+"diamond": [
+"P52732",
+"Kinesin-like protein KIF11",
+"KIF11",
+"Homo sapiens (Human)",
+53.4,
+54.0,
+"2.29e-152"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN016555",
+"unifire": [
+"Kinesin-like protein",
+33
+]
+},
+"FUN016734_MDM1": {
+"diamond": [
+"Q8TC05",
+"Stabilizer of axonemal microtubules 6",
+"SAXO6",
+"Homo sapiens (Human)",
+24.8,
+100.0,
+"1.35e-23"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN016734",
+"unifire": [
+"Stabilizer of axonemal microtubules 6",
+14
+]
+},
+"FUN017143_FUN017143": {
+"diamond": 0,
+"fantasia": [
+"Q95RQ9",
+"LD15640p",
+"wake",
+"Drosophila melanogaster (Fruit fly)",
+0.243
+],
+"jackhmmer": 0,
+"proteome_id": "FUN017143",
+"unifire": 0
+},
+"FUN017965_FUN017965": {
+"diamond": 0,
+"fantasia": [
+"Q385X3",
+"Uncharacterized protein",
+"",
+"Trypanosoma brucei brucei (strain 927/4 GUTat10.1)",
+0.172
+],
+"jackhmmer": 0,
+"proteome_id": "FUN017965",
+"unifire": 0
+},
+"FUN019243_CSNK1A1": {
+"diamond": [
+"P48729",
+"Casein kinase I isoform alpha",
+"CSNK1A1",
+"Homo sapiens (Human)",
+86.1,
+100.0,
+"1.77e-203"
+],
+"fantasia": "not run",
+"jackhmmer": [
+"IRAK",
+"IRAK4_HUMAN",
+5,
+"5.37e-35"
+],
+"proteome_id": "FUN019243",
+"unifire": [
+"Casein kinase I isoform alpha",
+42
+]
+},
+"FUN019272_TTN.1": {
+"diamond": [
+"A2ASS6",
+"Titin",
+"Ttn",
+"Mus musculus (Mouse)",
+30.3,
+93.0,
+"4.17e-272"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN019272.2",
+"unifire": [
+"Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family",
+40
+]
+},
+"FUN021695_FUN021695": {
+"diamond": 0,
+"fantasia": [
+"Q68FU0",
+"Transmembrane protein 174",
+"Tmem174",
+"Rattus norvegicus (Rat)",
+0.225
+],
+"jackhmmer": 0,
+"proteome_id": "FUN021695",
+"unifire": 0
+},
+"FUN024044_FUN024044": {
+"diamond": 0,
+"fantasia": [
+"P45442",
+"Protein lag-2 (Lethal protein 461)",
+"lag-2",
+"Caenorhabditis elegans",
+0.241
+],
+"jackhmmer": [
+"MBL",
+"MBL2_HUMAN",
+5,
+"1.99e-14"
+],
+"proteome_id": "FUN024044",
+"unifire": 0
+},
+"FUN024568_FUN024568": {
+"diamond": 0,
+"fantasia": [
+"Q95RQ9",
+"LD15640p",
+"wake",
+"Drosophila melanogaster (Fruit fly)",
+0.267
+],
+"jackhmmer": 0,
+"proteome_id": "FUN024568",
+"unifire": 0
+},
+"FUN024991_FUN024991": {
+"diamond": 0,
+"fantasia": [
+"Q8BU41",
+"C2H2-type domain-containing protein",
+"Rsl1",
+"Mus musculus (Mouse)",
+0.165
+],
+"jackhmmer": [
+"NLR",
+"NLRC5_HUMAN",
+5,
+"6.93e-20"
+],
+"proteome_id": "FUN024991",
+"unifire": [
+"Metal-binding, Repeat, Zinc, Zinc-finger",
+5
+]
+},
+"FUN027726_FUN027726": {
+"diamond": 0,
+"fantasia": [
+"Q9W5W9",
+"PHD finger protein 7, isoform A (PHD finger protein 7, isoform B) (PHD finger protein 7, isoform C)",
+"Phf7",
+"Drosophila melanogaster (Fruit fly)",
+0.391
+],
+"jackhmmer": 0,
+"proteome_id": "FUN027726",
+"unifire": 0
+},
+"FUN028850_FUN028850": {
+"diamond": 0,
+"fantasia": [
+"Q7M3K2",
+"Transposable element P transposase (P-element transposase) (EC 2.7.7.-) (THAP domain-containing protein) (DmTHAP)",
+"T",
+"Drosophila melanogaster (Fruit fly)",
+0.456
+],
+"jackhmmer": 0,
+"proteome_id": "FUN028850",
+"unifire": 0
+},
+"FUN029023_FUN029023": {
+"diamond": 0,
+"fantasia": [
+"A0A8M9PQ91",
+"Membrane protein MLC1 isoform X4",
+"mlc1",
+"Danio rerio (Zebrafish) (Brachydanio rerio)",
+0.124
+],
+"jackhmmer": 0,
+"proteome_id": "FUN029023",
+"unifire": 0
+},
+"FUN029254_FUN029254": {
+"diamond": 0,
+"fantasia": [
+"Q38BT9",
+"Uncharacterized protein",
+"",
+"Trypanosoma brucei brucei (strain 927/4 GUTat10.1)",
+0.203
+],
+"jackhmmer": 0,
+"proteome_id": "FUN029254",
+"unifire": [
+"Metal-binding, Zinc, Zinc-finger",
+4
+]
+},
+"FUN029685_FUN029685": {
+"diamond": 0,
+"fantasia": [
+"Q8SXY5",
+"RE54525p",
+"Rcd2",
+"Drosophila melanogaster (Fruit fly)",
+0.206
+],
+"jackhmmer": 0,
+"proteome_id": "FUN029685",
+"unifire": 0
+},
+"FUN029750_FUN029750": {
+"diamond": 0,
+"fantasia": [
+"P03715",
+"Small outer capsid protein (Soc)",
+"soc",
+"Enterobacteria phage T4 (Bacteriophage T4)",
+0.232
+],
+"jackhmmer": 0,
+"proteome_id": "FUN029750",
+"unifire": 0
+},
+"FUN030951_FUN030951": {
+"diamond": 0,
+"fantasia": [
+"Q582U8",
+"PHD-type domain-containing protein",
+"",
+"Trypanosoma brucei brucei (strain 927/4 GUTat10.1)",
+0.402
+],
+"jackhmmer": 0,
+"proteome_id": "FUN030951",
+"unifire": [
+"Metal-binding, Zinc, Zinc-finger",
+3
+]
+},
+"FUN033682_STK26": {
+"diamond": [
+"Q9P289",
+"Serine/threonine-protein kinase 26",
+"STK26",
+"Homo sapiens (Human)",
+65.9,
+100.0,
+"2.93e-187"
+],
+"fantasia": "not run",
+"jackhmmer": [
+"JAK",
+"JAK1_HUMAN",
+5,
+"3.48e-67"
+],
+"proteome_id": "FUN033682",
+"unifire": [
+"Belongs to the protein kinase superfamily. STE Ser/Thr protein kinase family. STE20 subfamily",
+34
+]
+},
+"FUN034727_FUN034727": {
+"diamond": 0,
+"fantasia": [
+"Q7JWP6",
+"HP1-HOAP-interacting protein",
+"HipHop",
+"Drosophila melanogaster (Fruit fly)",
+0.239
+],
+"jackhmmer": 0,
+"proteome_id": "FUN034727",
+"unifire": 0
+},
+"FUN034919_INSM1": {
+"diamond": [
+"Q6P0F9",
+"Insulinoma-associated protein 1a",
+"insm1a",
+"Danio rerio (Zebrafish) (Brachydanio rerio)",
+36.3,
+39.0,
+"4.77e-20"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN034919",
+"unifire": [
+"Metal-binding, Nucleus, Repeat, Transcription, Transcription regulation",
+13
+]
+},
+"FUN036638_FUN036638": {
+"diamond": 0,
+"fantasia": [
+"Q9UFW8",
+"CGG triplet repeat-binding protein 1 (CGG-binding protein 1) (20 kDa CGG-binding protein) (p20-CGGBP DNA-binding protein)",
+"CGGBP1",
+"Homo sapiens (Human)",
+0.372
+],
+"jackhmmer": 0,
+"proteome_id": "FUN036638",
+"unifire": 0
+},
+"FUN036660_MYO10.2": {
+"diamond": [
+"Q9HD67",
+"Unconventional myosin-X",
+"MYO10",
+"Homo sapiens (Human)",
+56.7,
+84.0,
+"2.79e-271"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN036660.2",
+"unifire": [
+"Belongs to the TRAFAC class myosin-kinesin ATPase superfamily. Myosin family",
+16
+]
+},
+"FUN037403_FUN037403": {
+"diamond": 0,
+"fantasia": [
+"Q59KP9",
+"Fgr13p",
+"FGR13",
+"Candida albicans (strain SC5314 / ATCC MYA-2876) (Yeast)",
+0.17
+],
+"jackhmmer": 0,
+"proteome_id": "FUN037403",
+"unifire": [
+"Zinc-finger",
+1
+]
+},
+"FUN038298_FUN038298": {
+"diamond": 0,
+"fantasia": [
+"Q4GZA9",
+"Uncharacterized protein",
+"",
+"Trypanosoma brucei brucei (strain 927/4 GUTat10.1)",
+0.189
+],
+"jackhmmer": 0,
+"proteome_id": "FUN019881",
+"unifire": 0
+},
+"FUN040741_FUN040741": {
+"diamond": 0,
+"fantasia": [
+"P0CU07",
+"UPF0742 protein SPAC977.02",
+"",
+"Schizosaccharomyces pombe (strain 972 / ATCC 24843) (Fission yeast)",
+0.116
+],
+"jackhmmer": 0,
+"proteome_id": "FUN040741",
+"unifire": 0
+},
+"FUN041303_CHORDC1": {
+"diamond": [
+"Q7T3F7",
+"Cysteine and histidine-rich domain-containing protein 1",
+"chordc1",
+"Danio rerio (Zebrafish) (Brachydanio rerio)",
+50.5,
+90.0,
+"3.01e-103"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN041303",
+"unifire": [
+"Metal-binding, Repeat, Zinc",
+3
+]
+},
+"FUN043701_PCNX1": {
+"diamond": [
+"Q96RV3",
+"Pecanex-like protein 1",
+"PCNX1",
+"Homo sapiens (Human)",
+54.1,
+75.0,
+"0.00e+00"
+],
+"fantasia": "not run",
+"jackhmmer": 0,
+"proteome_id": "FUN043701",
+"unifire": [
+"Belongs to the pecanex family",
+6
+]
+}
+}

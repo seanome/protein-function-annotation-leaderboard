@@ -10,7 +10,8 @@
    Residue panel (its own legend above the residues):
      #f9dfd0 fill, #eb6834 edge, #6b2a10 letter: a hydrophobic residue in the kmerseek alphabet
      #d9e7f8 fill, #2a78d6 edge, #123b6b letter: a polar residue
-     #c3c2b7  outline of a residue in neither class
+     #c3c2b7  outline of a residue in neither class, or in a class of a kmerseek alphabet other than hp_
+     #b8860b  kmerseek's seed: the bar above and below the columns where k residues in a row share a class
    Text and page (not data):
      #1a1a1a  text ink; also the outline of an expression bar, whose shape marks it, the
               sample boxes of the legend's E-value key, whose fading is the point, and the
@@ -67,6 +68,10 @@ svg text{font-family:"Source Sans 3",system-ui,sans-serif}
 .bl{font-size:11px;font-family:"Fantasque Sans Mono",ui-monospace,monospace!important;pointer-events:none}
 .nr{font-size:12px;font-style:italic;fill:var(--muted)}
 .nh{font-size:12px;fill:var(--ink)}
+.wt{font-size:12px;fill:var(--ink)}
+.wn{font-size:12px;fill:var(--muted)}
+.wt .lk{fill:var(--link);font-family:"Fantasque Sans Mono",ui-monospace,monospace}
+.wt a:hover .lk{text-decoration:underline}
 .sep{stroke:var(--line)}
 .hit{cursor:pointer;outline:none}
 .hit:focus-visible{outline:2px dotted #5a5a5a}
@@ -121,6 +126,9 @@ header.wide,main.wide{max-width:1380px}
 /* protein page: the legend is the left column, so it is read before the drawing; on a phone it
    comes first, above the drawing */
 .withside:has(.legend){grid-template-columns:200px minmax(0,1fr)}
+.withside>.legend{order:-1}
+.withside:has(.legend)>section{grid-column:2}
+.withside:has(.legend)>.legend{grid-column:1;grid-row:1/span 9}
 .side.legend li{align-items:flex-start;margin:0 0 4px}
 .side.legend li>svg,.side.legend summary>svg{flex:0 0 12px;margin-top:3px}
 .side.legend details{width:100%}
@@ -144,7 +152,10 @@ header.wide,main.wide{max-width:1380px}
 #panel .stats{font-size:14px;margin:6px 0}
 .pgrid{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:18px;align-items:start}
 .map svg text{font:11px "Source Sans 3",system-ui,sans-serif;fill:var(--secondary)}
-.mapkey{font-size:12px;color:var(--secondary);max-width:300px;margin:0 0 4px}
+.map svg{display:block;max-width:100%;height:auto}
+.map svg text.dl{font-size:10px;fill:#1a1a1a}
+.map svg text.dl.on{fill:#ffffff}
+.mapkey{font-size:12px;line-height:1.35;color:var(--secondary);margin:0 0 4px}
 .mapkey.tools{display:flex;flex-wrap:wrap;gap:2px 10px}
 .mapkey.tools i{display:inline-block;width:12px;height:4px;margin-right:4px;vertical-align:middle;border-radius:2px}
 .alegend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--secondary);margin-bottom:6px}
@@ -168,8 +179,12 @@ header.wide,main.wide{max-width:1380px}
 .cells.marks i{background:none;border-color:transparent;color:var(--secondary)}
 .cells.under i{box-shadow:0 2px 0 0 #1a1a1a}
 .cells.under i.flank,.cells.under i.gap{box-shadow:none}
+.cells.seedrow{line-height:5px}
+.cells.seedrow i{height:5px;vertical-align:top}
+.cells.seedrow i.sd,.alegend i.sd{background:#b8860b;border-color:#b8860b}
+.alegend i.sd{display:inline-block;width:18px;height:6px;padding:0;vertical-align:middle}
 .cells i[data-c]:hover{outline:2px solid #1a1a1a;outline-offset:-1px}
-@media (max-width:760px){.pgrid{grid-template-columns:1fr}}
+@media (max-width:760px){.pgrid{grid-template-columns:minmax(0,1fr)}#panel{padding:10px 12px 20px}}
 .bl.halo{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
 .side.legend .kind{font-size:12px;margin:0 0 4px;color:var(--ink)}
 .side.legend .kk{display:inline-flex;align-items:center;gap:3px;margin-right:8px;white-space:nowrap}
@@ -200,3 +215,33 @@ table.full th[aria-sort=descending]::after{content:" \2193"}
 #more{font:inherit;padding:4px 12px;border:1px solid #999;border-radius:6px;background:#fff;cursor:pointer}
 h3{font-size:16px;margin:16px 0 4px}
 .chips a{margin-right:6px;font-size:14px}
+/* drawn page: search box over the hits, and program names that fold a row (assets/protein.js) */
+.hsearch{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:8px 0}
+.hsearch label{font-weight:600}
+.hsearch input{flex:0 1 360px;min-width:0;font:inherit;padding:6px 10px;border:1px solid #999;border-radius:6px}
+.hsearch .note{margin:0;font-size:12px}
+.hsearch .note:last-child{flex-basis:100%}
+#hqn{font-weight:600;color:var(--ink)}
+#foldnote{margin:4px 0 0;font-size:12px}
+.names .tn{user-select:none}
+.dens{cursor:zoom-in}
+.fold{cursor:pointer;outline:none}
+.fold:hover .tn{text-decoration:underline}
+.fold:focus-visible{outline:2px dotted #5a5a5a}
+.fold .tri{fill:var(--muted)}
+table.hits th[data-c]{cursor:pointer;user-select:none;white-space:nowrap}
+table.hits th.up::after{content:" \25B2";font-size:10px}
+table.hits th.down::after{content:" \25BC";font-size:10px}
+table.hits tbody tr{cursor:pointer}
+table.hits tbody tr:hover{background:var(--hover,#f3f3f3)}
+.hit.dim{opacity:.18}
+
+.how{color:var(--muted);font-size:13px;font-weight:400}
+#mol{position:relative;width:100%;height:600px;border:1px solid var(--line);border-radius:0 0 6px 6px;border-top:0;background:#fff}
+#pstrip{display:block;width:100%;height:18px;margin:0;cursor:crosshair;touch-action:none;border:1px solid var(--line);border-bottom:0}
+.skey{margin-bottom:6px}
+.warn{border-left:3px solid #D55E00;padding:4px 10px;margin:8px 0;color:var(--ink)}
+.knownrow{margin:10px 0 0;font-size:16px}
+.knownrow .known{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none;margin-right:6px}
+.knownrow .known:hover{background:var(--panel)}
+.knownrow .known .mono{color:var(--muted);font-size:14px}
