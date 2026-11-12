@@ -4,3 +4,4 @@ __pycache__/
 protein-pages/site/
 protein-pages/screenshots/
 protein-pages/site_full/
+protein-pages/test_inputs/interpro_cache.jsonl
