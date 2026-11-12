@@ -1,0 +1,270 @@
+{
+ "page": "tools/hmmer3_jackhmmer.html",
+ "title": "jackhmmer card",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit_date": "2026-10-15T12:40:15Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T12:40:50Z",
+  "sha256": {
+   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
+   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
+   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d"
+  }
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 548ec5b8 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "jackhmmer"
+  },
+  {
+   "tag": "p",
+   "text": "Tool id hmmer3_jackhmmer. Numbers from seanome/2024-kmerseek-analysis commit 548ec5b8."
+  },
+  {
+   "tag": "h2",
+   "text": "What it compares"
+  },
+  {
+   "tag": "p",
+   "text": "A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all."
+  },
+  {
+   "tag": "h2",
+   "text": "What it needs"
+  },
+  {
+   "tag": "li",
+   "text": "sequence only: yes"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold model: no"
+  },
+  {
+   "tag": "li",
+   "text": "GPU: no"
+  },
+  {
+   "tag": "h2",
+   "text": "Reference searched"
+  },
+  {
+   "tag": "p",
+   "text": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a FASTA file."
+  },
+  {
+   "tag": "h2",
+   "text": "How to read its score"
+  },
+  {
+   "tag": "p",
+   "text": "Domain bit score: higher ranks first. The E-value cutoff was 10."
+  },
+  {
+   "tag": "h2",
+   "text": "Strong and weak strata"
+  },
+  {
+   "tag": "p",
+   "text": "Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is n3: Fmax 0.290 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared."
+  },
+  {
+   "tag": "p",
+   "text": "Where it is closest to, or furthest ahead of, the best other tool:"
+  },
+  {
+   "tag": "li",
+   "text": "regions 121–250 aa long: Fmax 0.333 (n = 504); best other: phmmer default, 0.329."
+  },
+  {
+   "tag": "li",
+   "text": "no same-family domain in the relative: Fmax 0.023 (n = 321); best other: HH-suite (hhsearch) single_seq, 0.032."
+  },
+  {
+   "tag": "p",
+   "text": "Where it is furthest behind the best other tool:"
+  },
+  {
+   "tag": "li",
+   "text": "regions 16–30 aa long: Fmax 0.029 (n = 271); best other: kmerseek wwmj5_k11_lcFalse, 0.330."
+  },
+  {
+   "tag": "li",
+   "text": "regions 31–60 aa long: Fmax 0.066 (n = 420); best other: kmerseek gbmr4_k21_lcFalse, 0.232."
+  },
+  {
+   "tag": "p",
+   "text": "Swiss-Prot features, raw calls, zebrafish, setting n3: best feature type ACT_SITE (active site residue), Fmax 0.287 (n = 176); worst MOTIF (short motif), Fmax 0.002 (n = 190)."
+  },
+  {
+   "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "li",
+   "text": "Each round can pull in proteins from a different family, which then pull in more. How often that happened here: not measured."
+  },
+  {
+   "tag": "h2",
+   "text": "Cost per 1,000 queries"
+  },
+  {
+   "tag": "p",
+   "text": "Setting n3, searching zebrafish: 1.83 CPU-hours, measured on Sherlock. Peak memory 5.2 GB. That is about $0.0818 at $0.044625 per CPU-hour. This search completed 2 times; the runs took 1.83 to 3.21 CPU-hours per 1,000 queries, and the newest is shown. Across the 15 relatives searched with this setting: 0.0402 to 2.43 CPU-hours per 1,000 queries; peak memory up to 5.2 GB."
+  },
+  {
+   "tag": "p",
+   "text": "CPU-hours count the search only, not building the relative's database."
+  },
+  {
+   "tag": "h2",
+   "text": "Licence"
+  },
+  {
+   "tag": "li",
+   "text": "Licence: BSD 3-clause (HMMER) (source)"
+  },
+  {
+   "tag": "li",
+   "text": "Commercial use allowed: Yes."
+  },
+  {
+   "tag": "h2",
+   "text": "Settings in the table"
+  },
+  {
+   "tag": "li",
+   "text": "n3: three rounds of search (-N 3)"
+  },
+  {
+   "tag": "h2",
+   "text": "Version, container, command"
+  },
+  {
+   "tag": "li",
+   "text": "Version: HMMER 3.4"
+  },
+  {
+   "tag": "li",
+   "text": "Container: quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)"
+  },
+  {
+   "tag": "pre",
+   "text": "jackhmmer \\ -N 3 \\ --domtblout /dev/stdout \\ --tblout /dev/null \\ -o /dev/stderr \\ --noali \\ -E 10.0 \\ --cpu 8 \\ UP000005640_9606.fasta UP000000437_7955.fasta"
+  },
+  {
+   "tag": "p",
+   "text": "Query: 998 human proteins. Target: the zebrafish proteome."
+  },
+  {
+   "tag": "h2",
+   "text": "Will it work for you?"
+  },
+  {
+   "tag": "li",
+   "text": "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.217 (n = 563), 60–100% 0.264 (n = 1,289). If no, 20–30% 0.327 (n = 93), 30–40% 0.175 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting n3; strata with at least 30 true instances.)"
+  },
+  {
+   "tag": "li",
+   "text": "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.210 (n = 963), 121–250 aa 0.333 (n = 504), 251 aa or more 0.427 (n = 277). If no, 16–30 aa 0.029 (n = 271), 31–60 aa 0.066 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting n3.)"
+  },
+  {
+   "tag": "li",
+   "text": "Can you spend about 1.83 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  },
+  {
+   "tag": "p",
+   "text": "All tool cards · this card as Markdown · as JSON"
+  }
+ ],
+ "data": {
+  "tool": "hmmer3_jackhmmer",
+  "name": "jackhmmer",
+  "kind": "builds a profile of a protein family",
+  "compares": "A profile of a protein family: it searches with one protein, builds a profile from the hits, and searches again with that profile, three rounds in all.",
+  "needs": {
+   "sequence only": true,
+   "AlphaFold model": false,
+   "GPU": false
+  },
+  "reference": "The relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a FASTA file.",
+  "score": "Domain bit score: higher ranks first. The E-value cutoff was 10.",
+  "failure_modes": [
+   "Each round can pull in proteins from a different family, which then pull in more. How often that happened here: not measured."
+  ],
+  "version": "HMMER 3.4",
+  "licence": "BSD 3-clause (HMMER)",
+  "commercial_use": "Yes.",
+  "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",
+  "container": "quay.io/biocontainers/hmmer:3.4--hb6cb901_4 (sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)",
+  "command": "jackhmmer \\\n    -N 3 \\\n    --domtblout /dev/stdout \\\n    --tblout /dev/null \\\n    -o /dev/stderr \\\n    --noali \\\n    -E 10.0 \\\n    --cpu 8 \\\n    UP000005640_9606.fasta UP000000437_7955.fasta",
+  "numbers_from": {
+   "repo": "seanome/2024-kmerseek-analysis",
+   "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+   "filters": "pfam, raw, zebrafish"
+  },
+  "best_setting": "n3",
+  "strong": [
+   {
+    "axis": "feature_length_bin",
+    "stratum": "121-250",
+    "fmax": 0.3329766444504547,
+    "n": 504,
+    "other_tool": "hmmer3_phmmer",
+    "other_setting": "default",
+    "other_fmax": 0.329341857962297,
+    "margin": 0.0036347864881577374
+   },
+   {
+    "axis": "identity",
+    "stratum": "no_homolog",
+    "fmax": 0.022590530497941866,
+    "n": 321,
+    "other_tool": "hhblits",
+    "other_setting": "single_seq",
+    "other_fmax": 0.03236195478661682,
+    "margin": -0.009771424288674953
+   }
+  ],
+  "weak": [
+   {
+    "axis": "feature_length_bin",
+    "stratum": "16-30",
+    "fmax": 0.02851890266845075,
+    "n": 271,
+    "other_tool": "kmerseek",
+    "other_setting": "wwmj5_k11_lcFalse",
+    "other_fmax": 0.3297506857792661,
+    "margin": -0.30123178311081533
+   },
+   {
+    "axis": "feature_length_bin",
+    "stratum": "31-60",
+    "fmax": 0.0659647996799396,
+    "n": 420,
+    "other_tool": "kmerseek",
+    "other_setting": "gbmr4_k21_lcFalse",
+    "other_fmax": 0.23209537155652643,
+    "margin": -0.16613057187658684
+   }
+  ],
+  "cost_per_1000_queries": {
+   "cpu_h_measured": 1.8338543754175018,
+   "peak_rss_gb": 5.2,
+   "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+  },
+  "questions": [
+   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.217 (n = 563), 60–100% 0.264 (n = 1,289). If no, 20–30% 0.327 (n = 93), 30–40% 0.175 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`; strata with at least 30 true instances.)",
+   "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.210 (n = 963), 121–250 aa 0.333 (n = 504), 251 aa or more 0.427 (n = 277). If no, 16–30 aa 0.029 (n = 271), 31–60 aa 0.066 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `n3`.)",
+   "Can you spend about 1.83 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  ],
+  "markdown": "hmmer3_jackhmmer.md"
+ }
+}
