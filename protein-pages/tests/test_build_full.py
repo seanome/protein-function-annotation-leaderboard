@@ -469,3 +469,26 @@ def test_a_row_with_no_diamond_match_still_says_what_else_was_found(site):
         for i, e in r[21] or []:
             assert e > build_full.FOLDSEEK_MAX_E and not r[17] >> i & 1, r[0]
 
+
+
+def test_immune_programs_panel(site):
+    site, _ = site
+    """The panel's data has every protein of immune_candidates_by_program.tsv.gz, each new-proteome ID has a page,
+    and the counts drawn on the index are the table's."""
+    raw = (site / "full" / "immune_programs.js").read_text()
+    d = json.loads(gzip.decompress(base64.b64decode(raw.split('"')[1])))
+    keys = [k for k, _, _ in build_full.IMMUNE_PROGRAMS]
+    assert [p[0] for p in d["programs"]] == keys
+    table = tsv("immune_candidates_by_program.tsv.gz")
+    assert len(d["rows"]) == len(table) == 10948
+    lengths = {r["protein_id"] for r in tsv("proteome_lengths.tsv")}
+    assert all(r[0] in lengths for r in d["rows"] if r[1])
+    assert not any(r[0] in lengths for r in d["rows"] if not r[1])
+    html = (site / "index.html").read_text()
+    for i, k in enumerate(keys):
+        n = sum(1 for r in table if r[k])
+        assert sum(1 for r in d["rows"] if r[2] >> i & 1) == n
+        assert '<span class="ip-n mono">%s</span>' % "{:,}".format(n) in html, k
+    for r in d["rows"]:  # one piece of evidence per program that calls it immune
+        assert len(r[3]) == bin(r[2]).count("1")
+    assert "1,105 by three or more" in html
