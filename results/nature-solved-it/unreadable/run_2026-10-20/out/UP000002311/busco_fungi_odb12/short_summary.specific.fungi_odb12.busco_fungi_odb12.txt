@@ -1,0 +1,17 @@
+# BUSCO version is: 6.1.0 
+# The lineage dataset is: fungi_odb12 (Creation date: 2026-05-22, number of genomes: 144, number of BUSCOs: 1122)
+# Summarized benchmarking in BUSCO notation for file /scratch/users/olgabot/nature-solved-it/unreadable/out/UP000002311/proteins.fasta
+# BUSCO was run in mode: proteins
+
+	***** Results: *****
+
+	C:75.8%[S:69.5%,D:6.2%],F:2.7%,M:21.6%,n:1122	   
+	850	Complete BUSCOs (C)			   
+	780	Complete and single-copy BUSCOs (S)	   
+	70	Complete and duplicated BUSCOs (D)	   
+	30	Fragmented BUSCOs (F)			   
+	242	Missing BUSCOs (M)			   
+	1122	Total BUSCO groups searched		   
+
+Dependencies and versions:
+	hmmsearch: 3.4
