@@ -155,6 +155,7 @@ Each figure shows the protein's residues, 100 per line, with a bar under the res
 - AlphaFold DB: mean pLDDT 41.5.
 - InterPro labels it: 2 entries or signatures, covering 38 of 875 residues (IPR002964 Adhesive plaque protein (interpro) at 48-65, 71-90; PR01216 ADHESIVEI (prints) at 48-65, 71-90).
 - MMseqs2 finds 2 other Swiss-Prot entries above 30% identity; the strongest: Q27409 (Adhesive plaque matrix protein, Mytilus galloprovincialis), 71.0% identity over residues 1-859; Q25434 (Adhesive plaque matrix protein, Mytilus coruscus), 65.5% identity over residues 1-859.
+- InterPro labels 38 of 875 residues; the hit to Q27409 covers residues 1 to 859. The two labels disagree on 821 residues of one protein, which is why the leaderboard scores regions, not proteins.
 
 ### P24856 Antifreeze glycoprotein polyprotein (Notothenia neglecta), 790 residues
 
