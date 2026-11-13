@@ -3,10 +3,11 @@
 // A protein with a drawn page (build.py) goes straight to it: build_full.py adds an element
 // #biomni to that page, and this script fills it with the same tables.
 (function () {
-  var F = window.FULL, CATS = F.cats, N_SHARDS = 96;
-  var box = document.getElementById("biomni"), BASE = box ? "../" : "";
-  var byId = {};
-  F.rows.forEach(function (r) { byId[r[0]] = r; });
+  var F = window.FULL_META, CATS = F.cats, N_SHARDS = 96;
+  // box: a dense page's #biomni (a drawn page's, in proteins/, or protein.html's, which says data-base="" and
+  // data-undrawn: there the Pfam table stays, since no hmmscan row draws the domains)
+  var box = document.getElementById("biomni"), BASE = box ? (box.dataset.base !== undefined ? box.dataset.base : "../") : "";
+  var undrawn = !!(box && box.dataset.undrawn);
   function shardOf(id) {
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
@@ -15,14 +16,6 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function fmt(n) { return n.toLocaleString("en-US"); }
   var main = box || document.getElementById("main"), loaded = {};
-  function load(s, then) {
-    if (loaded[s]) return then();
-    var el = document.createElement("script");
-    el.src = BASE + "full/" + ("00" + s).slice(-3) + ".js";
-    el.onload = function () { loaded[s] = true; then(); };
-    el.onerror = function () { main.innerHTML = "<p>Could not load " + esc(el.src) + ".</p>"; };
-    document.head.appendChild(el);
-  }
   function table(head, rows) {
     return "<div class=\"tablewrap\"><table class=\"small\"><thead><tr>" + head.map(function (h) {
       return "<th" + (h[1] ? " class=\"r\"" : "") + ">" + esc(h[0]) + "</th>";
@@ -31,16 +24,6 @@
     }).join("") + "</tbody></table></div>";
   }
   function link(id) { return "<a class=\"mono\" href=\"" + BASE + "protein.html#" + encodeURIComponent(id) + "\">" + esc(id) + "</a>"; }
-  function show() {
-    var id = location.hash.slice(1), r;
-    try { id = decodeURIComponent(id); } catch (e) { /* malformed escape: keep the raw text */ }
-    r = byId[id];
-    document.getElementById("pid").textContent = id || "No protein named";
-    if (!r) { main.innerHTML = "<p>No protein " + esc(id) + " in this proteome. <a href=\"index.html\">Search all proteins</a>.</p>"; return; }
-    if (r[14]) { location.replace(r[14]); return; }  // the drawn page is this protein's page
-    document.title = id + (r[3] || r[2] ? " " + (r[3] || r[2]) : "") + " · Botryllus protein";
-    load(shardOf(id), function () { render(id, r, window.FULL_SHARD[id]); window.scrollTo(0, 0); });
-  }
   // Links to other sites open in a new tab. uni: a UniProt accession (P12345, P12345-2). pfam: a
   // Pfam accession, with or without its version (PF00179.32 links to PF00179). accHtml: s escaped,
   // with every Pfam (PF00069) and InterPro (IPR000719) accession in it made a link; accessions
@@ -125,7 +108,7 @@
     if (d.km !== undefined && d.km !== null) {
       var k = d.km;
       row("kmerseek against Swiss-Prot 2026_03", !!k, k ? uni(k[2]) + " " + esc(k[3]) + (k[4] ? ", <i>" + esc(k[4]) + "</i>" : "") : "",
-        k ? "E-value " + k[1].toPrecision(3) + ", best of " + k[5] + " settings (" + esc(k[0]) + ")" : "", k ? (box ? "drawn above" : "not in this table") : "",
+        k ? "E-value " + k[1].toPrecision(3) + ", best of " + k[5] + " settings (" + esc(k[0]) + ")" : "", k ? (box ? "shown above" : "not in this table") : "",
         "best of its alphabet and k-mer size settings; E-value 10 or below");
     }
     if (d.uf === "not run") rows.push(["<b>UniFIRE (UniProt's annotation rules)</b>", "<i>not run (over 5,000 aa)</i>", "", ""]);
@@ -150,7 +133,7 @@
       "<p class=\"note\">Each program's best hit for this protein, from runs on the whole proteome. " +
       "Weaker hits are left out. The slider above does not change this table.</p>"] :
       ["<p class=\"lead\">" + esc(sentence) + "</p>", "<h2>What each program found</h2>",
-      "<p class=\"note\">The best hit of each program. Nothing is drawn along the protein on this page; the last column gives the residues where a program reports them" +
+      "<p class=\"note\">The best hit of each program. Nothing is placed along the protein on this page; the last column gives the residues where a program reports them" +
       (d.uf ? "; UniFIRE gives positions only for the sites it predicts, listed in its table below." : ".") + "</p>"];
     h.push(table([["Program"], ["Best hit"], ["Score"], ["Where on your protein"]], rows));
     return box ? h : h.concat(card(r, d));
@@ -159,14 +142,27 @@
     var h = [];
     if (d.card) {
       var c = d.card, v = c.name_verdict;
-      h.push("<h2>Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
+      h.push("<h2 id=\"gene-card\">Gene card</h2><p class=\"note\">Written by a language model (" + esc(c.model) + ") from the evidence on this page only; " +
         "check it against the tables below.</p><p>" + accHtml(c.summary) + "</p><p><b>Confidence: " + esc(c.confidence) + ".</b> " + accHtml(c.confidence_reason) + "</p>");
       if (v && v.choice !== "not_applicable") h.push("<p><b>Header name " + esc(r[2]) + " or proposed name " + esc(r[3]) + "?</b> " +
         esc((F.verdicts[v.choice] || v.choice).replace(/^./, function (x) { return x.toUpperCase(); })) + "; suggested name <b>" + esc(v.recommended_name) + "</b>. " + accHtml(v.reason) + "</p>");
     }
     return h;
   }
+  // Under the page's sentence: where the FASTA name and the proposed name differ, both names and any gene card's verdict
+  function nameLine(r, d) {
+    var at = document.querySelector(".sentence"), v = d.card && d.card.name_verdict;
+    if (!at || r[4] !== F.check_differs) return;
+    var h = (r[18] === 1 ? "Names conflict" : "Names differ only in spelling") + ": FASTA header <b>" + esc(r[2]) + "</b>, proposed <b>" + esc(r[3]) +
+      "</b> (from the best Swiss-Prot match or the Pfam domains).";
+    if (v && v.choice !== "not_applicable") h += " <a href=\"#gene-card\">Gene card</a> (" + esc(d.card.model) + "): " + esc(F.verdicts[v.choice] || v.choice) + "; suggested name <b>" + esc(v.recommended_name) + "</b>.";
+    else h += " No gene card checked this protein.";
+    var p = document.createElement("p");
+    p.className = "nameline"; p.innerHTML = h;
+    at.appendChild(p);
+  }
   function render(id, r, d) {
+    nameLine(r, d);
     var h = top(id, r, d);
     if (box) {  // on a drawn page each program is a row of the drawing; under it, only what the rows do not show
       box.innerHTML = "";
@@ -188,8 +184,8 @@
       if (d.kw.length) h.push("<h3>UniProt keywords of that entry</h3><p>" + d.kw.map(esc).join(", ") + "</p>");
     } else if (!box) h.push("<p>No Swiss-Prot match at E-value 0.001 or below.</p>");
     // Pfam (a drawn page has hmmscan's Pfam domains along the protein)
-    if (!box) h.push("<h2>Pfam domains (hmmsearch, gathering thresholds)</h2>");
-    if (box) { /* drawn: see the hmmscan row */ } else if (d.pfam.length) {
+    if (!box || undrawn) h.push("<h2>Pfam domains (hmmsearch, gathering thresholds)</h2>");
+    if (box && !undrawn) { /* drawn: see the hmmscan row */ } else if (d.pfam.length) {
       var seen = {}, rows = [];
       d.pfam.forEach(function (p) { seen[p[0]] = seen[p[0]] || { n: p[1], c: 0 }; seen[p[0]].c++; });
       Object.keys(seen).forEach(function (a) {
@@ -265,10 +261,7 @@
     main.innerHTML = h.join("");
   }
   if (box) {
-    var id = box.dataset.id;
-    load(shardOf(id), function () { render(id, byId[id], window.FULL_SHARD[id]); });
-  } else {
-    window.addEventListener("hashchange", show);
-    show();
+    var id = box.dataset.id || decodeURIComponent(location.hash.slice(1));
+    loadShard(shardOf(id), BASE).then(function () { var d = window.FULL_SHARD[id]; render(id, d.r, d); });
   }
 })();

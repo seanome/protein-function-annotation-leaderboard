@@ -31,9 +31,10 @@
   let ready = false, want = null;
   viewer.render(el, {
     customData: { url, format: "pdb", binary: false },
-    bgColor: "white", sequencePanel: true, hideControls: true, pdbeLink: false, reactive: true, hideStructure: ["water"],
+    bgColor: "white", sequencePanel: false, pdbeLink: false, reactive: true, hideStructure: ["water"],
+    hideControls: true, expanded: false, landscape: true,   // the whole molecule fills the box; Mol*'s panels open from its toggle at the top right
   });
-  viewer.events.loadComplete.subscribe(() => { ready = true; paint(want); });
+  viewer.events.loadComplete.subscribe(() => { ready = true; paint(want); try { viewer.visual.reset({ camera: true }); } catch (e) { /* older builds: no reset */ } });
 
   function paint(range) {
     if (!ready) { want = range; return; }
