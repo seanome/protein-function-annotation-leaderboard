@@ -1,0 +1,89 @@
+{
+ "read_utc_date": "2026-10-20",
+ "b10k_proteomes": [
+  {
+   "group": "random control",
+   "species": "Eurystomus gularis",
+   "upid": "UP000541249"
+  },
+  {
+   "group": "random control",
+   "species": "Calonectris borealis",
+   "upid": "UP000535403"
+  },
+  {
+   "group": "random control",
+   "species": "Phaetusa simplex",
+   "upid": "UP000556165"
+  },
+  {
+   "group": "random control",
+   "species": "Cettia cetti",
+   "upid": "UP000524451"
+  },
+  {
+   "group": "random control",
+   "species": "Chloropsis cyanopogon",
+   "upid": "UP000614263"
+  }
+ ],
+ "b10k_with_busco_90": 0,
+ "medians_all": {
+  "model organism": {
+   "n": 7,
+   "median_pct": 2.57
+  },
+  "atlas species": {
+   "n": 17,
+   "median_pct": 2.02
+  },
+  "random control": {
+   "n": 17,
+   "median_pct": 6.63
+  }
+ },
+ "medians_all_without_b10k": {
+  "model organism": {
+   "n": 7,
+   "median_pct": 2.57
+  },
+  "atlas species": {
+   "n": 17,
+   "median_pct": 2.02
+  },
+  "random control": {
+   "n": 12,
+   "median_pct": 11.42
+  }
+ },
+ "medians_busco_90": {
+  "model organism": {
+   "n": 5,
+   "median_pct": 2.57
+  },
+  "atlas species": {
+   "n": 8,
+   "median_pct": 1.6600000000000001
+  },
+  "random control": {
+   "n": 4,
+   "median_pct": 5.505
+  }
+ },
+ "medians_busco_90_without_b10k": {
+  "model organism": {
+   "n": 5,
+   "median_pct": 2.57
+  },
+  "atlas species": {
+   "n": 8,
+   "median_pct": 1.6600000000000001
+  },
+  "random control": {
+   "n": 4,
+   "median_pct": 5.505
+  }
+ },
+ "medians_all_atlas_minus_controls": -4.61,
+ "medians_all_without_b10k_atlas_minus_controls": -9.4
+}

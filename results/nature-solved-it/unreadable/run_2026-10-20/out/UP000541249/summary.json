@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 2,
+   "complete_single": 536,
+   "completeness_pct": 80.06,
+   "fragmented": 84,
+   "lineage": "metazoa_odb12",
+   "missing": 50,
+   "short_summary_c_pct": 80.1
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 0,
+   "complete_single": 103,
+   "completeness_pct": 79.84,
+   "fragmented": 17,
+   "lineage": "eukaryota_odb12",
+   "missing": 9,
+   "short_summary_c_pct": 79.8
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "random control",
+ "n_interpro_match": 13799,
+ "n_proteins": 13936,
+ "n_sprot_hit": 13914,
+ "n_uncharacterized_name": 0,
+ "n_unlabelled": 3,
+ "proteome_taxid": "325343",
+ "species": "Eurystomus gularis",
+ "uncharacterized_name_pct": 0.0,
+ "unlabelled_pct": 0.02,
+ "upid": "UP000541249"
+}

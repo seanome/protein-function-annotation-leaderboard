@@ -1,0 +1,43 @@
+group	species	upid	divergence_my	n_proteins	unlabelled_pct	uncharacterized_name_pct	sprot_hit_pct	busco_completeness_pct	annotation_source	first_citation	b10k	assembly	gene_symbol_pct	fragment_pct	pe_homology_pct
+model organism	Homo sapiens	UP000005640	0.0	20652	0.88	0.61	99.07	100.0	Ensembl	Mapping the human reference genome's missing sequence by three-way admixture in Latino genomes.	false	GCA_000001405.29	98.72	0.54	2.73
+model organism	Mus musculus	UP000000589	83.51396	21860	1.25	0.22	97.83	99.85	Ensembl	Revisiting the mouse mitochondrial DNA sequence.	false	GCA_000001635.9	98.6	1.89	11.42
+model organism	Danio rerio	UP000000437	435.12563	26567	2.57	2.06	91.1	100.0	Refseq	The complete sequence of the zebrafish (Danio rerio) mitochondrial genome and evolutionary patterns in vertebrate mitochondrial DNA.	false	GCF_049306965.1	98.34	0.06	33.97
+model organism	Drosophila melanogaster	UP000000803	692.17015	13814	13.25	17.48	71.2	95.09	ENA/EMBL	Gene Model Annotations for Drosophila melanogaster: Impact of High-Throughput Data.	false	GCA_000001215.4	98.15	0.08	17.96
+model organism	Caenorhabditis elegans	UP000001940	692.17015	19792	19.16	5.96	54.9	80.95	ENA/EMBL	The mitochondrial genomes of two nematodes, Caenorhabditis elegans and Ascaris suum.	false	GCA_000002985.3	56.32	0.09	16.68
+model organism	Saccharomyces cerevisiae	UP000002311	1164.29781	6066	0.02	0.0	99.98	75.76	ENA/EMBL	Complete DNA sequence of yeast chromosome II.	false	GCA_000146045.2	86.37	0.0	3.82
+model organism	Arabidopsis thaliana	UP000006548	1515.8312	27496	6.84	6.65	79.94	98.78	ENA/EMBL	Complete structure of the chloroplast genome of Arabidopsis thaliana.	false	GCA_000001735.1	58.12	0.24	7.82
+atlas species	Alligator mississippiensis	UP000050525	318.82488	24656	23.24	25.75	74.25	91.96	ENA/EMBL	Sequencing three crocodilian genomes to illuminate the evolution of archosaurs and amniotes.	false	GCA_000281125.4	51.18	0.0	44.65
+atlas species	Artemia franciscana	UP001187531	692.17015	19893	23.73	35.37	62.24	77.68	ENA/EMBL	Chromosome-level genome assembly of Artemia franciscana.	false	GCA_032884065.1	0.25	16.03	31.21
+atlas species	Calypte anna	UP000054308	318.82488	13267	3.94	3.62	93.87	84.97	ENA/EMBL	Comparative genomics reveals insights into avian genome evolution and adaptation.	false	GCA_000699085.1	0.32	83.46	58.94
+atlas species	Chrysemys picta	UP000694380	318.82488	21166	1.72	7.93	97.25	94.35	Ensembl	Physical Mapping and Refinement of the Painted Turtle Genome (Chrysemys picta) Inform Amniote Genome Evolution and Challenge Turtle-Bird Chromosomal Conservation.	false	GCA_000241765.2	71.79	0.0	58.54
+atlas species	Columba livia	UP000053872	318.82488	14619	1.6	1.0	97.78	88.99	ENA/EMBL	Genomic diversity and evolution of the head crest in the rock pigeon.	false	GCA_000337935.2	77.46	16.52	61.19
+atlas species	Culex quinquefasciatus	UP000002320	692.17015	18790	13.84	25.58	70.93	86.31	EnsemblMetazoa	Annotation of Culex pipiens quinquefasciatus.	false	GCA_000209185.1	96.08	0.01	40.41
+atlas species	Danaus plexippus	UP000007151	692.17015	15140	22.02	26.47	65.43	87.2	ENA/EMBL	The monarch butterfly genome yields insights into long-distance migration.	false	GCA_000235995.2	0.28	11.96	39.12
+atlas species	Gallus gallus	UP000000539	318.82488	18373	2.02	3.68	96.64	96.58	Ensembl	Gallus gallus (Chicken) genome, bGalGal1, GRCg7b, maternal haplotype autosomes + Z & W.	false	GCA_016699485.1	88.29	0.71	35.37
+atlas species	Heterocephalus glaber	UP000694906	83.51396	19874	1.79	0.09	98.01	98.21	Refseq	Complete Mitochondrial Genome of the Naked Mole Rat Heterocephalus glaber.	false	GCF_000247695.1	100.0	0.0	66.12
+atlas species	Ictidomys tridecemlineatus	UP000005215	83.51396	18446	0.31	1.19	99.57	93.9	Ensembl	The Draft Genome of Spermophilus tridecemlineatus.	false	GCA_000236235.1	92.72	0.0	67.78
+atlas species	Loxodonta africana	UP000007646	96.97232	20018	0.5	2.23	99.35	96.58	Ensembl	The Genome Sequence of Loxodonta africana (African elephant).	false	GCA_000001905.1	76.52	0.0	66.67
+atlas species	Mya arenaria	UP001164746	692.17015	37840	27.28	30.35	51.98	58.48	ENA/EMBL	Centuries of genome instability and evolution in soft-shell clam transmissible cancer (bioRxiv).	false	GCA_026914265.1	0.12	22.91	24.22
+atlas species	Poecilia mexicana	UP000261480	435.12563	23700	1.6	8.3	95.61	96.73	Ensembl	Schartl M.; Warren W.	false	GCA_001443325.1	0.73	0.0	57.51
+atlas species	Ramazzottius varieornatus	UP000186922	692.17015	22940	40.52	44.8	44.15	84.82	ENA/EMBL	Extremotolerant tardigrade genome and improved radiotolerance of human cultured cells by tardigrade-unique protein.	false	GCA_001949185.1	100.0	1.67	28.3
+atlas species	Tenebrio molitor	UP000719412	692.17015	15190	25.89	37.82	59.36	53.42	ENA/EMBL	The yellow mealworm (Tenebrio molitor) genome: a resource for the emerging insects as food and feed industry.	false	GCA_014282415.3	0.17	0.01	32.32
+atlas species	Urocitellus parryii	UP000694417	83.51396	19631	1.32	3.75	98.5	95.98	Ensembl	""	false	GCA_003426925.1	84.54	0.0	64.76
+atlas species	Ursus americanus	UP000291022	89.48067	20411	1.56	5.55	98.26	81.99	Ensembl	De novo assembly and RNA-Seq shows season-dependent expression and editing in black bear kidneys.	false	GCA_003344425.1	70.33	0.0	59.73
+random control	Eurystomus gularis	UP000541249	318.82488	13936	0.02	0.0	99.84	80.06	ENA/EMBL	Bird 10,000 Genomes (B10K) Project - Family phase.	true	GCA_013400335.1	99.59	100.0	59.01
+random control	Melipona quadrifasciata	UP000053105	692.17015	14253	34.22	36.8	56.37	83.93	ENA/EMBL	The genome of Melipona quadrifasciata.	false	GCA_001276565.1	0.29	7.48	34.22
+random control	Pagothenia borchgrevinki	UP001619887	435.12563	21860	6.75	12.29	87.88	91.07	ENA/EMBL	The genome of the cryopelagic Antarctic bald notothen, Trematomus borchgrevinki.	false	GCA_044885175.1	0.7	0.11	55.0
+random control	Calonectris borealis	UP000535403	318.82488	14417	0.02	0.0	99.79	76.19	ENA/EMBL	Bird 10,000 Genomes (B10K) Project - Family phase.	true	GCA_013401115.1	99.54	100.0	57.2
+random control	Ceutorhynchus assimilis	UP001152799	692.17015	14474	14.83	24.28	65.92	92.11	ENA/EMBL	King R.; King R.	false	GCA_917834065.1	0.32	0.06	42.42
+random control	Phaetusa simplex	UP000556165	318.82488	13248	0.03	0.0	99.8	79.17	ENA/EMBL	Bird 10,000 Genomes (B10K) Project - Family phase.	true	GCA_013399535.1	99.43	100.0	59.5
+random control	Cettia cetti	UP000524451	318.82488	14828	0.04	0.0	99.73	82.89	ENA/EMBL	Bird 10,000 Genomes (B10K) Project - Family phase.	true	GCA_013401135.1	99.56	100.0	57.93
+random control	Trichogramma brassicae	UP000479190	692.17015	16797	36.98	46.57	50.52	52.38	ENA/EMBL	Ferguson B K.	false	GCA_902806795.1	0.19	12.73	23.26
+random control	Pristionchus fissidentatus	UP001432322	692.17015	28245	40.75	40.53	40.48	75.45	ENA/EMBL	Genome assembly of Pristionchus species.	false	GCA_036245785.1	0.14	82.26	24.39
+random control	Chloropsis cyanopogon	UP000614263	318.82488	12540	0.04	0.0	99.76	71.88	ENA/EMBL	Bird 10,000 Genomes (B10K) Project - Family phase.	true	GCA_013400585.1	99.59	100.0	58.21
+random control	Paragonimus skrjabini	UP000822476	692.17015	12629	25.18	33.19	59.46	68.75	ENA/EMBL	Annotation for the trematode Paragonimus miyazaki's.	false	GCA_014338405.1	0.27	7.36	35.02
+random control	Octodon degus	UP000515203	83.51396	20433	0.46	0.04	99.41	94.64	Refseq	The evolution of mitochondrial genomes in subterranean caviomorph rodents: Adaptation against a background of purifying selection.	false	GCF_000260255.1	100.0	0.0	67.4
+random control	Oikopleura dioica	UP001158576	600.96099	17075	30.83	0.0	52.0	62.05	ENA/EMBL	Bliznina A.	false	GCA_907165135.1	0.11	0.05	32.04
+random control	Rhinopithecus bieti	UP000233180	28.89794	20855	4.26	6.41	95.64	94.79	Ensembl	Genome of Rhinopithecus bieti.	false	GCA_001698545.1	1.87	0.0	61.86
+random control	Pygathrix nigripes	UP001710656	28.89794	22758	8.01	33.63	91.76	71.58	ENA/EMBL	Adaptations to a cold climate promoted social evolution in Asian colobine primates.	false	GCA_047655245.1	0.62	14.87	50.8
+random control	Sciurus carolinensis	UP001166674	83.51396	22862	0.41	1.01	99.46	87.35	ENA/EMBL	Studies in the Genomics of Life Span.	false	GCA_020004445.1	0.71	5.79	66.19
+random control	Pteropus alecto	UP000010552	89.48067	19520	6.63	7.83	93.17	89.29	ENA/EMBL	Comparative analysis of bat genomes provides insight into the evolution of flight and immunity.	false	GCA_000325575.1	0.77	3.77	56.58
+leaderboard reference	Magallana gigas	UP000005408	692.17015	30272	19.41	26.61	60.68	95.68	EnsemblMetazoa	Gutierrez A.; Penaloza C.	false	GCA_902806645.1	0.16	0.02	30.43

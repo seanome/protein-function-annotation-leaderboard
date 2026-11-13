@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 31,
+   "complete_single": 539,
+   "completeness_pct": 84.82,
+   "fragmented": 42,
+   "lineage": "metazoa_odb12",
+   "missing": 60,
+   "short_summary_c_pct": 84.8
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 6,
+   "complete_single": 120,
+   "completeness_pct": 97.67,
+   "fragmented": 3,
+   "lineage": "eukaryota_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 97.7
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "atlas species",
+ "n_interpro_match": 13541,
+ "n_proteins": 22940,
+ "n_sprot_hit": 10129,
+ "n_uncharacterized_name": 10278,
+ "n_unlabelled": 9295,
+ "proteome_taxid": "947166",
+ "species": "Ramazzottius varieornatus",
+ "uncharacterized_name_pct": 44.8,
+ "unlabelled_pct": 40.52,
+ "upid": "UP000186922"
+}

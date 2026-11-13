@@ -1,0 +1,7 @@
+submitted_utc 2026-10-20T20:57:45Z
+commit ce7928db7c4006d5ed00c44b1dea928709c1b138
+proteomes 42
+setup 48677851
+fetch 48677853 array 0-41%8 time 02:00:00
+label 48677854 array 0-41%20 time 01:00:00
+collect 48677855

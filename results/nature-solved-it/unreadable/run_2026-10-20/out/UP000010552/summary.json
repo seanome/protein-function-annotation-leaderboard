@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 2,
+   "complete_single": 598,
+   "completeness_pct": 89.29,
+   "fragmented": 43,
+   "lineage": "metazoa_odb12",
+   "missing": 29,
+   "short_summary_c_pct": 89.3
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 2,
+   "complete_single": 114,
+   "completeness_pct": 89.92,
+   "fragmented": 11,
+   "lineage": "eukaryota_odb12",
+   "missing": 2,
+   "short_summary_c_pct": 89.9
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "89.48067",
+ "group": "random control",
+ "n_interpro_match": 17811,
+ "n_proteins": 19520,
+ "n_sprot_hit": 18186,
+ "n_uncharacterized_name": 1529,
+ "n_unlabelled": 1294,
+ "proteome_taxid": "9402",
+ "species": "Pteropus alecto",
+ "uncharacterized_name_pct": 7.83,
+ "unlabelled_pct": 6.63,
+ "upid": "UP000010552"
+}

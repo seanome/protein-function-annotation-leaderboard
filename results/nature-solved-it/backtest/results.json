@@ -1,0 +1,187 @@
+{
+  "generated": "2026-10-19",
+  "n": {
+    "A": 19,
+    "B": 24,
+    "B_i": 15,
+    "B_ii": 9
+  },
+  "median_T": {
+    "A": 5.0,
+    "B": 3.5,
+    "B_i": 5.0,
+    "B_ii": 2.0
+  },
+  "mean_T": {
+    "A": 3.895,
+    "B": 3.375,
+    "B_i": 4.267,
+    "B_ii": 1.889
+  },
+  "T_counts": {
+    "A": {
+      "0": 1,
+      "1": 4,
+      "2": 1,
+      "3": 1,
+      "4": 2,
+      "5": 3,
+      "6": 7
+    },
+    "B": {
+      "0": 3,
+      "1": 2,
+      "2": 5,
+      "3": 2,
+      "4": 3,
+      "5": 3,
+      "6": 6
+    },
+    "B_i": {
+      "0": 1,
+      "1": 0,
+      "2": 2,
+      "3": 1,
+      "4": 3,
+      "5": 3,
+      "6": 5
+    },
+    "B_ii": {
+      "0": 2,
+      "1": 2,
+      "2": 3,
+      "3": 1,
+      "4": 0,
+      "5": 0,
+      "6": 1
+    }
+  },
+  "mann_whitney": {
+    "U_A_over_B": 259.5,
+    "p_two_sided": 0.4395519890251727,
+    "p_one_sided_A_greater": 0.21977599451258634,
+    "pairs_A_greater": 222,
+    "pairs_tied": 75,
+    "pairs_total": 456
+  },
+  "split_comparisons": {
+    "A_vs_B_i": {
+      "n": 15,
+      "median": 5.0,
+      "U": 134.0,
+      "auc": 0.4702,
+      "p_one_sided": 0.625909178368654,
+      "p_two_sided": 0.7753629462063794
+    },
+    "A_vs_B_ii": {
+      "n": 9,
+      "median": 2.0,
+      "U": 125.5,
+      "auc": 0.7339,
+      "p_one_sided": 0.023788528185903053,
+      "p_two_sided": 0.047577056371806106
+    }
+  },
+  "auc": {
+    "by_hand_U_over_nA_nB": 0.5691,
+    "by_counting_pairs": 0.5691,
+    "sklearn_roc_auc_score": 0.5691
+  },
+  "venom_saliva_secretion_share_of_A": {
+    "numerator": 6,
+    "denominator": 19,
+    "share": 0.3158,
+    "entry_ids": [
+      "A01",
+      "A02",
+      "A03",
+      "A04",
+      "A05",
+      "A06"
+    ],
+    "definition": "the source material is a secretion the animal releases outside its body: venom, saliva or another oral or skin secretion",
+    "including_internal_secretion": {
+      "numerator": 7,
+      "denominator": 19
+    },
+    "peptide_or_protein_molecules": {
+      "numerator": 10,
+      "denominator": 19
+    },
+    "median_T_external": 6.0,
+    "median_T_rest_of_A": 3.0
+  },
+  "years": {
+    "A_approval": {
+      "min": 1972,
+      "median": 2003,
+      "max": 2016,
+      "all": [
+        1972,
+        1981,
+        1986,
+        1987,
+        1991,
+        1998,
+        1998,
+        1999,
+        2000,
+        2003,
+        2004,
+        2004,
+        2004,
+        2004,
+        2005,
+        2009,
+        2010,
+        2015,
+        2016
+      ]
+    },
+    "B_i_trial_start": {
+      "min": 1994,
+      "median": 2004,
+      "max": 2026,
+      "all": [
+        1994,
+        2000,
+        2000,
+        2001,
+        2002,
+        2003,
+        2003,
+        2004,
+        2005,
+        2005,
+        2007,
+        2012,
+        2013,
+        2020,
+        2026
+      ]
+    },
+    "B_ii_paper": {
+      "min": 2004,
+      "median": 2013,
+      "max": 2023,
+      "all": [
+        2004,
+        2010,
+        2011,
+        2012,
+        2013,
+        2015,
+        2017,
+        2019,
+        2023
+      ]
+    }
+  },
+  "rule": {
+    "median_gap_at_least_2": false,
+    "auc_at_least_0_75": false,
+    "at_least_15_per_set": true,
+    "t_predicts": false
+  },
+  "rule_text": "T predicts if the median T of Set A is at least 2 points above the median of Set B, the AUC is at least 0.75, and each set has at least 15 entries (INCLUSION.md, written before collection)."
+}

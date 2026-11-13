@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 18,
+   "complete_single": 341,
+   "completeness_pct": 53.42,
+   "fragmented": 79,
+   "lineage": "metazoa_odb12",
+   "missing": 234,
+   "short_summary_c_pct": 53.4
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 0,
+   "complete_single": 78,
+   "completeness_pct": 60.47,
+   "fragmented": 16,
+   "lineage": "eukaryota_odb12",
+   "missing": 35,
+   "short_summary_c_pct": 60.5
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "atlas species",
+ "n_interpro_match": 11100,
+ "n_proteins": 15190,
+ "n_sprot_hit": 9017,
+ "n_uncharacterized_name": 5745,
+ "n_unlabelled": 3933,
+ "proteome_taxid": "7067",
+ "species": "Tenebrio molitor",
+ "uncharacterized_name_pct": 37.82,
+ "unlabelled_pct": 25.89,
+ "upid": "UP000719412"
+}

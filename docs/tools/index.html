@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool cards</title>
+<meta name="description" content="One card per protein annotation tool.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+
+</head>
+<body data-page="tools">
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Protein annotation leaderboard</a>
+<nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../cost.html" data-keep-filters>Score against cost</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../coverage.html">Coverage</a><a href="../methods.html">Methods</a></nav>
+</div></header>
+<main class="wrap">
+<p class="source" id="source-commit" data-commit="548ec5b89dccedd329849d7a1b4ada2ae89478ee">Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/548ec5b89dccedd329849d7a1b4ada2ae89478ee/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/548ec5b89dccedd329849d7a1b4ada2ae89478ee">548ec5b8</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<h1>Tool cards</h1>
+<p class="lede">One card per tool: what it compares, what it needs, how to read its score, where it
+is strong and weak in the table, what it costs, and the exact command that was run.</p>
+<div class="legend" aria-label="Colour key"><span class="item"><span class="kind k-letters" aria-hidden="true"></span>aligns amino-acid letters: phmmer, MMseqs2</span><span class="item"><span class="kind k-profiles" aria-hidden="true"></span>builds a profile of a protein family: jackhmmer, MMseqs2, three rounds, HH-suite (hhsearch)</span><span class="item"><span class="kind k-shapes" aria-hidden="true"></span>compares 3-D shape letters (3Di): Foldseek, ProstT5 + Foldseek</span><span class="item"><span class="kind k-kmers" aria-hidden="true"></span>counts shared k-mers in a reduced alphabet: kmerseek</span><span class="item"><span class="kind k-models" aria-hidden="true"></span>scans curated Pfam family models: hmmscan with Pfam</span></div>
+<ul class="tools"><li><span class="kind k-letters" aria-hidden="true"></span><a href="hmmer3_phmmer.html"><b>phmmer</b></a><br><span class="muted">aligns amino-acid letters</span></li><li><span class="kind k-letters" aria-hidden="true"></span><a href="mmseqs2_seqseq.html"><b>MMseqs2</b></a><br><span class="muted">aligns amino-acid letters</span></li><li><span class="kind k-profiles" aria-hidden="true"></span><a href="hmmer3_jackhmmer.html"><b>jackhmmer</b></a><br><span class="muted">builds a profile of a protein family</span></li><li><span class="kind k-profiles" aria-hidden="true"></span><a href="mmseqs2_iterative.html"><b>MMseqs2, three rounds</b></a><br><span class="muted">builds a profile of a protein family</span></li><li><span class="kind k-profiles" aria-hidden="true"></span><a href="hhblits.html"><b>HH-suite (hhsearch)</b></a><br><span class="muted">builds a profile of a protein family</span></li><li><span class="kind k-shapes" aria-hidden="true"></span><a href="foldseek.html"><b>Foldseek</b></a><br><span class="muted">compares 3-D shape letters (3Di)</span></li><li><span class="kind k-shapes" aria-hidden="true"></span><a href="prostt5.html"><b>ProstT5 + Foldseek</b></a><br><span class="muted">compares 3-D shape letters (3Di)</span></li><li><span class="kind k-kmers" aria-hidden="true"></span><a href="kmerseek.html"><b>kmerseek</b></a><br><span class="muted">counts shared k-mers in a reduced alphabet</span></li><li><span class="kind k-models" aria-hidden="true"></span><a href="hmmscan.html"><b>hmmscan with Pfam</b></a><br><span class="muted">scans curated Pfam family models</span></li></ul>
+</main>
+<footer class="site"><div class="wrap">
+<p>Numbers from <a href="https://github.com/seanome/2024-kmerseek-analysis/tree/548ec5b89dccedd329849d7a1b4ada2ae89478ee/results/leaderboard">seanome/2024-kmerseek-analysis</a> at commit <a class="mono" href="https://github.com/seanome/2024-kmerseek-analysis/commit/548ec5b89dccedd329849d7a1b4ada2ae89478ee">548ec5b8</a> (<span class="mono">results/leaderboard</span>), copied 2026-10-15.</p>
+<p>Site source: <a href="https://github.com/seanome/protein-function-annotation-leaderboard">seanome/protein-function-annotation-leaderboard</a>. Code font: Fantasque Sans Mono 1.8.0 (SIL Open Font License).</p>
+<p>This page as JSON, for scripts and agents: <a class="mono" href="index.html.json">index.html.json</a></p>
+</div></footer>
+</body>
+</html>
