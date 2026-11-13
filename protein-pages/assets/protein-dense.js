@@ -42,7 +42,8 @@
     var L = r[1], name = r[3] || r[2] || "";
     document.title = id + (name ? " " + name : "") + ": what every annotation program found";
     if (name) document.querySelector(".titlebar .pn").textContent = name;
-    document.querySelector(".titlebar .len").textContent = L.toLocaleString("en-US") + " amino acids";
+    document.querySelector(".titlebar .len").textContent = L.toLocaleString("en-US") + " amino acids" +
+      (d.iso ? " · isoform " + (d.iso.map(function (m) { return m[0]; }).indexOf(id) + 1) + " of " + d.iso.length + " (listed below)" : "");
     var hits = [], tracksRun = {};
     function best(k, x, extra) {  // a best-hit table row: [accession, identity 0-1, start, end, E-value, bits, name, species, ..., target start, target end]
       tracksRun[k] = true;
@@ -156,7 +157,7 @@
                   unifire: ["source", "rule", "what it predicts", "where it points"], mmseqs2: ["evalue", "fident", "bits"], prostt5: ["evalue", "fident", "bits", "alntmscore"],
                   foldseek: ["evalue", "fident", "bits", "alntmscore", "lddt"], interproscan: ["member database", "signature", "its score or E-value", "InterPro entry"] };
     window.PAGE = {
-      id: id, pn: name, q: d.q || new Array(L + 1).join("X"), noseq: d.q ? 0 : 1, px: 640 / L, w: 640, top: 10, m: ran.length, sent: sent, hits: hits, td: {}, ds: {},
+      id: id, pn: name, ss: d.ss || null, q: d.q || new Array(L + 1).join("X"), noseq: d.q ? 0 : 1, px: 640 / L, w: 640, top: 10, m: ran.length, sent: sent, hits: hits, td: {}, ds: {},
       names: names, alpha: C.alpha || {}, nohit: { mmseqs2: "E ≤ 0.001: its table keeps nothing weaker", diamond: "E ≤ 0.001: its table keeps nothing weaker", kmerseek: "E ≤ " + C.kmerseek_max_e, prostt5: "E ≤ 10", foldseek: "E ≤ 10", unifire: "no rule fired" }, tracks: tracks, pfam_color: C.pfam_color, tseq_files: C.tseq_files || 1, tbase: "", agree: [],
       twelve: "the " + ran.length + " programs with positions run here (" + ran.map(function (p) { return C.program_names[p]; }).join(", ") +
         ") plus " + wholeRan.length + " that name a hit with no position: " + wholeRan.map(function (w) { return w[1]; }).join(", ")

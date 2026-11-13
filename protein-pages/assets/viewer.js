@@ -251,6 +251,15 @@
         h.push("<p class=\"note\">A prediction several rules make is listed once, with each rule. Positions are residue numbers on your protein.</p>");
       }
     }
+    // Isoforms: every protein of the same gene, in the order of the proteome FASTA
+    if (d.iso) {
+      h.push("<h2>Isoforms of this gene</h2>");
+      h.push("<p>This gene has " + d.iso.length + " proteins; this page is isoform " + (d.iso.map(function (m) { return m[0]; }).indexOf(id) + 1) +
+        ". The first has the bare ID and the others end in .2, .3 and so on, in the order of the proteome FASTA.</p>");
+      h.push(table([["Isoform"], ["Protein"], ["Length (aa)"], ["Name"]], d.iso.map(function (m, i) {
+        return [String(i + 1), m[0] === id ? "<b class=\"mono\">" + esc(m[0]) + "</b> (this page)" : link(m[0]), fmt(m[1]), esc(m[2])];
+      })));
+    }
     // Cluster
     h.push("<h2>MMseqs2 cluster</h2>");
     if (r[13] > 1) {

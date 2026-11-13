@@ -558,7 +558,8 @@
   const maxE = () => Math.pow(10, +emax.value);
   const shownE = (h) => h.e === null || h.e === undefined || h.e <= maxE();
   const openProg = {}, openHit = {}, shownHits = {}, FIRST_HITS = 200, MORE_HITS = 500;
-  let region = null;                     // [a, b, label] from a click on the domain lane: keep hits overlapping it
+  let region = null;                     // [a, b, label] from a click on the domain lane or on a bar of a program's histogram: keep hits overlapping it
+  let openSaved = null;                  // which programs were unfolded before a region was set, to put back when it is cleared
   let sortKey = "e", sortUp = true;      // order of the hit rows inside an unfolded program
   let TW = 400; const TH = 34, BH = 10, BY = 3;   // track width (measured), row height, box height and top
 
@@ -645,11 +646,37 @@
       if (ak) ak.innerHTML = `<b class="mono">${esc(an)}</b> classes: ` + names.map((c) => `<i class="pl" style="background:${col[c]}"></i><span class="mono">${esc(groups[c].sort().join(""))}</span>`).join(" ") + ` <span class="dim">(the alphabet of the kmerseek hit under the pointer)</span>`;
     }
     g += "</svg>";
-    const pl = PAGE.plddt ? ` Under it: pLDDT, then your protein in a kmerseek alphabet (key above).` : "";
+    const under = [PAGE.plddt && "pLDDT", an && "your protein in a kmerseek alphabet"].filter(Boolean);
+    const pl = under.length ? ` Under it: ${under.join(", then ")} (key above).` : "";
     return `<div class="g ruler"><div class="lbl">residue 1 to ${L} of your protein, the same axis in every row.${pl}</div><div class="track">${g}</div></div>`;
   }
   // the domain lane: hmmscan's Pfam domains, InterProScan's predictions (dashed) and the families the
   // headline sentence rests on (brackets with the count of programs). Click one to keep only hits in it.
+  // s4pred's predicted secondary structure, a row of its own right under the ruler, named at the left like the domain
+  // row (as a third unnamed strip under the ruler it was not found). One grey, two shapes, so helix and strand differ
+  // without a new colour: helix a tall dark bar, strand a lower lighter one, coil the thin line both sit on.
+  function ssRow() {
+    if (!PAGE.ss) return "";
+    const runs = [...PAGE.ss.matchAll(/([HEC])(\d+)/g)].map((m) => [m[1], +m[2]]), SSN = { H: "helix", E: "strand", C: "coil" };
+    const tot = { H: 0, E: 0, C: 0 }; for (const [c, n] of runs) tot[c] += n;
+    const pc = (c) => Math.round((100 * tot[c]) / L);
+    let g = svgOpen(22, "ss") + `<line x1="0" x2="${TW}" y1="11" y2="11" stroke="#c3c2b7" stroke-width="1"/>`, a = 1;
+    for (const [c, n] of runs) {
+      const b = a + n - 1, x0 = sx(a).toFixed(1), w = Math.max(0.6, (n / L) * TW).toFixed(1), t = `<title>s4pred: ${SSN[c]}, residues ${a}-${b} (${n})</title>`;
+      if (c === "H") g += `<rect class="ss h" x="${x0}" y="4" width="${w}" height="14" fill="#3D3D3D">${t}</rect>`;
+      else if (c === "E") g += `<rect class="ss e" x="${x0}" y="8" width="${w}" height="6" fill="#8a8a8a">${t}</rect>`;
+      a = b + 1;
+    }
+    g += "</svg>";
+    const sk = document.getElementById("sskey");
+    if (sk && !sk.firstChild) {
+      sk.title = "s4pred 1.2.1 predicts helix, strand or coil for each residue from this protein's sequence alone; a prediction, not a measured structure.";
+      sk.innerHTML = `<b>helix and strand (s4pred):</b> <svg width="14" height="12"><rect y="0" width="14" height="12" fill="#3D3D3D"/></svg> helix ` +
+        `<svg width="14" height="12"><rect y="3" width="14" height="6" fill="#8a8a8a"/></svg> strand <svg width="14" height="12"><line x1="0" x2="14" y1="6" y2="6" stroke="#c3c2b7"/></svg> coil`;
+    }
+    const why = "s4pred 1.2.1 predicts helix, strand or coil for each residue from this protein's sequence alone; a prediction, not a measured structure. The shares are of this protein's residues.";
+    return `<div class="g row ssrow"><div class="name"><b>helix and strand, predicted</b><div class="s" title="${why}">s4pred, from the sequence alone: helix ${pc("H")}%, strand ${pc("E")}%, coil ${pc("C")}%</div></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="num"></div><div class="txt"></div><div class="track">${g}</div></div>`;
+  }
   function laneRow() {
     // Pfam domains: hmmscan's; where hmmscan did not run (protein.html), InterProScan's Pfam matches, as on the first page
     let famSrc = "hmmscan", fam = H.map((h, i) => i).filter((i) => H[i].k === "hmmscan" && shownE(H[i]));
@@ -665,7 +692,21 @@
     if (!kept.length && !pred.length && !agree.length) return "";  // nothing to draw (protein.html: no hmmscan row)
     const lanes = [];  // brackets that overlap go on separate lines
     const laneOf = agree.map((a) => { let li = lanes.findIndex((end) => a.a > end + 2); if (li < 0) { lanes.push(a.b); li = lanes.length - 1; } else lanes[li] = a.b; return li; });
-    const hh = 16 + (pred.length ? 14 : 0) + lanes.length * 15;
+    // a prediction's label goes inside its dashed box when it fits, else beside it (to the right, or to the left when the
+    // right has no room), never over the box; a prediction whose box or label would touch one already placed goes a line lower
+    const predLines = [];
+    const predAt = pred.map((p) => {
+      const x0 = sx(p.a), w = wx(p.a, p.b), lab = `${p.l} ${p.a}–${p.b}`, tw = lab.length * 5.6;
+      let tx = x0 + w / 2, anchor = "middle", lo = x0, hi = x0 + w;
+      // beside the box whenever a side has room: inside, the letters touch the dashed lines above and below them
+      const right = x0 + w + 4 + tw <= TW, left = x0 - 4 - tw >= 0;
+      if (right || (!left && tw + 6 > w && TW - (x0 + w) >= x0)) { tx = x0 + w + 4; anchor = "start"; hi = tx + tw; }
+      else if (left || tw + 6 > w) { tx = x0 - 4; anchor = "end"; lo = tx - tw; }
+      let li = predLines.findIndex((end) => lo > end + 6);
+      if (li < 0) { predLines.push(hi); li = predLines.length - 1; } else predLines[li] = hi;
+      return { x0, w, lab, tx, anchor, li };
+    });
+    const hh = 16 + predLines.length * 14 + lanes.length * 15;
     let g = svgOpen(hh, "lane") + base(9);
     const on = (a, b) => (region && region[0] === a && region[1] === b ? " on" : "");
     for (const i of kept) {
@@ -676,13 +717,13 @@
     }
     let y = 16;
     if (pred.length) {
-      for (const p of pred) {
-        const x0 = sx(p.a), w = wx(p.a, p.b);
+      pred.forEach((p, n) => {
+        const { x0, w, lab, tx, anchor, li } = predAt[n], yl = y + li * 14;
         g += `<g class="dom${on(p.a, p.b)}" data-a="${p.a}" data-b="${p.b}" data-l="${esc(p.l)}"><title>${esc(p.l)}, predicted by InterProScan, residues ${p.a}-${p.b}; not counted as a hit. Click to keep only hits in it.</title>` +
-          `<rect x="${(x0 + 1).toFixed(1)}" y="${y + 2}" width="${Math.max(1, w - 2).toFixed(1)}" height="10" rx="2" fill="transparent" stroke="#3D3D3D" stroke-width="1.2" stroke-dasharray="3 2"/>` +
-          `<text x="${(x0 + w / 2).toFixed(1)}" y="${y + 10}" class="dl" text-anchor="middle">${esc(p.l)} ${p.a}–${p.b}</text></g>`;
-      }
-      y += 14;
+          `<rect class="pred" x="${(x0 + 1).toFixed(1)}" y="${yl + 2}" width="${Math.max(1, w - 2).toFixed(1)}" height="10" rx="2" fill="transparent" stroke="#3D3D3D" stroke-width="1.2" stroke-dasharray="3 2"/>` +
+          `<text x="${tx.toFixed(1)}" y="${yl + 10}" class="dl pred${anchor === "middle" ? " halo" : ""}" text-anchor="${anchor}">${esc(lab)}</text></g>`;
+      });
+      y += predLines.length * 14;
     }
     agree.forEach((a, n) => {
       const x0 = sx(a.a), x1 = sx(a.b) + wx(a.b, a.b), yy = y + laneOf[n] * 15;
@@ -732,7 +773,7 @@
     for (let a = 1; a <= L;) {
       let b = a; while (b < L && cnt[b + 1] === cnt[a] && Math.abs(op[b + 1] - op[a]) < 0.01) b++;
       const n = cnt[a];
-      if (n > 0) { const hgt = Math.max(1.5, (hmax * n) / YMAX); g += `<rect x="${sx(a).toFixed(1)}" y="${(base_y - hgt).toFixed(1)}" width="${wx(a, b).toFixed(1)}" height="${hgt.toFixed(1)}" fill="${tr.color}" opacity="${(0.15 + 0.6 * op[a]).toFixed(2)}"><title>residues ${a}-${b}: ${n} hit${n === 1 ? "" : "s"} (this program's peak: ${max}; the scale is the same in every row, top = ${YMAX}); shade = identity of the hits here</title></rect>`; }
+      if (n > 0) { const hgt = Math.max(1.5, (hmax * n) / YMAX); g += `<rect class="bar" data-a="${a}" data-b="${b}" x="${sx(a).toFixed(1)}" y="${(base_y - hgt).toFixed(1)}" width="${wx(a, b).toFixed(1)}" height="${hgt.toFixed(1)}" fill="${tr.color}" opacity="${(0.15 + 0.6 * op[a]).toFixed(2)}"><title>residues ${a}-${b}: ${n} hit${n === 1 ? "" : "s"} (this program's peak: ${max}; the scale is the same in every row, top = ${YMAX}); shade = identity of the hits here. Click to keep only the hits that reach these residues.</title></rect>`; }
       a = b + 1;
     }
     if (best !== undefined) {
@@ -753,7 +794,15 @@
       const p = merged.find((p) => p.l === h.l && h.q[0] <= p.b + 1 && h.q[1] >= p.a - 1);
       if (p) { p.a = Math.min(p.a, h.q[0]); p.b = Math.max(p.b, h.q[1]); p.n++; p.i.push(H.indexOf(h)); } else merged.push({ a: h.q[0], b: h.q[1], l: h.l, n: 1, i: [H.indexOf(h)] });
     });
-    for (const p of merged) { const x0 = sx(p.a), w = wx(p.a, p.b); g += `<g class="hit" data-i="${p.i[0]}"><title>${esc(p.l)}: ${p.n} overlapping prediction${p.n === 1 ? "" : "s"} merged, residues ${p.a}-${p.b}</title>${featureSvg(x0, BY, w, BH, tr.color)}<text x="${(x0 + w / 2).toFixed(1)}" y="${BY + BH + 9}" class="ax halo" text-anchor="middle">${esc(p.l)} ${p.a}–${p.b}${p.n > 1 ? ` (${p.n} predictions)` : ""}</text></g>`; }
+    // a label is written under its box, kept inside the drawing, and left out when it would run into the one before it
+    // (the box keeps its tooltip, and the domain lane at the top names every prediction)
+    let lastEnd = -Infinity;
+    for (const p of merged) {
+      const x0 = sx(p.a), w = wx(p.a, p.b), lab = `${p.l} ${p.a}–${p.b}${p.n > 1 ? ` (${p.n} predictions)` : ""}`, tw = lab.length * 5.2;
+      const cx = Math.max(tw / 2, Math.min(TW - tw / 2, x0 + w / 2)), fits = cx - tw / 2 > lastEnd + 6;
+      if (fits) lastEnd = cx + tw / 2;
+      g += `<g class="hit" data-i="${p.i[0]}"><title>${esc(p.l)}: ${p.n} overlapping prediction${p.n === 1 ? "" : "s"} merged, residues ${p.a}-${p.b}</title>${featureSvg(x0, BY, w, BH, tr.color)}${fits ? `<text x="${cx.toFixed(1)}" y="${BY + BH + 9}" class="ax halo" text-anchor="middle">${esc(lab)}</text>` : ""}</g>`;
+    }
     return g + "</svg>";
   }
   function boxTrack(i) {
@@ -860,13 +909,17 @@
     const sub = [h.n, h.o && `<i>${esc(h.o)}</i>`, fams && `Pfam: ${esc(fams)}`].filter(Boolean).map((s, j) => (j === 0 ? esc(s) : s)).join(" · ");
     const name = `<div class="name"><span class="rank">${n}</span><span class="nm"><span class="mono">${esc(h.l)}</span>${h.t && h.t !== h.l ? ` ${uniHtml(h.t)}` : ""}</span>` +
       `<div class="s" title="${esc([h.n, h.o, fams].filter(Boolean).join(" · "))}">${sub}</div></div>`;
-    const setting = h.k === "kmerseek" && h.m ? `<span class="chip" title="the alphabet and k-mer size kmerseek compared the two proteins in; ${h.sn || 0} seed window${h.sn === 1 ? "" : "s"}">${esc(h.m)} k${h.kk}</span>` : esc(sc[1].replace(" bits", "").replace("Prob ", ""));
+    // kmerseek gives no score; its alphabet and k go under the matched part, where a long alphabet name has room
+    // (in the narrow score column "hp_lehninger_c_nonpolar2 k25" ran over the columns on both sides)
+    const isKm = h.k === "kmerseek" && h.m;
+    const setting = isKm ? "" : esc(sc[1].replace(" bits", "").replace("Prob ", ""));
+    const kmLine = isKm ? `<div class="s setting" title="the alphabet and k-mer size kmerseek compared the two proteins in: ${esc(h.m)}, k = ${h.kk}; ${h.sn || 0} seed window${h.sn === 1 ? "" : "s"}"><span class="chip">${esc(h.m)} k${h.kk}</span></div>` : "";
     const re = h.k === "prostt5" || h.k === "foldseek" || h.k === "diamond";  // the count below is from a realignment, not from Foldseek's own alignment
     const idc = h.id ? `<span title="${esc(idFrom(h))}">${idText(h)}</span><div class="s" title="${esc(idSource(h))}">${h.id[0]} of ${h.id[1]}${re ? `<br><span class='re'>= ${Math.round((100 * h.id[0]) / h.id[1])}% realigned</span>` : ""}</div>` : idText(h);
     const tt = topTwo(h.q[0], h.q[1]);
     const cells = `<div class="num">${h.q[0]}–${h.q[1]}` + (PAGE.noseq ? `<div class="s">${h.q[1] - h.q[0] + 1} aa</div></div>` :
       `<div class="s${tt.pct >= 40 ? " bias" : ""}" title="${h.q[1] - h.q[0] + 1} residues; the two most common, ${esc(tt.res)}, make up ${tt.pct}% of them${tt.pct >= 40 ? ": a composition-biased stretch" : ""}">${h.q[1] - h.q[0] + 1} aa · ${esc(tt.res)} ${tt.pct}%</div></div>`) + `<div class="num">${esc(eText(h))}</div><div class="num">${setting}</div><div class="num">${idc}</div>` +
-      `<div class="txt">${h.r ? `<span class="s">${esc(h.k === "hmmscan" ? "model" : h.t || "")} ${Math.min(...h.r)}–${Math.max(...h.r)}${h.tl ? ` of ${h.tl}` : ""}</span>` : ""}${PAGE.plddt ? `<div class="s">pLDDT here ${Math.round(meanPl(h.q[0], h.q[1]))}</div>` : ""}</div>`;
+      `<div class="txt">${h.r ? `<span class="s">${esc(h.k === "hmmscan" ? "model" : h.t || "")} ${Math.min(...h.r)}–${Math.max(...h.r)}${h.tl ? ` of ${h.tl}` : ""}</span>` : ""}${kmLine}${PAGE.plddt ? `<div class="s">pLDDT here ${Math.round(meanPl(h.q[0], h.q[1]))}</div>` : ""}</div>`;
     let out = `<div class="g row hit${isOpen ? " open" : ""}" data-i="${i}" role="button" tabindex="0" aria-expanded="${isOpen}" style="--c:${tr.color}">${name}${cells}<div class="track">${boxTrack(i)}</div></div>`;
     if (isOpen) out += `<div class="panel" data-i="${i}"><p class="note">Loading the residues...</p></div>`;
     return out;
@@ -891,7 +944,7 @@
     document.documentElement.style.setProperty("--hh", headerEl.offsetHeight + "px");
     measure();
     YMAX = Math.max(1, ...PROG.map((k) => coverMax(matchOf(k))));
-    let html = rulerRow() + laneRow() + agreeRow();
+    let html = rulerRow() + ssRow() + laneRow() + agreeRow();
     const silent = [], notRun = [];
     for (const k of PROG) {
       if (NOTRUN[k]) notRun.push(k); else if (!keptOf(k).length && !featsOf(k).length) silent.push(k); else html += progRow(k);
@@ -907,15 +960,32 @@
     countEl.innerHTML = `<b>${m.length}</b> of ${all.length} hits · ${nProt} protein${nProt === 1 ? "" : "s"}` + (region ? ` · in <b>${esc(region[2])}</b> ${region[0]}–${region[1]} <button class="btn x" id="unregion" title="Show hits anywhere on the protein">×</button>` : "");
     document.querySelectorAll(".colhead [data-sort]").forEach((b) => { b.classList.toggle("on", b.dataset.sort === sortKey); b.querySelector("i").textContent = b.dataset.sort === sortKey ? (sortUp ? "▲" : "▼") : ""; });
     gridEl.querySelectorAll(".panel[data-i]").forEach((p) => open(H[+p.dataset.i], p));
-    const un = document.getElementById("unregion"); if (un) un.addEventListener("click", () => { region = null; render(); });
+    const un = document.getElementById("unregion"); if (un) un.addEventListener("click", () => { setRegion(null); render(); });
   }
-  // one click: a program row folds or unfolds; a hit row shows or hides its residues; a domain filters
+  // Keep only the hits that reach residues a to b, and unfold the programs named (all that still have a hit, when none is
+  // named) so the hits are on screen at once. Clearing puts the folds back as they were before the first region was set.
+  function setRegion(r, only) {
+    if (r) {
+      if (!region) openSaved = Object.assign({}, openProg);
+      region = r;
+      for (const k of only || PROG) if (matchOf(k).length) openProg[k] = true;
+    } else {
+      region = null;
+      if (openSaved) { for (const k in openProg) delete openProg[k]; Object.assign(openProg, openSaved); openSaved = null; }
+    }
+  }
+  // one click: a program row folds or unfolds; a hit row shows or hides its residues; a domain or a histogram bar filters
   gridEl.addEventListener("click", (e) => {
     const more = e.target.closest("[data-more]");
     if (more) { const k = more.dataset.more; shownHits[k] = (shownHits[k] || FIRST_HITS) + MORE_HITS; render(); return; }
     if (e.target.closest("a") || e.target.closest("button")) return;
     const d = e.target.closest(".dom[data-a]");
-    if (d) { const a = +d.dataset.a, b = +d.dataset.b; region = region && region[0] === a && region[1] === b ? null : [a, b, d.dataset.l]; render(); return; }
+    if (d) { const a = +d.dataset.a, b = +d.dataset.b; tip.hidden = true; setRegion(region && region[0] === a && region[1] === b ? null : [a, b, d.dataset.l]); render(); return; }
+    const bar = e.target.closest(".row.prog .bar[data-a]");
+    if (bar) {  // a bar of a program's histogram: the hits that reach its residues, with that program unfolded
+      const a = +bar.dataset.a, b = +bar.dataset.b, k = bar.closest(".row.prog").dataset.k;
+      tip.hidden = true; setRegion(region && region[0] === a && region[1] === b ? null : [a, b, "residues"], [k]); render(); focusRow(`.row.prog[data-k="${k}"]`); return;
+    }
     const pr = e.target.closest(".row.prog");
     if (pr) { tip.hidden = true; const k = pr.dataset.k; if (!pr.classList.contains("nohit")) { openProg[k] = !openProg[k]; render(); focusRow(`.row.prog[data-k="${k}"]`); } return; }
     const hr = e.target.closest(".row.hit");
@@ -963,7 +1033,7 @@
   }));
   document.getElementById("expand-all").addEventListener("click", () => { for (const k of PROG) if (matchOf(k).length) openProg[k] = true; render(); });
   document.getElementById("collapse-all").addEventListener("click", () => { for (const k in openProg) delete openProg[k]; for (const i in openHit) delete openHit[i]; render(); });
-  document.getElementById("clear").addEventListener("click", () => { emax.value = emax.dataset.start; hq.value = ""; words = []; region = null; sortKey = "e"; sortUp = true; laneAlpha = null; render(); if (ladder) ladder.innerHTML = ladderHtml(); });
+  document.getElementById("clear").addEventListener("click", () => { emax.value = emax.dataset.start; hq.value = ""; words = []; setRegion(null); sortKey = "e"; sortUp = true; laneAlpha = null; render(); if (ladder) ladder.innerHTML = ladderHtml(); });
   emax.addEventListener("change", render);
   // the ladder: one chip per E-value setting with what the sentence says there; the current one is dark
   const ladder = document.getElementById("ladder");

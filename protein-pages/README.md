@@ -332,6 +332,15 @@ python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/pro
 - `index.html` lists every protein: counts that filter the table when clicked, bars of the
   immune categories and of how the proposed name compares with the existing one, a search, and
   the table, shown 100 rows at a time and sorted by clicking a column heading.
+  The "gene group" list keeps the proteins whose best hit from DIAMOND, MMseqs2, either Foldseek
+  search or kmerseek is a Period protein, a Cry or photolyase, another clock gene, or an HLA or
+  other MHC protein (`GENE_GROUPS` in `build_full.py` holds the name patterns), at any E-value,
+  so weak hits from one program are kept and the row names the program and its E-value. MHC
+  class I and class II are also listed on their own. The aging group keeps a protein when the
+  gene symbol of such a hit is one of the 307 human genes of GenAge build 21
+  (`full_inputs/genage_human.tsv`). The allorecognition group is the one group that is not a
+  match to another species: the 53 proteins that DIAMOND matched to a Fester, Fester co-receptor
+  or BHF protein of *Botryllus schlosseri* itself.
 - `protein.html#FUN000002` shows one protein. There is one such page, not 45,339: the ID after
   `#` picks the protein, and its data come from one of 96 files in `full/`, picked by a hash
   of the ID. This keeps the site to about 340 files and 133 MB, small enough to publish as one
@@ -370,6 +379,10 @@ equal counts taken from the tables, and that each of the 51 test-set pages is li
 drawn `FUN019272_TTN.1` is the tables' `FUN019272.2`, 2,160 aa).
 
 ```bash
+pip install -r requirements-test.txt
+```
+
+```bash
 python -m pytest tests/
 ```
 
@@ -387,5 +400,8 @@ explains, that the six class numbers add up to the total on the index and in `su
 and that each page's sentence matches its index row ("N of the M programs run", and the
 status). `check_boxes.py` picks boxes at random and checks them against the line of the
 tool's file they came from, and the alignment's residues against the FASTA files; it exits 1
-if any fails. `tests/screenshots.py` takes full-page screenshots with Playwright
+if any fails. `tests/check_hover.py` opens pages in a browser at three window widths, points at each
+hit box and fails if the fixed header or any row moves, or if the label of a dashed prediction box lies
+over a box, another label or the edge; pytest runs it on five pages, so the tests need Playwright and
+Google Chrome (or `python -m playwright install chromium`). `tests/screenshots.py` takes full-page screenshots with Playwright
 (`PROTEIN_ID:kmerseek` opens that protein's first kmerseek box).

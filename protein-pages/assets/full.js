@@ -9,12 +9,13 @@
   // 14 drawn page, 15 InterProScan's Pfam matches [start, end, index into PFAM], 16 MMseqs2's best
   // hit [start, end, identity %, accession] or null, 17 the other programs with a hit, as bits of F.other, 19 kmerseek's best hit
   // [E-value, setting, accession, name] when no other program found anything and E is at most 0.001, else 0,
-  // 18 1 when the two names conflict (not only their spelling; build_full.names_conflict)
+  // 18 1 when the two names conflict (not only their spelling; build_full.names_conflict),
+  // 20 the gene groups it is in, [[index into F.groups, program, E-value, accession, name], ...] best first, or 0
   var grid = document.getElementById("grid"), AX = +grid.dataset.ax, SEQ = grid.dataset.seq, DOM = grid.dataset.dom;
   function catNames(m) { var o = []; for (var i = 0; i < CATS.length; i++) if (m >> i & 1) o.push(CATS[i]); return o; }
   function rowText(r) { return [r[0], r[2], r[3], r[5], r[6], r[10], catNames(r[11]).join(" ")].join(" ").toLowerCase(); }
   var text = [];
-  var OTHER = F.other || [], CUTS = [1e-3, 1e-10, 1e-50, 1e-100];
+  var OTHER = F.other || [], GROUPS = F.groups || [], ISO = F.iso || {}, CUTS = [1e-3, 1e-10, 1e-50, 1e-100];
   // a Swiss-Prot match counts when DIAMOND's E-value is at or below the cutoff on the ladder
   function isMatch(r) { var e = ev(r[9]); return !!r[6] && e !== null && e <= st.e; }
   var TILES = {
@@ -23,19 +24,31 @@
     drawn: function (r) { return !!r[14]; }, names: function (r) { return r[18] === 1; },
     km3: function (r) { return !!r[19]; }, km5: function (r) { return r[19] && r[19][0] <= 1e-5; }
   };
+  // Foldseek best hits weaker than E-value 0.001 (row field 21): "ProstT5 + Foldseek E 0.69"
+  function weak(r) { return (r[21] || []).map(function (x) { return OTHER[x[0]][0] + " E " + (+x[1].toPrecision(2)); }); }
+  // under "no DIAMOND match": how many other programs have a hit, counted or weaker, so the row does not read as nothing found
+  function anyOther(r) {
+    var n = others(r[17]).length, w = (r[21] || []).length;
+    return n + w === 0 ? "" : n ? n + " other program" + (n > 1 ? "s have" : " has") + " a hit" : w + " weaker hit" + (w > 1 ? "s" : "") + " from other programs";
+  }
   function others(b) { var o = []; for (var i = 0; i < OTHER.length; i++) if (b >> i & 1) o.push(OTHER[i][0]); return o; }
   function nbits(b) { var n = 0; while (b) { n += b & 1; b >>= 1; } return n; }
   var TILE_WORDS = { all: "", sp: "with a Swiss-Prot match", pfam: "with a Pfam domain", none: "with neither a Swiss-Prot match nor a Pfam domain",
     immune: "that are immune-gene candidates", drawn: "with every program's hits along the protein", names: "whose FASTA name and proposed name conflict",
     km3: "that only kmerseek found, E-value 0.001 or below", km5: "that only kmerseek found, E-value 0.00001 or below" };
-  var st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
+  var st = { q: "", tile: "all", cat: -1, chk: -1, grp: -1, iso: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 };
   var count = document.getElementById("count"), more = document.getElementById("more"), lbl = document.querySelector(".ix .ruler .lbl");
-  var catSel = document.getElementById("cat"), chkSel = document.getElementById("chk"), q = document.getElementById("q");
+  var catSel = document.getElementById("cat"), chkSel = document.getElementById("chk"), grpSel = document.getElementById("grp"), q = document.getElementById("q");
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function fmt(n) { return n.toLocaleString("en-US"); }
   function href(r) { return r[14] ? r[14] : "protein.html#" + encodeURIComponent(r[0]); }
   function ev(x) { var v = parseFloat(x); return isNaN(v) ? null : v; }
   var list = [];
+  // [which isoform, how many the gene has], or null for a gene with one protein; FUN1 is the first, FUN1.2 the second
+  function iso(id) { var p = id.split("."), n = ISO[p[0]]; return n ? [p[1] ? +p[1] : 1, n] : null; }
+  // a protein's hits in the gene group the filter is on, best first
+  function grpHits(r) { return (r[20] || []).filter(function (x) { return x[0] === st.grp; }); }
+  function grpText(x) { return x[1] + " " + (x[2] === 0 ? "0" : x[2] >= 0.001 ? +x[2].toPrecision(2) : x[2].toExponential(1)) + " · " + x[4] + " (" + x[3] + ")"; }
   // the value a column sorts by; null sorts last whichever the direction
   function val(r, k) {
     if (k === 9) return r[9] === "" ? null : ev(r[9]);
@@ -55,6 +68,8 @@
       if (!tf(r)) continue;
       if (st.cat >= 0 && !(r[11] >> st.cat & 1)) continue;
       if (st.chk >= 0 && r[4] !== st.chk) continue;
+      if (st.grp >= 0 && !grpHits(r).length) continue;
+      if (st.iso >= 0 && (ISO[r[0].split(".")[0]] || 1) !== st.iso) continue;
       var t = text[i], ok = true;
       for (var w = 0; w < words.length; w++) if (t.indexOf(words[w]) < 0) { ok = false; break; }
       if (ok) list.push(i);
@@ -69,6 +84,7 @@
         return d * c || R[a][0].localeCompare(R[b][0]);
       });
     }
+    else if (st.grp >= 0) list.sort(function (a, b) { return grpHits(R[a])[0][2] - grpHits(R[b])[0][2] || R[a][0].localeCompare(R[b][0]); });  // best first
     else if (st.tile === "km3" || st.tile === "km5") list.sort(function (a, b) { return R[a][19][0] - R[b][19][0]; });  // best first
     st.shown = 100; st.cur = -1;
     draw();
@@ -100,18 +116,25 @@
     var ips = (r[15] || []).length, mmo = r[16] && r[16][3] !== r[6];
     return '<div class="row g ixg' + (j === st.cur ? " cur" : "") + '" role="listitem" data-j="' + j + '" tabindex="-1">' +
       '<div><a class="id mono" href="' + esc(href(r)) + '">' + esc(r[0]) + "</a>" +
-      '<span class="s">' + names + (r[14] ? '<span class="dr">· hits along the protein</span>' : "") + "</span></div>" +
+      '<span class="s">' + names + (iso(r[0]) ? '<span class="dr">· isoform ' + iso(r[0])[0] + " of " + iso(r[0])[1] + "</span>" : "") +
+      (r[14] ? '<span class="dr">· hits along the protein</span>' : "") + "</span></div>" +
       '<div class="num">' + fmt(r[1]) + "</div>" +
-      '<div class="txt" title="' + esc(r[5]) + '">' + (r[6] ? (isMatch(r) ? esc(r[5]) : '<span class="dim">above the cutoff: ' + esc(r[5]) + "</span>") : '<span class="dim">no match</span>') +
-        '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : "") +
+      '<div class="txt" title="' + esc(r[5]) + '">' + (r[6] ? (isMatch(r) ? esc(r[5]) : '<span class="dim">above the cutoff: ' + esc(r[5]) + "</span>") : '<span class="dim" title="DIAMOND found no Swiss-Prot protein at E-value 0.001 or below. Other programs can still have a hit: see the column of other programs.">no DIAMOND match</span>') +
+        '<span class="s">' + (r[6] ? '<span class="mono">' + esc(r[6]) + "</span>" : anyOther(r) ? anyOther(r) + (mmo ? " · " : "") : "") +
         (mmo ? (r[6] ? " · " : "") + "MMseqs2's best: " + '<span class="mono">' + esc(r[16][3]) + "</span>" : "") + "</span></div>" +
       '<div class="num">' + (r[7] === null ? "" : r[7].toFixed(1) + "%") + (r[8] === null ? "" : '<span class="s">covers ' + Math.round(r[8]) + "%</span>") + "</div>" +
-      '<div class="num"' + (r[9] && ev(r[9]) === 0 ? ' title="DIAMOND writes 0 when the E-value is smaller than the smallest number it stores">0' : ">" + esc(r[9] || "")) + "</div>" +
+      // the column is DIAMOND's E-value; a protein that only kmerseek found has none, so kmerseek's is shown and labelled
+      (!r[9] && r[19] ? '<div class="num ekm" title="kmerseek\'s E-value for its best region over 35 alphabet and k settings; DIAMOND found no match, so this is not a DIAMOND E-value">' +
+        r[19][0].toExponential(1) + '<span class="s">kmerseek</span></div>' :
+      '<div class="num"' + (r[9] && ev(r[9]) === 0 ? ' title="DIAMOND writes 0 when the E-value is smaller than the smallest number it stores">0' : ">" + esc(r[9] || "")) + "</div>") +
       '<div class="txt" title="' + esc(r[10]) + '">' + (r[10] ? esc(r[10]) : '<span class="dim">none</span>') +
         '<span class="s">InterProScan: ' + (ips ? ips + " Pfam match" + (ips > 1 ? "es" : "") : "none") + "</span></div>" +
       '<div class="txt" title="' + esc(catNames(r[11]).join(", ")) + '">' + esc(catNames(r[11]).join(", ")) + "</div>" +
-      (r[19] && (st.tile === "km3" || st.tile === "km5") ? '<div class="txt" title="' + esc(r[19][3] + " (" + r[19][2] + "), " + r[19][1]) + '">kmerseek ' + r[19][0].toExponential(1) + " · " + esc(r[19][3]) + "</div>" :
-      '<div class="txt" title="' + esc(others(r[17]).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">none</span>') + "</div>") +
+      (st.grp >= 0 && grpHits(r).length ? '<div class="txt" title="' + esc(grpHits(r).map(grpText).join("\n")) + '">' + esc(grpText(grpHits(r)[0])) +
+        (grpHits(r).length > 1 ? '<span class="s">and ' + (grpHits(r).length - 1) + " more program" + (grpHits(r).length > 2 ? "s" : "") + " (hover)</span>" : "") + "</div>" :
+      r[19] && (st.tile === "km3" || st.tile === "km5") ? '<div class="txt" title="' + esc(r[19][3] + " (" + r[19][2] + "), " + r[19][1]) + '">' + esc(r[19][3]) + '<span class="s">kmerseek\'s best hit, ' + esc(r[19][2]) + " · " + esc(r[19][1]) + "</span></div>" :
+      '<div class="txt" title="' + esc(others(r[17]).concat(weak(r)).join(", ")) + '">' + (r[17] ? esc(others(r[17]).join(" · ")) : '<span class="dim">' + (r[21] ? "none at E ≤ 0.001" : "none") + "</span>") +
+        (r[21] ? '<span class="s" title="best hits weaker than E-value 0.001: not counted here, shown on the protein\'s page">weaker: ' + esc(weak(r).join(", ")) + "</span>" : "") + "</div>") +
       '<div class="num">' + fmt(r[13]) + (r[13] === 1 ? '<span class="s">alone</span>' : "") + "</div>" +
       '<div class="track">' + track(r) + "</div></div>";
   }
@@ -122,6 +145,8 @@
     var what = [TILE_WORDS[st.tile]];
     if (st.cat >= 0) what.push("in the immune category " + CATS[st.cat]);
     if (st.chk >= 0) what.push("where " + F.check[st.chk]);
+    if (st.iso >= 0) what.push("of genes with " + st.iso + (st.iso === 1 ? " protein" : " proteins"));
+    if (st.grp >= 0) what.push("with a best hit in the gene group " + GROUPS[st.grp] + ", weak hits included");
     if (st.q) what.push("matching “" + st.q + "”");
     what = what.filter(Boolean);
     count.innerHTML = "<b>" + fmt(found) + "</b> of " + fmt(all) + " proteins" + (what.length ? " " + esc(what.join(", ")) : "");
@@ -153,7 +178,8 @@
     document.querySelectorAll("#tiles .chip").forEach(function (b) { b.classList.toggle("on", b.dataset.t === st.tile); });
     document.querySelectorAll(".bar[data-cat]").forEach(function (b) { b.classList.toggle("on", +b.dataset.cat === st.cat); });
     document.querySelectorAll(".bar[data-chk]").forEach(function (b) { b.classList.toggle("on", +b.dataset.chk === st.chk); });
-    catSel.value = String(st.cat); chkSel.value = String(st.chk);
+    document.querySelectorAll(".bar[data-iso]").forEach(function (b) { b.classList.toggle("on", +b.dataset.iso === st.iso); });
+    catSel.value = String(st.cat); chkSel.value = String(st.chk); grpSel.value = String(st.grp);
     document.querySelectorAll(".colhead button[data-k]").forEach(function (b) {
       var on = +b.dataset.k === st.key;
       b.classList.toggle("on", on);
@@ -166,11 +192,15 @@
   });
   catSel.addEventListener("change", function () { st.cat = +catSel.value; filter(); top(); });
   chkSel.addEventListener("change", function () { st.chk = +chkSel.value; filter(); top(); });
+  grpSel.addEventListener("change", function () { st.grp = +grpSel.value; st.key = -1; filter(); top(); });
   document.querySelectorAll(".bar[data-cat]").forEach(function (b) {
     b.addEventListener("click", function () { st.cat = st.cat === +b.dataset.cat ? -1 : +b.dataset.cat; filter(); grid.scrollIntoView(); });
   });
   document.querySelectorAll(".bar[data-chk]").forEach(function (b) {
     b.addEventListener("click", function () { st.chk = st.chk === +b.dataset.chk ? -1 : +b.dataset.chk; filter(); grid.scrollIntoView(); });
+  });
+  document.querySelectorAll(".bar[data-iso]").forEach(function (b) {
+    b.addEventListener("click", function () { st.iso = st.iso === +b.dataset.iso ? -1 : +b.dataset.iso; filter(); grid.scrollIntoView(); });
   });
   var timer;
   q.addEventListener("input", function () {
@@ -188,16 +218,18 @@
   });
   more.addEventListener("click", function () { st.shown += 100; draw(); });
   document.getElementById("clear").addEventListener("click", function () {
-    st = { q: "", tile: "all", cat: -1, chk: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 }; q.value = ""; drawLadder(); filter();
+    st = { q: "", tile: "all", cat: -1, chk: -1, grp: -1, iso: -1, key: -1, dir: 1, shown: 100, cur: -1, e: 1e-3 }; q.value = ""; drawLadder(); filter();
   });
   document.getElementById("dl").addEventListener("click", function () {
     if (!ready) return;
     var head = ["protein", "length_aa", "existing_name", "proposed_name", "swissprot_name", "swissprot_accession", "identity_pct",
-      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size", "only_kmerseek_evalue", "only_kmerseek_setting", "only_kmerseek_hit"];
+      "coverage_pct", "evalue", "pfam_domains", "immune_categories", "other_programs_with_a_hit", "cluster_size", "only_kmerseek_evalue", "only_kmerseek_setting", "only_kmerseek_hit", "gene_groups", "isoform", "isoforms_of_gene"];
     var lines = [head.join("\t")].concat(list.map(function (i) {
       var r = R[i];
       return [r[0], r[1], r[2], r[3], r[5], r[6], r[7] === null ? "" : r[7], r[8] === null ? "" : r[8], r[9], r[10],
-        catNames(r[11]).join(", "), others(r[17]).join(", "), r[13]].concat(r[19] ? [r[19][0], r[19][1], r[19][2] + " " + r[19][3]] : ["", "", ""]).join("\t");
+        catNames(r[11]).join(", "), others(r[17]).join(", "), r[13]].concat(r[19] ? [r[19][0], r[19][1], r[19][2] + " " + r[19][3]] : ["", "", ""])
+        .concat([(r[20] || []).map(function (x) { return GROUPS[x[0]] + ": " + x[1] + " E " + x[2] + " " + x[3] + " " + x[4]; }).join(" | ")])
+        .concat(iso(r[0]) || [1, 1]).join("\t");
     }));
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], { type: "text/tab-separated-values" }));
@@ -249,7 +281,7 @@
     return gunzipB64(window.FULL_Z);
   }).then(function (d) {
     window.FULL_Z = null;
-    F = d; R = d.rows; CATS = d.cats; PFAM = d.pfam; ready = true;
+    F = d; R = d.rows; CATS = d.cats; PFAM = d.pfam; GROUPS = d.groups || []; ISO = d.iso || {}; ready = true;
     text = R.map(rowText);
     drawLadder();
     filter();

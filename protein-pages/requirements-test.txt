@@ -1,0 +1,7 @@
+# What the build and its tests need: pip install -r requirements-test.txt
+# The build itself needs only biopython.
+biopython>=1.79
+pytest
+# tests/check_hover.py and tests/screenshots.py drive a browser. It uses Google Chrome when that is
+# installed, else Playwright's own Chromium: python -m playwright install chromium
+playwright>=1.40

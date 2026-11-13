@@ -1,0 +1,308 @@
+symbol	name	uniprot_entry	why
+GHR	growth hormone receptor	GHR_HUMAN	mammal
+GHRH	growth hormone releasing hormone	SLIB_HUMAN	mammal
+SHC1	SHC (Src homology 2 domain containing) transforming protein 1	SHC1_HUMAN	mammal
+POU1F1	POU class 1 homeobox 1	PIT1_HUMAN	mammal
+PROP1	PROP paired-like homeobox 1	PROP1_HUMAN	mammal
+TP53	tumor protein p53	P53_HUMAN	mammal,model,cell
+TERC	telomerase RNA component		mammal,cell
+TERT	telomerase reverse transcriptase	TERT_HUMAN	cell,functional
+ATM	ATM serine/threonine kinase	ATM_HUMAN	mammal
+PLAU	plasminogen activator, urokinase	UROK_HUMAN	mammal
+ERCC2	excision repair cross-complementation group 2	ERCC2_HUMAN	mammal
+ERCC8	excision repair cross-complementation group 8	ERCC8_HUMAN	human
+WRN	Werner syndrome, RecQ helicase-like	WRN_HUMAN	human,mammal,cell
+LMNA	lamin A/C	LMNA_HUMAN	human
+IGF1R	insulin-like growth factor 1 receptor	IGF1R_HUMAN	model
+TXN	thioredoxin	THIO_HUMAN	model,functional
+KL	klotho	KLOT_HUMAN	mammal
+E2F1	E2F transcription factor 1	E2F1_HUMAN	cell,downstream
+PTPN11	protein tyrosine phosphatase, non-receptor type 11	PTN11_HUMAN	downstream
+NFKB2	nuclear factor of kappa light polypeptide gene enhancer in B-cells 2 (p49/p100)	NFKB2_HUMAN	functional
+STAT5B	signal transducer and activator of transcription 5B	STA5B_HUMAN	downstream
+STAT3	signal transducer and activator of transcription 3 (acute-phase response factor)	STAT3_HUMAN	downstream
+STAT5A	signal transducer and activator of transcription 5A	STA5A_HUMAN	downstream
+NRG1	neuregulin 1	NRG1_HUMAN	putative
+HDAC3	histone deacetylase 3	HDAC3_HUMAN	functional
+GH1	growth hormone 1	SOMA_HUMAN	mammal,functional,downstream
+IL7R	interleukin 7 receptor	IL7RA_HUMAN	putative
+IGF1	insulin-like growth factor 1 (somatomedin C)	IGF1	functional
+IGF2	insulin-like growth factor 2	IGF2_HUMAN	functional
+INS	insulin	INS_HUMAN	functional
+NGF	nerve growth factor (beta polypeptide)	NGF_HUMAN	putative
+IRS1	insulin receptor substrate 1	IRS1_HUMAN	model
+PTPN1	protein tyrosine phosphatase, non-receptor type 1	PTN1_HUMAN	downstream
+IRS2	insulin receptor substrate 2	IRS2_HUMAN	model,putative
+AKT1	v-akt murine thymoma viral oncogene homolog 1	AKT1_HUMAN	model,cell
+PIK3CB	phosphatidylinositol-4,5-bisphosphate 3-kinase, catalytic subunit beta	PK3CB_HUMAN	model,downstream
+NGFR	nerve growth factor receptor	TNR16_HUMAN	downstream
+HRAS	Harvey rat sarcoma viral oncogene homolog	RASH_HUMAN	model,cell
+MYC	v-myc avian myelocytomatosis viral oncogene homolog	MYC_HUMAN	cell,upstream
+EGFR	epidermal growth factor receptor	EGFR_HUMAN	downstream
+ERBB2	erb-b2 receptor tyrosine kinase 2	ERBB2_HUMAN	downstream
+INSR	insulin receptor	INSR_HUMAN	model
+NCOR1	nuclear receptor corepressor 1	NCOR1_HUMAN	downstream
+NBN	nibrin	NBN_HUMAN	functional,putative
+JUND	jun D proto-oncogene	JUND_HUMAN	mammal,putative
+IL2	interleukin 2	IL2_HUMAN	putative
+PDGFB	platelet-derived growth factor beta polypeptide	PDGFB_HUMAN	upstream
+EGF	epidermal growth factor	EGF_HUMAN	upstream
+IL2RG	interleukin 2 receptor, gamma	IL2RG_HUMAN	downstream
+FOS	FBJ murine osteosarcoma viral oncogene homolog	FOS_HUMAN	putative
+PDGFRB	platelet-derived growth factor receptor, beta polypeptide	PGFRB_HUMAN	downstream
+EPOR	Erythropoietin receptor	EPOR_HUMAN	downstream
+SST	somatostatin	SMS_HUMAN	upstream
+PRKCD	protein kinase C, delta	KPCD_HUMAN	downstream
+PPARA	peroxisome proliferator-activated receptor alpha	PPARA_HUMAN	putative
+RET	ret proto-oncogene	RET_HUMAN	downstream
+PLCG2	phospholipase C, gamma 2 (phosphatidylinositol-specific)	PLCG2_HUMAN	downstream
+PEX5	peroxisomal biogenesis factor 5	PEX5_HUMAN	functional
+TCF3	transcription factor 3	TFE2_HUMAN	putative
+PARP1	poly (ADP-ribose) polymerase 1	PARP1_HUMAN	functional,putative
+BRCA1	breast cancer 1, early onset	BRCA1_HUMAN	mammal
+PIN1	peptidylprolyl cis/trans isomerase, NIMA-interacting 1	PIN1_HUMAN	upstream
+PTEN	phosphatase and tensin homolog	PTEN_HUMAN	model
+CREBBP	CREB binding protein	CBP_HUMAN	upstream
+HIF1A	hypoxia inducible factor 1, alpha subunit (basic helix-loop-helix transcription factor)	HIF1A_HUMAN	functional,downstream
+UBB	ubiquitin B	UBIQ_HUMAN	putative
+RPA1	replication protein A1, 70kDa	RFA1_HUMAN	upstream
+BLM	Bloom syndrome, RecQ helicase-like	BLM_HUMAN	functional
+BCL2	B-cell CLL/lymphoma 2	BCL2_HUMAN	functional
+S100B	S100 calcium binding protein B	S100B_HUMAN	upstream,putative
+VCP	valosin containing protein	TERA_HUMAN	downstream
+POLG	polymerase (DNA directed), gamma	DPOG1_HUMAN	mammal
+IGFBP3	insulin-like growth factor binding protein 3	IBP3_HUMAN	upstream
+HSP90AA1	heat shock protein 90kDa alpha (cytosolic), class A member 1	HS90A_HUMAN	functional
+NR3C1	nuclear receptor subfamily 3, group C, member 1 (glucocorticoid receptor)	GCR_HUMAN	downstream
+EGR1	early growth response 1	EGR1_HUMAN	upstream
+VEGFA	vascular endothelial growth factor A	VEGFA_HUMAN	putative
+ABL1	ABL proto-oncogene 1, non-receptor tyrosine kinase	ABL1_HUMAN	functional,downstream
+BRCA2	breast cancer 2, early onset	BRCA2_HUMAN	functional
+TOP2A	topoisomerase (DNA) II alpha	TOP2A_HUMAN	functional
+TOP2B	topoisomerase (DNA) II beta	TOP2B_HUMAN	functional
+NFKB1	nuclear factor of kappa light polypeptide gene enhancer in B-cells 1	NFKB1_HUMAN	functional
+TOP1	topoisomerase (DNA) I	TOP1_HUMAN	functional
+RAD51	RAD51 recombinase	RAD51_HUMAN	cell,functional
+UBE2I	ubiquitin-conjugating enzyme E2I	UBC9_HUMAN	upstream
+TNF	tumor necrosis factor	TNFA_HUMAN	putative
+PDPK1	3-phosphoinositide dependent protein kinase 1	PDPK1_HUMAN	downstream
+CEBPA	CCAAT/enhancer binding protein (C/EBP), alpha	CEBPA_HUMAN	functional
+CEBPB	CCAAT/enhancer binding protein (C/EBP), beta	CEBPB_HUMAN	mammal
+MXI1	MAX interactor 1, dimerization protein	MXI1_HUMAN	putative
+TGFB1	transforming growth factor, beta 1	TGFB1_HUMAN	putative
+ERCC6	excision repair cross-complementation group 6	ERCC6_HUMAN	functional
+STK11	serine/threonine kinase 11	STK11_HUMAN	upstream
+EP300	E1A binding protein p300	EP300_HUMAN	upstream
+APTX	aprataxin	APTX_HUMAN	functional
+PML	promyelocytic leukemia	PML_HUMAN	cell,downstream
+GSK3B	glycogen synthase kinase 3 beta	GSK3B_HUMAN	downstream
+HTT	huntingtin	HD_HUMAN	mammal
+PRKCA	protein kinase C, alpha	KPCA_HUMAN	downstream
+SSTR3	somatostatin receptor 3	SSR3_HUMAN	downstream
+HELLS	helicase, lymphoid-specific	HELLS_HUMAN	mammal
+APOC3	apolipoprotein C-III	APOC3_HUMAN	putative
+EEF2	eukaryotic translation elongation factor 2	EF2_HUMAN	putative
+ERCC3	excision repair cross-complementation group 3	ERCC3_HUMAN	functional
+TERF1	telomeric repeat binding factor (NIMA-interacting) 1	TERF1_HUMAN	functional
+PRKDC	protein kinase, DNA-activated, catalytic polypeptide	PRKDC_HUMAN	functional
+CAT	catalase	CATA_HUMAN	model
+ERCC5	excision repair cross-complementation group 5	ERCC5_HUMAN	functional
+AR	androgen receptor	ANDR_HUMAN	upstream
+GTF2H2	general transcription factor IIH, polypeptide 2, 44kDa	TF2H2_HUMAN	downstream
+XRCC5	X-ray repair complementing defective repair in Chinese hamster cells 5 (double-strand-break rejoining)	XRCC5_HUMAN	mammal
+PCNA	proliferating cell nuclear antigen	PCNA_HUMAN	functional
+FEN1	flap structure-specific endonuclease 1	FEN1_HUMAN	downstream
+FAS	Fas cell surface death receptor	TNR6_HUMAN	putative
+TERF2	telomeric repeat binding factor 2	TERF2_HUMAN	functional
+XRCC6	X-ray repair complementing defective repair in Chinese hamster cells 6	KU70_HUMAN	functional
+POLD1	polymerase (DNA directed), delta 1, catalytic subunit	DPOD1_HUMAN	downstream
+BAX	BCL2-associated X protein	BAX_HUMAN	downstream,putative
+RB1	retinoblastoma 1	RB_HUMAN	cell
+EMD	emerin	EMD_HUMAN	functional
+GRB2	growth factor receptor-bound protein 2	GRB2_HUMAN	downstream
+FOXO3	forkhead box O3	FOXO3_HUMAN	model,human_link
+FOXO1	forkhead box O1	FOXO1_HUMAN	model
+HSF1	heat shock transcription factor 1	HSF1_HUMAN	model
+XPA	xeroderma pigmentosum, complementation group A	XPA_HUMAN	functional,putative
+MSRA	methionine sulfoxide reductase A	MSRA_HUMAN	mammal,model
+RECQL4	RecQ helicase-like 4	RECQ4_HUMAN	functional
+SOD2	superoxide dismutase 2, mitochondrial	SODM_HUMAN	mammal,model
+SOD1	superoxide dismutase 1, soluble	SODC_HUMAN	model
+FOXM1	forkhead box M1	FOXM1_HUMAN	functional
+COQ7	coenzyme Q7 homolog, ubiquinone (yeast)	COQ7_HUMAN	model
+CACNA1A	calcium channel, voltage-dependent, P/Q type, alpha 1A subunit	CAC1A_HUMAN	putative
+LRP2	low density lipoprotein receptor-related protein 2	LRP2_HUMAN	downstream
+AIFM1	apoptosis-inducing factor, mitochondrion-associated, 1	AIFM1_HUMAN	functional
+UCHL1	ubiquitin carboxyl-terminal esterase L1 (ubiquitin thiolesterase)	UCHL1_HUMAN	putative
+APP	amyloid beta (A4) precursor protein	A4_HUMAN	putative
+APOE	apolipoprotein E	APOE_HUMAN	human_link
+A2M	alpha-2-macroglobulin	A2MG_HUMAN	putative
+SNCG	synuclein, gamma (breast cancer-specific protein 1)	SYUG_HUMAN	upstream
+PRDX1	peroxiredoxin 1	PRDX1_HUMAN	functional,putative
+PON1	paraoxonase 1	PON1_HUMAN	putative
+RELA	v-rel avian reticuloendotheliosis viral oncogene homolog A	TF65_HUMAN	functional
+IL6	interleukin 6	IL6_HUMAN	putative
+RGN	regucalcin	RGN_HUMAN	putative
+ATP5O	ATP synthase, H+ transporting, mitochondrial F1 complex, O subunit	ATPO_HUMAN	model
+RAD52	RAD52 homolog, DNA repair protein	RAD52_HUMAN	cell,functional
+TOP3B	topoisomerase (DNA) III beta	TOP3B_HUMAN	functional,putative
+ERCC1	excision repair cross-complementation group 1	ERCC1_HUMAN	mammal,functional
+SIRT1	sirtuin 1	SIR1_HUMAN	mammal,model,cell
+HDAC1	histone deacetylase 1	HDAC1_HUMAN	functional
+HSPA9	heat shock 70kDa protein 9 (mortalin)	GRP75_HUMAN	model
+GPX1	glutathione peroxidase 1	GPX1_HUMAN	functional
+GSR	glutathione reductase	GSHR_HUMAN	functional
+GSS	glutathione synthetase	GSHB_HUMAN	functional
+GSTA4	glutathione S-transferase alpha 4	GSTA4_HUMAN	functional
+GSTP1	glutathione S-transferase pi 1	GSTP1_HUMAN	functional
+MT-CO1	mitochondrially encoded cytochrome c oxidase I	COX1_HUMAN	cell,functional
+HSPD1	heat shock 60kDa protein 1 (chaperonin)	CH60_HUMAN	functional
+HSPA1A	heat shock 70kDa protein 1A	HS71A_HUMAN	mammal,model,functional,putative
+HSPA1B	heat shock 70kDa protein 1B	HSPA1B	functional,putative
+PCMT1	protein-L-isoaspartate (D-aspartate) O-methyltransferase	PIMT_HUMAN	functional,putative
+MAPK8	mitogen-activated protein kinase 8	MK08_HUMAN	model
+YWHAZ	tyrosine 3-monooxygenase/tryptophan 5-monooxygenase activation protein, zeta	1433Z_HUMAN	downstream
+PTK2B	protein tyrosine kinase 2 beta	FAK2_HUMAN	downstream
+PTK2	protein tyrosine kinase 2	FAK1_HUMAN	downstream
+IL7	interleukin 7	IL7_HUMAN	putative
+MAPK14	mitogen-activated protein kinase 14	MK14_HUMAN	cell,functional
+FGFR1	fibroblast growth factor receptor 1	FGFR1_HUMAN	putative
+SP1	Sp1 transcription factor	SP1_HUMAN	upstream
+FLT1	fms-related tyrosine kinase 1	VGFR1_HUMAN	downstream
+JUN	jun proto-oncogene	JUN_HUMAN	upstream
+MED1	mediator complex subunit 1	MED1_HUMAN	putative
+MAPK9	mitogen-activated protein kinase 9	MK09_HUMAN	model
+MAPK3	mitogen-activated protein kinase 3	MK03_HUMAN	downstream
+HMGB1	high mobility group box 1	HMGB1_HUMAN	downstream
+CCNA2	cyclin A2	CCNA2_HUMAN	downstream
+HMGB2	high mobility group box 2	HMGB2_HUMAN	downstream
+MAP3K5	mitogen-activated protein kinase kinase kinase 5	M3K5_HUMAN	downstream
+TAF1	TAF1 RNA polymerase II, TATA box binding protein (TBP)-associated factor, 250kDa	TAF1_HUMAN	downstream
+LMNB1	lamin B1	LMNB1_HUMAN	functional
+SDHC	succinate dehydrogenase complex, subunit C, integral membrane protein, 15kDa	C560_HUMAN	model
+FOXO4	forkhead box O4	FOXO4_HUMAN	model
+HESX1	HESX homeobox 1	HESX1_HUMAN	upstream
+PIK3R1	phosphoinositide-3-kinase, regulatory subunit 1 (alpha)	P85A_HUMAN	downstream
+BSCL2	Berardinelli-Seip congenital lipodystrophy 2 (seipin)	BSCL2_HUMAN	putative
+AGPAT2	1-acylglycerol-3-phosphate O-acyltransferase 2	PLCB_HUMAN	putative
+BMI1	BMI1 proto-oncogene, polycomb ring finger	BMI1_HUMAN	putative
+EEF1A1	eukaryotic translation elongation factor 1 alpha 1	EF1A1_HUMAN	model
+TFAP2A	transcription factor AP-2 alpha (activating enhancer binding protein 2 alpha)	AP2A_HUMAN	upstream
+BDNF	brain-derived neurotrophic factor	BDNF_HUMAN	putative
+CREB1	cAMP responsive element binding protein 1	CREB1_HUMAN	upstream,putative
+ATF2	activating transcription factor 2	ATF2_HUMAN	downstream
+TBP	TATA box binding protein	TBP_HUMAN	upstream
+APEX1	APEX nuclease (multifunctional DNA repair enzyme) 1	APEX1_HUMAN	functional
+HBP1	HMG-box transcription factor 1	HBP1_HUMAN	downstream
+BUB1B	BUB1 mitotic checkpoint serine/threonine kinase B	BUB1B_HUMAN	mammal
+PTGS2	prostaglandin-endoperoxide synthase 2 (prostaglandin G/H synthase and cyclooxygenase)	PGH2_HUMAN	putative
+HSPA8	heat shock 70kDa protein 8	HSP7C_HUMAN	functional
+SIN3A	SIN3 transcription regulator family member A	SIN3A_HUMAN	putative
+CDK1	cyclin-dependent kinase 1	CDK1_HUMAN	downstream
+TFDP1	transcription factor Dp-1	TFDP1_HUMAN	cell,downstream
+DDIT3	DNA-damage-inducible transcript 3	DDIT3_HUMAN	putative
+POLA1	polymerase (DNA directed), alpha 1, catalytic subunit	DPOLA_HUMAN	cell
+MAPT	microtubule-associated protein tau	TAU_HUMAN	putative
+CTGF	connective tissue growth factor	CTGF_HUMAN	putative
+HDAC2	histone deacetylase 2	HDAC2_HUMAN	functional,upstream
+MAX	MYC associated factor X	MAX_HUMAN	functional
+MXD1	MAX dimerization protein 1	MAD1_HUMAN	functional
+MDM2	MDM2 proto-oncogene, E3 ubiquitin protein ligase	MDM2_HUMAN	upstream
+SUMO1	small ubiquitin-like modifier 1	SUMO1_HUMAN	upstream
+H2AFX	H2A histone family, member X	H2AX_HUMAN	functional
+HOXB7	homeobox B7	HXB7_HUMAN	putative
+HOXC4	homeobox C4	HXC4_HUMAN	putative
+JAK2	Janus kinase 2	JAK2_HUMAN	downstream
+ESR1	estrogen receptor 1	ESR1_HUMAN	upstream
+LEP	leptin	LEP_HUMAN	putative
+LEPR	leptin receptor	LEPR_HUMAN	putative
+NFKBIA	nuclear factor of kappa light polypeptide gene enhancer in B-cells inhibitor, alpha	IKBA_HUMAN	mammal,putative
+CLU	clusterin	CLUS_HUMAN	model,putative
+MTOR	mechanistic target of rapamycin (serine/threonine kinase)	MTOR_HUMAN	mammal,model,cell
+GHRHR	growth hormone releasing hormone receptor	GHRHR_HUMAN	upstream,putative
+CTNNB1	catenin (cadherin-associated protein), beta 1, 88kDa	CTNB1_HUMAN	downstream
+PSEN1	presenilin 1	PSN1_HUMAN	putative
+DLL3	delta-like 3 (Drosophila)	DLL3_HUMAN	putative
+CDKN2A	cyclin-dependent kinase inhibitor 2A	CDN2A_HUMAN	mammal,cell
+PPP1CA	protein phosphatase 1, catalytic subunit, alpha isozyme	PP1A_HUMAN	cell,putative
+DBN1	drebrin 1	DREB_HUMAN	putative
+NOG	noggin	NOGG_HUMAN	putative
+ELN	elastin	ELN_HUMAN	human_link
+ATR	ATR serine/threonine kinase	ATR_HUMAN	mammal
+UCP3	uncoupling protein 3 (mitochondrial, proton carrier)	UCP3_HUMAN	functional
+ZMPSTE24	zinc metallopeptidase STE24	FACE1_HUMAN	upstream,putative
+TP63	tumor protein p63	P63_HUMAN	mammal
+UCP2	uncoupling protein 2 (mitochondrial, proton carrier)	UCP2_HUMAN	model
+POLB	polymerase (DNA directed), beta	DPOLB_HUMAN	functional
+GCLC	glutamate-cysteine ligase, catalytic subunit	GSH1_HUMAN	functional
+GCLM	glutamate-cysteine ligase, modifier subunit	GSH0_HUMAN	model
+SIRT6	sirtuin 6	SIRT6_HUMAN	mammal
+BUB3	BUB3 mitotic checkpoint protein	BUB3_HUMAN	mammal
+RAE1	ribonucleic acid export 1	RAE1L_HUMAN	mammal
+PMCH	pro-melanin-concentrating hormone	MCH_HUMAN	functional
+MLH1	mutL homolog 1	MLH1_HUMAN	functional,putative
+CSNK1E	casein kinase 1, epsilon	KC1E_HUMAN	putative
+STUB1	STIP1 homology and U-box containing protein 1, E3 ubiquitin protein ligase	CHIP_HUMAN	mammal
+PPM1D	protein phosphatase, Mg2+/Mn2+ dependent, 1D	PPM1D_HUMAN	downstream,putative
+CHEK2	checkpoint kinase 2	CHK2_HUMAN	functional
+PCK1	phosphoenolpyruvate carboxykinase 1 (soluble)	PCKGC_HUMAN	putative
+ARHGAP1	Rho GTPase activating protein 1	RHG01_HUMAN	mammal
+CDC42	cell division cycle 42	CDC42_HUMAN	cell,downstream
+ARNTL	aryl hydrocarbon receptor nuclear translocator-like	BMAL1_HUMAN	mammal
+CLOCK	clock circadian regulator	CLOCK_HUMAN	functional,downstream
+HIC1	hypermethylated in cancer 1	HIC1_HUMAN	upstream
+PAPPA	pregnancy-associated plasma protein A, pappalysin 1	PAPP1_HUMAN	mammal,functional,putative
+ADCY5	adenylate cyclase 5	ADCY5_HUMAN	mammal
+PPARGC1A	peroxisome proliferator-activated receptor gamma, coactivator 1 alpha	PRGC1_HUMAN	mammal,upstream,downstream
+GPX4	glutathione peroxidase 4	GPX4_HUMAN	putative
+UCP1	uncoupling protein 1 (mitochondrial, proton carrier)	UCP1_HUMAN	putative
+FGF23	fibroblast growth factor 23	FGF23_HUMAN	downstream,putative
+EFEMP1	EGF containing fibulin-like extracellular matrix protein 1	FBLN3_HUMAN	mammal
+ERCC4	excision repair cross-complementation group 4	XPF_HUMAN	functional,putative
+CETP	cholesteryl ester transfer protein, plasma	CETP_HUMAN	human_link
+PPARG	peroxisome proliferator-activated receptor gamma	PPARG_HUMAN	functional
+AGTR1	angiotensin II receptor, type 1	AGTR1_HUMAN	mammal
+CISD2	CDGSH iron sulfur domain 2	CISD2_HUMAN	mammal
+EEF1E1	eukaryotic translation elongation factor 1 epsilon 1	MCA3_HUMAN	mammal
+EPS8	epidermal growth factor receptor pathway substrate 8	ES8L2_HUMAN	mammal
+KCNA3	potassium channel, voltage gated shaker related subfamily A, member 3	KCNA3_HUMAN	mammal
+SIRT7	sirtuin 7	SIR7_HUMAN	functional,putative
+SLC13A1	solute carrier family 13 (sodium/sulfate symporter), member 1	A4D0X1_HUMAN	mammal,model
+SOCS2	suppressor of cytokine signaling 2	SOCS2_HUMAN	functional,upstream
+TPP2	tripeptidyl peptidase II	TPP2_HUMAN	mammal
+TP53BP1	tumor protein p53 binding protein 1	TP53B_HUMAN	functional
+SIRT3	sirtuin 3	SIR3_HUMAN	functional
+NCOR2	nuclear receptor corepressor 2	NCOR2_HUMAN	mammal
+SUN1	Sad1 and UNC84 domain containing 1	SUN1_HUMAN	upstream
+BAK1	BCL2-antagonist/killer 1	BAK_HUMAN	functional
+IGFBP2	insulin-like growth factor binding protein 2, 36kDa	IBP2_HUMAN	mammal,functional
+PYCR1	pyrroline-5-carboxylate reductase 1	P5CR1_HUMAN	putative
+TP73	tumor protein p73	P73_HUMAN	functional,putative
+CNR1	cannabinoid receptor 1 (brain)	CNR1_HUMAN	putative
+NFE2L2	nuclear factor, erythroid 2-like 2	NF2L2_HUMAN	cell,upstream
+CDKN1A	cyclin-dependent kinase inhibitor 1A (p21, Cip1)	CDN1A_HUMAN	cell
+PDGFRA	platelet-derived growth factor receptor, alpha polypeptide	PGFRA_HUMAN	downstream
+PIK3CA	phosphatidylinositol-4,5-bisphosphate 3-kinase, catalytic subunit alpha	PK3CA_HUMAN	upstream
+C1QA	complement component 1, q subcomponent, A chain	C1QA_HUMAN	upstream
+CDKN2B	cyclin-dependent kinase inhibitor 2B (p15, inhibits CDK4)	CDN2B_HUMAN	cell
+EIF5A2	eukaryotic translation initiation factor 5A2	IF5A2_HUMAN	mammal
+MIF	macrophage migration inhibitory factor (glycosylation-inhibiting factor)	MIF_HUMAN	mammal
+DGAT1	diacylglycerol O-acyltransferase 1	DGAT1_HUMAN	mammal
+MT1E	metallothionein 1E	MT1E_HUMAN	putative
+FGF21	fibroblast growth factor 21	FGF21_HUMAN	mammal
+HTRA2	HtrA serine peptidase 2	HTRA2_HUMAN	mammal
+GSK3A	glycogen synthase kinase 3 alpha	GSK3A_HUMAN	mammal
+NUDT1	nudix (nucleoside diphosphate linked moiety X)-type motif 1	8ODP_HUMAN	mammal
+IKBKB	inhibitor of kappa light polypeptide gene enhancer in B-cells, kinase beta	IKKB_HUMAN	mammal
+SQSTM1	sequestosome 1	SQSTM_HUMAN	putative
+CDK7	cyclin-dependent kinase 7	CDK7_HUMAN	mammal
+GRN	granulin	GRN_HUMAN	putative
+SERPINE1	serpin peptidase inhibitor, clade E (nexin, plasminogen activator inhibitor type 1), member 1	PAI1_HUMAN	upstream
+SPRTN	SprT-like N-terminal domain	SPRTN_HUMAN	putative
+RICTOR	RPTOR independent companion of MTOR, complex 2	RICTR_HUMAN	functional,putative
+CTF1	cardiotrophin 1	CTF1_HUMAN	putative
+TRAP1	TNF receptor-associated protein 1	TRAP1_HUMAN	functional,putative
+TRPV1	transient receptor potential cation channel subfamily V member 1	TRPV1_HUMAN	mammal
+NFE2L1	nuclear factor, erythroid 2-like 1	NF2L1_HUMAN	model,functional
+IFNB1	Interferon beta	IFNB_HUMAN	mammal,cell
+GDF11	growth differentiation factor 11	A0A024RB20_HUMAN	mammal,human_link

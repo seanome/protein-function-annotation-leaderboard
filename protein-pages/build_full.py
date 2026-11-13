@@ -56,6 +56,84 @@ def names_conflict(existing, proposed):
 ONLY_KMERSEEK_E = 1e-3  # the "only kmerseek" filters keep this E-value or below; rows.js holds the hit for those
 
 
+# Gene groups for the index page's "gene group" filter. A protein is in a group when the best hit of
+# DIAMOND, MMseqs2, either Foldseek search or kmerseek is a Swiss-Prot protein whose name matches the
+# group's pattern, at any E-value the pages show: the filter is for looking, so weak hits are kept and
+# each row says which program and E-value put it there. Only the protein's main name is matched: "Isoform 2 of "
+# and the other names in brackets are dropped first, or Calnexin would be an MHC protein for its other name.
+# MHC class I and class II are also listed on their own; "HLA and other MHC" holds both.
+# The aging group is read another way: the best hit's gene symbol is one of the 307 human genes of
+# GenAge build 21 (full_inputs/genage_human.tsv), capitals ignored, in whichever species the hit is.
+# The allorecognition group is the one group that is not a match to another species: Biomni's DIAMOND
+# search of the proteome against 96 Botryllus schlosseri proteins from NCBI (Fester family, Fester
+# co-receptor and one partial BHF), so a hit can be the protein itself.
+GENAGE, ALLO = "genage", "allorecognition"  # groups read from a table, not from a name pattern
+GENE_GROUPS = [
+    ("Period", r"^Period (circadian|clock) protein"),
+    ("Cry and photolyases", r"^Cryptochrome|photo-?lyase"),
+    ("other clock genes", r"^(Circadian locomoter output cycles protein kaput|Basic helix-loop-helix ARNT-like protein|"
+     r"Neuronal PAS domain-containing protein 2|Nuclear receptor subfamily 1 group D|Nuclear receptor ROR-|Protein timeless|"
+     r"TIMELESS-interacting protein|Casein kinase I isoform (delta|epsilon)|Nuclear factor interleukin-3-regulated protein|"
+     r"Thyrotroph embryonic factor|Transcription factor VBP|Hepatic leukemia factor|D site-binding protein|"
+     r"Circadian-associated transcriptional repressor|Protein cycle)"),
+    ("HLA and other MHC", r"^(?!Minor ).*histocompatibility|^HLA class|^Beta-2-microglobulin|^MHC class I polypeptide-related"),
+    # beta-2-microglobulin is the second chain of a class I molecule; MIC-A and MIC-B are class I relatives
+    ("MHC class I", r"^(?!Minor ).*[Cc]lass I histocompatibility|^Beta-2-microglobulin|^MHC class I polypeptide-related"),
+    # the gamma chain is the invariant chain (CD74), which escorts class II molecules
+    ("MHC class II", r"^(?!Minor ).*[Cc]lass II histocompatibility"),
+    ("allorecognition (Fester, Fester co-receptor, BHF)", ALLO),
+    ("aging (GenAge human genes)", GENAGE),
+]
+
+
+def read_allorecognition(folder):
+    """protein -> [E-value, reference accession, its NCBI title] of its best hit (lowest E-value, then
+    highest bit score) in botryllus_allorecognition_hits.tsv; empty when the table is not there."""
+    hits, titles = inp(folder, "botryllus_allorecognition_hits.tsv"), inp(folder, "allorecognition_references.tsv")
+    if not hits.exists():
+        return {}
+    title = {r["accession"]: r["title"].replace(" [Botryllus schlosseri]", "") for r in csv.DictReader(opentext(titles), delimiter="\t")} if titles.exists() else {}
+    best = {}
+    for f in csv.reader(opentext(hits), delimiter="\t"):  # no header: query, reference, % identity, columns, E-value, bit score, ...
+        key = (float(f[4]), -float(f[5]))
+        if f[0] not in best or key < best[f[0]][0]:
+            best[f[0]] = (key, [float(f[4]), f[1], title.get(f[1], "")])
+    return {pid: v for pid, (_, v) in best.items()}
+
+
+def read_genage(folder):
+    """The GenAge human gene symbols, lower case; empty when the table is not there."""
+    p = inp(folder, "genage_human.tsv")
+    return {r["symbol"].lower() for r in csv.DictReader(opentext(p), delimiter="\t")} if p.exists() else set()
+
+
+def gene_groups(r, pid, uni, aging, mm, fs, fst, km, allo=None):
+    """[[group index, program, E-value, accession, name], ...] for one protein, best E-value first.
+    uni: accession -> names (uniprot_names.tsv); aging: read_genage(); allo: read_allorecognition()."""
+    hits = [("DIAMOND", r["sp_evalue"], r["sp_acc"], r["sp_name"])] if r["sp_acc"] else []
+    for prog, d in (("MMseqs2", mm), ("ProstT5 + Foldseek", fs), ("Foldseek on structure", fst)):
+        if d and d.get(pid):
+            hits.append((prog, d[pid][4], d[pid][0], d[pid][6]))
+    if km and km.get(pid):
+        hits.append(("kmerseek", km[pid][1], km[pid][2], km[pid][3]))
+    out = []
+    for i, (_, pat) in enumerate(GENE_GROUPS):
+        if pat == ALLO:
+            if allo and allo.get(pid):
+                out.append([i, "DIAMOND against Botryllus proteins", allo[pid][0], allo[pid][1], allo[pid][2] or "no title"])
+            continue
+        if pat == GENAGE:
+            for prog, e, acc, name in hits:
+                gene = uni.get(acc, {}).get("gene", "")
+                if gene.lower() in aging:
+                    out.append([i, prog, float(e), acc, "%s, gene %s" % (name or "no name", gene)])
+            continue
+        for prog, e, acc, name in hits:
+            if name and re.search(pat, re.split(r" [(\[]", re.sub(r"^Isoform \S+ of ", "", name))[0]):
+                out.append([i, prog, float(e), acc, name])
+    return sorted(out, key=lambda x: (x[2], x[0]))
+
+
 def other_program_found(r, pid, mm, fs, fst, jh, ips, uf):
     """True when any program but kmerseek found something on this protein, each at the cutoff the pages
     use. InterProScan's predictions (disorder, coiled coil, membrane, signal) are not findings."""
@@ -130,6 +208,28 @@ def unifire_hits(preds, matches, length):
     return list(hits.values())
 
 
+def read_s4pred(folder, lengths):
+    """protein -> s4pred's predicted secondary structure as runs ('C16E5C1E2': 16 coil, 5 strand, ...), from
+    s4pred_states.tsv (full_inputs/make_s4pred_table.py); None when the table is not there. Each protein's runs
+    must add up to its length, and the summary's three shares are of all residues."""
+    if not inp(folder, "s4pred_states.tsv").exists():
+        return None, None
+    csv.field_size_limit(10 ** 9)  # the longest protein's runs are longer than csv's default limit
+    ss, tot = {}, Counter()
+    for r in csv.DictReader(opentext(inp(folder, "s4pred_states.tsv")), delimiter="\t"):
+        pid, runs = r["protein_id"], re.findall(r"([HEC])(\d+)", r["states"])
+        if pid not in lengths:
+            sys.exit("%s is in s4pred_states.tsv but not in the proteome" % pid)
+        if "".join(c + n for c, n in runs) != r["states"] or sum(int(n) for _, n in runs) != lengths[pid][0]:
+            sys.exit("s4pred_states.tsv: the runs of %s do not add up to its %d residues" % (pid, lengths[pid][0]))
+        ss[pid] = r["states"]
+        for c, n in runs:
+            tot[c] += int(n)
+    n = sum(tot.values())
+    return ss, dict(proteins=len(ss), residues=n, helix_pct=round(100 * tot["H"] / n, 1), strand_pct=round(100 * tot["E"] / n, 1),
+                    coil_pct=round(100 * tot["C"] / n, 1))
+
+
 def drawn_additions(r, d, length):
     """The script that adds DIAMOND's realigned best hit and UniFIRE's predictions to a drawn page's
     data, before assets/dense-bhf.js reads it. A DIAMOND hit too long to realign keeps its row with no position."""
@@ -146,7 +246,7 @@ def drawn_additions(r, d, length):
         hits += unifire_hits(d["uf"], d["ips"] if isinstance(d["ips"], list) else [], length)
     tracks = {k: dict(name=DRAWN_NAMES[k], color=build.WHOLE_TRACKS[k]["color"], shape=build.WHOLE_TRACKS[k]["shape"],
                       cat=build.WHOLE_TRACKS[k]["cat"], p=k) for k in ("diamond", "unifire") if "w_" + k in move}
-    return dict(tracks=tracks, hits=hits, names=DRAWN_SCORE_NAMES, nohit=DRAWN_NOHIT, move=move, how=DRAWN_HOW,
+    return dict(tracks=tracks, hits=hits, names=DRAWN_SCORE_NAMES, nohit=DRAWN_NOHIT, move=move, how=DRAWN_HOW, ss=d.get("ss"),
                 twelve="; DIAMOND's hit is realigned, and UniFIRE is placed where its rules' signatures lie")
 
 
@@ -254,9 +354,10 @@ UNIFIRE_MAX_AA = 5000  # longer proteins were not run through InterProScan and U
 
 # Biomni also searched every protein against 95 Fester and 1 BHF protein, all from Botryllus itself
 # (botryllus_allorecognition_hits.tsv, allorecognition_references.tsv). Matches within the same
-# species are not shown, so those two files are not read, and the immune category those hits set
-# is dropped from the immune table.
-NOT_READ = {"botryllus_allorecognition_hits.tsv", "allorecognition_references.tsv"}
+# species are not shown on the protein pages, and the immune category those hits set is dropped from
+# the immune table. The index page's allorecognition gene group (read_allorecognition) is the one
+# place the two files are read.
+NOT_READ = set()  # tables in the folder that the build does not read
 DROPPED_CATEGORIES = {"allorecognition"}
 
 
@@ -463,6 +564,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     t0 = time.time()
     ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst, dm = load(folder)
     seqs = read_proteome(proteome, lengths) if proteome else {}
+    ss, ss_summary = read_s4pred(folder, lengths)
     # the Swiss-Prot proteins of the best hits with a position (MMseqs2, ProstT5 + Foldseek, Foldseek on
     # structure), so protein.html can align the two proteins; isoforms (P12345-2) are not in uniprot_sprot.fasta
     best_targets = {r["sp_acc"] for r in ann if r["sp_acc"] and r["protein_id"] in dm} | {v[0] for d in (mm, fs, fst) if d for v in d.values() if v and float(v[4]) <= FOLDSEEK_MAX_E}
@@ -470,6 +572,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     tlen = {a: len(s) for a, s in tseqs.items()}  # a kmerseek hit keeps only its region's residues, so the sequence is left out
     tseqs = {a: s for a, s in tseqs.items() if a in best_targets}
     rules = read_rules(folder)
+    aging, allo = read_genage(folder), read_allorecognition(folder)
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -491,6 +594,10 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                 drawn_page[pid] = page
 
     name = {r["protein_id"]: r["proposed_name"] or r["existing_name"] for r in ann}
+    # a gene's proteins in FASTA order: FUN1, FUN1.2, FUN1.3 (make_proteome_lengths.py names them)
+    gene_proteins = defaultdict(list)
+    for r in ann:
+        gene_proteins[r["protein_id"].split(".")[0]].append(r["protein_id"])
     rows, shards, n_no_other = [], defaultdict(dict), 0
     cache = {}
 
@@ -525,7 +632,12 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
                      sum(1 << i for i, d in enumerate((mm, strong(fs), strong(fst), km, jh)) if d and d.get(pid)),
                      1 if r["name_status"] == "conflict" and names_conflict(r["existing_name"], r["proposed_name"]) else 0,  # 18
                      # 19: kmerseek's best hit when no other program found anything: [E-value, setting, accession, name], or 0
-                     [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0])
+                     [k[1], k[0], k[2], k[3]] if k and k[1] <= ONLY_KMERSEEK_E else 0,
+                     # 20: the gene groups it is in (gene_groups), or 0
+                     gene_groups(r, pid, uni, aging, mm, fs, fst, km, allo) or 0,
+                     # 21: Foldseek best hits weaker than FOLDSEEK_MAX_E, which field 17 leaves out but the protein's page
+                     # shows: [[index into OTHER_HITS, E-value], ...], or 0
+                     [[i, float(d[pid][4])] for i, d in ((1, fs), (2, fst)) if d and d.get(pid) and float(d[pid][4]) > FOLDSEEK_MAX_E] or 0])
         n_no_other += not found
         mem = [m for m in members[rep] if m != pid]
         u = uni.get(r["sp_acc"], {})
@@ -542,6 +654,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
             # UniFIRE: its predictions; "not run" for proteins over UNIFIRE_MAX_AA, which it skipped
             km=None if km is None else km.get(pid, 0),
             dm=dm.get(pid),
+            ss=ss.get(pid) if ss else None,  # s4pred's helix, strand and coil as runs, drawn under the ruler
             mm=None if mm is None else mm.get(pid, 0),
             fs=None if fs is None else fs.get(pid, 0),  # 0: no hit at FOLDSEEK_MAX_E or below
             fst=None if fst is None else ("not run" if lengths[pid][0] > STRUCT_MAX_AA else fst.get(pid, 0)),
@@ -555,6 +668,8 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
             sp_e=r["sp_evalue"], ev=evidence_list(im["evidence"]) if im else [],
             jh=sorted(jh.get(pid, []), key=lambda x: float(x[3])), rep=rep,
+            # every protein of its gene, itself included, when the gene has more than one: [ID, length, name]
+            iso=[[m, lengths[m][0], name[m]] for m in gene_proteins[pid.split(".")[0]]] if len(gene_proteins[pid.split(".")[0]]) > 1 else None,
             mem=[[m, name[m]] for m in mem[:MEMBERS_MAX]], more=max(0, len(mem) - MEMBERS_MAX))
 
     pfam_desc = {x[1]: x[2] for v in (ips or {}).values() for x in v if x[0] == "Pfam"}
@@ -583,14 +698,17 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     for k in range(N_SHARDS):
         if k not in shards:
             (out / "full" / ("%03d.js" % k)).write_text('(window.FULL_GZ=window.FULL_GZ||{})[%d]="%s";' % (k, packed({})))
-    full = dict(cats=cats, check=[t for _, t in NAME_CHECK], other=OTHER_HITS, total=len(rows), rows=rows,
+    # isoforms: a gene's first protein has the bare ID, the others end in .2, .3, ... (make_proteome_lengths.py)
+    n_iso = Counter(r[0].split(".")[0] for r in rows)
+    iso = {g: k for g, k in n_iso.items() if k > 1}
+    full = dict(cats=cats, check=[t for _, t in NAME_CHECK], other=OTHER_HITS, total=len(rows), rows=rows, groups=[g for g, _ in GENE_GROUPS], iso=iso,
                 pfam=[[a, pfam_desc.get(a, "")] for a in sorted(pfam_ix, key=pfam_ix.get)])
     (out / "full" / "rows.js").write_text('window.FULL_Z="%s";' % packed(full))
     (out / "full" / "meta.js").write_text("window.FULL_META=%s;" % json.dumps(
         dict(cats=cats, check=full["check"], check_differs=status_code["conflict"], verdicts=VERDICT_TEXT), separators=(",", ":")))
     # What index.html needs to show its first screen before full/rows.js arrives
     used = {x[2] for r in rows[:100] for x in r[15]}
-    first = dict(full, rows=rows[:100], pfam={i: full["pfam"][i] for i in used},
+    first = dict(full, rows=rows[:100], pfam={i: full["pfam"][i] for i in used}, iso={g: k for g, k in iso.items() if g in {r[0].split(".")[0] for r in rows[:100]}},
                  ladder=[sum(1 for r in rows if r[6] and r[9] and float(r[9]) <= c) for c in (1e-3, 1e-10, 1e-50, 1e-100)])
 
     n = len(rows)
@@ -611,9 +729,13 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
         names_conflict=sum(1 for r in rows if r[18]),
         no_other_program=n_no_other,
         only_kmerseek_3=sum(1 for r in rows if r[19]),
+        s4pred=ss_summary,  # None when s4pred_states.tsv is not there
         only_kmerseek_5=sum(1 for r in rows if r[19] and r[19][0] <= 1e-5),
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
         immune_categories={c: sum(1 for r in rows if r[11] >> i & 1) for i, c in enumerate(cats)},
+        genes=len(n_iso), genes_with_isoforms=len(iso), most_isoforms=max(n_iso.values()),
+        genes_by_isoforms=dict(sorted(Counter(n_iso.values()).items())),
+        gene_groups={g: sum(1 for r in rows if r[20] and any(x[0] == i for x in r[20])) for i, (g, _) in enumerate(GENE_GROUPS)},
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
     inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
@@ -661,6 +783,68 @@ OTHER_HITS = [["MMseqs2", "E-value 0.001 or below"], ["ProstT5 + Foldseek", "E-v
               ["kmerseek", "region E-value %g or below" % KMERSEEK_MAX_E], ["jackhmmer, immune seeds", "any hit in Biomni's table"]]
 
 
+# The paper of each program and database the pages name, for the index page's reference list. Every
+# entry was read from its PubMed record on 2026-11-10 (authors, journal, volume, pages, DOI); none is
+# written from memory. (what it is on the pages, authors, title, journal, volume and issue, year, pages, DOI)
+CITATIONS = [
+    ("DIAMOND", "Buchfink, Benjamin, Klaus Reuter, and Hajk-Georg Drost", "Sensitive protein alignments at tree-of-life scale using DIAMOND",
+     "Nature Methods", "18, no. 4", 2021, "366–68", "10.1038/s41592-021-01101-x"),
+    ("MMseqs2", "Steinegger, Martin, and Johannes Söding", "MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets",
+     "Nature Biotechnology", "35, no. 11", 2017, "1026–28", "10.1038/nbt.3988"),
+    ("Foldseek", "van Kempen, Michel, et al.", "Fast and accurate protein structure search with Foldseek",
+     "Nature Biotechnology", "42, no. 2", 2024, "243–46", "10.1038/s41587-023-01773-0"),
+    ("ProstT5", "Heinzinger, Michael, et al.", "Bilingual language model for protein sequence and structure",
+     "NAR Genomics and Bioinformatics", "6, no. 4", 2024, "lqae150", "10.1093/nargab/lqae150"),
+    ("HMMER: hmmsearch, hmmscan, phmmer, jackhmmer", "Eddy, Sean R.", "Accelerated profile HMM searches",
+     "PLoS Computational Biology", "7, no. 10", 2011, "e1002195", "10.1371/journal.pcbi.1002195"),
+    ("pyhmmer", "Larralde, Martin, and Georg Zeller", "PyHMMER: a Python library binding to HMMER for efficient sequence analysis",
+     "Bioinformatics", "39, no. 5", 2023, "btad214", "10.1093/bioinformatics/btad214"),
+    ("HH-suite (hhsearch)", "Steinegger, Martin, et al.", "HH-suite3 for fast remote homology detection and deep protein annotation",
+     "BMC Bioinformatics", "20, no. 1", 2019, "473", "10.1186/s12859-019-3019-7"),
+    ("InterProScan", "Jones, Philip, et al.", "InterProScan 5: genome-scale protein function classification",
+     "Bioinformatics", "30, no. 9", 2014, "1236–40", "10.1093/bioinformatics/btu031"),
+    ("Pfam", "Paysan-Lafosse, Typhaine, et al.", "The Pfam protein families database: embracing AI/ML",
+     "Nucleic Acids Research", "53, no. D1", 2025, "D523–34", "10.1093/nar/gkae997"),
+    ("UniFIRE's UniRule rules", "MacDougall, Alistair, et al.", "UniRule: a unified rule resource for automatic annotation in the UniProt Knowledgebase",
+     "Bioinformatics", "36, no. 17", 2020, "4643–48", "10.1093/bioinformatics/btaa485"),
+    ("FANTASIA, the method across about 1,000 animal proteomes", "Martínez-Redondo, Gemma I., et al.", "FANTASIA leverages language models to decode the functional dark proteome across the animal tree of life",
+     "Communications Biology", "8, no. 1", 2025, "1227", "10.1038/s42003-025-08651-2"),
+    ("FANTASIA, the software", "Pérez-Canales, Francisco M., et al.", "FANTASIA suite: a reproducible and configurable framework for embedding-based functional annotation of proteins",
+     "NAR Genomics and Bioinformatics", "8, no. 3", 2026, "lqag106", "10.1093/nargab/lqag106"),
+    ("FANTASIA, the earlier test on model organisms", "Barrios-Núñez, Israel, et al.", "Decoding functional proteome information in model organisms using protein language models",
+     "NAR Genomics and Bioinformatics", "6, no. 3", 2024, "lqae078", "10.1093/nargab/lqae078"),
+    ("ESMFold, the model before ESMFold2", "Lin, Zeming, et al.", "Evolutionary-scale prediction of atomic-level protein structure with a language model",
+     "Science", "379, no. 6637", 2023, "1123–30", "10.1126/science.ade2574"),
+    ("Swiss-Prot (UniProt)", "The UniProt Consortium", "UniProt: the Universal Protein Knowledgebase in 2025",
+     "Nucleic Acids Research", "53, no. D1", 2025, "D609–17", "10.1093/nar/gkae1010"),
+    ("AlphaFold's models of Swiss-Prot, which Foldseek searched", "Bertoni, Damian, et al.", "AlphaFold Protein Structure Database 2025: a redesigned interface and updated structural coverage",
+     "Nucleic Acids Research", "54, no. D1", 2026, "D358–62", "10.1093/nar/gkaf1226"),
+    ("Mol*, the 3-D viewer", "Sehnal, David, et al.", "Mol* Viewer: modern web app for 3D visualization and analysis of large biomolecular structures",
+     "Nucleic Acids Research", "49, no. W1", 2021, "W431–37", "10.1093/nar/gkab314"),
+    ("GenAge, the aging gene group", "Tacutu, Robi, et al.", "Human Ageing Genomic Resources: new and updated databases",
+     "Nucleic Acids Research", "46, no. D1", 2018, "D1083–90", "10.1093/nar/gkx1042"),
+    ("Biomni, the agent that ran the whole-proteome programs", "Huang, Kexin, et al.", "Biomni: a general-purpose biomedical AI agent",
+     "bioRxiv", "preprint", 2025, "", "10.1101/2025.05.30.656746"),
+    ("s4pred, the helix and strand prediction", "Moffat, Lewis, and David T. Jones", "Increasing the accuracy of single sequence prediction methods using a deep semi-supervised learning framework",
+     "Bioinformatics", "37, no. 21", 2021, "3744–51", "10.1093/bioinformatics/btab491"),
+]
+# Named on the pages with no paper to cite
+NO_PAPER = [("kmerseek", 'no paper yet; the code is at <a href="https://github.com/seanome/kmerseek">github.com/seanome/kmerseek</a>'),
+            ("ESMFold2", "we found no PubMed record for this model; the paper of the first ESMFold is listed above"),
+            ("UniFIRE's ARBA rules", "we found no PubMed record for ARBA; UniProt describes it in its online help")]
+
+
+def citations_html():
+    """The reference list of the index page, Chicago style, one line per program or database."""
+    e = build.esc
+    items = "".join(
+        '<li><b>%s.</b> %s. "%s." <i>%s</i> %s (%d)%s. <a href="https://doi.org/%s">https://doi.org/%s</a></li>'
+        % (e(what), e(authors).rstrip("."), e(title), e(journal), e(vol), year, ": " + e(pages) if pages else "", doi, doi)
+        for what, authors, title, journal, vol, year, pages, doi in CITATIONS)
+    none = "".join("<li><b>%s.</b> %s.</li>" % (e(what), why[0].upper() + why[1:]) for what, why in NO_PAPER)
+    return '<ol class="refs">%s</ol><p class="note">No paper to cite:</p><ul class="refs">%s</ul>' % (items, none)
+
+
 def index_html(s, cats, inputs, ver, known="", first=None):
     """The first page, after the dense-results-page skill: the answer in one sentence, then a sticky
     header (filters, search, a three-line key, column names, the residue ruler) over one grid row per
@@ -685,8 +869,10 @@ def index_html(s, cats, inputs, ver, known="", first=None):
                         for k, v, w in chips)
     cat_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(c), f(s["immune_categories"][c])) for i, c in enumerate(cats))
     chk_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(t), f(s["name_check"][t])) for i, (_, t) in enumerate(NAME_CHECK))
+    grp_opts = "".join('<option value="%d">%s (%s)</option>' % (i, build.esc(g), f(s["gene_groups"][g])) for i, (g, _) in enumerate(GENE_GROUPS))
     cat_bars = bars([(i, s["immune_categories"][c], c) for i, c in enumerate(cats)], n, "cat")
     chk_bars = bars([(i, s["name_check"][t], t) for i, (_, t) in enumerate(NAME_CHECK)], n, "chk")
+    iso_bars = bars([(k, v, "1 protein, bare ID" if int(k) == 1 else "%s proteins, up to .%s" % (k, k)) for k, v in s["genes_by_isoforms"].items()], n, "iso")
     seq, dom = build.CATEGORIES["seq"]["color"], build.CATEGORIES["pfam"]["color"]
     ramp = "".join('<i style="opacity:%s;background:%s"></i>' % (o, seq) for o in (".3", ".5", ".75", "1"))
     # the same scale as full.js's track: residue 1 to AXIS_AA over the first TRACK_PCT% of the width
@@ -696,14 +882,15 @@ def index_html(s, cats, inputs, ver, known="", first=None):
                     for v in (1, AXIS_AA // 4, AXIS_AA // 2, 3 * AXIS_AA // 4, AXIS_AA))
     return head("Botryllus proteome annotations", ver, dense=True) + """
 <div class="titleblock">
- <div class="titlebar"><h1><i>Botryllus schlosseri</i> proteome</h1><span class="pn">%(n)s proteins predicted from the new genome: what each one matches</span>%(known)s</div>
+ <div class="titlebar"><h1><i>Botryllus schlosseri</i> proteome</h1><span class="pn">%(n)s proteins predicted from the new genome: what each one matches</span>
+ <span class="pn" title="A gene's first protein has the bare ID; its other isoforms end in .2, .3 and so on, in the order of the proteome FASTA. Each row says which isoform it is.">%(genes)s genes · %(gi)s have 2 to %(mi)s isoforms</span>%(known)s</div>
  <div class="sentence"><p id="sent">%(sp)s of %(n)s proteins (%(spp)s) match a Swiss-Prot protein, %(pf)s (%(pfp)s) carry a Pfam domain, and %(ne)s (%(nep)s) have neither.</p>
  <div id="sentnote"><p class="note">Swiss-Prot match = the best hit of DIAMOND (a fast BLAST-like sequence search) at E-value 0.001 or below,
  in Swiss-Prot release 2026_03 (575,748 proteins). Pfam domain = a Pfam family model that pyhmmer's hmmsearch finds above the score Pfam sets
  for that family. Biomni, the agent that ran the whole-proteome programs except kmerseek, made both tables. A protein with neither can still have a hit
  from another program: the "other programs" column says which. %(dp)s test proteins have a page that shows every program's hits along the protein
  (<a href="drawn.html">their own index</a>).</p></div></div>
- <details class="overview-fold"><summary>Counts by immune-gene category and by how the proposed name compares with the existing one</summary>
+ <details class="overview-fold"><summary>Counts by immune-gene category, by how the proposed name compares with the existing one, and by isoforms per gene</summary>
  <div class="overview">
  <section><h2>Immune-gene candidates, by category</h2><p class="note">%(im)s proteins; one protein can be in several categories. A category
  comes from a Pfam domain, the gene name, or an immune keyword or GO term of the best Swiss-Prot match; each protein page says which.
@@ -712,6 +899,9 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  <section><h2>Proposed name compared with the existing name</h2><p class="note">Existing = the name in the FASTA header. Proposed = from
  the best Swiss-Prot match or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (NLRC5 and Nlrc5-like). Bars: of all
  %(n)s proteins.</p>%(kb)s</section>
+ <section><h2>Genes by number of proteins (isoforms)</h2><p class="note">%(genes)s genes. A gene's first protein has the bare ID; its other
+ isoforms end in .2, .3 and so on, in the order of the proteome FASTA. %(gi)s genes have more than one protein, which adds %(extra)s proteins.
+ Bar length: number of genes; click a bar to list those genes' proteins.</p>%(ib)s</section>
  </div></details>
 </div>
 <header class="top ix">
@@ -720,6 +910,7 @@ def index_html(s, cats, inputs, ver, known="", first=None):
   <span class="lead2">show:</span><span class="ladder" id="tiles">%(chips)s</span>
   <label>immune category <select id="cat"><option value="-1">any</option>%(cat_opts)s</select></label>
   <label>names <select id="chk"><option value="-1">any</option>%(chk_opts)s</select></label>
+  <label title="Proteins whose best hit from DIAMOND, MMseqs2, Foldseek or kmerseek is a Swiss-Prot protein of this group, at any E-value, weak hits included: the last column then names the program, its E-value and the hit. Aging: the hit's gene symbol is one of the 307 human genes of GenAge build 21.">gene group <select id="grp"><option value="-1">any</option>%(grp_opts)s</select></label>
   <span class="search"><input id="q" type="search" placeholder="search: every word must match" autocomplete="off" spellcheck="false" aria-label="Search the ID, names, Swiss-Prot match, Pfam domains and categories: every word must match"></span>
   <button class="btn" id="dl" title="Every protein the filters keep, not only the rows shown, one line each, as a tab-separated file">&#8595; TSV of these proteins</button>
   <button class="btn" id="help-btn" aria-expanded="false" title="What the columns and marks mean; keys">? Help</button>
@@ -750,13 +941,22 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  <h2>Rows</h2><p>One row per protein, 100 at a time. Click a row, or press Enter on it, to open its page.</p>
  <h2>Columns</h2><dl>
  <dt>protein</dt><dd>the ID in the proteome FASTA (gene ID, underscore, transcript ID; a second isoform of the same gene gets .2), then the
- name in the FASTA header and the proposed name</dd>
+ name in the FASTA header and the proposed name. "isoform 2 of 3" = the gene has three proteins and this is the second in the FASTA; a
+ protein that is its gene's only one says nothing</dd>
  <dt>best Swiss-Prot match</dt><dd>DIAMOND's best hit (E-value 0.001 or below) in Swiss-Prot 2026_03, with its accession</dd>
  <dt>identity · coverage</dt><dd>identical residues in DIAMOND's alignment, and the share of your protein the alignment spans</dd>
  <dt>Pfam domains</dt><dd>Pfam models found by pyhmmer's hmmsearch at Pfam's gathering thresholds (Biomni). The boxes in the track are
  InterProScan's Pfam matches, which can differ</dd>
  <dt>cluster</dt><dd>proteins in the same MMseqs2 cluster (Biomni's clustering of the proteome), itself included</dd>
  <dt>other programs with a hit</dt><dd>%(other)s</dd>
+ <dt>gene group</dt><dd>a filter, not a finding: it keeps a protein when the best hit of DIAMOND, MMseqs2, either Foldseek search or kmerseek
+ is a Swiss-Prot protein whose name is in the group (%(grp)s), at any E-value, so weak hits from one program are kept. While it is on, the
+ "other programs" column names the program, its E-value and the hit, best first. MHC class I and class II are the two halves of
+ "HLA and other MHC". Aging keeps a protein when the gene symbol of such a hit is one of the 307 human genes of GenAge build 21
+ (genomics.senescence.info/genes, Tacutu et al. 2018, CC BY 3.0), capitals ignored, in whichever species the hit is; a hit with no gene
+ symbol in our names table cannot count. Allorecognition is the one group that is not a match to another species: it keeps the %(allo_n)s
+ proteins that DIAMOND matched to one of 96 <i>Botryllus schlosseri</i> proteins from NCBI (Fester family, Fester co-receptor and one partial
+ BHF), so a hit can be the protein itself; the column names the best of those</dd>
  <dt>position along the protein</dt><dd>the protein from residue 1 to %(ax)s on one scale for every row; a longer protein ends in &#8250; and
  its length</dd></dl>
  <h2>Programs</h2><dl><dt>DIAMOND, MMseqs2</dt><dd>fast sequence searches, like BLAST, against Swiss-Prot</dd>
@@ -773,12 +973,17 @@ def index_html(s, cats, inputs, ver, known="", first=None):
 <section class="below"><h2>Which Swiss-Prot</h2><p class="note">"Swiss-Prot" on this page is release 2026_03 (575,748 proteins), the copy
 DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (at most 25 per protein). Each protein's page says which copy each other
 program searched.</p></section>
+<section class="below"><h2>Papers of the programs and databases</h2><p class="note">One paper for each program and database these pages
+name. Each entry was read from its PubMed record on 2026-11-10.</p>%(refs)s</section>
 <footer><h2>Input files read</h2><p class="note">Built by build_full.py from %(inputs)s. These tables come from Biomni's runs and our kmerseek run on Sherlock
 (full_inputs/README.md in the repository says how each was made). This page only reads those tables; building it ran no search.</p></footer>
 <script>window.FULL_FIRST=%(first)s;</script><script src="assets/gz.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
 """ % dict(first=dumps(first), n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
            ne=f(s["neither"]), nep=pc(s["neither"]), dp=f(s["drawn_pages"]), dr=f(s["drawn"]), im=f(s["immune_candidates"]),
-           jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts,
+           jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts, grp_opts=grp_opts,
+           refs=citations_html(), genes=f(s["genes"]), gi=f(s["genes_with_isoforms"]), mi=s["most_isoforms"], ib=iso_bars, extra=f(n - s["genes"]),
+           allo_n=f(next(v for g, v in s["gene_groups"].items() if g.startswith(ALLO))),
+           grp=build.esc("; ".join(g for g, p in GENE_GROUPS if p not in (GENAGE, ALLO))),
            other="; ".join("%s: %s" % (a, c) for a, c in OTHER_HITS), ax=f(AXIS_AA), axn=AXIS_AA, tw=TRACK_PCT, seq=seq, dom=dom, ramp=ramp, ticks=ticks, cnt="", inputs=build.esc(", ".join(inputs)), ver=ver)
 
 
@@ -813,7 +1018,7 @@ def protein_html(ver, n_tseq=0):
              'looks through the matched protein\'s name, accession and species; every word typed must appear.</p><h2>Keyboard</h2><dl>'
              '<dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>next and previous row</dd><dt><kbd>Enter</kbd> <kbd>Space</kbd></dt><dd>unfold a program, '
              'or open a hit</dd><dt><kbd>Esc</kbd></dt><dd>close every open hit and this help</dd><dt><kbd>?</kbd></dt><dd>this help</dd></dl></aside>')
-    return head + """<div class="titleblock"><div class="titlebar"><h1 title="the ID as written in the proteome FASTA">loading…</h1><span class="pn"></span><span class="len"></span><a class="back" href="index.html">All proteins</a></div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>
+    return head + """<div class="titleblock"><div class="titlebar"><a class="back" href="index.html" title="back to the table of all proteins"><span aria-hidden="true">←</span> All proteins</a><h1 title="the ID as written in the proteome FASTA">loading…</h1><span class="pn"></span><span class="len"></span></div><div class="sentence"><p id="sent"></p><div id="sentnote"></div></div></div>
 <header class="top">%s%s%s</header>
 <main><div class="withviewer noviewer"><div id="grid"></div></div>
 <section class="below" id="biomni" data-base="" data-undrawn="1"></section><section class="below" id="biomni-more"></section>%s</main>

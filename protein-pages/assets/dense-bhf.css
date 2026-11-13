@@ -21,8 +21,9 @@ header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--s
 .titlebar h1{font:700 15px/1.3 "Fantasque Sans Mono",ui-monospace,monospace;margin:0;white-space:nowrap}
 .titlebar .pn{color:var(--secondary)}
 .titlebar .len{color:var(--secondary);margin:0}
-.titlebar .back{margin-left:auto;color:var(--secondary);text-decoration:none;white-space:nowrap}
-.titlebar .back:hover{color:var(--ink);text-decoration:underline}
+/* the way back to the table of all proteins: first thing on the page, top left, drawn as a button */
+.titlebar .back{order:-1;margin:0 6px 0 0;padding:3px 11px 3px 9px;border-radius:999px;background:var(--ink);color:var(--surface);font:600 13px "Source Sans 3",system-ui,sans-serif;text-decoration:none;white-space:nowrap;align-self:center}
+.titlebar .back:hover,.titlebar .back:focus-visible{background:var(--secondary);color:var(--surface);text-decoration:none}
 .sentence{padding:0 14px 6px;font-size:13.5px}
 .sentence p{margin:0}
 .sentence #sent{font-weight:600}
@@ -37,6 +38,7 @@ header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--s
 .btn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;border:0;background:none;color:var(--secondary);cursor:pointer;font-size:12.5px}
 .btn:hover{background:var(--wash);color:var(--ink)}
 .btn[aria-expanded="true"]{background:var(--wash2);color:var(--ink)}
+.btn[hidden]{display:none}
 .count{margin-left:auto;white-space:nowrap}
 .count b{color:var(--ink)}
 .key{display:flex;flex-wrap:wrap;gap:3px 14px;padding:5px 14px 6px;border-top:1px solid var(--grid);color:var(--secondary);font-size:12px;background:var(--surface)}
@@ -155,6 +157,9 @@ footer td,footer th{padding:1px 8px 1px 0;border:0}
 .row.lane .name{align-self:start}
 .name .s.wrap{white-space:normal;line-height:1.3}
 .lane .dom{cursor:pointer}
+.row.prog .bar{cursor:pointer}
+.txt .setting{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row.prog .bar:hover{stroke:var(--focus);stroke-width:1.2}
 .lane .dom:hover rect,.lane .dom:hover path{stroke:var(--focus);stroke-width:1.6}
 .lane .dom.on rect{fill:#fff3c4;stroke:var(--ink);stroke-width:1.4}
 .lane .dom.on path{stroke-width:2}
@@ -183,7 +188,6 @@ h2 .how{font-weight:400;font-size:12.5px;color:var(--secondary);display:block}
 /* v4: ladder, silent line, fading, alphabet lane, Fraunces headline */
 .sentence #sent{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:15.5px;line-height:1.3}
 .sentence #overlap{margin:1px 0 0;font-size:12px;color:#8a4b00;min-height:0}
-.sentence #overlap:empty{display:none}
 .ladder{display:inline-flex;flex-wrap:wrap;gap:4px}
 .ladder .chip{border:1px solid var(--axis);border-radius:999px;padding:1px 8px;font-size:11.5px;color:var(--secondary);background:var(--surface);cursor:pointer;font-family:"Source Sans 3",system-ui,sans-serif}
 .ladder .chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
@@ -213,6 +217,10 @@ header.top .filters .btn:hover{background:var(--wash);color:var(--ink)}
 .key .ramp i{flex:none;width:12px;height:9px;background:#52514e}
 .key .pl{display:inline-block;width:10px;height:7px;margin:0 2px 0 3px;vertical-align:middle}
 .key #alphakey:empty{display:none}
+.key #sskey:empty{display:none}
+.key #sskey svg{vertical-align:middle;margin:0 1px 0 4px}
+.row.ssrow{min-height:30px;align-items:center}
+.row.ssrow .name{align-self:center}
 .colhead button,.colhead>div{font-family:"Source Sans 3",system-ui,sans-serif}
 .num .same{color:var(--secondary)}
 .num .s .re{color:var(--secondary);font-style:italic}
@@ -229,7 +237,14 @@ header.top .filters .btn:hover{background:var(--wash);color:var(--ink)}
 
 .titleblock{background:var(--surface);border-bottom:1px solid var(--grid)}
 .filters #overlap{flex-basis:100%;margin:0;font-size:12px;color:var(--secondary)}
-.filters #overlap:empty{display:none}
+/* the note keeps one line of room even when empty, and never wraps: a line that came and went made the fixed header taller and moved every row under the pointer */
+.filters #overlap,.sentence #overlap{display:block;height:17px;line-height:17px;min-height:17px;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* last in the filter row, so the button after it in the markup stays on the buttons' line */
+.filters #overlap{order:99;margin-top:-4px}
+/* the alphabet's classes get a line of their own in the key, one line high and never wrapping: their text changes with the
+   kmerseek hit under the pointer (2 classes or 20), and sharing a line with the other key entries made the key wrap differently */
+.key #alphakey{flex:0 0 100%;min-width:0;height:16px;flex-wrap:nowrap;overflow:hidden}
+.key #alphakey>*{flex:none}
 .track .tl{text-anchor:start}
 .key{padding:3px 14px 3px;gap:2px 12px;font-size:11.5px}
 .sentence #sentnote .note{max-width:none}
