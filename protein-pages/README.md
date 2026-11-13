@@ -352,6 +352,25 @@ python build_full.py full_inputs --drawn site --drawn-fasta test_inputs/data/pro
 - `--out` follows the same rule as build.py's: an empty folder, or one holding
   `full_summary.json`, else the script exits with status 2.
 
+### Possible immune genes, by program
+
+The index page's fold "Possible immune genes by program and by category, ..." opens on a panel that lists
+the 10,948 proteins that at least one of 8 programs, or the literature (BHF), calls a possible immune gene. The list comes from
+olgabot/botryllus-mhc PR 16, through `full_inputs/immune_candidates_by_program.tsv.gz`. One row per program: a bar of
+its proteins on one scale for every row, split into this proteome (dark) and old-proteome proteins with no identical
+protein here (light grey), with the counts and what makes that program call a protein immune.
+
+- The ladder above the rows ("any program", "≥ 2 programs", ...) keeps only proteins that at least that many programs call
+  immune, and redraws every row.
+- Pointing at a program draws, in vermillion on every other row, how many of that row's proteins the pointed-at program
+  also calls immune. Programs that ran on different proteomes share few proteins, because one gene has a different ID in each.
+- Clicking a program opens its proteins under its row, most agreed first, 50 at a time. Each line has the protein (a link to its page),
+  its gene name, one square per program in row order (filled = that program calls it immune), and the clicked program's evidence.
+  The search box filters the open list; "TSV of this list" downloads what it keeps, with every program's evidence.
+
+`build_full.py` (`immune_programs_panel`) draws the rows, so the counts are there without JavaScript; `assets/immune-programs.js`
+loads `full/immune_programs.js` (packed, 290 KB) when the fold opens. The panel is left out when the table is not in the inputs.
+
 ## Hosting at Stanford
 
 `deploy_stanford.sh <site folder>` copies a built site to Stanford personal web space

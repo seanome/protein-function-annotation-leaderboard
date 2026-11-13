@@ -739,7 +739,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None, proteome=N
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
     inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
-    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver, known_html(drawn_page), first))
+    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver, known_html(drawn_page), first, immune_programs_panel(folder, out)))
     (out / "protein.html").write_text(protein_html(asset_ver, n_tseq))
     print("%d proteins, %d drawn, %d data files, %.1f s" % (n, summ["drawn"], N_SHARDS, time.time() - t0))
     return summ
@@ -845,7 +845,71 @@ def citations_html():
     return '<ol class="refs">%s</ol><p class="note">No paper to cite:</p><ul class="refs">%s</ul>' % (items, none)
 
 
-def index_html(s, cats, inputs, ver, known="", first=None):
+# The index page's "Possible immune genes, by program" panel (full_inputs/make_immune_candidates_by_program.py,
+# from olgabot/botryllus-mhc PR 16). (column, name, what makes the program call a protein immune), in the panel's order.
+IMMUNE_PROGRAMS = [
+    ("kmerseek_human", "kmerseek, human immune genes", "a match to a human gene annotated to immune system process (GO:0002376), E ≤ 0.001, in any of its alphabets"),
+    ("foldseek_best_hit", "Foldseek (ProstT5), best hit", "its best hit in AlphaFold's Swiss-Prot models is an immune protein"),
+    ("mmseqs2_best_hit", "MMseqs2, best hit", "its best Swiss-Prot hit is an immune protein"),
+    ("interproscan", "InterProScan", "an immune or defense GO term (GO:0002376, GO:0006952), or one of 24 immune-related domains (MHC, Ig C1 and V sets, TIR, NACHT, C-type lectin, ...)"),
+    ("funannotate_name", "Gene name", "its name in the proteome FASTA is a human gene annotated to immune system process"),
+    ("kmerseek_swissprot", "kmerseek, best Swiss-Prot hit", "its best Swiss-Prot hit, E ≤ 0.001, is an immune protein"),
+    ("mhc_search", "MHC search", "any MMseqs2 or Foldseek hit, at any rank, to an MHC class I or II protein, B2M or another Ig C1-set protein"),
+    ("unifire", "UniFIRE", "an immune UniProt keyword or GO term"),
+    ("known_botryllus", "Known Botryllus gene", "BHF, the histocompatibility factor (Voskoboynik et al. 2013); no program calls it immune"),
+]
+IMMUNE_PROGRAMS_FILE = "immune_candidates_by_program.tsv.gz"
+
+
+def immune_programs_panel(folder, out):
+    """Writes full/immune_programs.js (packed) and returns the panel's HTML, or "" when the table is not there.
+    Rows of the data: [protein ID, 1 if it is in the new proteome (has a page), bit mask of the programs that call it
+    immune, that program's evidence for each set bit in IMMUNE_PROGRAMS order, gene name in the FASTA header]."""
+    f = folder / IMMUNE_PROGRAMS_FILE
+    if not f.exists():
+        return ""
+    keys = [k for k, _, _ in IMMUNE_PROGRAMS]
+    rows = []
+    with gzip.open(f, "rt") as fh:
+        for r in csv.DictReader(fh, delimiter="\t", quoting=csv.QUOTE_NONE):
+            mask = sum(1 << i for i, k in enumerate(keys) if r[k])
+            rows.append([r["protein_id"], int(r["proteome"] == "new"), mask, [r[k] for k in keys if r[k]], r["name"]])
+    rows.sort(key=lambda r: (-bin(r[2]).count("1"), r[0]))
+    (out / "full" / "immune_programs.js").write_text('window.IMMUNE_PROG_Z="%s";' % packed(
+        dict(programs=[[k, n, w] for k, n, w in IMMUNE_PROGRAMS], rows=rows)))
+    n, n_new = len(rows), sum(r[1] for r in rows)
+    agree = [sum(1 for r in rows if bin(r[2]).count("1") >= k) for k in range(1, 6)]
+    per = [(sum(1 for r in rows if r[2] >> i & 1 and r[1]), sum(1 for r in rows if r[2] >> i & 1 and not r[1])) for i in range(len(keys))]
+    top = max(a + b for a, b in per)
+    fm = "{:,}".format
+    lad = "".join('<button class="chip%s" data-k="%d">%s<b class="mono">%s</b></button>'
+                  % (" on" if k == 1 else "", k, "any program" if k == 1 else "≥ %d programs" % k, fm(v)) for k, v in zip(range(1, 6), agree))
+    rws = "".join(
+        '<div class="ip-row" role="button" tabindex="0" data-p="%d" aria-expanded="false"><span class="ip-name" title="%s">%s</span>'
+        '<span class="ip-bar"><i class="new" style="width:%.2f%%"></i><i class="old" style="width:%.2f%%"></i></span>'
+        '<span class="ip-n mono">%s</span><span class="ip-split mono">%s new · %s old</span><span class="ip-what">%s</span></div>'
+        % (i, build.esc(w), build.esc(nm), 100 * a / top, 100 * b / top, fm(a + b), fm(a), fm(b), build.esc(w))
+        for i, ((k, nm, w), (a, b)) in enumerate(zip(IMMUNE_PROGRAMS, per)))
+    return """<section class="ip" id="ip"><h2>Possible immune genes, by program</h2>
+ <p class="ip-sent">%(n)s proteins are called possibly immune by at least one program; %(a3)s by three or more.</p>
+ <p class="note">Wide on purpose, for folding and searching elsewhere: every protein that any program run on this proteome or the old
+ one calls immune, from olgabot/botryllus-mhc PR 16. Immune protein = a Swiss-Prot entry annotated to immune system process (GO:0002376)
+ or defense response (GO:0006952), or with an immune keyword. The bar is split by proteome: <i class="sw new"></i>%(nn)s proteins of this
+ proteome, with a page here; <i class="sw old"></i>%(no)s of the old proteome (g IDs) with no identical protein in this one. MMseqs2,
+ Foldseek and the MHC search ran on the old proteome, so one gene can be counted twice, under each ID. Point at a program to see how many of
+ its proteins each other program also calls immune <i class="sw ov"></i> (programs run on different proteomes share few, because one gene has a
+ different ID in each); click it to list its proteins, most agreed first.</p>
+ <div class="ip-ladder"><span class="lead2">proteins called immune by:</span><span class="ladder">%(lad)s</span>
+ <span class="search"><input id="ip-q" type="search" placeholder="search the lists: every word must match" autocomplete="off" spellcheck="false" aria-label="Search the immune lists"></span>
+ <button class="btn" id="ip-dl" title="The proteins the open list keeps, as a tab-separated file" hidden>&#8595; TSV of this list</button></div>
+ <div class="ip-head"><span>program</span><span>proteins it calls possibly immune (one scale for every row)</span><span class="num">proteins</span><span class="num">new · old</span><span>what counts</span></div>
+ <div class="ip-rows">%(rws)s</div><p class="ip-hovernote" aria-live="polite"></p>
+ <p class="note ip-foot">"E ≤ 0.001": kmerseek's E-value for the region it matched. A single program's call is weak evidence: immune system process
+ includes proteasome, DNA repair and translation proteins, and kmerseek's matches to immune genes often come through domains every cell has.</p>
+</section>""" % dict(n=fm(n), a3=fm(agree[2]), nn=fm(n_new), no=fm(n - n_new), lad=lad, rws=rws)
+
+
+def index_html(s, cats, inputs, ver, known="", first=None, improg=""):
     """The first page, after the dense-results-page skill: the answer in one sentence, then a sticky
     header (filters, search, a three-line key, column names, the residue ruler) over one grid row per
     protein, each with its Pfam matches and MMseqs2's best hit drawn along the protein."""
@@ -890,8 +954,8 @@ def index_html(s, cats, inputs, ver, known="", first=None):
  for that family. Biomni, the agent that ran the whole-proteome programs except kmerseek, made both tables. A protein with neither can still have a hit
  from another program: the "other programs" column says which. %(dp)s test proteins have a page that shows every program's hits along the protein
  (<a href="drawn.html">their own index</a>).</p></div></div>
- <details class="overview-fold"><summary>Counts by immune-gene category, by how the proposed name compares with the existing one, and by isoforms per gene</summary>
- <div class="overview">
+ <details class="overview-fold"%(fold_open)s><summary>Possible immune genes by program and by category, how the proposed name compares with the existing one, and isoforms per gene</summary>
+ <div class="overview">%(improg)s
  <section><h2>Immune-gene candidates, by category</h2><p class="note">%(im)s proteins; one protein can be in several categories. A category
  comes from a Pfam domain, the gene name, or an immune keyword or GO term of the best Swiss-Prot match; each protein page says which.
  A jackhmmer hit from an immune seed protein does not give a category: %(jn)s proteins have such a hit and no category. Bar length: share of
@@ -977,8 +1041,9 @@ program searched.</p></section>
 name. Each entry was read from its PubMed record on 2026-11-10.</p>%(refs)s</section>
 <footer><h2>Input files read</h2><p class="note">Built by build_full.py from %(inputs)s. These tables come from Biomni's runs and our kmerseek run on Sherlock
 (full_inputs/README.md in the repository says how each was made). This page only reads those tables; building it ran no search.</p></footer>
-<script>window.FULL_FIRST=%(first)s;</script><script src="assets/gz.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script></body></html>
-""" % dict(first=dumps(first), n=f(n), known=known, sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
+<script>window.FULL_FIRST=%(first)s;</script><script src="assets/gz.js%(ver)s"></script><script src="assets/full.js%(ver)s"></script>%(ipjs)s</body></html>
+""" % dict(first=dumps(first), n=f(n), known=known, improg=improg, fold_open="",
+           ipjs='<script src="assets/immune-programs.js%s"></script>' % ver if improg else "", sp=f(s["swissprot_hit"]), spp=pc(s["swissprot_hit"]), pf=f(s["pfam_domain"]), pfp=pc(s["pfam_domain"]),
            ne=f(s["neither"]), nep=pc(s["neither"]), dp=f(s["drawn_pages"]), dr=f(s["drawn"]), im=f(s["immune_candidates"]),
            jn=f(s["jackhmmer_not_immune"]), cb=cat_bars, kb=chk_bars, chips=chip_html, cat_opts=cat_opts, chk_opts=chk_opts, grp_opts=grp_opts,
            refs=citations_html(), genes=f(s["genes"]), gi=f(s["genes_with_isoforms"]), mi=s["most_isoforms"], ib=iso_bars, extra=f(n - s["genes"]),

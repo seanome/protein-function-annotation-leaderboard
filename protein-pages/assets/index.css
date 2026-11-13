@@ -84,3 +84,63 @@ header.top.ix .chip.on b{font-weight:600}
 .refs li{margin:2px 0}
 .refs b{color:var(--ink);font-weight:600}
 .bar[data-iso] .bt i{min-width:1px}
+
+/* "Possible immune genes, by program" (build_full.py immune_programs_panel, immune-programs.js). The panel's
+   only data colours, all in its note: #52514e this proteome, #c3c2b7 the old proteome only, #d55e00 shared with
+   the program pointed at. */
+.overview .ip{grid-column:1/-1;margin:2px 0 10px;padding:0 0 10px;border-bottom:1px solid var(--grid)}
+.ip .ip-sent{font:500 17px/1.35 Fraunces,Georgia,serif;margin:2px 0 4px;color:var(--ink)}
+.ip .note{max-width:110ch}
+.ip i.sw{display:inline-block;width:10px;height:8px;margin:0 3px 0 2px;vertical-align:baseline}
+.ip i.sw.new,.ip .ip-bar i.new{background:#52514e}
+.ip i.sw.old,.ip .ip-bar i.old{background:#c3c2b7}
+.ip i.sw.ov,.ip .ip-bar b.ov{background:#d55e00}
+.ip-ladder{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:4px 0 6px}
+.ip-ladder .lead2{color:var(--muted);font-size:12px}
+.ip-ladder .chip b{margin-left:4px;font-weight:400}
+.ip-ladder .chip.on b{font-weight:600}
+.ip-ladder .search input{border:0;border-bottom:1px solid var(--grid);background:none;padding:1px 0;font-size:12.5px;width:260px}
+.ip-head,.ip-row,.ip-lhead,.ip-li{display:grid;grid-template-columns:minmax(0,15em) minmax(120px,1fr) 7.5em 9.5em minmax(0,22em);gap:0 12px;align-items:center}
+.ip-head{font-size:11.5px;color:var(--muted);padding:0 6px 2px;border-bottom:1px solid var(--grid)}
+.ip-head .num,.ip-row .ip-n,.ip-row .ip-split{text-align:right}
+.ip-row{min-height:26px;padding:0 6px;font-size:13px;cursor:pointer;position:relative;border-radius:4px}
+.ip-row:hover,.ip-row.pt{background:var(--wash)}
+.ip-row.open{background:var(--wash2)}
+.ip-row.open::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink)}
+.ip-row.dim{opacity:.45}
+.ip-row .ip-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ip-bar{position:relative;display:flex;height:10px;background:var(--plane)}
+.ip-bar i{display:block;height:10px;transition:width .15s}
+.ip-bar b.ov{position:absolute;left:0;top:2px;height:6px;transition:width .15s}
+.ip-row .ip-n{font-size:12.5px;white-space:nowrap}
+.ip-row .ovn{color:#d55e00;font-size:11.5px}
+.ip-row .ip-split{font-size:11.5px;color:var(--secondary);white-space:nowrap}
+.ip-row .ip-what{font-size:11.5px;color:var(--secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ip-hovernote{min-height:16px;font-size:11.5px;color:#d55e00;margin:2px 6px 0}
+.ip-list{margin:0 0 6px;padding:2px 6px 4px 12px;border-left:3px solid var(--ink);background:var(--surface)}
+.ip-lhead,.ip-li{grid-template-columns:15em 10em minmax(0,1fr)}
+.ip-li>span,.ip-lhead>span{text-align:left;justify-self:stretch;min-width:0}
+.ip-li .pid{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ip-lhead{font-size:11.5px;color:var(--muted);border-bottom:1px solid var(--grid);padding:2px 0}
+.ip-li{min-height:22px;font-size:12.5px;border-bottom:1px solid var(--plane)}
+.ip-li a{text-decoration:none;border-bottom:1px solid var(--axis)}
+.ip-li small{color:var(--muted);font-family:"Source Sans 3",system-ui,sans-serif}
+.ip-li .sq{display:inline-flex;align-items:center;gap:2px}
+.ip-li .sq i{display:inline-block;width:8px;height:8px;border:1px solid var(--axis);box-sizing:border-box}
+.ip-li .sq i.on{background:var(--ink);border-color:var(--ink)}
+.ip-li .sq b{margin-left:5px;font-weight:400;font-size:12px;color:var(--secondary)}
+.ip-li .ev{color:var(--secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ip-more{font-size:12px;color:var(--muted);margin:3px 0 0}
+@media (max-width:900px){
+  .ip-head,.ip-row{grid-template-columns:minmax(0,9em) minmax(80px,1fr) 6.5em}
+  .ip-head span:nth-child(n+4),.ip-row .ip-split,.ip-row .ip-what{display:none}
+  .ip-lhead,.ip-li{grid-template-columns:10em 9em minmax(0,1fr)}
+  .ip-ladder .search input{width:100%}
+}
+@media (max-width:900px){
+  .ip-li{grid-template-columns:minmax(0,1fr) auto}
+  .ip-li .ev{grid-column:1/-1;white-space:normal;padding:0 0 3px}
+  .ip-lhead span:nth-child(3){display:none}
+  .ip-lhead{grid-template-columns:minmax(0,1fr) auto}
+}
+.ip-head span{font-family:"Source Sans 3",system-ui,sans-serif}
