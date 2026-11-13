@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 1,
+   "complete_single": 570,
+   "completeness_pct": 84.97,
+   "fragmented": 49,
+   "lineage": "metazoa_odb12",
+   "missing": 52,
+   "short_summary_c_pct": 85.0
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 107,
+   "completeness_pct": 83.72,
+   "fragmented": 12,
+   "lineage": "eukaryota_odb12",
+   "missing": 9,
+   "short_summary_c_pct": 83.7
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "atlas species",
+ "n_interpro_match": 12642,
+ "n_proteins": 13267,
+ "n_sprot_hit": 12454,
+ "n_uncharacterized_name": 480,
+ "n_unlabelled": 523,
+ "proteome_taxid": "9244",
+ "species": "Calypte anna",
+ "uncharacterized_name_pct": 3.62,
+ "unlabelled_pct": 3.94,
+ "upid": "UP000054308"
+}

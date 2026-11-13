@@ -1,0 +1,11 @@
+blind_id,T1,T1_reason,T2,T2_reason,T3,T3_reason,T4,T4_reason,T5,T5_reason,T6,T6_reason,T_total
+E030,1,"one gene one chain",0,"works inside the nucleus, not secreted",1,"binds nucleosome DNA, a binding activity",1,"nucleosome is conserved across animals",1,"single chain, one domain",0,"must be expressed inside the cell to do anything",4
+E042,1,"one small peptide gene",1,"secreted by the animal",1,"binds a cell-surface receptor",1,"receptor class is not a species-specific partner",1,"36 residues, one folded domain",1,"works without partners",6
+E021,0,"many gene products in one mixture",1,"the enzymes are secreted ones",1,"each enzyme is catalytic",0,"acts on food in the gut, not a conserved protein target",0,"a mixture of several multi-domain enzymes",1,"the enzymes need no cofactor partner",3
+E014,1,"one gene",1,"released from gland cells",1,"acts as a secreted ligand, so binding",0,"needs the right cells and nerve signals of a limb stump",1,"one secreted single-domain protein",0,"only works inside an already primed stump",4
+E031,1,"one gene",1,"secreted in saliva",1,"catalytic",0,"needs the human partner protein plasminogen and fibrin present",0,"a multi-domain protease, not a peptide",0,"needs plasminogen and fibrin, so not alone",3
+E004,0,"a chimera, so two genes, only part from the animal",1,"a secreted-type peptide",1,"switches on receptors, so binding",1,"the two human receptor enzymes are conserved",1,"a short peptide",1,"no cofactor",5
+E032,1,"one gene makes the peptide",1,"secreted into the bloodstream",1,"blocks an enzyme active site",1,"angiotensin-converting enzyme is conserved across phyla",1,"a short peptide",1,"needs no partner protein and no cofactor",6
+E006,1,"one protein in two glycoforms",1,"secreted",1,"catalytic, cuts hyaluronan",1,"hyaluronan is conserved across animals",1,"one catalytic chain",1,"no cofactor",6
+E010,0,"two different subunits, so two genes",1,"secreted in venom",1,"catalytic",1,"lipid membranes are universal",0,"two subunits, not a single domain",0,"needs its partner subunit and calcium",3
+E003,1,"one gene",1,"secreted into the host",1,"blocks clotting by binding",1,"the clotting starter proteins are conserved in animals",1,"small single domain",0,"needs an assembled two-protein complex to act on",5

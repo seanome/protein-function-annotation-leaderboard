@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 4,
+   "complete_single": 645,
+   "completeness_pct": 96.58,
+   "fragmented": 13,
+   "lineage": "metazoa_odb12",
+   "missing": 10,
+   "short_summary_c_pct": 96.6
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 3,
+   "complete_single": 121,
+   "completeness_pct": 96.12,
+   "fragmented": 3,
+   "lineage": "eukaryota_odb12",
+   "missing": 2,
+   "short_summary_c_pct": 96.1
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "96.97232",
+ "group": "atlas species",
+ "n_interpro_match": 19814,
+ "n_proteins": 20018,
+ "n_sprot_hit": 19887,
+ "n_uncharacterized_name": 447,
+ "n_unlabelled": 101,
+ "proteome_taxid": "9785",
+ "species": "Loxodonta africana",
+ "uncharacterized_name_pct": 2.23,
+ "unlabelled_pct": 0.5,
+ "upid": "UP000007646"
+}

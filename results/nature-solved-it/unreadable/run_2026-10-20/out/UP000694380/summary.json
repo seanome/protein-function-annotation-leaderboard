@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 3,
+   "complete_single": 631,
+   "completeness_pct": 94.35,
+   "fragmented": 34,
+   "lineage": "metazoa_odb12",
+   "missing": 4,
+   "short_summary_c_pct": 94.3
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 122,
+   "completeness_pct": 95.35,
+   "fragmented": 4,
+   "lineage": "eukaryota_odb12",
+   "missing": 2,
+   "short_summary_c_pct": 95.3
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "atlas species",
+ "n_interpro_match": 20586,
+ "n_proteins": 21166,
+ "n_sprot_hit": 20583,
+ "n_uncharacterized_name": 1678,
+ "n_unlabelled": 363,
+ "proteome_taxid": "8478",
+ "species": "Chrysemys picta",
+ "uncharacterized_name_pct": 7.93,
+ "unlabelled_pct": 1.72,
+ "upid": "UP000694380"
+}
