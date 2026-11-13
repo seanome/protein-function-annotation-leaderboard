@@ -3,6 +3,7 @@
 The test set has no hhsearch or InterProScan output, so their parsers are checked here on
 files written by hand in each tool's documented layout. Run with: python -m pytest tests/
 """
+import re
 import sys
 from pathlib import Path
 
@@ -215,7 +216,7 @@ def test_site_from_test_data(tmp_path):
     import re
     html = (out / "proteins" / "FUN008084_FUN008084.html").read_text()
     assert '<input id="hq" type="search"' in html and 'id="hqn"' in html
-    assert "A program with more than 100 hits starts folded into one row, shaded by how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold any row." in html
+    assert "Every program starts folded into one row, shaded by how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold it again." in html
     assert '<div id="ht"></div>' in html
     page = json.loads(re.search(r"const PAGE=(.*?);</script>", html).group(1).replace("<\\/", "</"))
     rrp36 = [h for h in page["hits"] if "rrp36" in " ".join(str(h.get(f) or "") for f in "ltngo").lower()]
@@ -231,15 +232,36 @@ def test_site_from_test_data(tmp_path):
     # its own file, a pLDDT strip from its B-factors (already 0 to 100), the predictor named from the
     # file's REMARK line, and no warning, since neighbouring CA atoms are a median 3.8 angstrom apart
     assert '<section id="structure">' in html and 'data-scale="1"' in html
-    assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists() and 'data-k="plddt"' in html
+    assert (out / "proteins" / "FUN008084_FUN008084.pdb.js").exists()
+    # Foldseek on Biomni's predicted structures ran only on proteins of 200 aa or less: BHF (252 aa)
+    # says so on its row and in the legend; RNF4 (195 aa) has hits on the row and its structure,
+    # with the line saying where it came from
+    assert "not run: structures were predicted only for proteins of 200 aa or less" in html
+    assert "Foldseek, 3-D structures: not run on proteins over 200 aa" in html
+    rnf4 = (out / "proteins" / "FUN005158_RNF4.html").read_text()
+    rpage = json.loads(re.search(r"const PAGE=(.*?);</script>", rnf4).group(1).replace("<\\/", "</"))
+    assert any(h["k"] == "foldseek" for h in rpage["hits"]) and "not run: structures" not in rnf4
+    assert '<section id="structure">' in rnf4 and "ESMFold2, fast model (esmcfold2-fast" in rnf4
+    fold = [h for h in rpage["hits"] if h["k"] == "foldseek"]
+    assert rpage["names"]["foldseek"] == ["evalue", "fident", "bits", "alntmscore", "lddt"]
+    assert all(0 < float(h["s"][3]) < 1.1 and 0 < float(h["s"][4]) <= 1 for h in fold)
+    # The pLDDT strip sits right above the structure, with nothing between them, and not in the
+    # drawing; the structure comes right after the drawing, before the hit table
+    assert 'data-k="plddt"' not in html and re.search(r'</svg><div id="mol"', html)
+    assert html.index('id="pstrip"') < html.index('id="mol"') < html.index('<div id="ht">')
+    assert html.index('<section id="structure">') < html.index("Every hit, in a table") < html.index('<section id="swissprot">')
     assert "ESMFold2 (esm 3.4.2" in html and "not a physical protein chain" not in html
+    # Published pages take stylesheets only from their own files (and Google Fonts): Mol*'s is a copy
+    assert not re.search(r'<link rel="stylesheet" href="https?://(?!fonts\.googleapis)', html)
+    assert (out / "assets" / "pdbe-molstar-light-3.12.0.css").exists()
     st = build.read_structure(DATA / "structures" / "FUN008084.pdb")
     assert st["n"] == 252 and st["scale"] == 1 and round(st["ca_ca"], 2) == 3.84
     assert round(sum(st["plddt"]) / 252, 1) == 76.7
-    # The table of which Swiss-Prot each program searched: kmerseek 2026_03, phmmer and jackhmmer an
-    # earlier release without sea squirts, DIAMOND's copy of 533,805
+    # The table of which Swiss-Prot each program searched: kmerseek 2026_03, phmmer and jackhmmer
+    # 2025_01 without sea squirts, ProstT5 + Foldseek AlphaFold's 590,183 models
     assert '<section id="swissprot">' in html and 'href="#swissprot"' in html
-    assert "Swiss-Prot release 2026_03" in html and "572,850" in html and "533,805" in html
+    assert "Swiss-Prot release 2026_03" in html and "Swiss-Prot release 2025_01" in html and "572,850" in html
+    assert "590,183" in html and "570,421" not in html and "not recorded" not in html.split('<section id="swissprot">')[1]
     # A file whose CA atoms are twice as far apart, on a 0 to 1 confidence scale, gets the warning
     lines = []
     for l in st["text"].splitlines():

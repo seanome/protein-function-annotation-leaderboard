@@ -161,3 +161,29 @@ def test_foldseek_on_the_pages(site):
     raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
     pid = next(p for p, v in fs.items() if v)
     assert build.af_accession(raw[pid]["target"]) == fs[pid][0] and int(raw[pid]["qstart"]) == fs[pid][2]
+
+
+def test_foldseek_on_structures_on_the_pages(site):
+    """The best hit of Foldseek on Biomni's predicted structures: 3,729 proteins at FOLDSEEK_MAX_E
+    or below, all 200 aa or less; every longer protein says "not run", BHF (252 aa) among them."""
+    out, summ = site
+    fst, length = {}, {}
+    for s in range(build_full.N_SHARDS):
+        for pid, d in read_js(out / "full" / ("%03d.js" % s), "window.FULL_SHARD=").items():
+            fst[pid] = d["fst"]
+    for r in csv.DictReader(gzip.open(FULL / "proteome_lengths.tsv.gz", "rt"), delimiter="\t"):
+        length[r["protein_id"]] = int(r["length"])
+    assert summ["foldseek_struct_hit"] == sum(1 for v in fst.values() if v and v != "not run") == 3729
+    assert {p for p, v in fst.items() if v == "not run"} == {p for p, n in length.items() if n > build_full.STRUCT_MAX_AA}
+    assert fst["FUN008084"] == "not run"
+    raw = {r["protein_id"]: r for r in csv.DictReader(gzip.open(FULL / "foldseek_struct_best_per_protein.tsv.gz", "rt"), delimiter="\t")}
+    pid = next(p for p, v in fst.items() if v and v != "not run")
+    assert build.af_accession(raw[pid]["target"]) == fst[pid][0] and int(raw[pid]["qstart"]) == fst[pid][2]
+    assert fst[pid][8:] == [float(raw[pid]["alntmscore"]), float(raw[pid]["lddt"])]
+
+
+def test_known_proteins_link_only_when_drawn():
+    page = {"FUN008084": "proteins/FUN008084_FUN008084.html"}
+    html = build_full.known_html(page)
+    assert 'href="proteins/FUN008084_FUN008084.html"' in html and "BHF" in html
+    assert build_full.known_html({}) == ""

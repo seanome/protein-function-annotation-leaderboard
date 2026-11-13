@@ -1,0 +1,37 @@
+binomial,as_written,rows,rows_with_number,in_atlas_group,reason
+Acomys cahirinus,Acomys cahirinus,1,1,yes,
+Acomys spp.,"Acomys spp. (two wild-caught Kenyan spiny mouse species; the PubMed full-text tool strips italic species names, so the two binomials were not read today)",1,1,no,"genus only, not a species (decision 5)"
+Alligator mississippiensis,Alligator mississippiensis,1,1,yes,
+Ambystoma mexicanum,Ambystoma mexicanum,1,1,yes,
+Anser anser,Anser anser,1,1,yes,
+Anser indicus,Anser indicus,1,1,yes,
+Artemia franciscana,Artemia franciscana,1,1,yes,
+Calypte anna,Calypte anna,1,1,yes,
+Chrysemys picta,Chrysemys picta bellii,2,2,yes,
+Columba livia,Columba livia,1,1,yes,
+Culex quinquefasciatus,Culex quinquefasciatus,1,1,yes,
+Danaus plexippus,Danaus plexippus,1,1,yes,
+Danio rerio,Danio rerio,3,3,no,model organism; kept in the model-organism group only
+Deinococcus radiodurans,Deinococcus radiodurans,1,1,no,bacterium; the question is about animals and the control pool is Eukaryota
+Desmodus rotundus,Desmodus rotundus,1,1,yes,
+Didelphis aurita,Didelphis aurita,1,1,yes,
+Drosophila melanogaster,Drosophila melanogaster,1,1,no,model organism; kept in the model-organism group only
+Flavobacterium frigoris,Flavobacterium frigoris,1,1,no,bacterium; the question is about animals and the control pool is Eukaryota
+Gallus gallus,"Gallus gallus (domestic chicken; the abstract says 'chick', MeSH term Chickens)",1,1,yes,
+Heterocephalus glaber,Heterocephalus glaber,4,4,yes,
+Ictidomys tridecemlineatus,Ictidomys tridecemlineatus,1,1,yes,
+Lama glama,Lama glama,1,1,yes,
+Loxodonta africana,"Loxodonta africana (TP53 copy count); the cancer mortality is from zoo necropsy data on elephants, n = 644, African and Asian not split in the abstract",1,1,yes,
+Mirounga angustirostris,Mirounga angustirostris,2,2,yes,
+Mya arenaria,Mya arenaria,1,1,yes,
+Neotoma albigula,Neotoma albigula,1,1,yes,
+Onychomys torridus,Onychomys torridus (southern grasshopper mouse),1,0,no,no row with a measured number (decision 3)
+Periophthalmodon schlosseri,Periophthalmodon schlosseri,1,1,yes,
+Poecilia mexicana,Poecilia mexicana,1,1,yes,
+Ramazzottius varieornatus,Ramazzottius varieornatus,1,1,yes,
+Rana sylvatica,Rana sylvatica (also written Lithobates sylvaticus),1,1,yes,
+Squalus acanthias,Squalus acanthias,1,1,yes,
+Tenebrio molitor,Tenebrio molitor,1,1,yes,
+Urocitellus parryii,Urocitellus parryii,3,3,yes,
+Ursus americanus,Ursus americanus,1,1,yes,
+Ursus arctos,Ursus arctos horribilis,1,1,yes,

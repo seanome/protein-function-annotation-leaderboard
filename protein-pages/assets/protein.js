@@ -26,7 +26,7 @@
 
   function tipHtml(h) {
     let rows = `<tr><td>this protein</td><td>${h.q[0]}-${h.q[1]}</td></tr>`;
-    if (h.r) rows += `<tr><td>${esc(h.t)}</td><td>${h.r[0]}-${h.r[1]}</td></tr>`;
+    if (h.r) rows += `<tr><td>${h.t ? esc(h.t) : h.k === "hmmscan" ? "Pfam model" : "matched protein"}</td><td>${h.r[0]}-${h.r[1]}</td></tr>`;
     const names = PAGE.names[h.k] || [];
     h.s.forEach((v, i) => { rows += `<tr><td>${esc(names[i] || "")}</td><td>${esc(v)}</td></tr>`; });
     return `<div>${esc(PAGE.tracks[h.k].name)}</div><b>${esc(h.l)}</b>${about(h, esc)}<table>${rows}</table>` +
@@ -69,7 +69,7 @@
         tip.innerHTML = tipHtml(h); tip.hidden = false; place({ clientX: b.left, clientY: b.bottom });
       });
       g.addEventListener("blur", () => { tip.hidden = true; });
-      g.addEventListener("click", () => open(h));
+      g.addEventListener("click", () => { if (window.STRUCT) STRUCT.pin(h.q[0], h.q[1]); open(h); });
       g.addEventListener("keydown", (e) => { if (e.key === "Enter") open(h); });
     });
   }
@@ -136,9 +136,10 @@
   let words = [];
   const matches = (i) => words.every((w) => hay[i].includes(w));
   // Folded programs: one row shaded by how many hits cover each residue. Remembered per program.
-  // A row with more than FOLD_OVER hits at the slider's E-value starts folded; a click on its name
-  // folds or unfolds it for the rest of this visit (folded[k] true or false). foldNow: as drawn now.
-  const FOLD_OVER = 100;
+  // Every row with a hit at the slider's E-value starts folded (more than FOLD_OVER hits; 0 folds
+  // them all); a click on its name folds or unfolds it for the rest of this visit (folded[k] true or
+  // false). foldNow: as drawn now.
+  const FOLD_OVER = 0;
   const folded = {}, foldNow = {};
   // A program can be folded when it has at least one hit (feature predictions do not count).
   const FOLDABLE = {};
@@ -354,7 +355,7 @@
     if (th) { const c = +th.dataset.c; htSort = { c, up: htSort.c === c ? !htSort.up : c !== 4 }; hitTable(currentMaxE()); return; }
     if (e.target.closest("a")) return;
     const tr = e.target.closest("tr[data-i]");
-    if (tr) open(H[+tr.dataset.i]);
+    if (tr) { if (window.STRUCT) STRUCT.pin(H[+tr.dataset.i].q[0], H[+tr.dataset.i].q[1]); open(H[+tr.dataset.i]); }
   });
   // hovering a row shows that hit's residues on the 3-D structure, when the page has one
   if (htDiv) htDiv.addEventListener("mouseover", (e) => {

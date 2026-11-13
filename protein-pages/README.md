@@ -89,7 +89,7 @@ From top to bottom:
    - if `plddt.tsv` is given, a strip coloured by AlphaFold's confidence scale; a predicted
      structure in `structures/<protein ID>.pdb` (or the ID's first part, `FUN008084.pdb`) fills
      it from its B-factor column when `plddt.tsv` has none, and adds a "3-D structure" section:
-     ribbons drawn with 3Dmol.js 2.4.0 (loaded from cdnjs), coloured by that confidence;
+     ribbons drawn in Mol* (PDBe's pdbe-molstar 3.12.0, script loaded from jsDelivr, its stylesheet copied into assets/, with Mol*'s control panels), coloured by that confidence;
      hovering a hit box or table row shows the hit's residues in black. A model whose
      neighbouring CA atoms are not about 3.8 angstrom apart gets a warning;
    - "Programs with a hit": at each residue, how many of the programs run (0 to M) have a

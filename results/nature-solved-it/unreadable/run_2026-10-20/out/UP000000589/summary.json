@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 6,
+   "complete_single": 665,
+   "completeness_pct": 99.85,
+   "fragmented": 1,
+   "lineage": "metazoa_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 99.9
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 2,
+   "complete_single": 127,
+   "completeness_pct": 100.0,
+   "fragmented": 0,
+   "lineage": "eukaryota_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 100.0
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "83.51396",
+ "group": "model organism",
+ "n_interpro_match": 21453,
+ "n_proteins": 21860,
+ "n_sprot_hit": 21385,
+ "n_uncharacterized_name": 49,
+ "n_unlabelled": 274,
+ "proteome_taxid": "10090",
+ "species": "Mus musculus",
+ "uncharacterized_name_pct": 0.22,
+ "unlabelled_pct": 1.25,
+ "upid": "UP000000589"
+}

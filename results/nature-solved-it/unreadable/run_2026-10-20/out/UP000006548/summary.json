@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 822,
+   "complete_duplicated": 47,
+   "complete_single": 765,
+   "completeness_pct": 98.78,
+   "fragmented": 1,
+   "lineage": "viridiplantae_odb12",
+   "missing": 9,
+   "short_summary_c_pct": 98.8
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 19,
+   "complete_single": 110,
+   "completeness_pct": 100.0,
+   "fragmented": 0,
+   "lineage": "eukaryota_odb12",
+   "missing": 0,
+   "short_summary_c_pct": 100.0
+  }
+ ],
+ "busco_lineage": "viridiplantae_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "1515.8312",
+ "group": "model organism",
+ "n_interpro_match": 25255,
+ "n_proteins": 27496,
+ "n_sprot_hit": 21980,
+ "n_uncharacterized_name": 1829,
+ "n_unlabelled": 1881,
+ "proteome_taxid": "3702",
+ "species": "Arabidopsis thaliana",
+ "uncharacterized_name_pct": 6.65,
+ "unlabelled_pct": 6.84,
+ "upid": "UP000006548"
+}

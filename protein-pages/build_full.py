@@ -113,6 +113,7 @@ def read_fasta_md5(path):
 
 
 KMERSEEK_MAX_E = 10.0  # a kmerseek best hit is shown when its E-value is at most this
+STRUCT_MAX_AA = 200  # Biomni predicted 3-D structures only for proteins of at most this length
 FOLDSEEK_MAX_E = 1e-3  # a Foldseek best hit is shown when its E-value is at most this, the cut the Biomni report calls confident
 UNIFIRE_MAX_AA = 5000  # longer proteins were not run through InterProScan and UniFIRE (botryllus-mhc PR 13)
 
@@ -198,18 +199,27 @@ def load(folder):
         mm = {r["protein_id"]: [r["target"], float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
                                 uni.get(r["target"], {}).get("protein_name", ""), uni.get(r["target"], {}).get("organism", "")]
               for r in tsv("mmseqs2_best_per_protein.tsv")}
-    # Best ProstT5 + Foldseek hit per protein (make_foldseek_tables.py); optional
-    fs = None
-    if inp(folder, "foldseek_best_per_protein.tsv").exists():
-        fs = {}
-        for r in tsv("foldseek_best_per_protein.tsv"):
+    # Best Foldseek hit per protein (make_foldseek_tables.py): ProstT5 + Foldseek on the whole
+    # proteome, and Foldseek on predicted structures of proteins up to STRUCT_MAX_AA; optional
+    def foldseek(name):
+        if not inp(folder, name).exists():
+            return None
+        out = {}
+        for r in tsv(name):
             if r["protein_id"] not in lengths:
-                sys.exit("%s is in foldseek_best_per_protein.tsv but not in the proteome" % r["protein_id"])
+                sys.exit("%s is in %s but not in the proteome" % (r["protein_id"], name))
+            if name.startswith("foldseek_struct") and lengths[r["protein_id"]][0] > STRUCT_MAX_AA:
+                sys.exit("%s is in %s but longer than %d aa" % (r["protein_id"], name, STRUCT_MAX_AA))
             if float(r["evalue"]) <= FOLDSEEK_MAX_E:
                 acc = build.af_accession(r["target"])  # AF-P12345-F1-model_v6, AF-C3VPR6-2-F1-model_v6
-                fs[r["protein_id"]] = [acc, float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
-                                       uni.get(acc, {}).get("protein_name", ""), uni.get(acc, {}).get("organism", "")]
-    return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs
+                out[r["protein_id"]] = [acc, float(r["fident"]), int(r["qstart"]), int(r["qend"]), r["evalue"], r["bits"],
+                                        uni.get(acc, {}).get("protein_name", ""), uni.get(acc, {}).get("organism", "")]
+                if "lddt" in r:  # Foldseek on structures: TM-score and LDDT of the alignment
+                    out[r["protein_id"]] += [float(r["alntmscore"]), float(r["lddt"])]
+        return out
+    fs = foldseek("foldseek_best_per_protein.tsv")
+    fst = foldseek("foldseek_struct_best_per_protein.tsv")
+    return ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst
 
 
 def read_cards(paths):
@@ -234,7 +244,7 @@ def evidence_list(s):
 
 def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     t0 = time.time()
-    ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs = load(folder)
+    ann, lengths, immune, jh, rep_of, members, uni, go, uf, km, ips, mm, fs, fst = load(folder)
     cards = read_cards(cards)
     cats = sorted({c for r in immune.values() for c in split_list(r["categories"])},
                   key=lambda c: (-sum(c in split_list(r["categories"]) for r in immune.values()), c))
@@ -286,6 +296,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
             km=None if km is None else km.get(pid, 0),
             mm=None if mm is None else mm.get(pid, 0),
             fs=None if fs is None else fs.get(pid, 0),  # 0: no hit at FOLDSEEK_MAX_E or below
+            fst=None if fst is None else ("not run" if lengths[pid][0] > STRUCT_MAX_AA else fst.get(pid, 0)),
             ips=None if ips is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not ips.get(pid) else sorted(ips.get(pid, []), key=lambda x: (x[3], x[4]))),  # 0: searched, no hit at E-value KMERSEEK_MAX_E or below
             uf=None if uf is None else ("not run" if lengths[pid][0] > UNIFIRE_MAX_AA and not uf.get(pid) else uf.get(pid, [])),
             card={k: card[k] for k in ("card_name", "one_line", "summary", "confidence", "confidence_reason", "name_verdict", "model")} if card else None,
@@ -331,6 +342,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
         in_cluster_of_2_or_more=sum(1 for r in rows if r[13] > 1),
         clusters=len(members),
         foldseek_hit=None if fs is None else len(fs),
+        foldseek_struct_hit=None if fst is None else len(fst),
         drawn=sum(1 for r in rows if r[14]),
         drawn_pages=len({r[14] for r in rows if r[14]}),
         name_check={t: sum(1 for r in rows if r[4] == i) for i, (_, t) in enumerate(NAME_CHECK)},
@@ -338,7 +350,7 @@ def build_site(folder, out, drawn=None, drawn_fasta=None, cards=None):
     )
     (out / "full_summary.json").write_text(json.dumps(summ, indent=1))
     inputs = sorted(p.name for p in folder.iterdir() if p.suffix in (".tsv", ".gz") and p.name not in NOT_READ)
-    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver))
+    (out / "index.html").write_text(index_html(summ, cats, inputs, asset_ver, known_html(drawn_page)))
     (out / "protein.html").write_text(protein_html(asset_ver))
     print("%d proteins, %d drawn, %d data files, %.1f s" % (n, summ["drawn"], N_SHARDS, time.time() - t0))
     return summ
@@ -360,7 +372,19 @@ def bars(items, total, key):
     return '<div class="bars">%s</div>' % rows
 
 
-def index_html(s, cats, inputs, ver):
+# Proteins the lab already knows, linked at the top of the index when they have a drawn page:
+# (protein ID, short name, full name)
+KNOWN = [("FUN008084", "BHF", "Botryllus histocompatibility factor")]
+
+
+def known_html(drawn_page):
+    links = ['<a class="known" href="%s"><b>%s</b> %s <span class="mono">%s</span></a>'
+             % (build.esc(drawn_page[pid]), build.esc(short), build.esc(full), build.esc(pid))
+             for pid, short, full in KNOWN if pid in drawn_page]
+    return '<p class="knownrow">Go straight to: %s</p>' % " ".join(links) if links else ""
+
+
+def index_html(s, cats, inputs, ver, known=""):
     f = "{:,}".format
     nums = [("all", s["total"], "proteins"), ("sp", s["swissprot_hit"], "with a Swiss-Prot hit"),
             ("pfam", s["pfam_domain"], "with a Pfam domain"), ("none", s["neither"], "with neither"),
@@ -373,7 +397,7 @@ def index_html(s, cats, inputs, ver):
     return head("Botryllus proteome annotations", ver) + """
 <header class="wide"><h1>Every <i>Botryllus schlosseri</i> protein, and what is known about it</h1>
 <p class="summary">%s proteins of the new genome's predicted proteome. For each: its best Swiss-Prot match, its Pfam domains,
-and whether it looks like an immune gene.</p></header>
+and whether it looks like an immune gene.</p>%s</header>
 <main class="wide">
 <section class="nums">%s</section>
 <p class="note">Click a number to list those proteins. %s pages draw every annotation program's hits along the protein
@@ -391,7 +415,7 @@ or the Pfam domains. "Differs" includes a proposed name that only adds "-like" (
 <h2>Proteins</h2>
 <div class="search"><label for="q">Search</label><input id="q" type="search" autocomplete="off"
  placeholder="an ID, gene, protein name, Pfam domain or category, e.g. NLRC5, lectin, TIR"></div>
-<p class="note">"Swiss-Prot" on this page means the copy Biomni's DIAMOND searched: 533,805 proteins, release not recorded (release 2026_03 has 575,748, so not that one). The protein pages say which copy each other program searched.</p>
+<p class="note">"Swiss-Prot" on this page means release 2026_03 (575,748 proteins), the copy Biomni's DIAMOND searched; 533,805 of its proteins are among DIAMOND's hits (E-value 0.001 or below, at most 25 per protein). The protein pages say which copy each other program searched.</p>
 <p class="note">The search reads the ID, the existing and proposed names, the best Swiss-Prot match's name and accession,
 the Pfam domain names and the immune categories. Every word typed must appear.</p>
 <p id="count" class="note"></p>
@@ -407,7 +431,7 @@ the Pfam domain names and the immune categories. Every word typed must appear.</
 (full_inputs/README.md in the repository says how each was made). Identity and coverage are DIAMOND's, against
 Swiss-Prot. No tool was run to make these pages.</p></footer>
 <script src="full/rows.js%s"></script><script src="assets/full.js%s"></script></body></html>
-""" % (f(s["total"]), tiles, f(s["drawn_pages"]), f(s["drawn"]), f(s["immune_candidates"]), f(s["jackhmmer_not_immune"]), cat_bars, chk_bars,
+""" % (f(s["total"]), known, tiles, f(s["drawn_pages"]), f(s["drawn"]), f(s["immune_candidates"]), f(s["jackhmmer_not_immune"]), cat_bars, chk_bars,
        build.esc(", ".join(inputs)), ver, ver)
 
 

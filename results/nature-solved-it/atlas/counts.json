@@ -1,0 +1,31 @@
+{
+  "diseases_in_scope": 60,
+  "funnel_all_rows": {
+    "in_scope": 60,
+    "named_species_with_a_number": 42,
+    "molecule_named": 29,
+    "shown_on_a_human_target": 7,
+    "approved_drug": 0
+  },
+  "funnel_rows_with_T_5_or_6": {
+    "in_scope": 60,
+    "named_species_with_a_number": 7,
+    "molecule_named": 7,
+    "shown_on_a_human_target": 3,
+    "approved_drug": 0
+  },
+  "diseases_with_no_species_and_no_number": 18,
+  "diseases_with_no_T5_or_T6_row_with_a_number": 53,
+  "rows_total": 62,
+  "rows_with_a_number": 44,
+  "queries_total": 235,
+  "drug_rows": [
+    {
+      "disease": "Hyperuricaemia and gout [metabolite that accumulates]",
+      "species": "none found",
+      "T": 4,
+      "drug": "yes; rasburicase (brand ELITEK), US FDA, BLA 103946, Sanofi Synthelabo, original approval 12 July 2002. Page fetched today: https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=103946"
+    }
+  ],
+  "rows_with_T_2_or_below_and_a_drug": 0
+}

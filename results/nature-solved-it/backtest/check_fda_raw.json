@@ -1,0 +1,465 @@
+{
+ "A01": {
+  "record": "NDA018343",
+  "query": "application_number:\"NDA018343\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA018343",
+    "sponsor": "AARXION ANDA HLDING",
+    "brands": [
+     "CAPOTEN"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19810406"
+     ]
+    ],
+    "subst": [
+     "CAPTOPRIL"
+    ]
+   }
+  ]
+ },
+ "A02": {
+  "record": "NDA021773",
+  "query": "application_number:\"NDA021773\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA021773",
+    "sponsor": "ASTRAZENECA AB",
+    "brands": [
+     "BYETTA"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20050428"
+     ]
+    ],
+    "subst": [
+     "EXENATIDE SYNTHETIC"
+    ]
+   }
+  ]
+ },
+ "A03": {
+  "record": "NDA021060",
+  "query": "application_number:\"NDA021060\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA021060",
+    "sponsor": "ESTEVE",
+    "brands": [
+     "PRIALT"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20041228"
+     ]
+    ],
+    "subst": [
+     "ZICONOTIDE ACETATE"
+    ]
+   }
+  ]
+ },
+ "A04": {
+  "record": "NDA020718",
+  "query": "application_number:\"NDA020718\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA020718",
+    "sponsor": "MSD SUB MERCK",
+    "brands": [
+     "INTEGRILIN"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19980518"
+     ]
+    ],
+    "subst": [
+     "EPTIFIBATIDE"
+    ]
+   }
+  ]
+ },
+ "A05": {
+  "record": "NDA020873",
+  "query": "application_number:\"NDA020873\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA020873",
+    "sponsor": "SANDOZ",
+    "brands": [
+     "ANGIOMAX"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20001215"
+     ]
+    ],
+    "subst": [
+     "BIVALIRUDIN"
+    ]
+   }
+  ]
+ },
+ "A06": {
+  "record": "BLA021271",
+  "query": "application_number:\"BLA021271\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "BLA021271",
+    "sponsor": "BAUSCH",
+    "brands": [
+     "IPRIVASK"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20030404"
+     ]
+    ],
+    "subst": [
+     "DESIRUDIN RECOMBINANT"
+    ]
+   }
+  ]
+ },
+ "A07": {
+  "record": "NDA208114",
+  "query": "application_number:\"NDA208114\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA208114",
+    "sponsor": "JAZZ PHARMS INC",
+    "brands": [
+     "DEFITELIO"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20160330"
+     ]
+    ],
+    "subst": [
+     "DEFIBROTIDE SODIUM"
+    ]
+   }
+  ]
+ },
+ "A08": {
+  "record": "NDA017029",
+  "query": "application_number:\"NDA017029\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA017029",
+    "sponsor": "FRESENIUS KABI USA",
+    "brands": [
+     "HEPARIN SODIUM",
+     "HEPARIN SODIUM 20,000 UNITS IN DEXTROSE 5%",
+     "HEPARIN SODIUM 25,000 UNITS IN DEXTROSE 5%",
+     "HEPARIN SODIUM 25,000 UNITS IN SODIUM CHLORIDE 0.45%",
+     "HEPARIN SODIUM IN PLASTIC CONTAINER",
+     "HEPARIN SODIUM PRESERVATIVE FREE"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19720222"
+     ]
+    ],
+    "subst": [
+     "HEPARIN SODIUM"
+    ]
+   }
+  ]
+ },
+ "A09": {
+  "record": "ANDA089454",
+  "query": "application_number:\"ANDA089454\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "ANDA089454",
+    "sponsor": "FRESENIUS KABI USA",
+    "brands": [
+     "PROTAMINE SULFATE"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19870407"
+     ]
+    ],
+    "subst": [
+     "PROTAMINE SULFATE"
+    ]
+   }
+  ]
+ },
+ "A10": {
+  "record": "NDA017808",
+  "query": "application_number:\"NDA017808\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA017808",
+    "sponsor": "MYLAN IRELAND LTD",
+    "brands": [
+     "MIACALCIN"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19860703"
+     ]
+    ],
+    "subst": [
+     "CALCITONIN SALMON"
+    ]
+   }
+  ]
+ },
+ "A11": {
+  "record": "BLA021665",
+  "query": "application_number:\"BLA021665\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "BLA021665",
+    "sponsor": "AMPHASTAR PHARM",
+    "brands": [
+     "AMPHADASE"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20041026"
+     ]
+    ],
+    "subst": [
+     "HYALURONIDASE"
+    ]
+   }
+  ]
+ },
+ "A12": {
+  "record": "BLA021640",
+  "query": "application_number:\"BLA021640\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "BLA021640",
+    "sponsor": "BAUSCH AND LOMB",
+    "brands": [
+     "VITRASE"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20040505"
+     ]
+    ],
+    "subst": [
+     "HYALURONIDASE"
+    ]
+   }
+  ]
+ },
+ "A13": {
+  "record": "BLA020725",
+  "query": "application_number:\"BLA020725\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "BLA020725",
+    "sponsor": "ABBVIE",
+    "brands": [
+     "CREON"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20090430"
+     ]
+    ],
+    "subst": [
+     "LIPASE",
+     "PANCRELIPASE (AMYLASE",
+     "PROTEASE)"
+    ]
+   }
+  ]
+ },
+ "A14": {
+  "record": "BLA020032",
+  "query": "application_number:\"BLA020032\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "BLA020032",
+    "sponsor": "ABBVIE",
+    "brands": [
+     "SURVANTA"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19910701"
+     ]
+    ],
+    "subst": [
+     "BERACTANT"
+    ]
+   }
+  ]
+ },
+ "A15": {
+  "record": "BLA020521",
+  "query": "application_number:\"BLA020521\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "BLA020521",
+    "sponsor": "ONY",
+    "brands": [
+     "INFASURF PRESERVATIVE FREE"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19980701"
+     ]
+    ],
+    "subst": [
+     "CALFACTANT"
+    ]
+   }
+  ]
+ },
+ "A16": {
+  "record": "BLA020744",
+  "query": "application_number:\"BLA020744\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "BLA020744",
+    "sponsor": "CHIESI USA INC",
+    "brands": [
+     "CUROSURF"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "19991118"
+     ]
+    ],
+    "subst": [
+     "PORACTANT ALFA"
+    ]
+   }
+  ]
+ },
+ "A17": {
+  "record": "NDA201532",
+  "query": "application_number:\"NDA201532\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA201532",
+    "sponsor": "EISAI INC",
+    "brands": [
+     "HALAVEN"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20101115"
+     ]
+    ],
+    "subst": [
+     "ERIBULIN MESYLATE"
+    ]
+   }
+  ]
+ },
+ "A18": {
+  "record": "NDA207953",
+  "query": "application_number:\"NDA207953\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA207953",
+    "sponsor": "JANSSEN PRODS",
+    "brands": [
+     "YONDELIS"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20151023"
+     ]
+    ],
+    "subst": [
+     "TRABECTEDIN"
+    ]
+   }
+  ]
+ },
+ "A19": {
+  "record": "NDA021654",
+  "query": "application_number:\"NDA021654\"",
+  "n": 1,
+  "info": [
+   {
+    "app": "NDA021654",
+    "sponsor": "WAYLIS THERAP",
+    "brands": [
+     "LOVAZA"
+    ],
+    "orig": [
+     [
+      "ORIG",
+      "1",
+      "20041110"
+     ]
+    ],
+    "subst": [
+     "OMEGA-3-ACID ETHYL ESTERS"
+    ]
+   }
+  ]
+ }
+}

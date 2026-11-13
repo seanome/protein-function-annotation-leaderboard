@@ -1,0 +1,3 @@
+3522449d4501a559396bd19db05439d3575d346e8260ac31df3cd67a98fdf262  /scratch/users/olgabot/nature-solved-it/unreadable/inputs/UP000233180_61621.fasta.gz
+a9c3496aa727e61d25d9e1291c9ba28d2c2ad19c0e26569dc083d53ec4169536  /scratch/users/olgabot/nature-solved-it/unreadable/inputs/uniprot_sprot.fasta.gz
+07612b1d1a91a34e0bacf62aa270b2b7db2d9f1fe4e5fb84a0eb659f71ddf24a  /scratch/users/olgabot/nature-solved-it/unreadable/inputs/UP000233180_uniprot.tsv.gz

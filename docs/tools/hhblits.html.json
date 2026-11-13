@@ -1,0 +1,270 @@
+{
+ "page": "tools/hhblits.html",
+ "title": "HH-suite (hhsearch) card",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit_date": "2026-10-15T12:40:15Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T12:40:50Z",
+  "sha256": {
+   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
+   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
+   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d"
+  }
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 548ec5b8 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "HH-suite (hhsearch)"
+  },
+  {
+   "tag": "p",
+   "text": "Tool id hhblits. Numbers from seanome/2024-kmerseek-analysis commit 548ec5b8."
+  },
+  {
+   "tag": "h2",
+   "text": "What it compares"
+  },
+  {
+   "tag": "p",
+   "text": "Two profiles against each other. Here each profile was built from a single protein, not from a family alignment, because no UniRef30 database was given."
+  },
+  {
+   "tag": "h2",
+   "text": "What it needs"
+  },
+  {
+   "tag": "li",
+   "text": "sequence only: yes"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold model: no"
+  },
+  {
+   "tag": "li",
+   "text": "GPU: no"
+  },
+  {
+   "tag": "h2",
+   "text": "Reference searched"
+  },
+  {
+   "tag": "p",
+   "text": "Single-protein profiles of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an HH-suite database."
+  },
+  {
+   "tag": "h2",
+   "text": "How to read its score"
+  },
+  {
+   "tag": "p",
+   "text": "Bit score from hhsearch: higher ranks first."
+  },
+  {
+   "tag": "h2",
+   "text": "Strong and weak strata"
+  },
+  {
+   "tag": "p",
+   "text": "Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is single_seq: Fmax 0.313 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared."
+  },
+  {
+   "tag": "p",
+   "text": "Where it is closest to, or furthest ahead of, the best other tool:"
+  },
+  {
+   "tag": "li",
+   "text": "no same-family domain in the relative: Fmax 0.032 (n = 321); best other: Foldseek 3di_aa, 0.027."
+  },
+  {
+   "tag": "li",
+   "text": "identity 40–60% to the closest same-family domain: Fmax 0.248 (n = 563); best other: phmmer default, 0.252."
+  },
+  {
+   "tag": "p",
+   "text": "Where it is furthest behind the best other tool:"
+  },
+  {
+   "tag": "li",
+   "text": "regions 16–30 aa long: Fmax 0.066 (n = 271); best other: kmerseek wwmj5_k11_lcFalse, 0.330."
+  },
+  {
+   "tag": "li",
+   "text": "regions 31–60 aa long: Fmax 0.085 (n = 420); best other: kmerseek gbmr4_k21_lcFalse, 0.232."
+  },
+  {
+   "tag": "p",
+   "text": "Swiss-Prot features, raw calls, zebrafish, setting single_seq: best feature type DOMAIN (domain), Fmax 0.294 (n = 1,107); worst MOTIF (short motif), Fmax 0.003 (n = 190)."
+  },
+  {
+   "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "li",
+   "text": "The run names this tool hhblits (its tool id), but it ran hhsearch on profiles of single proteins. HH-suite's usual use, with family alignments from UniRef30, was not run, so these numbers say nothing about it."
+  },
+  {
+   "tag": "h2",
+   "text": "Cost per 1,000 queries"
+  },
+  {
+   "tag": "p",
+   "text": "Setting single_seq, searching zebrafish: 21 CPU-hours, measured on Sherlock. Peak memory 23.4 GB. That is about $0.935 at $0.044625 per CPU-hour. This search completed 2 times; the runs took 21 to 21.6 CPU-hours per 1,000 queries, and the newest is shown. Across the 15 relatives searched with this setting: 2.18 to 30.9 CPU-hours per 1,000 queries; peak memory up to 23.4 GB."
+  },
+  {
+   "tag": "p",
+   "text": "CPU-hours count the search only, not building the relative's database."
+  },
+  {
+   "tag": "h2",
+   "text": "Licence"
+  },
+  {
+   "tag": "li",
+   "text": "Licence: GPL-3.0 (source)"
+  },
+  {
+   "tag": "li",
+   "text": "Commercial use allowed: Yes. If you distribute a changed version, you must release its source under GPL-3.0 too."
+  },
+  {
+   "tag": "h2",
+   "text": "Settings in the table"
+  },
+  {
+   "tag": "li",
+   "text": "single_seq: profiles built from single proteins, no family database"
+  },
+  {
+   "tag": "h2",
+   "text": "Version, container, command"
+  },
+  {
+   "tag": "li",
+   "text": "Version: HH-suite 3.3.0"
+  },
+  {
+   "tag": "li",
+   "text": "Container: quay.io/biocontainers/hhsuite:3.3.0--h503566f_15 (sha256:4bf9bb5229de18f522a94f4443c19fdcbb0f0cb0e6ea92f5390aa170bcb0a24f)"
+  },
+  {
+   "tag": "pre",
+   "text": "ffindex_apply \\ human-38fdd87d_hhdb/db_a3m.ffdata human-38fdd87d_hhdb/db_a3m.ffindex \\ -d results.ffdata -i results.ffindex \\ -- hhsearch -i stdin -d zebrafish_hhdb/db -blasttab /dev/stdout -cpu 16 -v 0"
+  },
+  {
+   "tag": "p",
+   "text": "One hhsearch per query protein, run through ffindex_apply."
+  },
+  {
+   "tag": "h2",
+   "text": "Will it work for you?"
+  },
+  {
+   "tag": "li",
+   "text": "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.248 (n = 563), 60–100% 0.283 (n = 1,289). If no, 20–30% 0.321 (n = 93), 30–40% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting single_seq; strata with at least 30 true instances.)"
+  },
+  {
+   "tag": "li",
+   "text": "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.230 (n = 963), 121–250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16–30 aa 0.066 (n = 271), 31–60 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting single_seq.)"
+  },
+  {
+   "tag": "li",
+   "text": "Can you spend about 21 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  },
+  {
+   "tag": "p",
+   "text": "All tool cards · this card as Markdown · as JSON"
+  }
+ ],
+ "data": {
+  "tool": "hhblits",
+  "name": "HH-suite (hhsearch)",
+  "kind": "builds a profile of a protein family",
+  "compares": "Two profiles against each other. Here each profile was built from a single protein, not from a family alignment, because no UniRef30 database was given.",
+  "needs": {
+   "sequence only": true,
+   "AlphaFold model": false,
+   "GPU": false
+  },
+  "reference": "Single-protein profiles of the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as an HH-suite database.",
+  "score": "Bit score from hhsearch: higher ranks first.",
+  "failure_modes": [
+   "The run names this tool hhblits (its tool id), but it ran hhsearch on profiles of single proteins. HH-suite's usual use, with family alignments from UniRef30, was not run, so these numbers say nothing about it."
+  ],
+  "version": "HH-suite 3.3.0",
+  "licence": "GPL-3.0",
+  "commercial_use": "Yes. If you distribute a changed version, you must release its source under GPL-3.0 too.",
+  "licence_url": "https://github.com/soedinglab/hh-suite",
+  "container": "quay.io/biocontainers/hhsuite:3.3.0--h503566f_15 (sha256:4bf9bb5229de18f522a94f4443c19fdcbb0f0cb0e6ea92f5390aa170bcb0a24f)",
+  "command": "ffindex_apply \\\n    human-38fdd87d_hhdb/db_a3m.ffdata human-38fdd87d_hhdb/db_a3m.ffindex \\\n    -d results.ffdata -i results.ffindex \\\n    -- hhsearch -i stdin -d zebrafish_hhdb/db -blasttab /dev/stdout -cpu 16 -v 0",
+  "numbers_from": {
+   "repo": "seanome/2024-kmerseek-analysis",
+   "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+   "filters": "pfam, raw, zebrafish"
+  },
+  "best_setting": "single_seq",
+  "strong": [
+   {
+    "axis": "identity",
+    "stratum": "no_homolog",
+    "fmax": 0.03236195478661682,
+    "n": 321,
+    "other_tool": "foldseek",
+    "other_setting": "3di_aa",
+    "other_fmax": 0.027082308589475693,
+    "margin": 0.005279646197141125
+   },
+   {
+    "axis": "identity",
+    "stratum": "40-60%",
+    "fmax": 0.2482755120174425,
+    "n": 563,
+    "other_tool": "hmmer3_phmmer",
+    "other_setting": "default",
+    "other_fmax": 0.25193530617302773,
+    "margin": -0.003659794155585233
+   }
+  ],
+  "weak": [
+   {
+    "axis": "feature_length_bin",
+    "stratum": "16-30",
+    "fmax": 0.06589146154089374,
+    "n": 271,
+    "other_tool": "kmerseek",
+    "other_setting": "wwmj5_k11_lcFalse",
+    "other_fmax": 0.3297506857792661,
+    "margin": -0.2638592242383723
+   },
+   {
+    "axis": "feature_length_bin",
+    "stratum": "31-60",
+    "fmax": 0.08480095524712318,
+    "n": 420,
+    "other_tool": "kmerseek",
+    "other_setting": "gbmr4_k21_lcFalse",
+    "other_fmax": 0.23209537155652643,
+    "margin": -0.14729441630940326
+   }
+  ],
+  "cost_per_1000_queries": {
+   "cpu_h_measured": 20.960518537074147,
+   "peak_rss_gb": 23.4,
+   "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+  },
+  "questions": [
+   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.248 (n = 563), 60–100% 0.283 (n = 1,289). If no, 20–30% 0.321 (n = 93), 30–40% 0.190 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `single_seq`; strata with at least 30 true instances.)",
+   "Are the features you care about longer than 60 residues? If yes, Fmax here is 61–120 aa 0.230 (n = 963), 121–250 aa 0.298 (n = 504), 251 aa or more 0.417 (n = 277). If no, 16–30 aa 0.066 (n = 271), 31–60 aa 0.085 (n = 420). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `single_seq`.)",
+   "Can you spend about 21 CPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  ],
+  "markdown": "hhblits.md"
+ }
+}

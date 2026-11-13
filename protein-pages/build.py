@@ -81,9 +81,11 @@ TRACKS = [
          database="Swiss-Prot", score="evalue", kind="m8"),
     dict(key="kmerseek", file="kmerseek.tsv", program="kmerseek", second=False, name="kmerseek",
          setting="", database="Swiss-Prot", score="region_evalue", kind="kmerseek"),
+    # max_aa: Biomni predicted structures only for proteins of at most 200 aa, so on a longer
+    # protein this row says "not run" whatever the input folder holds
     dict(key="foldseek", file="foldseek.m8", program="foldseek", second=False, name="Foldseek, 3-D structures",
-         setting="3Di shape letters and amino acids together",
-         database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8"),
+         setting="Foldseek on 3-D structures predicted by ESMFold2 (fast model), for proteins of 200 aa or less",
+         database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8", max_aa=200),
     dict(key="prostt5", file="prostt5_foldseek.m8", program="foldseek", second=True,
          name="ProstT5 + Foldseek", setting="3Di letters predicted from sequence by ProstT5",
          database="AlphaFold models of Swiss-Prot", score="evalue", kind="m8"),
@@ -225,13 +227,14 @@ HMMER_ALN = {}
 
 def m8_hit(line, key):
     """One MMseqs2 or Foldseek row. Two optional last columns, qaln and taln (the aligned
-    sequences, from --format-output ...,qaln,taln), give the tool's own alignment."""
-    cols = M8_COLS + (["alntmscore", "theader"] if key in ("foldseek", "prostt5") else ["theader"]) + ["qaln", "taln"]
+    sequences, from --format-output ...,qaln,taln), give the tool's own alignment. Foldseek on
+    structures also has lddt after alntmscore."""
+    extra = {"foldseek": ["alntmscore", "lddt"], "prostt5": ["alntmscore"]}.get(key, [])
+    cols = M8_COLS + extra + ["theader", "qaln", "taln"]
     d = dict(zip(cols, line.rstrip("\n").split("\t")))
     e = fnum(d["evalue"])
     sc = [("evalue", d["evalue"]), ("fident", d.get("fident", "")), ("bits", d.get("bits", ""))]
-    if key in ("foldseek", "prostt5"):
-        sc.append(("alntmscore", d.get("alntmscore", "")))
+    sc += [(k, d.get(k, "")) for k in extra]
     sc = [(k, v if v not in ("", None) else "not in the file") for k, v in sc]
     aln = None
     if d.get("qaln") and d.get("taln"):
@@ -1065,9 +1068,15 @@ def read_structure(path):
                 ca_ca=gaps[len(gaps) // 2] if gaps else None)
 
 
+HIGHLIGHT = "#E6007E"  # residues pointed at or dragged across: drawing, pLDDT strip and structure
+
+
 def structure_html(pid, st):
-    """The 3-D structure section of a drawn page (assets/structure.js draws it with 3Dmol.js)."""
+    """The 3-D structure section of a drawn page (assets/structure.js draws it in Mol*, PDBe's build, with Mol*'s own controls): a key,
+    the pLDDT strip along the protein right above the structure, the structure, then the text.
+    Pointing at a hit, or dragging across the strip, colours those residues on the structure."""
     mean = sum(st["plddt"]) / max(1, len(st["plddt"]))
+    n = len(st["plddt"])
     warn = ""
     if st["ca_ca"] is not None and not 3.6 <= st["ca_ca"] <= 4.0:
         warn = ('<p class="warn">These coordinates are not a physical protein chain: neighbouring residues\' '
@@ -1076,12 +1085,29 @@ def structure_html(pid, st):
     made = (' The file says how it was made: <span class="mono">%s</span>. pTM, where given, is the predictor\'s '
             'confidence in the overall fold, 0 to 1; below 0.5 the arrangement of the parts is a guess even where each '
             'part is confident.' % esc(st["made"])) if st.get("made") else ""
-    return ('<section id="structure"><h2>3-D structure (predicted)</h2>'
-            '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by the predictor\'s '
-            'confidence in each residue (pLDDT, 0 to 100; mean %.0f here), in the colours of the pLDDT strip in the drawing. '
-            'Hover a box in the drawing or a row of the table to show that hit\'s residues in black. Drag to turn the '
-            'structure; scroll to zoom.%s</p>%s<div id="mol" data-scale="%g"></div></section>'
-            % (esc(st["file"]), st["n"], mean, made, warn, st["scale"]))
+    sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
+    key = ('<p class="note skey"><b>pLDDT</b>, the predictor\'s confidence in each residue: %s'
+           '<span class="sw" style="background:%s"></span>residues you point at or select. The strip runs from residue 1 '
+           '(left) to %d (right); drag across it, or click a box in the drawing, to select residues. '
+           '<b id="molsel" aria-live="polite"></b></p>' % (sw, HIGHLIGHT, n))
+    rects = []
+    for i, v in enumerate(st["plddt"]):
+        c = next((col for lo, hi, col, _ in PLDDT if lo <= v < hi), PLDDT[-1][2])
+        rects.append('<rect x="%d" y="0" width="1.05" height="10" fill="%s"/>' % (i, c))
+    strip = ('<svg id="pstrip" viewBox="0 0 %d 10" preserveAspectRatio="none" role="img" '
+             'aria-label="pLDDT of each residue, residue 1 to %d">%s<rect id="pmask1" x="0" y="0" width="0" height="10" '
+             'fill="#fff" opacity="0.7"/><rect id="pmask2" x="0" y="0" width="0" height="10" fill="#fff" opacity="0.7"/>'
+             '<rect id="pbrush" x="0" y="0" width="0" height="10" fill="none" stroke="%s" stroke-width="2.5" '
+             'vector-effect="non-scaling-stroke"/></svg>' % (n, n, "".join(rects), HIGHLIGHT))
+    return ('<section id="structure"><h2>3-D structure (predicted)</h2>%s%s<div id="mol" data-scale="%g" data-n="%d" '
+            'data-hl="%s"></div>'
+            '<p class="note">Ribbons drawn from <span class="mono">%s</span> (%d residues), coloured by pLDDT as in the '
+            'strip above them (mean %.0f here). Point at a box in the drawing or a row of the table, or drag across the '
+            'strip, to colour those residues %s on the structure and the strip; the rest turns grey. Clicking a box or '
+            'a row, or dragging across the strip, keeps the selection until you click the strip again. Point at the structure to see a residue\'s number and mark it on the strip. '
+            'The viewer is Mol* (PDBe\'s build, the one the PDB and AlphaFold DB use): drag to turn, scroll to zoom, '
+            'and the sliders button on its right edge opens the sequence and the Structure Tools panels (drawing style, colours, selections, measurements).%s</p>%s</section>'
+            % (key, strip, st["scale"], n, HIGHLIGHT, esc(st["file"]), st["n"], mean, "magenta", made, warn))
 
 
 def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
@@ -1106,7 +1132,10 @@ def page_svg(p, hits_by_track, cov, plddt, W, px, run_status, m=8, whole=()):
         shown = real[:TOP_N] + [h for h in hs if h.get("feature")]
         place, n_l = place_labels(shown, px, W)
         h_row = ROW_PAD + n_l * LANE_H + 4
-        if run_status[k] == "not run" and k == "foldseek" and run_status.get("prostt5") != "not run":
+        if run_status[k] == "too long":
+            g = ['<text x="4" y="%d" class="nr">not run: structures were predicted only for proteins of %d aa or less</text>'
+                 % (ROW_PAD + 11, t["max_aa"])]
+        elif run_status[k] == "not run" and k == "foldseek" and run_status.get("prostt5") != "not run":
             # Readers looked here for Foldseek and missed the next row
             g = ['<text x="4" y="%d" class="nr">not run on 3-D structures. Foldseek on shape letters '
                  'predicted from the sequence is the next row, ProstT5 + Foldseek.</text>' % (ROW_PAD + 11)]
@@ -1239,23 +1268,22 @@ def page_head(title, depth):
 
 
 # Which Swiss-Prot each search used: not the same release for every program, so each drawn page
-# shows this table under the drawing. Releases from the reldate.txt beside each database file and
-# protein counts from the files, both read on Sherlock 2026-11-02 (test_inputs/PROVENANCE.md).
+# shows this table under the drawing. Releases and protein counts as test_inputs/PROVENANCE.md
+# says how each was checked (2025_01 by comparing accessions, 2026-11-03).
 SWISSPROT_USED = [
     (("kmerseek",), "Swiss-Prot release 2026_03", "all of it", "575,748"),
-    (("mmseqs2_3rounds", "phmmer", "jackhmmer"), "an earlier Swiss-Prot release: which one was not recorded "
-     "(49 of its proteins are not in 2026_03)", "without its 120 sea-squirt (Ascidiacea) proteins", "572,850"),
-    (("mmseqs2",), "Swiss-Prot, release not recorded with the hit table", "not recorded", "not recorded"),
-    (("diamond",), "Swiss-Prot, release not recorded by Biomni (release 2026_03 has 575,748 proteins, so "
-     "not that one)", "", "533,805"),
-    (("foldseek", "prostt5"), "AlphaFold's models of Swiss-Prot proteins (not a sequence release)",
-     "sea-squirt proteins kept", "570,421"),
+    (("mmseqs2_3rounds", "phmmer", "jackhmmer"), "Swiss-Prot release 2025_01 (5 February 2025)",
+     "without its 120 sea-squirt (Ascidiacea) proteins", "572,850"),
+    (("mmseqs2",), "Swiss-Prot release 2026_03 (Biomni's run)", "all of it", "575,748"),
+    (("diamond",), "Swiss-Prot release 2026_03 (Biomni's run)", "all of it", "575,748"),
+    (("foldseek", "prostt5"), "AlphaFold's models of Swiss-Prot proteins, Foldseek's prebuilt database "
+     "(not a sequence release; it keeps models of retired accessions)", "sea-squirt proteins kept", "590,183"),
 ]
 
 
 def swissprot_html(ctx, whole):
     """The table of which Swiss-Prot each program run on this page searched."""
-    names = {t["key"]: t["name"] for t in TRACKS if ctx["run_status"][t["key"]] != "not run"}
+    names = {t["key"]: t["name"] for t in TRACKS if ctx["run_status"][t["key"]] not in ("not run", "too long")}
     names.update({w[0]: w[1] for w in whole if w[4] and w[0] == "diamond"})
     rows = []
     for keys, what, part, n in SWISSPROT_USED:
@@ -1273,7 +1301,7 @@ def swissprot_html(ctx, whole):
             '</tbody></table></div></section>' % "".join(rows))
 
 
-def legend_html(ctx, has_plddt, has_expr):
+def legend_html(ctx, has_plddt, has_expr, has_struct=False):
     """The legend, in a narrow column left of the drawing (above it on a phone), so the reader
     meets the key before the marks: one line per tool, its mark then its name. The rule for a
     hit, the setting, the database and the columns that give the box open on a click."""
@@ -1282,8 +1310,9 @@ def legend_html(ctx, has_plddt, has_expr):
         k = t["key"]
         prog = PROGRAMS[t["program"]]
         mark = svg_inline(legend_mark(t, 12, 10), 12, 10)
-        if ctx["run_status"][k] == "not run":
-            items.append('<li class="off">%s<span>%s: not run</span></li>' % (mark, esc(t["name"])))
+        if ctx["run_status"][k] in ("not run", "too long"):
+            why = " on proteins over %d aa" % t["max_aa"] if ctx["run_status"][k] == "too long" else ""
+            items.append('<li class="off">%s<span>%s: not run%s</span></li>' % (mark, esc(t["name"]), why))
             continue
         c, d = fmt_thr(COUNT_E), fmt_thr(E_MAX)
         if k == "hhsearch":
@@ -1311,6 +1340,10 @@ def legend_html(ctx, has_plddt, has_expr):
     if has_plddt:
         sw = "".join('<span class="sw" style="background:%s"></span>%s ' % (c, esc(lbl)) for _, _, c, lbl in PLDDT)
         items.append('<li><span></span><span><b>pLDDT</b>, the structure predictor\'s confidence in each residue, 0 to 100: %s</span></li>' % sw)
+    if has_struct:
+        hl = svg_inline('<rect x="0.5" y="1.5" width="11" height="7" fill="%s"/>' % HIGHLIGHT, 12, 10)
+        items.append('<li>%s<span>on the pLDDT strip and the 3-D structure: the residues of the hit you point at or click, '
+                     'or the ones you drag across on the strip</span></li>' % hl)
     step = svg_inline('<path d="M0,9 L4,9 L4,2 L8,2 L8,6 L12,6" fill="none" stroke="%s" stroke-width="1.4"/>' % AGREEMENT, 12, 10)
     items.append('<li>%s<span>programs with a hit at each residue, 0 to %d (the programs run), each program counted once</span></li>'
                  % (step, ctx["n_run"]))
@@ -1469,6 +1502,10 @@ def build_protein(task):
     p = ctx["proteins"][pid]
     hits = [materialize(x) for x in ctx["hits"].get(pid, [])]
     L = p["length"]
+    long_for = {t["key"]: "too long" for t in TRACKS
+                if t.get("max_aa") and L > t["max_aa"] and ctx["run_status"][t["key"]] == "run"}
+    if long_for:  # tracks run only on shorter proteins: "not run" on this page
+        ctx = dict(ctx, run_status={**ctx["run_status"], **long_for})
     seq = p["seq"]
     for h in hits:
         h["_names"] = target_names(h, ctx["target_ann"])
@@ -1581,7 +1618,8 @@ def build_protein(task):
     whole = whole_rows(ctx["biomni"].get(pid), W)
     n_whole = sum(1 for w in whole if w[3])
     m_whole = sum(1 for w in whole if w[4])  # WHOLE programs run on this protein
-    hgt, left, right = page_svg(p, counted_by_track, cov, plddt, W, px, ctx["run_status"], ctx["n_run"], whole)
+    row_plddt = None if st else plddt  # with a structure, the strip sits right above it instead
+    hgt, left, right = page_svg(p, counted_by_track, cov, row_plddt, W, px, ctx["run_status"], ctx["n_run"], whole)
     blocks = ['<div class="tracks" id="tracks"><div class="names">%s</div><div class="scroll">%s</div></div>'
               % (svg_inline(left, "100%", hgt), svg_inline(right, W, hgt, "trk"))]
     n_more = sum(max(0, sum(not h.get("feature") for h in v) - TOP_N) for v in counted_by_track.values())
@@ -1634,8 +1672,8 @@ def build_protein(task):
                    '<span class="note">Looks through the matched protein\'s name, gene, accession, species, Pfam '
                    'families and GO terms. Every word typed must appear. Hits that do not match are drawn faint, '
                    'and the table under the drawing lists only the matching ones.</span></div>' +
-                   '<p class="note" id="foldnote">A program with more than 100 hits starts folded into one row, shaded by '
-                   'how many hits cover each residue. Click its name or the folded row to see each hit; click a name to fold any row.</p>')
+                   '<p class="note" id="foldnote">Every program starts folded into one row, shaded by how many hits cover each '
+                   'residue. Click its name or the folded row to see each hit; click a name to fold it again.</p>')
     toggle = ""
     # The drawing comes first; each of its rows starts with the tool's name and mark, and the
     # table under it gives each tool's setting, database and threshold.
@@ -1651,12 +1689,12 @@ def build_protein(task):
                'immune seeds, FANTASIA, UniFIRE) come from Biomni\'s run on the whole proteome, which kept only each '
                'protein\'s best hit and not where it lies, so they name the hit with no box; each counts in the sentence '
                'at the top by its own cutoff, which the slider does not change.</p></section>'
-               '%s%s<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
+               '%s<section><h2>Every hit, in a table</h2><p class="note">The hits the drawing shows, at the slider\'s E-value '
                'and matching the search. Each program computes its own E-value and score, so compare them within one '
                'program. Score is in bits, except hhsearch\'s Prob (the chance, out of 100, that the hit is a true '
-               'relative); identity is given by MMseqs2 and Foldseek only.</p><div id="ht"></div></section>'
-               % (slider, "".join(blocks), toggle, swissprot_html(ctx, whole), struct))
-    out.append(legend_html(ctx, plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid))))
+               'relative); identity is given by MMseqs2 and Foldseek only.</p><div id="ht"></div></section>%s'
+               % (slider, "".join(blocks), toggle, struct, swissprot_html(ctx, whole)))
+    out.append(legend_html(ctx, row_plddt is not None, bool(ctx["expression"] and ctx["expression"][1].get(pid)), bool(st)))
     out.append('</div>')
     out.append(expr)
     out.append('<div id="tip" role="tooltip" hidden></div><aside id="panel" hidden><button id="close" type="button">Close</button><div id="pbody"></div></aside>')
@@ -1669,9 +1707,10 @@ def build_protein(task):
         pfam_color=CATEGORIES["pfam"]["color"],
         tseq_files=ctx["n_shards"])
     mol = ""
-    if st:  # the structure's text in its own file, read by assets/structure.js after 3Dmol.js
+    if st:  # the structure's text in its own file, read by assets/structure.js after Mol* (PDBe's pdbe-molstar)
         (ctx["out"] / "proteins" / (safe(pid) + ".pdb.js")).write_text("window.PDB=%s;" % json.dumps(st["text"]))
-        mol = ('<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.0/3Dmol-min.js"></script>'
+        mol = ('<link rel="stylesheet" href="../assets/pdbe-molstar-light-3.12.0.css">'  # a copy: published pages take stylesheets only from their own files
+               '<script src="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.12.0/build/pdbe-molstar-plugin.js"></script>'
                '<script src="%s.pdb.js"></script><script src="../assets/structure.js%s"></script>' % (safe(pid), ASSET_VER[0]))
     out.append('<script>const PAGE=%s;</script><script src="../assets/protein.js%s"></script>%s</body></html>'
                % (json.dumps(page_data, separators=(",", ":")).replace("</", "<\\/"), ASSET_VER[0], mol))

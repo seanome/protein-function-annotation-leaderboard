@@ -1,0 +1,236 @@
+disease_id,human_disease,pubmed_query
+D01,Snakebite envenoming [toxin],Didelphis virginiana snake venom resistance serum
+D01,Snakebite envenoming [toxin],mongoose nicotinic acetylcholine receptor alpha-bungarotoxin resistance
+D01,Snakebite envenoming [toxin],opossum lethal toxin-neutralizing factor LTNF
+D01,Snakebite envenoming [toxin],opossum resistance Bothrops venom LD50 survival
+D01,Snakebite envenoming [toxin],convergent evolution resistance alpha-neurotoxin nicotinic receptor mammals snakes independent origins
+D01,Snakebite envenoming [toxin],widespread evolution molecular resistance snake venom alpha-neurotoxins vertebrates
+D02,Scorpion sting envenoming [toxin],grasshopper mouse Centruroides venom pain insensitivity
+D02,Scorpion sting envenoming [toxin],scorpion venom resistance mammal LD50 tolerance
+D02,Scorpion sting envenoming [toxin],grasshopper mouse scorpion venom Nav1.8 amino acid variants analgesia
+D03,Cardiac glycoside poisoning (digoxin and plant or toad cardenolides) [toxin],"Danaus plexippus Na,K-ATPase cardiac glycoside resistance substitutions"
+D03,Cardiac glycoside poisoning (digoxin and plant or toad cardenolides) [toxin],convergent evolution cardiac glycoside insensitivity ATP1A1 insects vertebrates
+D03,Cardiac glycoside poisoning (digoxin and plant or toad cardenolides) [toxin],"monarch butterfly Na,K-ATPase ouabain insensitivity amino acid substitutions"
+D04,Tetrodotoxin poisoning [toxin],Thamnophis sirtalis tetrodotoxin resistance sodium channel Nav1.4 mass-adjusted dose
+D04,Tetrodotoxin poisoning [toxin],garter snake tetrodotoxin resistance newt coevolution sodium channel
+D04,Tetrodotoxin poisoning [toxin],Thamnophis sirtalis tetrodotoxin resistance mass adjusted mouse units phenotype population
+D04,Tetrodotoxin poisoning [toxin],pufferfish tetrodotoxin resistance sodium channel
+D04,Tetrodotoxin poisoning [toxin],tetrodotoxin resistance Taricha granulosa toxicity garter snake sprint speed
+D05,Paralytic shellfish poisoning (saxitoxin) [toxin],Mya arenaria saxitoxin resistance sodium channel mutation softshell clam
+D05,Paralytic shellfish poisoning (saxitoxin) [toxin],saxitoxin resistance bivalve sodium channel evolution
+D05,Paralytic shellfish poisoning (saxitoxin) [toxin],Mya arenaria saxitoxin uptake nerve assay resistant genotype
+D06,Ciguatera poisoning (ciguatoxin) [toxin],ciguatoxin resistance fish tolerance
+D06,Ciguatera poisoning (ciguatoxin) [toxin],ciguatoxin tolerance moray eel barracuda
+D06,Ciguatera poisoning (ciguatoxin) [toxin],ciguatera fish toxin accumulation resistance mechanism herbivorous fish
+D07,Nicotine poisoning [toxin],nicotine tolerance Manduca sexta nicotine resistance mechanism
+D07,Nicotine poisoning [toxin],CYP6B46 nicotine Manduca sexta
+D07,Nicotine poisoning [toxin],nicotine resistant nicotinic receptor insect herbivore
+D07,Nicotine poisoning [toxin],nicotine detoxification tobacco hornworm excretion rate
+D08,Ethanol poisoning and alcohol-related liver injury [toxin],alcohol dehydrogenase Drosophila ethanol tolerance measured
+D08,Ethanol poisoning and alcohol-related liver injury [toxin],ADH4 hominid ethanol
+D08,Ethanol poisoning and alcohol-related liver injury [toxin],ethanol tolerance Drosophila melanogaster larvae survival concentration
+D09,Cadmium poisoning [toxin],cadmium tolerance metallothionein oyster accumulation
+D09,Cadmium poisoning [toxin],Crassostrea gigas cadmium metallothionein concentration gill
+D09,Cadmium poisoning [toxin],cadmium tolerance Nereis diversicolor population
+D10,Arsenic poisoning [toxin],arsenic tolerance Atacama Andean population AS3MT adaptation
+D10,Arsenic poisoning [toxin],arsenic methylation adaptation Argentina AS3MT variant urinary
+D10,Arsenic poisoning [toxin],arsenic resistance fish population adaptation
+D10,Arsenic poisoning [toxin],arsenic tolerance Daphnia Chironomus
+D10,Arsenic poisoning [toxin],Lumbricus rubellus arsenic tolerance lineage
+D11,Methylmercury poisoning [toxin],methylmercury tolerance seal
+D11,Methylmercury poisoning [toxin],methylmercury resistance killifish
+D11,Methylmercury poisoning [toxin],pilot whale mercury selenium liver
+D11,Methylmercury poisoning [toxin],methylmercury demethylation cetacean liver
+D11,Methylmercury poisoning [toxin],Globicephala melas liver mercury concentration Faroe
+D11,Methylmercury poisoning [toxin],methylmercury LC50 tolerant population fish
+D12,Lead poisoning [toxin],lead tolerance Daphnia resistant population
+D12,Lead poisoning [toxin],lead tolerant earthworm mine soil
+D12,Lead poisoning [toxin],lead resistance ALAD polymorphism bird
+D12,Lead poisoning [toxin],Pb LC50 metal adapted population invertebrate
+D12,Lead poisoning [toxin],blood lead concentration condor without toxicity
+D13,Cyanide poisoning [toxin],cyanide tolerance bamboo lemur
+D13,Cyanide poisoning [toxin],cyanogenic glucoside sequestration Zygaena larvae
+D13,Cyanide poisoning [toxin],cyanide resistance millipede hydrogen cyanide defence
+D13,Cyanide poisoning [toxin],rhodanese cyanide detoxification insect larvae
+D13,Cyanide poisoning [toxin],beta-cyanoalanine synthase Heliconius cyanide
+D13,Cyanide poisoning [toxin],Hapalemur bamboo cyanide intake
+D14,Hydrogen sulfide poisoning [toxin],Poecilia mexicana sulfide spring tolerance
+D14,Hydrogen sulfide poisoning [toxin],sulfide tolerance LC50 Poecilia sulphuraria
+D14,Hydrogen sulfide poisoning [toxin],sulfide tolerance survival Arenicola marina sulphide
+D14,Hydrogen sulfide poisoning [toxin],hydrogen sulfide exposure tolerance fish micromolar survival
+D15,Carbon monoxide poisoning [toxin],elephant seal carboxyhemoglobin carbon monoxide
+D15,Carbon monoxide poisoning [toxin],methylmercury tolerance seal
+D15,Carbon monoxide poisoning [toxin],carbon monoxide tolerance diving mammal blood
+D15,Carbon monoxide poisoning [toxin],endogenous carbon monoxide heme oxygenase seal tissue
+D16,Organophosphate poisoning [toxin],acetylcholinesterase G119S resistance Culex
+D16,Organophosphate poisoning [toxin],insensitive acetylcholinesterase ace-1 Culex pipiens mutation
+D16,Organophosphate poisoning [toxin],G119S acetylcholinesterase bimolecular rate constant insensitivity
+D17,Hyperammonaemia (urea cycle disorders and hepatic encephalopathy) [metabolite that accumulates],mudskipper Periophthalmodon ammonia tolerance
+D17,Hyperammonaemia (urea cycle disorders and hepatic encephalopathy) [metabolite that accumulates],Lake Magadi tilapia ammonia urea excretion
+D17,Hyperammonaemia (urea cycle disorders and hepatic encephalopathy) [metabolite that accumulates],high environmental ammonia tolerance air-breathing fish
+D18,Uraemia in kidney failure [metabolite that accumulates],urea tolerance elasmobranch plasma concentration
+D18,Uraemia in kidney failure [metabolite that accumulates],shark trimethylamine oxide urea protein stabilization
+D18,Uraemia in kidney failure [metabolite that accumulates],urea retention osmoconforming shark kidney transporter
+D19,Type 2 diabetes (chronic high blood glucose) [metabolite that accumulates],hummingbird blood glucose concentration
+D19,Type 2 diabetes (chronic high blood glucose) [metabolite that accumulates],hummingbird hyperglycemia glycated hemoglobin nectarivore
+D19,Type 2 diabetes (chronic high blood glucose) [metabolite that accumulates],nectar bat high blood glucose tolerance
+D20,Unconjugated hyperbilirubinaemia (jaundice) [metabolite that accumulates],bilirubin tolerance bird biliverdin reductase absence
+D20,Unconjugated hyperbilirubinaemia (jaundice) [metabolite that accumulates],unconjugated bilirubin tolerance fish species
+D20,Unconjugated hyperbilirubinaemia (jaundice) [metabolite that accumulates],bilirubin UGT1A1 absence cat Felis glucuronidation
+D20,Unconjugated hyperbilirubinaemia (jaundice) [metabolite that accumulates],bilirubin oxidase bird plasma pigment jaundice
+D20,Unconjugated hyperbilirubinaemia (jaundice) [metabolite that accumulates],hyperbilirubinaemia resistant animal model high serum bilirubin
+D21,Hyperuricaemia and gout [metabolite that accumulates],uricase loss hominoid evolution
+D21,Hyperuricaemia and gout [metabolite that accumulates],bird uric acid tolerance plasma
+D21,Hyperuricaemia and gout [metabolite that accumulates],ancient mammalian uricases resurrection
+D21,Hyperuricaemia and gout [metabolite that accumulates],Dalmatian dog hyperuricosuria urate
+D21,Hyperuricaemia and gout [metabolite that accumulates],plasma uric acid concentration python postprandial
+D21,Hyperuricaemia and gout [metabolite that accumulates],serum urate reptiles birds comparative
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],deoxysphingolipid HSAN1 neurotoxicity
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],Arctica islandica longevity oxidative
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],Arctica islandica bivalve
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],Arctica islandica sphingolipid
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],serine palmitoyltransferase alanine specificity mutation
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],deoxysphingolipids zebrafish model
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],1-deoxysphinganine tolerance species comparison
+D22,HSAN1 neuropathy (1-deoxysphingolipid accumulation) [metabolite that accumulates],spisulosine Spisula polynyma
+D23,Iron overload (haemochromatosis) [metabolite that accumulates],hemochromatosis iron overload bat tolerance
+D23,Iron overload (haemochromatosis) [metabolite that accumulates],vampire bat iron diet
+D23,Iron overload (haemochromatosis) [metabolite that accumulates],Morton Wimsatt vampire bat iron absorption
+D23,Iron overload (haemochromatosis) [metabolite that accumulates],hepcidin ferroportin degradation human cells
+D24,Copper overload (Wilson disease) [metabolite that accumulates],Wilson disease copper tolerance Bedlington terrier
+D24,Copper overload (Wilson disease) [metabolite that accumulates],copper accumulation liver tolerance sheep
+D24,Copper overload (Wilson disease) [metabolite that accumulates],copper tolerance crab hepatopancreas accumulation
+D24,Copper overload (Wilson disease) [metabolite that accumulates],copper accumulation Wilson disease ATP7B dog model
+D24,Copper overload (Wilson disease) [metabolite that accumulates],copper tolerance mollusc metallothionein hemocyanin
+D24,Copper overload (Wilson disease) [metabolite that accumulates],pigs high dietary copper 250 mg/kg liver
+D25,Fatty liver disease (hepatic steatosis) [metabolite that accumulates],hibernating bear hepatic steatosis liver injury
+D25,Fatty liver disease (hepatic steatosis) [metabolite that accumulates],migratory bird fatty liver lipid loading
+D25,Fatty liver disease (hepatic steatosis) [metabolite that accumulates],goose liver steatosis overfeeding Anser
+D25,Fatty liver disease (hepatic steatosis) [metabolite that accumulates],goose fatty liver no inflammation mechanism
+D25,Fatty liver disease (hepatic steatosis) [metabolite that accumulates],goose liver weight overfeeding lipid percentage Landes
+D25,Fatty liver disease (hepatic steatosis) [metabolite that accumulates],hummingbird hepatic lipid migratory sandpiper fat
+D26,Lactic acidosis [metabolite that accumulates],turtle anoxia lactate Trachemys
+D26,Lactic acidosis [metabolite that accumulates],Chrysemys picta anoxic submergence lactate
+D26,Lactic acidosis [metabolite that accumulates],freshwater turtle shell buffering anoxia tolerance
+D27,Hypercapnia (carbon dioxide retention and respiratory acidosis) [metabolite that accumulates],naked mole-rat carbon dioxide acid pain
+D27,Hypercapnia (carbon dioxide retention and respiratory acidosis) [metabolite that accumulates],naked mole-rat hypercapnia ventilation blunted
+D27,Hypercapnia (carbon dioxide retention and respiratory acidosis) [metabolite that accumulates],aprepitant human NK1 receptor affinity
+D28,Protein aggregation neurodegeneration [metabolite that accumulates],naked mole-rat proteostasis protein aggregation resistance
+D28,Protein aggregation neurodegeneration [metabolite that accumulates],naked mole-rat carbon dioxide acid pain
+D28,Protein aggregation neurodegeneration [metabolite that accumulates],long-lived species polyglutamine proteotoxicity fibroblast
+D29,Hyperoxaluria and oxalate kidney stones [metabolite that accumulates],Neotoma albigula oxalate degradation
+D29,Hyperoxaluria and oxalate kidney stones [metabolite that accumulates],woodrat oxalate microbiome transplant degradation
+D29,Hyperoxaluria and oxalate kidney stones [metabolite that accumulates],Oxalobacter formigenes urinary oxalate hyperoxaluria trial
+D30,Hypercholesterolaemia and atherosclerosis [metabolite that accumulates],Show Racer pigeon atherosclerosis resistant White Carneau
+D30,Hypercholesterolaemia and atherosclerosis [metabolite that accumulates],cavefish Astyanax mexicanus cholesterol triglyceride
+D30,Hypercholesterolaemia and atherosclerosis [metabolite that accumulates],cavefish insulin resistance blood glucose
+D31,Ischaemic stroke [loss of oxygen],naked mole-rat anoxia fructose
+D31,Ischaemic stroke [loss of oxygen],Park fructose-driven glycolysis naked mole-rat
+D31,Ischaemic stroke [loss of oxygen],Trachemys scripta anoxic brain
+D31,Ischaemic stroke [loss of oxygen],Chrysemys picta anoxia submergence months
+D31,Ischaemic stroke [loss of oxygen],turtle cortical neuron anoxia cell death
+D32,Myocardial infarction (ischaemic heart injury) [loss of oxygen],hibernating ground squirrel cardiomyocyte ischemia tolerance
+D32,Myocardial infarction (ischaemic heart injury) [loss of oxygen],hibernating squirrel heart ischemia reperfusion
+D32,Myocardial infarction (ischaemic heart injury) [loss of oxygen],naked mole-rat heart anoxia contractile function
+D32,Myocardial infarction (ischaemic heart injury) [loss of oxygen],SIRT3 human cardiomyocytes hypoxia reoxygenation
+D33,Ischaemic acute kidney injury [loss of oxygen],hibernator kidney ischemia reperfusion protection
+D33,Ischaemic acute kidney injury [loss of oxygen],naked mole-rat kidney acute injury
+D33,Ischaemic acute kidney injury [loss of oxygen],seal kidney ischemia diving
+D33,Ischaemic acute kidney injury [loss of oxygen],hamster torpor renal injury creatinine
+D34,Neonatal hypoxic-ischaemic encephalopathy [loss of oxygen],neonatal hypoxia tolerance newborn rat species comparison
+D34,Neonatal hypoxic-ischaemic encephalopathy [loss of oxygen],neonatal naked mole-rat hypoxia
+D34,Neonatal hypoxic-ischaemic encephalopathy [loss of oxygen],Larson Park naked mole-rat anoxic depolarization hippocampal
+D34,Neonatal hypoxic-ischaemic encephalopathy [loss of oxygen],naked mole-rat hippocampal slice extreme hypoxia tolerance
+D35,Brain injury after cardiac arrest [loss of oxygen],arctic ground squirrel cardiac arrest resuscitation brain
+D35,Brain injury after cardiac arrest [loss of oxygen],turtle cortical neuron anoxia cell death
+D35,Brain injury after cardiac arrest [loss of oxygen],seal brain slice hypoxia membrane potential mouse comparison
+D36,Chronic mountain sickness (high-altitude hypoxia) [loss of oxygen],bar-headed goose hemoglobin oxygen affinity
+D36,Chronic mountain sickness (high-altitude hypoxia) [loss of oxygen],bar-headed goose severe hypoxia flight altitude
+D36,Chronic mountain sickness (high-altitude hypoxia) [loss of oxygen],chronic mountain sickness Tibetan yak adaptation EPAS1
+D36,Chronic mountain sickness (high-altitude hypoxia) [loss of oxygen],deer mouse high altitude hypoxia maximum oxygen consumption
+D37,Hypoxic pulmonary hypertension [loss of oxygen],yak pulmonary artery hypoxic vasoconstriction
+D37,Hypoxic pulmonary hypertension [loss of oxygen],Bos grunniens pulmonary hypertension altitude
+D37,Hypoxic pulmonary hypertension [loss of oxygen],llama blunted hypoxic pulmonary vasoconstriction
+D37,Hypoxic pulmonary hypertension [loss of oxygen],yak mean pulmonary arterial pressure measured
+D38,Obstructive sleep apnoea (intermittent hypoxia) [loss of oxygen],elephant seal sleep apnea intermittent hypoxia
+D38,Obstructive sleep apnoea (intermittent hypoxia) [loss of oxygen],Mirounga angustirostris apnea oxygen saturation
+D38,Obstructive sleep apnoea (intermittent hypoxia) [loss of oxygen],seal kidney ischemia diving
+D39,Ischaemia-reperfusion injury in organ transplantation [loss of oxygen],hibernator kidney ischemia reperfusion protection
+D39,Ischaemia-reperfusion injury in organ transplantation [loss of oxygen],ground squirrel kidney cold storage hours
+D39,Ischaemia-reperfusion injury in organ transplantation [loss of oxygen],ground squirrel liver cold preservation transplantation tolerance
+D40,Haemorrhagic shock [loss of oxygen],hemorrhagic shock tolerance hibernating squirrel
+D40,Haemorrhagic shock [loss of oxygen],hibernation induction trigger hemorrhagic shock survival
+D40,Haemorrhagic shock [loss of oxygen],hemorrhagic shock animal hibernator protection
+D41,Frostbite [freezing],frostbite antifreeze protein
+D41,Frostbite [freezing],Tenebrio molitor antifreeze protein thermal hysteresis
+D41,Frostbite [freezing],Dissostichus mawsoni antifreeze thermal hysteresis
+D41,Frostbite [freezing],convergent evolution antifreeze glycoproteins Antarctic notothenioid Arctic cod
+D42,Freezing injury in cell and organ cryopreservation [freezing],antifreeze protein cryopreservation cell survival
+D42,Freezing injury in cell and organ cryopreservation [freezing],antifreeze glycoprotein AFGP vitrification oocyte survival
+D42,Freezing injury in cell and organ cryopreservation [freezing],Rana sylvatica freeze tolerance ice content
+D42,Freezing injury in cell and organ cryopreservation [freezing],Tenebrio molitor antifreeze protein thermal hysteresis
+D43,Accidental hypothermia [freezing],accidental hypothermia hibernator
+D43,Accidental hypothermia [freezing],arctic ground squirrel supercooling body temperature
+D43,Accidental hypothermia [freezing],Barnes supercooling hibernating arctic ground squirrel
+D43,Accidental hypothermia [freezing],ground squirrel iPSC neurons cold microtubule
+D44,Dry eye disease [drying],dry eye trehalose eye drops
+D44,Dry eye disease [drying],tardigrade anhydrobiosis survival water content percentage
+D44,Dry eye disease [drying],Hypsibius dujardini desiccation survival rate
+D44,Dry eye disease [drying],CAHS protein desiccation tolerance human cells
+D45,Severe dehydration [drying],Artemia franciscana trehalose desiccation survival
+D45,Severe dehydration [drying],CAHS protein desiccation tolerance human cells
+D45,Severe dehydration [drying],Polypedilum vanderplanki anhydrobiosis desiccation water content
+D45,Severe dehydration [drying],dry eye trehalose eye drops
+D46,Acute radiation syndrome [radiation],Ramazzottius varieornatus Dsup radiation tolerance
+D46,Acute radiation syndrome [radiation],tardigrade Dsup human cells X-ray
+D46,Acute radiation syndrome [radiation],tardigrade unique protein protects DNA radiotolerance
+D46,Acute radiation syndrome [radiation],Deinococcus radiodurans gamma radiation dose survival
+D47,Ultraviolet skin damage (sunburn) [radiation],Deinococcus ultraviolet radiation resistance survival
+D47,Ultraviolet skin damage (sunburn) [radiation],Paramacrobiotus ultraviolet tolerance fluorescence
+D47,Ultraviolet skin damage (sunburn) [radiation],tardigrade Dsup human cells X-ray
+D47,Ultraviolet skin damage (sunburn) [radiation],Deinococcus radiodurans gamma radiation dose survival
+D48,Disuse osteoporosis (bone loss during immobility) [long immobility],black bear bone mineral density hibernation
+D48,Disuse osteoporosis (bone loss during immobility) [long immobility],disuse osteoporosis prevention hibernating bear bone
+D48,Disuse osteoporosis (bone loss during immobility) [long immobility],bear parathyroid hormone bone resorption hibernation
+D49,Disuse muscle atrophy [long immobility],hibernating bear muscle atrophy protein
+D49,Disuse muscle atrophy [long immobility],brown bear hibernation muscle fiber cross sectional area loss
+D49,Disuse muscle atrophy [long immobility],hibernating ground squirrel skeletal muscle mass percent loss torpor
+D50,Venous thromboembolism during immobility [long immobility],immobility thrombosis hibernating bear HSP47
+D50,Venous thromboembolism during immobility [long immobility],HSP47 platelet venous thrombosis spinal cord injury
+D50,Venous thromboembolism during immobility [long immobility],HSP47 platelets neutrophil extracellular traps thromboprotection
+D51,Limb loss (no regrowth after amputation) [injury that scars instead of regrowing],axolotl limb regeneration
+D51,Limb loss (no regrowth after amputation) [injury that scars instead of regrowing],axolotl limb regeneration days
+D51,Limb loss (no regrowth after amputation) [injury that scars instead of regrowing],salamander limb regeneration speed
+D51,Limb loss (no regrowth after amputation) [injury that scars instead of regrowing],axolotl limb regeneration body size rate
+D52,Heart scarring after myocardial infarction [injury that scars instead of regrowing],zebrafish heart regeneration
+D52,Heart scarring after myocardial infarction [injury that scars instead of regrowing],zebrafish ventricle resection regeneration
+D52,Heart scarring after myocardial infarction [injury that scars instead of regrowing],heart regeneration zebrafish cryoinjury
+D52,Heart scarring after myocardial infarction [injury that scars instead of regrowing],Poss KD[Author] heart regeneration zebrafish
+D52,Heart scarring after myocardial infarction [injury that scars instead of regrowing],Poss KD[Author] AND Science[journal] AND heart regeneration
+D53,Spinal cord injury [injury that scars instead of regrowing],axolotl spinal cord regeneration
+D53,Spinal cord injury [injury that scars instead of regrowing],spinal cord regeneration zebrafish locomotor recovery
+D53,Spinal cord injury [injury that scars instead of regrowing],Becker T[Author] spinal cord zebrafish regeneration
+D53,Spinal cord injury [injury that scars instead of regrowing],ctgfa glial bridging spinal cord
+D54,Skin scarring after full-thickness wounds [injury that scars instead of regrowing],Acomys skin shedding regeneration
+D54,Skin scarring after full-thickness wounds [injury that scars instead of regrowing],Seifert AW[Author] Acomys Nature 2012
+D54,Skin scarring after full-thickness wounds [injury that scars instead of regrowing],Acomys kempi percivali skin
+D55,Liver fibrosis and cirrhosis [injury that scars instead of regrowing],Acomys liver fibrosis
+D55,Liver fibrosis and cirrhosis [injury that scars instead of regrowing],acomys[tiab] AND (liver[tiab] OR hepatic[tiab]) AND fibrosis[tiab]
+D55,Liver fibrosis and cirrhosis [injury that scars instead of regrowing],zebrafish liver fibrosis regression
+D55,Liver fibrosis and cirrhosis [injury that scars instead of regrowing],axolotl liver regeneration
+D55,Liver fibrosis and cirrhosis [injury that scars instead of regrowing],naked mole-rat liver fibrosis
+D56,Sensorineural hearing loss (hair cell loss) [injury that scars instead of regrowing],hair cell regeneration chick basilar papilla
+D56,Sensorineural hearing loss (hair cell loss) [injury that scars instead of regrowing],zebrafish lateral line hair cell regeneration neomycin
+D56,Sensorineural hearing loss (hair cell loss) [injury that scars instead of regrowing],avian hair cell regeneration hearing recovery
+D57,Retinal degeneration (photoreceptor loss) [injury that scars instead of regrowing],zebrafish photoreceptor regeneration light lesion Muller glia
+D57,Retinal degeneration (photoreceptor loss) [injury that scars instead of regrowing],Vihtelic TS[Author] light-induced albino zebrafish
+D57,Retinal degeneration (photoreceptor loss) [injury that scars instead of regrowing],newt retina regeneration
+D58,Tooth loss [injury that scars instead of regrowing],alligator tooth replacement stem cells
+D58,Tooth loss [injury that scars instead of regrowing],tooth replacement rate reptile
+D58,Tooth loss [injury that scars instead of regrowing],Alligator mississippiensis tooth replacement
+D59,Pulmonary fibrosis [injury that scars instead of regrowing],bleomycin lung fibrosis resistant species
+D59,Pulmonary fibrosis [injury that scars instead of regrowing],spiny mouse lung injury
+D59,Pulmonary fibrosis [injury that scars instead of regrowing],naked mole-rat lung fibrosis
+D60,Cancer in a large or long-lived body (Peto's paradox) [cancer in a large or long-lived body],elephant TP53 copies cancer
+D60,Cancer in a large or long-lived body (Peto's paradox) [cancer in a large or long-lived body],Abegglen LM[Author] elephant TP53
+D60,Cancer in a large or long-lived body (Peto's paradox) [cancer in a large or long-lived body],naked mole rat hyaluronan cancer resistance

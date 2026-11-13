@@ -1,0 +1,373 @@
+row,disease_id,species,column,what_was_checked,status,what_the_paper_says
+1,D01,Didelphis aurita,c3,"the number, its unit and its condition",HELD,abstract: cytotoxicity of myotoxin II inhibited by 92% at a 1:1 molar ratio
+1,D01,Didelphis aurita,c4,citation for the number,HELD,PMID 28759578 is the DM64 Pichia paper cited
+1,D01,Didelphis aurita,c5,independent origins,HELD,"abstract: 13 lineages plus 12 further motifs, 25 times in all"
+1,D01,Didelphis aurita,c6,UniProt accessions,HELD,"Q8MIS3 is Venom myotoxin inhibitor DM64, Didelphis marsupialis, as the row says"
+1,D01,Didelphis aurita,c7,human target,HELD,row claims nothing; the papers opened test DM64 on snake toxins
+1,D01,Didelphis aurita,c8,approved drug,HELD,row claims nothing
+2,D02,Onychomys torridus (southern grasshopper mouse),c3,"the number, its unit and its condition",HELD,"abstract gives no dose, time or fold-change, as the row says"
+2,D02,Onychomys torridus (southern grasshopper mouse),c4,citation for the number,HELD,PMID 24159039 is the grasshopper mouse Nav1.8 paper
+2,D02,Onychomys torridus (southern grasshopper mouse),c5,independent origins,NOTHING TO OPEN,
+2,D02,Onychomys torridus (southern grasshopper mouse),c6,UniProt accessions,NOTHING TO OPEN,no accession claimed
+2,D02,Onychomys torridus (southern grasshopper mouse),c7,human target,NOTHING TO OPEN,
+2,D02,Onychomys torridus (southern grasshopper mouse),c8,approved drug,NOTHING TO OPEN,
+3,D03,Danaus plexippus,c3,"the number, its unit and its condition",HELD,"abstract: transfected HEK cells tolerated 50 mM ouabain; note the paper says controls showed substantial mortality, the row says they died"
+3,D03,Danaus plexippus,c4,citation for the number,HELD,PMID 24227116 is the Holzinger and Wink paper
+3,D03,Danaus plexippus,c5,independent origins,HELD,"abstract: N122H in four further species across four orders, 300 Myr of divergence"
+3,D03,Danaus plexippus,c6,UniProt accessions,HELD,"Q2XN70 is the Danaus plexippus Na+,K+-ATPase alpha subunit"
+3,D03,Danaus plexippus,c7,human target,FAILED,"the pump put into human cells is the Drosophila ATPase carrying the monarch's N122H, not the Danaus protein of column 6; no monarch molecule acts on a human target"
+3,D03,Danaus plexippus,c8,approved drug,NOTHING TO OPEN,
+4,D04,none found with a number,c3,"the number, its unit and its condition",HELD,"neither abstract carries a dose, survival time or fold-change"
+4,D04,none found with a number,c4,citation for the number,HELD,both PMIDs resolve to the papers named
+4,D04,none found with a number,c5,independent origins,HELD,abstract: independent origins in Thamnophis couchii and T. sirtalis
+4,D04,none found with a number,c6,UniProt accessions,NOTHING TO OPEN,
+4,D04,none found with a number,c7,human target,NOTHING TO OPEN,
+4,D04,none found with a number,c8,approved drug,NOTHING TO OPEN,
+5,D05,Mya arenaria,c3,"the number, its unit and its condition",HELD,"abstract: 1,000-fold drop in affinity, whole-nerve assays"
+5,D05,Mya arenaria,c4,citation for the number,HELD,PMID 15815630 is the Nature clam paper
+5,D05,Mya arenaria,c5,independent origins,HELD,no origin count in the paper; RR = 70.0% confirmed in PMID 30075308
+5,D05,Mya arenaria,c6,UniProt accessions,NOTHING TO OPEN,
+5,D05,Mya arenaria,c7,human target,NOTHING TO OPEN,
+5,D05,Mya arenaria,c8,approved drug,NOTHING TO OPEN,
+6,D06,none found,c3,"the number, its unit and its condition",NOTHING TO OPEN,no identifier to open
+6,D06,none found,c4,citation for the number,NOTHING TO OPEN,
+6,D06,none found,c5,independent origins,NOTHING TO OPEN,
+6,D06,none found,c6,UniProt accessions,NOTHING TO OPEN,
+6,D06,none found,c7,human target,NOTHING TO OPEN,
+6,D06,none found,c8,approved drug,NOTHING TO OPEN,
+7,D07,none found with a tolerance number,c3,"the number, its unit and its condition",HELD,abstract: CYP6B46 moves 0.65% of ingested nicotine into the hemolymph
+7,D07,none found with a tolerance number,c4,citation for the number,HELD,PMID 24379363 is the CYP6B46 paper
+7,D07,none found with a tolerance number,c5,independent origins,NOTHING TO OPEN,
+7,D07,none found with a tolerance number,c6,UniProt accessions,NOTHING TO OPEN,no accession claimed
+7,D07,none found with a tolerance number,c7,human target,NOTHING TO OPEN,
+7,D07,none found with a tolerance number,c8,approved drug,NOTHING TO OPEN,
+8,D08,Drosophila melanogaster,c3,"the number, its unit and its condition",HELD,"abstract: seven isochromosomal lines on 4.5% v/v ethanol, four generations"
+8,D08,Drosophila melanogaster,c4,citation for the number,HELD,PMID 28564174 is the Geer 1991 Evolution paper
+8,D08,Drosophila melanogaster,c5,independent origins,NOTHING TO OPEN,
+8,D08,Drosophila melanogaster,c6,UniProt accessions,HELD,P00334 is Drosophila melanogaster alcohol dehydrogenase
+8,D08,Drosophila melanogaster,c7,human target,NOTHING TO OPEN,
+8,D08,Drosophila melanogaster,c8,approved drug,NOTHING TO OPEN,
+9,D09,none found with a cadmium number,c3,"the number, its unit and its condition",HELD,"abstract: longer median lethal times for zinc only, not cadmium or copper"
+9,D09,none found with a cadmium number,c4,citation for the number,HELD,PMID 15712333 is the Nereis diversicolor paper
+9,D09,none found with a cadmium number,c5,independent origins,NOTHING TO OPEN,
+9,D09,none found with a cadmium number,c6,UniProt accessions,NOTHING TO OPEN,
+9,D09,none found with a cadmium number,c7,human target,NOTHING TO OPEN,
+9,D09,none found with a cadmium number,c8,approved drug,NOTHING TO OPEN,
+10,D10,none found,c3,"the number, its unit and its condition",HELD,abstract: a review; the arsenic-tolerant earthworm lineage is named without a binomial and without a number
+10,D10,none found,c4,citation for the number,HELD,PMID 24004878 is the ecotoxicological epigenetics review
+10,D10,none found,c5,independent origins,NOTHING TO OPEN,
+10,D10,none found,c6,UniProt accessions,NOTHING TO OPEN,
+10,D10,none found,c7,human target,NOTHING TO OPEN,
+10,D10,none found,c8,approved drug,NOTHING TO OPEN,
+11,D11,none found,c3,"the number, its unit and its condition",HELD,both abstracts are concentration surveys with no tolerance number
+11,D11,none found,c4,citation for the number,HELD,PMIDs 35086557 and 31927288 resolve to the papers named
+11,D11,none found,c5,independent origins,NOTHING TO OPEN,
+11,D11,none found,c6,UniProt accessions,NOTHING TO OPEN,
+11,D11,none found,c7,human target,NOTHING TO OPEN,
+11,D11,none found,c8,approved drug,NOTHING TO OPEN,
+12,D12,none found,c3,"the number, its unit and its condition",HELD,"both Daphnia abstracts are about mine drainage, copper and cadmium, with no lead dose"
+12,D12,none found,c4,citation for the number,HELD,PMIDs 22278886 and 19379016 resolve to the papers named
+12,D12,none found,c5,independent origins,NOTHING TO OPEN,
+12,D12,none found,c6,UniProt accessions,NOTHING TO OPEN,
+12,D12,none found,c7,human target,NOTHING TO OPEN,
+12,D12,none found,c8,approved drug,NOTHING TO OPEN,
+13,D13,none found,c3,"the number, its unit and its condition",HELD,neither abstract gives a cyanide dose the animal withstands
+13,D13,none found,c4,citation for the number,HELD,PMIDs 30018390 and 42572112 resolve; the second is Mol Biol Evol 43(8) 2026
+13,D13,none found,c5,independent origins,HELD,abstract: CYP405A and CYP332A independently co-opted in Heliconiinae and Zygaena
+13,D13,none found,c6,UniProt accessions,HELD,A0A345BJE4 and A0A345BJE5 are Pieris rapae TST1 and TST2; PMID 28629163 is the beta-cyanoalanine synthase paper
+13,D13,none found,c7,human target,NOTHING TO OPEN,
+13,D13,none found,c8,approved drug,NOTHING TO OPEN,
+14,D14,Poecilia mexicana,c3,"the number, its unit and its condition",HELD,full text: COX activity held across 0-0.9 uM H2S in the Puyacatengo and Pichucalco populations; mitochondrial respiration measured across 0-90 uM
+14,D14,Poecilia mexicana,c4,citation for the number,HELD,PMID 32586956 is the PNAS convergence paper
+14,D14,Poecilia mexicana,c5,independent origins,HELD,"full text: three colonisations from 13,390,303 SNPs, 10 lineages across five genera over 40 Myr, convergent substitutions at six COX1 and two COX3 codons"
+14,D14,Poecilia mexicana,c6,UniProt accessions,HELD,A0A023IMR0 is Poecilia mexicana cytochrome c oxidase subunit 1
+14,D14,Poecilia mexicana,c7,human target,NOTHING TO OPEN,
+14,D14,Poecilia mexicana,c8,approved drug,NOTHING TO OPEN,
+15,D15,Mirounga angustirostris,c3,"the number, its unit and its condition",HELD,"abstract: 8.7 +/- 0.3% mean, 10.4% maximum, 7.6 and 7.1% in juveniles and pups, 7% cut in total body oxygen stores"
+15,D15,Mirounga angustirostris,c4,citation for the number,HELD,PMID 24829326 is the elephant seal carboxyhaemoglobin paper
+15,D15,Mirounga angustirostris,c5,independent origins,NOTHING TO OPEN,
+15,D15,Mirounga angustirostris,c6,UniProt accessions,NOTHING TO OPEN,
+15,D15,Mirounga angustirostris,c7,human target,NOTHING TO OPEN,
+15,D15,Mirounga angustirostris,c8,approved drug,NOTHING TO OPEN,
+16,D16,Culex quinquefasciatus,c3,"the number, its unit and its condition",HELD,"abstract: 3.4- and 3.8-fold for MAmCq, 2.2- and 1.9-fold for HAmCq, G119S in ace-1"
+16,D16,Culex quinquefasciatus,c4,citation for the number,HELD,PMID 16363165 is the chlorpyrifos resistance paper
+16,D16,Culex quinquefasciatus,c5,independent origins,HELD,abstract: G119S arose independently at least four times in mosquitoes
+16,D16,Culex quinquefasciatus,c6,UniProt accessions,HELD,"Q867X2 is Culex quinquefasciatus acetylcholinesterase, gene ACE-1"
+16,D16,Culex quinquefasciatus,c7,human target,NOTHING TO OPEN,
+16,D16,Culex quinquefasciatus,c8,approved drug,NOTHING TO OPEN,
+17,D17,Periophthalmodon schlosseri,c3,"the number, its unit and its condition",HELD,"abstract: 10 mmol/l ambient ammonia built in 8 days, skin flux 0.0095 umol/cm2/min across one pH unit, 30 mmol/l for 6 days given as the exposure, not as a stated limit"
+17,D17,Periophthalmodon schlosseri,c4,citation for the number,HELD,PMID 14747411 is the mudskipper NH4+ excretion paper
+17,D17,Periophthalmodon schlosseri,c5,independent origins,HELD,no origin count; the Boleophthalmus contrast is in PMID 12794674
+17,D17,Periophthalmodon schlosseri,c6,UniProt accessions,HELD,A0A191B6Q3 is Periophthalmodon schlosseri vacuolar proton pump subunit B
+17,D17,Periophthalmodon schlosseri,c7,human target,NOTHING TO OPEN,
+17,D17,Periophthalmodon schlosseri,c8,approved drug,NOTHING TO OPEN,
+18,D18,Squalus acanthias,c3,"the number, its unit and its condition",HELD,"abstract: plasma urea fell from 340 to 225 mM at the lethal 685 ug/l silver dose; the comparison with human kidney failure is the atlas's own, not the paper's"
+18,D18,Squalus acanthias,c4,citation for the number,HELD,PMID 11489311 is the dogfish silver paper
+18,D18,Squalus acanthias,c5,independent origins,NOTHING TO OPEN,
+18,D18,Squalus acanthias,c6,UniProt accessions,HELD,Q9I9F0 is a Squalus acanthias urea transporter; the three Rh accessions are Squalus ammonium transporters
+18,D18,Squalus acanthias,c7,human target,NOTHING TO OPEN,
+18,D18,Squalus acanthias,c8,approved drug,NOTHING TO OPEN,
+19,D19,Calypte anna,c3,"the number, its unit and its condition",HELD,"abstract: 17 mM fasted, up to 42 mM after feeding, glycated haemoglobin below non-diabetic humans"
+19,D19,Calypte anna,c4,citation for the number,HELD,PMID 9787825 is the hummingbird hyperglycaemia paper
+19,D19,Calypte anna,c5,independent origins,NOTHING TO OPEN,
+19,D19,Calypte anna,c6,UniProt accessions,HELD,"A0A7H1CRJ6 is Archilochus colubris GLUT5; the three Calypte anna accessions are GLUT6, GLUT10 and GLUT12, as the row says"
+19,D19,Calypte anna,c7,human target,NOTHING TO OPEN,
+19,D19,Calypte anna,c8,approved drug,NOTHING TO OPEN,
+20,D20,none found,c3,"the number, its unit and its condition",NOTHING TO OPEN,no identifier to open
+20,D20,none found,c4,citation for the number,NOTHING TO OPEN,
+20,D20,none found,c5,independent origins,NOTHING TO OPEN,
+20,D20,none found,c6,UniProt accessions,NOTHING TO OPEN,
+20,D20,none found,c7,human target,NOTHING TO OPEN,
+20,D20,none found,c8,approved drug,NOTHING TO OPEN,
+21,D21,none found,c3,"the number, its unit and its condition",HELD,"abstract: the paper measures resurrected enzyme activity, not what an animal withstands, as the row says"
+21,D21,none found,c4,citation for the number,NOTHING TO OPEN,no citation claimed for a number
+21,D21,none found,c5,independent origins,HELD,"abstract: multiple independent events, no count given"
+21,D21,none found,c6,UniProt accessions,HELD,"Q00511 is Aspergillus flavus uricase, alternative name Rasburicase; P16164 is Sus scrofa uricase"
+21,D21,none found,c7,human target,HELD,abstract: ancient and modern uricases stably transfected into human HepG2 cells
+21,D21,none found,c8,approved drug,HELD,"FDA page fetched today: ELITEK, rasburicase, BLA 103946, Sanofi Synthelabo, original approval 07/12/2002"
+22,D22,none found,c3,"the number, its unit and its condition",HELD,"abstract: spisulosine IC50 1 uM in PC-3 and LNCaP, and no tolerance measurement"
+22,D22,none found,c4,citation for the number,HELD,PMID 18343365 is the spisulosine paper
+22,D22,none found,c5,independent origins,NOTHING TO OPEN,
+22,D22,none found,c6,UniProt accessions,NOTHING TO OPEN,
+22,D22,none found,c7,human target,HELD,"the row says the human-cell result runs the other way, which the abstract supports"
+22,D22,none found,c8,approved drug,NOTHING TO OPEN,
+23,D23,Desmodus rotundus,c3,"the number, its unit and its condition",HELD,"abstract: 0.068 +/- 0.0032% absorbed, 6.1 mg Fe/day eaten, about 4.2 ug absorbed, 80 +/- 67 mg Fe/kg, turnover half-life 379 +/- 101 days"
+23,D23,Desmodus rotundus,c4,citation for the number,HELD,PMID 6128125 is the vampire bat iron balance paper
+23,D23,Desmodus rotundus,c5,independent origins,HELD,"abstract: 27 bat species screened, REP15 loss on the vampire lineage, no origin count"
+23,D23,Desmodus rotundus,c6,UniProt accessions,HELD,P81172 is human hepcidin; the row states no Desmodus entry exists
+23,D23,Desmodus rotundus,c7,human target,FAILED,"the cited paper measures bat hepcidin mRNA after iron challenge and compares it with humans; no bat molecule acts in a human cell, on a human receptor or in a human assay. The 'yes' rests on human hepcidin acting on human ferroportin"
+23,D23,Desmodus rotundus,c8,approved drug,NOTHING TO OPEN,
+24,D24,none found,c3,"the number, its unit and its condition",NOTHING TO OPEN,no identifier to open
+24,D24,none found,c4,citation for the number,NOTHING TO OPEN,
+24,D24,none found,c5,independent origins,NOTHING TO OPEN,
+24,D24,none found,c6,UniProt accessions,NOTHING TO OPEN,
+24,D24,none found,c7,human target,NOTHING TO OPEN,
+24,D24,none found,c8,approved drug,NOTHING TO OPEN,
+25,D25,Anser anser,c3,"the number, its unit and its condition",HELD,"full text: 420 g per meal five times daily on days 18-24 in Landes geese, Sirius Red with no fibrosis, and no liver weight or triglyceride figure, as the row says"
+25,D25,Anser anser,c4,citation for the number,HELD,PMID 41205434 is the goose PGC-1alpha paper
+25,D25,Anser anser,c5,independent origins,NOTHING TO OPEN,
+25,D25,Anser anser,c6,UniProt accessions,HELD,"A0A8B9ED99 and A0A8B9CCL4 are PGC-1alpha in Anser cygnoides and Anser brachyrhynchus, not Anser anser, as the row says"
+25,D25,Anser anser,c7,human target,HELD,"abstract of PMID 40651204: goose hepatocytes at 200 mmol/l glucose, not human cells"
+25,D25,Anser anser,c8,approved drug,NOTHING TO OPEN,
+26,D26,Chrysemys picta bellii,c3,"the number, its unit and its condition",HELD,"abstract: 9 days of anoxic submergence at 10 C against 2 days for Apalone spinifera, with lactate in blood, bone and shell and rising plasma Ca and Mg"
+26,D26,Chrysemys picta bellii,c4,citation for the number,HELD,PMID 10893168 is the turtle shell buffering paper
+26,D26,Chrysemys picta bellii,c5,independent origins,HELD,"abstract: a five-species ranking with no tree, as the row says"
+26,D26,Chrysemys picta bellii,c6,UniProt accessions,NOTHING TO OPEN,
+26,D26,Chrysemys picta bellii,c7,human target,NOTHING TO OPEN,
+26,D26,Chrysemys picta bellii,c8,approved drug,NOTHING TO OPEN,
+27,D27,Heterocephalus glaber,c3,"the number, its unit and its condition",HELD,abstract: 0-10% CO2 with ventilation up only at 10% and metabolism unchanged; substance P 2 mg/kg and DiMe-C7 40-400 ug/kg restored the response at 2-10%
+27,D27,Heterocephalus glaber,c4,citation for the number,HELD,PMID 31967860 is the naked mole-rat hypercapnia paper
+27,D27,Heterocephalus glaber,c5,independent origins,HELD,"abstract of PMID 19219614: ammonia and capsaicin insensitivity, no origin count"
+27,D27,Heterocephalus glaber,c6,UniProt accessions,HELD,A0A0P6JY17 is Heterocephalus glaber protachykinin-1; P25103 is the human substance-P receptor
+27,D27,Heterocephalus glaber,c7,human target,FAILED,"the cited paper tests aprepitant, a synthetic antagonist, on human leukaemia cells; naked mole-rat substance P was not put in a human cell or assay"
+27,D27,Heterocephalus glaber,c8,approved drug,HELD,"FDA page fetched today: EMEND, aprepitant, NDA 021549, original approval 03/26/2003; the applicant is listed today as MSD, and the row claims no approval for this animal molecule"
+28,D28,Heterocephalus glaber,c3,"the number, its unit and its condition",HELD,"full text: 56% against 11% alive at 72 h, median survival 70 against 20 h, hazard 1.9 against 7.2; the percentages are survival relative to the polyQ19 control, not absolute shares, which the row does not say"
+28,D28,Heterocephalus glaber,c4,citation for the number,HELD,PMID 32515471 is the aggresome paper
+28,D28,Heterocephalus glaber,c5,independent origins,NOTHING TO OPEN,
+28,D28,Heterocephalus glaber,c6,UniProt accessions,HELD,G5BMN2 is Heterocephalus glaber autophagy protein 5
+28,D28,Heterocephalus glaber,c7,human target,NOTHING TO OPEN,
+28,D28,Heterocephalus glaber,c8,approved drug,NOTHING TO OPEN,
+29,D29,Neotoma albigula,c3,"the number, its unit and its condition",HELD,"full text: oxalate degradation exceeded 90% of the amount eaten at every dietary concentration, up to the 3% oxalate diet"
+29,D29,Neotoma albigula,c4,citation for the number,HELD,PMID 26896138 is the woodrat oxalate paper
+29,D29,Neotoma albigula,c5,independent origins,NOTHING TO OPEN,
+29,D29,Neotoma albigula,c6,UniProt accessions,HELD,O06644 and P40149 are Oxalobacter formigenes frc and oxc
+29,D29,Neotoma albigula,c7,human target,HELD,"abstract of PMID 25645091: 80 patients, 700 million twice daily, hyperoxaluria 82.5% to 15%. The agent is the whole bacterium in people, and neither it nor its enzymes are the woodrat's own molecule, which the row states"
+29,D29,Neotoma albigula,c8,approved drug,NOTHING TO OPEN,
+30,D30,Columba livia,c3,"the number, its unit and its condition",FAILED,"the 1.5- to 2.0-fold syndecan-4 difference, the faster proliferation and the lower cell-surface heparan sulfate all hold, but the added sentence that the two breeds show no consistent difference in plasma cholesterol is in neither cited paper's abstract"
+30,D30,Columba livia,c4,citation for the number,HELD,PMID 15596055 is the pigeon syndecan-4 paper
+30,D30,Columba livia,c5,independent origins,HELD,abstract: susceptibility behaves as one autosomal recessive trait
+30,D30,Columba livia,c6,UniProt accessions,HELD,P31431 is human syndecan-4; the row states no Columba livia entry exists
+30,D30,Columba livia,c7,human target,NOTHING TO OPEN,
+30,D30,Columba livia,c8,approved drug,NOTHING TO OPEN,
+31,D31,Heterocephalus glaber,c3,"the number, its unit and its condition",HELD,abstract: 18 minutes of anoxia survived without apparent injury
+31,D31,Heterocephalus glaber,c4,citation for the number,HELD,PMID 28428423 is the fructose glycolysis paper
+31,D31,Heterocephalus glaber,c5,independent origins,HELD,"abstract of PMID 30327830: independent invasions, different genes, no count"
+31,D31,Heterocephalus glaber,c6,UniProt accessions,HELD,A0A0P6JEK5 and A0AAX6NXL4 are Heterocephalus glaber Slc2a5 and Khk; P22732 is human SLC2A5
+31,D31,Heterocephalus glaber,c7,human target,NOTHING TO OPEN,
+31,D31,Heterocephalus glaber,c8,approved drug,NOTHING TO OPEN,
+32,D31,Chrysemys picta bellii,c3,"the number, its unit and its condition",HELD,"abstract: 3 months of submergence anoxia at 3 C, shell lactate 133 mmol/kg, plasma lactate 144 mmol/l"
+32,D31,Chrysemys picta bellii,c4,citation for the number,HELD,PMID 9320212 is the turtle shell lactate paper
+32,D31,Chrysemys picta bellii,c5,independent origins,NOTHING TO OPEN,
+32,D31,Chrysemys picta bellii,c6,UniProt accessions,NOTHING TO OPEN,
+32,D31,Chrysemys picta bellii,c7,human target,NOTHING TO OPEN,
+32,D31,Chrysemys picta bellii,c8,approved drug,NOTHING TO OPEN,
+33,D32,Urocitellus parryii,c3,"the number, its unit and its condition",HELD,"full text: 45 min of deep hypothermic circulatory arrest at 18 C, troponin I 0.9 +/- 0.2 against 4.8 +/- 0.8 and 6.7 +/- 1.3 after 3 h; 6.7/0.9 is 7.4-fold, and the row says about 8-fold"
+33,D32,Urocitellus parryii,c4,citation for the number,HELD,PMID 27187119 is the Anesthesiology proteomics paper
+33,D32,Urocitellus parryii,c5,independent origins,HELD,"abstract of PMID 30327830: no origin count, as the row says"
+33,D32,Urocitellus parryii,c6,UniProt accessions,HELD,A0A8D2GQS9 is Urocitellus parryii SIRT3; Q9NTG7 is human SIRT3
+33,D32,Urocitellus parryii,c7,human target,FAILED,the cited paper raises human SIRT3 in human cardiomyocytes through HOTAIR and FUS; the Arctic ground squirrel protein was not tested in a human cell
+33,D32,Urocitellus parryii,c8,approved drug,NOTHING TO OPEN,
+34,D33,none found,c3,"the number, its unit and its condition",NOTHING TO OPEN,no identifier to open
+34,D33,none found,c4,citation for the number,NOTHING TO OPEN,
+34,D33,none found,c5,independent origins,NOTHING TO OPEN,
+34,D33,none found,c6,UniProt accessions,NOTHING TO OPEN,
+34,D33,none found,c7,human target,NOTHING TO OPEN,
+34,D33,none found,c8,approved drug,NOTHING TO OPEN,
+35,D34,Heterocephalus glaber,c3,"the number, its unit and its condition",HELD,"full text: no detectable calcium rise through the 10-minute hypoxia in P5-7 slices, a rise only when extended to 15 minutes, and -3.8 +/- 0.75% against -12.1 +/- 1.96% at P18-22, which is a 69% cut, against the row's 68%"
+35,D34,Heterocephalus glaber,c4,citation for the number,HELD,PMID 22363676 is the calcium response paper
+35,D34,Heterocephalus glaber,c5,independent origins,HELD,"abstract of PMID 30327830: no origin count, as the row says"
+35,D34,Heterocephalus glaber,c6,UniProt accessions,HELD,A0AAX6RX97 is Heterocephalus glaber Grin2d; O15399 is human GRIN2D; PMID 22155615 is the GluN2D paper
+35,D34,Heterocephalus glaber,c7,human target,NOTHING TO OPEN,
+35,D34,Heterocephalus glaber,c8,approved drug,NOTHING TO OPEN,
+36,D35,Urocitellus parryii,c3,"the number, its unit and its condition",HELD,"full text: 30 min of oxygen glucose deprivation at 36 C, bath PO2 0-2.9 mmHg averaging 1.1 mmHg over 6 determinations, less lactate dehydrogenase release than rat, and the same at pH 6.3 and in ionic-shift solution; the 2 h figure is in the introduction, citing Christian et al. 2008, which the row says"
+36,D35,Urocitellus parryii,c4,citation for the number,HELD,PMID 28222226 is the Arctic ground squirrel OGD paper
+36,D35,Urocitellus parryii,c5,independent origins,NOTHING TO OPEN,
+36,D35,Urocitellus parryii,c6,UniProt accessions,NOTHING TO OPEN,
+36,D35,Urocitellus parryii,c7,human target,NOTHING TO OPEN,
+36,D35,Urocitellus parryii,c8,approved drug,NOTHING TO OPEN,
+37,D36,Anser indicus,c3,"the number, its unit and its condition",HELD,"abstract: 15 minutes at 7% oxygen at the normoxic maximum speed, heart rate 466 +/- 8 beats per minute, barnacle geese unable to finish"
+37,D36,Anser indicus,c4,citation for the number,HELD,PMID 24710001 is the bar-headed goose running paper
+37,D36,Anser indicus,c5,independent origins,NOTHING TO OPEN,
+37,D36,Anser indicus,c6,UniProt accessions,HELD,"E5D5T8 is Anser indicus COX3; PMID 20685719 reports the Trp-116 to Arg substitution, the lower maximum activity and the higher affinity for reduced cytochrome c"
+37,D36,Anser indicus,c7,human target,NOTHING TO OPEN,
+37,D36,Anser indicus,c8,approved drug,NOTHING TO OPEN,
+38,D37,Lama glama,c3,"the number, its unit and its condition",HELD,"abstract: newborns at 3600 m had a lower pulmonary pressor response than those at 580 m, and the abstract carries no mmHg value, as the row says"
+38,D37,Lama glama,c4,citation for the number,HELD,PMID 29369354 is the llama nitric oxide paper
+38,D37,Lama glama,c5,independent origins,NOTHING TO OPEN,
+38,D37,Lama glama,c6,UniProt accessions,HELD,O75116 is human ROCK2; the abstract reports lower ROCK2 and phosphorylated MLC20 and higher MYPT1 in highland lungs
+38,D37,Lama glama,c7,human target,NOTHING TO OPEN,
+38,D37,Lama glama,c8,approved drug,NOTHING TO OPEN,
+39,D38,Mirounga angustirostris,c3,"the number, its unit and its condition",HELD,"abstract: six apnoeas of 8-12 min, muscle blood flow to 31 +/- 8%, oxygen depletion 1-2.3 ml O2/kg/min, high-energy phosphates unchanged"
+39,D38,Mirounga angustirostris,c4,citation for the number,HELD,PMID 18840667 is the seal muscle apnoea paper
+39,D38,Mirounga angustirostris,c5,independent origins,HELD,"abstract of PMID 32324472: three lineages from separate recolonisations; it is a review, which the row says"
+39,D38,Mirounga angustirostris,c6,UniProt accessions,HELD,R9S002 is Mirounga angustirostris myoglobin; P02144 is human myoglobin
+39,D38,Mirounga angustirostris,c7,human target,NOTHING TO OPEN,
+39,D38,Mirounga angustirostris,c8,approved drug,NOTHING TO OPEN,
+40,D39,Ictidomys tridecemlineatus,c3,"the number, its unit and its condition",HELD,"abstract: 24 h of cold storage at 4 C then 24 h of rewarming to 37 C, with less apoptosis than mouse cells"
+40,D39,Ictidomys tridecemlineatus,c4,citation for the number,HELD,PMID 26457601 is the ground squirrel tubular cell paper
+40,D39,Ictidomys tridecemlineatus,c5,independent origins,NOTHING TO OPEN,
+40,D39,Ictidomys tridecemlineatus,c6,UniProt accessions,HELD,I3M2E8 is Ictidomys tridecemlineatus XIAP; P98170 is human XIAP
+40,D39,Ictidomys tridecemlineatus,c7,human target,NOTHING TO OPEN,
+40,D39,Ictidomys tridecemlineatus,c8,approved drug,NOTHING TO OPEN,
+41,D40,none found,c3,"the number, its unit and its condition",NOTHING TO OPEN,no identifier to open
+41,D40,none found,c4,citation for the number,NOTHING TO OPEN,
+41,D40,none found,c5,independent origins,NOTHING TO OPEN,
+41,D40,none found,c6,UniProt accessions,NOTHING TO OPEN,
+41,D40,none found,c7,human target,NOTHING TO OPEN,
+41,D40,none found,c8,approved drug,NOTHING TO OPEN,
+42,D41,Tenebrio molitor,c3,"the number, its unit and its condition",HELD,"abstract: thermal hysteresis up to 5.5 C, over 4 C after 4 weeks at 4 C, with an about 20-fold rise in thermal hysteresis protein"
+42,D41,Tenebrio molitor,c4,citation for the number,HELD,PMID 11029589 is the Tenebrio antifreeze protein paper
+42,D41,Tenebrio molitor,c5,independent origins,HELD,"abstract of PMID 9108061: notothenioid and Arctic cod genes have different progenitors, intron-exon layouts and spacers"
+42,D41,Tenebrio molitor,c6,UniProt accessions,HELD,O16119 is Tenebrio molitor thermal hysteresis protein YL-1; PMID 12372611 is the ice-binding face paper
+42,D41,Tenebrio molitor,c7,human target,HELD,"both papers cited are non-human: a transgenic mouse and porcine epidermis, which is what the row's 'no' says"
+42,D41,Tenebrio molitor,c8,approved drug,NOTHING TO OPEN,
+43,D42,Rana sylvatica (also written Lithobates sylvaticus),c3,"the number, its unit and its condition",HELD,"abstract: glucose-loaded frogs survived -5 C while saline controls died, against a spring limit near -3 C, with lower ice content and red-cell injury"
+43,D42,Rana sylvatica (also written Lithobates sylvaticus),c4,citation for the number,HELD,PMID 8409827 is the wood frog glucose paper
+43,D42,Rana sylvatica (also written Lithobates sylvaticus),c5,independent origins,NOTHING TO OPEN,
+43,D42,Rana sylvatica (also written Lithobates sylvaticus),c6,UniProt accessions,NOTHING TO OPEN,
+43,D42,Rana sylvatica (also written Lithobates sylvaticus),c7,human target,NOTHING TO OPEN,
+43,D42,Rana sylvatica (also written Lithobates sylvaticus),c8,approved drug,NOTHING TO OPEN,
+44,D42,Flavobacterium frigoris,c3,"the number, its unit and its condition",HELD,"abstract: survival 75.0% to 89.0%, blastocysts per surviving oocyte 30.7% to 78.0%, double-strand-break-positive oocytes 65.2% to 30.8%"
+44,D42,Flavobacterium frigoris,c4,citation for the number,HELD,PMID 26202918 is the oocyte vitrification paper
+44,D42,Flavobacterium frigoris,c5,independent origins,HELD,abstract of PMID 9108061 supports more than one origin in fish
+44,D42,Flavobacterium frigoris,c6,UniProt accessions,NOTHING TO OPEN,no accession claimed
+44,D42,Flavobacterium frigoris,c7,human target,HELD,"the abstract does say these proteins should be tested on human oocytes before clinical use, so the row's 'no' matches"
+44,D42,Flavobacterium frigoris,c8,approved drug,NOTHING TO OPEN,
+45,D43,Urocitellus parryii,c3,"the number, its unit and its condition",HELD,"abstract: steady-state torpor at -26 C through a 36-fold rise in torpid metabolic rate over the minimum at 0 C, torpid down to -30 C when ramped, against -8 C and 13.5-fold in Callospermophilus lateralis"
+45,D43,Urocitellus parryii,c4,citation for the number,HELD,PMID 25590595 is the subzero thermogenesis paper
+45,D43,Urocitellus parryii,c5,independent origins,NOTHING TO OPEN,
+45,D43,Urocitellus parryii,c6,UniProt accessions,NOTHING TO OPEN,
+45,D43,Urocitellus parryii,c7,human target,HELD,"abstract of PMID 29576452: 13-lined ground squirrel cells, not Urocitellus parryii, which is what the row says"
+45,D43,Urocitellus parryii,c8,approved drug,NOTHING TO OPEN,
+46,D44,none found,c3,"the number, its unit and its condition",NOTHING TO OPEN,no identifier to open
+46,D44,none found,c4,citation for the number,NOTHING TO OPEN,
+46,D44,none found,c5,independent origins,NOTHING TO OPEN,
+46,D44,none found,c6,UniProt accessions,NOTHING TO OPEN,
+46,D44,none found,c7,human target,NOTHING TO OPEN,
+46,D44,none found,c8,approved drug,NOTHING TO OPEN,
+47,D45,Artemia franciscana,c3,"the number, its unit and its condition",HELD,"abstract: up to a 34-fold rise in immediate survival and colony formation after drying to 0.2 g water per g dry weight, in human 293H cells"
+47,D45,Artemia franciscana,c4,citation for the number,HELD,PMID 15963489 is the p26 and trehalose paper
+47,D45,Artemia franciscana,c5,independent origins,NOTHING TO OPEN,
+47,D45,Artemia franciscana,c6,UniProt accessions,HELD,O44112 is the Artemia franciscana small heat shock protein p26
+47,D45,Artemia franciscana,c7,human target,HELD,same paper: p26 expressed in human 293H cells; PMID 19228698 imports AfrLEA3m into human hepatoma mitochondria
+47,D45,Artemia franciscana,c8,approved drug,NOTHING TO OPEN,
+48,D46,Ramazzottius varieornatus,c3,"the number, its unit and its condition",HELD,abstract: Dsup in human cultured cells suppressed X-ray DNA damage by about 40% and improved radiotolerance
+48,D46,Ramazzottius varieornatus,c4,citation for the number,HELD,PMID 27649274 is the tardigrade genome paper
+48,D46,Ramazzottius varieornatus,c5,independent origins,HELD,"abstract of PMID 20817622: 5 kGy repaired without loss of viability, 25 kGy gives frequent rearrangements, and no origin count, as the row says"
+48,D46,Ramazzottius varieornatus,c6,UniProt accessions,HELD,P0DOW4 is the Ramazzottius varieornatus damage suppressor protein
+48,D46,Ramazzottius varieornatus,c7,human target,HELD,"same paper plus PMID 34681069 in human cells, and PMID 36858083 is the rat neuron caution the row records"
+48,D46,Ramazzottius varieornatus,c8,approved drug,NOTHING TO OPEN,
+49,D47,Deinococcus radiodurans,c3,"the number, its unit and its condition",HELD,"abstract: 112 mJ/cm2 of 222-nm light for a 1-log drop, the most resistant vegetative cell tested"
+49,D47,Deinococcus radiodurans,c4,citation for the number,HELD,PMID 38670653 is the far-UVC paper
+49,D47,Deinococcus radiodurans,c5,independent origins,NOTHING TO OPEN,
+49,D47,Deinococcus radiodurans,c6,UniProt accessions,HELD,"Q9RXY7 is Deinococcus radiodurans R1 IrrE, tested against ionising radiation, not UV, as the row says"
+49,D47,Deinococcus radiodurans,c7,human target,HELD,"abstract of PMID 27974687: pprI in mice against cobalt-60 gamma rays, so not human and not UV, which is what the row says"
+49,D47,Deinococcus radiodurans,c8,approved drug,NOTHING TO OPEN,
+50,D48,Ursus arctos horribilis,c3,"the number, its unit and its condition",HELD,"abstract: activation frequency of intracortical remodeling down 75%, mineral apposition rate, geometry and whole-bone mechanics unchanged, hibernating femurs less porous and more mineralised"
+50,D48,Ursus arctos horribilis,c4,citation for the number,HELD,PMID 18037367 is the grizzly bear bone paper
+50,D48,Ursus arctos horribilis,c5,independent origins,NOTHING TO OPEN,
+50,D48,Ursus arctos horribilis,c6,UniProt accessions,HELD,"abstract of PMID 21893223 reports the suppressed bone-specific alkaline phosphatase, the CTX range, the raised leptin and the sclerostin in a quarter of bears"
+50,D48,Ursus arctos horribilis,c7,human target,NOTHING TO OPEN,
+50,D48,Ursus arctos horribilis,c8,approved drug,NOTHING TO OPEN,
+51,D49,Ursus americanus,c3,"the number, its unit and its condition",HELD,"abstract: seven free-ranging female black bears, fibre number and cross-sectional area unchanged, a moderate fall in protein concentration, and no percentage, as the row says"
+51,D49,Ursus americanus,c4,citation for the number,HELD,PMID 9678502 is the black bear muscle paper
+51,D49,Ursus americanus,c5,independent origins,NOTHING TO OPEN,
+51,D49,Ursus americanus,c6,UniProt accessions,HELD,"P05019 is human IGF1, which the row marks as the human target rather than the bear agent"
+51,D49,Ursus americanus,c7,human target,HELD,"abstract of PMID 35077510: hibernating bear serum on human myotubes, raised total protein, lower MuRF1, Akt/FOXO3a. The further claim that bear and human IGF-1 are identical in sequence is not in the abstract and was not checked"
+51,D49,Ursus americanus,c8,approved drug,NOTHING TO OPEN,
+52,D50,none found,c3,"the number, its unit and its condition",HELD,"abstract: HSP47 is the most substantially reduced platelet protein and the abstract carries no number, as the row says"
+52,D50,none found,c4,citation for the number,NOTHING TO OPEN,no citation claimed for a number
+52,D50,none found,c5,independent origins,NOTHING TO OPEN,
+52,D50,none found,c6,UniProt accessions,HELD,P50454 is human Serpin H1
+52,D50,none found,c7,human target,HELD,abstract: the same platelet signature in paralysed spinal cord injury patients
+52,D50,none found,c8,approved drug,NOTHING TO OPEN,
+53,D51,Ambystoma mexicanum,c3,"the number, its unit and its condition",HELD,"abstract: induced metamorphosis cut the regeneration rate twofold and caused carpal and digit malformations, with no effect of body size"
+53,D51,Ambystoma mexicanum,c4,citation for the number,HELD,PMID 27499857 is the axolotl metamorphosis paper
+53,D51,Ambystoma mexicanum,c5,independent origins,NOTHING TO OPEN,
+53,D51,Ambystoma mexicanum,c6,UniProt accessions,NOTHING TO OPEN,
+53,D51,Ambystoma mexicanum,c7,human target,NOTHING TO OPEN,
+53,D51,Ambystoma mexicanum,c8,approved drug,NOTHING TO OPEN,
+54,D52,Danio rerio,c3,"the number, its unit and its condition",HELD,"abstract: hearts fully regenerated within 2 months of 20% ventricular resection, by histology, and Mps1 mutants scarred"
+54,D52,Danio rerio,c4,citation for the number,HELD,PMID 12481136 is the zebrafish heart paper
+54,D52,Danio rerio,c5,independent origins,NOTHING TO OPEN,
+54,D52,Danio rerio,c6,UniProt accessions,HELD,Q8AYG3 is Danio rerio Ttk; P33981 is human TTK
+54,D52,Danio rerio,c7,human target,NOTHING TO OPEN,
+54,D52,Danio rerio,c8,approved drug,NOTHING TO OPEN,
+55,D53,Danio rerio,c3,"the number, its unit and its condition",HELD,full text: ctgfa mutants showed about 71% less bridging than wild-type clutchmates at 4 weeks
+55,D53,Danio rerio,c4,citation for the number,HELD,PMID 27811277 is the ctgfa paper
+55,D53,Danio rerio,c5,independent origins,NOTHING TO OPEN,
+55,D53,Danio rerio,c6,UniProt accessions,HELD,Q5RI33 is Danio rerio ccn2a; P29279 is human CCN2
+55,D53,Danio rerio,c7,human target,HELD,"full text: human CTGF protein gave more than 10-fold more bridging at 1 week, in the fish, which is the 'partial' the row records"
+55,D53,Danio rerio,c8,approved drug,NOTHING TO OPEN,
+56,D54,"Acomys spp. (two wild-caught Kenyan spiny mouse species; the PubMed full-text tool strips italic species names, so the two binomials were not read today)",c3,"the number, its unit and its condition",HELD,"full text: five of six 4 mm wounds fully re-epithelialized by day 3, and hair follicles regrew in 1.5 cm wounds. The full text does name Acomys kempi and Acomys percivali, so the two binomials were available"
+56,D54,"Acomys spp. (two wild-caught Kenyan spiny mouse species; the PubMed full-text tool strips italic species names, so the two binomials were not read today)",c4,citation for the number,HELD,PMID 23018966 is the spiny mouse Nature paper
+56,D54,"Acomys spp. (two wild-caught Kenyan spiny mouse species; the PubMed full-text tool strips italic species names, so the two binomials were not read today)",c5,independent origins,NOTHING TO OPEN,
+56,D54,"Acomys spp. (two wild-caught Kenyan spiny mouse species; the PubMed full-text tool strips italic species names, so the two binomials were not read today)",c6,UniProt accessions,NOTHING TO OPEN,
+56,D54,"Acomys spp. (two wild-caught Kenyan spiny mouse species; the PubMed full-text tool strips italic species names, so the two binomials were not read today)",c7,human target,NOTHING TO OPEN,
+56,D54,"Acomys spp. (two wild-caught Kenyan spiny mouse species; the PubMed full-text tool strips italic species names, so the two binomials were not read today)",c8,approved drug,NOTHING TO OPEN,
+57,D55,none found,c3,"the number, its unit and its condition",HELD,"PMID 36629985 resolves to the IL11 essay in J Cardiovasc Transl Res 16(4) 2023, an opinion piece with no number, as the row says"
+57,D55,none found,c4,citation for the number,NOTHING TO OPEN,no citation claimed
+57,D55,none found,c5,independent origins,NOTHING TO OPEN,
+57,D55,none found,c6,UniProt accessions,NOTHING TO OPEN,
+57,D55,none found,c7,human target,NOTHING TO OPEN,
+57,D55,none found,c8,approved drug,NOTHING TO OPEN,
+58,D56,"Gallus gallus (domestic chicken; the abstract says 'chick', MeSH term Chickens)",c3,"the number, its unit and its condition",HELD,"abstract: 10-day-old chicks, 1500 Hz at 120 dB SPL for 48 h, a patch with all hair cells lost, new hair cells 48 h after exposure, bundles maturing over 10 days"
+58,D56,"Gallus gallus (domestic chicken; the abstract says 'chick', MeSH term Chickens)",c4,citation for the number,HELD,PMID 3680064 is the chick cochlea paper
+58,D56,"Gallus gallus (domestic chicken; the abstract says 'chick', MeSH term Chickens)",c5,independent origins,NOTHING TO OPEN,
+58,D56,"Gallus gallus (domestic chicken; the abstract says 'chick', MeSH term Chickens)",c6,UniProt accessions,NOTHING TO OPEN,
+58,D56,"Gallus gallus (domestic chicken; the abstract says 'chick', MeSH term Chickens)",c7,human target,NOTHING TO OPEN,
+58,D56,"Gallus gallus (domestic chicken; the abstract says 'chick', MeSH term Chickens)",c8,approved drug,NOTHING TO OPEN,
+59,D57,Danio rerio,c3,"the number, its unit and its condition",HELD,"abstract: 7 days of constant 8000 lux, rods and cones dead by apoptosis within 24 h, all four cell types replaced within the 28-day recovery, mosaic not restored, proliferation next to Mueller glia"
+59,D57,Danio rerio,c4,citation for the number,HELD,"PMID 10942883 resolves and its PubMed DOI matches the row's, including the ';2-h' ending"
+59,D57,Danio rerio,c5,independent origins,NOTHING TO OPEN,
+59,D57,Danio rerio,c6,UniProt accessions,NOTHING TO OPEN,
+59,D57,Danio rerio,c7,human target,NOTHING TO OPEN,
+59,D57,Danio rerio,c8,approved drug,NOTHING TO OPEN,
+60,D58,Alligator mississippiensis,c3,"the number, its unit and its condition",HELD,abstract: tooth families with up to five generations at hatching and 42 teeth in function after hatching
+60,D58,Alligator mississippiensis,c4,citation for the number,HELD,PMID 2353674 is the alligator dentition paper
+60,D58,Alligator mississippiensis,c5,independent origins,NOTHING TO OPEN,
+60,D58,Alligator mississippiensis,c6,UniProt accessions,HELD,"PMID 23671090 reports the beta-catenin activation and sFRP1 loss; it does have a full text in PubMed Central, PMC3670376, although the row says the tool returned none"
+60,D58,Alligator mississippiensis,c7,human target,NOTHING TO OPEN,
+60,D58,Alligator mississippiensis,c8,approved drug,NOTHING TO OPEN,
+61,D59,Acomys cahirinus,c3,"the number, its unit and its condition",HELD,"full text: 15 U/kg in three animals, sub-lethal or lethal for C57BL/6 at 5 and 15 U/kg, collagen area about doubled in Mus by day 28 and did not rise in Acomys"
+61,D59,Acomys cahirinus,c4,citation for the number,HELD,PMID 40883787 is the Acomys bleomycin paper
+61,D59,Acomys cahirinus,c5,independent origins,NOTHING TO OPEN,
+61,D59,Acomys cahirinus,c6,UniProt accessions,HELD,"full text: about 2 times more bleomycin hydrolase by semi-quantitative analysis, with the authors' own BALB/c caveat; Q13867 is human BLMH"
+61,D59,Acomys cahirinus,c7,human target,NOTHING TO OPEN,
+61,D59,Acomys cahirinus,c8,approved drug,NOTHING TO OPEN,
+62,D60,"Loxodonta africana (TP53 copy count); the cancer mortality is from zoo necropsy data on elephants, n = 644, African and Asian not split in the abstract",c3,"the number, its unit and its condition",HELD,"abstract: cancer mortality 4.81% (95% CI 3.14-6.49) against 11-25% in humans, from necropsies of 644 elephants"
+62,D60,"Loxodonta africana (TP53 copy count); the cancer mortality is from zoo necropsy data on elephants, n = 644, African and Asian not split in the abstract",c4,citation for the number,HELD,PMID 26447779 is the JAMA elephant paper
+62,D60,"Loxodonta africana (TP53 copy count); the cancer mortality is from zoo necropsy data on elephants, n = 644, African and Asian not split in the abstract",c5,independent origins,HELD,"abstract of PMID 27642012: 20 TP53 copies, gained as body size grew, in the Proboscidean lineage"
+62,D60,"Loxodonta africana (TP53 copy count); the cancer mortality is from zoo necropsy data on elephants, n = 644, African and Asian not split in the abstract",c6,UniProt accessions,HELD,G3UI57 is a Loxodonta africana p53 entry; P04637 is human TP53
+62,D60,"Loxodonta africana (TP53 copy count); the cancer mortality is from zoo necropsy data on elephants, n = 644, African and Asian not split in the abstract",c7,human target,HELD,"abstract: 14.64% of elephant cells against 7.17% of human control and 2.71% of Li-Fraumeni cells, which is the 'partial' the row records"
+62,D60,"Loxodonta africana (TP53 copy count); the cancer mortality is from zoo necropsy data on elephants, n = 644, African and Asian not split in the abstract",c8,approved drug,NOTHING TO OPEN,

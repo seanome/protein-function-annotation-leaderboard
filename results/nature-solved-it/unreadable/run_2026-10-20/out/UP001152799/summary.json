@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 24,
+   "complete_single": 595,
+   "completeness_pct": 92.11,
+   "fragmented": 20,
+   "lineage": "metazoa_odb12",
+   "missing": 33,
+   "short_summary_c_pct": 92.1
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 2,
+   "complete_single": 123,
+   "completeness_pct": 96.9,
+   "fragmented": 1,
+   "lineage": "eukaryota_odb12",
+   "missing": 3,
+   "short_summary_c_pct": 96.9
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "random control",
+ "n_interpro_match": 12271,
+ "n_proteins": 14474,
+ "n_sprot_hit": 9541,
+ "n_uncharacterized_name": 3515,
+ "n_unlabelled": 2146,
+ "proteome_taxid": "467358",
+ "species": "Ceutorhynchus assimilis",
+ "uncharacterized_name_pct": 24.28,
+ "unlabelled_pct": 14.83,
+ "upid": "UP001152799"
+}
