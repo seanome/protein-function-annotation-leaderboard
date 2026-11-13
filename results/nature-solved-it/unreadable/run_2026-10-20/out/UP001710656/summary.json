@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 15,
+   "complete_single": 466,
+   "completeness_pct": 71.58,
+   "fragmented": 98,
+   "lineage": "metazoa_odb12",
+   "missing": 93,
+   "short_summary_c_pct": 71.6
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 3,
+   "complete_single": 90,
+   "completeness_pct": 72.09,
+   "fragmented": 26,
+   "lineage": "eukaryota_odb12",
+   "missing": 10,
+   "short_summary_c_pct": 72.1
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "28.89794",
+ "group": "random control",
+ "n_interpro_match": 20064,
+ "n_proteins": 22758,
+ "n_sprot_hit": 20883,
+ "n_uncharacterized_name": 7653,
+ "n_unlabelled": 1822,
+ "proteome_taxid": "310352",
+ "species": "Pygathrix nigripes",
+ "uncharacterized_name_pct": 33.63,
+ "unlabelled_pct": 8.01,
+ "upid": "UP001710656"
+}

@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 9,
+   "complete_single": 535,
+   "completeness_pct": 80.95,
+   "fragmented": 30,
+   "lineage": "metazoa_odb12",
+   "missing": 98,
+   "short_summary_c_pct": 81.0
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 124,
+   "completeness_pct": 96.9,
+   "fragmented": 1,
+   "lineage": "eukaryota_odb12",
+   "missing": 3,
+   "short_summary_c_pct": 96.9
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "model organism",
+ "n_interpro_match": 15721,
+ "n_proteins": 19792,
+ "n_sprot_hit": 10865,
+ "n_uncharacterized_name": 1180,
+ "n_unlabelled": 3792,
+ "proteome_taxid": "6239",
+ "species": "Caenorhabditis elegans",
+ "uncharacterized_name_pct": 5.96,
+ "unlabelled_pct": 19.16,
+ "upid": "UP000001940"
+}

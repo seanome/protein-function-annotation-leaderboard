@@ -1,0 +1,43 @@
+group	species	upid	proteins	uniprot_entries	busco_lineages	busco_lineages_unmeasured	label_cpu_h	label_wall_h	fetch_wall_h
+model organism	Homo sapiens	UP000005640	20652	147520	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1478	0.1203	0.245
+model organism	Mus musculus	UP000000589	21860	54855	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.2012	0.1239	0.0911
+model organism	Danio rerio	UP000000437	26567	69241	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.4089	0.138	0.115
+model organism	Drosophila melanogaster	UP000000803	13814	21947	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.846	0.0999	0.0364
+model organism	Caenorhabditis elegans	UP000001940	19792	26629	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1099	0.1178	0.0442
+model organism	Saccharomyces cerevisiae	UP000002311	6066	6067	fungi_odb12 + eukaryota_odb12	fungi_odb12 + eukaryota_odb12	0.504	0.0767	0.0101
+model organism	Arabidopsis thaliana	UP000006548	27496	39272	viridiplantae_odb12 + eukaryota_odb12	viridiplantae_odb12 + eukaryota_odb12	1.4499	0.1408	0.0652
+atlas species	Alligator mississippiensis	UP000050525	24656	31974	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.3246	0.1323	0.0531
+atlas species	Artemia franciscana	UP001187531	19893	23911	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1143	0.1181	0.0397
+atlas species	Calypte anna	UP000054308	13267	13267	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.8218	0.0982	0.022
+atlas species	Chrysemys picta	UP000694380	21166	37046	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1705	0.1219	0.0615
+atlas species	Columba livia	UP000053872	14619	17309	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.8815	0.1023	0.0287
+atlas species	Culex quinquefasciatus	UP000002320	18790	18868	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.0656	0.1148	0.0313
+atlas species	Danaus plexippus	UP000007151	15140	15140	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.9045	0.1038	0.0251
+atlas species	Gallus gallus	UP000000539	18373	43712	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.0472	0.1135	0.0726
+atlas species	Heterocephalus glaber	UP000694906	19874	48019	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1135	0.118	0.0797
+atlas species	Ictidomys tridecemlineatus	UP000005215	18446	25333	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.0505	0.1137	0.0421
+atlas species	Loxodonta africana	UP000007646	20018	25615	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1198	0.1184	0.0425
+atlas species	Mya arenaria	UP001164746	37840	37840	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.9065	0.1717	0.0628
+atlas species	Poecilia mexicana	UP000261480	23700	33125	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.2824	0.1294	0.055
+atlas species	Ramazzottius varieornatus	UP000186922	22940	22940	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.2488	0.1272	0.0381
+atlas species	Tenebrio molitor	UP000719412	15190	15190	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.9067	0.104	0.0252
+atlas species	Urocitellus parryii	UP000694417	19631	29187	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1028	0.1173	0.0485
+atlas species	Ursus americanus	UP000291022	20411	32512	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1372	0.1196	0.054
+random control	Eurystomus gularis	UP000541249	13936	13936	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.8514	0.1002	0.0231
+random control	Melipona quadrifasciata	UP000053105	14253	14253	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.8654	0.1012	0.0237
+random control	Pagothenia borchgrevinki	UP001619887	21860	27042	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.2012	0.1239	0.0449
+random control	Calonectris borealis	UP000535403	14417	14417	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.8726	0.1017	0.0239
+random control	Ceutorhynchus assimilis	UP001152799	14474	15296	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.8751	0.1019	0.0254
+random control	Phaetusa simplex	UP000556165	13248	13248	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.821	0.0982	0.022
+random control	Cettia cetti	UP000524451	14828	14828	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.8908	0.1029	0.0246
+random control	Trichogramma brassicae	UP000479190	16797	16797	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.9777	0.1088	0.0279
+random control	Pristionchus fissidentatus	UP001432322	28245	28245	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.483	0.143	0.0469
+random control	Chloropsis cyanopogon	UP000614263	12540	12540	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.7898	0.0961	0.0208
+random control	Paragonimus skrjabini	UP000822476	12629	12629	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.7937	0.0963	0.021
+random control	Octodon degus	UP000515203	20433	35368	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1382	0.1197	0.0587
+random control	Oikopleura dioica	UP001158576	17075	18603	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	0.9899	0.1096	0.0309
+random control	Rhinopithecus bieti	UP000233180	20855	42660	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.1568	0.1209	0.0708
+random control	Pygathrix nigripes	UP001710656	22758	22758	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.2408	0.1266	0.0378
+random control	Sciurus carolinensis	UP001166674	22862	22862	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.2454	0.1269	0.038
+random control	Pteropus alecto	UP000010552	19520	19520	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.0979	0.1169	0.0324
+leaderboard reference	Magallana gigas	UP000005408	30272	57874	metazoa_odb12 + eukaryota_odb12	eukaryota_odb12	1.5725	0.1491	0.0961

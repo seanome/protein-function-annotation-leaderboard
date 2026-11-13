@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 17,
+   "complete_single": 570,
+   "completeness_pct": 87.35,
+   "fragmented": 50,
+   "lineage": "metazoa_odb12",
+   "missing": 35,
+   "short_summary_c_pct": 87.4
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 5,
+   "complete_single": 111,
+   "completeness_pct": 89.92,
+   "fragmented": 9,
+   "lineage": "eukaryota_odb12",
+   "missing": 4,
+   "short_summary_c_pct": 89.9
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "83.51396",
+ "group": "random control",
+ "n_interpro_match": 22287,
+ "n_proteins": 22862,
+ "n_sprot_hit": 22738,
+ "n_uncharacterized_name": 231,
+ "n_unlabelled": 93,
+ "proteome_taxid": "30640",
+ "species": "Sciurus carolinensis",
+ "uncharacterized_name_pct": 1.01,
+ "unlabelled_pct": 0.41,
+ "upid": "UP001166674"
+}

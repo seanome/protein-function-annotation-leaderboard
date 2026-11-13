@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 3,
+   "complete_single": 459,
+   "completeness_pct": 68.75,
+   "fragmented": 106,
+   "lineage": "metazoa_odb12",
+   "missing": 104,
+   "short_summary_c_pct": 68.8
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 0,
+   "complete_single": 98,
+   "completeness_pct": 75.97,
+   "fragmented": 16,
+   "lineage": "eukaryota_odb12",
+   "missing": 15,
+   "short_summary_c_pct": 76.0
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "random control",
+ "n_interpro_match": 9366,
+ "n_proteins": 12629,
+ "n_sprot_hit": 7509,
+ "n_uncharacterized_name": 4191,
+ "n_unlabelled": 3180,
+ "proteome_taxid": "59628",
+ "species": "Paragonimus skrjabini",
+ "uncharacterized_name_pct": 33.19,
+ "unlabelled_pct": 25.18,
+ "upid": "UP000822476"
+}

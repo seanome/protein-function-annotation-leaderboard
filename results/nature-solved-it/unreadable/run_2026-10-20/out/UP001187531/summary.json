@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 39,
+   "complete_single": 483,
+   "completeness_pct": 77.68,
+   "fragmented": 61,
+   "lineage": "metazoa_odb12",
+   "missing": 89,
+   "short_summary_c_pct": 77.7
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 5,
+   "complete_single": 103,
+   "completeness_pct": 83.72,
+   "fragmented": 6,
+   "lineage": "eukaryota_odb12",
+   "missing": 15,
+   "short_summary_c_pct": 83.7
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "692.17015",
+ "group": "atlas species",
+ "n_interpro_match": 14959,
+ "n_proteins": 19893,
+ "n_sprot_hit": 12382,
+ "n_uncharacterized_name": 7036,
+ "n_unlabelled": 4720,
+ "proteome_taxid": "6661",
+ "species": "Artemia franciscana",
+ "uncharacterized_name_pct": 35.37,
+ "unlabelled_pct": 23.73,
+ "upid": "UP001187531"
+}
