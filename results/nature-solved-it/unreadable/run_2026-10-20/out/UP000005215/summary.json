@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 7,
+   "complete_single": 624,
+   "completeness_pct": 93.9,
+   "fragmented": 25,
+   "lineage": "metazoa_odb12",
+   "missing": 16,
+   "short_summary_c_pct": 93.9
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 119,
+   "completeness_pct": 93.02,
+   "fragmented": 5,
+   "lineage": "eukaryota_odb12",
+   "missing": 4,
+   "short_summary_c_pct": 93.0
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "83.51396",
+ "group": "atlas species",
+ "n_interpro_match": 18287,
+ "n_proteins": 18446,
+ "n_sprot_hit": 18367,
+ "n_uncharacterized_name": 220,
+ "n_unlabelled": 58,
+ "proteome_taxid": "43179",
+ "species": "Ictidomys tridecemlineatus",
+ "uncharacterized_name_pct": 1.19,
+ "unlabelled_pct": 0.31,
+ "upid": "UP000005215"
+}
