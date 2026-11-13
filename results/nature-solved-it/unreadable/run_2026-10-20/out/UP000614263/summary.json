@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 9,
+   "complete_single": 474,
+   "completeness_pct": 71.88,
+   "fragmented": 90,
+   "lineage": "metazoa_odb12",
+   "missing": 99,
+   "short_summary_c_pct": 71.9
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 1,
+   "complete_single": 87,
+   "completeness_pct": 68.22,
+   "fragmented": 23,
+   "lineage": "eukaryota_odb12",
+   "missing": 18,
+   "short_summary_c_pct": 68.2
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "random control",
+ "n_interpro_match": 12370,
+ "n_proteins": 12540,
+ "n_sprot_hit": 12510,
+ "n_uncharacterized_name": 0,
+ "n_unlabelled": 5,
+ "proteome_taxid": "1218682",
+ "species": "Chloropsis cyanopogon",
+ "uncharacterized_name_pct": 0.0,
+ "unlabelled_pct": 0.04,
+ "upid": "UP000614263"
+}

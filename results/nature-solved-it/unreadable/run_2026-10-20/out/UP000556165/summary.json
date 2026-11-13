@@ -1,0 +1,39 @@
+{
+ "busco": [
+  {
+   "buscos": 672,
+   "complete_duplicated": 1,
+   "complete_single": 531,
+   "completeness_pct": 79.17,
+   "fragmented": 78,
+   "lineage": "metazoa_odb12",
+   "missing": 62,
+   "short_summary_c_pct": 79.2
+  },
+  {
+   "buscos": 129,
+   "complete_duplicated": 0,
+   "complete_single": 94,
+   "completeness_pct": 72.87,
+   "fragmented": 16,
+   "lineage": "eukaryota_odb12",
+   "missing": 19,
+   "short_summary_c_pct": 72.9
+  }
+ ],
+ "busco_lineage": "metazoa_odb12",
+ "busco_lineage_all": "eukaryota_odb12",
+ "definition": "share of proteins with neither an InterPro match nor a Swiss-Prot hit above 30% identity (a hit to its own entry counts)",
+ "divergence_my": "318.82488",
+ "group": "random control",
+ "n_interpro_match": 13112,
+ "n_proteins": 13248,
+ "n_sprot_hit": 13222,
+ "n_uncharacterized_name": 0,
+ "n_unlabelled": 4,
+ "proteome_taxid": "297813",
+ "species": "Phaetusa simplex",
+ "uncharacterized_name_pct": 0.0,
+ "unlabelled_pct": 0.03,
+ "upid": "UP000556165"
+}

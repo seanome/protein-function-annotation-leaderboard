@@ -1,0 +1,275 @@
+{
+ "page": "tools/prostt5.html",
+ "title": "ProstT5 + Foldseek card",
+ "source": {
+  "repo": "seanome/2024-kmerseek-analysis",
+  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit_date": "2026-10-15T12:40:15Z",
+  "path": "results/leaderboard",
+  "copied_at": "2026-10-15T12:40:50Z",
+  "sha256": {
+   "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
+   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
+   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d"
+  }
+ },
+ "text": [
+  {
+   "tag": "p",
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 548ec5b8 (results/leaderboard), copied 2026-10-15."
+  },
+  {
+   "tag": "h1",
+   "text": "ProstT5 + Foldseek"
+  },
+  {
+   "tag": "p",
+   "text": "Tool id prostt5. Numbers from seanome/2024-kmerseek-analysis commit 548ec5b8."
+  },
+  {
+   "tag": "h2",
+   "text": "What it compares"
+  },
+  {
+   "tag": "p",
+   "text": "Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protein language model, then searched with Foldseek, so no AlphaFold model is needed."
+  },
+  {
+   "tag": "h2",
+   "text": "What it needs"
+  },
+  {
+   "tag": "li",
+   "text": "sequence only: yes"
+  },
+  {
+   "tag": "li",
+   "text": "AlphaFold model: no"
+  },
+  {
+   "tag": "li",
+   "text": "GPU: yes"
+  },
+  {
+   "tag": "h2",
+   "text": "Reference searched"
+  },
+  {
+   "tag": "p",
+   "text": "3Di letters predicted by ProstT5 for the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a Foldseek database."
+  },
+  {
+   "tag": "h2",
+   "text": "How to read its score"
+  },
+  {
+   "tag": "p",
+   "text": "Bit score: higher ranks first. The E-value cutoff was 10."
+  },
+  {
+   "tag": "h2",
+   "text": "Strong and weak strata"
+  },
+  {
+   "tag": "p",
+   "text": "Under the Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, its best setting is 3di_from_seq: Fmax 0.223 over 2,435 true instances. Below, each stratum compares this setting with the best setting of any other tool in that same stratum, so the other tool's setting can change from line to line. Only strata with at least 30 true instances are compared."
+  },
+  {
+   "tag": "p",
+   "text": "Where it is closest to, or furthest ahead of, the best other tool:"
+  },
+  {
+   "tag": "li",
+   "text": "no same-family domain in the relative: Fmax 0.020 (n = 321); best other: HH-suite (hhsearch) single_seq, 0.032."
+  },
+  {
+   "tag": "li",
+   "text": "identity 30–40% to the closest same-family domain: Fmax 0.144 (n = 165); best other: MMseqs2, three rounds s7, 0.209."
+  },
+  {
+   "tag": "p",
+   "text": "Where it is furthest behind the best other tool:"
+  },
+  {
+   "tag": "li",
+   "text": "regions 16–30 aa long: Fmax 0.000 (n = 271); best other: kmerseek wwmj5_k11_lcFalse, 0.330."
+  },
+  {
+   "tag": "li",
+   "text": "regions 31–60 aa long: Fmax 0.032 (n = 420); best other: kmerseek gbmr4_k21_lcFalse, 0.232."
+  },
+  {
+   "tag": "p",
+   "text": "Swiss-Prot features, raw calls, zebrafish, setting 3di_from_seq: best feature type ACT_SITE (active site residue), Fmax 0.278 (n = 176); worst TRANSMEM (membrane-spanning segment), Fmax 0.000 (n = 1,124)."
+  },
+  {
+   "tag": "h2",
+   "text": "Known failure modes"
+  },
+  {
+   "tag": "li",
+   "text": "Proteins longer than 6,000 residues are skipped before the 3Di letters are predicted, and are listed in a skipped-proteins file."
+  },
+  {
+   "tag": "li",
+   "text": "Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the 998 queries that step is counted in the GPU column and the cost; for each relative's proteome it is a one-off database build and is not counted."
+  },
+  {
+   "tag": "h2",
+   "text": "Cost per 1,000 queries"
+  },
+  {
+   "tag": "p",
+   "text": "Setting 3di_from_seq, searching zebrafish: 0.0861 CPU-hours plus 0.0192 GPU-hours for predicting the queries' 3Di letters, measured on Sherlock. Peak memory 1.5 GB. That is about $0.0232 at $0.044625 per CPU-hour and $1.006 per GPU-hour. This search completed 2 times; the runs took 0.0861 to 0.131 CPU-hours per 1,000 queries, and the newest is shown. Across the 15 relatives searched with this setting: 0.0541 to 0.123 CPU-hours per 1,000 queries; peak memory up to 1.5 GB."
+  },
+  {
+   "tag": "p",
+   "text": "CPU-hours count the search only, not building the relative's database."
+  },
+  {
+   "tag": "h2",
+   "text": "Licence"
+  },
+  {
+   "tag": "li",
+   "text": "Licence: GPL-3.0 (Foldseek); MIT (ProstT5 model weights) (source)"
+  },
+  {
+   "tag": "li",
+   "text": "Commercial use allowed: Yes. Foldseek's GPL-3.0 applies to changed versions you distribute."
+  },
+  {
+   "tag": "h2",
+   "text": "Settings in the table"
+  },
+  {
+   "tag": "li",
+   "text": "3di_from_seq: 3Di letters predicted from sequence by ProstT5"
+  },
+  {
+   "tag": "h2",
+   "text": "Version, container, command"
+  },
+  {
+   "tag": "li",
+   "text": "Version: Foldseek 10.941cd33 with ProstT5 weights"
+  },
+  {
+   "tag": "li",
+   "text": "Container: quay.io/biocontainers/foldseek:10.941cd33--h5021889_1 (sha256:1156a052f31b2afb85257c02e83a962f559c9752273fe1064ab735f90ac29d1a)"
+  },
+  {
+   "tag": "pre",
+   "text": "foldseek createdb filtered.fasta zebrafish_prostt5/db \\ --prostt5-model weights --gpu 1 --threads 8 foldseek search \\ human-38fdd87d_prostt5/db zebrafish_prostt5/db result tmp \\ --threads 16 \\ -e 10.0 \\ --max-seqs 1000"
+  },
+  {
+   "tag": "p",
+   "text": "The first command (one per proteome, on a GPU) predicts the 3Di letters. The second is the search the cost columns measure."
+  },
+  {
+   "tag": "h2",
+   "text": "Will it work for you?"
+  },
+  {
+   "tag": "li",
+   "text": "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting 3di_from_seq; strata with at least 30 true instances.)"
+  },
+  {
+   "tag": "li",
+   "text": "Do you have a GPU to predict the 3Di letters for your proteins? The run used one GPU for that step; its cost is not counted here."
+  },
+  {
+   "tag": "li",
+   "text": "Can you spend about 0.0861 CPU-hours and 0.0192 GPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  },
+  {
+   "tag": "p",
+   "text": "All tool cards · this card as Markdown · as JSON"
+  }
+ ],
+ "data": {
+  "tool": "prostt5",
+  "name": "ProstT5 + Foldseek",
+  "kind": "compares 3-D shape letters (3Di)",
+  "compares": "Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protein language model, then searched with Foldseek, so no AlphaFold model is needed.",
+  "needs": {
+   "sequence only": true,
+   "AlphaFold model": false,
+   "GPU": true
+  },
+  "reference": "3Di letters predicted by ProstT5 for the relative's proteome (Quest for Orthologs reference proteomes, release 2020_04), as a Foldseek database.",
+  "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
+  "failure_modes": [
+   "Proteins longer than 6,000 residues are skipped before the 3Di letters are predicted, and are listed in a skipped-proteins file.",
+   "Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the 998 queries that step is counted in the GPU column and the cost; for each relative's proteome it is a one-off database build and is not counted."
+  ],
+  "version": "Foldseek 10.941cd33 with ProstT5 weights",
+  "licence": "GPL-3.0 (Foldseek); MIT (ProstT5 model weights)",
+  "commercial_use": "Yes. Foldseek's GPL-3.0 applies to changed versions you distribute.",
+  "licence_url": "https://huggingface.co/Rostlab/ProstT5",
+  "container": "quay.io/biocontainers/foldseek:10.941cd33--h5021889_1 (sha256:1156a052f31b2afb85257c02e83a962f559c9752273fe1064ab735f90ac29d1a)",
+  "command": "foldseek createdb filtered.fasta zebrafish_prostt5/db \\\n    --prostt5-model weights --gpu 1 --threads 8\n\nfoldseek search \\\n    human-38fdd87d_prostt5/db zebrafish_prostt5/db result tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
+  "numbers_from": {
+   "repo": "seanome/2024-kmerseek-analysis",
+   "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+   "filters": "pfam, raw, zebrafish"
+  },
+  "best_setting": "3di_from_seq",
+  "strong": [
+   {
+    "axis": "identity",
+    "stratum": "no_homolog",
+    "fmax": 0.019770817207544145,
+    "n": 321,
+    "other_tool": "hhblits",
+    "other_setting": "single_seq",
+    "other_fmax": 0.03236195478661682,
+    "margin": -0.012591137579072674
+   },
+   {
+    "axis": "identity",
+    "stratum": "30-40%",
+    "fmax": 0.14395007502778603,
+    "n": 165,
+    "other_tool": "mmseqs2_iterative",
+    "other_setting": "s7",
+    "other_fmax": 0.20886402027992682,
+    "margin": -0.06491394525214078
+   }
+  ],
+  "weak": [
+   {
+    "axis": "feature_length_bin",
+    "stratum": "16-30",
+    "fmax": 0.0001885191818267509,
+    "n": 271,
+    "other_tool": "kmerseek",
+    "other_setting": "wwmj5_k11_lcFalse",
+    "other_fmax": 0.3297506857792661,
+    "margin": -0.3295621665974393
+   },
+   {
+    "axis": "feature_length_bin",
+    "stratum": "31-60",
+    "fmax": 0.03167736406589417,
+    "n": 420,
+    "other_tool": "kmerseek",
+    "other_setting": "gbmr4_k21_lcFalse",
+    "other_fmax": 0.23209537155652643,
+    "margin": -0.20041800749063227
+   }
+  ],
+  "cost_per_1000_queries": {
+   "cpu_h_measured": 0.08607492763304385,
+   "peak_rss_gb": 1.5,
+   "hardware": "Stanford Sherlock, SLURM partition hns; searches on CPU only"
+  },
+  "questions": [
+   "Is the closest same-family domain in the relative you will search at least 40% identical, for most of your proteins? If yes, Fmax here is 40–60% 0.139 (n = 563), 60–100% 0.209 (n = 1,289). If no, 20–30% 0.247 (n = 93), 30–40% 0.144 (n = 165). (Pfam truth set, raw calls, zebrafish (430 Mya) as the relative searched, setting `3di_from_seq`; strata with at least 30 true instances.)",
+   "Do you have a GPU to predict the 3Di letters for your proteins? The run used one GPU for that step; its cost is not counted here.",
+   "Can you spend about 0.0861 CPU-hours and 0.0192 GPU-hours per 1,000 proteins for each relative you search? That is the measured cost against zebrafish; the range over relatives is under \"Cost per 1,000 queries\" above."
+  ],
+  "markdown": "prostt5.md"
+ }
+}
