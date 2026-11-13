@@ -1,6 +1,6 @@
 # MMseqs2
 
-Tool id `mmseqs2_seqseq`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
+Tool id `mmseqs2_seqseq`. Numbers from seanome/2024-kmerseek-analysis commit `39d81ec9`.
 
 ## What it compares
 

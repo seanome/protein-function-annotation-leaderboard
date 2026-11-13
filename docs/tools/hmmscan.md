@@ -1,6 +1,6 @@
 # hmmscan with Pfam
 
-Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
+Tool id `hmmscan`. Numbers from seanome/2024-kmerseek-analysis commit `39d81ec9`.
 
 ## What it compares
 

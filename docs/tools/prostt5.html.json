@@ -3,21 +3,24 @@
  "title": "ProstT5 + Foldseek card",
  "source": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
-  "commit_date": "2026-10-15T12:40:15Z",
+  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
+  "commit_date": "2026-10-15T13:17:37Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-15T12:40:50Z",
+  "copied_at": "2026-10-15T13:18:08Z",
   "sha256": {
    "results.parquet": "e7856899290c7efdb75b18764ed826388166169d7eecfbd9a9cf312c10c5623c",
-   "compute.parquet": "9121fe7c65a62dcb05bd175e3a426767dee7576229e35912038298a7b92ef870",
+   "compute.parquet": "411cac8cc8fb4b30e84a1a5319cfe08d7c42044a095307d1723acd52e084eefa",
    "coverage.md": "a1092eca82d46a8c506ed4f1c549f23280188b2858b7965fc6b859627f9260f8",
-   "provenance.json": "91ed1ec5e537cca199453ce6b28a328b62a9ad87a317a2f575dcabc003b2b28d"
+   "provenance.json": "70edaff69036ea89dffcf703cf303b2d9a6e4f92f1f83a2c9043a53f7cacb3b9",
+   "pileup/regions.parquet": "e97701d2fcb601babe25c7d5c6c82760ea19e460e9bc1d555fe5f8f69cb4d6d8",
+   "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
+   "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e"
   }
  },
  "text": [
   {
    "tag": "p",
-   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 548ec5b8 (results/leaderboard), copied 2026-10-15."
+   "text": "Numbers from seanome/2024-kmerseek-analysis at commit 39d81ec9 (results/leaderboard), copied 2026-10-15."
   },
   {
    "tag": "h1",
@@ -25,7 +28,7 @@
   },
   {
    "tag": "p",
-   "text": "Tool id prostt5. Numbers from seanome/2024-kmerseek-analysis commit 548ec5b8."
+   "text": "Tool id prostt5. Numbers from seanome/2024-kmerseek-analysis commit 39d81ec9."
   },
   {
    "tag": "h2",
@@ -212,7 +215,7 @@
   "command": "foldseek createdb filtered.fasta zebrafish_prostt5/db \\\n    --prostt5-model weights --gpu 1 --threads 8\n\nfoldseek search \\\n    human-38fdd87d_prostt5/db zebrafish_prostt5/db result tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
   "numbers_from": {
    "repo": "seanome/2024-kmerseek-analysis",
-   "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+   "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
    "filters": "pfam, raw, zebrafish"
   },
   "best_setting": "3di_from_seq",

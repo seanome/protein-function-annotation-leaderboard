@@ -1,0 +1,94 @@
+{
+ "hmmer3_phmmer|default": {
+  "per_residue_recall_mean_over_regions": 0.8069412314058036,
+  "n_regions_any_body_residue_covered": 2008
+ },
+ "mmseqs2_seqseq|s7": {
+  "per_residue_recall_mean_over_regions": 0.8211844432594403,
+  "n_regions_any_body_residue_covered": 2021
+ },
+ "hmmer3_jackhmmer|n3": {
+  "per_residue_recall_mean_over_regions": 0.8391155093793387,
+  "n_regions_any_body_residue_covered": 2074
+ },
+ "mmseqs2_iterative|s7": {
+  "per_residue_recall_mean_over_regions": 0.8210503777238548,
+  "n_regions_any_body_residue_covered": 2027
+ },
+ "hhblits|single_seq": {
+  "per_residue_recall_mean_over_regions": 0.8603488804339282,
+  "n_regions_any_body_residue_covered": 2114
+ },
+ "foldseek|3di_aa": {
+  "per_residue_recall_mean_over_regions": 0.7788480632995967,
+  "n_regions_any_body_residue_covered": 1900
+ },
+ "prostt5|3di_from_seq": {
+  "per_residue_recall_mean_over_regions": 0.8483205755353327,
+  "n_regions_any_body_residue_covered": 2067
+ },
+ "kmerseek|gbmr4_k15_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.14253051350906487,
+  "n_regions_any_body_residue_covered": 442
+ },
+ "kmerseek|gbmr4_k17_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.14221077687541492,
+  "n_regions_any_body_residue_covered": 445
+ },
+ "kmerseek|gbmr4_k19_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.13665904822162891,
+  "n_regions_any_body_residue_covered": 430
+ },
+ "kmerseek|gbmr4_k21_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.13019629917647363,
+  "n_regions_any_body_residue_covered": 415
+ },
+ "kmerseek|hp_thomas_dill2_k24_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.15688521640008812,
+  "n_regions_any_body_residue_covered": 506
+ },
+ "kmerseek|hp_thomas_dill2_k27_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.1374653182527674,
+  "n_regions_any_body_residue_covered": 448
+ },
+ "kmerseek|hp_thomas_dill2_k30_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.12034826216261199,
+  "n_regions_any_body_residue_covered": 391
+ },
+ "kmerseek|hp_thomas_dill2_k33_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.10758527884819558,
+  "n_regions_any_body_residue_covered": 347
+ },
+ "kmerseek|protein20_k6_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.03555520072415217,
+  "n_regions_any_body_residue_covered": 119
+ },
+ "kmerseek|protein20_k7_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.03593216672106615,
+  "n_regions_any_body_residue_covered": 119
+ },
+ "kmerseek|protein20_k8_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.03593216672106615,
+  "n_regions_any_body_residue_covered": 119
+ },
+ "kmerseek|wwmj5_k11_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.07217085084321488,
+  "n_regions_any_body_residue_covered": 250
+ },
+ "kmerseek|wwmj5_k12_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.07075342080217878,
+  "n_regions_any_body_residue_covered": 244
+ },
+ "kmerseek|wwmj5_k14_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.06664331214126196,
+  "n_regions_any_body_residue_covered": 233
+ },
+ "kmerseek|wwmj5_k15_lcFalse": {
+  "per_residue_recall_mean_over_regions": 0.06444959779618813,
+  "n_regions_any_body_residue_covered": 225
+ },
+ "hmmscan|direct": {
+  "per_residue_recall_mean_over_regions": 0.9945592342774506,
+  "n_regions_any_body_residue_covered": 2422
+ }
+}
