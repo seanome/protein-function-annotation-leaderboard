@@ -23,6 +23,7 @@ STEPS = {
     2: "Proteins with an experimental structure (PDB)",
     3: "Described species, and species with a Swiss-Prot entry",
     4: "Human and Pacific oyster, one row per protein",
+    7: "What labelling the two proteomes cost",
 }
 FOUR = {
     "Q25460": "Mussel foot protein 1 (Mytilus edulis)",
@@ -111,6 +112,13 @@ def main():
                 "protein has the labels named in the legend. The counts printed above each map come from "
                 "`results/why/proteome_labels.parquet`, the same table as the numbers above.\n"
             )
+            if "cost_mmseqs2_reserved_core_h" in V:
+                md.append(t(
+                    "Labelling both proteomes this way took {cost_mmseqs2_reserved_core_h} reserved core-hours and "
+                    "{cost_mmseqs2_peak_rss_gb} GB of memory on {cost_mmseqs2_cpus} CPUs for MMseqs2 (one search for both), "
+                    "and {cost_busco_oyster_reserved_core_h} reserved core-hours for BUSCO on the oyster, Sherlock job 47961379. "
+                    "Step 7 has both species and the CPU-hours used.\n"
+                ))
 
     # Step 6
     calls = pl.read_parquet(OUT / "four_proteins_calls.parquet")
