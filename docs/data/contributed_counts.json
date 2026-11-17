@@ -1,6 +1,18 @@
 {
  "note": "Accepted wet-lab rows in data/truth_contributed.tsv, per organism. Keyed by NCBI taxon ID; rows given as a sequence with an organism name and no taxon ID are under 'by_name'.",
- "n_rows": 0,
+ "n_rows": 14,
  "by_taxon": {},
- "by_name": {}
+ "by_name": {
+  "Salmonella typhimurium": 2,
+  "Staphylococcus aureus": 2,
+  "myxoma virus": 2,
+  "Borrelia burgdorferi": 1,
+  "Caenorhabditis elegans": 1,
+  "Human adenovirus 2": 1,
+  "Methanocaldococcus jannaschii": 1,
+  "Notothenia neglecta (Antarctic)": 1,
+  "Thermotoga maritima": 1,
+  "influenza A H3N2, A/Udorn/307/1972": 1,
+  "vaccinia virus": 1
+ }
 }

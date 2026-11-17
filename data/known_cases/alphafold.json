@@ -1,0 +1,51 @@
+{
+ "P41958": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P41958-F1-model_v6.cif",
+  "version": 6
+ },
+ "Q9Q8H3": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365764421-model_v1.cif",
+  "version": 1
+ },
+ "P0DTS9": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P0DTS9-F1-model_v6.cif",
+  "version": 6
+ },
+ "H7C7N8": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-H7C7N8-F1-model_v6.cif",
+  "version": 6
+ },
+ "P24856": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P24856-F1-model_v6.cif",
+  "version": 6
+ },
+ "P03254": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-0000000211982092-model_v1.cif",
+  "version": 1
+ },
+ "P69732": {},
+ "Q83383": {},
+ "P03322": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365763033-model_v1.cif",
+  "version": 1
+ },
+ "P03347": {},
+ "P03255": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-0000000211982139-model_v1.cif",
+  "version": 1
+ },
+ "P03077": {},
+ "P06463": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365832307-model_v1.cif",
+  "version": 1
+ },
+ "P03383": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-0000000365761473-model_v1.cif",
+  "version": 1
+ },
+ "P03375": {},
+ "P33379": {
+  "url": "https://alphafold.ebi.ac.uk/files/AF-P33379-F1-model_v6.cif",
+  "version": 6
+ }
+}

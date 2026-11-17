@@ -23,6 +23,7 @@ PAGES = {
     "6_methods": "methods.html",
     "7_claims": "claims.html",
     "8_coverage": "coverage.html",
+    "9_known_cases": "known-cases.html",
 }
 EXTRA = {
     "3b_compare_cost_usd_auprc": "cost.html#x=cost&y=auprc",
