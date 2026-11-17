@@ -3,12 +3,16 @@
 SOURCE_REPO ?= seanome/2024-kmerseek-analysis
 SOURCE_COMMIT ?= 7eca428b
 PILEUP_COMMIT ?= 39d81ec9
+# No-search baseline rows and their cost: the Sherlock run (job 48547674) on
+# olgabot/no-search-baselines, PR 158 of the source repo.
+NOSEARCH_COMMIT ?= 5b644dc8
+NOSEARCH_PATH ?= results/leaderboard
 PY ?= .venv/bin/python
 
 .PHONY: tables site check serve
 
 tables:
-	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --out data
+	$(PY) scripts/copy_tables.py --repo $(SOURCE_REPO) --commit $(SOURCE_COMMIT) --pileup-commit $(PILEUP_COMMIT) --nosearch-commit $(NOSEARCH_COMMIT) --nosearch-path $(NOSEARCH_PATH) --out data
 
 site:
 	$(PY) scripts/build_site.py --data data --out docs

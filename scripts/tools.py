@@ -17,6 +17,8 @@ KINDS = {
     "shapes": {"label": "compares 3-D shape letters (3Di)", "color": "#009E73"},
     "kmers": {"label": "counts shared k-mers in a reduced alphabet", "color": "#CC3311"},
     "models": {"label": "scans curated Pfam family models", "color": "#6B4C9A"},
+    # Grey: a context row, not a competitor. Always drawn last in Table 1.
+    "nosearch": {"label": "no search: reads the query sequence alone", "color": "#777777"},
 }
 
 TOOLS = {
@@ -356,6 +358,45 @@ foldseek search \\
         "requirement_question": None,
     },
 }
+
+# The no-search baselines (seanome/2024-kmerseek-analysis, scripts and pipeline entry
+# noSearchBaselines; rules in docs/no_search_baselines_rules.md). They search nothing, so
+# they have no tool card: the leaderboard links them to Methods, where each is described.
+BASELINES = {
+    "kyte_doolittle": {
+        "name": "Kyte-Doolittle scan",
+        "what": "Hydropathy (Kyte and Doolittle 1982) averaged over 19-residue windows; "
+                "windows above 1.6 are called membrane-spanning. The scan of notebook 231.",
+        "addresses": "Swiss-Prot TRANSMEM and INTRAMEM features",
+    },
+    "iupred": {
+        "name": "IUPred long",
+        "what": "IUPred 1.0, long mode; runs of 20 or more residues scoring above 0.5 are "
+                "called disordered.",
+        "addresses": "Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS",
+    },
+    "metapredict": {
+        "name": "metapredict",
+        "what": "metapredict 3.0.1; runs of 20 or more residues scoring above 0.5 are called "
+                "disordered.",
+        "addresses": "Swiss-Prot REGION features (all, and those noted Disordered) and COMPBIAS",
+    },
+    "seg": {
+        "name": "SEG",
+        "what": "segmasker from BLAST+ 2.16.0 at its default settings (window 12, locut 2.2, "
+                "hicut 2.5); each masked stretch is a call.",
+        "addresses": "Swiss-Prot COMPBIAS and REPEAT features",
+    },
+    "pfam_family_frequency": {
+        "name": "Pfam family frequency",
+        "what": "Every query gets, over its whole length, the Pfam family held by the most "
+                "human proteins of its length, the queries themselves left out.",
+        "addresses": "Pfam and Pfam-N",
+    },
+}
+for _t, _b in BASELINES.items():
+    _b.update(kind="nosearch", shape="circle",
+              needs={"sequence only": True, "3D structure prediction": False, "GPU": False})
 
 # Common names for the relatives, in the order of time since they split from human.
 SPECIES = {
