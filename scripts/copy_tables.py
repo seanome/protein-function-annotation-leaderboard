@@ -20,6 +20,25 @@ PILEUP = ["pileup/regions.parquet", "pileup/calls.parquet", "pileup/provenance.j
 # Optional, and copied from their own commit and path: the first copy is the laptop check in
 # tables/no_search_baselines_laptop_check/, until the Sherlock run's table replaces it.
 NO_SEARCH = ["no_search_baselines.parquet", "no_search_compute.parquet"]
+# The best-hit transfer rows (source repo PR 160, nextflow-runs/qfo-pfam-region-benchmark
+# bin/annotator_tool_rows.py and scripts/annotator_g1_call_rules.py). Copied from their own
+# commit into data/best_hit/; each file must match the sha256 pinned in
+# data/best_hit_pins.json, because the source folder has no provenance listing of its own.
+# Paths from the source repo's root; each lands in data/best_hit/ under its file name
+# (cards in data/best_hit/cards/).
+BEST_HIT = [f"results/leaderboard/annotator_tools/{n}" for n in (
+    "rows.parquet", "compute.parquet", "call_rules.parquet",
+    "cards/diamond_besthit.sensitive.json",
+    "cards/diamond_besthit.ultra-sensitive.json",
+    "cards/mmseqs2_besthit.s7.5.json")] + [
+    f"figures/annotator_tools/{n}_best_hit_vs_qfo_relatives_midi_plus.png"
+    for n in ("fmax", "median_iou")]
+
+
+def best_hit_dest(path: str) -> str:
+    """data/best_hit/<name>, keeping cards/ for the cards."""
+    parts = path.split("/")
+    return "/".join(parts[-2:]) if parts[-2] == "cards" else parts[-1]
 
 
 def gh(*args: str, raw: bool = False) -> bytes:
@@ -51,6 +70,10 @@ def main() -> None:
                     help="commit holding the no-search baseline tables")
     ap.add_argument("--nosearch-path", default="results/leaderboard",
                     help="folder of the no-search baseline tables at --nosearch-commit")
+    ap.add_argument("--besthit-commit", default=None,
+                    help="commit holding the best-hit transfer tables")
+    ap.add_argument("--besthit-pins", type=Path, default=Path("data/best_hit_pins.json"),
+                    help="sha256 each best-hit file must have")
     a = ap.parse_args()
 
     commit = json.loads(gh(f"repos/{a.repo}/commits/{a.commit}"))
@@ -108,6 +131,24 @@ def main() -> None:
     if nosearch_sha and "no_search_baselines.parquet" not in checksums:
         raise SystemExit(f"{a.nosearch_path}/no_search_baselines.parquet is not at {nosearch_sha[:8]}")
 
+    besthit_sha = None
+    if a.besthit_commit:
+        besthit_sha = json.loads(gh(f"repos/{a.repo}/commits/{a.besthit_commit}"))["sha"]
+        pins = json.loads(a.besthit_pins.read_text())
+        if pins.get("commit") != besthit_sha:
+            raise SystemExit(f"{a.besthit_pins} pins commit {pins.get('commit')}, "
+                             f"not {besthit_sha}: update the pins with the commit")
+        for path in BEST_HIT:
+            body = gh(f"repos/{a.repo}/contents/{path}?ref={besthit_sha}", raw=True)
+            name = best_hit_dest(path)
+            (a.out / "best_hit" / name).parent.mkdir(parents=True, exist_ok=True)
+            (a.out / "best_hit" / name).write_bytes(body)
+            checksums["best_hit/" + name] = hashlib.sha256(body).hexdigest()
+        check_listed(pins["sha256"], checksums, str(a.besthit_pins), prefix="best_hit/")
+    else:
+        import shutil
+        shutil.rmtree(a.out / "best_hit", ignore_errors=True)
+
     # The source's own provenance.json lists the checksum of each table it wrote.
     expected = json.loads((a.out / "provenance.json").read_text())["outputs"]
     check_listed(expected, checksums, "provenance.json")
@@ -122,6 +163,7 @@ def main() -> None:
         "pileup_commit": pileup_sha if "pileup/regions.parquet" in checksums else None,
         "nosearch_commit": nosearch_sha,
         "nosearch_path": a.nosearch_path if nosearch_sha else None,
+        "besthit_commit": besthit_sha,
     }
     (a.out / "SOURCE.json").write_text(json.dumps(source, indent=1) + "\n")
     print(f"copied {len(FILES)} files from {a.repo}@{sha[:8]}")

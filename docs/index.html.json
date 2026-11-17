@@ -6,7 +6,7 @@
   "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
   "commit_date": "2026-10-20T13:23:48Z",
   "path": "results/leaderboard",
-  "copied_at": "2026-10-20T14:06:46Z",
+  "copied_at": "2026-10-20T14:15:57Z",
   "sha256": {
    "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
    "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -17,11 +17,20 @@
    "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
    "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
    "no_search_baselines.parquet": "977198351dda8a58becfc86819d6c6eba8cc3fb72522f5f7b4193675a8db3f2b",
-   "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81"
+   "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81",
+   "best_hit/rows.parquet": "22492bed2e0b82895e18651a9d3148089f0dba5bf89fd2cc98e8ef6bd6458894",
+   "best_hit/compute.parquet": "af3dd9994ae2b7ab063ffd0faed3bc8dce3c00f5664fba1bff6b897f1b29caf7",
+   "best_hit/call_rules.parquet": "c4ec3c68d8924c8bf67848ba212f84496729a4b3ae871b0899a0636a9a53f25c",
+   "best_hit/cards/diamond_besthit.sensitive.json": "913553aad4f7a1c7f4af63b17fc66a902d2f37c46b6475209ef0c98475be696a",
+   "best_hit/cards/diamond_besthit.ultra-sensitive.json": "ba5121d09f559360f17c2518ccfe5f441507a3ffc66aa74b76087671ea3dea43",
+   "best_hit/cards/mmseqs2_besthit.s7.5.json": "a8437d4451f07dae114eb47eb96160fb0901344c09ac4ad69d331371a5718db6",
+   "best_hit/fmax_best_hit_vs_qfo_relatives_midi_plus.png": "7e52633f4c40cf7d65fd59f126fa03ac6946fc863ec4f2af23fe2fdd0d9588d9",
+   "best_hit/median_iou_best_hit_vs_qfo_relatives_midi_plus.png": "1ff5271264ae492e34f6fbe1e4222fbce67f75093b9b879267d8082020101948"
   },
   "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
   "nosearch_commit": "5b644dc8195cba4535d06d59c6b15748a30874b0",
-  "nosearch_path": "results/leaderboard"
+  "nosearch_path": "results/leaderboard",
+  "besthit_commit": "f0802ebe12a15d752580798f37a32c0033d6a81a"
  },
  "text": [
   {
@@ -51,6 +60,226 @@
   {
    "tag": "summary",
    "text": "The marks and colours in Table 1, in full"
+  },
+  {
+   "tag": "h2",
+   "text": "A different call rule: the best Swiss-Prot hit's Pfam domains, copied through the alignment"
+  },
+  {
+   "tag": "p",
+   "text": "These three rows are not ranked against Table 1, because they make their calls by a different rule. Each human protein is searched against Swiss-Prot 2026_03 with every mammal removed. The Pfam domains of its single best hit are copied onto the query, residue by residue, through the alignment. Table 1 uses the whole-region rule: for every hit, the whole aligned part of the query is the call. The column \"Fmax, whole aligned region\" scores the same best hits with Table 1's rule. The gap between a row's first two numbers is what the call rule adds."
+  },
+  {
+   "tag": "p",
+   "text": "The target is Swiss-Prot without mammals, not one relative's proteome. So these rows have no time since the split from human, and the choices above Table 1 do not change them. They score Pfam domains on every protein, with duplicate calls kept. The rows are in a fixed order, not sorted by score. The copied domains' median IoU is 1.000 because the hit proteins' domains were found with the same Pfam models that define the truth. Source: PR 160, copied at commit f0802ebe."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Table 2. Best Swiss-Prot hit (Mammalia removed), 998 human proteins."
+  },
+  {
+   "tag": "th",
+   "text": "Search"
+  },
+  {
+   "tag": "th",
+   "text": "Fmax, domains copied through the alignment"
+  },
+  {
+   "tag": "th",
+   "text": "Fmax, best hit's whole aligned region (Table 1's rule)"
+  },
+  {
+   "tag": "th",
+   "text": "Precision at Fmax"
+  },
+  {
+   "tag": "th",
+   "text": "Recall at Fmax"
+  },
+  {
+   "tag": "th",
+   "text": "Median IoU, copied domains (correct calls)"
+  },
+  {
+   "tag": "th",
+   "text": "Median IoU, best hit's whole aligned region (correct calls)"
+  },
+  {
+   "tag": "th",
+   "text": "Pfam domains in the truth"
+  },
+  {
+   "tag": "th",
+   "text": "Proteins with a call"
+  },
+  {
+   "tag": "th",
+   "text": "Core-hours per 1,000 proteins, search alone"
+  },
+  {
+   "tag": "th",
+   "text": "Peak memory of the search, GB"
+  },
+  {
+   "tag": "th",
+   "text": "Version"
+  },
+  {
+   "tag": "th",
+   "text": "DIAMOND --sensitive"
+  },
+  {
+   "tag": "td",
+   "text": "0.756"
+  },
+  {
+   "tag": "td",
+   "text": "0.410"
+  },
+  {
+   "tag": "td",
+   "text": "0.810"
+  },
+  {
+   "tag": "td",
+   "text": "0.709"
+  },
+  {
+   "tag": "td",
+   "text": "1.000 (1,528)"
+  },
+  {
+   "tag": "td",
+   "text": "0.789 (467)"
+  },
+  {
+   "tag": "td",
+   "text": "2,435"
+  },
+  {
+   "tag": "td",
+   "text": "803 of 998"
+  },
+  {
+   "tag": "td",
+   "text": "0.082"
+  },
+  {
+   "tag": "td",
+   "text": "0.6"
+  },
+  {
+   "tag": "td",
+   "text": "diamond version 2.2.8"
+  },
+  {
+   "tag": "th",
+   "text": "DIAMOND --ultra-sensitive"
+  },
+  {
+   "tag": "td",
+   "text": "0.764"
+  },
+  {
+   "tag": "td",
+   "text": "0.416"
+  },
+  {
+   "tag": "td",
+   "text": "0.809"
+  },
+  {
+   "tag": "td",
+   "text": "0.723"
+  },
+  {
+   "tag": "td",
+   "text": "1.000 (1,547)"
+  },
+  {
+   "tag": "td",
+   "text": "0.793 (476)"
+  },
+  {
+   "tag": "td",
+   "text": "2,435"
+  },
+  {
+   "tag": "td",
+   "text": "820 of 998"
+  },
+  {
+   "tag": "td",
+   "text": "0.151"
+  },
+  {
+   "tag": "td",
+   "text": "2.0"
+  },
+  {
+   "tag": "td",
+   "text": "diamond version 2.2.8"
+  },
+  {
+   "tag": "th",
+   "text": "MMseqs2 -s 7.5, one round"
+  },
+  {
+   "tag": "td",
+   "text": "0.773"
+  },
+  {
+   "tag": "td",
+   "text": "0.393"
+  },
+  {
+   "tag": "td",
+   "text": "0.798"
+  },
+  {
+   "tag": "td",
+   "text": "0.750"
+  },
+  {
+   "tag": "td",
+   "text": "1.000 (1,735)"
+  },
+  {
+   "tag": "td",
+   "text": "0.789 (453)"
+  },
+  {
+   "tag": "td",
+   "text": "2,435"
+  },
+  {
+   "tag": "td",
+   "text": "840 of 998"
+  },
+  {
+   "tag": "td",
+   "text": "0.058"
+  },
+  {
+   "tag": "td",
+   "text": "2.4"
+  },
+  {
+   "tag": "td",
+   "text": "18.8cc5c"
+  },
+  {
+   "tag": "p",
+   "text": "Three steps are shared by the three rows and left out of their core-hours: building the reference, listing the hit proteins, and running hmmscan on the hit proteins. Together they took 0.728 core-hours for all 998 proteins, not per 1,000. Building the search databases is left out of the rows too: 0.0033 core-hours for DIAMOND and 0.0022 for MMseqs2. Core-hours are cores asked times wall time, from the run's task records."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 18. Fmax, the same 2,435 Pfam domains in every row. Relatives are ordered by their TimeTree 5 divergence time from human. Circles: every hit's whole aligned region (filled: duplicate calls kept; open: merged), the rule of Table 1. Triangles: the best hit's whole aligned region. Squares: the best hit's Pfam domains copied through the alignment. Only the squares jump; kmerseek's light marks are its best of 15 settings for each relative, picked after seeing the result."
+  },
+  {
+   "tag": "figcaption",
+   "text": "Figure 19. Median IoU of correct calls: the overlap between a call and the true domain, divided by their union. A call counts as correct only when its IoU is at least 0.5, so every median is at least 0.5. Beside each row, the fewest and most correct calls its medians rest on. A tool that finds few domains can still score a high IoU, so read it next to Fmax. The squares sit at 1.0 because the hit proteins' domains were found with the same Pfam models that define the truth."
   },
   {
    "tag": "p",
@@ -1459,7 +1688,7 @@
     "commit": "7eca428b763ccb5b4209d5b76ca2f7db1e0f6ab0",
     "commit_date": "2026-10-20T13:23:48Z",
     "path": "results/leaderboard",
-    "copied_at": "2026-10-20T14:06:46Z",
+    "copied_at": "2026-10-20T14:15:57Z",
     "sha256": {
      "results.parquet": "de8faba3d84118e1894f3b9348d08cf2c7903a8e2a2d44e1e35f44c8352d166d",
      "compute.parquet": "8a47ba2123c60cbb41b4833c9f96661934369137b72c5d81ef0808c98247e435",
@@ -1470,11 +1699,20 @@
      "pileup/calls.parquet": "41bc1f6db7bf54f00370b11db2ffed61031d90a42895aa1697be26fc449ea958",
      "pileup/provenance.json": "5ed6e70dd9e82b5200f089b9da3afc62d0a10cc6a51da86715f5f26d3aac9b9e",
      "no_search_baselines.parquet": "977198351dda8a58becfc86819d6c6eba8cc3fb72522f5f7b4193675a8db3f2b",
-     "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81"
+     "no_search_compute.parquet": "0b8ecdb9d27a499e5c6fa9f025cf63d347f637c4d7c03483b2b4e563f2bb5b81",
+     "best_hit/rows.parquet": "22492bed2e0b82895e18651a9d3148089f0dba5bf89fd2cc98e8ef6bd6458894",
+     "best_hit/compute.parquet": "af3dd9994ae2b7ab063ffd0faed3bc8dce3c00f5664fba1bff6b897f1b29caf7",
+     "best_hit/call_rules.parquet": "c4ec3c68d8924c8bf67848ba212f84496729a4b3ae871b0899a0636a9a53f25c",
+     "best_hit/cards/diamond_besthit.sensitive.json": "913553aad4f7a1c7f4af63b17fc66a902d2f37c46b6475209ef0c98475be696a",
+     "best_hit/cards/diamond_besthit.ultra-sensitive.json": "ba5121d09f559360f17c2518ccfe5f441507a3ffc66aa74b76087671ea3dea43",
+     "best_hit/cards/mmseqs2_besthit.s7.5.json": "a8437d4451f07dae114eb47eb96160fb0901344c09ac4ad69d331371a5718db6",
+     "best_hit/fmax_best_hit_vs_qfo_relatives_midi_plus.png": "7e52633f4c40cf7d65fd59f126fa03ac6946fc863ec4f2af23fe2fdd0d9588d9",
+     "best_hit/median_iou_best_hit_vs_qfo_relatives_midi_plus.png": "1ff5271264ae492e34f6fbe1e4222fbce67f75093b9b879267d8082020101948"
     },
     "pileup_commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
     "nosearch_commit": "5b644dc8195cba4535d06d59c6b15748a30874b0",
-    "nosearch_path": "results/leaderboard"
+    "nosearch_path": "results/leaderboard",
+    "besthit_commit": "f0802ebe12a15d752580798f37a32c0033d6a81a"
    },
    "terms": {
     "th": {
