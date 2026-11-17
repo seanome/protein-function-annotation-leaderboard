@@ -1,7 +1,3 @@
 .venv/
 __pycache__/
 .DS_Store
-protein-pages/site/
-protein-pages/screenshots/
-protein-pages/site_full/
-protein-pages/test_inputs/interpro_cache.jsonl
