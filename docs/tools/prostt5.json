@@ -22,7 +22,7 @@
  "command": "foldseek createdb filtered.fasta zebrafish_prostt5/db \\\n    --prostt5-model weights --gpu 1 --threads 8\n\nfoldseek search \\\n    human-38fdd87d_prostt5/db zebrafish_prostt5/db result tmp \\\n    --threads 16 \\\n    -e 10.0 \\\n    --max-seqs 1000",
  "numbers_from": {
   "repo": "seanome/2024-kmerseek-analysis",
-  "commit": "548ec5b89dccedd329849d7a1b4ada2ae89478ee",
+  "commit": "39d81ec90815cacbf3744199d1fa8e99ab28c6f4",
   "filters": "pfam, raw, zebrafish"
  },
  "best_setting": "3di_from_seq",

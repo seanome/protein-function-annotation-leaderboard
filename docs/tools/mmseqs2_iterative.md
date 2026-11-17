@@ -1,6 +1,6 @@
 # MMseqs2, three rounds
 
-Tool id `mmseqs2_iterative`. Numbers from seanome/2024-kmerseek-analysis commit `548ec5b8`.
+Tool id `mmseqs2_iterative`. Numbers from seanome/2024-kmerseek-analysis commit `39d81ec9`.
 
 ## What it compares
 

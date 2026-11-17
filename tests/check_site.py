@@ -201,6 +201,7 @@ def main() -> int:
 
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "tools/index.html"] + \
+        (["pileup.html"] if (a.site / "pileup.html").exists() else []) + \
             [f"tools/{t}.html" for t in sorted(meta["tools"])]
         files_ok = {str(q.relative_to(a.site)) for q in a.site.rglob("*") if q.is_file()}
         for width in (1280, 375):
