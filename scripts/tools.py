@@ -41,7 +41,7 @@ TOOLS = {
             "first. A region was kept when either test passed: its own score was at least "
             "1.3, or the whole query protein's p-value was at most 0.05."
         ),
-        "failure_modes": [
+        "caveats": [
             "A feature shorter than k residues contains no complete k-mer, so it cannot be "
             "found. Figure 2 above shows how Fmax changes with region "
             "length.",
@@ -82,7 +82,7 @@ TOOLS = {
         "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as a FASTA file.",
         "score": "Domain bit score: higher ranks first. The E-value cutoff was 10.",
-        "failure_modes": ["Failure modes specific to phmmer: not measured in this run."],
+        "caveats": ["None recorded for this run."],
         "version": "HMMER 3.4",
         "container": "quay.io/biocontainers/hmmer:3.4--hb6cb901_4 "
         "(sha256:7a2b317b8d2fd3650b4924a8482cddeb940d4a0746c6a1501ff03ac1b7439e0c)",
@@ -112,7 +112,7 @@ TOOLS = {
         "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as a FASTA file.",
         "score": "Domain bit score: higher ranks first. The E-value cutoff was 10.",
-        "failure_modes": [
+        "caveats": [
             "Each round can pull in proteins from a different family, which then pull in "
             "more. How often that happened here: not measured."
         ],
@@ -147,7 +147,7 @@ TOOLS = {
         "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as an MMseqs2 database.",
         "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
-        "failure_modes": [
+        "caveats": [
             "At most 1,000 target proteins are kept per query (--max-seqs 1000), so a query "
             "from a very large family can lose hits. How often: not measured."
         ],
@@ -178,7 +178,7 @@ TOOLS = {
         "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": f"The relative's proteome ({QFO}), as an MMseqs2 database.",
         "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
-        "failure_modes": [
+        "caveats": [
             "At most 1,000 target proteins are kept per query (--max-seqs 1000). How often "
             "that cut hits: not measured.",
             "Each round can pull in proteins from a different family. How often: not "
@@ -215,7 +215,7 @@ TOOLS = {
             "database."
         ),
         "score": "Bit score from hhsearch: higher ranks first.",
-        "failure_modes": [
+        "caveats": [
             "The run names this tool hhblits (its tool id), but it ran hhsearch on profiles "
             "of single proteins. HH-suite's usual use, with family alignments from UniRef30, "
             "was not run, so these numbers say nothing about it.",
@@ -249,7 +249,7 @@ TOOLS = {
             "database."
         ),
         "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
-        "failure_modes": [
+        "caveats": [
             "A protein with no AlphaFold model cannot be searched. Five relatives have no "
             "Foldseek rows at all (chimpanzee, cow, dog, opossum, western clawed frog): "
             "not run.",
@@ -291,7 +291,7 @@ TOOLS = {
             "Foldseek database."
         ),
         "score": "Bit score: higher ranks first. The E-value cutoff was 10.",
-        "failure_modes": [
+        "caveats": [
             "Proteins longer than 6,000 residues are skipped before the 3Di letters are "
             "predicted, and are listed in a skipped-proteins file.",
             "Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the "
@@ -331,7 +331,7 @@ foldseek search \\
         "needs": {"sequence only": True, "3D structure prediction": False, "GPU": False},
         "reference": "Pfam-A 38.2 family models (30,134 models).",
         "score": "Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).",
-        "failure_modes": [
+        "caveats": [
             "Pfam domains are defined by these same models, so scoring hmmscan against the "
             "Pfam truth set grades the models against their own output. Read its Pfam row "
             "as the best a search could do, not as a competitor.",

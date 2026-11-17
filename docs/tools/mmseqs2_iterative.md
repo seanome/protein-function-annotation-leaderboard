@@ -12,6 +12,12 @@ A profile of a protein family, built by MMseqs2 from its own hits over three rou
 
 Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is sensitivity 7, 3 rounds (`s7`): Fmax 0.324 over 2,435 true instances. Searching costs about $0.00351 per 1,000 queries (0.0787 core-hours), for each relative searched.
 
+## Known failure modes
+
+- A call is the whole alignment, not the target's domain placed on the query, so a long alignment over repeats never lands on one repeat. On a 23-aa LRR_1 repeat, every MMseqs2 and phmmer call was 47 aa or longer, so none landed. The number: 47 aa or longer, on a 23-aa repeat. Status: open. What to do: Place the target's domain on the query through the alignment before scoring. Notebook 280 switched to this rule; the leaderboard's own calls are still whole alignments. Source: [seanome/2024-kmerseek-analysis PR 121, comment 6154499159](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6154499159); [seanome/2024-kmerseek-analysis PR 121, comment 6154499159](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6154499159); [seanome/2024-kmerseek-analysis PR 121, comment 6169102356](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6169102356).
+- Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early. The number: median 5 to 21 residues early; 45% to 60% more than 100 residues early. Status: open. What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment. Source: [seanome/2024-kmerseek-analysis PR 146](https://github.com/seanome/2024-kmerseek-analysis/pull/146); [PR 3, comment 6193138553](https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553).
+- Three rounds of profile search gave dipeptide-shuffled decoy proteins hits as strong as E 1e-22. One round gave them none below E 0.026. So with three rounds, a cutoff matched to decoys is set by the profile's own drift toward a family. The number: E 1e-22 (three rounds) vs E 0.026 (one round). Status: open. What to do: Run one round (`--num-iterations 1`) when a cutoff is matched to decoys, or set the cutoff separately for each number of rounds. Source: [seanome/2024-kmerseek-analysis PR 121, comment 6155881035](https://github.com/seanome/2024-kmerseek-analysis/pull/121#issuecomment-6155881035).
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -47,7 +53,7 @@ The relative's proteome (Quest for Orthologs reference proteomes, release 2020_0
 
 Bit score: higher ranks first. The E-value cutoff was 10.
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
 - At most 1,000 target proteins are kept per query (--max-seqs 1000). How often that cut hits: not measured.
 - Each round can pull in proteins from a different family. How often: not measured.

@@ -12,6 +12,10 @@ Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protei
 
 Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is shape letters from sequence (`3di_from_seq`): Fmax 0.223 over 2,435 true instances. Searching costs about $0.00486 per 1,000 queries (0.109 core-hours), for each relative searched.
 
+## Known failure modes
+
+- Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early. The number: median 5 to 21 residues early; 45% to 60% more than 100 residues early. Status: open. What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment. Source: [seanome/2024-kmerseek-analysis PR 146](https://github.com/seanome/2024-kmerseek-analysis/pull/146); [PR 3, comment 6193138553](https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553).
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -47,7 +51,7 @@ Shape letters (3Di) predicted from the amino-acid sequence by the ProstT5 protei
 
 Bit score: higher ranks first. The E-value cutoff was 10.
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
 - Proteins longer than 6,000 residues are skipped before the 3Di letters are predicted, and are listed in a skipped-proteins file.
 - Predicting the 3Di letters ran on one GPU (foldseek createdb --gpu 1). For the 998 queries that step is counted in the GPU column and the cost; for each relative's proteome it is a one-off database build and is not counted.

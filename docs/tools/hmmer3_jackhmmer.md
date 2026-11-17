@@ -12,6 +12,11 @@ A profile of a protein family: it searches with one protein, builds a profile fr
 
 Under the Pfam truth set, raw calls, zebrafish (435 Mya) as the relative searched, its best setting is 3 rounds (`n3`): Fmax 0.290 over 2,435 true instances. Searching costs about $0.109 per 1,000 queries (2.45 core-hours), for each relative searched.
 
+## Known failure modes
+
+- HMMER rounds E-values to two significant figures. Counting E ≤ cutoff on those rounded values, instead of E < cutoff, made the dark-set counts 2 to 222 lower. The dark set is the proteins that phmmer, jackhmmer and MMseqs2 all fail to place. The number: 2 to 222. Status: open. What to do: Say whether each cutoff is strict (E < 1) or not (E ≤ 1), and use the same rule in every count that is compared. Source: [seanome/2024-kmerseek-analysis PR 57, comment 6151921382](https://github.com/seanome/2024-kmerseek-analysis/pull/57#issuecomment-6151921382); [seanome/2024-kmerseek-analysis nextflow-runs/invertebrate-dark-set/main.nf at ec91da53](https://github.com/seanome/2024-kmerseek-analysis/blob/ec91da53b26d88474679989205045de45e38a162/nextflow-runs/invertebrate-dark-set/main.nf).
+- Aligner calls run past the domain, because a call spans the whole aligned stretch. Over correct calls, they start a median 5 to 21 residues early. Over all calls, 45% to 60% start more than 100 residues early. The number: median 5 to 21 residues early; 45% to 60% more than 100 residues early. Status: open. What to do: Read a call's ends as the alignment's ends, not the domain's. To score where a domain sits, place the target's domain through the alignment. Source: [seanome/2024-kmerseek-analysis PR 146](https://github.com/seanome/2024-kmerseek-analysis/pull/146); [PR 3, comment 6193138553](https://github.com/seanome/protein-function-annotation-leaderboard/pull/3#issuecomment-6193138553).
+
 ## Where it is strong and weak
 
 Each line compares this setting with the best setting of any other tool on the same subset of the proteins, so the other tool's setting can change from line to line. Only subsets with at least 30 true instances are compared.
@@ -47,7 +52,7 @@ The relative's proteome (Quest for Orthologs reference proteomes, release 2020_0
 
 Domain bit score: higher ranks first. The E-value cutoff was 10.
 
-## Known failure modes {#failure-modes}
+## Caveats of how this run was set up {#caveats}
 
 - Each round can pull in proteins from a different family, which then pull in more. How often that happened here: not measured.
 

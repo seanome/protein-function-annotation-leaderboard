@@ -10,11 +10,12 @@
  },
  "reference": "Pfam-A 38.2 family models (30,134 models).",
  "score": "Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).",
- "failure_modes": [
+ "caveats": [
   "Pfam domains are defined by these same models, so scoring hmmscan against the Pfam truth set grades the models against their own output. Read its Pfam row as the best a search could do, not as a competitor.",
   "It was scored against the Pfam truth set only. Swiss-Prot features and Pfam-N: not run."
  ],
  "version": "HMMER 3.4",
+ "known_failure_modes": [],
  "licence": "BSD 3-clause (HMMER); CC0 1.0 (Pfam-A models, per the Pfam 38.2 release notes)",
  "commercial_use": "Yes.",
  "licence_url": "https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE",

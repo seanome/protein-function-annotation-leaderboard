@@ -18,9 +18,9 @@
 <header class="site"><div class="wrap">
 <a class="brand" href="../index.html">Protein annotation leaderboard</a>
 <nav class="site" aria-label="Pages"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><details class="navmore"><summary>More</summary>
-<div class="navpop"><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details></nav>
+<div class="navpop"><a href="../claims.html">Claims</a><a href="../failure-modes.html">Known failure modes</a><a href="../coverage.html">Coverage</a></div></details></nav>
 <details class="navmenu"><summary aria-label="Pages: Tool cards">Tool cards</summary>
-<div class="navpop"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../coverage.html">Coverage</a></div></details>
+<div class="navpop"><a href="../index.html" data-keep-filters>Leaderboard</a><a href="../tools/index.html" aria-current="page">Tool cards</a><a href="../cost.html" data-keep-filters>Compare two columns</a><a href="../explainers.html">How the scores work</a><a href="../pileup.html">Region pile-up</a><a href="../methods.html">Methods</a><a href="../claims.html">Claims</a><a href="../failure-modes.html">Known failure modes</a><a href="../coverage.html">Coverage</a></div></details>
 </div></header>
 <main class="wrap" data-page="tools">
 <nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Tool cards</a> › hmmscan with Pfam</nav><div class="card"><h1>hmmscan with Pfam</h1>
@@ -44,7 +44,12 @@ Pfam models).</figcaption>
 <span class="item"><svg width="14" height="14" aria-hidden="true"><path d="M7,2 l5,5 l-5,5 l-5,-5 z" class="cf-o"/></svg>best other tool on that subset, named at the right</span></div>
 <svg class="cf" viewBox="0 0 360 176" role="img" aria-label="Fmax by subset for hmmscan with Pfam and the best other tool"><text x="0" y="22" class="cf-h">length of the annotated region</text><line x1="104" x2="238" y1="44" y2="44" class="cf-row"/><text x="98" y="48" text-anchor="end" class="cf-l">16–30 aa</text><circle cx="190.4" cy="44" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.580, n = 271</title></circle><line x1="104" x2="238" y1="64" y2="64" class="cf-row"/><text x="98" y="68" text-anchor="end" class="cf-l">31–60 aa</text><circle cx="189.3" cy="64" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.573, n = 420</title></circle><line x1="104" x2="238" y1="84" y2="84" class="cf-row"/><text x="98" y="88" text-anchor="end" class="cf-l">61–120 aa</text><circle cx="220.9" cy="84" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.785, n = 963</title></circle><line x1="104" x2="238" y1="104" y2="104" class="cf-row"/><text x="98" y="108" text-anchor="end" class="cf-l">121–250 aa</text><circle cx="223.4" cy="104" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.802, n = 504</title></circle><line x1="104" x2="238" y1="124" y2="124" class="cf-row"/><text x="98" y="128" text-anchor="end" class="cf-l">251 aa or more</text><circle cx="233.6" cy="124" r="5" fill="var(--k-models)" stroke="var(--surface)" stroke-width="1"><title>hmmscan with Pfam: Fmax 0.871, n = 277</title></circle><line x1="104.0" x2="104.0" y1="28" y2="138" class="cf-grid"/><text x="104.0" y="152" text-anchor="middle" class="cf-t">0</text><line x1="133.8" x2="133.8" y1="28" y2="138" class="cf-grid"/><text x="133.8" y="152" text-anchor="middle" class="cf-t">0.2</text><line x1="163.6" x2="163.6" y1="28" y2="138" class="cf-grid"/><text x="163.6" y="152" text-anchor="middle" class="cf-t">0.4</text><line x1="193.3" x2="193.3" y1="28" y2="138" class="cf-grid"/><text x="193.3" y="152" text-anchor="middle" class="cf-t">0.6</text><line x1="223.1" x2="223.1" y1="28" y2="138" class="cf-grid"/><text x="223.1" y="152" text-anchor="middle" class="cf-t">0.8</text><text x="171.0" y="168" text-anchor="middle" class="cf-l">Fmax (higher is better)</text></svg>
 </figure></div>
-<div class="card card-rest"><h2>What it compares</h2>
+<section class="cl-card fm-card" id="failure-modes" aria-label="Known failure modes of hmmscan with Pfam">
+<div class="cl-head"><h2 class="cl-title">Known failure modes</h2><span class="cl-file">no <span class="mono">failure_modes/hmmscan.yaml</span> yet</span></div>
+<p class="cl-sub">each row: how it fails, the number from the run that showed it, and the PR that reports it. Each quote is checked against its source on every push.</p>
+<p class="fm-none">None recorded yet.</p>
+<div class="cl-buttons"><a class="cl-btn" href="../failure-modes.html">All known failure modes ↗</a></div>
+</section><div class="card card-rest"><h2>What it compares</h2>
 <p>Each query protein against the curated profile models of every Pfam family, without searching any relative.</p>
 <h2>What it needs</h2>
 <ul>
@@ -56,7 +61,7 @@ Pfam models).</figcaption>
 <p>Pfam-A 38.2 family models (30,134 models).</p>
 <h2>How to read its score</h2>
 <p>Domain bit score: higher ranks first. E-value cutoffs 10 (sequence and domain).</p>
-<h2 id="failure-modes">Known failure modes</h2>
+<h2 id="caveats">Caveats of how this run was set up</h2>
 <ul>
 <li>Pfam domains are defined by these same models, so scoring hmmscan against the Pfam truth set grades the models against their own output. Read its Pfam row as the best a search could do, not as a competitor.</li>
 <li>It was scored against the Pfam truth set only. Swiss-Prot features and Pfam-N: not run.</li>

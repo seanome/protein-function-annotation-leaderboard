@@ -1,0 +1,79 @@
+# Known failure modes of kmerseek.
+# Each quote must match its source character for character: scripts/failure_modes.py --check.
+# Schema: failure_modes/schema.json.
+
+tool: kmerseek
+name: kmerseek
+updated: "2026-10-16"
+
+entries:
+  - id: index-merges-equal-kmer-sets
+    finding: >-
+      kmerseek 0.4.0 keys each index entry by its k-mer set, so two different sequences
+      with the same k-mer set become one entry and the second is lost. In a regions-index
+      pilot, 6 of 99_232 rows reported residues that are not at the target's own
+      coordinates; the PR traces this to the key but has not confirmed it for each of the 6.
+      In an index of 125 ribonucleases built on a later branch with the same key, 31 are
+      missing under cys2 and 7 under cys_hp3.
+    number: 6 of 99_232 rows; 31 of the 125 ribonucleases
+    evidence:
+      - source: {kind: pr_body, repo: seanome/kmerseek, pr: 141}
+        quote: >-
+          In the 2024-kmerseek-analysis regions-index pilot (kmerseek v0.4.0, protein20, k=5),
+          6 of 99_232 rows had a `target_subseq` that is not `target[target_start:target_end]`.
+      - source: {kind: pr_body, repo: seanome/kmerseek, pr: 141}
+        quote: >-
+          Two different sequences with the same k-mer set get the same sum. So the second
+          entry's hits came out with the first entry's coordinates and residues.
+      - source: {kind: pr_body, repo: seanome/kmerseek, pr: 141}
+        quote: >-
+          Not done: rebuilding the pilot index and rechecking the 6 rows. The two rows that are
+          not anywhere in the target fit this cause, but I have not confirmed which earlier
+          entry each of the 6 targets was merged into.
+      - source: {kind: pr_body, repo: seanome/kmerseek, pr: 148}
+        quote: >-
+          An index keys each entry by its k-mer set, so two sequences with equal sets collapse
+          into one entry and only the first is stored.
+      - source: {kind: pr_body, repo: seanome/kmerseek, pr: 148}
+        quote: >-
+          That is why 31 of the 125 ribonucleases are absent under `cys2` and 7 under `cys_hp3`.
+    run: >-
+      the regions-index pilot (kmerseek v0.4.0, protein20, k=5), and the 125 test
+      ribonucleases searched with topi ribonuclease (P00659)
+    commit: {repo: seanome/kmerseek, sha: d3046f8}
+    pr:
+      - {repo: seanome/kmerseek, number: 141}
+      - {repo: seanome/kmerseek, number: 148}
+    what_to_do: >-
+      Rebuild every 0.4.0 index once kmerseek PR 141 is merged; it keys each entry by its
+      sequence. Until then, a recall number from a 0.4.0 index is measured against a
+      reference that may be missing targets.
+    date: "2026-10-10"
+    status: open
+
+  - id: poisson-score-ceiling
+    finding: >-
+      The exact Poisson score (`region_poisson_score`) stops at 307.65, where the p-value
+      underflows. In 102 of 107 exact settings, decoy pairs reach that ceiling, so the
+      decoy-matched cutoff sits above it and those settings find nothing.
+    number: "307.65"
+    evidence:
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6169347124}
+        quote: >-
+          `region_poisson_score` stops at 307.65, which is -log10 of the smallest normal
+          double: the Poisson p-value underflows. In 102 of 107 exact settings, at least two
+          tune decoy-family pairs reach that ceiling. The matched cutoff then sits just above
+          it, and those settings find nothing at all.
+      - source: {kind: pr_comment, repo: seanome/2024-kmerseek-analysis, pr: 121, comment_id: 6170231005}
+        quote: >-
+          b215e87 scores the exact arm on `region_tfidf` (Olga, 2026-10-14; recorded in nb
+          280's first cell).
+    run: the time-split pilot's tune half, 186 settings (notebook 280)
+    commit: {repo: seanome/2024-kmerseek-analysis, sha: f918447}
+    pr:
+      - {repo: seanome/2024-kmerseek-analysis, number: 121}
+    what_to_do: >-
+      Compute the p-value in log space inside kmerseek. Until then, score exact settings on
+      `region_tfidf`, as notebook 280 now does.
+    date: "2026-10-14"
+    status: open

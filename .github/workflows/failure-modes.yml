@@ -1,0 +1,26 @@
+# Checks every failure_modes/<tool>.yaml against its sources: fetches each PR body, PR
+# comment or file at a commit from GitHub, and fails if a quote is not in it character for
+# character or a number in a finding is not in a quote. Then checks the built pages, and
+# that a wrong number in a real file fails the check (tests/check_failure_modes.py --live).
+# Runs weekly too, because a PR body or comment can be edited after the push that checked it.
+name: failure-modes
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 6 * * 1"
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install polars==1.44.2 pyarrow==26.0.0 pyyaml==6.0.2 jsonschema==4.23.0
+      - run: python scripts/failure_modes.py --check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: python tests/check_failure_modes.py --site docs --live
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

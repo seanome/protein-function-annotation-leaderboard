@@ -1,0 +1,75 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://seanome.github.io/protein-function-annotation-leaderboard/failure_modes/schema.json",
+ "title": "failure_modes/<tool>.yaml",
+ "description": "Ways one tool (or one input, such as a truth set) is known to fail, each with a source a reader can open. scripts/failure_modes.py --check fetches every source and fails if a quote is not in it character for character, or if a number in the finding is not in a quote.",
+ "type": "object",
+ "required": ["tool", "name", "updated", "entries"],
+ "additionalProperties": false,
+ "properties": {
+  "tool": {"type": "string", "pattern": "^[a-z0-9_]+$", "description": "Tool id as in results.parquet and scripts/tools.py, or an input id (pfam_truth, alphafold_models) for a failure that belongs to no tool. Must equal the file name."},
+  "name": {"type": "string", "description": "Name shown on the page."},
+  "updated": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "Date the file was last edited, YYYY-MM-DD, quoted."},
+  "entries": {"type": "array", "items": {"$ref": "#/$defs/entry"}, "description": "May be empty; the card then says none recorded yet."}
+ },
+ "$defs": {
+  "entry": {
+   "type": "object",
+   "required": ["id", "finding", "number", "evidence", "run", "pr", "what_to_do", "date", "status"],
+   "additionalProperties": false,
+   "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "finding": {"type": "string", "description": "One line, in a biologist's words. Every number in it must appear in one of the evidence quotes."},
+    "number": {"type": ["string", "null"], "description": "The number that shows the failure, as printed in the source. Every number in it must be in the finding and in a quote. null only when the source gives no count; then number_note says so."},
+    "number_note": {"type": "string"},
+    "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
+    "run": {"type": "string", "description": "The run or notebook that showed it. Every number in it must appear somewhere in the evidence sources."},
+    "commit": {"$ref": "#/$defs/commit"},
+    "pr": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/pr"}, "description": "The PR or PRs that report it."},
+    "what_to_do": {"type": "string", "description": "Every number in it must appear somewhere in the evidence sources."},
+    "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "Date the source first reported it."},
+    "status": {"type": "string", "pattern": "^(open|fixed in .+)$", "description": "open, or fixed in <version or commit>."},
+    "also_tools": {"type": "array", "items": {"type": "string"}, "description": "Other tool cards that show this entry."}
+   }
+  },
+  "evidence": {
+   "type": "object",
+   "required": ["source", "quote"],
+   "additionalProperties": false,
+   "properties": {
+    "source": {"$ref": "#/$defs/source"},
+    "quote": {"type": "string", "minLength": 20, "description": "Text copied from the source, character for character, Markdown included."}
+   }
+  },
+  "source": {
+   "type": "object",
+   "required": ["kind", "repo"],
+   "additionalProperties": false,
+   "properties": {
+    "kind": {"enum": ["pr_body", "pr_comment", "file"]},
+    "repo": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "pr": {"type": "integer", "minimum": 1},
+    "comment_id": {"type": "integer", "minimum": 1},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "path": {"type": "string"}
+   },
+   "allOf": [
+    {"if": {"properties": {"kind": {"const": "pr_body"}}}, "then": {"required": ["pr"]}},
+    {"if": {"properties": {"kind": {"const": "pr_comment"}}}, "then": {"required": ["pr", "comment_id"]}},
+    {"if": {"properties": {"kind": {"const": "file"}}}, "then": {"required": ["commit", "path"]}}
+   ]
+  },
+  "commit": {
+   "type": "object",
+   "required": ["repo", "sha"],
+   "additionalProperties": false,
+   "properties": {"repo": {"type": "string"}, "sha": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"}}
+  },
+  "pr": {
+   "type": "object",
+   "required": ["repo", "number"],
+   "additionalProperties": false,
+   "properties": {"repo": {"type": "string"}, "number": {"type": "integer", "minimum": 1}}
+  }
+ }
+}
