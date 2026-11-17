@@ -4,6 +4,10 @@ Which tool finds the known domains and features of a protein, and what does it c
 A static site, served by GitHub Pages from `docs/`:
 https://seanome.github.io/protein-function-annotation-leaderboard/
 
+The Botryllus protein pages that used to be in `protein-pages/` moved on 2026-11-17 to their own
+private repository, seanome/botryllus-protein-pages, with their full history, and were removed from
+every commit of this one, since they held unpublished sequences.
+
 ## Where the numbers come from
 
 `data/` holds four files copied from one commit of
