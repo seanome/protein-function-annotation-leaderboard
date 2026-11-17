@@ -93,6 +93,14 @@
    "text": "Figure 2. Where ProstT5 + Foldseek is ahead and behind: its Fmax on each subset of the proteins, against the best other tool on that subset (Pfam truth set, raw calls, zebrafish as the relative; its best setting, shape letters from sequence). Left out, under 30 true instances: 0–20%."
   },
   {
+   "tag": "figcaption",
+   "text": "Figure 14. Precision and recall of ProstT5 + Foldseek (shape letters from sequence) at its Fmax cutoff, one point per subset of the proteins. The tables keep precision and recall at that one cutoff only, so the curve through the other cutoffs cannot be drawn. Pfam truth set, raw calls, zebrafish as the relative; subsets with at least 30 true domains. Up and to the right is better."
+  },
+  {
+   "tag": "p",
+   "text": "On all proteins ProstT5 + Foldseek reaches precision 0.158 and recall 0.378 at its Fmax cutoff (Fmax 0.223, n = 2,435). Its best subset is regions 251 aa or more long (Fmax 0.365, n = 277), its worst regions 16–30 aa long (0.000, n = 271)."
+  },
+  {
    "tag": "h2",
    "text": "What it compares"
   },

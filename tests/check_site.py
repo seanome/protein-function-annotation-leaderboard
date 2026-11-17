@@ -143,6 +143,12 @@ def main() -> int:
         mya_want[sp] = v
     mya_shown = {sp: (None if v is None else int(round(v))) for sp, v in mya_want.items()}
     mya_allowed = {v for v in mya_shown.values() if v is not None}
+    TEXT_OUTSIDE_SVG = """(() => {
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), out = [];
+      let n;
+      while ((n = w.nextNode())) if (!n.parentElement.closest("svg, script, style")) out.push(n.nodeValue);
+      return out.join("");
+    })()"""
     MYA_RE = re.compile(r"(\d[\d,]*)\s*(?:Mya|million years)")
 
     failures: list[str] = []
@@ -389,7 +395,7 @@ def main() -> int:
 
         # ---- 3. every page: links, errors, phone width ----
         pages = ["index.html", "cost.html", "coverage.html", "methods.html", "explainers.html", "tools/index.html"] + \
-        (["pileup.html"] if (a.site / "pileup.html").exists() else []) + \
+        [x for x in ("pileup.html", "proteins.html") if (a.site / x).exists()] + \
         [x for x in ("claims.html", "claims-schema.html") if (a.site / x).exists()] + \
             [f"tools/{t}.html" for t in sorted(meta["tools"])]
         files_ok = {str(q.relative_to(a.site)) for q in a.site.rglob("*") if q.is_file()}
@@ -404,7 +410,8 @@ def main() -> int:
                 if over > 0:
                     failures.append(f"{pg} at {width}px: page scrolls sideways by {over}px")
                 if width == 1280:
-                    text = page.evaluate("document.body.innerText")
+                    # Text outside SVG figures, script and style; an axis tick is a scale mark.
+                    text = page.evaluate(TEXT_OUTSIDE_SVG)
                     for m in MYA_RE.finditer(text):
                         stats["mya_mentions_checked"] = stats.get("mya_mentions_checked", 0) + 1
                         if int(m.group(1).replace(",", "")) not in mya_allowed:
