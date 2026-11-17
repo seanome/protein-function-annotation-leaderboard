@@ -464,3 +464,26 @@ table.cov .mono,td.num{overflow-wrap:normal;white-space:nowrap}
   border-bottom:2px dashed var(--accent);cursor:ew-resize;touch-action:none;user-select:none;padding:0 2px}
 .scrub:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .scrub.scrubbing{background:var(--surface);border-bottom-style:solid}
+
+/* Contribute pages. The step diagram (Figures 1 and 2) uses no colour for meaning: every box
+   is the same, the number gives the order. The form keeps the site's ink, hairlines and accent. */
+ol.flow{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+ol.flow li{background:var(--surface);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+ol.flow .flow-n{font-family:"Fantasque Sans Mono",monospace;font-weight:700;color:var(--muted)}
+ol.flow .flow-d{font-size:.9rem;color:var(--muted)}
+form.tf{max-width:46rem}
+form.tf fieldset{border:1px solid var(--hair);border-radius:8px;margin:0 0 16px;padding:10px 14px 14px;background:var(--surface);min-width:0}
+form.tf legend{font-family:Fraunces,Georgia,serif;font-weight:600;padding:0 6px}
+form.tf label{display:block;margin:10px 0 4px;font-weight:600}
+form.tf .tf-hint{display:block;font-weight:400;font-size:.88rem;color:var(--muted)}
+form.tf input:not([type=radio]):not([type=checkbox]),form.tf textarea{font:inherit;width:100%;max-width:100%;padding:6px 8px;
+  border:1px solid var(--hair);border-radius:6px;background:var(--bg);color:var(--ink)}
+form.tf input[name=accession],form.tf input[name=eco],form.tf input[name=orcid],form.tf textarea[name=sequence],
+form.tf input[type=number]{font-family:"Fantasque Sans Mono",monospace}
+form.tf .tf-radio{font-weight:400;display:flex;gap:8px;align-items:baseline}
+form.tf .tf-pair{display:flex;flex-wrap:wrap;gap:12px}
+form.tf .tf-pair>span{flex:1 1 10rem}
+.tf-go{font:inherit;font-weight:600;padding:9px 16px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer}
+.tf-go:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tf-problems{border:1px solid var(--warn);background:var(--warn-bg);border-radius:8px;padding:8px 12px}
+.tf-preview pre{white-space:pre-wrap;overflow-wrap:anywhere}

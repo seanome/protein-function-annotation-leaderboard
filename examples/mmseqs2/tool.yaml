@@ -1,0 +1,21 @@
+# The tool card for the MMseqs2 worked example. run.sh fills in @VERSION@ and @THREADS@.
+tool: mmseqs2_seqseq
+name: MMseqs2
+version: "@VERSION@"
+kind: letters
+compares: >-
+  Amino-acid letters: it first keeps target proteins that share similar short words with
+  the query, then aligns only those, which makes it much faster than aligning every pair.
+needs:
+  sequence_only: true
+  structure_prediction: false
+  gpu: false
+licence: MIT
+licence_url: https://github.com/soedinglab/MMseqs2/blob/master/LICENSE.md
+container: quay.io/biocontainers/mmseqs2@sha256:3503bfe576d560e550df2872af86a1ad1bcc1c06cfb7caadd3e7a95649f5f0ef
+command: |
+  mmseqs createdb relative.fasta target
+  mmseqs createdb queries.fasta query
+  mmseqs search query target result tmp --threads @THREADS@ -s 7 --max-seqs 1000 -e 10.0
+  mmseqs convertalis query target result hits.tsv \
+      --format-output "query,target,qstart,qend,tstart,tend,bits,evalue"

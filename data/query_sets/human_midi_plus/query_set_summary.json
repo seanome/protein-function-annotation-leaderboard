@@ -1,0 +1,128 @@
+{
+  "gene_set": "chr6_plus",
+  "full_targets": true,
+  "n_queries": 998,
+  "n_query_families": 1089,
+  "query_sets": {
+    "b2m": {
+      "n_queries": 1,
+      "n_domain_instances": 1
+    },
+    "cd1_mr1": {
+      "n_queries": 6,
+      "n_domain_instances": 12
+    },
+    "chr6": {
+      "n_queries": 964,
+      "n_domain_instances": 2358
+    },
+    "kir_lilr": {
+      "n_queries": 27,
+      "n_domain_instances": 64
+    }
+  },
+  "species": {
+    "mouse": {
+      "full_target": true,
+      "n_targets": 20707,
+      "n_domain_instances": 49998,
+      "n_shared_families": 1076
+    },
+    "chicken": {
+      "full_target": true,
+      "n_targets": 6051,
+      "n_domain_instances": 13421,
+      "n_shared_families": 742
+    },
+    "zebrafish": {
+      "full_target": true,
+      "n_targets": 12336,
+      "n_domain_instances": 28019,
+      "n_shared_families": 905
+    },
+    "ciona": {
+      "full_target": true,
+      "n_targets": 10658,
+      "n_domain_instances": 20234,
+      "n_shared_families": 804
+    },
+    "fly": {
+      "full_target": true,
+      "n_targets": 11089,
+      "n_domain_instances": 22096,
+      "n_shared_families": 813
+    },
+    "worm": {
+      "full_target": true,
+      "n_targets": 14015,
+      "n_domain_instances": 24316,
+      "n_shared_families": 722
+    },
+    "yeast": {
+      "full_target": true,
+      "n_targets": 5365,
+      "n_domain_instances": 9155,
+      "n_shared_families": 453
+    },
+    "arabidopsis": {
+      "full_target": true,
+      "n_targets": 22911,
+      "n_domain_instances": 42714,
+      "n_shared_families": 528
+    },
+    "ecoli": {
+      "full_target": true,
+      "n_targets": 4188,
+      "n_domain_instances": 6735,
+      "n_shared_families": 166
+    },
+    "botryllus": {
+      "full_target": true,
+      "annotated": false,
+      "scored": false
+    }
+  },
+  "human_fasta_records": 998,
+  "structures": {
+    "mouse": {
+      "n_linked": 21452,
+      "full_target": true
+    },
+    "chicken": {
+      "n_linked": 5878,
+      "full_target": true
+    },
+    "zebrafish": {
+      "n_linked": 26290,
+      "full_target": true
+    },
+    "ciona": {
+      "n_linked": 10398,
+      "full_target": true
+    },
+    "fly": {
+      "n_linked": 13461,
+      "full_target": true
+    },
+    "worm": {
+      "n_linked": 19700,
+      "full_target": true
+    },
+    "yeast": {
+      "n_linked": 6055,
+      "full_target": true
+    },
+    "arabidopsis": {
+      "n_linked": 27402,
+      "full_target": true
+    },
+    "ecoli": {
+      "n_linked": 4370,
+      "full_target": true
+    },
+    "human": {
+      "n_wanted": 998,
+      "n_linked": 997
+    }
+  }
+}
