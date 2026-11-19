@@ -1,10 +1,11 @@
 """Step 4: one row per protein of the human and oyster one-protein-per-gene sets.
 
-Columns: length; AlphaFold DB model (yes/no, mean pLDDT); any InterPro match (yes/no);
+Columns: length and the site's length bin; SEG low-complexity fraction (with --seg); AlphaFold DB model (yes/no, mean pLDDT); any InterPro match (yes/no);
 a Swiss-Prot hit above 30% identity by MMseqs2 (yes/no); BUSCO status. A protein is
 labelled when any of the three yes/no columns is yes.
 
-    python3 -I scripts/why/labels.py --raw ~/data/why-numbers/2026_03 --sherlock ~/data/why-numbers/2026_03/sherlock
+    python3 -I scripts/why/labels.py --raw ~/data/why-numbers/2026_03 --sherlock ~/data/why-numbers/2026_03/sherlock \
+        --seg ~/data/why-numbers/2026_03/seg
 """
 
 import argparse
@@ -21,6 +22,37 @@ from numbers_table import Numbers  # noqa: E402
 OUT = pathlib.Path("results/why")
 PROTEOMES = {"human": "UP000005640_9606", "oyster": "UP000005408_29159"}
 MIN_FIDENT = 0.30  # "above 30% identity": MMseqs2 fident > 0.30, E <= 1e-3 (search setting)
+# The site's protein length bins and SEG cut (data/query_strata/RULES.md on the site's
+# olgabot/query-strata branch): length edges [0, 100), [100, 300), [300, 1000], (1000, inf);
+# a protein is low-complexity when more than 20% of its residues are masked by SEG.
+SEG_HIGH = 0.20
+
+
+def length_bin(length):
+    return (
+        pl.when(length < 100).then(pl.lit("<100"))
+        .when(length < 300).then(pl.lit("100-300"))
+        .when(length <= 1000).then(pl.lit("300-1000"))
+        .otherwise(pl.lit(">1000"))
+    )
+
+
+def seg_fractions(path, seqs):
+    """segmasker -outfmt interval: a '>header' line, then 'start - end' lines (0-based,
+    inclusive) for each masked stretch. Returns accession -> masked residues / length."""
+    masked, acc = {}, None
+    with gzip.open(path, "rt") as fh:
+        for line in fh:
+            if line.startswith(">"):
+                acc = line[1:].split("|")[1]
+                masked[acc] = 0
+            elif line.strip():
+                a, b = (int(x) for x in line.split("-"))
+                masked[acc] += b - a + 1
+    missing = set(seqs) - set(masked)
+    if missing:
+        raise ValueError(f"{path}: {len(missing)} proteins missing, e.g. {sorted(missing)[:3]}")
+    return pl.DataFrame({"accession": list(masked), "seg_fraction": [masked[a] / len(seqs[a]) for a in masked]})
 
 
 def read_fasta(path):
@@ -124,6 +156,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--raw", required=True, type=pathlib.Path)
     ap.add_argument("--sherlock", required=True, type=pathlib.Path, help="the job's out/ folder, copied back")
+    ap.add_argument("--seg", type=pathlib.Path, help="folder with <species>.segmasker.txt.gz from scripts/why/seg.sh")
     args = ap.parse_args()
     raw, sh = args.raw, args.sherlock
 
@@ -158,9 +191,14 @@ def main():
                 busco_status=pl.col("busco_status").fill_null("not a BUSCO gene"),
                 busco_genes=pl.col("busco_genes").fill_null(0),
             )
-            .with_columns(any_label=pl.col("af_model") | pl.col("interpro_match") | pl.col("sprot_hit"))
+            .with_columns(
+                any_label=pl.col("af_model") | pl.col("interpro_match") | pl.col("sprot_hit"),
+                length_bin=length_bin(pl.col("length")),
+            )
             .drop("af_model_sequence")
         )
+        if args.seg:
+            df = df.join(seg_fractions(args.seg / f"{tag}.segmasker.txt.gz", seqs), on="accession", how="left")
         if df["reviewed"].null_count():
             raise ValueError(f"{tag}: {df['reviewed'].null_count()} canonical accessions missing from the proteome fields")
         frames.append(df)
